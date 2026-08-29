@@ -1,0 +1,29 @@
+{
+  "name": "@sevendays/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "tsc --noEmit",
+    "deploy": "wrangler deploy",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.4.0",
+    "@sevendays/db": "workspace:*",
+    "@sevendays/types": "workspace:*",
+    "hono": "^4.6.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250101.0",
+    "@sevendays/config": "workspace:*",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0",
+    "wrangler": "^3.99.0"
+  }
+}

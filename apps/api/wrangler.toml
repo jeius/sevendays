@@ -1,0 +1,22 @@
+name = "sevendays-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# TODO once provisioned:
+# [[r2_buckets]]
+# binding = "MEDIA_BUCKET"
+# bucket_name = "sevendays-media"
+
+# Secrets (set via `wrangler secret put <NAME>`, never committed):
+#   DATABASE_URL
+#   BETTER_AUTH_SECRET
+#   RESEND_API_KEY
+#   SENTRY_DSN
+#   POSTHOG_API_KEY
+
+[vars]
+ENVIRONMENT = "development"
+
+[dev]
+port = 8787

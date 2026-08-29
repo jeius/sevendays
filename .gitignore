@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.output/
+.vinxi/
+.wrangler/
+*.tsbuildinfo
+
+# Turborepo
+.turbo/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+*.log
+
+# Testing
+coverage/
