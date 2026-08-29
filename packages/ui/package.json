@@ -1,0 +1,17 @@
+{
+  "name": "@sevendays/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tailwind-preset": "./tailwind-preset.ts",
+    "./globals.css": "./src/globals.css"
+  },
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@sevendays/config": "workspace:*",
+    "tailwindcss": "^3.4.0"
+  }
+}
