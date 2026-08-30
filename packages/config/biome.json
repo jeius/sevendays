@@ -1,0 +1,4 @@
+{
+  "root": false,
+  "extends": ["./src/biome/base.json"]
+}

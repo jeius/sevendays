@@ -1,3 +1,3 @@
-export * from "./branch";
-export * from "./package";
-export * from "./appointment";
+export * from './appointment.js';
+export * from './branch.js';
+export * from './package.js';

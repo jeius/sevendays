@@ -1,9 +1,11 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalPassThroughEnv": ["DATABASE_URI"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".output/**", "dist/**", ".vinxi/**"],
       "env": ["NODE_ENV"]
     },
@@ -12,13 +14,24 @@
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"]
+      "inputs": ["$TURBO_DEFAULT$"]
+    },
+    "format": {
+      "inputs": ["$TURBO_DEFAULT$"]
+    },
+    "fix": {
+      "inputs": ["$TURBO_DEFAULT$"]
+    },
+    "fix:unsafe": {
+      "inputs": ["$TURBO_DEFAULT$"]
     },
     "typecheck": {
-      "dependsOn": ["^build"]
+      "inputs": ["$TURBO_DEFAULT$"]
     },
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^test"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/vitest.config.ts"],
+      "outputs": ["coverage/blob/**"]
     },
     "clean": {
       "cache": false

@@ -1,0 +1,7 @@
+{
+  "root": false,
+  "extends": ["@sevendays/config/biome/base", "@sevendays/config/biome/vite"],
+  "files": {
+    "includes": ["!src/routeTree.gen.ts", "!instrument.server.mjs", "!!**/.output", "!!**/dist"]
+  }
+}

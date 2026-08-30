@@ -9,20 +9,26 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "lint": "eslint .",
+    "build": "tsc --project tsconfig.build.json",
+    "lint": "biome lint",
+    "format": "biome format",
+    "fix": "biome check --fix .",
+    "fix:unsafe": "biome check --fix --unsafe .",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "drizzle-orm": "^0.38.0",
-    "postgres": "^3.4.0"
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9"
   },
   "devDependencies": {
     "@sevendays/config": "workspace:*",
     "@sevendays/types": "workspace:*",
-    "drizzle-kit": "^0.30.0",
-    "typescript": "^5.7.0"
+    "@types/node": "^26.4.0",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^6.0.3"
   }
 }

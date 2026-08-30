@@ -1,0 +1,7 @@
+{
+  "root": false,
+  "extends": ["@sevendays/config/biome/base", "@sevendays/config/biome/worker"],
+  "files": {
+    "includes": ["!worker-configuration.d.ts"]
+  }
+}

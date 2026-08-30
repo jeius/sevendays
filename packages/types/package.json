@@ -9,14 +9,19 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "lint": "eslint .",
+    "lint": "biome lint",
+    "format": "biome format",
+    "fix": "biome check --fix .",
+    "fix:unsafe": "biome check --fix --unsafe .",
     "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@sevendays/config": "workspace:*",
-    "typescript": "^5.7.0"
+    "@types/node": "^26.4.0",
+    "typescript": "^6.0.3",
+    "zod": "^4.5.1"
+  },
+  "peerDependencies": {
+    "zod": "^4.5.1"
   }
 }

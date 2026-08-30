@@ -4,14 +4,16 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./tailwind-preset": "./tailwind-preset.ts",
     "./globals.css": "./src/globals.css"
   },
   "scripts": {
-    "lint": "eslint ."
+    "lint": "biome lint",
+    "format": "biome format",
+    "fix": "biome check --fix .",
+    "fix:unsafe": "biome check --fix --unsafe ."
   },
   "devDependencies": {
     "@sevendays/config": "workspace:*",
-    "tailwindcss": "^3.4.0"
+    "tailwindcss": "^4.3.3"
   }
 }
