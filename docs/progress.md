@@ -1,6 +1,6 @@
 # Progress
 
-_Last updated: 2026-08-30 (toolchain consolidation verified; Milestone 0 exit criteria met; roadmap expanded — Milestone 3 "Booking Availability" inserted, old 3–5 renumbered to 4–6; per-milestone checklists now execution-ordered in docs/plan.md)_
+_Last updated: 2026-08-31 (M1 pre-flight landed on feat/m1-preflight — CI, env examples + .dev.vars hygiene, turbo passthrough swap, manifest aligns, ADR-0007; M1 checklist rewritten in docs/plan.md. Prior: 2026-08-30 toolchain consolidation, M0 exit verified, roadmap expanded.)_
 
 ## Current Milestone: 1 — Real Data Layer (next up; Milestone 0 exit criteria verified 2026-08-30)
 
@@ -29,19 +29,16 @@ _Last updated: 2026-08-30 (toolchain consolidation verified; Milestone 0 exit cr
 ## Known Gaps / Not Yet Done
 
 - No auth anywhere yet (BetterAuth not integrated) — Milestone 4.
-- No CI (no `.github/workflows/`) — Milestone 1 pre-flight.
 - CORS on `apps/api` is wide open (`origin: "*"` in `src/index.ts`) — must be locked down before Milestone 6.
 - Logging is Hono's `logger()` middleware, not the planned Loglayer + Pino — Milestone 6.
 - No DB migrations or seed script — Milestone 1.
-- No `.env.example` — the apps' dev scripts read `.env.local` (gitignored); a fresh clone has to know to create one.
-- `apps/landing`/`apps/admin` tsconfigs pin `@types/node@^22` while the workspace standard is `^26` (scaffold residue; harmless — align when next touched).
-- lucide-react manifests say `^1.36.0` but the lockfile resolved `1.37.0` (and `pnpm-workspace.yaml` excludes exactly 1.37.0 from `minimumReleaseAge`) — bump the manifests to `^1.37.0` or the next re-resolution silently downgrades.
-- `turbo.json` still passes through `DATABASE_URI`; everything in the repo reads `DATABASE_URL`.
+- Root `.env.example` documents the database URLs (M1 pre-flight); the apps' dev scripts still read `.env.local` (gitignored) for app-level vars — per-app examples land with M2.
+- `turbo.json` passes through `DATABASE_URL` + `DATABASE_MIGRATE_URL` (M1 pre-flight, ADR-0007); `drizzle.config.ts` still reads `DATABASE_URL` until M1.3 wires the migrate URL.
 
 ## Immediate Next Steps (in order)
 
 1. Push local commits (`git status` to see how many; `git push`).
-2. Start **Milestone 1** — follow its checklist in `docs/plan.md` top to bottom: the pre-flight block (CI, `.env.example`, `DATABASE_URI` cleanup, lucide-react bump, `@types/node` align) covers what used to be items 2–5 here, then Supabase pooled URL → Worker secret → migration → real routes → seed.
+2. Continue **Milestone 1** (pre-flight complete, ticket #3): M1.2 catalog schema (#4) → M1.3 provision/migrate/seed (#5) → M1.4 real routes + integration tests (#6) → M1.5 exit verification (#7). Checklist lives in `docs/plan.md`; spec in `docs/specs/2026-08-30-m1-real-data-layer-spec.md`.
 
 ## Notes for Future Sessions
 
