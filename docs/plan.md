@@ -22,23 +22,25 @@ Get the monorepo, apps, and shared packages scaffolded and booting locally. No r
 
 ## Milestone 1 — Real Data Layer
 
-Move off stub data onto a real, migrated Postgres database.
+Move off stub data onto a real, migrated Postgres database, seeded with the studio's real catalog (`docs/catalog.md`). Spec: `docs/specs/2026-08-30-m1-real-data-layer-spec.md` (GitHub issue #2); tickets #3–#7.
 
 Pre-flight — small debt from Milestone 0, cleared before the DB work (CI included so every later milestone is guarded):
 
-- [ ] CI via GitHub Actions: run `pnpm check` + `pnpm build` on push/PR to `main`
-- [ ] `.env.example` at the repo root (dev scripts read `.env.local`, which is gitignored — a fresh clone has to know to create one)
-- [ ] Drop `DATABASE_URI` from `turbo.json` `globalPassThroughEnv` (everything reads `DATABASE_URL`)
-- [ ] Bump `lucide-react` manifests to `^1.37.0` (lockfile already resolved 1.37.0; see `docs/progress.md`)
-- [ ] Align `apps/landing`/`apps/admin` tsconfigs' `@types/node` to `^26` (workspace standard)
+- [x] CI via GitHub Actions: run `pnpm check` + `pnpm build` on push/PR to `main`
+- [x] `.env.example` at the repo root and `.dev.vars.example` for the api Worker (`DATABASE_URL` pooled, `DATABASE_MIGRATE_URL` direct — see ADR-0007); `.dev.vars` gitignored
+- [x] Replace `DATABASE_URI` with `DATABASE_URL` + `DATABASE_MIGRATE_URL` in `turbo.json` `globalPassThroughEnv` (everything reads the new names)
+- [x] Bump `lucide-react` manifests to `^1.37.0` (lockfile already resolved 1.37.0)
+- [x] Align `apps/landing`/`apps/admin` `@types/node` to `^26` (workspace standard)
 
 Data layer:
 
-- [ ] Create a Supabase project; copy the **pooled** connection string (Supavisor, port 6543 — Workers can't open raw TCP)
-- [ ] Set the URL for local `packages/db` scripts (`.env`, per `drizzle.config.ts`) and as an `apps/api` Worker secret (`wrangler secret put DATABASE_URL`)
-- [ ] Generate the first Drizzle migration (`db:generate`) and apply it (`db:migrate`)
-- [ ] Rewrite `/api/branches` and `/api/appointments` to read/write real rows via `packages/db` instead of stub data (thin routes, logic in a service module)
-- [ ] Seed script (`db:seed` in `packages/db`) inserting the 3 real branches — names, addresses, phones, walk-in flags supplied by the client at this point
+- [ ] Catalog schema in `packages/types` (Zod: Print sizes, Attires, Inclusions, Add-on Services, appointment Kind) mirrored in `packages/db` (Drizzle), first migration generated (ADR-0009)
+- [ ] Create a Supabase project; wire the two connection strings per ADR-0007 (`DATABASE_MIGRATE_URL` for migrations, pooled `DATABASE_URL` as the api Worker secret and `.dev.vars`)
+- [ ] Apply the migration (`db:migrate`) over the direct connection
+- [ ] Seed script (`db:seed`): 3 real branches (details supplied by the client at seed time), 11 Service Packages with Inclusions from `docs/catalog.md`, Print size + Attire lookups, Add-on Services (Make-up, Hairstyle)
+- [ ] Rewrite `/api/branches`, add `/api/service-packages` and `/api/addon-services` (thin routes, logic in service modules)
+- [ ] `POST /api/appointments` persists with package + add-on price snapshots and Kind; minimal `GET /api/appointments?branchId=`
+- [ ] Integration tests against real Postgres (docker compose locally, CI service container, migrations before tests, fail loud when unreachable — ADR-0008)
 - [ ] Verify: create a row via the API, confirm it in Supabase, redeploy and confirm it survived
 
 **Exit criteria:** a row created via the API is visible in the Postgres database, and survives a redeploy; CI runs `pnpm check` on every push.
