@@ -17,6 +17,9 @@ dist/
 .env.*
 !.env.example
 
+# Scratch (working notes; promoted artifacts live in docs/)
+.scratch/
+
 # Editor / OS
 .DS_Store
 .vscode/*

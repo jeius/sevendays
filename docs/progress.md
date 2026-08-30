@@ -1,6 +1,6 @@
 # Progress
 
-_Last updated: 2026-08-30 (toolchain consolidation rounds verified; Milestone 0 exit criteria met)_
+_Last updated: 2026-08-30 (toolchain consolidation verified; Milestone 0 exit criteria met; roadmap expanded — Milestone 3 "Booking Availability" inserted, old 3–5 renumbered to 4–6; per-milestone checklists now execution-ordered in docs/plan.md)_
 
 ## Current Milestone: 1 — Real Data Layer (next up; Milestone 0 exit criteria verified 2026-08-30)
 
@@ -28,10 +28,10 @@ _Last updated: 2026-08-30 (toolchain consolidation rounds verified; Milestone 0 
 
 ## Known Gaps / Not Yet Done
 
-- No auth anywhere yet (BetterAuth not integrated) — Milestone 3.
-- No CI (no `.github/workflows/`).
-- CORS on `apps/api` is wide open (`origin: "*"` in `src/index.ts`) — must be locked down before Milestone 5.
-- Logging is Hono's `logger()` middleware, not the planned Loglayer + Pino — Milestone 5.
+- No auth anywhere yet (BetterAuth not integrated) — Milestone 4.
+- No CI (no `.github/workflows/`) — Milestone 1 pre-flight.
+- CORS on `apps/api` is wide open (`origin: "*"` in `src/index.ts`) — must be locked down before Milestone 6.
+- Logging is Hono's `logger()` middleware, not the planned Loglayer + Pino — Milestone 6.
 - No DB migrations or seed script — Milestone 1.
 - No `.env.example` — the apps' dev scripts read `.env.local` (gitignored); a fresh clone has to know to create one.
 - `apps/landing`/`apps/admin` tsconfigs pin `@types/node@^22` while the workspace standard is `^26` (scaffold residue; harmless — align when next touched).
@@ -41,10 +41,7 @@ _Last updated: 2026-08-30 (toolchain consolidation rounds verified; Milestone 0 
 ## Immediate Next Steps (in order)
 
 1. Push local commits (`git status` to see how many; `git push`).
-2. Bump lucide-react manifests to `^1.37.0` (or drop the `minimumReleaseAgeExclude` from `pnpm-workspace.yaml`).
-3. Drop `DATABASE_URI` from `turbo.json` `globalPassThroughEnv`.
-4. Start **Milestone 1** — see `docs/plan.md`: provision Postgres (Supabase/Neon), set `DATABASE_URL`, then `db:generate` + `db:migrate`.
-5. When Milestone 2 work touches landing/admin, align their tsconfigs' `@types/node` to `^26`.
+2. Start **Milestone 1** — follow its checklist in `docs/plan.md` top to bottom: the pre-flight block (CI, `.env.example`, `DATABASE_URI` cleanup, lucide-react bump, `@types/node` align) covers what used to be items 2–5 here, then Supabase pooled URL → Worker secret → migration → real routes → seed.
 
 ## Notes for Future Sessions
 

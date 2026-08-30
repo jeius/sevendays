@@ -2,7 +2,7 @@
 
 ## System Overview
 
-Three independently deployed apps, all on **Cloudflare Workers** (`landing` and `admin` are Worker-based TanStack Start apps via `@cloudflare/vite-plugin`, not Pages). Every database touch goes through `apps/api` + `packages/db`; the frontends depend only on `packages/types` and shared config, so data shapes stay consistent without a shared runtime.
+Three independently deployed apps, all on **Cloudflare Workers** (`landing` and `admin` are Worker-based TanStack Start apps via `@cloudflare/vite-plugin`, not Pages). Every database touch goes through `apps/api` + `packages/db`; the frontends depend only on shared packages (`packages/types`, `packages/api-client`) and shared config, so data shapes stay consistent without the frontends ever touching the database or hand-rolling API calls.
 
 ```text
    customers ─────────┐                         ┌───────── admin staff
@@ -13,7 +13,7 @@ Three independently deployed apps, all on **Cloudflare Workers** (`landing` and 
           └───────────┬───────────┘ └───────────┬───────────┘
                       │                         │
                       └────────────┬────────────┘
-                                   │ REST (fetch)
+                                   │ REST via @sevendays/api-client (server-to-server)
                                    ▼
                         ┌───────────────────────┐
                         │  apps/api             │  Cloudflare Workers
@@ -39,6 +39,7 @@ Three independently deployed apps, all on **Cloudflare Workers** (`landing` and 
 - **`apps/api`** owns all writes to Postgres and all business logic (appointment status transitions, package activation rules, etc). Routes are thin; logic lives in per-domain modules (to be added as `apps/api/src/services/*` as the API grows past the current stub routes).
 - **`packages/db`** owns the Drizzle schema and exports a `createDbClient(connectionString)` factory. No app should import `drizzle-orm` directly — always go through this package so schema changes propagate everywhere.
 - **`packages/types`** owns Zod schemas and inferred TypeScript types for every domain object (`Branch`, `ServicePackage`, `Appointment`). Both the API (server-side validation) and the frontends (form validation) import from here so a schema change only happens in one place.
+- **`packages/api-client`** owns how the frontends call `apps/api`: a thin Hono RPC client (`createApiClient`) whose types are inferred from the API's exported `AppType` (type-only dependency — no runtime coupling with the app), Zod-parses every response against `packages/types` schemas, and throws a typed `ApiClientError` on non-2xx. Neither frontend hand-rolls fetch calls to the API (ADR-0006).
 - **`packages/ui`** owns the shadcn/ui CSS variables (`src/globals.css`) so `landing` and `admin` don't drift on tokens. Actual shadcn components are generated per-app (via the shadcn CLI) since they're copy-paste by design. Apps are Tailwind v4 (CSS-first): theme customization lives in each app's `styles.css` via `@theme`, and `packages/ui` holds shared variables only — there is no shared JS preset (the v3-era one was removed when the apps landed on v4).
 - **`apps/landing`** and **`apps/admin`** each own their own routes, pages, and app-specific components. Neither should reach into the other's `src/`.
 
@@ -46,13 +47,13 @@ Three independently deployed apps, all on **Cloudflare Workers** (`landing` and 
 
 1. Customer fills out the booking form in `apps/landing` (branch, package, date/time, contact info).
 2. Form is validated client-side against `createAppointmentSchema` from `packages/types`.
-3. `apps/landing` calls `POST /api/appointments` on `apps/api`.
+3. `apps/landing`'s server function calls `POST /api/appointments` on `apps/api` through `@sevendays/api-client` — the browser talks only to its own app; frontend→API calls are always server-to-server (ADR-0006).
 4. `apps/api` re-validates with the same Zod schema (never trust the client), writes the row via `packages/db`, and triggers a Resend confirmation email.
-5. Appointment appears in `apps/admin`'s dashboard, which polls/fetches `GET /api/appointments` from `apps/api`.
+5. Appointment appears in `apps/admin`'s dashboard, which fetches `GET /api/appointments` through `@sevendays/api-client` from its own server functions, cached by TanStack Query (ADR-0006).
 
 ## Auth (planned, not yet wired up)
 
-`apps/admin` will use BetterAuth for staff login. `apps/api` will verify BetterAuth sessions on any mutating admin route (package/branch edits, appointment status changes). `apps/landing`'s booking flow stays unauthenticated by design (see PRD — guest booking is a v1 requirement). The exact session-sharing mechanism between `admin` (frontend) and `api` (backend, different origin) is an open decision — record it as an ADR in `docs/adr/` once resolved, since it affects CORS/cookie config in both apps.
+`apps/admin` will use BetterAuth for staff login. `apps/api` will verify BetterAuth sessions on any mutating admin route (package/branch edits, appointment status changes). `apps/landing`'s booking flow stays unauthenticated by design (see PRD — guest booking is a v1 requirement). Session sharing is decided: `apps/api` verifies the BetterAuth session token against the shared auth tables (ADR-0004), and all frontend→API calls run server-to-server through `@sevendays/api-client` (ADR-0006), so the session token never reaches browser JS.
 
 ## Media Storage
 
