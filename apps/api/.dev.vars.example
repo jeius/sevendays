@@ -1,0 +1,3 @@
+# Local wrangler secrets — copy to .dev.vars (gitignored) and fill in.
+# Pooled Supabase connection (Supavisor, port 6543) — see docs/adr/0007-database-connection-topology.md
+DATABASE_URL=
