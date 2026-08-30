@@ -26,11 +26,11 @@ Move off stub data onto a real, migrated Postgres database, seeded with the stud
 
 Pre-flight — small debt from Milestone 0, cleared before the DB work (CI included so every later milestone is guarded):
 
-- [ ] CI via GitHub Actions: run `pnpm check` + `pnpm build` on push/PR to `main`
-- [ ] `.env.example` at the repo root and `.dev.vars.example` for the api Worker (`DATABASE_URL` pooled, `DATABASE_MIGRATE_URL` direct — see ADR-0007); `.dev.vars` gitignored
-- [ ] Replace `DATABASE_URI` with `DATABASE_URL` + `DATABASE_MIGRATE_URL` in `turbo.json` `globalPassThroughEnv` (everything reads the new names)
-- [ ] Bump `lucide-react` manifests to `^1.37.0` (lockfile already resolved 1.37.0)
-- [ ] Align `apps/landing`/`apps/admin` `@types/node` to `^26` (workspace standard)
+- [x] CI via GitHub Actions: run `pnpm check` + `pnpm build` on push/PR to `main`
+- [x] `.env.example` at the repo root and `.dev.vars.example` for the api Worker (`DATABASE_URL` pooled, `DATABASE_MIGRATE_URL` direct — see ADR-0007); `.dev.vars` gitignored
+- [x] Replace `DATABASE_URI` with `DATABASE_URL` + `DATABASE_MIGRATE_URL` in `turbo.json` `globalPassThroughEnv` (everything reads the new names)
+- [x] Bump `lucide-react` manifests to `^1.37.0` (lockfile already resolved 1.37.0)
+- [x] Align `apps/landing`/`apps/admin` `@types/node` to `^26` (workspace standard)
 
 Data layer:
 
