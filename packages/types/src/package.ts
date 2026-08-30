@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const servicePackageSchema = z.object({
   id: z.string().uuid(),
@@ -20,6 +20,4 @@ export const createServicePackageSchema = servicePackageSchema.omit({
   updatedAt: true,
 });
 
-export type CreateServicePackageInput = z.infer<
-  typeof createServicePackageSchema
->;
+export type CreateServicePackageInput = z.infer<typeof createServicePackageSchema>;

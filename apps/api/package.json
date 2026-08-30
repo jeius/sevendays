@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "build": "tsc --noEmit",
+    "build": "tsc --project tsconfig.build.json",
     "deploy": "wrangler deploy",
-    "lint": "eslint .",
+    "lint": "biome lint",
+    "format": "biome format",
+    "fix": "biome check --fix .",
+    "fix:unsafe": "biome check --fix --unsafe .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "cf-typegen": "wrangler types"
@@ -17,13 +20,13 @@
     "@sevendays/db": "workspace:*",
     "@sevendays/types": "workspace:*",
     "hono": "^4.6.0",
-    "zod": "^3.24.0"
+    "zod": "^4.5.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250101.0",
+    "@cloudflare/workers-types": "^5",
     "@sevendays/config": "workspace:*",
-    "typescript": "^5.7.0",
-    "vitest": "^2.1.0",
-    "wrangler": "^3.99.0"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.127.1"
   }
 }

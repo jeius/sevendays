@@ -1,0 +1,16 @@
+{
+  "root": false,
+  "extends": ["@sevendays/config/biome/base", "@sevendays/config/biome/node"],
+  "overrides": [
+    {
+      "includes": ["src/globals.css"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noUnknownAtRules": "off"
+          }
+        }
+      }
+    }
+  ]
+}

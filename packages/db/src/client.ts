@@ -1,6 +1,6 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import * as schema from "./schema";
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import * as schema from './schema/index.js';
 
 /**
  * STUB: no live database is provisioned yet.
@@ -18,4 +18,4 @@ export function createDbClient(connectionString: string) {
 }
 
 export type Database = ReturnType<typeof createDbClient>;
-export * from "./schema";
+export * from './schema/index.js';
