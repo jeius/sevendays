@@ -2,33 +2,31 @@
 
 ## System Overview
 
-Three independently deployed apps share two internal packages (`db`, `types`) so data shapes and persistence stay consistent without a shared runtime.
+Three independently deployed apps, all on **Cloudflare Workers** (`landing` and `admin` are Worker-based TanStack Start apps via `@cloudflare/vite-plugin`, not Pages). Every database touch goes through `apps/api` + `packages/db`; the frontends depend only on `packages/types` and shared config, so data shapes stay consistent without a shared runtime.
 
 ```text
-                         ┌─────────────────────┐
-   customers  ─────────▶ │  apps/landing        │  Cloudflare Pages
-                         │  (TanStack Start)    │
-                         └──────────┬───────────┘
-                                    │ REST (fetch)
+   customers ─────────┐                         ┌───────── admin staff
+                      ▼                         ▼
+          ┌───────────────────────┐ ┌───────────────────────┐
+          │  apps/landing         │ │  apps/admin           │
+          │  (TanStack Start)     │ │  (TanStack Start)     │
+          └───────────┬───────────┘ └───────────┬───────────┘
+                      │                         │
+                      └────────────┬────────────┘
+                                   │ REST (fetch)
+                                   ▼
+                        ┌───────────────────────┐
+                        │  apps/api             │  Cloudflare Workers
+                        │  (Hono)               │
+                        └───────────┬───────────┘
+                                    │ Drizzle (packages/db) — the only direct DB client
                                     ▼
-                         ┌─────────────────────┐
-                         │  apps/api            │  Cloudflare Workers
-                         │  (Hono)              │
-                         └──────────┬───────────┘
-                                    │ Drizzle (packages/db)
-                                    ▼
-                         ┌─────────────────────┐
-                         │  PostgreSQL          │  Supabase (or equivalent)
-                         └─────────────────────┘
-                                    ▲
-                                    │ REST (fetch) + Drizzle where server functions need direct access
-                         ┌──────────┴───────────┐
-   admin staff ────────▶ │  apps/admin           │  Cloudflare Pages
-                         │  (TanStack Start)    │
-                         └─────────────────────┘
+                        ┌───────────────────────┐
+                        │  PostgreSQL           │  Supabase (or equivalent) — not yet provisioned
+                        └───────────────────────┘
 
-   Cloudflare R2 — package/portfolio images, referenced by key from Postgres,
-                   written to by apps/admin, read by apps/landing + apps/admin.
+   Cloudflare R2 (planned) — package/portfolio images; uploads flow through
+   apps/api (which holds the R2 binding), object keys referenced from Postgres.
 ```
 
 ## Why 3 separate apps instead of 1
@@ -41,7 +39,7 @@ Three independently deployed apps share two internal packages (`db`, `types`) so
 - **`apps/api`** owns all writes to Postgres and all business logic (appointment status transitions, package activation rules, etc). Routes are thin; logic lives in per-domain modules (to be added as `apps/api/src/services/*` as the API grows past the current stub routes).
 - **`packages/db`** owns the Drizzle schema and exports a `createDbClient(connectionString)` factory. No app should import `drizzle-orm` directly — always go through this package so schema changes propagate everywhere.
 - **`packages/types`** owns Zod schemas and inferred TypeScript types for every domain object (`Branch`, `ServicePackage`, `Appointment`). Both the API (server-side validation) and the frontends (form validation) import from here so a schema change only happens in one place.
-- **`packages/ui`** owns the shared Tailwind preset and shadcn/ui CSS variables so `landing` and `admin` don't visually drift or duplicate token definitions. Actual shadcn components are generated per-app (via the shadcn CLI) since they're copy-paste by design, but they consume the shared tokens.
+- **`packages/ui`** owns the shadcn/ui CSS variables (`src/globals.css`) so `landing` and `admin` don't drift on tokens. Actual shadcn components are generated per-app (via the shadcn CLI) since they're copy-paste by design. Apps are Tailwind v4 (CSS-first): theme customization lives in each app's `styles.css` via `@theme`, and `packages/ui` holds shared variables only — there is no shared JS preset (the v3-era one was removed when the apps landed on v4).
 - **`apps/landing`** and **`apps/admin`** each own their own routes, pages, and app-specific components. Neither should reach into the other's `src/`.
 
 ## Data Flow: Booking a Shoot
@@ -58,7 +56,7 @@ Three independently deployed apps share two internal packages (`db`, `types`) so
 
 ## Media Storage
 
-Package cover images and portfolio photos are uploaded from `apps/admin`, stored in Cloudflare R2, and referenced by object key (not full URL) in Postgres (`service_packages.cover_image_key`). Both frontends resolve keys to a servable URL — the exact resolution strategy (public R2 bucket vs. signed URLs vs. a Worker route) is not yet decided; record the decision as an ADR when it's made, since it affects `apps/api`'s response shape.
+Package cover images and portfolio photos are uploaded through `apps/api` (which will hold the R2 binding), initiated from the admin dashboard, and referenced by object key (not full URL) in Postgres (`service_packages.cover_image_key`). Both frontends resolve keys to a servable URL — the exact resolution strategy (public R2 bucket vs. signed URLs vs. a Worker route) is not yet decided; record the decision as an ADR when it's made, since it affects `apps/api`'s response shape.
 
 ## Observability
 
@@ -70,6 +68,6 @@ Package cover images and portfolio photos are uploaded from `apps/admin`, stored
 
 | App | Platform | Notes |
 |---|---|---|
-| `apps/landing` | Cloudflare Pages/Workers (via `@cloudflare/vite-plugin`) | Public, cacheable |
-| `apps/admin` | Cloudflare Pages/Workers (via `@cloudflare/vite-plugin`) | Auth-gated, separate deployment from landing |
+| `apps/landing` | Cloudflare Workers (via `@cloudflare/vite-plugin`, `wrangler deploy`) | Public, cacheable |
+| `apps/admin` | Cloudflare Workers (via `@cloudflare/vite-plugin`, `wrangler deploy`) | Auth-gated, separate deployment from landing |
 | `apps/api` | Cloudflare Workers (via Wrangler) | Bindings/secrets TODO — see `apps/api/wrangler.toml` |
