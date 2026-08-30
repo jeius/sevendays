@@ -4,24 +4,25 @@
 
 - **Turborepo** — task orchestration/caching across apps and packages (`turbo.json`).
 - **pnpm workspaces** — package manager, pinned via `packageManager` in root `package.json`. Use `corepack enable` to get the right version automatically.
+- **Node >= 24** — required by `engines` in the root `package.json` (raised from >=20 on 2026-08-30).
 
 ## Frontend (`apps/landing`, `apps/admin`)
 
 - **TanStack Start** — full-stack React framework (file-based routing via TanStack Router, SSR, server functions). Scaffolded with the official `@tanstack/cli create` tool, not hand-written, so it tracks upstream conventions.
-- **shadcn/ui** — components generated per-app via the shadcn CLI (`components.json` present in both apps), styled with the shared preset in `packages/ui`.
+- **shadcn/ui** — components generated per-app via the shadcn CLI (`components.json` present in both apps), themed by shared CSS variables from `packages/ui` plus each app's Tailwind v4 `@theme` styles.
 - **Tailwind CSS v4** — as scaffolded by TanStack CLI (`@tailwindcss/vite`).
-- **Cloudflare Workers/Pages** — deploy target, via `@cloudflare/vite-plugin` + Wrangler (`wrangler.jsonc` in each app).
+- **Cloudflare Workers** — deploy target for all three apps (`landing`/`admin` are Worker-based TanStack Start, not Pages), via `@cloudflare/vite-plugin` + Wrangler (`wrangler.jsonc` in each app; `deploy` runs `wrangler deploy`). Builds emit to `dist/` (TanStack Start 1.168 layout: `dist/client`, `dist/server`, `dist/wrangler.json`) — the scaffold's `.output/` paths are obsolete.
 
 ## Backend (`apps/api`)
 
 - **Hono** — HTTP router/framework, deployed as a Cloudflare Worker (`wrangler.toml`).
-- **Zod** — request validation via `@hono/zod-validator`, using shared schemas from `packages/types`.
+- **Zod v4** (^4.5.1) — request validation via `@hono/zod-validator`, using shared schemas from `packages/types`.
 - **Loglayer + Pino** — structured logging. *Not yet wired in* — the API currently uses Hono's built-in `logger()` middleware as a placeholder. Swap this in when logging requirements firm up.
 
 ## Data Layer
 
 - **PostgreSQL** — via Supabase (or another Postgres-compatible free tier — Neon is a reasonable alternative). *Not yet provisioned.*
-- **Drizzle ORM** — schema and query builder, lives in `packages/db`. Schema is written; migrations have not been generated or run against a real database yet.
+- **Drizzle ORM** (^0.45) — schema and query builder, lives in `packages/db`. Schema is written; migrations have not been generated or run against a real database yet.
 
 ### Provisioning Postgres (when ready)
 
@@ -50,7 +51,12 @@
 
 ## Validation
 
-- **Zod** — single source of truth for data shapes, defined once in `packages/types` and consumed by both the API (server-side validation) and the frontends (form validation).
+- **Zod v4** — single source of truth for data shapes, defined once in `packages/types` and consumed by both the API (server-side validation) and the frontends (form validation).
+
+## Testing
+
+- **Vitest 4** — every workspace that owns tests has its own `vitest.config.ts` extending `@sevendays/config/vitest` (a built entry — run `pnpm build:packages` after a fresh clone). See `docs/adr/0003-vitest-4-per-workspace-configs.md` for why per-workspace configs are mandatory.
+- Root `vitest.config.ts` composes `packages/` and `apps/` projects for root-level runs and coverage merging; it does not discover a workspace's tests on its own.
 
 ## Secrets Checklist (none committed to the repo)
 

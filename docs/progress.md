@@ -1,38 +1,54 @@
 # Progress
 
-_Last updated: 2026-08-29_
+_Last updated: 2026-08-30 (toolchain consolidation rounds verified; Milestone 0 exit criteria met)_
 
-## Current Milestone: 0 — Baseline
+## Current Milestone: 1 — Real Data Layer (next up; Milestone 0 exit criteria verified 2026-08-30)
+
+## Gate status (all verified live on 2026-08-30)
+
+- `pnpm install --frozen-lockfile` — clean; lockfile consistent with all manifests.
+- `pnpm check` (lint + format + typecheck + test) — 23/23 turbo tasks green.
+- `pnpm test` — `apps/api` runs its vitest 4 suite for real (1/1); `landing`/`admin` still no-op by design.
+- `pnpm build` — 5/5 green. Frontends emit `dist/` (TanStack Start 1.168 output layout: `dist/client`, `dist/server`, `dist/wrangler.json`); `apps/api` emits real `dist/` output via `tsconfig.build.json`.
+- `pnpm dev` — all three apps boot together: api on 8787 (`/health` → 200), admin on 3000, landing on 3001 (Vite auto-increments when 3000 is taken). Exit criteria met: nothing provisioned in the cloud.
+- `pnpm --filter @sevendays/landing start` / `admin start` — boot the built output (`node --import ./dist/server/instrument.server.mjs dist/server/index.js`).
+- Initial commit pushed to GitHub ✅ (2026-08-29); check `git status` — recent tooling commits may still be local-only.
 
 ## What Exists
 
-- Monorepo structure (`apps/`, `packages/`) with pnpm + Turborepo wired up.
-- `packages/types`: Zod schemas for `Branch`, `ServicePackage`, `Appointment` — considered stable, extend rather than replace.
-- `packages/db`: Drizzle schema for the same 3 entities, plus a `createDbClient()` factory. **No live database is connected.** `drizzle.config.ts` points at a placeholder local connection string that will fail if you actually try to run it against nothing — this is expected until Milestone 1.
-- `packages/ui`: shared Tailwind preset + shadcn CSS variables. Not yet consumed by either app's Tailwind config — that wiring is still TODO.
-- `apps/api`: Hono app with `/health` (real), `/api/branches` (returns one hardcoded fixture), `/api/appointments` (`POST` validates input with Zod and echoes it back — does not persist). One vitest test for `/health`.
-- `apps/landing`, `apps/admin`: freshly scaffolded via `@tanstack/cli create` with the `shadcn`, `sentry`, `posthog` add-ons and Cloudflare deployment target. Still contain the CLI's default starter content — no Sevendays-specific pages yet.
-- `AGENTS.md` and `docs/{PRD,architecture,tech-stack,plan}.md` written and current as of this update.
+- Monorepo structure (`apps/`, `packages/`) with pnpm 11 + Turborepo. `engines` requires **Node >= 24** (raised from >=20 on 2026-08-30).
+- Toolchain: TypeScript `^6.0.3` in every manifest; Biome `2.5.11` (exact, root devDep); tiered Biome per ADR-0002; per-workspace vitest configs per ADR-0003. `pnpm check` includes format; `pnpm fix` / `pnpm fix:unsafe` for lint+format fixes.
+- `packages/config`: exports `ts/{base,node,react,vite}.json`, `biome/{base,vite,node,worker}.json`, and a **built** `@sevendays/config/vitest` (now emitting `.d.ts` too). Fresh clones must run `pnpm build:packages` before `pnpm check` (dist/ is gitignored).
+- `packages/types`: Zod **v4** schemas (`^4.5.1`, declared as devDep + peerDep) for `Branch`, `ServicePackage`, `Appointment` — stable, extend rather than replace. Upgraded from v3 workspace-wide on 2026-08-30.
+- `packages/db`: Drizzle schema for the same 3 entities (`drizzle-orm ^0.45.2`) + `createDbClient()` factory. **No live database connected.** `drizzle.config.ts` points at a placeholder URL that fails if run — expected until Milestone 1. `db:push` script added; `tsconfig.build.json` emits `dist/`.
+- `packages/ui`: **tokens-only** — `src/globals.css` shadcn CSS variables. The v3-era JS `tailwind-preset.ts` was deleted on 2026-08-30: the apps are Tailwind v4 (CSS-first) and cannot consume a v3 preset. Apps style via `@theme` in their own `styles.css`.
+- `apps/api`: Hono app with `/health` (real), `/api/branches` (one hardcoded fixture), `/api/appointments` (`POST` validates with Zod and echoes back — does not persist). Owns `vitest.config.ts` (node env, explicit include — required on vitest 4, see ADR-0003), `tsconfig.build.json` (emits `dist/`), and `worker-configuration.d.ts` included in both tsconfigs so the global `Env` resolves in every compile path.
+- `apps/landing`, `apps/admin`: TanStack Start 1.168.49 + Vite 8 + React 19 + Tailwind v4 + Sentry/PostHog add-ons. Build/start scripts target `dist/` — the `.output/` paths the CLI generated were written for TanStack Start <1.141 and failed on this version. `routeTree.gen.ts` committed in its stable post-build state.
+- Dependency refresh (2026-08-30): zod 4.5, vitest 4.1, wrangler 4.127, vite 8.2, `@cloudflare/vite-plugin` 1.54, `@cloudflare/workers-types` 5, drizzle-orm 0.45, drizzle-kit 0.31, tailwindcss 4.3, React 19.2, Sentry 10.72, posthog-js 1.42.
 
 ## Known Gaps / Not Yet Done
 
-- `pnpm install` has **not been run and verified** at the repo root since the apps were scaffolded — do this first before writing any new code, since dependency resolution across the workspace hasn't been confirmed clean.
-- `pnpm dev` has not been verified to boot all three apps together.
-- `packages/config`'s base tsconfig is not yet `extends`-ed by `apps/landing` or `apps/admin` (they currently use the tsconfig the TanStack CLI generated). Low priority — only matters if tsconfig settings drift between apps.
-- No auth anywhere yet (BetterAuth not integrated).
-- No CI (no `.github/workflows/`) — not set up yet.
-- CORS on `apps/api` is wide open (`origin: "*"`) — fine for local dev, must be locked down before Milestone 5.
-- Logging is Hono's default `logger()` middleware, not the planned Loglayer + Pino.
+- No auth anywhere yet (BetterAuth not integrated) — Milestone 3.
+- No CI (no `.github/workflows/`).
+- CORS on `apps/api` is wide open (`origin: "*"` in `src/index.ts`) — must be locked down before Milestone 5.
+- Logging is Hono's `logger()` middleware, not the planned Loglayer + Pino — Milestone 5.
+- No DB migrations or seed script — Milestone 1.
+- No `.env.example` — the apps' dev scripts read `.env.local` (gitignored); a fresh clone has to know to create one.
+- `apps/landing`/`apps/admin` tsconfigs pin `@types/node@^22` while the workspace standard is `^26` (scaffold residue; harmless — align when next touched).
+- lucide-react manifests say `^1.36.0` but the lockfile resolved `1.37.0` (and `pnpm-workspace.yaml` excludes exactly 1.37.0 from `minimumReleaseAge`) — bump the manifests to `^1.37.0` or the next re-resolution silently downgrades.
+- `turbo.json` still passes through `DATABASE_URI`; everything in the repo reads `DATABASE_URL`.
 
 ## Immediate Next Steps (in order)
 
-1. Run `pnpm install` at the repo root; fix any dependency resolution issues.
-2. Run `pnpm dev` and confirm all three apps boot without errors.
-3. Run `pnpm check` and fix any lint/typecheck failures introduced by scaffolding.
-4. Make the initial commit and push to `https://github.com/jeius/sevendays.git`.
-5. Run `/setup-matt-pocock-skills` now that there's a real repo (issue tracker, domain docs).
-6. Start Milestone 1 (real Postgres) — see `docs/plan.md`.
+1. Push local commits (`git status` to see how many; `git push`).
+2. Bump lucide-react manifests to `^1.37.0` (or drop the `minimumReleaseAgeExclude` from `pnpm-workspace.yaml`).
+3. Drop `DATABASE_URI` from `turbo.json` `globalPassThroughEnv`.
+4. Start **Milestone 1** — see `docs/plan.md`: provision Postgres (Supabase/Neon), set `DATABASE_URL`, then `db:generate` + `db:migrate`.
+5. When Milestone 2 work touches landing/admin, align their tsconfigs' `@types/node` to `^26`.
 
 ## Notes for Future Sessions
 
+- Fresh clone: `pnpm install` → `pnpm build:packages` → anything else (the vitest config entry is built, not source).
+- Vitest gotcha (ADR-0003): every workspace with tests needs its own `vitest.config.ts`. Vitest 4 does not reliably discover a workspace's tests from the root config alone, and the shared `passWithNoTests` turns a miss into a silent green. After any vitest upgrade, run the workspace's tests directly and confirm the suite count is >0.
+- TanStack Start output: v1.168 emits `dist/` (`client/`, `server/`, `wrangler.json`), not the older `.output/`. Do not reintroduce `.output/` paths in scripts.
 - If you're an agent picking this up cold: read `AGENTS.md` first, then this file, then `docs/plan.md` for the current milestone's task list. Don't assume the DB or auth work — check "Known Gaps" above first.

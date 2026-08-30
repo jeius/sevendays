@@ -2,21 +2,21 @@
 
 Phased so each milestone ends in something demoable and independently verifiable, per the "small, verifiable tasks" workflow in `AGENTS.md`.
 
-## Milestone 0 — Baseline (in progress)
+## Milestone 0 — Baseline (complete — exit criteria verified 2026-08-30)
 
 Get the monorepo, apps, and shared packages scaffolded and booting locally. No real features yet.
 
-- [x] Turborepo + pnpm workspace scaffolded
-- [x] `packages/types` — Zod schemas for Branch, ServicePackage, Appointment
-- [x] `packages/db` — Drizzle schema (stubbed, no live DB)
-- [x] `packages/ui` — shared Tailwind preset
-- [x] `apps/api` — Hono skeleton with `/health`, stub `/api/branches`, stub `/api/appointments`
-- [x] `apps/landing`, `apps/admin` — scaffolded via official TanStack CLI (Cloudflare + shadcn + Sentry + PostHog add-ons)
-- [x] `AGENTS.md` + `docs/` written
-- [ ] `pnpm install` verified clean at the root
-- [ ] `pnpm dev` boots all three apps locally without errors
-- [ ] `pnpm check` (lint + typecheck + test) passes across the whole repo
-- [ ] Initial commit pushed to GitHub
+- [✅] Turborepo + pnpm workspace scaffolded
+- [✅] `packages/types` — Zod schemas for Branch, ServicePackage, Appointment
+- [✅] `packages/db` — Drizzle schema (stubbed, no live DB)
+- [✅] `packages/ui` — shared design tokens (v3-era JS preset removed when apps moved to Tailwind v4, 2026-08-30)
+- [✅] `apps/api` — Hono skeleton with `/health`, stub `/api/branches`, stub `/api/appointments`
+- [✅] `apps/landing`, `apps/admin` — scaffolded via official TanStack CLI (Cloudflare + shadcn + Sentry + PostHog add-ons)
+- [✅] `AGENTS.md` + `docs/` written
+- [✅] `pnpm install` verified clean at the root (2026-08-29; `--frozen-lockfile` re-verified 2026-08-30)
+- [✅] `pnpm dev` boots all three apps locally without errors (verified 2026-08-30 — api :8787, admin :3000, landing :3001)
+- [✅] `pnpm check` (lint + format + typecheck + test) passes across the whole repo (23/23 tasks, 2026-08-30; `pnpm build` also 5/5)
+- [✅] Initial commit pushed to GitHub (2026-08-29)
 
 **Exit criteria:** all three apps run locally, `pnpm check` is green, nothing is provisioned in the cloud yet.
 
@@ -68,7 +68,7 @@ The landing site's core feature per the PRD.
 - [ ] PostHog booking-funnel events instrumented on `landing`
 - [ ] CORS locked down on `apps/api` (currently wide open — see `AGENTS.md` TODO)
 - [ ] Basic rate limiting / abuse protection on the public booking endpoint
-- [ ] Real domains + Cloudflare Pages custom domain setup for both apps
+- [ ] Real domains + Cloudflare custom domain setup for all three apps (Workers routes)
 
 **Exit criteria:** the app is safe to point real customers and the client's team at.
 
