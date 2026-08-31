@@ -2,6 +2,6 @@
   "root": false,
   "extends": ["@sevendays/config/biome/base", "@sevendays/config/biome/node"],
   "files": {
-    "includes": ["!!drizzle", "!!dist"]
+    "includes": ["!!drizzle", "!!dist", "!!migrations"]
   }
 }
