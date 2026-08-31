@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const addonServiceSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   // Catalog: "Makeup", "Hairstyle" — flat per-service pricing, no
   // per-package price variants.
   name: z.string().min(1),

@@ -17,11 +17,11 @@ export const appointmentKindSchema = z.enum(['scheduled', 'walk_in', 'visitation
 export type AppointmentKind = z.infer<typeof appointmentKindSchema>;
 
 export const appointmentSchema = z.object({
-  id: z.string().uuid(),
-  branchId: z.string().uuid(),
-  servicePackageId: z.string().uuid(),
+  id: z.uuid(),
+  branchId: z.uuid(),
+  servicePackageId: z.uuid(),
   customerName: z.string().min(1),
-  customerEmail: z.string().email(),
+  customerEmail: z.email(),
   customerPhone: z.string().min(1),
   scheduledAt: z.coerce.date(),
   status: appointmentStatusSchema.default('pending'),
@@ -48,7 +48,7 @@ export const createAppointmentSchema = appointmentSchema
     // Resolved against addon_services and price-snapshotted by the server
     // at booking time (M1.4). Any add-on may attach to any package.
     addonServiceIds: z
-      .array(z.string().uuid())
+      .array(z.uuid())
       .refine((ids) => new Set(ids).size === ids.length, {
         error: 'Duplicate add-on service ids are not allowed.',
       })
@@ -59,7 +59,7 @@ export const createAppointmentSchema = appointmentSchema
 export type CreateAppointmentInput = z.infer<typeof createAppointmentSchema>;
 
 export const updateAppointmentStatusSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   status: appointmentStatusSchema,
 });
 

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { packageInclusionSchema } from './inclusion.js';
 
 export const servicePackageSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().min(1),
   description: z.string().min(1),
   priceCents: z.number().int().nonnegative(),

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const attireSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   // One row per catalog value, including the combined forms
   // (Filipiniana/Executive, Filipiniana/Executive/Uniform, Executive/Uniform).
   name: z.string().min(1),
