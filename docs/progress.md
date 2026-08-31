@@ -1,6 +1,6 @@
 # Progress
 
-_Last updated: 2026-08-31 (M1 pre-flight landed on feat/m1-preflight — CI, env examples + .dev.vars hygiene, turbo passthrough swap, manifest aligns, ADR-0007; M1 checklist rewritten in docs/plan.md. Prior: 2026-08-30 toolchain consolidation, M0 exit verified, roadmap expanded.)_
+_Last updated: 2026-08-31 (M1.2 catalog schema landed on feat/m1.2-catalog-schema — catalog Zod schemas + tests in packages/types, mirrored Drizzle tables + relations in packages/db, first generated migration, ADR-0009; awaiting push/PR. Prior: M1 pre-flight on feat/m1-preflight; 2026-08-30 toolchain consolidation.)_
 
 ## Current Milestone: 1 — Real Data Layer (next up; Milestone 0 exit criteria verified 2026-08-30)
 
@@ -16,6 +16,8 @@ _Last updated: 2026-08-31 (M1 pre-flight landed on feat/m1-preflight — CI, env
 
 ## What Exists
 
+- **M1.2 catalog schema (on feat/m1.2-catalog-schema, awaiting PR):** packages/types gains Print size, Attire, PackageInclusion (plain object with a `kind` enum — deliberately not `z.discriminatedUnion`, all three kinds share one field set), AddonService schemas with a real vitest harness (24+1 tests; per-workspace config per ADR-0003). `appointmentSchema` gains `kind` (default `scheduled`) + `packagePriceCents` (server-written); `createAppointmentSchema` gains `addonServiceIds` (default `[]`, duplicate-rejecting refine) and `notes` optional (Task 4 ruling, recorded in the plan + commit 6ac3921); `servicePackageSchema.durationMinutes` nullable + `servicePackageWithInclusionsSchema` read shape. packages/db mirrors everything: `print_sizes`/`attires`/`package_inclusions`/`addon_services` tables, `appointment_addon_services` unique-pair join with price snapshot, `appointment_kind` enum, relations for the with-inclusions read. First migration `0000_elite_dormammu.sql` generated (offline) + reviewed against `docs/catalog.md`. ADR-0009 records normalized catalog lookups. Generated migrations are Biome-excluded (`!!migrations` in packages/db/biome.json).
+
 - Monorepo structure (`apps/`, `packages/`) with pnpm 11 + Turborepo. `engines` requires **Node >= 24** (raised from >=20 on 2026-08-30).
 - Toolchain: TypeScript `^6.0.3` in every manifest; Biome `2.5.11` (exact, root devDep); tiered Biome per ADR-0002; per-workspace vitest configs per ADR-0003. `pnpm check` includes format; `pnpm fix` / `pnpm fix:unsafe` for lint+format fixes.
 - `packages/config`: exports `ts/{base,node,react,vite}.json`, `biome/{base,vite,node,worker}.json`, and a **built** `@sevendays/config/vitest` (now emitting `.d.ts` too). Fresh clones must run `pnpm build:packages` before `pnpm check` (dist/ is gitignored).
@@ -28,6 +30,8 @@ _Last updated: 2026-08-31 (M1 pre-flight landed on feat/m1-preflight — CI, env
 
 ## Known Gaps / Not Yet Done
 
+- **M1.3 carries two obligations from the M1.2 review (before first `db:migrate`):** (1) fold FK indexes into migration 0000 via schema + `db:generate` — at minimum `package_inclusions.service_package_id` and `appointments.branch_id` — while the migration is still unapplied (after first apply this becomes migration #2); (2) seed review must confirm the 8R-vs-8x10 descriptions and decide whether frame grouping (catalog "Frame 1/2/3") needs a nullable `frame_number` column.
+
 - No auth anywhere yet (BetterAuth not integrated) — Milestone 4.
 - CORS on `apps/api` is wide open (`origin: "*"` in `src/index.ts`) — must be locked down before Milestone 6.
 - Logging is Hono's `logger()` middleware, not the planned Loglayer + Pino — Milestone 6.
@@ -38,7 +42,7 @@ _Last updated: 2026-08-31 (M1 pre-flight landed on feat/m1-preflight — CI, env
 ## Immediate Next Steps (in order)
 
 1. Push local commits (`git status` to see how many; `git push`).
-2. Continue **Milestone 1** (pre-flight complete, ticket #3): M1.2 catalog schema (#4) → M1.3 provision/migrate/seed (#5) → M1.4 real routes + integration tests (#6) → M1.5 exit verification (#7). Checklist lives in `docs/plan.md`; spec in `docs/specs/2026-08-30-m1-real-data-layer-spec.md`.
+2. Push `feat/m1.2-catalog-schema` and open the PR that closes #4 (M1.2 code-complete: all 5 acceptance criteria verified; `pnpm check` + `pnpm build` green on HEAD). Then continue **Milestone 1**: M1.3 provision/migrate/seed (#5) → M1.4 real routes + integration tests (#6) → M1.5 exit verification (#7). Checklist lives in `docs/plan.md`; spec in `docs/specs/2026-08-30-m1-real-data-layer-spec.md`.
 
 ## Notes for Future Sessions
 
