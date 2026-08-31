@@ -8,7 +8,8 @@ describe('printSizeSchema', () => {
     const result = printSizeSchema.safeParse({
       id: UUID,
       code: '8R',
-      description: 'Nominal same physical size as 8x10; kept as a separate row pending client confirmation.',
+      description:
+        'Nominal same physical size as 8x10; kept as a separate row pending client confirmation.',
       createdAt: '2026-08-31T00:00:00.000Z',
       updatedAt: '2026-08-31T00:00:00.000Z',
     });
