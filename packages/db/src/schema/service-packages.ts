@@ -6,7 +6,9 @@ export const servicePackages = pgTable('service_packages', {
   name: text('name').notNull(),
   description: text('description').notNull(),
   priceCents: integer('price_cents').notNull(),
-  durationMinutes: integer('duration_minutes').notNull(),
+  // The catalog specifies no durations; availability (ADR-0005) ignores
+  // duration. Nullable until the client supplies real values.
+  durationMinutes: integer('duration_minutes'),
   isActive: boolean('is_active').notNull().default(true),
   // R2 object key for the cover image; resolved to a URL at read time.
   coverImageKey: text('cover_image_key'),
