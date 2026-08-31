@@ -4,7 +4,7 @@ import { createPackageInclusionSchema, packageInclusionSchema } from './inclusio
 const UUID = '00000000-0000-4000-8000-000000000000';
 
 describe('packageInclusionSchema', () => {
-  it('parses a framed picture row (quantity + attire, no print size)', () => {
+  it('parses a framed picture row (quantity, print size, and attire)', () => {
     const result = packageInclusionSchema.safeParse({
       id: UUID,
       kind: 'framed_picture',
