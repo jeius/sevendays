@@ -1,3 +1,4 @@
+export * from './addon-service.js';
 export * from './appointment.js';
 export * from './attire.js';
 export * from './branch.js';
