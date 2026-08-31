@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { integer, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { branches } from './branches.js';
 import { servicePackages } from './service-packages.js';
 
@@ -10,7 +10,14 @@ export const appointmentStatusEnum = pgEnum('appointment_status', [
   'no_show',
 ]);
 
-// Draft v1 schema.
+// How the session happens (scheduled, walk-in, visitation) — recorded only;
+// the walk-in booking and visitation flows are deferred features.
+export const appointmentKindEnum = pgEnum('appointment_kind', [
+  'scheduled',
+  'walk_in',
+  'visitation',
+]);
+
 export const appointments = pgTable('appointments', {
   id: uuid('id').primaryKey().defaultRandom(),
   branchId: uuid('branch_id')
@@ -24,6 +31,10 @@ export const appointments = pgTable('appointments', {
   customerPhone: text('customer_phone').notNull(),
   scheduledAt: timestamp('scheduled_at', { withTimezone: true }).notNull(),
   status: appointmentStatusEnum('status').notNull().default('pending'),
+  kind: appointmentKindEnum('kind').notNull().default('scheduled'),
+  // Booking-time snapshot of the package price — the quoted price survives
+  // later catalog price changes. Server-written at booking (M1.4).
+  packagePriceCents: integer('package_price_cents').notNull(),
   notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

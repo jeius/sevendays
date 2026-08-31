@@ -31,3 +31,7 @@ dist/
 
 # Testing
 coverage/
+
+# SDD/agent scratch workspaces
+.superpowers/
+.worktrees/

@@ -13,12 +13,14 @@
     "format": "biome format",
     "fix": "biome check --fix .",
     "fix:unsafe": "biome check --fix --unsafe .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@sevendays/config": "workspace:*",
     "@types/node": "^26.4.0",
     "typescript": "^6.0.3",
+    "vitest": "^4.1.11",
     "zod": "^4.5.1"
   },
   "peerDependencies": {
