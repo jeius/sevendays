@@ -68,6 +68,14 @@ describe('createAppointmentSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it('rejects duplicate add-on service ids', () => {
+    const result = createAppointmentSchema.safeParse({
+      ...baseCreate,
+      addonServiceIds: [UUID, UUID],
+    });
+    expect(result.success).toBe(false);
+  });
+
   it('rejects a malformed add-on id', () => {
     const result = createAppointmentSchema.safeParse({
       ...baseCreate,

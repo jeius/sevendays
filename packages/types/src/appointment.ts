@@ -47,7 +47,12 @@ export const createAppointmentSchema = appointmentSchema
   .extend({
     // Resolved against addon_services and price-snapshotted by the server
     // at booking time (M1.4). Any add-on may attach to any package.
-    addonServiceIds: z.array(z.string().uuid()).default([]),
+    addonServiceIds: z
+      .array(z.string().uuid())
+      .refine((ids) => new Set(ids).size === ids.length, {
+        error: 'Duplicate add-on service ids are not allowed.',
+      })
+      .default([]),
     notes: z.string().nullable().optional(),
   });
 
