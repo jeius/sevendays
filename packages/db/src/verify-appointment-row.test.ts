@@ -79,6 +79,7 @@ describe.skipIf(!TEST_DATABASE_URL)('verify-appointment-row probe (live compose 
       kind: 'scheduled',
       status: 'pending',
       packagePriceCents: 150000,
+      notes: 'probe row',
       addonServices: [{ addonServiceId: ids.addonId, name: 'Make-up', priceCents: 12000 }],
     };
     await expect(probe.assertAppointmentRecord(sql, expected)).resolves.toMatchObject({
@@ -97,11 +98,14 @@ describe.skipIf(!TEST_DATABASE_URL)('verify-appointment-row probe (live compose 
       kind: 'scheduled',
       status: 'pending',
       packagePriceCents: 999999,
+      notes: 'wrong notes',
       addonServices: [{ addonServiceId: ids.addonId, name: 'Make-up', priceCents: 12000 }],
     };
-    await expect(probe.assertAppointmentRecord(sql, expected)).resolves.toMatchObject({
-      ok: false,
-    });
+    const result = await probe.assertAppointmentRecord(sql, expected);
+    expect(result.ok).toBe(false);
+    const failedLabels = (result.failed ?? []).map((c) => c.label);
+    expect(failedLabels).toContain('notes');
+    expect(failedLabels).toContain('packagePriceCents');
   });
 
   it('confirm mode: missing row reports not found', async () => {

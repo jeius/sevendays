@@ -39,6 +39,9 @@ export async function assertAppointmentRecord(sql, expected) {
   if (expected.customerPhone !== undefined) {
     push('customerPhone', row.customer_phone, expected.customerPhone);
   }
+  if (expected.notes !== undefined) {
+    push('notes', row.notes, expected.notes);
+  }
   push('kind', row.kind, expected.kind);
   push('status', row.status, expected.status);
   push('packagePriceCents', row.package_price_cents, expected.packagePriceCents);

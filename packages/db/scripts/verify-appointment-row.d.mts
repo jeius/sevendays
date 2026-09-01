@@ -13,6 +13,7 @@ export interface AppointmentProbeExpected {
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
+  notes?: string | null;
   kind: string;
   status: string;
   packagePriceCents: number;
