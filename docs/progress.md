@@ -28,8 +28,8 @@ _Last updated: 2026-09-02 (M1.5 exit gate verified; close-out landing on feat/m1
   /api/v1/appointments`, 200, verification row at position 0, newest-first, identical snapshots). Negative
   controls proved the uniform error shape on the final artifact (unknown servicePackageId → 400
   `Unknown servicePackageId.`; malformed payload → 400 `Invalid request payload.` + `details` with 6 per-issue
-  entries). Verification row is deleted after this close-out lands (single-row, flag-gated probe delete + absence
-  re-assert, per Q3=A). Deploy history: two deploy blockers found + fixed on this branch — (a) `3e67059` the db
+  entries). Verification row was deleted on 2026-09-02 after the evidence was recorded (single-row, flag-gated
+  probe delete + absence re-assert, Q3=A); public list verified back to 0 rows. Deploy history: two deploy blockers found + fixed on this branch — (a) `3e67059` the db
   package root barrel re-exported the test-only migrator into the Worker bundle (`migrate.js` evaluated
   `import.meta.url` at module init, which workerd rejects — Cloudflare validation 10021; every deploy of main was
   failing); (b) `369d4c8` the API memoized its postgres.js client per isolate, but workerd scopes I/O objects to
