@@ -192,7 +192,10 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     description: '2R print x2',
   });
 
-  // Junction rows inserted after inclusions, resolving attire ids by name.
+  // Junction rows inserted after inclusions, resolving attire ids by captured
+  // .returning ids (split statements per row: deterministic created_at for
+  // the stitch query's ORDER BY — autocommit gives each insert its own
+  // timestamp).
   // One row per statement (not one batch): the junction has no position
   // column, so render order falls back to insertion order via created_at —
   // rows written in a single INSERT share now() and would tie on an

@@ -42,7 +42,7 @@ _Last updated: 2026-09-01 (M1.3 provision/migrate/seed landed on feat/m1.3-provi
 - CORS on `apps/api` is wide open (`origin: "*"` in `src/index.ts`) — must be locked down before Milestone 6.
 - Logging is Hono's `logger()` middleware, not the planned Loglayer + Pino — Milestone 6.
 - Root `.env.example` documents the database URLs (M1 pre-flight); the apps' dev scripts still read `.env.local` (gitignored) for app-level vars — per-app examples land with M2.
-- `turbo.json` passes through `DATABASE_URL` + `DATABASE_MIGRATE_URL` (M1 pre-flight, ADR-0007); `drizzle.config.ts` reads `DATABASE_MIGRATE_URL` first (fallback `DATABASE_URL`) — seed/verify ride the session-mode connection (ADR-0007).
+- turbo.json passes through `DATABASE_URL` + `DATABASE_MIGRATE_URL` (M1 pre-flight, ADR-0007); `drizzle.config.ts` reads `DATABASE_MIGRATE_URL` first (fallback `DATABASE_URL`) — seed/verify ride the session-mode connection (ADR-0007). `TEST_DATABASE_URL` is also passed through (M1.4) for the integration-test harness (compose default locally, CI sets it at job level).
 
 ## Immediate Next Steps (in order)
 
