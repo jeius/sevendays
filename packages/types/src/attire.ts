@@ -2,8 +2,9 @@ import { z } from 'zod';
 
 export const attireSchema = z.object({
   id: z.uuid(),
-  // One row per catalog value, including the combined forms
-  // (Filipiniana/Executive, Filipiniana/Executive/Uniform, Executive/Uniform).
+  // Atomic attires (ADR-0009 revision): single values only (Toga,
+  // Filipiniana, Executive, Uniform). Combined contexts are junction-composed
+  // per inclusion, not stored names.
   name: z.string().min(1),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),

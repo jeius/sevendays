@@ -8,7 +8,7 @@ Get the monorepo, apps, and shared packages scaffolded and booting locally. No r
 
 - [✅] Turborepo + pnpm workspace scaffolded
 - [✅] `packages/types` — Zod schemas for Branch, ServicePackage, Appointment
-- [✅] `packages/db` — Drizzle schema (stubbed, no live DB)
+- [✅] `packages/db` — Drizzle schema (live: migrations 0000 + 0001 applied, catalog seeded)
 - [✅] `packages/ui` — shared design tokens (v3-era JS preset removed when apps moved to Tailwind v4, 2026-08-30)
 - [✅] `apps/api` — Hono skeleton with `/health`, stub `/api/branches`, stub `/api/appointments`
 - [✅] `apps/landing`, `apps/admin` — scaffolded via official TanStack CLI (Cloudflare + shadcn + Sentry + PostHog add-ons)
@@ -18,7 +18,7 @@ Get the monorepo, apps, and shared packages scaffolded and booting locally. No r
 - [✅] `pnpm check` (lint + format + typecheck + test) passes across the whole repo (23/23 tasks, 2026-08-30; `pnpm build` also 5/5)
 - [✅] Initial commit pushed to GitHub (2026-08-29)
 
-**Exit criteria:** all three apps run locally, `pnpm check` is green, nothing is provisioned in the cloud yet.
+**Exit criteria:** all three apps run locally, `pnpm check` is green, nothing is provisioned in the cloud yet. _(Verified 2026-08-30; the cloud posture changed under Milestone 1 — Supabase is provisioned and seeded, see the M1 checklist below.)_
 
 ## Milestone 1 — Real Data Layer
 
@@ -34,7 +34,7 @@ Pre-flight — small debt from Milestone 0, cleared before the DB work (CI inclu
 
 Data layer:
 
-- [ ] Catalog schema in `packages/types` (Zod: Print sizes, Attires, Inclusions, Add-on Services, appointment Kind) mirrored in `packages/db` (Drizzle), first migration generated (ADR-0009)
+- [x] Catalog schema in `packages/types` (Zod: Print sizes, Attires, Inclusions, Add-on Services, appointment Kind) mirrored in `packages/db` (Drizzle), first migration generated (ADR-0009)
 - [x] Create a Supabase project; wire the two connection strings per ADR-0007 (`DATABASE_MIGRATE_URL` for migrations, pooled `DATABASE_URL` as the api Worker secret and `.dev.vars`)
 - [x] Apply the migration (`db:migrate`) over the direct connection
 - [x] Seed script (`db:seed`): 3 real branches (details supplied by the client at seed time), 11 Service Packages with Inclusions from `docs/catalog.md`, Print size + Attire lookups, Add-on Services (Make-up, Hairstyle)
