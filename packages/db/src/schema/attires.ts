@@ -1,8 +1,9 @@
 import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
-// One row per catalog value, including the combined forms
-// (Filipiniana/Executive, Filipiniana/Executive/Uniform, Executive/Uniform) —
-// the unique constraint enforces "one row per value" structurally.
+// Atomic attires (ADR-0009 revision): one row per single attire value
+// (Toga, Filipiniana, Executive, Uniform). Combined contexts like
+// Filipiniana/Executive live in the package_inclusion_attires junction —
+// one row per (inclusion, attire) pair — not as stored names.
 export const attires = pgTable('attires', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull().unique(),

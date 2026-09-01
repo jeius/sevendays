@@ -27,7 +27,7 @@ Run from the repo root unless noted. All commands are powered by Turborepo and f
 - Typecheck: `pnpm typecheck`
 - Test: `pnpm test`
 - Everything (lint + format + typecheck + test): `pnpm check`
-- DB schema changes: `pnpm --filter @sevendays/db db:generate` then `pnpm --filter @sevendays/db db:migrate` (requires `DATABASE_URL` — see `docs/tech-stack.md`)
+- DB schema changes: `pnpm --filter @sevendays/db db:generate` then `pnpm --filter @sevendays/db db:migrate` (requires `DATABASE_MIGRATE_URL` in `packages/db/.env` — the session-mode pooler URL per `docs/adr/0007-database-connection-topology.md`)
 
 ### Current status of `pnpm test`
 
@@ -39,12 +39,13 @@ Run from the repo root unless noted. All commands are powered by Turborepo and f
 - **Never commit secrets.** `DATABASE_URL`, `BETTER_AUTH_SECRET`, `RESEND_API_KEY`, `SENTRY_DSN`, `POSTHOG_API_KEY` are set via `wrangler secret put` per environment, never in `wrangler.toml`/`.env` files that get committed.
 - **Validate all external input with Zod.** Use the schemas in `packages/types` rather than redefining shapes per app. If a new shape is needed, add it to `packages/types`, not inline in a route/component.
 - **Database access goes through `packages/db`.** Don't hand-write SQL or open a second Postgres client elsewhere. Schema changes are Drizzle migrations, generated via `db:generate`, never edited by hand in `packages/db/migrations`.
-- **The DB and auth are currently stubbed.** `packages/db`'s client works but nothing is provisioned yet, and BetterAuth is not wired in. Don't build features that assume a live database or a logged-in admin user until `docs/progress.md` says otherwise — check there before starting DB- or auth-dependent work.
+- **The DB is provisioned and the catalog is seeded.** `packages/db`'s client works against the live Supabase database (migrations 0000 + 0001 applied, catalog seeded + verified). BetterAuth is still not wired in — don't build features that assume a logged-in admin user until `docs/progress.md` says otherwise.
 - **Keep route handlers thin.** In `apps/api`, business logic belongs in a service/module, not inline in the Hono route. Routes: parse/validate input, call a function, return a response.
 - **Use `async`/`await`** exclusively; avoid raw Promise chains or callbacks.
 - **Each app owns its UI**, but shared tokens live in `packages/ui` (shadcn CSS variables). Apps are Tailwind v4 (CSS-first) — theme via `@theme` in each app's `styles.css`; don't duplicate token definitions between `landing` and `admin`.
 - **Do not commit code that fails `pnpm check`** (lint + format + typecheck + test) for the packages/apps you touched.
 - **Update `docs/progress.md`** at the end of any task that changes what's implemented vs. stubbed, so the next session (human or agent) doesn't have to rediscover it.
+- **Tick checklist boxes in `docs/*.md` with the ✅ emoji (`- [✅]`), never plain `[x]`.**
 - **Log decisions.** Any nontrivial architectural choice (e.g., how auth sessions are shared across `landing`/`admin`/`api`, or how R2-stored images are served) gets an ADR in `docs/adr/`.
 
 ## Directory Structure
@@ -67,7 +68,7 @@ sevendays/
 │   ├── admin/            # TanStack Start — dashboard + CMS
 │   └── api/              # Hono on Cloudflare Workers
 └── packages/
-    ├── db/               # Drizzle schema + client (stubbed, no live DB yet)
+    ├── db/               # Drizzle schema + client (live DB: migrations applied, catalog seeded)
     ├── types/             # Zod schemas, shared types
     ├── ui/               # shadcn tokens (CSS variables)
     └── config/           # shared ts/biome/vitest configs

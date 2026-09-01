@@ -21,16 +21,15 @@
 
 ## Data Layer
 
-- **PostgreSQL** — via Supabase (or another Postgres-compatible free tier — Neon is a reasonable alternative). *Not yet provisioned.*
-- **Drizzle ORM** (^0.45) — schema and query builder, lives in `packages/db`. Schema is written; migrations have not been generated or run against a real database yet.
+- **PostgreSQL** — via Supabase (or another Postgres-compatible free tier — Neon is a reasonable alternative). (Supabase project provisioned; M1.3 applied migration 0000 and seeded the catalog).
+- **Drizzle ORM** (^0.45) — schema and query builder, lives in `packages/db`. Schema is written; migration 0000 (with the first-apply FK indexes + natural keys) is applied to the live database and the catalog is seeded — see docs/progress.md.
 
-### Provisioning Postgres (when ready)
+### Provisioning Postgres (done 2026-08-31 — record of how it was done)
 
-1. Create a Supabase project (or Neon, or any Postgres host).
-2. Copy the connection string.
-3. Set it locally for `packages/db` in a `.env` file (see `drizzle.config.ts`) for running `db:generate`/`db:migrate` from your machine.
-4. Set it as a Cloudflare Workers secret for `apps/api`: `wrangler secret put DATABASE_URL` (run from `apps/api`).
-5. Run `pnpm --filter @sevendays/db db:generate` to produce the first migration from the current schema, then `pnpm --filter @sevendays/db db:migrate` to apply it.
+1. Supabase project created; the previous project's 12 Payload tables were removed under owner authorization (public now holds only this project's 10 tables — 8 from migration 0000 plus `frames` and `package_inclusion_attires` from 0001).
+2. **Session-mode pooler** string (Project Settings → Database → Connection pooling → Session mode, port 5432 — the plain direct host is IPv6-only) went into `packages/db/.env` as `DATABASE_MIGRATE_URL` for drizzle-kit and the seed scripts; the **transaction-pooled** string (port 6543) into `apps/api/.dev.vars` as `DATABASE_URL` for the Worker runtime.
+3. Cloudflare Workers secret: `wrangler secret put DATABASE_URL` from `apps/api` (operator step — done during M1.5's deploy task if not already).
+4. Migrations 0000 + 0001 generated from the current schema and applied over the session connection; the catalog was seeded and verified (`pnpm --filter @sevendays/db db:seed` / `db:verify-seed`).
 
 ## Auth
 
@@ -62,7 +61,8 @@
 
 | Secret | Used by | Set via |
 |---|---|---|
-| `DATABASE_URL` | `apps/api`, local `packages/db` scripts | `wrangler secret put` / local `.env` |
+| `DATABASE_URL` | `apps/api` Worker runtime, local `wrangler dev` | `wrangler secret put` / local `.dev.vars` |
+| `DATABASE_MIGRATE_URL` | drizzle-kit + seed/verify scripts (`packages/db`) | local `packages/db/.env` (gitignored) |
 | `BETTER_AUTH_SECRET` | `apps/api`, `apps/admin` | `wrangler secret put` |
 | `RESEND_API_KEY` | `apps/api` | `wrangler secret put` |
 | `SENTRY_DSN` (×3 apps) | all apps | `wrangler secret put` / app env |

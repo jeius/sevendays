@@ -1,6 +1,6 @@
 {
-  "id": "78970a88-d158-4b83-b878-1e868edbc3d9",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "81c49a24-c3a7-4d62-bcad-d5e18c7c9832",
+  "prevId": "78970a88-d158-4b83-b878-1e868edbc3d9",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -461,6 +461,182 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.frames": {
+      "name": "frames",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "service_package_id": {
+          "name": "service_package_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "frame_number": {
+          "name": "frame_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "frames_service_package_id_idx": {
+          "name": "frames_service_package_id_idx",
+          "columns": [
+            {
+              "expression": "service_package_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "frames_service_package_id_service_packages_id_fk": {
+          "name": "frames_service_package_id_service_packages_id_fk",
+          "tableFrom": "frames",
+          "tableTo": "service_packages",
+          "columnsFrom": [
+            "service_package_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "frames_pair_unique": {
+          "name": "frames_pair_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "service_package_id",
+            "frame_number"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.package_inclusion_attires": {
+      "name": "package_inclusion_attires",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "inclusion_id": {
+          "name": "inclusion_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attire_id": {
+          "name": "attire_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "package_inclusion_attires_attire_id_idx": {
+          "name": "package_inclusion_attires_attire_id_idx",
+          "columns": [
+            {
+              "expression": "attire_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "package_inclusion_attires_inclusion_id_package_inclusions_id_fk": {
+          "name": "package_inclusion_attires_inclusion_id_package_inclusions_id_fk",
+          "tableFrom": "package_inclusion_attires",
+          "tableTo": "package_inclusions",
+          "columnsFrom": [
+            "inclusion_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "package_inclusion_attires_attire_id_attires_id_fk": {
+          "name": "package_inclusion_attires_attire_id_attires_id_fk",
+          "tableFrom": "package_inclusion_attires",
+          "tableTo": "attires",
+          "columnsFrom": [
+            "attire_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "package_inclusion_attires_pair_unique": {
+          "name": "package_inclusion_attires_pair_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "inclusion_id",
+            "attire_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.package_inclusions": {
       "name": "package_inclusions",
       "schema": "",
@@ -497,8 +673,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "attire_id": {
-          "name": "attire_id",
+        "frame_id": {
+          "name": "frame_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -555,11 +731,11 @@
           "method": "btree",
           "with": {}
         },
-        "package_inclusions_attire_id_idx": {
-          "name": "package_inclusions_attire_id_idx",
+        "package_inclusions_frame_id_idx": {
+          "name": "package_inclusions_frame_id_idx",
           "columns": [
             {
-              "expression": "attire_id",
+              "expression": "frame_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -598,12 +774,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "package_inclusions_attire_id_attires_id_fk": {
-          "name": "package_inclusions_attire_id_attires_id_fk",
+        "package_inclusions_frame_id_frames_id_fk": {
+          "name": "package_inclusions_frame_id_frames_id_fk",
           "tableFrom": "package_inclusions",
-          "tableTo": "attires",
+          "tableTo": "frames",
           "columnsFrom": [
-            "attire_id"
+            "frame_id"
           ],
           "columnsTo": [
             "id"
