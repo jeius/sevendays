@@ -1,5 +1,6 @@
 // psql-equivalent acceptance read-back (psql is not installed on this machine):
-// counts, catalog price checks, and a line-for-line inclusion comparison
+// counts, catalog price checks, line-for-line inclusion comparison (with
+// junction-resolved attire names), frame count + partition checks — all
 // against scripts/catalog.ts (the docs/catalog.md transcription).
 // Run: pnpm --filter @sevendays/db db:verify-seed   — exit 0 = verified.
 import process from 'node:process';
@@ -9,6 +10,8 @@ import {
   attires,
   branches,
   createDbClient,
+  frames,
+  packageInclusionAttires,
   packageInclusions,
   printSizes,
   servicePackages,
@@ -43,9 +46,31 @@ printSizeRows.length === 6
   : fail(`print_sizes: ${printSizeRows.length} != 6`);
 
 const attireRows = await db.select().from(attires);
-attireRows.length === 7
-  ? pass(`attires: ${attireRows.length}/7`)
-  : fail(`attires: ${attireRows.length} != 7`);
+attireRows.length === 4
+  ? pass(`attires: ${attireRows.length}/4 (atomic — combined contexts are junction-composed)`)
+  : fail(`attires: ${attireRows.length} != 4`);
+
+// Junction attires — fetched once; insertion order per inclusion preserves
+// the catalog's attire order for the canonical join.
+const junctionRows = await db
+  .select({ inclusionId: packageInclusionAttires.inclusionId, attireName: attires.name })
+  .from(packageInclusionAttires)
+  .innerJoin(attires, eq(packageInclusionAttires.attireId, attires.id));
+const attireNamesByInclusion = new Map<string, string[]>();
+for (const j of junctionRows) {
+  const list = attireNamesByInclusion.get(j.inclusionId);
+  if (list) {
+    list.push(j.attireName);
+  } else {
+    attireNamesByInclusion.set(j.inclusionId, [j.attireName]);
+  }
+}
+
+const frameRows = await db.select().from(frames);
+const expectedFrameCount = packageSeeds.reduce((n, p) => n + p.framedPictures.length, 0);
+frameRows.length === expectedFrameCount
+  ? pass(`frames: ${frameRows.length}/${expectedFrameCount}`)
+  : fail(`frames: ${frameRows.length} != ${expectedFrameCount}`);
 
 const addonRows = await db.select().from(addonServices);
 addonRows.length === addonServiceSeeds.length
@@ -77,23 +102,24 @@ for (const seed of packageSeeds) {
   if (!row) continue;
   const rows = await db
     .select({
+      id: packageInclusions.id,
       kind: packageInclusions.kind,
       quantity: packageInclusions.quantity,
       description: packageInclusions.description,
       printSizeCode: printSizes.code,
-      attireName: attires.name,
+      frameId: packageInclusions.frameId,
     })
     .from(packageInclusions)
     .leftJoin(printSizes, eq(packageInclusions.printSizeId, printSizes.id))
-    .leftJoin(attires, eq(packageInclusions.attireId, attires.id))
     .where(eq(packageInclusions.servicePackageId, row.id));
 
   const actual = rows
-    .map((r) =>
-      r.kind === 'privilege'
-        ? `privilege|0|${r.attireName ?? '-'}|${r.description ?? ''}`
-        : `${r.kind}|${r.quantity}|${r.printSizeCode ?? '?'}|${r.attireName ?? '?'}`
-    )
+    .map((r) => {
+      const names = attireNamesByInclusion.get(r.id) ?? [];
+      return r.kind === 'privilege'
+        ? `privilege|0|${names.length > 0 ? names.join('/') : '-'}|${r.description ?? ''}`
+        : `${r.kind}|${r.quantity}|${r.printSizeCode ?? '?'}|${names.length > 0 ? names.join('/') : '-'}`;
+    })
     .sort();
   const expected = inclusionSignatures(seed).sort();
 
@@ -110,6 +136,33 @@ for (const seed of packageSeeds) {
   } else {
     pass(`${seed.name}: ${actual.length} inclusion rows match docs/catalog.md line-for-line`);
   }
+
+  // Frame partition (ADR-0009 revision): every framed_picture row references
+  // one of this package's frames; each frame is referenced at least once.
+  const pkgFrameRows = frameRows.filter((f) => f.servicePackageId === row.id);
+  pkgFrameRows.length === seed.framedPictures.length
+    ? pass(`${seed.name}: ${pkgFrameRows.length} frames`)
+    : fail(`${seed.name}: ${pkgFrameRows.length} frames != ${seed.framedPictures.length}`);
+  const includedFrameIds = new Set(
+    rows
+      .filter((r) => r.kind === 'framed_picture')
+      .map((r) => r.frameId)
+      .filter((id) => id !== null)
+  );
+  includedFrameIds.size === pkgFrameRows.length
+    ? pass(`${seed.name}: every frame carries ≥1 framed picture`)
+    : fail(
+        `${seed.name}: framed pictures reference ${includedFrameIds.size}/${pkgFrameRows.length} frames`
+      );
+
+  // Attire completeness: every picture inclusion carries ≥1 junction row.
+  const pictureRows = rows.filter((r) => r.kind !== 'privilege');
+  const barePictures = pictureRows.filter(
+    (r) => (attireNamesByInclusion.get(r.id) ?? []).length === 0
+  );
+  barePictures.length === 0
+    ? pass(`${seed.name}: all ${pictureRows.length} picture inclusions carry attire context`)
+    : fail(`${seed.name}: ${barePictures.length} picture inclusions have no attire`);
 }
 
 // Spot rows (public seed data — safe to print).
