@@ -1,8 +1,9 @@
 import { createAppointmentSchema } from '@sevendays/types';
 import { Hono } from 'hono';
+import { z } from 'zod';
 import type { Env } from '../env.js';
 import type { CreateAppointmentResult } from '../services/appointments.js';
-import { createAppointment } from '../services/appointments.js';
+import { createAppointment, listAppointments } from '../services/appointments.js';
 import { createApiDb } from '../services/db.js';
 import { badRequest, internalError } from '../services/errors.js';
 import { validated } from '../services/validator.js';
@@ -18,6 +19,21 @@ const REASON_MESSAGES: Record<CreateReason, string> = {
   addon: 'Unknown addonServiceId.',
   addon_inactive: 'Add-on Service is inactive.',
 };
+
+appointments.get(
+  '/',
+  validated(z.object({ branchId: z.uuid().optional() }), 'query'),
+  async (c) => {
+    const { branchId } = c.req.valid('query');
+    try {
+      const db = createApiDb(c.env.DATABASE_URL);
+      const rows = await listAppointments(db, { branchId });
+      return c.json(rows);
+    } catch {
+      return internalError(c);
+    }
+  }
+);
 
 appointments.post('/', validated(createAppointmentSchema, 'json'), async (c) => {
   const input = c.req.valid('json');

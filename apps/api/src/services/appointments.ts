@@ -6,8 +6,12 @@ import {
   branches,
   servicePackages,
 } from '@sevendays/db';
-import type { AppointmentWithAddons, CreateAppointmentInput } from '@sevendays/types';
-import { eq, inArray } from 'drizzle-orm';
+import type {
+  AppointmentAddonEntry,
+  AppointmentWithAddons,
+  CreateAppointmentInput,
+} from '@sevendays/types';
+import { desc, eq, inArray } from 'drizzle-orm';
 
 export type CreateAppointmentResult =
   | { ok: true; record: AppointmentWithAddons }
@@ -104,4 +108,69 @@ export async function createAppointment(
     })),
   };
   return { ok: true, record };
+}
+
+/**
+ * List Appointments newest-first, optionally filtered to one Branch, capped
+ * at 200 rows. Add-on Services are fetched in one inArray query for the
+ * fetched appointment ids and stitched back in insertion order per
+ * Appointment (the add-ons were written at booking in the order the client
+ * supplied, so insertion order == requested order).
+ */
+export async function listAppointments(
+  db: Database,
+  { branchId }: { branchId?: string } = {}
+): Promise<AppointmentWithAddons[]> {
+  const returning = {
+    id: appointments.id,
+    branchId: appointments.branchId,
+    servicePackageId: appointments.servicePackageId,
+    customerName: appointments.customerName,
+    customerEmail: appointments.customerEmail,
+    customerPhone: appointments.customerPhone,
+    scheduledAt: appointments.scheduledAt,
+    status: appointments.status,
+    kind: appointments.kind,
+    packagePriceCents: appointments.packagePriceCents,
+    notes: appointments.notes,
+    createdAt: appointments.createdAt,
+    updatedAt: appointments.updatedAt,
+  };
+
+  const rows = await db
+    .select(returning)
+    .from(appointments)
+    .where(branchId ? eq(appointments.branchId, branchId) : undefined)
+    .orderBy(desc(appointments.createdAt))
+    .limit(200);
+
+  const ids = rows.map((r) => r.id);
+  if (ids.length === 0) return [];
+
+  const addonRows = await db
+    .select({
+      appointmentId: appointmentAddonServices.appointmentId,
+      addonServiceId: appointmentAddonServices.addonServiceId,
+      name: addonServices.name,
+      priceCents: appointmentAddonServices.priceCents,
+    })
+    .from(appointmentAddonServices)
+    .innerJoin(addonServices, eq(appointmentAddonServices.addonServiceId, addonServices.id))
+    .where(inArray(appointmentAddonServices.appointmentId, ids));
+
+  const addonsByAppointment = new Map<string, AppointmentAddonEntry[]>();
+  for (const row of addonRows) {
+    const list = addonsByAppointment.get(row.appointmentId) ?? [];
+    list.push({
+      addonServiceId: row.addonServiceId,
+      name: row.name,
+      priceCents: row.priceCents,
+    });
+    addonsByAppointment.set(row.appointmentId, list);
+  }
+
+  return rows.map((row) => ({
+    ...row,
+    addonServices: addonsByAppointment.get(row.id) ?? [],
+  }));
 }
