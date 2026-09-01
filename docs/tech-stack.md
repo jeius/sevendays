@@ -27,10 +27,9 @@
 ### Provisioning Postgres (when ready)
 
 1. Create a Supabase project (or Neon, or any Postgres host).
-2. Copy the connection string.
-3. Set it locally for `packages/db` in a `.env` file (see `drizzle.config.ts`) for running `db:generate`/`db:migrate` from your machine.
-4. Set it as a Cloudflare Workers secret for `apps/api`: `wrangler secret put DATABASE_URL` (run from `apps/api`).
-5. Run `pnpm --filter @sevendays/db db:generate` to produce the first migration from the current schema, then `pnpm --filter @sevendays/db db:migrate` to apply it.
+2. Copy the **Session-mode pooler** connection string (Project Settings → Database → Connection pooling → Session mode, port 5432 — the plain direct host is IPv6-only) into `packages/db/.env` as `DATABASE_MIGRATE_URL` for drizzle-kit and the seed scripts, and the **transaction-pooled** string (port 6543) into `apps/api/.dev.vars` as `DATABASE_URL` for the Worker runtime.
+3. Set it as a Cloudflare Workers secret for `apps/api`: `wrangler secret put DATABASE_URL` (run from `apps/api`).
+4. Run `pnpm --filter @sevendays/db db:generate` to produce the first migration from the current schema, then `pnpm --filter @sevendays/db db:migrate` to apply it.
 
 ## Auth
 
@@ -62,7 +61,8 @@
 
 | Secret | Used by | Set via |
 |---|---|---|
-| `DATABASE_URL` | `apps/api`, local `packages/db` scripts | `wrangler secret put` / local `.env` |
+| `DATABASE_URL` | `apps/api` Worker runtime, local `wrangler dev` | `wrangler secret put` / local `.dev.vars` |
+| `DATABASE_MIGRATE_URL` | drizzle-kit + seed/verify scripts (`packages/db`) | local `packages/db/.env` (gitignored) |
 | `BETTER_AUTH_SECRET` | `apps/api`, `apps/admin` | `wrangler secret put` |
 | `RESEND_API_KEY` | `apps/api` | `wrangler secret put` |
 | `SENTRY_DSN` (×3 apps) | all apps | `wrangler secret put` / app env |

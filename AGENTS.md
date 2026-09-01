@@ -27,7 +27,7 @@ Run from the repo root unless noted. All commands are powered by Turborepo and f
 - Typecheck: `pnpm typecheck`
 - Test: `pnpm test`
 - Everything (lint + format + typecheck + test): `pnpm check`
-- DB schema changes: `pnpm --filter @sevendays/db db:generate` then `pnpm --filter @sevendays/db db:migrate` (requires `DATABASE_URL` — see `docs/tech-stack.md`)
+- DB schema changes: `pnpm --filter @sevendays/db db:generate` then `pnpm --filter @sevendays/db db:migrate` (requires `DATABASE_MIGRATE_URL` in `packages/db/.env` — the session-mode pooler URL per `docs/adr/0007-database-connection-topology.md`)
 
 ### Current status of `pnpm test`
 
