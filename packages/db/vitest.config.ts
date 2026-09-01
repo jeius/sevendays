@@ -7,5 +7,6 @@ export default defineConfig({
     ...baseConfig.test,
     environment: 'node',
     include: ['src/**/*.test.ts'],
+    fileParallelism: false,
   },
 });
