@@ -193,10 +193,19 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
   });
 
   // Junction rows inserted after inclusions, resolving attire ids by name.
-  await db.insert(packageInclusionAttires).values([
-    { inclusionId: inclusionFramedPicture.id, attireId: attireFilipiniana.id },
-    { inclusionId: inclusionFramedPicture.id, attireId: attireExecutive.id },
-  ]);
+  // One row per statement (not one batch): the junction has no position
+  // column, so render order falls back to insertion order via created_at —
+  // rows written in a single INSERT share now() and would tie on an
+  // (id-ordered) coin flip (Task 4 finding). Distinct statements give each
+  // row a distinct timestamp, preserving catalog attire order deterministically.
+  await db.insert(packageInclusionAttires).values({
+    inclusionId: inclusionFramedPicture.id,
+    attireId: attireFilipiniana.id,
+  });
+  await db.insert(packageInclusionAttires).values({
+    inclusionId: inclusionFramedPicture.id,
+    attireId: attireExecutive.id,
+  });
   await db
     .insert(packageInclusionAttires)
     .values({ inclusionId: inclusionPrint2R.id, attireId: attireToga.id });
