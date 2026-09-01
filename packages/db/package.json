@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./migrate": {
+      "types": "./dist/migrate.d.ts",
+      "default": "./dist/migrate.js"
     }
   },
   "scripts": {
@@ -19,6 +23,7 @@
     "fix": "biome check --fix .",
     "fix:unsafe": "biome check --fix --unsafe .",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
@@ -36,6 +41,7 @@
     "@types/node": "^26.4.0",
     "drizzle-kit": "^0.31.10",
     "typescript": "^6.0.3",
-    "tsx": "^4.23.13"
+    "tsx": "^4.23.13",
+    "vitest": "^4.1.11"
   }
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createPackageInclusionSchema, packageInclusionSchema } from './inclusion.js';
+import { resolvedInclusionSchema } from './package.js';
 
 const UUID = '00000000-0000-4000-8000-000000000000';
 
@@ -66,6 +67,36 @@ describe('packageInclusionSchema', () => {
       printSizeId: UUID,
       attireIds: [UUID],
       description: null,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('resolvedInclusionSchema', () => {
+  const baseResolved = {
+    id: UUID,
+    kind: 'framed_picture',
+    quantity: 1,
+    frameId: UUID,
+    description: null,
+    createdAt: '2026-08-31T00:00:00.000Z',
+    updatedAt: '2026-08-31T00:00:00.000Z',
+  };
+
+  it('parses a framed picture with resolved print size and attires', () => {
+    const result = resolvedInclusionSchema.safeParse({
+      ...baseResolved,
+      printSize: { id: UUID, code: '8R', description: '8R print' },
+      attires: [{ id: UUID, name: 'Toga' }],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a bare uuid print size instead of the resolved object', () => {
+    const result = resolvedInclusionSchema.safeParse({
+      ...baseResolved,
+      printSize: UUID,
+      attires: [{ id: UUID, name: 'Toga' }],
     });
     expect(result.success).toBe(false);
   });

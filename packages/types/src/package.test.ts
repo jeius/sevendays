@@ -33,7 +33,7 @@ describe('servicePackageSchema', () => {
 });
 
 describe('servicePackageWithInclusionsSchema', () => {
-  it('parses a package with its inclusions', () => {
+  it('parses a package with a framed inclusion and resolved lookups', () => {
     const result = servicePackageWithInclusionsSchema.safeParse({
       ...fullRow,
       inclusions: [
@@ -41,25 +41,25 @@ describe('servicePackageWithInclusionsSchema', () => {
           id: UUID,
           kind: 'framed_picture',
           quantity: 1,
-          printSizeId: UUID,
-          attireIds: [UUID],
           frameId: UUID,
           description: null,
           createdAt: '2026-08-31T00:00:00.000Z',
           updatedAt: '2026-08-31T00:00:00.000Z',
-        },
-        {
-          id: UUID,
-          kind: 'privilege',
-          quantity: null,
-          printSizeId: null,
-          attireIds: [],
-          frameId: null,
-          description: 'Usage of Toga and Hood',
-          createdAt: '2026-08-31T00:00:00.000Z',
-          updatedAt: '2026-08-31T00:00:00.000Z',
+          printSize: { id: UUID, code: '8R', description: '8R print' },
+          attires: [{ id: UUID, name: 'Toga' }],
         },
       ],
+      frames: [{ id: UUID, frameNumber: 1 }],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('parses an inactive package (the read shape does not filter — the server does)', () => {
+    const result = servicePackageWithInclusionsSchema.safeParse({
+      ...fullRow,
+      isActive: false,
+      inclusions: [],
+      frames: [],
     });
     expect(result.success).toBe(true);
   });
