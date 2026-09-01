@@ -20,12 +20,12 @@
     "@sevendays/db": "workspace:*",
     "@sevendays/types": "workspace:*",
     "hono": "^4.6.0",
-    "zod": "^4.5.1"
+    "zod": "^4.5.1",
+    "drizzle-orm": "^0.45.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5",
     "@sevendays/config": "workspace:*",
-    "drizzle-orm": "^0.45.2",
     "postgres": "^3.4.9",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11",
