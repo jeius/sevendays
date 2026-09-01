@@ -1,6 +1,6 @@
 # Progress
 
-_Last updated: 2026-08-31 (M1.2 catalog schema landed on feat/m1.2-catalog-schema — catalog Zod schemas + tests in packages/types, mirrored Drizzle tables + relations in packages/db, first generated migration, ADR-0009; awaiting push/PR. Prior: M1 pre-flight on feat/m1-preflight; 2026-08-30 toolchain consolidation.)_
+_Last updated: 2026-09-01 (M1.3 provision/migrate/seed landed on feat/m1.3-provision-migrate-seed — live schema applied, catalog seeded + verified, seed/verify tooling committed; awaiting push/PR. Prior: M1.2 catalog schema landed on feat/m1.2-catalog-schema; 2026-08-30 toolchain consolidation.)_
 
 ## Current Milestone: 1 — Real Data Layer (next up; Milestone 0 exit criteria verified 2026-08-30)
 
@@ -16,7 +16,9 @@ _Last updated: 2026-08-31 (M1.2 catalog schema landed on feat/m1.2-catalog-schem
 
 ## What Exists
 
-- **M1.2 catalog schema (on feat/m1.2-catalog-schema, awaiting PR):** packages/types gains Print size, Attire, PackageInclusion (plain object with a `kind` enum — deliberately not `z.discriminatedUnion`, all three kinds share one field set), AddonService schemas with a real vitest harness (24+1 tests; per-workspace config per ADR-0003). `appointmentSchema` gains `kind` (default `scheduled`) + `packagePriceCents` (server-written); `createAppointmentSchema` gains `addonServiceIds` (default `[]`, duplicate-rejecting refine) and `notes` optional (Task 4 ruling, recorded in the plan + commit 6ac3921); `servicePackageSchema.durationMinutes` nullable + `servicePackageWithInclusionsSchema` read shape. packages/db mirrors everything: `print_sizes`/`attires`/`package_inclusions`/`addon_services` tables, `appointment_addon_services` unique-pair join with price snapshot, `appointment_kind` enum, relations for the with-inclusions read. First migration `0000_elite_dormammu.sql` generated (offline) + reviewed against `docs/catalog.md`. ADR-0009 records normalized catalog lookups. Generated migrations are Biome-excluded (`!!migrations` in packages/db/biome.json).
+- **M1.3 provision/migrate/seed (on feat/m1.3-provision-migrate-seed, awaiting PR):** Supabase provisioned; migration `0000_known_professor_monster.sql` applied over the session-mode pooler with 7 FK indexes + 3 natural keys folded in per the M1.2-review ruling (no migration #2). `db:seed` is a re-runnable natural-key upsert — 3 identical runs proven; `db:verify-seed` psql-equivalent verification PASSED, all 11 packages line-for-line against `docs/catalog.md`. Tooling: `scripts/check-env.mjs` env gate (prints ports only, never secrets) + `scripts/db-state.mjs` probe. Branch phones are `TODO(seed)` placeholders pending the client's real numbers; the 8R/8x10 merge confirmation is still open at seed review. Seed/verify ride `DATABASE_MIGRATE_URL` (session-mode) — refines ADR-0007's pooled-URL line.
+
+- **M1.2 catalog schema (merged via #9):** packages/types gains Print size, Attire, PackageInclusion (plain object with a `kind` enum — deliberately not `z.discriminatedUnion`, all three kinds share one field set), AddonService schemas with a real vitest harness (24+1 tests; per-workspace config per ADR-0003). `appointmentSchema` gains `kind` (default `scheduled`) + `packagePriceCents` (server-written); `createAppointmentSchema` gains `addonServiceIds` (default `[]`, duplicate-rejecting refine) and `notes` optional (Task 4 ruling, recorded in the plan + commit 6ac3921); `servicePackageSchema.durationMinutes` nullable + `servicePackageWithInclusionsSchema` read shape. packages/db mirrors everything: `print_sizes`/`attires`/`package_inclusions`/`addon_services` tables, `appointment_addon_services` unique-pair join with price snapshot, `appointment_kind` enum, relations for the with-inclusions read. First migration `0000_elite_dormammu.sql` generated (offline) + reviewed against `docs/catalog.md`. ADR-0009 records normalized catalog lookups. Generated migrations are Biome-excluded (`!!migrations` in packages/db/biome.json).
 
 - Monorepo structure (`apps/`, `packages/`) with pnpm 11 + Turborepo. `engines` requires **Node >= 24** (raised from >=20 on 2026-08-30).
 - Toolchain: TypeScript `^6.0.3` in every manifest; Biome `2.5.11` (exact, root devDep); tiered Biome per ADR-0002; per-workspace vitest configs per ADR-0003. `pnpm check` includes format; `pnpm fix` / `pnpm fix:unsafe` for lint+format fixes.
@@ -30,19 +32,19 @@ _Last updated: 2026-08-31 (M1.2 catalog schema landed on feat/m1.2-catalog-schem
 
 ## Known Gaps / Not Yet Done
 
-- **M1.3 carries two obligations from the M1.2 review (before first `db:migrate`):** (1) fold FK indexes into migration 0000 via schema + `db:generate` — at minimum `package_inclusions.service_package_id` and `appointments.branch_id` — while the migration is still unapplied (after first apply this becomes migration #2); (2) seed review must confirm the 8R-vs-8x10 descriptions and decide whether frame grouping (catalog "Frame 1/2/3") needs a nullable `frame_number` column.
+- **Branch phones are `TODO(seed)` placeholders** in `packages/db/scripts/catalog.ts` (`+63 900 000 00x`) — pending the client's real numbers; replace then re-run `db:seed`. The 8R/8x10 merge confirmation remains open at seed review.
+- The previous project's tables (Payload CMS) were removed from the shared Supabase project under user authorization — public now holds exactly the 8 sevendays tables. The M4 BetterAuth naming note no longer applies: the old `users`/`sessions` tables are gone, so BetterAuth's table names won't collide.
 
 - No auth anywhere yet (BetterAuth not integrated) — Milestone 4.
 - CORS on `apps/api` is wide open (`origin: "*"` in `src/index.ts`) — must be locked down before Milestone 6.
 - Logging is Hono's `logger()` middleware, not the planned Loglayer + Pino — Milestone 6.
-- No DB migrations or seed script — Milestone 1.
 - Root `.env.example` documents the database URLs (M1 pre-flight); the apps' dev scripts still read `.env.local` (gitignored) for app-level vars — per-app examples land with M2.
-- `turbo.json` passes through `DATABASE_URL` + `DATABASE_MIGRATE_URL` (M1 pre-flight, ADR-0007); `drizzle.config.ts` still reads `DATABASE_URL` until M1.3 wires the migrate URL.
+- `turbo.json` passes through `DATABASE_URL` + `DATABASE_MIGRATE_URL` (M1 pre-flight, ADR-0007); `drizzle.config.ts` reads `DATABASE_MIGRATE_URL` first (fallback `DATABASE_URL`) — seed/verify ride the session-mode connection (ADR-0007).
 
 ## Immediate Next Steps (in order)
 
-1. Push local commits (`git status` to see how many; `git push`).
-2. Push `feat/m1.2-catalog-schema` and open the PR that closes #4 (M1.2 code-complete: all 5 acceptance criteria verified; `pnpm check` + `pnpm build` green on HEAD). Then continue **Milestone 1**: M1.3 provision/migrate/seed (#5) → M1.4 real routes + integration tests (#6) → M1.5 exit verification (#7). Checklist lives in `docs/plan.md`; spec in `docs/specs/2026-08-30-m1-real-data-layer-spec.md`.
+1. Push local commits (`git status` to see how many; `git push`) on `feat/m1.3-provision-migrate-seed` and open the PR that closes #5 (M1.3 code-complete: migration applied over the session-mode pooler, catalog seeded + verified, seed/verify tooling committed; `pnpm check` + `pnpm build` green on HEAD). After merge, tick the five acceptance boxes on #5.
+2. Then **Milestone 1** continues: M1.4 real routes + integration tests (#6) → M1.5 exit verification (#7). Checklist lives in `docs/plan.md`; spec in `docs/specs/2026-08-30-m1-real-data-layer-spec.md`.
 
 ## Notes for Future Sessions
 
