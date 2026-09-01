@@ -60,6 +60,10 @@ describe.skipIf(!TEST_DATABASE_URL)('verify-appointment-row probe (live compose 
   });
 
   afterAll(async () => {
+    if (!ids) {
+      await sql?.end({ timeout: 5 });
+      return;
+    }
     await sql`delete from appointment_addon_services where appointment_id = ${ids.appointmentId}`;
     await sql`delete from appointments where id = ${ids.appointmentId}`;
     await sql`delete from addon_services where id = ${ids.addonId}`;
