@@ -67,7 +67,7 @@ sevendays/
 │   ├── admin/            # TanStack Start — dashboard + CMS
 │   └── api/              # Hono on Cloudflare Workers
 └── packages/
-    ├── db/               # Drizzle schema + client (stubbed, no live DB yet)
+    ├── db/               # Drizzle schema + client (live DB: migrations applied, catalog seeded)
     ├── types/             # Zod schemas, shared types
     ├── ui/               # shadcn tokens (CSS variables)
     └── config/           # shared ts/biome/vitest configs
