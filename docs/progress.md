@@ -33,7 +33,8 @@ _Last updated: 2026-09-01 (M1.3 provision/migrate/seed landed on feat/m1.3-provi
 ## Known Gaps / Not Yet Done
 
 - **Branch phones are `TODO(seed)` placeholders** in `packages/db/scripts/catalog.ts` (`+63 900 000 00x`) — pending the client's real numbers; replace then re-run `db:seed`. The 8R/8x10 merge confirmation remains open at seed review.
-- The previous project's tables (Payload CMS) were removed from the shared Supabase project under user authorization — public now holds exactly the 8 sevendays tables. The M4 BetterAuth naming note no longer applies: the old `users`/`sessions` tables are gone, so BetterAuth's table names won't collide.
+- **M1.4 watch-items (from the frames + attire junction review, 2026-09-01):** (a) the create-shape `frameId` is optional — when the M1.4 routes write inclusions, the server must assign `frameId` (or a route-level rule must require it for `framed_picture`); the DB has no kind-aware CHECK to catch a null `frame_id` on a framed picture; (b) the `package_inclusion_attires` junction has no position column — verify's canonical re-sort covers rendering order for now, but if M2's UI needs persisted per-inclusion attire order, that means an ordinal column (a later migration).
+- The previous project's tables (Payload CMS) were removed from the shared Supabase project under user authorization — public now holds exactly the 10 tables (8 from 0000 + `frames` + `package_inclusion_attires` from 0001). The M4 BetterAuth naming note no longer applies: the old `users`/`sessions` tables are gone, so BetterAuth's table names won't collide.
 
 - No auth anywhere yet (BetterAuth not integrated) — Milestone 4.
 - CORS on `apps/api` is wide open (`origin: "*"` in `src/index.ts`) — must be locked down before Milestone 6.
@@ -49,6 +50,7 @@ _Last updated: 2026-09-01 (M1.3 provision/migrate/seed landed on feat/m1.3-provi
 
 ## Notes for Future Sessions
 
+- If you're picking this up cold: read `AGENTS.md` first, then this file, then `docs/plan.md` for the current milestone's task list. Don't assume the DB or auth state — check "Known Gaps" first.
 - Fresh clone: `pnpm install` → `pnpm build:packages` → anything else (the vitest config entry is built, not source).
 - Vitest gotcha (ADR-0003): every workspace with tests needs its own `vitest.config.ts`. Vitest 4 does not reliably discover a workspace's tests from the root config alone, and the shared `passWithNoTests` turns a miss into a silent green. After any vitest upgrade, run the workspace's tests directly and confirm the suite count is >0.
 - TanStack Start output: v1.168 emits `dist/` (`client/`, `server/`, `wrangler.json`), not the older `.output/`. Do not reintroduce `.output/` paths in scripts.
