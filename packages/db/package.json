@@ -23,8 +23,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx scripts/seed.ts",
-    "db:verify-seed": "tsx scripts/verify-seed.ts"
+    "db:seed": "tsx --env-file=.env scripts/seed.ts",
+    "db:verify-seed": "tsx --env-file=.env scripts/verify-seed.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
