@@ -2,6 +2,9 @@
 // The verify script compares the DATABASE rows against these values, so any
 // edit here must mirror the catalog file (and vice versa).
 // Phones are user-sanctioned placeholders (TODO(seed)) — replaced after seed review.
+// Attire lines are structured arrays (ADR-0009 revision): combined contexts
+// like 'Filipiniana/Executive' are attireNames arrays in the catalog's own
+// attire order (Toga, Filipiniana, Executive, Uniform) — never alphabetized.
 
 export const printSizeSeeds = [
   { code: '1x1', description: 'One by one inch portrait print.' },
@@ -16,14 +19,14 @@ export const printSizeSeeds = [
   { code: '11x14', description: '11x14 inch print, commonly framed.' },
 ] as const;
 
+// Atomic attires (ADR-0009 revision): the lookup stores single values only;
+// combined contexts (Filipiniana/Executive, etc.) are composed per inclusion
+// through the package_inclusion_attires junction, in catalog order.
 export const attireSeeds = [
   { name: 'Toga' },
   { name: 'Filipiniana' },
   { name: 'Executive' },
   { name: 'Uniform' },
-  { name: 'Filipiniana/Executive' },
-  { name: 'Filipiniana/Executive/Uniform' },
-  { name: 'Executive/Uniform' },
 ] as const;
 
 // USER-SUPPLIED branch rows (2026-09-01). Phones are TODO(seed) placeholders.
@@ -65,24 +68,33 @@ export const addonServiceSeeds = [
 
 // Universal privileges seeded per package (catalog: "All packages includes
 // High Resolution soft copies" + the "Include Usage of" list). Lamination is
-// NOT here — framed_picture kind encodes it structurally.
+// NOT here — framed_picture kind encodes it structurally. attireNames is the
+// junction set: the Executive grant links Executive; the rest link none.
 export const privilegeSeeds = [
-  { description: 'High Resolution soft copies', attireName: null },
-  { description: 'Usage of Toga and Hood', attireName: 'Toga' },
-  { description: 'Usage of Ladies Accessories', attireName: null },
-  { description: 'Usage of Executive Attire', attireName: 'Executive' },
-  { description: 'Usage of Barong', attireName: null },
-  { description: 'Usage of Filipiniana', attireName: 'Filipiniana' },
+  { description: 'High Resolution soft copies', attireNames: [] },
+  { description: 'Usage of Toga and Hood', attireNames: ['Toga'] },
+  { description: 'Usage of Ladies Accessories', attireNames: [] },
+  { description: 'Usage of Executive Attire', attireNames: ['Executive'] },
+  { description: 'Usage of Barong', attireNames: [] },
+  { description: 'Usage of Filipiniana', attireNames: ['Filipiniana'] },
 ] as const;
 
 export type PackageSeed = {
   name: string;
   description: string;
   priceCents: number;
-  // Framed pictures: one row per catalog Frame line (quantity 1).
-  framedPictures: { printSizeCode: string; attireName: string; catalogLine: string }[];
+  // Framed pictures: one row per catalog Frame line (quantity 1). frameNumber
+  // is the catalog grouping (ADR-0009 revision): explicit "Frame 1/2/3"
+  // headings map as-is; unlabeled multi-line "Frame:" sections number in
+  // listed order (1..N).
+  framedPictures: {
+    frameNumber: number;
+    printSizeCode: string;
+    attireNames: string[];
+    catalogLine: string;
+  }[];
   // Loose prints: one row per catalog Picture line (per-line quantity).
-  prints: { quantity: number; printSizeCode: string; attireName: string; catalogLine: string }[];
+  prints: { quantity: number; printSizeCode: string; attireNames: string[]; catalogLine: string }[];
 };
 
 export const packageSeeds: PackageSeed[] = [
@@ -92,12 +104,17 @@ export const packageSeeds: PackageSeed[] = [
     priceCents: 90000,
     framedPictures: [
       // Frame: 1pc 8x10 Toga
-      { printSizeCode: '8x10', attireName: 'Toga', catalogLine: 'Frame: 1pc 8x10 Toga' },
+      {
+        frameNumber: 1,
+        printSizeCode: '8x10',
+        attireNames: ['Toga'],
+        catalogLine: 'Frame: 1pc 8x10 Toga',
+      },
     ],
     prints: [
-      { quantity: 2, printSizeCode: '2R', attireName: 'Toga', catalogLine: '2pcs 2R Toga' },
-      { quantity: 5, printSizeCode: '2x2', attireName: 'Toga', catalogLine: '5pcs 2x2 Toga' },
-      { quantity: 4, printSizeCode: '1x1', attireName: 'Toga', catalogLine: '4pcs 1x1 Toga' },
+      { quantity: 2, printSizeCode: '2R', attireNames: ['Toga'], catalogLine: '2pcs 2R Toga' },
+      { quantity: 5, printSizeCode: '2x2', attireNames: ['Toga'], catalogLine: '5pcs 2x2 Toga' },
+      { quantity: 4, printSizeCode: '1x1', attireNames: ['Toga'], catalogLine: '4pcs 1x1 Toga' },
     ],
   },
   {
@@ -106,12 +123,17 @@ export const packageSeeds: PackageSeed[] = [
     priceCents: 110000,
     framedPictures: [
       // Frame: 1pc 11x14 Toga
-      { printSizeCode: '11x14', attireName: 'Toga', catalogLine: 'Frame: 1pc 11x14 Toga' },
+      {
+        frameNumber: 1,
+        printSizeCode: '11x14',
+        attireNames: ['Toga'],
+        catalogLine: 'Frame: 1pc 11x14 Toga',
+      },
     ],
     prints: [
-      { quantity: 4, printSizeCode: '2R', attireName: 'Toga', catalogLine: '4pcs 2R Toga' },
-      { quantity: 5, printSizeCode: '2x2', attireName: 'Toga', catalogLine: '5pcs 2x2 Toga' },
-      { quantity: 4, printSizeCode: '1x1', attireName: 'Toga', catalogLine: '4pcs 1x1 Toga' },
+      { quantity: 4, printSizeCode: '2R', attireNames: ['Toga'], catalogLine: '4pcs 2R Toga' },
+      { quantity: 5, printSizeCode: '2x2', attireNames: ['Toga'], catalogLine: '5pcs 2x2 Toga' },
+      { quantity: 4, printSizeCode: '1x1', attireNames: ['Toga'], catalogLine: '4pcs 1x1 Toga' },
     ],
   },
   {
@@ -121,28 +143,34 @@ export const packageSeeds: PackageSeed[] = [
     priceCents: 150000,
     framedPictures: [
       // Frame: 1pc 8x10 Toga
-      { printSizeCode: '8x10', attireName: 'Toga', catalogLine: 'Frame: 1pc 8x10 Toga' },
+      {
+        frameNumber: 1,
+        printSizeCode: '8x10',
+        attireNames: ['Toga'],
+        catalogLine: 'Frame: 1pc 8x10 Toga',
+      },
       // Frame: 1pc 8x10 Filipiniana/Executive
       {
+        frameNumber: 2,
         printSizeCode: '8x10',
-        attireName: 'Filipiniana/Executive',
+        attireNames: ['Filipiniana', 'Executive'],
         catalogLine: 'Frame: 1pc 8x10 Filipiniana/Executive',
       },
     ],
     prints: [
-      { quantity: 4, printSizeCode: '2R', attireName: 'Toga', catalogLine: '4pcs 2R Toga' },
-      { quantity: 5, printSizeCode: '2x2', attireName: 'Toga', catalogLine: '5pcs 2x2 Toga' },
-      { quantity: 4, printSizeCode: '1x1', attireName: 'Toga', catalogLine: '4pcs 1x1 Toga' },
+      { quantity: 4, printSizeCode: '2R', attireNames: ['Toga'], catalogLine: '4pcs 2R Toga' },
+      { quantity: 5, printSizeCode: '2x2', attireNames: ['Toga'], catalogLine: '5pcs 2x2 Toga' },
+      { quantity: 4, printSizeCode: '1x1', attireNames: ['Toga'], catalogLine: '4pcs 1x1 Toga' },
       {
         quantity: 6,
         printSizeCode: '2R',
-        attireName: 'Filipiniana/Executive',
+        attireNames: ['Filipiniana', 'Executive'],
         catalogLine: '6pcs 2R Filipiniana/Executive',
       },
       {
         quantity: 6,
         printSizeCode: '2x2',
-        attireName: 'Filipiniana/Executive',
+        attireNames: ['Filipiniana', 'Executive'],
         catalogLine: '6pcs 2x2 Filipiniana/Executive',
       },
     ],
@@ -153,28 +181,33 @@ export const packageSeeds: PackageSeed[] = [
     priceCents: 160000,
     framedPictures: [
       // Frame: 1pc 11x14 Toga
-      { printSizeCode: '11x14', attireName: 'Toga', catalogLine: 'Frame: 1pc 11x14 Toga' },
+      {
+        frameNumber: 1,
+        printSizeCode: '11x14',
+        attireNames: ['Toga'],
+        catalogLine: 'Frame: 1pc 11x14 Toga',
+      },
     ],
     prints: [
-      { quantity: 4, printSizeCode: '2R', attireName: 'Toga', catalogLine: '4pcs 2R Toga' },
-      { quantity: 5, printSizeCode: '2x2', attireName: 'Toga', catalogLine: '5pcs 2x2 Toga' },
-      { quantity: 4, printSizeCode: '1x1', attireName: 'Toga', catalogLine: '4pcs 1x1 Toga' },
+      { quantity: 4, printSizeCode: '2R', attireNames: ['Toga'], catalogLine: '4pcs 2R Toga' },
+      { quantity: 5, printSizeCode: '2x2', attireNames: ['Toga'], catalogLine: '5pcs 2x2 Toga' },
+      { quantity: 4, printSizeCode: '1x1', attireNames: ['Toga'], catalogLine: '4pcs 1x1 Toga' },
       {
         quantity: 1,
         printSizeCode: '8R',
-        attireName: 'Filipiniana/Executive',
+        attireNames: ['Filipiniana', 'Executive'],
         catalogLine: '1pc 8R Filipiniana/Executive',
       },
       {
         quantity: 4,
         printSizeCode: '2R',
-        attireName: 'Filipiniana/Executive',
+        attireNames: ['Filipiniana', 'Executive'],
         catalogLine: '4pcs 2R Filipiniana/Executive',
       },
       {
         quantity: 6,
         printSizeCode: '2x2',
-        attireName: 'Filipiniana/Executive',
+        attireNames: ['Filipiniana', 'Executive'],
         catalogLine: '6pcs 2x2 Filipiniana/Executive',
       },
     ],
@@ -186,28 +219,34 @@ export const packageSeeds: PackageSeed[] = [
     priceCents: 180000,
     framedPictures: [
       // Frame 1: 1pc 11x14 Toga
-      { printSizeCode: '11x14', attireName: 'Toga', catalogLine: 'Frame 1: 1pc 11x14 Toga' },
+      {
+        frameNumber: 1,
+        printSizeCode: '11x14',
+        attireNames: ['Toga'],
+        catalogLine: 'Frame 1: 1pc 11x14 Toga',
+      },
       // Frame 2: 1pc 8x10 Filipiniana/Executive
       {
+        frameNumber: 2,
         printSizeCode: '8x10',
-        attireName: 'Filipiniana/Executive',
+        attireNames: ['Filipiniana', 'Executive'],
         catalogLine: 'Frame 2: 1pc 8x10 Filipiniana/Executive',
       },
     ],
     prints: [
-      { quantity: 4, printSizeCode: '2R', attireName: 'Toga', catalogLine: '4pcs 2R Toga' },
-      { quantity: 5, printSizeCode: '2x2', attireName: 'Toga', catalogLine: '5pcs 2x2 Toga' },
-      { quantity: 4, printSizeCode: '1x1', attireName: 'Toga', catalogLine: '4pcs 1x1 Toga' },
+      { quantity: 4, printSizeCode: '2R', attireNames: ['Toga'], catalogLine: '4pcs 2R Toga' },
+      { quantity: 5, printSizeCode: '2x2', attireNames: ['Toga'], catalogLine: '5pcs 2x2 Toga' },
+      { quantity: 4, printSizeCode: '1x1', attireNames: ['Toga'], catalogLine: '4pcs 1x1 Toga' },
       {
         quantity: 4,
         printSizeCode: '2R',
-        attireName: 'Filipiniana/Executive',
+        attireNames: ['Filipiniana', 'Executive'],
         catalogLine: '4pcs 2R Filipiniana/Executive',
       },
       {
         quantity: 6,
         printSizeCode: '2x2',
-        attireName: 'Filipiniana/Executive',
+        attireNames: ['Filipiniana', 'Executive'],
         catalogLine: '6pcs 2x2 Filipiniana/Executive',
       },
     ],
@@ -219,36 +258,47 @@ export const packageSeeds: PackageSeed[] = [
     priceCents: 200000,
     framedPictures: [
       // Frame: 1pc 8x10 Toga
-      { printSizeCode: '8x10', attireName: 'Toga', catalogLine: 'Frame: 1pc 8x10 Toga' },
+      {
+        frameNumber: 1,
+        printSizeCode: '8x10',
+        attireNames: ['Toga'],
+        catalogLine: 'Frame: 1pc 8x10 Toga',
+      },
       // Frame: 1pc 8x10 Filipiniana
       {
+        frameNumber: 2,
         printSizeCode: '8x10',
-        attireName: 'Filipiniana',
+        attireNames: ['Filipiniana'],
         catalogLine: 'Frame: 1pc 8x10 Filipiniana',
       },
       // Frame: 1pc 8x10 Executive
-      { printSizeCode: '8x10', attireName: 'Executive', catalogLine: 'Frame: 1pc 8x10 Executive' },
+      {
+        frameNumber: 3,
+        printSizeCode: '8x10',
+        attireNames: ['Executive'],
+        catalogLine: 'Frame: 1pc 8x10 Executive',
+      },
     ],
     prints: [
-      { quantity: 4, printSizeCode: '2R', attireName: 'Toga', catalogLine: '4pcs 2R Toga' },
-      { quantity: 5, printSizeCode: '2x2', attireName: 'Toga', catalogLine: '5pcs 2x2 Toga' },
-      { quantity: 4, printSizeCode: '1x1', attireName: 'Toga', catalogLine: '4pcs 1x1 Toga' },
+      { quantity: 4, printSizeCode: '2R', attireNames: ['Toga'], catalogLine: '4pcs 2R Toga' },
+      { quantity: 5, printSizeCode: '2x2', attireNames: ['Toga'], catalogLine: '5pcs 2x2 Toga' },
+      { quantity: 4, printSizeCode: '1x1', attireNames: ['Toga'], catalogLine: '4pcs 1x1 Toga' },
       {
         quantity: 6,
         printSizeCode: '2x2',
-        attireName: 'Filipiniana/Executive',
+        attireNames: ['Filipiniana', 'Executive'],
         catalogLine: '6pcs 2x2 Filipiniana/Executive',
       },
       {
         quantity: 4,
         printSizeCode: '2R',
-        attireName: 'Filipiniana',
+        attireNames: ['Filipiniana'],
         catalogLine: '4pcs 2R Filipiniana',
       },
       {
         quantity: 4,
         printSizeCode: '2R',
-        attireName: 'Executive',
+        attireNames: ['Executive'],
         catalogLine: '4pcs 2R Executive',
       },
     ],
@@ -260,40 +310,47 @@ export const packageSeeds: PackageSeed[] = [
     priceCents: 220000,
     framedPictures: [
       // Frame 1: 1pc 8x10 Toga
-      { printSizeCode: '8x10', attireName: 'Toga', catalogLine: 'Frame 1: 1pc 8x10 Toga' },
+      {
+        frameNumber: 1,
+        printSizeCode: '8x10',
+        attireNames: ['Toga'],
+        catalogLine: 'Frame 1: 1pc 8x10 Toga',
+      },
       // Frame 2: 1pc 8x10 Filipiniana
       {
+        frameNumber: 2,
         printSizeCode: '8x10',
-        attireName: 'Filipiniana',
+        attireNames: ['Filipiniana'],
         catalogLine: 'Frame 2: 1pc 8x10 Filipiniana',
       },
       // Frame 3: 1pc 8x10 Executive
       {
+        frameNumber: 3,
         printSizeCode: '8x10',
-        attireName: 'Executive',
+        attireNames: ['Executive'],
         catalogLine: 'Frame 3: 1pc 8x10 Executive',
       },
     ],
     prints: [
-      { quantity: 4, printSizeCode: '2R', attireName: 'Toga', catalogLine: '4pcs 2R Toga' },
-      { quantity: 5, printSizeCode: '2x2', attireName: 'Toga', catalogLine: '5pcs 2x2 Toga' },
-      { quantity: 4, printSizeCode: '1x1', attireName: 'Toga', catalogLine: '4pcs 1x1 Toga' },
+      { quantity: 4, printSizeCode: '2R', attireNames: ['Toga'], catalogLine: '4pcs 2R Toga' },
+      { quantity: 5, printSizeCode: '2x2', attireNames: ['Toga'], catalogLine: '5pcs 2x2 Toga' },
+      { quantity: 4, printSizeCode: '1x1', attireNames: ['Toga'], catalogLine: '4pcs 1x1 Toga' },
       {
         quantity: 6,
         printSizeCode: '2x2',
-        attireName: 'Filipiniana/Executive',
+        attireNames: ['Filipiniana', 'Executive'],
         catalogLine: '6pcs 2x2 Filipiniana/Executive',
       },
       {
         quantity: 4,
         printSizeCode: '2R',
-        attireName: 'Filipiniana',
+        attireNames: ['Filipiniana'],
         catalogLine: '4pcs 2R Filipiniana',
       },
       {
         quantity: 4,
         printSizeCode: '2R',
-        attireName: 'Executive',
+        attireNames: ['Executive'],
         catalogLine: '4pcs 2R Executive',
       },
     ],
@@ -304,28 +361,34 @@ export const packageSeeds: PackageSeed[] = [
     priceCents: 300000,
     framedPictures: [
       // Frame: 1pc 11x14 Toga
-      { printSizeCode: '11x14', attireName: 'Toga', catalogLine: 'Frame: 1pc 11x14 Toga' },
+      {
+        frameNumber: 1,
+        printSizeCode: '11x14',
+        attireNames: ['Toga'],
+        catalogLine: 'Frame: 1pc 11x14 Toga',
+      },
       // Frame: 1pc 11x14 Filipiniana/Executive/Uniform
       {
+        frameNumber: 2,
         printSizeCode: '11x14',
-        attireName: 'Filipiniana/Executive/Uniform',
+        attireNames: ['Filipiniana', 'Executive', 'Uniform'],
         catalogLine: 'Frame: 1pc 11x14 Filipiniana/Executive/Uniform',
       },
     ],
     prints: [
-      { quantity: 4, printSizeCode: '2R', attireName: 'Toga', catalogLine: '4pcs 2R Toga' },
-      { quantity: 5, printSizeCode: '2x2', attireName: 'Toga', catalogLine: '5pcs 2x2 Toga' },
-      { quantity: 4, printSizeCode: '1x1', attireName: 'Toga', catalogLine: '4pcs 1x1 Toga' },
+      { quantity: 4, printSizeCode: '2R', attireNames: ['Toga'], catalogLine: '4pcs 2R Toga' },
+      { quantity: 5, printSizeCode: '2x2', attireNames: ['Toga'], catalogLine: '5pcs 2x2 Toga' },
+      { quantity: 4, printSizeCode: '1x1', attireNames: ['Toga'], catalogLine: '4pcs 1x1 Toga' },
       {
         quantity: 6,
         printSizeCode: '2x2',
-        attireName: 'Filipiniana/Executive/Uniform',
+        attireNames: ['Filipiniana', 'Executive', 'Uniform'],
         catalogLine: '6pcs 2x2 Filipiniana/Executive/Uniform',
       },
       {
         quantity: 4,
         printSizeCode: '2R',
-        attireName: 'Filipiniana/Executive/Uniform',
+        attireNames: ['Filipiniana', 'Executive', 'Uniform'],
         catalogLine: '4pcs 2R Filipiniana/Executive/Uniform',
       },
     ],
@@ -337,36 +400,47 @@ export const packageSeeds: PackageSeed[] = [
     priceCents: 300000,
     framedPictures: [
       // Frame: 1pc 11x14 Toga
-      { printSizeCode: '11x14', attireName: 'Toga', catalogLine: 'Frame: 1pc 11x14 Toga' },
+      {
+        frameNumber: 1,
+        printSizeCode: '11x14',
+        attireNames: ['Toga'],
+        catalogLine: 'Frame: 1pc 11x14 Toga',
+      },
       // Frame: 1pc 8x10 Filipiniana
       {
+        frameNumber: 2,
         printSizeCode: '8x10',
-        attireName: 'Filipiniana',
+        attireNames: ['Filipiniana'],
         catalogLine: 'Frame: 1pc 8x10 Filipiniana',
       },
       // Frame: 1pc 8x10 Executive
-      { printSizeCode: '8x10', attireName: 'Executive', catalogLine: 'Frame: 1pc 8x10 Executive' },
+      {
+        frameNumber: 3,
+        printSizeCode: '8x10',
+        attireNames: ['Executive'],
+        catalogLine: 'Frame: 1pc 8x10 Executive',
+      },
     ],
     prints: [
-      { quantity: 4, printSizeCode: '2R', attireName: 'Toga', catalogLine: '4pcs 2R Toga' },
-      { quantity: 5, printSizeCode: '2x2', attireName: 'Toga', catalogLine: '5pcs 2x2 Toga' },
-      { quantity: 4, printSizeCode: '1x1', attireName: 'Toga', catalogLine: '4pcs 1x1 Toga' },
+      { quantity: 4, printSizeCode: '2R', attireNames: ['Toga'], catalogLine: '4pcs 2R Toga' },
+      { quantity: 5, printSizeCode: '2x2', attireNames: ['Toga'], catalogLine: '5pcs 2x2 Toga' },
+      { quantity: 4, printSizeCode: '1x1', attireNames: ['Toga'], catalogLine: '4pcs 1x1 Toga' },
       {
         quantity: 6,
         printSizeCode: '2x2',
-        attireName: 'Filipiniana/Executive/Uniform',
+        attireNames: ['Filipiniana', 'Executive', 'Uniform'],
         catalogLine: '6pcs 2x2 Filipiniana/Executive/Uniform',
       },
       {
         quantity: 4,
         printSizeCode: '2R',
-        attireName: 'Filipiniana',
+        attireNames: ['Filipiniana'],
         catalogLine: '4pcs 2R Filipiniana',
       },
       {
         quantity: 4,
         printSizeCode: '2R',
-        attireName: 'Executive/Uniform',
+        attireNames: ['Executive', 'Uniform'],
         catalogLine: '4pcs 2R Executive/Uniform',
       },
     ],
@@ -378,40 +452,47 @@ export const packageSeeds: PackageSeed[] = [
     priceCents: 240000,
     framedPictures: [
       // Frame 1: 1pc 11x14 Toga
-      { printSizeCode: '11x14', attireName: 'Toga', catalogLine: 'Frame 1: 1pc 11x14 Toga' },
+      {
+        frameNumber: 1,
+        printSizeCode: '11x14',
+        attireNames: ['Toga'],
+        catalogLine: 'Frame 1: 1pc 11x14 Toga',
+      },
       // Frame 2: 1pc 8x10 Filipiniana
       {
+        frameNumber: 2,
         printSizeCode: '8x10',
-        attireName: 'Filipiniana',
+        attireNames: ['Filipiniana'],
         catalogLine: 'Frame 2: 1pc 8x10 Filipiniana',
       },
       // Frame 3: 1pc 8x10 Executive/Uniform
       {
+        frameNumber: 3,
         printSizeCode: '8x10',
-        attireName: 'Executive/Uniform',
+        attireNames: ['Executive', 'Uniform'],
         catalogLine: 'Frame 3: 1pc 8x10 Executive/Uniform',
       },
     ],
     prints: [
-      { quantity: 4, printSizeCode: '2R', attireName: 'Toga', catalogLine: '4pcs 2R Toga' },
-      { quantity: 5, printSizeCode: '2x2', attireName: 'Toga', catalogLine: '5pcs 2x2 Toga' },
-      { quantity: 4, printSizeCode: '1x1', attireName: 'Toga', catalogLine: '4pcs 1x1 Toga' },
+      { quantity: 4, printSizeCode: '2R', attireNames: ['Toga'], catalogLine: '4pcs 2R Toga' },
+      { quantity: 5, printSizeCode: '2x2', attireNames: ['Toga'], catalogLine: '5pcs 2x2 Toga' },
+      { quantity: 4, printSizeCode: '1x1', attireNames: ['Toga'], catalogLine: '4pcs 1x1 Toga' },
       {
         quantity: 6,
         printSizeCode: '2x2',
-        attireName: 'Filipiniana/Executive/Uniform',
+        attireNames: ['Filipiniana', 'Executive', 'Uniform'],
         catalogLine: '6pcs 2x2 Filipiniana/Executive/Uniform',
       },
       {
         quantity: 4,
         printSizeCode: '2R',
-        attireName: 'Filipiniana',
+        attireNames: ['Filipiniana'],
         catalogLine: '4pcs 2R Filipiniana',
       },
       {
         quantity: 4,
         printSizeCode: '2R',
-        attireName: 'Executive/Uniform',
+        attireNames: ['Executive', 'Uniform'],
         catalogLine: '4pcs 2R Executive/Uniform',
       },
     ],
@@ -423,50 +504,61 @@ export const packageSeeds: PackageSeed[] = [
     priceCents: 220000,
     framedPictures: [
       // Frame 1: 1pc 11x14 Toga
-      { printSizeCode: '11x14', attireName: 'Toga', catalogLine: 'Frame 1: 1pc 11x14 Toga' },
+      {
+        frameNumber: 1,
+        printSizeCode: '11x14',
+        attireNames: ['Toga'],
+        catalogLine: 'Frame 1: 1pc 11x14 Toga',
+      },
       // Frame 2: 1pc 11x14 Filipiniana/Executive/Uniform
       {
+        frameNumber: 2,
         printSizeCode: '11x14',
-        attireName: 'Filipiniana/Executive/Uniform',
+        attireNames: ['Filipiniana', 'Executive', 'Uniform'],
         catalogLine: 'Frame 2: 1pc 11x14 Filipiniana/Executive/Uniform',
       },
     ],
     prints: [
-      { quantity: 4, printSizeCode: '2R', attireName: 'Toga', catalogLine: '4pcs 2R Toga' },
-      { quantity: 5, printSizeCode: '2x2', attireName: 'Toga', catalogLine: '5pcs 2x2 Toga' },
-      { quantity: 4, printSizeCode: '1x1', attireName: 'Toga', catalogLine: '4pcs 1x1 Toga' },
+      { quantity: 4, printSizeCode: '2R', attireNames: ['Toga'], catalogLine: '4pcs 2R Toga' },
+      { quantity: 5, printSizeCode: '2x2', attireNames: ['Toga'], catalogLine: '5pcs 2x2 Toga' },
+      { quantity: 4, printSizeCode: '1x1', attireNames: ['Toga'], catalogLine: '4pcs 1x1 Toga' },
       {
         quantity: 6,
         printSizeCode: '2x2',
-        attireName: 'Filipiniana/Executive/Uniform',
+        attireNames: ['Filipiniana', 'Executive', 'Uniform'],
         catalogLine: '6pcs 2x2 Filipiniana/Executive/Uniform',
       },
       {
         quantity: 4,
         printSizeCode: '2R',
-        attireName: 'Filipiniana',
+        attireNames: ['Filipiniana'],
         catalogLine: '4pcs 2R Filipiniana',
       },
       {
         quantity: 4,
         printSizeCode: '2R',
-        attireName: 'Executive/Uniform',
+        attireNames: ['Executive', 'Uniform'],
         catalogLine: '4pcs 2R Executive/Uniform',
       },
     ],
   },
 ];
 
-// Canonical inclusion signature: `kind|quantity|printSizeCode|attireName` for
-// pictures/prints, `privilege|0|<attireName or ->|<description>` for privileges.
-// Shared with verify-seed.ts so the comparison is byte-consistent.
+// Canonical inclusion signature: `kind|quantity|printSizeCode|attireNames` for
+// pictures/prints, `privilege|0|<attireNames or ->|<description>` for
+// privileges. attireNames joins with '/' in catalog order — byte-identical to
+// the docs/catalog.md strings (e.g. 'Filipiniana/Executive/Uniform'). Shared
+// with verify-seed.ts so the comparison is byte-consistent.
 export function inclusionSignatures(pkg: PackageSeed): string[] {
   const framed = pkg.framedPictures.map(
-    (f) => `framed_picture|1|${f.printSizeCode}|${f.attireName}`
+    (f) => `framed_picture|1|${f.printSizeCode}|${f.attireNames.join('/')}`
   );
-  const prints = pkg.prints.map((p) => `print|${p.quantity}|${p.printSizeCode}|${p.attireName}`);
+  const prints = pkg.prints.map(
+    (p) => `print|${p.quantity}|${p.printSizeCode}|${p.attireNames.join('/')}`
+  );
   const privileges = privilegeSeeds.map(
-    (p) => `privilege|0|${p.attireName ?? '-'}|${p.description}`
+    (p) =>
+      `privilege|0|${p.attireNames.length > 0 ? p.attireNames.join('/') : '-'}|${p.description}`
   );
   return [...framed, ...prints, ...privileges].sort();
 }
