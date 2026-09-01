@@ -156,7 +156,12 @@ export async function listAppointments(
     })
     .from(appointmentAddonServices)
     .innerJoin(addonServices, eq(appointmentAddonServices.addonServiceId, addonServices.id))
-    .where(inArray(appointmentAddonServices.appointmentId, ids));
+    .where(inArray(appointmentAddonServices.appointmentId, ids))
+    // Requested-attachment order within an appointment: createdAt is the
+    // append-only monotonic proxy (no ordinal column — Known-Gap watch-item
+    // (b)); SQL gives no row-order guarantee without an explicit ORDER BY
+    // (Task 6 review ruling).
+    .orderBy(appointmentAddonServices.createdAt);
 
   const addonsByAppointment = new Map<string, AppointmentAddonEntry[]>();
   for (const row of addonRows) {
