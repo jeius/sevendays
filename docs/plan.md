@@ -26,18 +26,18 @@ Move off stub data onto a real, migrated Postgres database, seeded with the stud
 
 Pre-flight — small debt from Milestone 0, cleared before the DB work (CI included so every later milestone is guarded):
 
-- [x] CI via GitHub Actions: run `pnpm check` + `pnpm build` on push/PR to `main`
-- [x] `.env.example` at the repo root and `.dev.vars.example` for the api Worker (`DATABASE_URL` pooled, `DATABASE_MIGRATE_URL` direct — see ADR-0007); `.dev.vars` gitignored
-- [x] Replace `DATABASE_URI` with `DATABASE_URL` + `DATABASE_MIGRATE_URL` in `turbo.json` `globalPassThroughEnv` (everything reads the new names)
-- [x] Bump `lucide-react` manifests to `^1.37.0` (lockfile already resolved 1.37.0)
-- [x] Align `apps/landing`/`apps/admin` `@types/node` to `^26` (workspace standard)
+- [✅] CI via GitHub Actions: run `pnpm check` + `pnpm build` on push/PR to `main`
+- [✅] `.env.example` at the repo root and `.dev.vars.example` for the api Worker (`DATABASE_URL` pooled, `DATABASE_MIGRATE_URL` direct — see ADR-0007); `.dev.vars` gitignored
+- [✅] Replace `DATABASE_URI` with `DATABASE_URL` + `DATABASE_MIGRATE_URL` in `turbo.json` `globalPassThroughEnv` (everything reads the new names)
+- [✅] Bump `lucide-react` manifests to `^1.37.0` (lockfile already resolved 1.37.0)
+- [✅] Align `apps/landing`/`apps/admin` `@types/node` to `^26` (workspace standard)
 
 Data layer:
 
-- [x] Catalog schema in `packages/types` (Zod: Print sizes, Attires, Inclusions, Add-on Services, appointment Kind) mirrored in `packages/db` (Drizzle), first migration generated (ADR-0009)
-- [x] Create a Supabase project; wire the two connection strings per ADR-0007 (`DATABASE_MIGRATE_URL` for migrations, pooled `DATABASE_URL` as the api Worker secret and `.dev.vars`)
-- [x] Apply the migration (`db:migrate`) over the direct connection
-- [x] Seed script (`db:seed`): 3 real branches (details supplied by the client at seed time), 11 Service Packages with Inclusions from `docs/catalog.md`, Print size + Attire lookups, Add-on Services (Make-up, Hairstyle)
+- [✅] Catalog schema in `packages/types` (Zod: Print sizes, Attires, Inclusions, Add-on Services, appointment Kind) mirrored in `packages/db` (Drizzle), first migration generated (ADR-0009)
+- [✅] Create a Supabase project; wire the two connection strings per ADR-0007 (`DATABASE_MIGRATE_URL` for migrations, pooled `DATABASE_URL` as the api Worker secret and `.dev.vars`)
+- [✅] Apply the migration (`db:migrate`) over the direct connection
+- [✅] Seed script (`db:seed`): 3 real branches (details supplied by the client at seed time), 11 Service Packages with Inclusions from `docs/catalog.md`, Print size + Attire lookups, Add-on Services (Make-up, Hairstyle)
 - [ ] Rewrite `/api/branches`, add `/api/service-packages` and `/api/addon-services` (thin routes, logic in service modules)
 - [ ] `POST /api/appointments` persists with package + add-on price snapshots and Kind; minimal `GET /api/appointments?branchId=`
 - [ ] Integration tests against real Postgres (docker compose locally, CI service container, migrations before tests, fail loud when unreachable — ADR-0008)

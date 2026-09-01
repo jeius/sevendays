@@ -45,6 +45,7 @@ Run from the repo root unless noted. All commands are powered by Turborepo and f
 - **Each app owns its UI**, but shared tokens live in `packages/ui` (shadcn CSS variables). Apps are Tailwind v4 (CSS-first) — theme via `@theme` in each app's `styles.css`; don't duplicate token definitions between `landing` and `admin`.
 - **Do not commit code that fails `pnpm check`** (lint + format + typecheck + test) for the packages/apps you touched.
 - **Update `docs/progress.md`** at the end of any task that changes what's implemented vs. stubbed, so the next session (human or agent) doesn't have to rediscover it.
+- **Tick checklist boxes in `docs/*.md` with the ✅ emoji (`- [✅]`), never plain `[x]`.**
 - **Log decisions.** Any nontrivial architectural choice (e.g., how auth sessions are shared across `landing`/`admin`/`api`, or how R2-stored images are served) gets an ADR in `docs/adr/`.
 
 ## Directory Structure
