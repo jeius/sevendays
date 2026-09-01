@@ -41,9 +41,9 @@ Data layer:
 - [✅] Rewrite `/api/branches`, add `/api/service-packages` and `/api/addon-services` (thin routes, logic in service modules)
 - [✅] `POST /api/appointments` persists with package + add-on price snapshots and Kind; minimal `GET /api/appointments?branchId=`
 - [✅] Integration tests against real Postgres (docker compose locally, CI service container, migrations before tests, fail loud when unreachable — ADR-0008)
-- [ ] Verify: create a row via the API, confirm it in Supabase, redeploy and confirm it survived
+- [✅] Verify: create a row via the API, confirm it in Supabase, redeploy and confirm it survived
 
-**Exit criteria:** a row created via the API is visible in the Postgres database, and survives a redeploy; CI runs `pnpm check` on every push.
+**Exit criteria:** a row created via the API is visible in the Postgres database, and survives a redeploy; CI runs `pnpm check` on every push. _(Verified 2026-09-02 via the M1.5 exit gate — see `docs/progress.md`.)_
 
 ## Milestone 2 — Public Booking Flow
 

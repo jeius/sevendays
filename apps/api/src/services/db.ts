@@ -1,13 +1,15 @@
 import type { Database } from '@sevendays/db';
 import { createDbClient } from '@sevendays/db';
 
-let cached: Database | null = null;
-
 /**
  * The API's db handle (ADR-0007): the pooled DATABASE_URL — Workers cannot
  * open raw TCP; prepare:false is required under transaction pooling.
- * Memoized per isolate; dev/tests re-create the worker per run, prod pools
- * isolates — postgres-js clients are safe to reuse across requests.
+ * Created fresh per request: workerd scopes I/O objects to the request that
+ * created them, so a client memoized per isolate throws "Cannot perform I/O
+ * on behalf of a different request" on every later call. Under Supavisor
+ * transaction pooling (ADR-0007) per-request connections are the documented
+ * pattern; request-scoped sockets are reclaimed when the request context
+ * ends. Revisit with Hyperdrive only if volume demands it.
  */
 export function createApiDb(connectionString: string): Database {
   if (!connectionString) {
@@ -15,6 +17,5 @@ export function createApiDb(connectionString: string): Database {
       'DATABASE_URL is not set — the Worker needs the pooled connection secret per ADR-0007.'
     );
   }
-  cached ??= createDbClient(connectionString);
-  return cached;
+  return createDbClient(connectionString);
 }
