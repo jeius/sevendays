@@ -3,6 +3,8 @@ export * from './appointment-addon-services.js';
 export * from './appointments.js';
 export * from './attires.js';
 export * from './branches.js';
+export * from './frames.js';
+export * from './package-inclusion-attires.js';
 export * from './package-inclusions.js';
 export * from './print-sizes.js';
 export * from './relations.js';
