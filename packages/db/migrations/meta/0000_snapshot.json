@@ -1,5 +1,5 @@
 {
-  "id": "8f568948-f8ae-4de0-a1f3-f239ef3a063c",
+  "id": "78970a88-d158-4b83-b878-1e868edbc3d9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -58,7 +58,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "addon_services_name_unique": {
+          "name": "addon_services_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -107,7 +115,38 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "appointment_addon_services_appointment_id_idx": {
+          "name": "appointment_addon_services_appointment_id_idx",
+          "columns": [
+            {
+              "expression": "appointment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "appointment_addon_services_addon_service_id_idx": {
+          "name": "appointment_addon_services_addon_service_id_idx",
+          "columns": [
+            {
+              "expression": "addon_service_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "appointment_addon_services_appointment_id_appointments_id_fk": {
           "name": "appointment_addon_services_appointment_id_appointments_id_fk",
@@ -241,7 +280,38 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "appointments_branch_id_idx": {
+          "name": "appointments_branch_id_idx",
+          "columns": [
+            {
+              "expression": "branch_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "appointments_service_package_id_idx": {
+          "name": "appointments_service_package_id_idx",
+          "columns": [
+            {
+              "expression": "service_package_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "appointments_branch_id_branches_id_fk": {
           "name": "appointments_branch_id_branches_id_fk",
@@ -378,7 +448,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "branches_name_unique": {
+          "name": "branches_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -446,7 +524,53 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "package_inclusions_service_package_id_idx": {
+          "name": "package_inclusions_service_package_id_idx",
+          "columns": [
+            {
+              "expression": "service_package_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "package_inclusions_print_size_id_idx": {
+          "name": "package_inclusions_print_size_id_idx",
+          "columns": [
+            {
+              "expression": "print_size_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "package_inclusions_attire_id_idx": {
+          "name": "package_inclusions_attire_id_idx",
+          "columns": [
+            {
+              "expression": "attire_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "package_inclusions_service_package_id_service_packages_id_fk": {
           "name": "package_inclusions_service_package_id_service_packages_id_fk",
@@ -614,7 +738,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "service_packages_name_unique": {
+          "name": "service_packages_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
