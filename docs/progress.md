@@ -24,7 +24,7 @@ _Last updated: 2026-09-01 (M1.3 provision/migrate/seed landed on feat/m1.3-provi
 - Toolchain: TypeScript `^6.0.3` in every manifest; Biome `2.5.11` (exact, root devDep); tiered Biome per ADR-0002; per-workspace vitest configs per ADR-0003. `pnpm check` includes format; `pnpm fix` / `pnpm fix:unsafe` for lint+format fixes.
 - `packages/config`: exports `ts/{base,node,react,vite}.json`, `biome/{base,vite,node,worker}.json`, and a **built** `@sevendays/config/vitest` (now emitting `.d.ts` too). Fresh clones must run `pnpm build:packages` before `pnpm check` (dist/ is gitignored).
 - `packages/types`: Zod **v4** schemas (`^4.5.1`, declared as devDep + peerDep) for `Branch`, `ServicePackage`, `Appointment` — stable, extend rather than replace. Upgraded from v3 workspace-wide on 2026-08-30.
-- `packages/db`: Drizzle schema for the same 3 entities (`drizzle-orm ^0.45.2`) + `createDbClient()` factory. **No live database connected.** `drizzle.config.ts` points at a placeholder URL that fails if run — expected until Milestone 1. `db:push` script added; `tsconfig.build.json` emits `dist/`.
+- `packages/db`: Drizzle schema for the same 3 entities (`drizzle-orm ^0.45.2`) + `createDbClient()` factory. M1.3 applied migration 0000 to the live Supabase database and seeded the catalog; `drizzle.config.ts` reads `DATABASE_MIGRATE_URL` (session-mode pooler) first. `db:push` script added; `tsconfig.build.json` emits `dist/`.
 - `packages/ui`: **tokens-only** — `src/globals.css` shadcn CSS variables. The v3-era JS `tailwind-preset.ts` was deleted on 2026-08-30: the apps are Tailwind v4 (CSS-first) and cannot consume a v3 preset. Apps style via `@theme` in their own `styles.css`.
 - `apps/api`: Hono app with `/health` (real), `/api/branches` (one hardcoded fixture), `/api/appointments` (`POST` validates with Zod and echoes back — does not persist). Owns `vitest.config.ts` (node env, explicit include — required on vitest 4, see ADR-0003), `tsconfig.build.json` (emits `dist/`), and `worker-configuration.d.ts` included in both tsconfigs so the global `Env` resolves in every compile path.
 - `apps/landing`, `apps/admin`: TanStack Start 1.168.49 + Vite 8 + React 19 + Tailwind v4 + Sentry/PostHog add-ons. Build/start scripts target `dist/` — the `.output/` paths the CLI generated were written for TanStack Start <1.141 and failed on this version. `routeTree.gen.ts` committed in its stable post-build state.
@@ -44,7 +44,8 @@ _Last updated: 2026-09-01 (M1.3 provision/migrate/seed landed on feat/m1.3-provi
 ## Immediate Next Steps (in order)
 
 1. Push local commits (`git status` to see how many; `git push`) on `feat/m1.3-provision-migrate-seed` and open the PR that closes #5 (M1.3 code-complete: migration applied over the session-mode pooler, catalog seeded + verified, seed/verify tooling committed; `pnpm check` + `pnpm build` green on HEAD). After merge, tick the five acceptance boxes on #5.
-2. Then **Milestone 1** continues: M1.4 real routes + integration tests (#6) → M1.5 exit verification (#7). Checklist lives in `docs/plan.md`; spec in `docs/specs/2026-08-30-m1-real-data-layer-spec.md`.
+2. Run `wrangler secret put DATABASE_URL` from `apps/api` (the pooled URL is in `apps/api/.dev.vars`; never paste the value into chat).
+3. Then **Milestone 1** continues: M1.4 real routes + integration tests (#6) → M1.5 exit verification (#7). Checklist lives in `docs/plan.md`; spec in `docs/specs/2026-08-30-m1-real-data-layer-spec.md`.
 
 ## Notes for Future Sessions
 

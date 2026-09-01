@@ -1,5 +1,6 @@
 // Re-runnable catalog seeder: one transaction, natural-key upserts, per-package
-// inclusion rebuild. Reruns never duplicate rows and never change ids.
+// inclusion rebuild. Reruns never duplicate rows; branch/lookup/package ids stay
+// stable — inclusion rows are deleted and rebuilt per package.
 // Run: pnpm --filter @sevendays/db db:seed
 import process from 'node:process';
 import { eq } from 'drizzle-orm';
