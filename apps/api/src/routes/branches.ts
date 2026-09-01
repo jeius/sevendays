@@ -1,18 +1,16 @@
 import { Hono } from 'hono';
+import type { Env } from '../env.js';
+import { listBranches } from '../services/branches.js';
+import { createApiDb } from '../services/db.js';
+import { internalError } from '../services/errors.js';
 
-// STUB: returns fixture data until @sevendays/db is wired to a live
-// DATABASE_URL. Replace with real Drizzle queries once the DB is provisioned
-// (see docs/tech-stack.md).
 export const branches = new Hono<{ Bindings: Env }>();
 
-branches.get('/', (c) =>
-  c.json([
-    {
-      id: '00000000-0000-0000-0000-000000000001',
-      name: 'Sevendays — Branch 1',
-      address: 'TBD',
-      phone: 'TBD',
-      acceptsWalkIns: true,
-    },
-  ])
-);
+branches.get('/', async (c) => {
+  const db = createApiDb(c.env.DATABASE_URL as string);
+  try {
+    return c.json(await listBranches(db));
+  } catch {
+    return internalError(c);
+  }
+});
