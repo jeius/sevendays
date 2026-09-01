@@ -41,6 +41,12 @@
     },
     "db:migrate": {
       "cache": false
+    },
+    "db:seed": {
+      "cache": false
+    },
+    "db:verify-seed": {
+      "cache": false
     }
   }
 }
