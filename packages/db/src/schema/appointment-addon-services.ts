@@ -1,4 +1,4 @@
-import { integer, pgTable, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import { index, integer, pgTable, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 import { addonServices } from './addon-services.js';
 import { appointments } from './appointments.js';
 
@@ -22,5 +22,7 @@ export const appointmentAddonServices = pgTable(
   },
   (table) => [
     unique('appointment_addon_services_pair_unique').on(table.appointmentId, table.addonServiceId),
+    index('appointment_addon_services_appointment_id_idx').on(table.appointmentId),
+    index('appointment_addon_services_addon_service_id_idx').on(table.addonServiceId),
   ]
 );

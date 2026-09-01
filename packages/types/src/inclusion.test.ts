@@ -4,13 +4,14 @@ import { createPackageInclusionSchema, packageInclusionSchema } from './inclusio
 const UUID = '00000000-0000-4000-8000-000000000000';
 
 describe('packageInclusionSchema', () => {
-  it('parses a framed picture row (quantity, print size, and attire)', () => {
+  it('parses a framed picture row (quantity, print size, attires, frame)', () => {
     const result = packageInclusionSchema.safeParse({
       id: UUID,
       kind: 'framed_picture',
       quantity: 1,
       printSizeId: UUID,
-      attireId: UUID,
+      attireIds: [UUID],
+      frameId: UUID,
       description: null,
       createdAt: '2026-08-31T00:00:00.000Z',
       updatedAt: '2026-08-31T00:00:00.000Z',
@@ -18,14 +19,30 @@ describe('packageInclusionSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('parses a privilege row (nulls for quantity and lookups)', () => {
+  it('parses a privilege row (nulls for quantity and lookups, empty attires)', () => {
     const result = packageInclusionSchema.safeParse({
       id: UUID,
       kind: 'privilege',
       quantity: null,
       printSizeId: null,
-      attireId: null,
+      attireIds: [],
+      frameId: null,
       description: 'Usage of Toga and Hood',
+      createdAt: '2026-08-31T00:00:00.000Z',
+      updatedAt: '2026-08-31T00:00:00.000Z',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('parses a picture row with empty attires (read shape is 0..N; the ≥1 rule is create-only)', () => {
+    const result = packageInclusionSchema.safeParse({
+      id: UUID,
+      kind: 'framed_picture',
+      quantity: 1,
+      printSizeId: UUID,
+      attireIds: [],
+      frameId: UUID,
+      description: null,
       createdAt: '2026-08-31T00:00:00.000Z',
       updatedAt: '2026-08-31T00:00:00.000Z',
     });
@@ -37,7 +54,6 @@ describe('packageInclusionSchema', () => {
       kind: 'souvenir',
       quantity: 2,
       printSizeId: null,
-      attireId: null,
       description: null,
     });
     expect(result.success).toBe(false);
@@ -48,9 +64,45 @@ describe('packageInclusionSchema', () => {
       kind: 'print',
       quantity: 2.5,
       printSizeId: UUID,
-      attireId: UUID,
+      attireIds: [UUID],
       description: null,
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe('createPackageInclusionSchema attire rule', () => {
+  it('rejects a framed picture create payload without attireIds', () => {
+    const result = createPackageInclusionSchema.safeParse({
+      kind: 'framed_picture',
+      quantity: 1,
+      printSizeId: UUID,
+      description: null,
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.path).toEqual(['attireIds']);
+    }
+  });
+
+  it('accepts a framed picture create payload with attireIds and no frameId', () => {
+    const result = createPackageInclusionSchema.safeParse({
+      kind: 'framed_picture',
+      quantity: 1,
+      printSizeId: UUID,
+      attireIds: [UUID],
+      description: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts a privilege create payload without attireIds', () => {
+    const result = createPackageInclusionSchema.safeParse({
+      kind: 'privilege',
+      quantity: null,
+      printSizeId: null,
+      description: 'High Resolution soft copies',
+    });
+    expect(result.success).toBe(true);
   });
 });

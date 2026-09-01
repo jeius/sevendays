@@ -8,7 +8,8 @@ CREATE TABLE "addon_services" (
 	"price_cents" integer NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "addon_services_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE "appointment_addon_services" (
@@ -52,7 +53,8 @@ CREATE TABLE "branches" (
 	"phone" text NOT NULL,
 	"accepts_walk_ins" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "branches_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE "package_inclusions" (
@@ -85,7 +87,8 @@ CREATE TABLE "service_packages" (
 	"is_active" boolean DEFAULT true NOT NULL,
 	"cover_image_key" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "service_packages_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 ALTER TABLE "appointment_addon_services" ADD CONSTRAINT "appointment_addon_services_appointment_id_appointments_id_fk" FOREIGN KEY ("appointment_id") REFERENCES "public"."appointments"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -94,4 +97,11 @@ ALTER TABLE "appointments" ADD CONSTRAINT "appointments_branch_id_branches_id_fk
 ALTER TABLE "appointments" ADD CONSTRAINT "appointments_service_package_id_service_packages_id_fk" FOREIGN KEY ("service_package_id") REFERENCES "public"."service_packages"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "package_inclusions" ADD CONSTRAINT "package_inclusions_service_package_id_service_packages_id_fk" FOREIGN KEY ("service_package_id") REFERENCES "public"."service_packages"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "package_inclusions" ADD CONSTRAINT "package_inclusions_print_size_id_print_sizes_id_fk" FOREIGN KEY ("print_size_id") REFERENCES "public"."print_sizes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "package_inclusions" ADD CONSTRAINT "package_inclusions_attire_id_attires_id_fk" FOREIGN KEY ("attire_id") REFERENCES "public"."attires"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "package_inclusions" ADD CONSTRAINT "package_inclusions_attire_id_attires_id_fk" FOREIGN KEY ("attire_id") REFERENCES "public"."attires"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "appointment_addon_services_appointment_id_idx" ON "appointment_addon_services" USING btree ("appointment_id");--> statement-breakpoint
+CREATE INDEX "appointment_addon_services_addon_service_id_idx" ON "appointment_addon_services" USING btree ("addon_service_id");--> statement-breakpoint
+CREATE INDEX "appointments_branch_id_idx" ON "appointments" USING btree ("branch_id");--> statement-breakpoint
+CREATE INDEX "appointments_service_package_id_idx" ON "appointments" USING btree ("service_package_id");--> statement-breakpoint
+CREATE INDEX "package_inclusions_service_package_id_idx" ON "package_inclusions" USING btree ("service_package_id");--> statement-breakpoint
+CREATE INDEX "package_inclusions_print_size_id_idx" ON "package_inclusions" USING btree ("print_size_id");--> statement-breakpoint
+CREATE INDEX "package_inclusions_attire_id_idx" ON "package_inclusions" USING btree ("attire_id");

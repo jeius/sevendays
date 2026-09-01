@@ -45,8 +45,12 @@ The finishing applied to printed Inclusions — currently laminated or raw. Not 
 _Avoid_: lamination, coating
 
 **Attire**:
-The wardrobe context a framed picture or print is shot in — Toga, Filipiniana, Executive, Uniform — including combined contexts (e.g. Filipiniana/Executive), each stored as one lookup row.
+The wardrobe context a framed picture or print is shot in — stored atomically (Toga, Filipiniana, Executive, Uniform); combined contexts like Filipiniana/Executive are Inclusions linked to multiple Attire rows in catalog order.
 _Avoid_: outfit, costume, wardrobe (that is the usage Inclusion)
+
+**Frame**:
+One physical frame bundled with a Service Package, numbered per package (catalog "Frame 1/2/3"; unlabeled frames number in listed order). A frame holds one or more framed pictures; today every catalog frame holds exactly one. Distinct from loose picture Inclusions.
+_Avoid_: framed picture (that is the Inclusion inside a Frame), frame size (that is the Print size of the framed picture)
 
 **API client**:
 The shared package (`@sevendays/api-client`) through which both apps call this API — the only supported path; frontends never hand-roll calls to it.
