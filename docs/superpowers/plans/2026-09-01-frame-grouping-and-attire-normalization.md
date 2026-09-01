@@ -140,9 +140,10 @@ export const packageInclusionSchema = z.object({
   // laminated, print rows are loose — the kind decides, not data.
   printSizeId: z.uuid().nullable(),
   // Attire context lives in the package_inclusion_attires junction (ADR-0009
-  // revision): the read shape carries the resolved id array (≥1 for picture
-  // inclusions; privileges 0..N — some usage grants name no attire).
-  attireIds: z.array(z.uuid()).min(1),
+  // revision): the read shape carries the resolved id array (0..N — the ≥1
+  // rule for picture inclusions is kind-dependent and enforced on the create
+  // shape, not here).
+  attireIds: z.array(z.uuid()),
   // Frame identity (ADR-0009 revision): which catalog frame this framed
   // picture belongs to — null for prints and privileges. Required-nullable
   // on the row shape; optional+nullable on the create shape.
