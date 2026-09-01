@@ -16,7 +16,13 @@ import {
   printSizes,
   servicePackages,
 } from '../src/index.js';
-import { addonServiceSeeds, branchSeeds, inclusionSignatures, packageSeeds } from './catalog.js';
+import {
+  addonServiceSeeds,
+  attireSeeds,
+  branchSeeds,
+  inclusionSignatures,
+  packageSeeds,
+} from './catalog.js';
 
 const url = process.env.DATABASE_MIGRATE_URL ?? process.env.DATABASE_URL;
 if (!url) {
@@ -50,12 +56,17 @@ attireRows.length === 4
   ? pass(`attires: ${attireRows.length}/4 (atomic — combined contexts are junction-composed)`)
   : fail(`attires: ${attireRows.length} != 4`);
 
-// Junction attires — fetched once; insertion order per inclusion preserves
-// the catalog's attire order for the canonical join.
+// Junction attires — fetched once; the junction has no position column, so
+// each inclusion's names are re-sorted by the canonical catalog order
+// (attireSeeds index) before joining — the line-for-line guarantee is
+// order-independent, not accident-of-insertion dependent.
 const junctionRows = await db
   .select({ inclusionId: packageInclusionAttires.inclusionId, attireName: attires.name })
   .from(packageInclusionAttires)
   .innerJoin(attires, eq(packageInclusionAttires.attireId, attires.id));
+const canonicalAttireOrder = new Map<string, number>(
+  attireSeeds.map((a, i) => [a.name as string, i])
+);
 const attireNamesByInclusion = new Map<string, string[]>();
 for (const j of junctionRows) {
   const list = attireNamesByInclusion.get(j.inclusionId);
@@ -64,6 +75,13 @@ for (const j of junctionRows) {
   } else {
     attireNamesByInclusion.set(j.inclusionId, [j.attireName]);
   }
+}
+for (const list of attireNamesByInclusion.values()) {
+  list.sort(
+    (a, b) =>
+      (canonicalAttireOrder.get(a) ?? Number.MAX_SAFE_INTEGER) -
+      (canonicalAttireOrder.get(b) ?? Number.MAX_SAFE_INTEGER)
+  );
 }
 
 const frameRows = await db.select().from(frames);
@@ -149,10 +167,12 @@ for (const seed of packageSeeds) {
       .map((r) => r.frameId)
       .filter((id) => id !== null)
   );
-  includedFrameIds.size === pkgFrameRows.length
-    ? pass(`${seed.name}: every frame carries ≥1 framed picture`)
+  const pkgFrameIdSet = new Set(pkgFrameRows.map((f) => f.id));
+  const foreignFrames = [...includedFrameIds].filter((id) => !pkgFrameIdSet.has(id));
+  includedFrameIds.size === pkgFrameRows.length && foreignFrames.length === 0
+    ? pass(`${seed.name}: every frame carries ≥1 framed picture (ownership verified)`)
     : fail(
-        `${seed.name}: framed pictures reference ${includedFrameIds.size}/${pkgFrameRows.length} frames`
+        `${seed.name}: frame partition broken — referenced ${includedFrameIds.size}/${pkgFrameRows.length} frames, ${foreignFrames.length} foreign`
       );
 
   // Attire completeness: every picture inclusion carries ≥1 junction row.
