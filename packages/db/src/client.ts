@@ -3,14 +3,12 @@ import postgres from 'postgres';
 import * as schema from './schema/index.js';
 
 /**
- * STUB: no live database is provisioned yet.
+ * The one db client (ADR-0007): `prepare: false` is required under Supabase
+ * transaction-mode pooling. Callers pass the URL their runtime owns — the
+ * deployed Worker its pooled `DATABASE_URL` secret (per-request, ADR-0011),
+ * test harnesses `TEST_DATABASE_URL` (compose/CI).
  *
- * Once you have a Postgres connection string (e.g. from Supabase), set
- * `DATABASE_URL` in the consuming app's environment (for apps/api, this is a
- * Cloudflare Workers binding/secret, not a local .env at runtime) and this
- * client will work as-is.
- *
- * Usage: `createDbClient(env.DATABASE_URL)`
+ * Usage: `createDbClient(connectionString)`
  */
 export function createDbClient(connectionString: string) {
   const client = postgres(connectionString, { prepare: false });
