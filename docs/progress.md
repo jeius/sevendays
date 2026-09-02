@@ -1,6 +1,6 @@
 # Progress
 
-_Last updated: 2026-09-02 (2026-09-02 intake deepening (candidate A) landed; prior: M1.5 exit gate verified; close-out landing on feat/m1.5-exit-verification. Prior: M1.4 real routes + integration tests merged via #11, 894d1c1; M1.3 provision/migrate/seed landed on feat/m1.3-provision-migrate-seed; M1.2 catalog schema landed on feat/m1.2-catalog-schema; 2026-08-30 toolchain consolidation.)_
+_Last updated: 2026-09-02 (intake deepening (candidate A) landed; prior: M1.5 exit gate verified; close-out landing on feat/m1.5-exit-verification. Prior: M1.4 real routes + integration tests merged via #11, 894d1c1; M1.3 provision/migrate/seed landed on feat/m1.3-provision-migrate-seed; M1.2 catalog schema landed on feat/m1.2-catalog-schema; 2026-08-30 toolchain consolidation.)_
 
 ## Current Milestone: 1 — Real Data Layer (complete — exit criteria verified live 2026-09-02; next up: Milestone 2 pre-flight, issue #1)
 
