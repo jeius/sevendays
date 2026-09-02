@@ -1,6 +1,9 @@
-import { appointments as appointmentsTable } from '@sevendays/db';
+import { appointmentAddonServices, appointments as appointmentsTable } from '@sevendays/db';
+import { createAppointmentSchema } from '@sevendays/types';
+import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
+import { createAppointment } from '../src/services/appointments.js';
 import { createTestDb } from './helpers/db.js';
 import type { FixtureIds } from './helpers/fixtures.js';
 import { loadFixtures } from './helpers/fixtures.js';
@@ -88,7 +91,7 @@ describe('POST /api/v1/appointments', () => {
       { DATABASE_URL: url }
     );
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toMatch(/branch/i);
+    expect((await res.json()).error).toBe('Unknown branchId.');
   });
 
   it('rejects an inactive Service Package reference', async () => {
@@ -116,7 +119,7 @@ describe('POST /api/v1/appointments', () => {
       { DATABASE_URL: url }
     );
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toMatch(/add-on/i);
+    expect((await res.json()).error).toBe('Add-on Service is inactive.');
   });
 
   it('rejects a duplicate add-on id', async () => {
@@ -218,5 +221,62 @@ describe('GET /api/v1/appointments', () => {
   it('serves through the api-client-free public surface (no auth yet — Known Gap)', async () => {
     const res = await app.request('/api/v1/appointments', undefined, { DATABASE_URL: url });
     expect(res.status).toBe(200);
+  });
+});
+
+// Seam 1 of the intake spec — the module's interface is the only place
+// intake behavior is proven: rejection failures carry the module-owned
+// message, and the happy path commits record + junction rows in one
+// transaction. Complements the HTTP-level tests above (route = one call to
+// badRequest with result.message).
+describe('createAppointment module seam', () => {
+  const moduleInput = (overrides: Record<string, unknown> = {}) =>
+    createAppointmentSchema.parse(payload(overrides));
+
+  it('carries the exact rejection message for all five reasons', async () => {
+    await expect(createAppointment(db, moduleInput({ branchId: MISSING_UUID }))).resolves.toEqual({
+      ok: false,
+      reason: 'branch',
+      message: 'Unknown branchId.',
+    });
+    await expect(
+      createAppointment(db, moduleInput({ servicePackageId: MISSING_UUID }))
+    ).resolves.toEqual({ ok: false, reason: 'package', message: 'Unknown servicePackageId.' });
+    await expect(
+      createAppointment(db, moduleInput({ servicePackageId: ids.packageRetired }))
+    ).resolves.toEqual({
+      ok: false,
+      reason: 'package_inactive',
+      message: 'Service Package is inactive.',
+    });
+    await expect(
+      createAppointment(db, moduleInput({ addonServiceIds: [MISSING_UUID] }))
+    ).resolves.toEqual({ ok: false, reason: 'addon', message: 'Unknown addonServiceId.' });
+    await expect(
+      createAppointment(db, moduleInput({ addonServiceIds: [ids.addonRetired] }))
+    ).resolves.toEqual({
+      ok: false,
+      reason: 'addon_inactive',
+      message: 'Add-on Service is inactive.',
+    });
+  });
+
+  it('commits the record and its junction rows through one transaction', async () => {
+    const result = await createAppointment(db, moduleInput());
+    expect(result.ok).toBe(true);
+    if (!result.ok) return; // narrows for TS; the line above already failed otherwise
+    expect(result.record.packagePriceCents).toBe(150000);
+    expect(result.record.addonServices).toEqual([
+      { addonServiceId: ids.addonMakeup, name: 'Makeup', priceCents: 12000 },
+    ]);
+    const junction = await db
+      .select({
+        appointmentId: appointmentAddonServices.appointmentId,
+        addonServiceId: appointmentAddonServices.addonServiceId,
+      })
+      .from(appointmentAddonServices)
+      .where(eq(appointmentAddonServices.appointmentId, result.record.id));
+    expect(junction).toHaveLength(1);
+    expect(junction[0]?.addonServiceId).toBe(ids.addonMakeup);
   });
 });
