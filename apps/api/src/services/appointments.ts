@@ -6,12 +6,9 @@ import {
   branches,
   servicePackages,
 } from '@sevendays/db';
-import type {
-  AppointmentAddonEntry,
-  AppointmentWithAddons,
-  CreateAppointmentInput,
-} from '@sevendays/types';
+import type { AppointmentWithAddons, CreateAppointmentInput } from '@sevendays/types';
 import { desc, eq, inArray } from 'drizzle-orm';
+import { groupChildren } from './group-children.js';
 
 /** The five intake rejections; wording is module-owned (route stays thin). */
 const REJECTION_MESSAGES = {
@@ -171,19 +168,15 @@ export async function listAppointments(
     // row-order guarantee without an explicit ORDER BY.
     .orderBy(appointmentAddonServices.createdAt);
 
-  const addonsByAppointment = new Map<string, AppointmentAddonEntry[]>();
-  for (const row of addonRows) {
-    const list = addonsByAppointment.get(row.appointmentId) ?? [];
-    list.push({
-      addonServiceId: row.addonServiceId,
-      name: row.name,
-      priceCents: row.priceCents,
-    });
-    addonsByAppointment.set(row.appointmentId, list);
-  }
+  // Raw rows carry appointmentId — group raw, project at the attach pass.
+  const addonsByAppointment = groupChildren(addonRows, (row) => row.appointmentId);
 
   return rows.map((row) => ({
     ...row,
-    addonServices: addonsByAppointment.get(row.id) ?? [],
+    addonServices: addonsByAppointment(row.id).map((a) => ({
+      addonServiceId: a.addonServiceId,
+      name: a.name,
+      priceCents: a.priceCents,
+    })),
   }));
 }
