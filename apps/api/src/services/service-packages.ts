@@ -7,13 +7,9 @@ import {
   printSizes,
   servicePackages,
 } from '@sevendays/db';
-import type {
-  ResolvedAttire,
-  ResolvedFrame,
-  ResolvedPrintSize,
-  ServicePackageWithInclusions,
-} from '@sevendays/types';
+import type { ResolvedPrintSize, ServicePackageWithInclusions } from '@sevendays/types';
 import { asc, eq, inArray } from 'drizzle-orm';
+import { groupChildren } from './group-children.js';
 
 /**
  * Active packages with server-resolved lookups (M1.4 Q1=B): the read carries
@@ -77,52 +73,29 @@ export async function listActivePackagesWithInclusions(
     printSizeById.set(s.id, { id: s.id, code: s.code, description: s.description });
   }
 
-  const attiresByInclusion = new Map<string, ResolvedAttire[]>();
-  for (const row of junctionRows) {
-    const list = attiresByInclusion.get(row.inclusionId);
-    const attire = { id: row.id, name: row.name };
-    if (list) {
-      list.push(attire);
-    } else {
-      attiresByInclusion.set(row.inclusionId, [attire]);
-    }
-  }
+  // Assembly = groupChildren (order-preserving, empty-group-defaulting);
+  // the projections below are shape-building, which stays in this service.
+  const attiresByInclusion = groupChildren(junctionRows, (row) => row.inclusionId);
 
-  const framesByPackage = new Map<string, ResolvedFrame[]>();
-  for (const f of frameRows) {
-    const list = framesByPackage.get(f.servicePackageId);
-    const frame = { id: f.id, frameNumber: f.frameNumber };
-    if (list) {
-      list.push(frame);
-    } else {
-      framesByPackage.set(f.servicePackageId, [frame]);
-    }
-  }
+  const framesByPackage = groupChildren(frameRows, (f) => f.servicePackageId);
 
-  const inclusionsByPackage = new Map<string, ServicePackageWithInclusions['inclusions']>();
-  for (const i of inclusionRows) {
-    const inclusion: ServicePackageWithInclusions['inclusions'][number] = {
-      id: i.id,
-      kind: i.kind,
-      quantity: i.quantity,
-      printSize: i.printSizeId ? (printSizeById.get(i.printSizeId) ?? null) : null,
-      attires: attiresByInclusion.get(i.id) ?? [],
-      frameId: i.frameId,
-      description: i.description,
-      createdAt: i.createdAt,
-      updatedAt: i.updatedAt,
-    };
-    const list = inclusionsByPackage.get(i.servicePackageId);
-    if (list) {
-      list.push(inclusion);
-    } else {
-      inclusionsByPackage.set(i.servicePackageId, [inclusion]);
-    }
-  }
+  const inclusionsByPackage = groupChildren(inclusionRows, (i) => i.servicePackageId);
 
   return packageRows.map((p) => ({
     ...p,
-    inclusions: inclusionsByPackage.get(p.id) ?? [],
-    frames: framesByPackage.get(p.id) ?? [],
+    inclusions: inclusionsByPackage(p.id).map(
+      (i): ServicePackageWithInclusions['inclusions'][number] => ({
+        id: i.id,
+        kind: i.kind,
+        quantity: i.quantity,
+        printSize: i.printSizeId ? (printSizeById.get(i.printSizeId) ?? null) : null,
+        attires: attiresByInclusion(i.id).map((row) => ({ id: row.id, name: row.name })),
+        frameId: i.frameId,
+        description: i.description,
+        createdAt: i.createdAt,
+        updatedAt: i.updatedAt,
+      })
+    ),
+    frames: framesByPackage(p.id).map((f) => ({ id: f.id, frameNumber: f.frameNumber })),
   }));
 }
