@@ -49,7 +49,7 @@ Task map: 0 — branch + environment bootstrap + baseline → 1 — `groupChildr
 
 **Files:** none (session setup only).
 
-- [ ] **Step 1: Fork the feature branch from main**
+- [✅] **Step 1: Fork the feature branch from main**
 
 ```bash
 git switch main
@@ -61,7 +61,7 @@ ls docs/specs/2026-09-02-extract-read-stitch-module-spec.md
 
 Expected: HEAD is on `feat/extract-read-stitch-module`; the spec file exists on the branch (it is already on main).
 
-- [ ] **Step 2: Bootstrap and start the compose db**
+- [✅] **Step 2: Bootstrap and start the compose db**
 
 ```bash
 docker compose up -d db
@@ -73,7 +73,7 @@ export TEST_DATABASE_URL='postgres://postgres:***@localhost:5432/sevendays_test'
 
 Expected: install clean; `dist/` built for `packages/db` + `packages/config`.
 
-- [ ] **Step 3: Baseline green — record the count**
+- [✅] **Step 3: Baseline green — record the count**
 
 ```bash
 pnpm --filter @sevendays/api test
@@ -93,7 +93,7 @@ Expected: all green. **Record the printed test total** (integration + index test
 - Consumes: nothing (pure; no imports besides vitest in the test).
 - Produces: `groupChildren<Child, Key extends string>(children: readonly Child[], childKey: (child: Child) => Key): (key: Key) => Child[]` — Task 2's call sites consume exactly this.
 
-- [ ] **Step 1: Write the failing tests**
+- [✅] **Step 1: Write the failing tests**
 
 Create `apps/api/src/services/group-children.test.ts`:
 
@@ -162,7 +162,7 @@ describe('groupChildren', () => {
 });
 ```
 
-- [ ] **Step 2: Run the suite to verify it fails**
+- [✅] **Step 2: Run the suite to verify it fails**
 
 ```bash
 pnpm --filter @sevendays/api test src/services/group-children.test.ts
@@ -170,7 +170,7 @@ pnpm --filter @sevendays/api test src/services/group-children.test.ts
 
 Expected: FAIL — vitest cannot resolve `./group-children.js` (module not written yet). Note the global setup still runs: the compose db must be up even for this red run.
 
-- [ ] **Step 3: Write the module**
+- [✅] **Step 3: Write the module**
 
 Create `apps/api/src/services/group-children.ts`:
 
@@ -211,7 +211,7 @@ export function groupChildren<Child, Key extends string>(
 }
 ```
 
-- [ ] **Step 4: Run the suite to verify it passes**
+- [✅] **Step 4: Run the suite to verify it passes**
 
 ```bash
 pnpm --filter @sevendays/api test src/services/group-children.test.ts
@@ -219,7 +219,7 @@ pnpm --filter @sevendays/api test src/services/group-children.test.ts
 
 Expected: PASS — 7/7.
 
-- [ ] **Step 5: Full api suite — count gate**
+- [✅] **Step 5: Full api suite — count gate**
 
 ```bash
 pnpm --filter @sevendays/api test
@@ -227,7 +227,7 @@ pnpm --filter @sevendays/api test
 
 Expected: all green; printed total = Task 0 baseline + 7. If the new file was not discovered (count unchanged), stop and fix discovery — do not proceed on a silent suite (ADR-0003 gotcha).
 
-- [ ] **Step 6: Biome + typecheck, then commit**
+- [✅] **Step 6: Biome + typecheck, then commit**
 
 ```bash
 pnpm exec biome check --write apps/api/src/services/group-children.ts apps/api/src/services/group-children.test.ts
@@ -252,7 +252,7 @@ Expected: biome clean; typecheck green; commit lands.
 - Consumes: `groupChildren` from Task 1 (exact signature above).
 - Produces: no exported-interface change in either service — `listActivePackagesWithInclusions(db)` and `listAppointments(db, { branchId })` keep their signatures; response payloads stay byte-identical.
 
-- [ ] **Step 1: Rewrite the Service Package catalog read's stitch**
+- [✅] **Step 1: Rewrite the Service Package catalog read's stitch**
 
 In `apps/api/src/services/service-packages.ts`:
 
@@ -289,7 +289,7 @@ In `apps/api/src/services/service-packages.ts`:
 
 Keep unchanged: all five queries, the `printSizeById` Map (keyed single-object lookup, not grouping — not this spec's concern), and the ordering comment above the junction query.
 
-- [ ] **Step 2: Rewrite the Appointment list read's stitch**
+- [✅] **Step 2: Rewrite the Appointment list read's stitch**
 
 In `apps/api/src/services/appointments.ts`:
 
@@ -312,7 +312,7 @@ In `apps/api/src/services/appointments.ts`:
 
 Keep unchanged: both queries, the `orderBy(appointmentAddonServices.createdAt)` and its comment, the `listAppointments` docstring (its "stitched back in insertion order" statement remains true).
 
-- [ ] **Step 3: Verify — integration suites green, unchanged**
+- [✅] **Step 3: Verify — integration suites green, unchanged**
 
 ```bash
 pnpm --filter @sevendays/api test
@@ -320,7 +320,7 @@ pnpm --filter @sevendays/api test
 
 Expected: all green; printed total = baseline + 7 (identical to the Task 1 gate). Zero test-file edits in this task — `git status` must show only the two service files. The catalog assertions (`['Filipiniana', 'Executive']` attire order, `[]` privilege attires, frames `[1]`) passing unmodified IS the behavior-preservation proof.
 
-- [ ] **Step 4: Repo-wide static gates**
+- [✅] **Step 4: Repo-wide static gates**
 
 ```bash
 pnpm typecheck
@@ -329,7 +329,7 @@ pnpm lint
 
 Expected: green. (No `?? []` remains at the adoption sites — the lookup guarantees the empty list; that deletion is the point of the change.)
 
-- [ ] **Step 5: Biome + commit**
+- [✅] **Step 5: Biome + commit**
 
 ```bash
 pnpm exec biome check --write apps/api/src/services/service-packages.ts apps/api/src/services/appointments.ts
@@ -353,7 +353,7 @@ Expected: biome clean; commit lands.
 - Consumes: everything landed in Tasks 1–2 (commit hashes for evidence).
 - Produces: progress.md ledger current for the next session; evidence comment on issue #14.
 
-- [ ] **Step 1: Full gate**
+- [✅] **Step 1: Full gate**
 
 ```bash
 pnpm check
@@ -361,7 +361,7 @@ pnpm check
 
 Expected: green (lint + format + typecheck + test across the repo). Nothing outside `apps/api` changed except progress.md, so this is a formality gate — but it is the commit gate per AGENTS.md.
 
-- [ ] **Step 2: Update docs/progress.md**
+- [✅] **Step 2: Update docs/progress.md**
 
 1. **Last-updated line:** extend the existing `_Last updated: …_` line to lead with: `read-stitch module (candidate B) landed on feat/extract-read-stitch-module; prior: intake deepening (candidate A) merged via #17 …` (keep the existing history tail).
 2. **Landed line** (in the landed/completed section, after the candidate-A bullet):
@@ -369,7 +369,7 @@ Expected: green (lint + format + typecheck + test across the repo). Nothing outs
 3. **Junction-ordering watch-item** (the M1.4 watch-item bullet about `package_inclusion_attires` having no position column): append to that bullet —
    `; 2026-09-02 (candidate B): assembly's order-preservation and empty-group rules are now pinned by apps/api/src/services/group-children.test.ts — introducing a persisted position column later means one module's documentation changes, not every call site's assumptions`
 
-- [ ] **Step 3: Post evidence on issue #14**
+- [✅] **Step 3: Post evidence on issue #14**
 
 ```bash
 gh issue comment 14 --body "$(cat <<'EOF'
@@ -385,7 +385,7 @@ EOF
 
 Expected: comment posted (verify with `gh issue view 14 --comments | tail -20`). Leave the issue open — it closes when the user's PR merges (`Closes #14` in the PR body).
 
-- [ ] **Step 4: Commit docs**
+- [✅] **Step 4: Commit docs**
 
 ```bash
 git add docs/progress.md
