@@ -18,7 +18,12 @@ appointments.get(
       const db = createApiDb(c.env.DATABASE_URL);
       const rows = await listAppointments(db, { branchId });
       return c.json(rows);
-    } catch {
+    } catch (error) {
+      // Log before the uniform 500 (progress.md M2 item): the blocker-#2 class
+      // of failure was invisible until wrangler tail. console.error is the
+      // stopgap — M6 swaps in Loglayer + Pino; candidate D generalizes this
+      // into middleware for the other routes.
+      console.error('[appointments] list failed:', error);
       return internalError(c);
     }
   }
@@ -33,7 +38,9 @@ appointments.post('/', validated(createAppointmentSchema, 'json'), async (c) => 
       return badRequest(c, result.message);
     }
     return c.json(result.record, 201);
-  } catch {
+  } catch (error) {
+    // Same log-before-500 contract as the list handler above.
+    console.error('[appointments] create failed:', error);
     return internalError(c);
   }
 });
