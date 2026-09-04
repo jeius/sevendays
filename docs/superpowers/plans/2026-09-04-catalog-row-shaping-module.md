@@ -53,7 +53,7 @@ Task map: 0 — branch + environment bootstrap + baselines → 1 — builders TD
 
 **Files:** none (session setup only).
 
-- [ ] **Step 1: Fork the feature branch from main**
+- [✅] **Step 1: Fork the feature branch from main**
 
 ```bash
 git switch main
@@ -65,7 +65,7 @@ ls docs/specs/2026-09-02-catalog-row-shaping-module-spec.md
 
 Expected: HEAD is on `feat/catalog-row-shaping-module`; the spec file exists on the branch (it is already on main).
 
-- [ ] **Step 2: Bootstrap and start the compose db**
+- [✅] **Step 2: Bootstrap and start the compose db**
 
 ```bash
 pnpm install
@@ -76,7 +76,7 @@ docker compose ps   # db healthy (pg_isready passing)
 
 Expected: install clean; `dist/` built for `packages/db` + `packages/config`. No `TEST_DATABASE_URL` export needed — `apps/api/test/global-setup.ts` defaults to the compose db.
 
-- [ ] **Step 3: Baseline green — record the counts**
+- [✅] **Step 3: Baseline green — record the counts**
 
 ```bash
 pnpm --filter @sevendays/db test 2>&1 | grep -E "Test Files|Tests "
@@ -156,7 +156,7 @@ Contract notes the implementer must honor (these ARE the module's docs):
 - **Unknown attire name** → throw `Unknown attire name: X` (loud, never skip).
 - **Purity**: no I/O, no client creation, no transactions. A `switch (entry.kind)` is exhaustive over `InclusionEntry` — do not widen with a default branch.
 
-- [ ] **Step 1: Write the failing tests**
+- [✅] **Step 1: Write the failing tests**
 
 Create `packages/db/src/catalog-rows.test.ts`:
 
@@ -513,7 +513,7 @@ describe.runIf(process.env.TEST_DATABASE_URL)('live insert-compatibility', async
 > service_packages → attires), then runs plain inserts. The snippet above is kept for the record; the landed
 > test file is authoritative.
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [✅] **Step 2: Run tests to verify they fail**
 
 ```bash
 pnpm --filter @sevendays/db exec vitest run src/catalog-rows.test.ts 2>&1 | tail -5
@@ -521,7 +521,7 @@ pnpm --filter @sevendays/db exec vitest run src/catalog-rows.test.ts 2>&1 | tail
 
 Expected: FAIL — cannot resolve `./catalog-rows.js` (module not yet created).
 
-- [ ] **Step 3: Write the module**
+- [✅] **Step 3: Write the module**
 
 Create `packages/db/src/catalog-rows.ts`:
 
@@ -679,7 +679,7 @@ Notes for the implementer:
 - The exhaustive `switch` (no default) is deliberate: adding a Kind variant becomes a compile error here, which is the point of the module (spec user story 2).
 - `buildInclusionRowValues` returns rows in `entries` order; the caller pairs them with `buildJunctionPairs` using the same array (the seeder's returning-order cursor walk stays valid).
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [✅] **Step 4: Run tests to verify they pass**
 
 ```bash
 pnpm --filter @sevendays/db exec vitest run src/catalog-rows.test.ts 2>&1 | grep -E "Test Files|Tests "
@@ -687,7 +687,7 @@ pnpm --filter @sevendays/db exec vitest run src/catalog-rows.test.ts 2>&1 | grep
 
 Expected (no `TEST_DATABASE_URL`): **15 passed, 1 skipped** (16 total). With the compose db's URL exported, the live probe runs too (16 passed).
 
-- [ ] **Step 5: Add the opt-in subpath export**
+- [✅] **Step 5: Add the opt-in subpath export**
 
 In `packages/db/package.json`, extend the exports map (leave `.` and `./migrate` untouched):
 
@@ -708,7 +708,7 @@ In `packages/db/package.json`, extend the exports map (leave `.` and `./migrate`
   },
 ```
 
-- [ ] **Step 6: Build, typecheck, full db suite, commit**
+- [✅] **Step 6: Build, typecheck, full db suite, commit**
 
 ```bash
 pnpm --filter @sevendays/db build
@@ -755,7 +755,7 @@ Background facts (verified on drizzle-orm 0.45.2 in this repo — statically in 
 - **Narrow with `PgTable`, not root `Table`**: `getTableConfig`'s parameter is constrained to `PgTable`, so `is(v, Table)` narrowing would not typecheck the `getTableConfig(v)` call. `is()` walks the prototype chain comparing `entityKind`, so `is(v, PgTable)` matches exactly the pg table instances in the barrel.
 - The barrel's non-table exports (the `relations` objects, the `packageInclusionKindEnum` builder) fail the `is(v, PgTable)` guard. `getTableConfig(...).schema` is `undefined` for all ten public tables (default schema) — that filter excludes any future namespaced table (e.g. BetterAuth's).
 
-- [ ] **Step 1: Write the failing tests**
+- [✅] **Step 1: Write the failing tests**
 
 Create `apps/api/test/helpers/truncate.test.ts`:
 
@@ -792,7 +792,7 @@ describe('publicTableNames', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [✅] **Step 2: Run tests to verify they fail**
 
 ```bash
 pnpm --filter @sevendays/api exec vitest run test/helpers/truncate.test.ts 2>&1 | tail -5
@@ -800,7 +800,7 @@ pnpm --filter @sevendays/api exec vitest run test/helpers/truncate.test.ts 2>&1 
 
 Expected: FAIL — `publicTableNames` does not exist in `./truncate.js` (import error).
 
-- [ ] **Step 3: Replace the hand-named list with the derived one**
+- [✅] **Step 3: Replace the hand-named list with the derived one**
 
 Rewrite `apps/api/test/helpers/truncate.ts` in full:
 
@@ -838,7 +838,7 @@ export async function truncateAll(db: TestDb): Promise<void> {
 
 (`publicTableNames` sorts so the SQL and the pinned expectation are deterministic; TRUNCATE order is irrelevant anyway because of `CASCADE`.)
 
-- [ ] **Step 4: Run the helper tests, then the whole api suite**
+- [✅] **Step 4: Run the helper tests, then the whole api suite**
 
 ```bash
 pnpm --filter @sevendays/api exec vitest run test/helpers/truncate.test.ts 2>&1 | grep -E "Test Files|Tests "
@@ -847,7 +847,7 @@ pnpm --filter @sevendays/api test 2>&1 | grep -E "Test Files|Tests "
 
 Expected: helper file = 2 passed; whole suite = **32 passed / 7 files** (30 baseline + 2 new), compose db up.
 
-- [ ] **Step 5: Commit**
+- [✅] **Step 5: Commit**
 
 ```bash
 pnpm --filter @sevendays/api exec biome check --write test/helpers/truncate.ts test/helpers/truncate.test.ts
@@ -876,7 +876,7 @@ git commit -m "test: derive the truncate table list from the exported db schema
 - Consumes (from Task 1, via `@sevendays/db/catalog-rows`, resolving from `packages/db/dist/` after `pnpm build:packages`): `buildInclusionRowValues`, `buildJunctionPairs`, type `InclusionEntry`.
 - Produces: `loadFixtures(db: TestDb): Promise<FixtureIds>` — same signature, same `FixtureIds` shape, same dataset, same insertion sequence (junction per-row statements preserved for the `created_at` render-order invariant).
 
-- [ ] **Step 1: Add the builder imports**
+- [✅] **Step 1: Add the builder imports**
 
 At the top of `apps/api/test/helpers/fixtures.ts`, alongside the existing type import:
 
@@ -890,7 +890,7 @@ import {
 
 (The dynamic `await import('@sevendays/db')` for schema tables stays as-is.)
 
-- [ ] **Step 2: Replace the inclusion + junction section**
+- [✅] **Step 2: Replace the inclusion + junction section**
 
 Replace everything from `const [inclusionFramedPicture] = await db` (fixtures.ts line ~151) through the last `packageInclusionAttires` insert (line ~217, the `inclusionPrint2x2`/`attireToga` one) — i.e. the five inclusion inserts and the four junction inserts — with:
 
@@ -1002,7 +1002,7 @@ What changed vs. the old block, and why each is safe:
 - **`packageRetired` still gets no inclusions**; **`Uniform` stays insert-only** (the ids map carries it for future cases, exactly like the old code captured `attireUniform` without linking it).
 - The `const [x] = await ... .returning()` destructures follow the file's existing pattern (array destructuring is unaffected by `noUncheckedIndexedAccess`; direct indexed reads are the ones guarded above).
 
-- [ ] **Step 3: Run the integration suite (zero assertion edits)**
+- [✅] **Step 3: Run the integration suite (zero assertion edits)**
 
 ```bash
 pnpm --filter @sevendays/api test 2>&1 | grep -E "Test Files|Tests "
@@ -1011,7 +1011,7 @@ git diff --stat -- apps/api/test/service-packages.test.ts apps/api/test/appointm
 
 Expected: **32 passed / 7 files** — same as after Task 2 — and the diff output is **empty**: `service-packages.test.ts` (attire order `['Filipiniana', 'Executive']`, privilege attires `[]`, `printSize` null on privileges, frames `[1]`), `appointments.test.ts`, `branches.test.ts`, `addon-services.test.ts` all pass **without a single assertion change**. That is the fixtures-adoption proof.
 
-- [ ] **Step 4: Commit**
+- [✅] **Step 4: Commit**
 
 ```bash
 pnpm --filter @sevendays/api exec biome check --write test/helpers/fixtures.ts
@@ -1040,7 +1040,7 @@ git commit -m "refactor: shape the api fixture inclusions and junction pairs via
 - Consumes (from Task 1): `buildInclusionRowValues`, `buildJunctionPairs`, `buildFrameRowValues`, `assertAllKnownAttires`, and types `InclusionEntry`/`PictureEntry` — imported from `'../src/catalog-rows.js'` (scripts are in-workspace; same pattern as `seed.ts` importing `../src/index.js`).
 - Produces: the same seeded rows — proven by `db:verify-seed` PASSED on the live database after a re-run.
 
-- [ ] **Step 1: Rewire the seeder's shaping to the builders**
+- [✅] **Step 1: Rewire the seeder's shaping to the builders**
 
 In `packages/db/scripts/seed.ts`:
 
@@ -1133,7 +1133,7 @@ Transcription notes:
 
 4. Note the error-wording change (accepted, Global Constraints): unknown attire now throws `Unknown attire name: X` from `assertAllKnownAttires`/`buildJunctionPairs` instead of `seed: unknown attire X for PKG`. The assert runs per package inside the loop, so the failure still localizes.
 
-- [ ] **Step 2: Typecheck, lint, unit suite**
+- [✅] **Step 2: Typecheck, lint, unit suite**
 
 ```bash
 pnpm --filter @sevendays/db typecheck
@@ -1144,7 +1144,7 @@ pnpm --filter @sevendays/db test 2>&1 | grep -E "Test Files|Tests "
 
 Expected: all green; db suite still **16 passed / 8 skipped** (24 total). (The seed script is not in the vitest include path — `src/**/*.test.ts` — so the count is unchanged; this gate is against accidental breakage.)
 
-- [ ] **Step 3: Live proof — re-run the seed and verify against the catalog document**
+- [✅] **Step 3: Live proof — re-run the seed and verify against the catalog document**
 
 The compose db is a test db — the seed rides the **live Supabase** URL from `packages/db/.env` (`DATABASE_MIGRATE_URL`, session-mode pooler per ADR-0007; the script reads it via `--env-file=.env`). This is the spec's behavior-preservation proof: the verified seed keeps its exact behavior.
 
@@ -1156,7 +1156,7 @@ pnpm --filter @sevendays/db db:verify-seed
 
 Expected: first seed `[ok] seeded: 3 branches, 6 print sizes, 4 attires, 2 add-on services, 11 packages with frames and inclusions`; second run identical (no duplicate rows); `db:verify-seed` prints its PASSED summary — all 11 packages line-for-line against `docs/catalog.md`, exit 0. **If the live DB is unreachable from this environment, stop and flag the gap in the PR description and progress.md — do not claim the proof.**
 
-- [ ] **Step 4: Commit**
+- [✅] **Step 4: Commit**
 
 ```bash
 git add packages/db/scripts/seed.ts
@@ -1178,7 +1178,7 @@ git commit -m "refactor: shape seed inclusions, junction pairs, and frames via t
 
 **Files:** none (verification only).
 
-- [ ] **Step 1: The monorepo gate**
+- [✅] **Step 1: The monorepo gate**
 
 ```bash
 pnpm check   # lint + format + typecheck + test, all workspaces
@@ -1187,7 +1187,7 @@ pnpm build
 
 Expected: all green. Test totals: db **24 total (16 passed / 8 skipped without `TEST_DATABASE_URL`)**, api **32 / 7 files**, shared-types untouched. If the api count moved, an assertion was edited — find and revert it.
 
-- [ ] **Step 2: Zero-assertion-edit audit**
+- [✅] **Step 2: Zero-assertion-edit audit**
 
 ```bash
 git diff main...HEAD --stat -- 'apps/api/test/service-packages.test.ts' 'apps/api/test/appointments.test.ts' 'apps/api/test/branches.test.ts' 'apps/api/test/addon-services.test.ts'
@@ -1195,7 +1195,7 @@ git diff main...HEAD --stat -- 'apps/api/test/service-packages.test.ts' 'apps/ap
 
 Expected: **no output** — not a single existing test file changed. (The new `truncate.test.ts` is additive.)
 
-- [ ] **Step 3: Diff-shape audit (the spec's one-diff review story)**
+- [✅] **Step 3: Diff-shape audit (the spec's one-diff review story)**
 
 ```bash
 git diff main...HEAD -- packages/db/scripts/seed.ts | grep -cE "^-.*attireNames" || true
@@ -1204,7 +1204,7 @@ grep -rn "kind: 'framed_picture'" apps/api/test/helpers/fixtures.ts packages/db/
 
 Expected: the seeder diff removes all hand-shaped `attireNames` consumption; exactly **one** occurrence of `kind: 'framed_picture'` remains across both write adapters (inside each file's entries array) — the shape rules now live in `catalog-rows.ts` alone.
 
-- [ ] **Step 4: Confirm the branch state**
+- [✅] **Step 4: Confirm the branch state**
 
 ```bash
 git status --short        # expect clean tree
@@ -1220,7 +1220,7 @@ Expected: 4 commits (Task 1 builders, Task 2 truncate, Task 3 fixtures, Task 4 s
 **Files:**
 - Modify: `docs/progress.md`
 
-- [ ] **Step 1: Update docs/progress.md**
+- [✅] **Step 1: Update docs/progress.md**
 
 Add to **Known Gaps / Not Yet Done** (after the candidate-B landed bullet, matching the house style):
 
@@ -1244,7 +1244,7 @@ Update the `_Last updated:_` line at the top to:
 _Last updated: 2026-09-04 (catalog row-shaping module (candidate C) landed on feat/catalog-row-shaping-module; prior: read-stitch module (candidate B) landed; prior: intake deepening (candidate A) landed; prior: M1.5 exit gate verified.)_
 ```
 
-- [ ] **Step 2: Close the loop on issue #15**
+- [✅] **Step 2: Close the loop on issue #15**
 
 ```bash
 gh issue comment 15 --body "Implementation plan: docs/superpowers/plans/2026-09-04-catalog-row-shaping-module.md. Landed on feat/catalog-row-shaping-module — builders in packages/db/src/catalog-rows.ts (opt-in ./catalog-rows subpath), three consumers adopted in the same change (seeder, api fixtures, schema-derived truncate list). Proofs: 15 builder unit tests + TEST_DATABASE_URL-gated live insert probe; api integration suites 32/32 with zero assertion edits; db:seed re-run idempotent + db:verify-seed PASSED line-for-line against docs/catalog.md. pnpm check + pnpm build green."
@@ -1252,7 +1252,7 @@ gh issue comment 15 --body "Implementation plan: docs/superpowers/plans/2026-09-
 
 (Leave the issue open — the user closes it when the PR merges, matching the #13/#14 flow.)
 
-- [ ] **Step 3: Commit the ledger update**
+- [✅] **Step 3: Commit the ledger update**
 
 ```bash
 git add docs/progress.md
@@ -1264,7 +1264,7 @@ git commit -m "docs: record the catalog row-shaping module (candidate C) in the 
 - Last-updated line now leads with candidate C"
 ```
 
-- [ ] **Step 4: Final verification sweep**
+- [✅] **Step 4: Final verification sweep**
 
 ```bash
 pnpm check 2>&1 | tail -3
