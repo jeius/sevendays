@@ -46,3 +46,4 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
 
 export type { AppType, CreateApiClientOptions, RpcClient } from './client.js';
 export { ApiClientError } from './error.js';
+export { toLoopbackFetch } from './loopback.js';
