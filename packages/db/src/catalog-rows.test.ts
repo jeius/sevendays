@@ -262,6 +262,12 @@ describe('assertAllKnownAttires', () => {
 // (FK-safe deletes on name LIKE 'BuilderProbe%'), then inserts plain. That
 // keeps it re-runnable despite unique keys (attires.name,
 // service_packages.name, frames natural key).
+// Self-provisioning on a fresh database (CI service container): the db
+// package's vitest config has no globalSetup, so migrations are NOT applied
+// before tests here, and vitest orders files largest-first — this file can
+// run before migrate.test.ts. The probe therefore checks for the core table
+// and applies migrations itself (migrateDatabase is idempotent: drizzle's
+// migrations journal tracks what already ran).
 describe.runIf(process.env.TEST_DATABASE_URL)('live insert-compatibility', async () => {
   it('accepts builder output as drizzle insert values for all three tables', async () => {
     const {
@@ -274,6 +280,11 @@ describe.runIf(process.env.TEST_DATABASE_URL)('live insert-compatibility', async
     } = await import('./index.js');
     const db = createDbClient(process.env.TEST_DATABASE_URL as string);
     try {
+      const coreTable = await db.$client`select to_regclass('public.package_inclusions') as t`;
+      if (!coreTable[0]?.t) {
+        const { migrateDatabase } = await import('./migrate.js');
+        await migrateDatabase(process.env.TEST_DATABASE_URL as string);
+      }
       await db.execute(
         sql`DELETE FROM package_inclusion_attires WHERE inclusion_id IN (SELECT i.id FROM package_inclusions i JOIN service_packages p ON p.id = i.service_package_id WHERE p.name LIKE 'BuilderProbe%')`
       );
