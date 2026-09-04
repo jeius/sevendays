@@ -505,6 +505,14 @@ describe.runIf(process.env.TEST_DATABASE_URL)('live insert-compatibility', async
 });
 ```
 
+> **Amended during execution (2026-09-04, controller ruling on implementer finding):** drizzle's
+> `db.transaction` COMMITs on success — there is no rollback-on-success primitive — so the probe as written
+> above leaves `BuilderProbe%` rows behind and a second run dies on `attires_name_unique`. The landed probe
+> (see `packages/db/src/catalog-rows.test.ts`) drops the transaction and **pre-cleans** any committed probe rows
+> first (five FK-safe deletes on `name LIKE 'BuilderProbe%'`: junction → inclusions → frames →
+> service_packages → attires), then runs plain inserts. The snippet above is kept for the record; the landed
+> test file is authoritative.
+
 - [ ] **Step 2: Run tests to verify they fail**
 
 ```bash
