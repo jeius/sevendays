@@ -20,7 +20,7 @@ Integration tests run against **real Postgres**: the composed app (all routes mo
 ## Consequences
 
 - The compose volume is tests-only — no catalog seed ever lands in it.
-- Any new table must join the `truncateAll` list, or tests leak state between files.
+- Any new table must join the `truncateAll` list, or tests leak state between files. **(_Superseded 2026-09-04:_ candidate C (#19) made `apps/api/test/helpers/truncate.ts` derive the table list from the schema barrel via `is(v, PgTable)` + `getTableConfig`, so new tables are truncated automatically — this consequence now only applies if a table lives outside the default schema.)**
 - Suites get slower as they grow (real round-trips to Postgres); accepted at this size.
 - After a manifest edit (new devDependency, etc.), workers must run `pnpm install` or the test run breaks against stale deps — the lockfile-drift lesson from this run.
 

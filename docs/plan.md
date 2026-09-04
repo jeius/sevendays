@@ -51,7 +51,7 @@ The landing site's core feature per the PRD. Deliberately minimal on validation:
 
 Pre-flight — shared API client infrastructure (ADR-0006), built once for both frontends before the first real endpoint call. Spec: `docs/specs/2026-08-30-m2-preflight-api-client-spec.md` (GitHub issue #1).
 
-- [ ] `apps/api` restructure: chain route sub-apps, `export type AppType`, move `Env` to an explicit exported type (cross-package type imports can't see the ambient `worker-configuration.d.ts` global); adopt the "always `c.json({ error }, status)`, never bare `c.notFound()`" convention
+- [ ] `apps/api` restructure: chain route sub-apps, `export type AppType`, move `Env` to an explicit exported type (cross-package type imports can't see the ambient `worker-configuration.d.ts` global); adopt the "always `c.json({ error }, status)`, never bare `c.notFound()`" convention _(2026-09-04 audit note: most of this landed early via M1.4 + candidates A–D — sub-app chaining (`routes/v1.ts`), explicit exported `Env` (`src/env.ts`), and the JSON-error/`notFound` convention are all in; the remaining open piece is `export type AppType`, grep-verifiable at zero occurrences in `apps/api/src`. Tick when AppType lands.)_
 - [ ] `packages/api-client` (`@sevendays/api-client`): `createApiClient({ baseUrl, fetch? })` over Hono RPC (`hc<AppType>`, type-only devDep on `@sevendays/api`), Zod-parsed responses, typed `ApiClientError`; `apiErrorSchema` (`{ error, details? }`) added to `packages/types`
 - [ ] `API_URL` wired as server-side env in both apps (`.env.local` in dev, Workers vars in prod; no fallback — a missing env fails loudly)
 - [ ] Install `@tanstack/react-query` in `apps/landing` + `apps/admin` with SSR query integration (loader `ensureQueryData` + `useSuspenseQuery` patterns)
