@@ -84,7 +84,10 @@ _Last updated: 2026-09-04 (catalog row-shaping module (candidate C) landed on fe
   with zero assertion edits; `db:seed` re-run twice + `db:verify-seed` PASSED line-for-line against
   `docs/catalog.md` (rehearsal run on the compose db, proving user story 5 — shaping outside the seed script).
   15 builder unit tests + live insert-compatibility probe (TEST_DATABASE_URL-gated, pre-cleans its own probe rows
-  FK-safely — drizzle transactions commit on success, so pre-clean is the re-runnability mechanism). M2
+  FK-safely — drizzle transactions commit on success, so pre-clean is the re-runnability mechanism; also
+  self-provisions migrations via a to_regclass check + migrateDatabase, because the db package's vitest config has
+  no globalSetup and vitest runs files largest-first — CI's fresh container hit this (42P01) and any future gated
+  test touching migration-created tables must do the same). M2
   catalog-write routes (next) call the builders — shape parity with the seed by construction.
 - **Deferred minors from the candidate-B review (2026-09-02, triaged OK-TO-DEFER):** `groupChildren`'s lookup returns live internal arrays for existing keys — same aliasing semantics as the hand-rolled Maps it replaced (both call sites only `.map()`), but the docstring should state it when M3 adopts the module; missing-key calls allocate a fresh `[]` per call (correct — avoids shared-empty aliasing; revisit only if a hot all-miss path appears).
 - **Isolation caveat on the intake transaction (review ruling, 2026-09-02):** the module-internal transaction guarantees atomicity (all five statements or none), but at Postgres READ COMMITTED it does NOT fully close the deactivate-between-read-and-insert window — full closure needs `SELECT ... FOR UPDATE` on the referenced rows (or SERIALIZABLE). M3's Slot capacity check-then-insert MUST add the row locks when it joins this transaction (ADR-0005).
