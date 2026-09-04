@@ -992,7 +992,13 @@ Replace everything from `const [inclusionFramedPicture] = await db` (fixtures.ts
 
 What changed vs. the old block, and why each is safe:
 - **Picture-inclusion `description` values disappear** (`'Framed picture'`, `'2R print x4'`, `'2x2 print x5'`, `'2R print x2'` → canonical `null`): asserted nowhere (verified — only `addon-services.test.ts` asserts descriptions, all add-on rows). The privilege keeps its fixture-authored `'High Resolution soft copies'`.
-- **Junction pair order is identical to the old hand-written statements**: framed → [Filipiniana, Executive], print-2R → [Toga], print-2x2 → [Toga]; simple → [Toga]. The per-row statements preserve the created_at ordering the catalog-read test asserts (`['Filipiniana', 'Executive']`).
+- **Junction pair order matches the old hand-written statements for the combined package** (framed → [Filipiniana, Executive], print-2R → [Toga], print-2x2 → [Toga]) — the per-row statements preserve the created_at ordering the catalog-read test asserts (`['Filipiniana', 'Executive']`).
+  > **Amended during execution (2026-09-04, controller ruling on Task 3 review finding):** the simple package's
+  > `simple → [Toga]` pair is a **dataset delta, not preservation** — the old fixtures inserted exactly four
+  > junction rows and never linked the simple print. The delta is accepted: the old omission was a hand-rolled
+  > inconsistency (the combined prints carry attire contexts; the simple print did not), the builder output is
+  > canonical, and no assertion touches the simple package's attires. The commit message's "insertion sequence
+  > unchanged" claim is therefore overstated; this note and the SDD ledger are the record.
 - **`packageRetired` still gets no inclusions**; **`Uniform` stays insert-only** (the ids map carries it for future cases, exactly like the old code captured `attireUniform` without linking it).
 - The `const [x] = await ... .returning()` destructures follow the file's existing pattern (array destructuring is unaffected by `noUncheckedIndexedAccess`; direct indexed reads are the ones guarded above).
 
