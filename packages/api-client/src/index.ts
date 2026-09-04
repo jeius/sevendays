@@ -23,7 +23,16 @@ export interface ApiClient {
  */
 export function createApiClient(options: CreateApiClientOptions): ApiClient {
   if (!options || typeof options.baseUrl !== 'string' || options.baseUrl.trim() === '') {
-    throw new Error('createApiClient: baseUrl is required');
+    throw new Error('createApiClient: baseUrl is required (an absolute http(s) URL)');
+  }
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(options.baseUrl);
+  } catch {
+    throw new Error('createApiClient: baseUrl must be an absolute http(s) URL');
+  }
+  if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+    throw new Error('createApiClient: baseUrl must be an absolute http(s) URL');
   }
   const raw: RpcClient = hc<AppType>(options.baseUrl, { fetch: options.fetch });
   return {

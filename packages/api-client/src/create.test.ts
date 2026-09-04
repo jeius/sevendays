@@ -11,6 +11,14 @@ describe('createApiClient', () => {
     expect(() => createApiClient({ baseUrl: '   ' })).toThrow(/baseUrl/);
   });
 
+  it('throws when baseUrl has no scheme', () => {
+    expect(() => createApiClient({ baseUrl: 'api.example.com' })).toThrow(/baseUrl/);
+  });
+
+  it('throws when baseUrl uses a non-http(s) scheme', () => {
+    expect(() => createApiClient({ baseUrl: 'ftp://api.example.com' })).toThrow(/baseUrl/);
+  });
+
   it('builds a client whose raw surface is the RPC client', () => {
     const client = createApiClient({ baseUrl: 'http://localhost:4949/' });
     expect(typeof client.raw.api.v1.branches.$get).toBe('function');

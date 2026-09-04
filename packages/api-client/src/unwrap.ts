@@ -10,12 +10,17 @@ import { ApiClientError } from './error.js';
  * payload; a server drifting from the shared schema fails here.
  */
 export async function unwrap<T>(res: Response, schema: ZodType<T>): Promise<T> {
-  const body: unknown = await res.json();
-
   if (!res.ok) {
+    let body: unknown;
+    try {
+      body = await res.json();
+    } catch {
+      throw new ApiClientError(res.status, { error: 'Non-JSON error response' });
+    }
     const parsed = apiErrorSchema.parse(body);
     throw new ApiClientError(res.status, parsed);
   }
 
+  const body: unknown = await res.json();
   return schema.parse(body);
 }

@@ -40,4 +40,23 @@ describe('unwrap', () => {
       ZodError
     );
   });
+
+  it('throws ApiClientError on a non-2xx non-JSON (HTML) body', async () => {
+    const res = new Response('<html><body>502 Bad Gateway</body></html>', {
+      status: 502,
+      headers: { 'content-type': 'text/html' },
+    });
+    const err = await unwrap(res, schema).catch((e) => e);
+    expect(err).toBeInstanceOf(ApiClientError);
+    expect((err as ApiClientError).status).toBe(502);
+    expect((err as ApiClientError).details).toEqual({ error: 'Non-JSON error response' });
+  });
+
+  it('throws ApiClientError on a non-2xx empty body', async () => {
+    const res = new Response('', { status: 504 });
+    const err = await unwrap(res, schema).catch((e) => e);
+    expect(err).toBeInstanceOf(ApiClientError);
+    expect((err as ApiClientError).status).toBe(504);
+    expect((err as ApiClientError).details).toEqual({ error: 'Non-JSON error response' });
+  });
 });
