@@ -22,7 +22,7 @@ Three independently deployed apps, all on **Cloudflare Workers** (`landing` and 
                                     │ Drizzle (packages/db) — the only direct DB client
                                     ▼
                         ┌───────────────────────┐
-                        │  PostgreSQL           │  Supabase (or equivalent) — not yet provisioned
+                        │  PostgreSQL           │  Supabase — provisioned, migrations applied, catalog seeded (M1.3, 2026-08-31)
                         └───────────────────────┘
 
    Cloudflare R2 (planned) — package/portfolio images; uploads flow through
@@ -36,7 +36,7 @@ Three independently deployed apps, all on **Cloudflare Workers** (`landing` and 
 
 ## Module Boundaries
 
-- **`apps/api`** owns all writes to Postgres and all business logic (appointment status transitions, package activation rules, etc). Routes are thin; logic lives in per-domain modules (to be added as `apps/api/src/services/*` as the API grows past the current stub routes).
+- **`apps/api`** owns all writes to Postgres and all business logic (appointment status transitions, package activation rules, etc). Routes are thin; logic lives in the per-domain modules under `apps/api/src/services/*` (real routes since M1.4 — branches, service-packages, addon-services, appointments, all against live Postgres via `packages/db`).
 - **`packages/db`** owns the Drizzle schema and exports a `createDbClient(connectionString)` factory. No app should import `drizzle-orm` directly — always go through this package so schema changes propagate everywhere.
 - **`packages/types`** owns Zod schemas and inferred TypeScript types for every domain object (`Branch`, `ServicePackage`, `Appointment`). Both the API (server-side validation) and the frontends (form validation) import from here so a schema change only happens in one place.
 - **`packages/api-client`** owns how the frontends call `apps/api`: a thin Hono RPC client (`createApiClient`) whose types are inferred from the API's exported `AppType` (type-only dependency — no runtime coupling with the app), Zod-parses every response against `packages/types` schemas, and throws a typed `ApiClientError` on non-2xx. Neither frontend hand-rolls fetch calls to the API (ADR-0006).
@@ -61,7 +61,7 @@ Package cover images and portfolio photos are uploaded through `apps/api` (which
 
 ## Observability
 
-- **Logging:** `apps/api` uses Loglayer + Pino for structured logs (not yet wired into the current stub — see `docs/progress.md`).
+- **Logging:** `apps/api` uses Loglayer + Pino for structured logs (planned for M6 — the API currently uses Hono's built-in `logger()` middleware as a placeholder; see `docs/progress.md`).
 - **Errors:** Sentry is scaffolded into all three apps via the TanStack CLI's `sentry` add-on (`landing`, `admin`) — `apps/api` will need Sentry added separately since it isn't a TanStack Start app.
 - **Analytics:** PostHog is scaffolded into `landing` and `admin` via the CLI add-on. The booking funnel (view package → start booking → complete booking) is the primary metric to instrument once the booking flow is built.
 
