@@ -1,21 +1,30 @@
-import { sql } from 'drizzle-orm';
+// biome-ignore lint/performance/noNamespaceImport: the truncate list must be derived from whatever the schema barrel exports, not hand-listed; tree-shaking is irrelevant in a test helper
+import * as schema from '@sevendays/db';
+import { is, sql } from 'drizzle-orm';
+import { getTableConfig, PgTable } from 'drizzle-orm/pg-core';
 import type { TestDb } from './db.js';
 
-// Every public table in packages/db/src/schema (10 after 0000+0001). A new
-// table added by a future migration must be added here too.
-const TABLES = [
-  'appointment_addon_services',
-  'appointments',
-  'package_inclusion_attires',
-  'package_inclusions',
-  'frames',
-  'attires',
-  'print_sizes',
-  'service_packages',
-  'addon_services',
-  'branches',
-] as const;
+/**
+ * The truncate list is derived, not hand-kept (candidate C spec): every
+ * public table exported by packages/db's schema barrel — `is(v, PgTable)`
+ * and default-schema only. A new table added by a future migration is
+ * truncated automatically once the schema barrel exports it; the mirror
+ * drift the integration-test ADR (0008) warned about is structurally
+ * closed.
+ */
+export function publicTableNames(): string[] {
+  const names: string[] = [];
+  for (const value of Object.values(schema)) {
+    if (is(value, PgTable)) {
+      const config = getTableConfig(value);
+      if (config.schema === undefined) {
+        names.push(config.name);
+      }
+    }
+  }
+  return names.sort();
+}
 
 export async function truncateAll(db: TestDb): Promise<void> {
-  await db.execute(sql.raw(`TRUNCATE ${TABLES.join(', ')} RESTART IDENTITY CASCADE`));
+  await db.execute(sql.raw(`TRUNCATE ${publicTableNames().join(', ')} RESTART IDENTITY CASCADE`));
 }
