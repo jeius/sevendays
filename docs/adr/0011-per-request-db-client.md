@@ -20,5 +20,12 @@ The API memoized its postgres.js client per isolate (`services/db.ts`, "safe to 
 - No cross-request I/O scoping failures.
 - Connection setup cost per request is acceptable at current volume — revisit Hyperdrive if API request volume (not just booking volume) demands it.
 - Documented in `docs/progress.md` Known Gaps.
+- **Relocated into the acquisition middleware (candidate D, 2026-09-04):** the
+  per-request `createApiDb` call now lives in one `v1.use('*')` middleware
+  (set into Hono context as `db`) instead of being repeated inside each route
+  handler. Same per-request semantics — one client per request, request-scoped
+  sockets reclaimed at request end — only the call site moved. Routes read
+  `c.get('db')`; a missing `DATABASE_URL` throws in the middleware and is
+  caught by the root `onError` as the uniform 500.
 
 ---
