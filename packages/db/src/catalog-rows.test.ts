@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 import {
   assertAllKnownAttires,
@@ -255,9 +256,12 @@ describe('assertAllKnownAttires', () => {
 // configured) — proves the builders' values insert cleanly against the real
 // schema, i.e. the shapes match the tables, not just the type signatures.
 // package_inclusions.service_package_id is a NOT-NULL FK, so the probe
-// inserts a real parent service package first and rolls the whole thing
-// back in a transaction: no leftover rows, re-runnable despite unique keys
-// (attires.name, service_packages.name, frames natural key).
+// inserts a real parent service package first. Drizzle's transaction COMMITs
+// on success — there is no rollback-on-success primitive — so instead of a
+// transaction the probe pre-cleans any rows a prior committed run left behind
+// (FK-safe deletes on name LIKE 'BuilderProbe%'), then inserts plain. That
+// keeps it re-runnable despite unique keys (attires.name,
+// service_packages.name, frames natural key).
 describe.runIf(process.env.TEST_DATABASE_URL)('live insert-compatibility', async () => {
   it('accepts builder output as drizzle insert values for all three tables', async () => {
     const {
@@ -270,69 +274,79 @@ describe.runIf(process.env.TEST_DATABASE_URL)('live insert-compatibility', async
     } = await import('./index.js');
     const db = createDbClient(process.env.TEST_DATABASE_URL as string);
     try {
-      await db.transaction(async (tx) => {
-        const [attireRow] = await tx
-          .insert(attires)
-          .values({ name: 'BuilderProbe' })
-          .returning({ id: attires.id });
-        const probeAttireId = attireRow?.id;
-        expect(probeAttireId).toBeDefined();
-        if (!probeAttireId) throw new Error('probe: attire insert returned no id');
+      await db.execute(
+        sql`DELETE FROM package_inclusion_attires WHERE inclusion_id IN (SELECT i.id FROM package_inclusions i JOIN service_packages p ON p.id = i.service_package_id WHERE p.name LIKE 'BuilderProbe%')`
+      );
+      await db.execute(
+        sql`DELETE FROM package_inclusions WHERE service_package_id IN (SELECT id FROM service_packages WHERE name LIKE 'BuilderProbe%')`
+      );
+      await db.execute(
+        sql`DELETE FROM frames WHERE service_package_id IN (SELECT id FROM service_packages WHERE name LIKE 'BuilderProbe%')`
+      );
+      await db.execute(sql`DELETE FROM service_packages WHERE name LIKE 'BuilderProbe%'`);
+      await db.execute(sql`DELETE FROM attires WHERE name LIKE 'BuilderProbe%'`);
 
-        const [pkgRow] = await tx
-          .insert(servicePackages)
-          .values({
-            name: 'BuilderProbe Package',
-            description: 'probe',
-            priceCents: 1,
-            isActive: false,
-          })
-          .returning({ id: servicePackages.id });
-        const probePkgId = pkgRow?.id;
-        expect(probePkgId).toBeDefined();
-        if (!probePkgId) throw new Error('probe: package insert returned no id');
+      const [attireRow] = await db
+        .insert(attires)
+        .values({ name: 'BuilderProbe' })
+        .returning({ id: attires.id });
+      const probeAttireId = attireRow?.id;
+      expect(probeAttireId).toBeDefined();
+      if (!probeAttireId) throw new Error('probe: attire insert returned no id');
 
-        const [frameRow] = await tx
-          .insert(frames)
-          .values(buildFrameRowValues({ servicePackageId: probePkgId, frameNumbers: [1] }))
-          .returning({ id: frames.id });
-        const probeFrameId = frameRow?.id;
-        expect(probeFrameId).toBeDefined();
-        if (!probeFrameId) throw new Error('probe: frame insert returned no id');
+      const [pkgRow] = await db
+        .insert(servicePackages)
+        .values({
+          name: 'BuilderProbe Package',
+          description: 'probe',
+          priceCents: 1,
+          isActive: false,
+        })
+        .returning({ id: servicePackages.id });
+      const probePkgId = pkgRow?.id;
+      expect(probePkgId).toBeDefined();
+      if (!probePkgId) throw new Error('probe: package insert returned no id');
 
-        const inclusionValues = buildInclusionRowValues({
-          servicePackageId: probePkgId,
-          entries: [
-            { kind: 'print', quantity: 1, printSizeCode: null, attireNames: [] },
-            {
-              kind: 'framed_picture',
-              quantity: 1,
-              printSizeCode: null,
-              attireNames: [],
-              frameId: probeFrameId,
-            },
-          ],
-          printSizeId: new Map(),
-        });
-        const inserted = await tx
-          .insert(packageInclusions)
-          .values(inclusionValues)
-          .returning({ id: packageInclusions.id, kind: packageInclusions.kind });
-        expect(inserted).toHaveLength(2);
+      const [frameRow] = await db
+        .insert(frames)
+        .values(buildFrameRowValues({ servicePackageId: probePkgId, frameNumbers: [1] }))
+        .returning({ id: frames.id });
+      const probeFrameId = frameRow?.id;
+      expect(probeFrameId).toBeDefined();
+      if (!probeFrameId) throw new Error('probe: frame insert returned no id');
 
-        const pairs = buildJunctionPairs({
-          inclusionIds: inserted.map((r) => r.id),
-          entries: [
-            { kind: 'print', quantity: 1, printSizeCode: null, attireNames: ['BuilderProbe'] },
-            { kind: 'privilege', description: 'probe', attireNames: [] },
-          ],
-          attireId: new Map([['BuilderProbe', probeAttireId]]),
-        });
-        expect(pairs).toHaveLength(1);
-        await tx.insert(packageInclusionAttires).values(pairs);
-        // No assert needed on the insert: it either succeeds or throws the
-        // test red. Transaction rollback restores the pre-probe state.
+      const inclusionValues = buildInclusionRowValues({
+        servicePackageId: probePkgId,
+        entries: [
+          { kind: 'print', quantity: 1, printSizeCode: null, attireNames: [] },
+          {
+            kind: 'framed_picture',
+            quantity: 1,
+            printSizeCode: null,
+            attireNames: [],
+            frameId: probeFrameId,
+          },
+        ],
+        printSizeId: new Map(),
       });
+      const inserted = await db
+        .insert(packageInclusions)
+        .values(inclusionValues)
+        .returning({ id: packageInclusions.id, kind: packageInclusions.kind });
+      expect(inserted).toHaveLength(2);
+
+      const pairs = buildJunctionPairs({
+        inclusionIds: inserted.map((r) => r.id),
+        entries: [
+          { kind: 'print', quantity: 1, printSizeCode: null, attireNames: ['BuilderProbe'] },
+          { kind: 'privilege', description: 'probe', attireNames: [] },
+        ],
+        attireId: new Map([['BuilderProbe', probeAttireId]]),
+      });
+      expect(pairs).toHaveLength(1);
+      await db.insert(packageInclusionAttires).values(pairs);
+      // No assert needed on the insert: it either succeeds or throws the
+      // test red.
     } finally {
       await db.$client.end();
     }
