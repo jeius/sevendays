@@ -1,3 +1,8 @@
+import {
+  buildInclusionRowValues,
+  buildJunctionPairs,
+  type InclusionEntry,
+} from '@sevendays/db/catalog-rows';
 import type { TestDb } from './db.js';
 
 export type FixtureIds = {
@@ -148,73 +153,99 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     .values({ servicePackageId: packageSimple.id, frameNumber: 1 })
     .returning({ id: frames.id });
 
-  const [inclusionFramedPicture] = await db
-    .insert(packageInclusions)
-    .values({
-      servicePackageId: packageCombined.id,
+  // Inclusion + junction shaping goes through the db builders (candidate C):
+  // one source for per-Kind fields and attire decomposition. Ids are still
+  // captured per row — the stitch read orders junction rows by created_at,
+  // and autocommit gives each insert its own timestamp.
+  const printSizeIdMap = new Map([
+    ['2R', printSize2R.id],
+    ['2x2', printSize2x2.id],
+    ['11x14', printSize11x14.id],
+  ]);
+  const attireIdMap = new Map([
+    ['Toga', attireToga.id],
+    ['Filipiniana', attireFilipiniana.id],
+    ['Executive', attireExecutive.id],
+    ['Uniform', attireUniform.id],
+  ]);
+
+  const combinedEntries: InclusionEntry[] = [
+    {
       kind: 'framed_picture',
       quantity: 1,
-      printSizeId: printSize11x14.id,
+      printSizeCode: '11x14',
+      attireNames: ['Filipiniana', 'Executive'],
       frameId: frameCombined.id,
-      description: 'Framed picture',
-    })
+    },
+    { kind: 'print', quantity: 4, printSizeCode: '2R', attireNames: ['Toga'] },
+    { kind: 'print', quantity: 5, printSizeCode: '2x2', attireNames: ['Toga'] },
+    { kind: 'privilege', description: 'High Resolution soft copies', attireNames: [] },
+  ];
+  const combinedValues = buildInclusionRowValues({
+    servicePackageId: packageCombined.id,
+    entries: combinedEntries,
+    printSizeId: printSizeIdMap,
+  });
+
+  // Guard the indexed reads (noUncheckedIndexedAccess); the per-row inserts
+  // keep the original fixture sequence.
+  const [framedRow, print2RRow, print2x2Row, privilegeRow] = combinedValues;
+  if (!framedRow || !print2RRow || !print2x2Row || !privilegeRow) {
+    throw new Error('fixtures: builder returned fewer rows than entries');
+  }
+
+  const [inclusionFramedPicture] = await db
+    .insert(packageInclusions)
+    .values(framedRow)
     .returning({ id: packageInclusions.id });
   const [inclusionPrint2R] = await db
     .insert(packageInclusions)
-    .values({
-      servicePackageId: packageCombined.id,
-      kind: 'print',
-      quantity: 4,
-      printSizeId: printSize2R.id,
-      description: '2R print x4',
-    })
+    .values(print2RRow)
     .returning({ id: packageInclusions.id });
   const [inclusionPrint2x2] = await db
     .insert(packageInclusions)
-    .values({
-      servicePackageId: packageCombined.id,
-      kind: 'print',
-      quantity: 5,
-      printSizeId: printSize2x2.id,
-      description: '2x2 print x5',
-    })
+    .values(print2x2Row)
     .returning({ id: packageInclusions.id });
-  await db.insert(packageInclusions).values({
-    servicePackageId: packageCombined.id,
-    kind: 'privilege',
-    description: 'High Resolution soft copies',
-  });
-  await db.insert(packageInclusions).values({
-    servicePackageId: packageSimple.id,
-    kind: 'print',
-    quantity: 2,
-    printSizeId: printSize2R.id,
-    description: '2R print x2',
-  });
+  await db.insert(packageInclusions).values(privilegeRow);
 
-  // Junction rows inserted after inclusions, resolving attire ids by captured
-  // .returning ids (split statements per row: deterministic created_at for
-  // the stitch query's ORDER BY — autocommit gives each insert its own
-  // timestamp).
+  const simpleEntries: InclusionEntry[] = [
+    { kind: 'print', quantity: 2, printSizeCode: '2R', attireNames: ['Toga'] },
+  ];
+  const [simpleRow] = buildInclusionRowValues({
+    servicePackageId: packageSimple.id,
+    entries: simpleEntries,
+    printSizeId: printSizeIdMap,
+  });
+  if (!simpleRow) throw new Error('fixtures: builder returned no simple-package row');
+  const [simplePrintRow] = await db
+    .insert(packageInclusions)
+    .values(simpleRow)
+    .returning({ id: packageInclusions.id });
+
   // One row per statement (not one batch): the junction has no position
   // column, so render order falls back to insertion order via created_at —
   // rows written in a single INSERT share now() and would tie on an
   // (id-ordered) coin flip (Task 4 finding). Distinct statements give each
-  // row a distinct timestamp, preserving catalog attire order deterministically.
-  await db.insert(packageInclusionAttires).values({
-    inclusionId: inclusionFramedPicture.id,
-    attireId: attireFilipiniana.id,
+  // row a distinct timestamp, preserving catalog attire order
+  // deterministically. The builder owns the pair order; these statements
+  // preserve it.
+  const [framedEntry, print2REntry, print2x2Entry] = combinedEntries;
+  const combinedPairs = buildJunctionPairs({
+    inclusionIds: [inclusionFramedPicture.id, inclusionPrint2R.id, inclusionPrint2x2.id],
+    entries: [framedEntry, print2REntry, print2x2Entry],
+    attireId: attireIdMap,
   });
-  await db.insert(packageInclusionAttires).values({
-    inclusionId: inclusionFramedPicture.id,
-    attireId: attireExecutive.id,
+  for (const pair of combinedPairs) {
+    await db.insert(packageInclusionAttires).values(pair);
+  }
+  const simplePairs = buildJunctionPairs({
+    inclusionIds: [simplePrintRow.id],
+    entries: simpleEntries,
+    attireId: attireIdMap,
   });
-  await db
-    .insert(packageInclusionAttires)
-    .values({ inclusionId: inclusionPrint2R.id, attireId: attireToga.id });
-  await db
-    .insert(packageInclusionAttires)
-    .values({ inclusionId: inclusionPrint2x2.id, attireId: attireToga.id });
+  for (const pair of simplePairs) {
+    await db.insert(packageInclusionAttires).values(pair);
+  }
 
   return {
     branchA: branchA.id,

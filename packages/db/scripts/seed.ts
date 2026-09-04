@@ -6,6 +6,16 @@
 import process from 'node:process';
 import { eq } from 'drizzle-orm';
 import {
+  assertAllKnownAttires,
+  buildFrameRowValues,
+  buildInclusionRowValues,
+  buildJunctionPairs,
+  type FrameRowValues,
+  type InclusionEntry,
+  type PictureEntry,
+  type PrivilegeEntry,
+} from '../src/catalog-rows.js';
+import {
   addonServices,
   attires,
   branches,
@@ -104,7 +114,12 @@ try {
       for (const fp of pkg.framedPictures) {
         const [frameRow] = await tx
           .insert(frames)
-          .values({ servicePackageId: row.id, frameNumber: fp.frameNumber })
+          .values(
+            ...(buildFrameRowValues({
+              servicePackageId: row.id,
+              frameNumbers: [fp.frameNumber],
+            }) as [FrameRowValues])
+          )
           .onConflictDoUpdate({
             target: [frames.servicePackageId, frames.frameNumber],
             set: { frameNumber: fp.frameNumber },
@@ -120,66 +135,54 @@ try {
       // rows cascade-delete with their inclusions).
       await tx.delete(packageInclusions).where(eqPackageInclusions(row.id));
 
-      const framedValues = pkg.framedPictures.map((f) => ({
+      // Entries in the catalog's own order: framed pictures, then prints,
+      // then the universal privileges. The builders shape rows and junction
+      // pairs; the returning-order cursor pairing below stays valid because
+      // the values array order matches the returning order.
+      const entries: InclusionEntry[] = [
+        ...pkg.framedPictures.map(
+          (f, _i): PictureEntry => ({
+            kind: 'framed_picture',
+            quantity: 1,
+            printSizeCode: f.printSizeCode,
+            attireNames: [...f.attireNames],
+            frameId: frameId.get(f.frameNumber) ?? null,
+          })
+        ),
+        ...pkg.prints.map(
+          (p): PictureEntry => ({
+            kind: 'print',
+            quantity: p.quantity,
+            printSizeCode: p.printSizeCode,
+            attireNames: [...p.attireNames],
+          })
+        ),
+        ...privilegeSeeds.map(
+          (p): PrivilegeEntry => ({
+            kind: 'privilege',
+            description: p.description,
+            attireNames: [...p.attireNames],
+          })
+        ),
+      ];
+      assertAllKnownAttires({ entries, attireId: attireIdMap });
+
+      const inclusionValues = buildInclusionRowValues({
         servicePackageId: row.id,
-        kind: 'framed_picture' as const,
-        quantity: 1,
-        printSizeId: printSizeId.get(f.printSizeCode) ?? null,
-        frameId: frameId.get(f.frameNumber) ?? null,
-        description: null,
-      }));
-      const printValues = pkg.prints.map((p) => ({
-        servicePackageId: row.id,
-        kind: 'print' as const,
-        quantity: p.quantity,
-        printSizeId: printSizeId.get(p.printSizeCode) ?? null,
-        frameId: null,
-        description: null,
-      }));
-      const privilegeValues = privilegeSeeds.map((p) => ({
-        servicePackageId: row.id,
-        kind: 'privilege' as const,
-        quantity: null,
-        printSizeId: null,
-        frameId: null,
-        description: p.description,
-      }));
+        entries,
+        printSizeId: printSizeId,
+      });
 
       const inclusionRows = await tx
         .insert(packageInclusions)
-        .values([...framedValues, ...printValues, ...privilegeValues])
+        .values(inclusionValues)
         .returning({ id: packageInclusions.id, kind: packageInclusions.kind });
 
-      // Junction rows — one per (inclusion, attire) in catalog order. The
-      // values array order matches the returning order, so a cursor walk
-      // pairs each inclusion with its catalog source.
-      const junctionValues: { inclusionId: string; attireId: string }[] = [];
-      const pictureSources = [...pkg.framedPictures, ...pkg.prints];
-      let pictureCursor = 0;
-      let privilegeCursor = 0;
-      for (const inclusion of inclusionRows) {
-        if (inclusion.kind === 'privilege') {
-          const source = privilegeSeeds[privilegeCursor];
-          privilegeCursor += 1;
-          if (!source)
-            throw new Error(`seed: more privilege inclusions than sources for ${pkg.name}`);
-          for (const name of source.attireNames) {
-            const attireId = attireIdMap.get(name);
-            if (!attireId) throw new Error(`seed: unknown attire ${name} for ${pkg.name}`);
-            junctionValues.push({ inclusionId: inclusion.id, attireId });
-          }
-        } else {
-          const source = pictureSources[pictureCursor];
-          pictureCursor += 1;
-          if (!source)
-            throw new Error(`seed: more picture inclusions than sources for ${pkg.name}`);
-          for (const name of source.attireNames) {
-            const attireId = attireIdMap.get(name);
-            if (!attireId) throw new Error(`seed: unknown attire ${name} for ${pkg.name}`);
-            junctionValues.push({ inclusionId: inclusion.id, attireId });
-          }
-        }
-      }
+      const junctionValues = buildJunctionPairs({
+        inclusionIds: inclusionRows.map((r) => r.id),
+        entries,
+        attireId: attireIdMap,
+      });
       if (junctionValues.length > 0) {
         await tx.insert(packageInclusionAttires).values(junctionValues);
       }
