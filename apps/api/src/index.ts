@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import type { Env } from './env.js';
 import { v1 } from './routes/v1.js';
 import { internalError } from './services/errors.js';
 
@@ -35,3 +36,8 @@ app.get('/health', (c) => c.json({ status: 'ok' }));
 app.route('/api/v1', v1);
 
 export default app;
+
+// Hono RPC type-sharing (ADR-0006): the client package type-imports this —
+// a route change here re-typechecks the client, which is the drift-kill
+// working as intended. Types-only: erased at runtime.
+export type AppType = typeof app;
