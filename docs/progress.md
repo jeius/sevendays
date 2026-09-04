@@ -1,6 +1,6 @@
 # Progress
 
-_Last updated: 2026-09-02 (read-stitch module (candidate B) landed on feat/extract-read-stitch-module; prior: intake deepening (candidate A) landed; prior: M1.5 exit gate verified; close-out landing on feat/m1.5-exit-verification. Prior: M1.4 real routes + integration tests merged via #11, 894d1c1; M1.3 provision/migrate/seed landed on feat/m1.3-provision-migrate-seed; M1.2 catalog schema landed on feat/m1.2-catalog-schema; 2026-08-30 toolchain consolidation.)_
+_Last updated: 2026-09-04 (catalog row-shaping module (candidate C) landed on feat/catalog-row-shaping-module; prior: read-stitch module (candidate B) landed; prior: intake deepening (candidate A) landed; prior: M1.5 exit gate verified. Prior: M1.4 real routes + integration tests merged via #11, 894d1c1; M1.3 provision/migrate/seed landed on feat/m1.3-provision-migrate-seed; M1.2 catalog schema landed on feat/m1.2-catalog-schema; 2026-08-30 toolchain consolidation.)_
 
 ## Current Milestone: 1 — Real Data Layer (complete — exit criteria verified live 2026-09-02; next up: Milestone 2 pre-flight, issue #1)
 
@@ -72,6 +72,23 @@ _Last updated: 2026-09-02 (read-stitch module (candidate B) landed on feat/extra
 - **log-before-500: appointments route done (2026-09-02), generalization open (candidate D):** both `/api/v1/appointments` handlers log the caught error (`console.error` stopgap; M6 = Loglayer + Pino) before the uniform 500 — the blocker-#2 class of failure can no longer be silent on the booking path. The Branches/Service Packages/Add-on Services routes still swallow errors; the intake spec hands generalization to candidate D (one acquisition/error seam via middleware).
 - **Appointment intake write is transactional (candidate A landed, 2026-09-02):** `createAppointment` resolves references and writes the Appointment + add-on junction rows inside one module-internal transaction (drizzle `db.transaction` → postgres.js `sql.begin`). Confirmed both ways per the spec's gate: compose rollback/commit proofs in `packages/db/src/client-transaction.test.ts` (Seam 2) and the live one-shot probe over the transaction-mode pooler, `packages/db/scripts/probe-pooler-transaction.mjs` (Seam 3, PASS — ADR-0007 amendment). **Insert-txn item closed.** Rejection wording moved into the module (failure variant carries `message`; route forwards verbatim); the 13-column projection is one constant. M3's capacity check-then-insert can join this transaction.
 - **Read-stitch module extracted (candidate B landed, 2026-09-02):** `apps/api/src/services/group-children.ts` owns row-assembly for stitched reads — `groupChildren(children, childKey)` returns a lookup preserving the children's incoming order and defaulting missing keys to `[]` (never undefined). Both call sites adopted in the same change: the Service Package catalog read's three grouping Maps (inclusions, attires-by-inclusion, frames-by-package) and the Appointment list read's add-on Map; groups hold raw rows and projection happens at the attach pass (shape-building stays in the service). SQL and ORDER BYs untouched; wire payloads byte-identical (integration suites passed with zero assertion edits; reviewer-proven via mechanical field-list diffs). 7 pure unit tests pin the interface contract.
+- **Catalog row-shaping module extracted (candidate C landed, 2026-09-04):** `packages/db/src/catalog-rows.ts`
+  owns catalog row shapes — `buildInclusionRowValues` (per-Kind fields), `buildJunctionPairs` (combined-attire
+  decomposition in catalog order, unknown names throw), `buildFrameRowValues`, `assertAllKnownAttires`; opt-in
+  subpath `@sevendays/db/catalog-rows` (main entry still schema + client only). Three consumers adopted in the
+  same change: the seeder (upsert/rebuild flow intact), the api fixtures (minimal synthetic dataset intact; per-row
+  junction statements preserve the created_at render-order invariant; NOTE the builder-shaped fixtures ADD a
+  simple→Toga junction pair the old hand-rolled fixtures never wrote — accepted delta, unasserted anywhere), and
+  the truncate helper (table list now derived from the schema barrel via `is(v, PgTable)` + `getTableConfig`,
+  default-schema only — a future table is truncated automatically). Behavior preserved: integration suites 32/32
+  with zero assertion edits; `db:seed` re-run twice + `db:verify-seed` PASSED line-for-line against
+  `docs/catalog.md` (rehearsal run on the compose db, proving user story 5 — shaping outside the seed script).
+  15 builder unit tests + live insert-compatibility probe (TEST_DATABASE_URL-gated, pre-cleans its own probe rows
+  FK-safely — drizzle transactions commit on success, so pre-clean is the re-runnability mechanism; also
+  self-provisions migrations via a to_regclass check + migrateDatabase, because the db package's vitest config has
+  no globalSetup and vitest runs files largest-first — CI's fresh container hit this (42P01) and any future gated
+  test touching migration-created tables must do the same). M2
+  catalog-write routes (next) call the builders — shape parity with the seed by construction.
 - **Deferred minors from the candidate-B review (2026-09-02, triaged OK-TO-DEFER):** `groupChildren`'s lookup returns live internal arrays for existing keys — same aliasing semantics as the hand-rolled Maps it replaced (both call sites only `.map()`), but the docstring should state it when M3 adopts the module; missing-key calls allocate a fresh `[]` per call (correct — avoids shared-empty aliasing; revisit only if a hot all-miss path appears).
 - **Isolation caveat on the intake transaction (review ruling, 2026-09-02):** the module-internal transaction guarantees atomicity (all five statements or none), but at Postgres READ COMMITTED it does NOT fully close the deactivate-between-read-and-insert window — full closure needs `SELECT ... FOR UPDATE` on the referenced rows (or SERIALIZABLE). M3's Slot capacity check-then-insert MUST add the row locks when it joins this transaction (ADR-0005).
 - **Per-request db client cost is fine at current volume** — one postgres.js client per request (the `369d4c8` fix) is acceptable now; revisit Hyperdrive only if M2 booking volume warrants it.
