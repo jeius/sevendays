@@ -4,7 +4,8 @@ import type { Env } from '../env.js';
 
 // The API's request context (ADR-0011 + candidate D): the per-request db
 // handle lives in Hono variables, set once by the acquisition middleware on
-// /api/v1 and read by every route handler. Bindings stay the ambient Env.
+// /api/v1 and read by every route handler. Bindings are the Zod-validated
+// Env from src/env.ts.
 export type ApiEnv = {
   Bindings: Env;
   Variables: { db: Database };
