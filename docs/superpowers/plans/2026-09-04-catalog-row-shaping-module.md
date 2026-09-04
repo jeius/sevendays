@@ -572,6 +572,7 @@ export type PrintSizeIdLookup = ReadonlyMap<string, string>;
 
 export type InclusionRowValues = typeof packageInclusions.$inferInsert;
 export type JunctionPairValues = typeof packageInclusionAttires.$inferInsert;
+export type FrameRowValues = typeof frames.$inferInsert;
 
 export function assertAllKnownAttires(input: {
   entries: readonly InclusionEntry[];
@@ -655,7 +656,7 @@ export function buildJunctionPairs(input: {
 export function buildFrameRowValues(input: {
   servicePackageId: string;
   frameNumbers: readonly number[];
-}): (typeof frames.$inferInsert)[] {
+}): FrameRowValues[] {
   return input.frameNumbers.map((frameNumber) => ({
     servicePackageId: input.servicePackageId,
     frameNumber,
