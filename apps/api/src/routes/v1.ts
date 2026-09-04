@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { parseEnv } from '../env.js';
 import { type ApiEnv, createApiDb } from '../services/db.js';
 import { addonServices } from './addon-services.js';
 import { appointments } from './appointments.js';
@@ -12,7 +13,7 @@ import { servicePackages } from './service-packages.js';
 // of a per-route comment. MUST be registered before the route mounts so it
 // composes with every handler.
 export const acquireDb = async (c: import('hono').Context<ApiEnv>, next: () => Promise<void>) => {
-  c.set('db', createApiDb(c.env.DATABASE_URL));
+  c.set('db', createApiDb(parseEnv(c.env).DATABASE_URL));
   await next();
 };
 
