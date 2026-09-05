@@ -113,7 +113,10 @@ _Last updated: 2026-09-04 (docs-alignment pass after the repo-docs audit — arc
   `process.env` reaches server functions in both shapes (CF vite plugin reads
   `.env.local` in dev; wrangler's dev-vars loader locally; Workers var in
   prod). `apps/landing/.env.example` added. Zero `API_URL`/origin leakage into
-  served HTML and `dist/client` (grep-verified).
+  served HTML and `dist/client` (grep-verified). The router.tsx 'static' comment
+  was reworded to credit staleTime + refetchOnReconnect:false at #25 close-out
+  (refetchOnMount has no 'static' value in query-core 5.102.8); landing
+  `.env.example` gained a trailing newline.
 
 - **M2 pre-flight admin wiring (#24):** apps/admin speaks to the API end to
   end (browser → own server functions → API through `@sevendays/api-client`),
@@ -129,7 +132,11 @@ _Last updated: 2026-09-04 (docs-alignment pass after the repo-docs audit — arc
   `process.env` reaches server functions in both shapes (CF vite plugin reads
   `.env.local` in dev; wrangler's dev-vars loader locally; Workers var in
   prod). `apps/admin/.env.example` added. Zero `API_URL`/origin leakage into
-  served HTML and `dist/client` (grep-verified).
+  served HTML and `dist/client` (grep-verified). The router.tsx 'static' comment
+  was reworded at #25 close-out (see #23 note); admin `.env.example` gained a
+  trailing newline.
+
+- **M2 pre-flight close-out (#25):** the Milestone 2 pre-flight block is complete and verified. One consolidated end-to-end pass re-verified both apps' sample branches call (browser → own server functions → `@sevendays/api-client` → `apps/api`) against the live API on the compose db: dev `GET /` 200 with all three seeded branches in both landing and admin; loud failure (blank `API_URL`) → 500 `API_URL is not set` in both vite dev and built-worker workerd for both apps; zero `API_URL`/`8787` leakage into served HTML or `dist/client`. Carried-forward minors from #21/#23/#24 reviews folded in: `apps/api/src/env.ts` dropped an unreachable `z.url().min(1)`; `apps/api/src/app-type.test.ts` notes its `expectTypeOf` assertions are typecheck-enforced; both `router.tsx` 'static' comments reworded to credit `staleTime` (no `'static'` preset configured — `refetchOnMount` has no `'static'` value in query-core 5.102.8); both `.env.example` files gained a trailing newline. `pnpm check` 29/29 + `pnpm build` 6/6 green. `docs/plan.md` M2 pre-flight checkboxes ticked `- [✅]` 2026-09-05; parent #1 stays OPEN.
 
 ## Known Gaps / Not Yet Done
 
@@ -151,7 +158,7 @@ _Last updated: 2026-09-04 (docs-alignment pass after the repo-docs audit — arc
 
 ## Immediate Next Steps (in order)
 
-1. **Milestone 2 pre-flight (#1)** — the API restructure piece (ADR-0006) is closed: sub-app chaining and the JSON-error convention landed early via M1.4 + candidates A–D, and the restructure closed the rest — explicit `Env` (Zod-validated, ambient global retired) and the `@sevendays/api/app` types-only subpath export. The client package (`@sevendays/api-client`) is closed (#22); what remains of the block is per-app wiring — `API_URL` env + React Query SSR in landing and admin (#23/#24, parallelizable), then #25 close-out. Checklist lives in `docs/plan.md`; spec in `docs/specs/2026-08-30-m2-preflight-api-client-spec.md`.
+1. **Milestone 2 proper (booking flow)** — the M2 pre-flight block is closed (verified 2026-09-05, #25). Next: landing pages reading from `apps/api` (Service Packages, Services, Branches), the guest booking form (branch → package → date/time → contact), past-date/time rejection, and `POST /api/appointments` persistence + Resend confirmation (see the Milestone 2 booking-flow checkboxes in `docs/plan.md`).
 
 ## Notes for Future Sessions
 
