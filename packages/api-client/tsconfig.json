@@ -1,0 +1,5 @@
+{
+  "extends": "@sevendays/config/ts/node",
+  "include": ["src", "*.config.ts", "**/*.test.ts", "**/*.spec.ts"],
+  "exclude": ["node_modules", "dist", ".turbo", "coverage"]
+}

@@ -1,0 +1,4 @@
+{
+  "root": false,
+  "extends": ["@sevendays/config/biome/base", "@sevendays/config/biome/node"]
+}
