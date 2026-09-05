@@ -100,6 +100,21 @@ _Last updated: 2026-09-04 (docs-alignment pass after the repo-docs audit — arc
 
 - **M2 pre-flight client package (#22, merged via the feat/api-client branch directly (no PR created)):** `@sevendays/api-client` — `createApiClient({ baseUrl, fetch? })` over Hono RPC (`hc<AppType>`; type-only devDependency via the API's `./app` subpath). Client surface: wrapper methods per resource (`client.branches.list()`, `client.servicePackages.list()`, `client.addonServices.list()`, `client.appointments.list()/create()`) over the raw client (`client.raw`) — every response crosses one `unwrap()` gate: 2xx parsed against the shared `packages/types` schemas (real `Date`s via `z.coerce.date`), non-2xx parsed against `apiErrorSchema` and thrown as `ApiClientError` (status + envelope details); missing/blank `baseUrl` throws at creation; injectable fetch (Seam 1) tested loopback against a chained in-memory mock mirroring the API's conventions; own vitest config (ADR-0003). **Type-surface rework rode along (probe evidence 2026-09-04):** Hono merges routes into the parent's type schema only through chained registration — the API's statement-style `app.get(...)`/`app.route(...)` left `AppType`'s schema empty (`hc<AppType>` → `unknown` members), so every registration in the /api/v1 tree was re-expressed chained; and `validated()` split into `validatedJson`/`validatedQuery` because its union-typed target polluted every endpoint's RPC input with `{ json, query }`. `toLoopbackFetch` is the verified `app.fetch` adapter. No API runtime behavior change (existing suites green). #23/#24 wire `API_URL` + React Query on top.
 
+- **M2 pre-flight landing wiring (#23):** apps/landing speaks to the API end to
+  end (browser → own server functions → API through `@sevendays/api-client`):
+  TanStack Query ^5.102.8 + `@tanstack/react-router-ssr-query` ^1.167.2 with
+  `setupRouterSsrQueryIntegration` (per-request QueryClient in router context,
+  root route on `createRootRouteWithContext`); the index route's loader
+  prefetches branches via `ensureQueryData` and renders through
+  `useSuspenseQuery` over the `getBranches` server function (Sentry span per
+  .cursorrules). `API_URL` is server-side env, no fallback —
+  `src/lib/api.server.ts` throws at client creation; verified loud in dev AND
+  under built-worker `wrangler dev` (HTTP 500 with the message), and
+  `process.env` reaches server functions in both shapes (CF vite plugin reads
+  `.env.local` in dev; wrangler's dev-vars loader locally; Workers var in
+  prod). `apps/landing/.env.example` added. Zero `API_URL`/origin leakage into
+  served HTML and `dist/client` (grep-verified).
+
 - **M2 pre-flight admin wiring (#24):** apps/admin speaks to the API end to
   end (browser → own server functions → API through `@sevendays/api-client`),
   the same pattern as landing (#23) but as its own verification unit:
@@ -118,6 +133,7 @@ _Last updated: 2026-09-04 (docs-alignment pass after the repo-docs audit — arc
 
 ## Known Gaps / Not Yet Done
 
+- `apps/landing`'s `start` script (`node --import ./dist/server/instrument.server.mjs dist/server/index.js`) is stale for the CF-plugin app — the built server entry is a Worker (`export default {fetch}`), so `pnpm --filter @sevendays/landing start` exits silently. Prod-shaped local serving is `wrangler dev --local` over the built output. Fix (or repoint to wrangler) at next touch of `apps/landing/package.json`.
 - **M2 pre-flight #21 follow-up minors (final review 2026-09-04, all triaged FOLLOW-UP, fix at next touch of each file):** (1) `apps/api/src/env.ts` — `z.url().min(1)`'s `.min(1)` is unreachable (`z.url()` already rejects `''`); drop the chain link next time the file is touched. (2) `apps/api/src/app-type.test.ts` — the `expectTypeOf` assertions are enforced by the `pnpm typecheck` gate, not the vitest run itself; a one-line comment naming the enforcement site would prevent future confusion. (3) `docs/progress.md:97` — "resolvable cross-workspace" is proven only via self-reference probe (same `exports`+symlink mechanism, not literally cross-workspace); soften the wording if #22 doesn't start promptly, moot once #22's client imports it for real.
 - **Branch phones are `TODO(seed)` placeholders** in `packages/db/scripts/catalog.ts` (`+63 900 000 00x`) — pending the client's real numbers; replace then re-run `db:seed`. **8R/8x10 merge confirmation also remains open at seed review, and its description text now surfaces publicly** — the Print size description carries the client-confirmation note ("both appear in the price list; client to confirm whether they merge") and M1.4's catalog endpoint serves it verbatim. Client confirmation owed before the M2 landing pages go live.
 - **`GET /api/v1/appointments` is public until M4** — the list returns customer names/emails/phones with no auth (Q9=A decision: pre-production only, no domains until M6; M4's BetterAuth closes this).
