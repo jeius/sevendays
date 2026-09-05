@@ -6,7 +6,7 @@ import { z } from 'zod';
 // Env derives from the schema; the ambient generated global in
 // worker-configuration.d.ts is no longer load-bearing anywhere.
 export const envSchema = z.object({
-  DATABASE_URL: z.url().min(1),
+  DATABASE_URL: z.url(),
 });
 
 export type Env = z.infer<typeof envSchema>;

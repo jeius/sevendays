@@ -9,8 +9,9 @@ export function getRouter() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        // Under SSR, 'static' stops every query refetching during hydration —
-        // the dehydrated server data is authoritative on first render.
+        // Under SSR, staleTime + refetchOnReconnect:false stop the dehydrated
+        // server data from refetching during hydration — it stays authoritative
+        // on first render (no 'static' preset is configured here).
         refetchOnReconnect: false,
         staleTime: 60_000,
       },
