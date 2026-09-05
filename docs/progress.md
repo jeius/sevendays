@@ -115,6 +115,22 @@ _Last updated: 2026-09-04 (docs-alignment pass after the repo-docs audit — arc
   prod). `apps/landing/.env.example` added. Zero `API_URL`/origin leakage into
   served HTML and `dist/client` (grep-verified).
 
+- **M2 pre-flight admin wiring (#24):** apps/admin speaks to the API end to
+  end (browser → own server functions → API through `@sevendays/api-client`),
+  the same pattern as landing (#23) but as its own verification unit:
+  TanStack Query ^5.102.8 + `@tanstack/react-router-ssr-query` ^1.167.2 with
+  `setupRouterSsrQueryIntegration` (per-request QueryClient in router
+  context, root route on `createRootRouteWithContext`); the index route's
+  loader prefetches branches via `ensureQueryData` and renders through
+  `useSuspenseQuery` over the `getBranches` server function (Sentry span per
+  .cursorrules). `API_URL` is server-side env, no fallback —
+  `src/lib/api.server.ts` throws at client creation; verified loud in dev AND
+  under built-worker `wrangler dev` (HTTP 500 with the message), and
+  `process.env` reaches server functions in both shapes (CF vite plugin reads
+  `.env.local` in dev; wrangler's dev-vars loader locally; Workers var in
+  prod). `apps/admin/.env.example` added. Zero `API_URL`/origin leakage into
+  served HTML and `dist/client` (grep-verified).
+
 ## Known Gaps / Not Yet Done
 
 - `apps/landing`'s `start` script (`node --import ./dist/server/instrument.server.mjs dist/server/index.js`) is stale for the CF-plugin app — the built server entry is a Worker (`export default {fetch}`), so `pnpm --filter @sevendays/landing start` exits silently. Prod-shaped local serving is `wrangler dev --local` over the built output. Fix (or repoint to wrangler) at next touch of `apps/landing/package.json`.
@@ -131,6 +147,7 @@ _Last updated: 2026-09-04 (docs-alignment pass after the repo-docs audit — arc
 - Logging is Hono's `logger()` middleware, not the planned Loglayer + Pino — Milestone 6.
 - Root `.env.example` documents the database URLs (M1 pre-flight); the apps' dev scripts still read `.env.local` (gitignored) for app-level vars — per-app examples land with M2.
 - turbo.json passes through `DATABASE_URL` + `DATABASE_MIGRATE_URL` (M1 pre-flight, ADR-0007); `drizzle.config.ts` reads `DATABASE_MIGRATE_URL` first (fallback `DATABASE_URL`) — seed/verify ride the session-mode connection (ADR-0007). `TEST_DATABASE_URL` is also passed through (M1.4) for the integration-test harness (compose default locally, CI sets it at job level).
+- `apps/admin`'s `start` script (`node --import ./dist/server/instrument.server.mjs dist/server/index.js`) is stale for the CF-plugin app — the built server entry is a Worker (`export default {fetch}`), so `pnpm --filter @sevendays/admin start` exits silently. Prod-shaped local serving is `wrangler dev --local` over the built output. Fix (or repoint to wrangler) at next touch of `apps/admin/package.json`.
 
 ## Immediate Next Steps (in order)
 
