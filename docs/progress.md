@@ -100,6 +100,22 @@ _Last updated: 2026-09-04 (docs-alignment pass after the repo-docs audit — arc
 
 - **M2 pre-flight client package (#22, merged via the feat/api-client branch directly (no PR created)):** `@sevendays/api-client` — `createApiClient({ baseUrl, fetch? })` over Hono RPC (`hc<AppType>`; type-only devDependency via the API's `./app` subpath). Client surface: wrapper methods per resource (`client.branches.list()`, `client.servicePackages.list()`, `client.addonServices.list()`, `client.appointments.list()/create()`) over the raw client (`client.raw`) — every response crosses one `unwrap()` gate: 2xx parsed against the shared `packages/types` schemas (real `Date`s via `z.coerce.date`), non-2xx parsed against `apiErrorSchema` and thrown as `ApiClientError` (status + envelope details); missing/blank `baseUrl` throws at creation; injectable fetch (Seam 1) tested loopback against a chained in-memory mock mirroring the API's conventions; own vitest config (ADR-0003). **Type-surface rework rode along (probe evidence 2026-09-04):** Hono merges routes into the parent's type schema only through chained registration — the API's statement-style `app.get(...)`/`app.route(...)` left `AppType`'s schema empty (`hc<AppType>` → `unknown` members), so every registration in the /api/v1 tree was re-expressed chained; and `validated()` split into `validatedJson`/`validatedQuery` because its union-typed target polluted every endpoint's RPC input with `{ json, query }`. `toLoopbackFetch` is the verified `app.fetch` adapter. No API runtime behavior change (existing suites green). #23/#24 wire `API_URL` + React Query on top.
 
+- **M2 pre-flight admin wiring (#24):** apps/admin speaks to the API end to
+  end (browser → own server functions → API through `@sevendays/api-client`),
+  the same pattern as landing (#23) but as its own verification unit:
+  TanStack Query ^5.102.8 + `@tanstack/react-router-ssr-query` ^1.167.2 with
+  `setupRouterSsrQueryIntegration` (per-request QueryClient in router
+  context, root route on `createRootRouteWithContext`); the index route's
+  loader prefetches branches via `ensureQueryData` and renders through
+  `useSuspenseQuery` over the `getBranches` server function (Sentry span per
+  .cursorrules). `API_URL` is server-side env, no fallback —
+  `src/lib/api.server.ts` throws at client creation; verified loud in dev AND
+  under built-worker `wrangler dev` (HTTP 500 with the message), and
+  `process.env` reaches server functions in both shapes (CF vite plugin reads
+  `.env.local` in dev; wrangler's dev-vars loader locally; Workers var in
+  prod). `apps/admin/.env.example` added. Zero `API_URL`/origin leakage into
+  served HTML and `dist/client` (grep-verified).
+
 ## Known Gaps / Not Yet Done
 
 - **M2 pre-flight #21 follow-up minors (final review 2026-09-04, all triaged FOLLOW-UP, fix at next touch of each file):** (1) `apps/api/src/env.ts` — `z.url().min(1)`'s `.min(1)` is unreachable (`z.url()` already rejects `''`); drop the chain link next time the file is touched. (2) `apps/api/src/app-type.test.ts` — the `expectTypeOf` assertions are enforced by the `pnpm typecheck` gate, not the vitest run itself; a one-line comment naming the enforcement site would prevent future confusion. (3) `docs/progress.md:97` — "resolvable cross-workspace" is proven only via self-reference probe (same `exports`+symlink mechanism, not literally cross-workspace); soften the wording if #22 doesn't start promptly, moot once #22's client imports it for real.
@@ -115,6 +131,7 @@ _Last updated: 2026-09-04 (docs-alignment pass after the repo-docs audit — arc
 - Logging is Hono's `logger()` middleware, not the planned Loglayer + Pino — Milestone 6.
 - Root `.env.example` documents the database URLs (M1 pre-flight); the apps' dev scripts still read `.env.local` (gitignored) for app-level vars — per-app examples land with M2.
 - turbo.json passes through `DATABASE_URL` + `DATABASE_MIGRATE_URL` (M1 pre-flight, ADR-0007); `drizzle.config.ts` reads `DATABASE_MIGRATE_URL` first (fallback `DATABASE_URL`) — seed/verify ride the session-mode connection (ADR-0007). `TEST_DATABASE_URL` is also passed through (M1.4) for the integration-test harness (compose default locally, CI sets it at job level).
+- `apps/admin`'s `start` script (`node --import ./dist/server/instrument.server.mjs dist/server/index.js`) is stale for the CF-plugin app — the built server entry is a Worker (`export default {fetch}`), so `pnpm --filter @sevendays/admin start` exits silently. Prod-shaped local serving is `wrangler dev --local` over the built output. Fix (or repoint to wrangler) at next touch of `apps/admin/package.json`.
 
 ## Immediate Next Steps (in order)
 
