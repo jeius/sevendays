@@ -17,9 +17,11 @@ export const acquireDb = async (c: import('hono').Context<ApiEnv>, next: () => P
   await next();
 };
 
-export const v1 = new Hono<ApiEnv>();
-v1.use('*', acquireDb);
-v1.route('/branches', branches);
-v1.route('/appointments', appointments);
-v1.route('/service-packages', servicePackages);
-v1.route('/addon-services', addonServices);
+// Chained registration (ADR-0006 Hono RPC): each .route() return value feeds
+// the next — the sub-tree lands in v1's schema only through the chain.
+export const v1 = new Hono<ApiEnv>()
+  .use('*', acquireDb)
+  .route('/branches', branches)
+  .route('/appointments', appointments)
+  .route('/service-packages', servicePackages)
+  .route('/addon-services', addonServices);
