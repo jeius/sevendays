@@ -29,7 +29,7 @@ function fail(reason: CreateReason): CreateAppointmentResult {
   return { ok: false, reason, message: REJECTION_MESSAGES[reason] };
 }
 
-// The one Appointment projection (13 columns) — create's `.returning()` and
+// The one Appointment projection (14 columns) — create's `.returning()` and
 // the list read select the same shape, so a column change lands here once.
 // Returning an explicit partial projection makes every selected column a
 // declared, non-optional field (noUncheckedIndexedAccess only guards the
@@ -39,13 +39,14 @@ const appointmentProjection = {
   id: appointments.id,
   branchId: appointments.branchId,
   servicePackageId: appointments.servicePackageId,
+  studioServiceId: appointments.studioServiceId,
   customerName: appointments.customerName,
   customerEmail: appointments.customerEmail,
   customerPhone: appointments.customerPhone,
   scheduledAt: appointments.scheduledAt,
   status: appointments.status,
   kind: appointments.kind,
-  packagePriceCents: appointments.packagePriceCents,
+  bookedPriceCents: appointments.bookedPriceCents,
   notes: appointments.notes,
   createdAt: appointments.createdAt,
   updatedAt: appointments.updatedAt,
@@ -73,6 +74,12 @@ export async function createAppointment(
       .from(branches)
       .where(eq(branches.id, input.branchId));
     if (!branchRow) return fail('branch');
+
+    // M2 ticket 02 interim: the generalized input admits a service-only
+    // payload, but the package path still owns this write seam until
+    // ticket 03 generalizes intake. A null package ref resolves to no row
+    // → the typed 'package' rejection (400), never a 500.
+    if (input.servicePackageId === null) return fail('package');
 
     const [packageRow] = await tx
       .select({
@@ -103,7 +110,7 @@ export async function createAppointment(
 
     const [appointment] = await tx
       .insert(appointments)
-      .values({ ...input, packagePriceCents: packageRow.priceCents, notes: input.notes ?? null })
+      .values({ ...input, bookedPriceCents: packageRow.priceCents, notes: input.notes ?? null })
       .returning(appointmentProjection);
     if (!appointment) {
       throw new Error('insert appointments: no row returned');

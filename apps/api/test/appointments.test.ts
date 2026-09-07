@@ -58,7 +58,7 @@ describe('POST /api/v1/appointments', () => {
     );
     expect(res.status).toBe(201);
     const body = await res.json();
-    expect(body.packagePriceCents).toBe(150000);
+    expect(body.bookedPriceCents).toBe(150000);
     expect(body.kind).toBe('scheduled');
     expect(body.status).toBe('pending');
     expect(body.addonServices).toEqual([
@@ -211,7 +211,7 @@ describe('GET /api/v1/appointments', () => {
         customerEmail: `customer${i}@example.com`,
         customerPhone: '+63 917 000 0000',
         scheduledAt: new Date('2026-09-10T10:00:00.000Z'),
-        packagePriceCents: 150000,
+        bookedPriceCents: 150000,
       });
     }
     const res = await app.request('/api/v1/appointments', undefined, { DATABASE_URL: url });
@@ -265,7 +265,7 @@ describe('createAppointment module seam', () => {
     const result = await createAppointment(db, moduleInput());
     expect(result.ok).toBe(true);
     if (!result.ok) return; // narrows for TS; the line above already failed otherwise
-    expect(result.record.packagePriceCents).toBe(150000);
+    expect(result.record.bookedPriceCents).toBe(150000);
     expect(result.record.addonServices).toEqual([
       { addonServiceId: ids.addonMakeup, name: 'Makeup', priceCents: 12000 },
     ]);
@@ -278,5 +278,52 @@ describe('createAppointment module seam', () => {
       .where(eq(appointmentAddonServices.appointmentId, result.record.id));
     expect(junction).toHaveLength(1);
     expect(junction[0]?.addonServiceId).toBe(ids.addonMakeup);
+  });
+});
+
+// The DB-enforced half of exactly-one (M2 ticket 02): the schema-level
+// refine and the intake checks are client-side; these inserts go straight
+// to the table and prove the appointments_offering_exactly_one CHECK
+// rejects both-set and neither at the storage layer (spec user story 31).
+describe('appointments offering CHECK (db-level)', () => {
+  const baseValues = () => ({
+    branchId: ids.branchA,
+    customerName: 'Check Probe',
+    customerEmail: 'check@example.com',
+    customerPhone: '+63 917 000 0000',
+    scheduledAt: new Date('2026-09-10T10:00:00.000Z'),
+    bookedPriceCents: 150000,
+  });
+
+  // Drizzle wraps driver errors: the PG message (with the CHECK name) sits
+  // on err.cause — unwrap before matching the constraint name.
+  const constraintError = async (promise: Promise<unknown>) => {
+    try {
+      await promise;
+    } catch (err) {
+      const cause = (err as { cause?: unknown }).cause;
+      expect((cause as Error | undefined)?.message).toMatch(/appointments_offering_exactly_one/);
+      return;
+    }
+    throw new Error('insert should have been rejected by the exactly-one CHECK');
+  };
+
+  it('rejects an insert with both offering refs set', async () => {
+    await constraintError(
+      db
+        .insert(appointmentsTable)
+        .values({
+          ...baseValues(),
+          servicePackageId: ids.packageCombined,
+          studioServiceId: ids.servicePortrait,
+        })
+        .returning({ id: appointmentsTable.id })
+    );
+  });
+
+  it('rejects an insert with neither offering ref set', async () => {
+    await constraintError(
+      db.insert(appointmentsTable).values(baseValues()).returning({ id: appointmentsTable.id })
+    );
   });
 });

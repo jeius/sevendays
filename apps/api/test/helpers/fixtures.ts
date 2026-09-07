@@ -23,6 +23,7 @@ export type FixtureIds = {
   addonMakeup: string;
   addonHairstyle: string;
   addonRetired: string;
+  servicePortrait: string;
 };
 
 export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
@@ -34,6 +35,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     attires,
     addonServices,
     servicePackages,
+    studioServices,
     frames,
     packageInclusions,
     packageInclusionAttires,
@@ -115,6 +117,20 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
       isActive: false,
     })
     .returning({ id: addonServices.id });
+
+  // M2 ticket 02: one active Studio Service — the db-level exactly-one CHECK
+  // test needs a second offering to attempt a both-set insert. Ticket 03's
+  // plan adds the inactive service + applicability-matrix fixtures its
+  // rejection tests need; nothing else consumes rows here.
+  const [servicePortrait] = await db
+    .insert(studioServices)
+    .values({
+      name: 'Portraits & ID Photo',
+      description: 'Studio portraits and ID photos.',
+      priceCents: 50000,
+      isActive: true,
+    })
+    .returning({ id: studioServices.id });
 
   const [packageCombined] = await db
     .insert(servicePackages)
@@ -268,5 +284,6 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     addonMakeup: addonMakeup.id,
     addonHairstyle: addonHairstyle.id,
     addonRetired: addonRetired.id,
+    servicePortrait: servicePortrait.id,
   };
 }
