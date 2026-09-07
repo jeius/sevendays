@@ -1,6 +1,6 @@
 # Progress
 
-_Last updated: 2026-09-04 (docs-alignment pass after the repo-docs audit — architecture diagram label + stub wording, ADR-0008 truncate annotation, gate-status parenthetical, Immediate Next Steps collapsed to the live item, Known Gaps purged of landed/closed items: candidates A–D + M1.4 watch-item resolutions moved to What Exists, forward-binding rulings consolidated into one watch-item bullet; code unchanged since candidate D: acquisition/error seam landed on feat/acquisition-error-seam; prior: catalog row-shaping module (candidate C) landed; prior: read-stitch module (candidate B); prior: intake deepening (candidate A); prior: M1.5 exit gate verified.)_
+_Last updated: 2026-09-07 (docs-only: M2 booking-flow spec written and published — `docs/specs/2026-09-07-m2-booking-flow-spec.md` + GitHub issue #37, and `docs/plan.md`'s M2 booking-flow checkboxes red-penciled to match; the deliverable of the M2 wayfinder map, issue #31. Prior 2026-09-04: docs-alignment pass after the repo-docs audit.)_
 
 ## Current Milestone: 1 — Real Data Layer (complete — exit criteria verified live 2026-09-02; next up: Milestone 2 pre-flight, issue #1)
 
@@ -158,7 +158,7 @@ _Last updated: 2026-09-04 (docs-alignment pass after the repo-docs audit — arc
 
 ## Immediate Next Steps (in order)
 
-1. **Milestone 2 proper (booking flow)** — the M2 pre-flight block is closed (verified 2026-09-05, #25). Next: landing pages reading from `apps/api` (Service Packages, Services, Branches), the guest booking form (branch → package → date/time → contact), past-date/time rejection, and `POST /api/appointments` persistence + Resend confirmation (see the Milestone 2 booking-flow checkboxes in `docs/plan.md`).
+1. **Milestone 2 proper (booking flow)** — the M2 pre-flight block is closed (verified 2026-09-05, #25) and the M2 spec is written (2026-09-07: `docs/specs/2026-09-07-m2-booking-flow-spec.md` + GitHub issue #37, the M2 wayfinder map's deliverable). Next: build the spec — schema + migrations first (studio services, junctions, generalized appointments, slug/featured), then the API endpoints and generalized intake, then the landing pages and variant-C booking form, then the Resend email — per the red-penciled Milestone 2 booking-flow checkboxes in `docs/plan.md`.
 
 ## Notes for Future Sessions
 

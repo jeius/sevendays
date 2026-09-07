@@ -57,15 +57,16 @@ Pre-flight — shared API client infrastructure (ADR-0006), built once for both 
 - [✅] Install `@tanstack/react-query` in `apps/landing` + `apps/admin` with SSR query integration (loader `ensureQueryData` + `useSuspenseQuery` patterns) _(2026-09-05: admin half landed via #24 — react-query ^5.102.8 + react-router-ssr-query ^1.167.2, per-request client in router context, loader `ensureQueryData` + `useSuspenseQuery` verified live. Landing half landed via #23 — same versions and patterns, verified live. Tick at #25 close-out; ticked 2026-09-05 at #25 close-out — landing #23 + admin #24, both verified live and re-verified in the #25 pass.)_
 - [✅] Verify: one sample call per app (branches list) flows browser → own server functions → `apps/api` through the client — type-inferred, Zod-parsed, end to end _(2026-09-05: re-verified in one consolidated pass for both landing and admin — dev 200 with all three seeded branches, loud 500 on blank API_URL in both vite dev and built-worker workerd, zero API_URL/origin leakage; see #25.)_
 
-Booking flow:
+Booking flow — red-penciled 2026-09-07 to match the M2 spec (`docs/specs/2026-09-07-m2-booking-flow-spec.md`, GitHub issue #37; "services" decoded as Studio Services, form flow re-sequenced, email content + mechanics pinned per the M2 wayfinder map):
 
-- [ ] Landing pages: packages, services, branches (reading from `apps/api`)
-- [ ] Booking form: branch → package → date/time → contact info (guest flow, no account)
-- [ ] Form + API reject past dates/times; all external input validated with `packages/types` Zod schemas
-- [ ] `POST /api/appointments` persists and returns a real appointment
-- [ ] Resend integration: confirmation email on successful booking (sandbox sender `onboarding@resend.dev` for now; `wrangler secret put RESEND_API_KEY`)
-- [ ] Booking confirmation page/state on the landing site
-- [ ] Verify: complete a real booking end-to-end and receive the confirmation email
+- [ ] Schema: `studio_services` + `branch_studio_services` (per-branch bookability junction) + `studio_service_addon_services` (add-on applicability matrix); `appointments` generalized to package-or-service (nullable refs, exactly-one CHECK, `packagePriceCents` → `bookedPriceCents`); `service_packages.slug` (unique, backfilled) + `is_featured` — via `db:generate` + `db:migrate`, with re-runnable seed extensions (four studio services, applicability rows, featured flags)
+- [ ] API: `GET /api/v1/studio-services` (with embedded `bookableBranchIds`), `GET /api/v1/service-packages/:slug`, public `GET /api/v1/appointments/:id` (same posture as the list until M4 closes both); `POST /api/v1/appointments` generalized — exactly-one offering, service active + bookable-at-branch, add-on applicability on service bookings, all inside the existing intake transaction
+- [ ] Form + API reject past dates/times — typed `past_datetime` rejection in the intake module (`createAppointmentSchema` stays shape-only); all external input validated with `packages/types` Zod schemas
+- [ ] Landing pages: home (featured strip, Studio Services teaser, branches strip), packages list, package detail by slug, branches, services (Studio Services showcase), about — reading from `apps/api`
+- [ ] Booking form (prototype variant C — one question per screen, auto-advance): branch → offering (package, or a Studio Service bookable at that branch) → conditional add-ons (screen skipped when none apply, "Skip — no add-ons" otherwise) → date/time (PHT note, hour chips) → contact info (guest flow, no account; deep links `?branch=&package=&service=`)
+- [ ] Booking confirmation page `/booking/:id` — snapshot read-back fed by the public single-get (client `appointments.get(id)` + landing server fn)
+- [ ] Resend integration: money-free confirmation email (content per the spec — "scheduled" copy, no prices, no booking fee) sent after the DB commit via `ctx.waitUntil` with `Idempotency-Key: booking-confirm/<appointmentId>` (sandbox sender `onboarding@resend.dev`; `wrangler secret put RESEND_API_KEY`; `LANDING_ORIGIN` env for the CTA)
+- [ ] Verify: complete a real booking end-to-end and receive the confirmation email at the Resend account owner's address (julius.porferio.pahama@gmail.com — the sandbox 403s every other recipient)
 
 **Exit criteria:** a real user can complete a booking end-to-end and receive a confirmation email.
 
@@ -134,3 +135,4 @@ Plan notes:
 - These checkboxes are the single source of truth for milestone progress — `docs/progress.md` narrates verification and dates but does not mirror this list (decided 2026-08-30).
 - Milestone 3 (Booking Availability) was added after the original roadmap (2026-08-30); Milestones 4–6 were renumbered from 3–5.
 - Milestone 2's pre-flight block (shared API client, ADR-0006) was added 2026-08-30, decided at zero frontend call sites.
+- Milestone 2's booking-flow checkboxes were red-penciled 2026-09-07 per the M2 booking-flow spec (`docs/specs/2026-09-07-m2-booking-flow-spec.md`, GitHub issue #37) — the output of the M2 wayfinder map (#31). Original seven-checkbox shape (2026-08-30): landing pages (packages/services/branches), form branch → package → date/time → contact, past-date rejection, POST persistence, Resend integration, confirmation page/state, end-to-end verify.
