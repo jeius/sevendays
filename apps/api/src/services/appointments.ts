@@ -6,7 +6,11 @@ import {
   branches,
   servicePackages,
 } from '@sevendays/db';
-import type { AppointmentWithAddons, CreateAppointmentInput } from '@sevendays/types';
+import type {
+  AppointmentAddonEntry,
+  AppointmentWithAddons,
+  CreateAppointmentInput,
+} from '@sevendays/types';
 import { desc, eq, inArray } from 'drizzle-orm';
 import { groupChildren } from './group-children.js';
 
@@ -139,6 +143,50 @@ export async function createAppointment(
 }
 
 /**
+ * Add-on entries for the given appointment ids in one inArray query (M2
+ * ticket 04) — shared by the list and the single-get so both shapes come
+ * from one stitch. Entries arrive pre-ordered: createdAt is the append-only
+ * monotonic proxy (the junction has no position column; SQL gives no
+ * row-order guarantee without an explicit ORDER BY — a later migration if
+ * M2's UI needs persisted order). Raw rows carry appointmentId — group raw,
+ * project at the attach pass. Every requested id gets an entry list (empty
+ * when it has no add-ons) — never undefined.
+ */
+async function fetchAddonEntries(
+  db: Database,
+  appointmentIds: string[]
+): Promise<Map<string, AppointmentAddonEntry[]>> {
+  if (appointmentIds.length === 0) return new Map();
+
+  const addonRows = await db
+    .select({
+      appointmentId: appointmentAddonServices.appointmentId,
+      addonServiceId: appointmentAddonServices.addonServiceId,
+      name: addonServices.name,
+      priceCents: appointmentAddonServices.priceCents,
+    })
+    .from(appointmentAddonServices)
+    .innerJoin(addonServices, eq(appointmentAddonServices.addonServiceId, addonServices.id))
+    .where(inArray(appointmentAddonServices.appointmentId, appointmentIds))
+    .orderBy(appointmentAddonServices.createdAt);
+
+  const addonsByAppointment = groupChildren(addonRows, (row) => row.appointmentId);
+
+  const entries = new Map<string, AppointmentAddonEntry[]>();
+  for (const appointmentId of appointmentIds) {
+    entries.set(
+      appointmentId,
+      addonsByAppointment(appointmentId).map((a) => ({
+        addonServiceId: a.addonServiceId,
+        name: a.name,
+        priceCents: a.priceCents,
+      }))
+    );
+  }
+  return entries;
+}
+
+/**
  * List Appointments newest-first, optionally filtered to one Branch, capped
  * at 200 rows. Add-on Services are fetched in one inArray query for the
  * fetched appointment ids and stitched back in insertion order per
@@ -159,31 +207,29 @@ export async function listAppointments(
   const ids = rows.map((r) => r.id);
   if (ids.length === 0) return [];
 
-  const addonRows = await db
-    .select({
-      appointmentId: appointmentAddonServices.appointmentId,
-      addonServiceId: appointmentAddonServices.addonServiceId,
-      name: addonServices.name,
-      priceCents: appointmentAddonServices.priceCents,
-    })
-    .from(appointmentAddonServices)
-    .innerJoin(addonServices, eq(appointmentAddonServices.addonServiceId, addonServices.id))
-    .where(inArray(appointmentAddonServices.appointmentId, ids))
-    // Requested-attachment order within an appointment: createdAt is the
-    // append-only monotonic proxy — the junction has no position column
-    // (a later migration if M2's UI needs persisted order); SQL gives no
-    // row-order guarantee without an explicit ORDER BY.
-    .orderBy(appointmentAddonServices.createdAt);
+  const addonsByAppointment = await fetchAddonEntries(db, ids);
 
-  // Raw rows carry appointmentId — group raw, project at the attach pass.
-  const addonsByAppointment = groupChildren(addonRows, (row) => row.appointmentId);
+  return rows.map((row) => ({ ...row, addonServices: addonsByAppointment.get(row.id) ?? [] }));
+}
 
-  return rows.map((row) => ({
-    ...row,
-    addonServices: addonsByAppointment(row.id).map((a) => ({
-      addonServiceId: a.addonServiceId,
-      name: a.name,
-      priceCents: a.priceCents,
-    })),
-  }));
+/**
+ * One Appointment with its add-on entries (M2 ticket 04): the same
+ * AppointmentWithAddons shape as the list, via the same stitch. Unknown id
+ * → null (the route turns it into the uniform 404). Public until M4 like
+ * the list (standing decision — this serves the customer's own
+ * confirmation read-back; M4's BetterAuth closes both together).
+ */
+export async function getAppointmentWithAddons(
+  db: Database,
+  id: string
+): Promise<AppointmentWithAddons | null> {
+  const [row] = await db
+    .select(appointmentProjection)
+    .from(appointments)
+    .where(eq(appointments.id, id))
+    .limit(1);
+  if (!row) return null;
+
+  const addonsByAppointment = await fetchAddonEntries(db, [row.id]);
+  return { ...row, addonServices: addonsByAppointment.get(row.id) ?? [] };
 }

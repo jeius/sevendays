@@ -56,3 +56,38 @@ describe('GET /api/v1/service-packages', () => {
     }
   });
 });
+
+describe('GET /api/v1/service-packages/:slug', () => {
+  it('returns one active package with resolved inclusions and frames (200)', async () => {
+    const res = await app.request('/api/v1/service-packages/simple-package', undefined, {
+      DATABASE_URL: url,
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as ServicePackageWithInclusions;
+
+    expect(body.slug).toBe('simple-package');
+    expect(body.id).toBe(ids.packageSimple);
+    expect(body.isFeatured).toBe(false);
+    expect(body.inclusions).toHaveLength(1);
+    expect(body.inclusions[0]?.kind).toBe('print');
+    expect(body.inclusions[0]?.printSize?.code).toBe('2R');
+    expect(body.inclusions[0]?.attires.map((a) => a.name)).toEqual(['Toga']);
+    expect(body.frames.map((f) => f.frameNumber)).toEqual([1]);
+  });
+
+  it('returns the uniform 404 envelope for an unknown slug', async () => {
+    const res = await app.request('/api/v1/service-packages/no-such-package', undefined, {
+      DATABASE_URL: url,
+    });
+    expect(res.status).toBe(404);
+    expect((await res.json()).error).toBe('Package not found.');
+  });
+
+  it('returns 404 for an inactive package slug', async () => {
+    const res = await app.request('/api/v1/service-packages/retired-package', undefined, {
+      DATABASE_URL: url,
+    });
+    expect(res.status).toBe(404);
+    expect((await res.json()).error).toBe('Package not found.');
+  });
+});
