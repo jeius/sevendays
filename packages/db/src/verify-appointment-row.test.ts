@@ -25,14 +25,14 @@ async function seedProbeFixtures(sql: postgres.Sql) {
     values ('33333333-3333-4333-8333-333333333333', 'Make-up', 'Probe add-on', 12000)
     returning id`;
   const [appt] = await sql`
-    insert into appointments
-      (id, branch_id, service_package_id, customer_name, customer_email, customer_phone,
-       scheduled_at, status, kind, package_price_cents, notes)
-    values
-      ('44444444-4444-4444-8444-444444444444',
-       ${branch?.id}, ${pkg?.id},
-       'M1.5 Exit Verification', 'm15-verify@example.com', '+63 900 000 0000',
-       '2026-09-15 10:00:00+08', 'pending', 'scheduled', 150000, 'probe row')
+  insert into appointments
+    (id, branch_id, service_package_id, customer_name, customer_email, customer_phone,
+     scheduled_at, status, kind, booked_price_cents, notes)
+  values
+    ('44444444-4444-4444-8444-444444444444',
+     ${branch?.id}, ${pkg?.id},
+     'M1.5 Exit Verification', 'm15-verify@example.com', '+63 900 000 0000',
+     '2026-09-15 10:00:00+08', 'pending', 'scheduled', 150000, 'probe row')
     returning id`;
   if (!branch || !pkg || !addon || !appt) {
     throw new Error('probe fixture seed failed: one or more inserts returned no row');
@@ -82,7 +82,7 @@ describe.skipIf(!TEST_DATABASE_URL)('verify-appointment-row probe (live compose 
       customerEmail: 'm15-verify@example.com',
       kind: 'scheduled',
       status: 'pending',
-      packagePriceCents: 150000,
+      bookedPriceCents: 150000,
       notes: 'probe row',
       addonServices: [{ addonServiceId: ids.addonId, name: 'Make-up', priceCents: 12000 }],
     };
@@ -101,7 +101,7 @@ describe.skipIf(!TEST_DATABASE_URL)('verify-appointment-row probe (live compose 
       customerEmail: 'm15-verify@example.com',
       kind: 'scheduled',
       status: 'pending',
-      packagePriceCents: 999999,
+      bookedPriceCents: 999999,
       notes: 'wrong notes',
       addonServices: [{ addonServiceId: ids.addonId, name: 'Make-up', priceCents: 12000 }],
     };
@@ -109,7 +109,7 @@ describe.skipIf(!TEST_DATABASE_URL)('verify-appointment-row probe (live compose 
     expect(result.ok).toBe(false);
     const failedLabels = (result.failed ?? []).map((c) => c.label);
     expect(failedLabels).toContain('notes');
-    expect(failedLabels).toContain('packagePriceCents');
+    expect(failedLabels).toContain('bookedPriceCents');
   });
 
   it('confirm mode: missing row reports not found', async () => {
@@ -123,7 +123,7 @@ describe.skipIf(!TEST_DATABASE_URL)('verify-appointment-row probe (live compose 
       customerEmail: 'x@example.com',
       kind: 'scheduled',
       status: 'pending',
-      packagePriceCents: 0,
+      bookedPriceCents: 0,
       addonServices: [],
     });
     expect(result.ok).toBe(false);

@@ -9,14 +9,15 @@ export interface AppointmentProbeAddon {
 export interface AppointmentProbeExpected {
   id: string;
   branchId: string;
-  servicePackageId: string;
+  servicePackageId?: string | null;
+  studioServiceId?: string | null;
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
   notes?: string | null;
   kind: string;
   status: string;
-  packagePriceCents: number;
+  bookedPriceCents: number;
   scheduledAt?: string;
   addonServices?: AppointmentProbeAddon[];
 }
