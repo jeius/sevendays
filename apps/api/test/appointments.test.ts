@@ -1,7 +1,7 @@
 import { appointmentAddonServices, appointments as appointmentsTable } from '@sevendays/db';
 import { createAppointmentSchema } from '@sevendays/types';
 import { eq } from 'drizzle-orm';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import app from '../src/index.js';
 import { createAppointment } from '../src/services/appointments.js';
 import { createTestDb } from './helpers/db.js';
@@ -15,6 +15,12 @@ let ids: FixtureIds;
 
 const MISSING_UUID = 'f0000000-0000-4000-8000-000000000000';
 
+// The intake floor (ticket 03) rejects at-or-before-now, so a hard-coded
+// future date rots into a mass 400 failure the calendar day it passes.
+// All future timestamps are now-relative; past-side tests mock the clock.
+const futureDate = (days = 5) => new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+const FUTURE_ISO = () => futureDate().toISOString();
+
 beforeEach(async () => {
   await truncateAll(db);
   ids = await loadFixtures(db);
@@ -26,7 +32,7 @@ const payload = (overrides: Record<string, unknown> = {}) => ({
   customerName: 'Ana Reyes',
   customerEmail: 'ana@example.com',
   customerPhone: '+63 917 000 0000',
-  scheduledAt: '2026-09-10T10:00:00.000Z',
+  scheduledAt: FUTURE_ISO(),
   addonServiceIds: [ids.addonMakeup],
   ...overrides,
 });
@@ -210,7 +216,7 @@ describe('GET /api/v1/appointments', () => {
         customerName: `Customer ${i}`,
         customerEmail: `customer${i}@example.com`,
         customerPhone: '+63 917 000 0000',
-        scheduledAt: new Date('2026-09-10T10:00:00.000Z'),
+        scheduledAt: futureDate(),
         bookedPriceCents: 150000,
       });
     }
@@ -358,7 +364,7 @@ describe('appointments offering CHECK (db-level)', () => {
     customerName: 'Check Probe',
     customerEmail: 'check@example.com',
     customerPhone: '+63 917 000 0000',
-    scheduledAt: new Date('2026-09-10T10:00:00.000Z'),
+    scheduledAt: futureDate(),
     bookedPriceCents: 150000,
   });
 
@@ -392,5 +398,195 @@ describe('appointments offering CHECK (db-level)', () => {
     await constraintError(
       db.insert(appointmentsTable).values(baseValues()).returning({ id: appointmentsTable.id })
     );
+  });
+});
+
+// M2 ticket 03 — the service path at the module seam: same failure-variant
+// contract as the package path, plus the floor (mocked clock, never a
+// public export). Complements the HTTP-level tests below (route = one
+// call to badRequest with result.message).
+describe('createAppointment module seam — service path + floor (ticket 03)', () => {
+  const moduleInput = (overrides: Record<string, unknown> = {}) =>
+    createAppointmentSchema.parse(
+      payload({
+        servicePackageId: null,
+        studioServiceId: ids.serviceStudio,
+        addonServiceIds: [],
+        ...overrides,
+      })
+    );
+
+  it('rejects an inactive service with the service_inactive wording', async () => {
+    await expect(
+      createAppointment(db, moduleInput({ studioServiceId: ids.serviceRetired }))
+    ).resolves.toEqual({
+      ok: false,
+      reason: 'service_inactive',
+      message: 'Studio Service is inactive.',
+    });
+  });
+
+  it('rejects an unknown-but-valid service uuid', async () => {
+    await expect(
+      createAppointment(db, moduleInput({ studioServiceId: MISSING_UUID }))
+    ).resolves.toEqual({ ok: false, reason: 'service', message: 'Unknown studioServiceId.' });
+  });
+
+  it('rejects an active service outside the branch (not bookable there)', async () => {
+    await expect(createAppointment(db, moduleInput({ branchId: ids.branchB }))).resolves.toEqual({
+      ok: false,
+      reason: 'service_not_bookable_at_branch',
+      message: "That service isn't offered at the branch you picked.",
+    });
+  });
+
+  it('rejects a non-applicable add-on on a service booking', async () => {
+    await expect(
+      createAppointment(db, moduleInput({ addonServiceIds: [ids.addonMakeup] }))
+    ).resolves.toEqual({
+      ok: false,
+      reason: 'addon_not_applicable',
+      message: "That add-on doesn't apply to the service you picked.",
+    });
+  });
+
+  it('rejects a linked-but-inactive add-on BEFORE the matrix (addon_inactive)', async () => {
+    await expect(
+      createAppointment(db, moduleInput({ addonServiceIds: [ids.addonRetired] }))
+    ).resolves.toEqual({
+      ok: false,
+      reason: 'addon_inactive',
+      message: 'Add-on Service is inactive.',
+    });
+  });
+
+  it('rejects at-or-before-now and accepts one second after (mocked clock, no export)', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      vi.setSystemTime(new Date('2026-09-10T00:00:00.000Z'));
+      // Typed rejections RESOLVE { ok: false } — never throw (the module's
+      // failure-variant contract, same as the five package-path reasons).
+      await expect(
+        createAppointment(db, moduleInput({ scheduledAt: '2026-09-10T00:00:00.000Z' }))
+      ).resolves.toEqual({
+        ok: false,
+        reason: 'past_datetime',
+        message: 'Your chosen schedule is already in the past. Please pick a future date and time.',
+      });
+      await expect(
+        createAppointment(db, moduleInput({ scheduledAt: '2026-09-10T00:00:01.000Z' }))
+      ).resolves.toMatchObject({ ok: true });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('commits a service booking with the service-price snapshot', async () => {
+    const result = await createAppointment(
+      db,
+      moduleInput({ studioServiceId: ids.servicePortrait })
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return; // narrows for TS; the line above already failed otherwise
+    expect(result.record.studioServiceId).toBe(ids.servicePortrait);
+    expect(result.record.servicePackageId).toBeNull();
+    expect(result.record.bookedPriceCents).toBe(50000);
+    expect(result.record.addonServices).toEqual([]);
+  });
+});
+
+// M2 ticket 03 — the service path through the HTTP seam. The thin route is
+// already the forwarding layer (badRequest(c, result.message)); these pin
+// the 201 record and the module-owned wordings arriving verbatim.
+describe('POST /api/v1/appointments — service path (ticket 03)', () => {
+  const servicePayload = (overrides: Record<string, unknown> = {}) => ({
+    branchId: ids.branchA,
+    servicePackageId: null,
+    studioServiceId: ids.servicePortrait,
+    customerName: 'Ana Reyes',
+    customerEmail: 'ana@example.com',
+    customerPhone: '+63 917 000 0000',
+    scheduledAt: FUTURE_ISO(),
+    addonServiceIds: [ids.addonMakeup],
+    ...overrides,
+  });
+
+  const post = (body: Record<string, unknown>) =>
+    app.request(
+      '/api/v1/appointments',
+      {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: { 'content-type': 'application/json' },
+      },
+      { DATABASE_URL: url }
+    );
+
+  it('books a Studio Service: 201 with the service-price snapshot and the applicable add-on', async () => {
+    const res = await post(servicePayload());
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.studioServiceId).toBe(ids.servicePortrait);
+    expect(body.servicePackageId).toBeNull();
+    expect(body.bookedPriceCents).toBe(50000);
+    expect(body.addonServices).toEqual([
+      { addonServiceId: ids.addonMakeup, name: 'Makeup', priceCents: 12000 },
+    ]);
+  });
+
+  it('rejects both offerings with the schema-level 400 (uniform envelope)', async () => {
+    const res = await post(servicePayload({ servicePackageId: ids.packageCombined }));
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe('Invalid request payload.');
+    expect(body.details[0]?.message).toContain(
+      'Exactly one of servicePackageId and studioServiceId'
+    );
+  });
+
+  it('rejects neither offering with the schema-level 400 (uniform envelope)', async () => {
+    const res = await post(servicePayload({ studioServiceId: null }));
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe('Invalid request payload.');
+    expect(body.details[0]?.message).toContain(
+      'Exactly one of servicePackageId and studioServiceId'
+    );
+  });
+
+  it('rejects an inactive service: the route forwards the module-owned wording verbatim', async () => {
+    const res = await post(servicePayload({ studioServiceId: ids.serviceRetired }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe('Studio Service is inactive.');
+  });
+
+  it('rejects a service not bookable at the branch', async () => {
+    const res = await post(
+      servicePayload({ studioServiceId: ids.serviceStudio, branchId: ids.branchB })
+    );
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("That service isn't offered at the branch you picked.");
+  });
+
+  it('rejects a non-applicable add-on on a service booking', async () => {
+    const res = await post(
+      servicePayload({ studioServiceId: ids.serviceStudio, addonServiceIds: [ids.addonMakeup] })
+    );
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("That add-on doesn't apply to the service you picked.");
+  });
+
+  it('rejects a past scheduledAt through the HTTP seam: 400 with the past_datetime message', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      vi.setSystemTime(new Date('2026-09-10T00:00:00.000Z'));
+      const res = await post(servicePayload({ scheduledAt: '2026-09-10T00:00:00.000Z' }));
+      expect(res.status).toBe(400);
+      expect((await res.json()).error).toBe(
+        'Your chosen schedule is already in the past. Please pick a future date and time.'
+      );
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

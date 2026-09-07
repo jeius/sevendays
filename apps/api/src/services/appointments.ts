@@ -4,23 +4,35 @@ import {
   appointmentAddonServices,
   appointments,
   branches,
+  branchStudioServices,
   servicePackages,
+  studioServiceAddonServices,
+  studioServices,
 } from '@sevendays/db';
 import type {
   AppointmentAddonEntry,
   AppointmentWithAddons,
   CreateAppointmentInput,
 } from '@sevendays/types';
-import { desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import { groupChildren } from './group-children.js';
 
-/** The five intake rejections; wording is module-owned (route stays thin). */
+/**
+ * The ten intake rejections; wording is module-owned (route stays thin).
+ * Ticket 03 adds the service-path cases + the past-datetime floor — the
+ * five package-path wordings are UNCHANGED (suites assert them verbatim).
+ */
 const REJECTION_MESSAGES = {
   branch: 'Unknown branchId.',
   package: 'Unknown servicePackageId.',
   package_inactive: 'Service Package is inactive.',
   addon: 'Unknown addonServiceId.',
   addon_inactive: 'Add-on Service is inactive.',
+  service: 'Unknown studioServiceId.',
+  service_inactive: 'Studio Service is inactive.',
+  service_not_bookable_at_branch: "That service isn't offered at the branch you picked.",
+  addon_not_applicable: "That add-on doesn't apply to the service you picked.",
+  past_datetime: 'Your chosen schedule is already in the past. Please pick a future date and time.',
 } as const;
 
 type CreateReason = keyof typeof REJECTION_MESSAGES;
@@ -58,15 +70,20 @@ const appointmentProjection = {
 
 /**
  * Resolve the referenced rows and persist the Appointment with booking-time
- * price snapshots (M1.4). One transaction wraps reference resolution and both
- * inserts (Appointment + add-on junction rows), so a failure anywhere leaves
- * nothing behind — and M3's Slot capacity check-then-insert can later join
- * this same transaction (ADR-0005). Reference resolution is validation: a
- * rejection returns a typed failure whose `message` is the caller-facing
- * wording (module-owned; the route forwards it verbatim). The client never
- * supplies a price — snapshots come from the resolved rows. ADR-0011
- * untouched: `db` is the per-request handle; the transaction lives inside
- * this one request (verified over the live pooler — ADR-0007 amendment).
+ * price snapshots (M1.4; ticket 03 generalizes the offering). One
+ * transaction wraps reference resolution and both inserts (Appointment +
+ * add-on junction rows), so a failure anywhere leaves nothing behind — and
+ * M3's Slot capacity check-then-insert can later join this same transaction
+ * (ADR-0005). The offering is exactly one of a Service Package or a Studio
+ * Service (the create schema's refine dispatches the path): the service
+ * path adds activity, bookability-at-branch, and add-on-matrix checks; the
+ * past-datetime floor applies to both paths before offering resolution.
+ * Reference resolution is validation: a rejection returns a typed failure
+ * whose `message` is the caller-facing wording (module-owned; the route
+ * forwards it verbatim). The client never supplies a price — snapshots
+ * come from the resolved rows. ADR-0011 untouched: `db` is the per-request
+ * handle; the transaction lives inside this one request (verified over the
+ * live pooler — ADR-0007 amendment).
  */
 export async function createAppointment(
   db: Database,
@@ -79,22 +96,60 @@ export async function createAppointment(
       .where(eq(branches.id, input.branchId));
     if (!branchRow) return fail('branch');
 
-    // M2 ticket 02 interim: the generalized input admits a service-only
-    // payload, but the package path still owns this write seam until
-    // ticket 03 generalizes intake. A null package ref resolves to no row
-    // → the typed 'package' rejection (400), never a 500.
-    if (input.servicePackageId === null) return fail('package');
+    // The floor (ticket 03): at-or-before the current instant → the typed
+    // 'past_datetime' rejection. PH is fixed UTC+8 with no DST, so "before
+    // now in Asia/Manila" IS "before now on the UTC instant" — a plain
+    // instant comparison, no tz arithmetic, and createAppointmentSchema
+    // stays shape-only (spec ruling). Evaluated after the branch resolve
+    // and before offering resolution — a rejected clock never reaches the
+    // junction queries.
+    if (input.scheduledAt.getTime() <= Date.now()) return fail('past_datetime');
 
-    const [packageRow] = await tx
-      .select({
-        id: servicePackages.id,
-        isActive: servicePackages.isActive,
-        priceCents: servicePackages.priceCents,
-      })
-      .from(servicePackages)
-      .where(eq(servicePackages.id, input.servicePackageId));
-    if (!packageRow) return fail('package');
-    if (!packageRow.isActive) return fail('package_inactive');
+    // Offering resolution (ticket 03): the generalized input carries
+    // exactly one ref (the create schema's refine); which one dispatches
+    // the path. Package path: unknown/inactive (unchanged). Service path:
+    // unknown → inactive → bookable at THIS branch, all inside this same
+    // transaction (the one write seam, ADR-0005).
+    let offeringPriceCents: number;
+    let serviceId: string | null = null;
+    if (input.servicePackageId !== null) {
+      const [packageRow] = await tx
+        .select({
+          id: servicePackages.id,
+          isActive: servicePackages.isActive,
+          priceCents: servicePackages.priceCents,
+        })
+        .from(servicePackages)
+        .where(eq(servicePackages.id, input.servicePackageId));
+      if (!packageRow) return fail('package');
+      if (!packageRow.isActive) return fail('package_inactive');
+      offeringPriceCents = packageRow.priceCents;
+    } else {
+      if (input.studioServiceId === null) return fail('service'); // refine-guaranteed; narrows for TS
+      serviceId = input.studioServiceId;
+      const [serviceRow] = await tx
+        .select({
+          id: studioServices.id,
+          isActive: studioServices.isActive,
+          priceCents: studioServices.priceCents,
+        })
+        .from(studioServices)
+        .where(eq(studioServices.id, serviceId));
+      if (!serviceRow) return fail('service');
+      if (!serviceRow.isActive) return fail('service_inactive');
+      const [bookable] = await tx
+        .select({ id: branchStudioServices.id })
+        .from(branchStudioServices)
+        .where(
+          and(
+            eq(branchStudioServices.studioServiceId, serviceId),
+            eq(branchStudioServices.branchId, input.branchId)
+          )
+        )
+        .limit(1);
+      if (!bookable) return fail('service_not_bookable_at_branch');
+      offeringPriceCents = serviceRow.priceCents;
+    }
 
     const addonRows =
       input.addonServiceIds.length > 0
@@ -112,9 +167,27 @@ export async function createAppointment(
     if (addonRows.length !== input.addonServiceIds.length) return fail('addon');
     if (addonRows.some((a) => !a.isActive)) return fail('addon_inactive');
 
+    // Service bookings accept only matrix-linked add-ons (ticket 03); the
+    // package path never consults the matrix (uniform all-active rule,
+    // unchanged). Requested ids are deduped by the create schema, so the
+    // linked subset's length against the requested length is a sound
+    // membership check.
+    if (serviceId !== null && addonRows.length > 0) {
+      const linkedRows = await tx
+        .select({ addonServiceId: studioServiceAddonServices.addonServiceId })
+        .from(studioServiceAddonServices)
+        .where(
+          and(
+            eq(studioServiceAddonServices.studioServiceId, serviceId),
+            inArray(studioServiceAddonServices.addonServiceId, input.addonServiceIds)
+          )
+        );
+      if (linkedRows.length !== addonRows.length) return fail('addon_not_applicable');
+    }
+
     const [appointment] = await tx
       .insert(appointments)
-      .values({ ...input, bookedPriceCents: packageRow.priceCents, notes: input.notes ?? null })
+      .values({ ...input, bookedPriceCents: offeringPriceCents, notes: input.notes ?? null })
       .returning(appointmentProjection);
     if (!appointment) {
       throw new Error('insert appointments: no row returned');
