@@ -12,8 +12,8 @@ const url = process.env.DATABASE_MIGRATE_URL;
 
 export async function assertAppointmentRecord(sql, expected) {
   const rows = await sql`
-    select id, branch_id, service_package_id, customer_name, customer_email,
-           customer_phone, scheduled_at, status, kind, package_price_cents,
+    select id, branch_id, service_package_id, studio_service_id, customer_name, customer_email,
+           customer_phone, scheduled_at, status, kind, booked_price_cents,
            notes, created_at, updated_at
     from appointments
     where id = ${expected.id}`;
@@ -33,7 +33,13 @@ export async function assertAppointmentRecord(sql, expected) {
   };
   push('id', row.id, expected.id);
   push('branchId', row.branch_id, expected.branchId);
-  push('servicePackageId', row.service_package_id, expected.servicePackageId);
+  if (expected.servicePackageId !== undefined) {
+    push('servicePackageId', row.service_package_id, expected.servicePackageId);
+  }
+  if (expected.studioServiceId !== undefined) {
+    push('studioServiceId', row.studio_service_id, expected.studioServiceId);
+  }
+  push('bookedPriceCents', row.booked_price_cents, expected.bookedPriceCents);
   push('customerName', row.customer_name, expected.customerName);
   push('customerEmail', row.customer_email, expected.customerEmail);
   if (expected.customerPhone !== undefined) {
@@ -44,7 +50,6 @@ export async function assertAppointmentRecord(sql, expected) {
   }
   push('kind', row.kind, expected.kind);
   push('status', row.status, expected.status);
-  push('packagePriceCents', row.package_price_cents, expected.packagePriceCents);
   if (expected.scheduledAt !== undefined) {
     const dbIso =
       row.scheduled_at instanceof Date ? row.scheduled_at.toISOString() : String(row.scheduled_at);

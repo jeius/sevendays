@@ -1,12 +1,12 @@
 import { branchSchema } from '@sevendays/types';
-import { ZodError } from 'zod';
 import { expect, it } from 'vitest';
+import { ZodError } from 'zod';
 import { ApiClientError } from '../src/error.js';
-import { toLoopbackFetch } from '../src/loopback.js';
 import { createApiClient } from '../src/index.js';
+import { toLoopbackFetch } from '../src/loopback.js';
 import { unwrap } from '../src/unwrap.js';
-import { mockApi, mockApiBrokenBranches } from './mock-api.js';
 import type { MockApi } from './mock-api.js';
+import { mockApi, mockApiBrokenBranches } from './mock-api.js';
 
 const BASE = 'http://localhost:4949/';
 
@@ -48,7 +48,7 @@ it('appointments.create returns the created record with add-ons (201)', async ()
     scheduledAt: '2026-10-01T09:00:00.000Z',
     addonServiceIds: ['33333333-3333-4333-8333-333333333333'],
   });
-  expect(record.packagePriceCents).toBe(250000); // server snapshot, not caller input
+  expect(record.bookedPriceCents).toBe(250000); // server snapshot, not caller input
   expect(record.addonServices[0]?.name).toBe('Makeup');
   expect(record.createdAt).toBeInstanceOf(Date);
 });
