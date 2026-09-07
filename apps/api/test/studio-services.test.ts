@@ -23,9 +23,10 @@ describe('GET /api/v1/studio-services', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as StudioServiceWithBranches[];
 
-    // Only the ACTIVE service is visible — even though the retired service
-    // has a branch link, inactive is invisible on the read surface.
-    expect(body).toHaveLength(1);
+    // Two active services now: portrait (both branches) + the ticket-03
+    // module fixture (branchA only). The retired service stays invisible
+    // despite its link — the active-only filter's whole point.
+    expect(body).toHaveLength(2);
     const portrait = body[0];
     expect(portrait?.id).toBe(ids.servicePortrait);
     expect(portrait?.name).toBe('Portraits & ID Photo');
@@ -38,5 +39,9 @@ describe('GET /api/v1/studio-services', () => {
     expect(portrait?.description).toBe('Studio portraits and ID photos.');
     expect(portrait?.createdAt).toBeDefined();
     expect(portrait?.updatedAt).toBeDefined();
+    const studio = body[1];
+    expect(studio?.id).toBe(ids.serviceStudio);
+    expect(studio?.name).toBe('Studio Portraits');
+    expect(studio?.bookableBranchIds).toEqual([ids.branchA]);
   });
 });

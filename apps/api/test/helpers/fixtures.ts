@@ -25,6 +25,7 @@ export type FixtureIds = {
   addonRetired: string;
   servicePortrait: string;
   serviceRetired: string;
+  serviceStudio: string;
   serviceBranchLinks: string[];
 };
 
@@ -39,6 +40,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     branchStudioServices,
     servicePackages,
     studioServices,
+    studioServiceAddonServices,
     frames,
     packageInclusions,
     packageInclusionAttires,
@@ -122,9 +124,9 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     .returning({ id: addonServices.id });
 
   // M2 ticket 02: one active Studio Service — the db-level exactly-one CHECK
-  // test needs a second offering to attempt a both-set insert. Ticket 03's
-  // plan adds the inactive service + applicability-matrix fixtures its
-  // rejection tests need; nothing else consumes rows here.
+  // test needs a second offering to attempt a both-set insert. M2 ticket 03
+  // adds the applicability-matrix fixtures its rejection tests need; the
+  // inactive service is the existing serviceRetired (reused).
   const [servicePortrait] = await db
     .insert(studioServices)
     .values({
@@ -144,13 +146,28 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     })
     .returning({ id: studioServices.id });
 
+  // M2 ticket 03: a second ACTIVE service, linked to branchA ONLY — the
+  // bookability rejection needs an active service that is NOT bookable
+  // everywhere (portrait is linked to both branches).
+  const [serviceStudio] = await db
+    .insert(studioServices)
+    .values({
+      name: 'Studio Portraits',
+      description: 'Module-level service fixture.',
+      priceCents: 70000,
+      isActive: true,
+    })
+    .returning({ id: studioServices.id });
+
   // Bookability rows (ticket 01's presence-row junction): portrait bookable
-  // at BOTH branches; the retired service linked to branchA only — the
-  // inactive filter must hide it from the read even though its link exists.
+  // at BOTH branches; retired linked to branchA only (inactive — invisible
+  // on reads even though its link exists); studio (ticket 03) linked to
+  // branchA only — booking it at branchB is the service_not_bookable case.
   await db.insert(branchStudioServices).values([
     { studioServiceId: servicePortrait.id, branchId: branchA.id },
     { studioServiceId: servicePortrait.id, branchId: branchB.id },
     { studioServiceId: serviceRetired.id, branchId: branchA.id },
+    { studioServiceId: serviceStudio.id, branchId: branchA.id },
   ]);
 
   const serviceBranchLinks = [
@@ -158,6 +175,14 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     { studioServiceId: servicePortrait.id, branchId: branchB.id },
     { studioServiceId: serviceRetired.id, branchId: branchA.id },
   ];
+
+  // Applicability matrix (ticket 03): Makeup applies to the portrait
+  // service; the RETIRED add-on is linked to the studio service — a live
+  // link on an inactive add-on proves activity-before-matrix (ticket 03).
+  await db.insert(studioServiceAddonServices).values([
+    { studioServiceId: servicePortrait.id, addonServiceId: addonMakeup.id },
+    { studioServiceId: serviceStudio.id, addonServiceId: addonRetired.id },
+  ]);
 
   const [packageCombined] = await db
     .insert(servicePackages)
@@ -313,6 +338,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     addonRetired: addonRetired.id,
     servicePortrait: servicePortrait.id,
     serviceRetired: serviceRetired.id,
+    serviceStudio: serviceStudio.id,
     serviceBranchLinks: serviceBranchLinks.map((l) => l.branchId),
   };
 }
