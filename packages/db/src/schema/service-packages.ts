@@ -7,6 +7,14 @@ export const servicePackages = pgTable(
     id: uuid('id').primaryKey().defaultRandom(),
     name: text('name').notNull(),
     description: text('description').notNull(),
+    // Stable shareable identifier (M2 ticket 01): generated from the name at
+    // insert; the seed's coalesce upsert never rewrites an existing slug, so
+    // /packages/:slug URLs survive catalog renames. NOT NULL since migration
+    // 0003 (0002 added it nullable+unique; the seed backfilled the 11 live
+    // rows between the two migrations — the populated-table two-step).
+    slug: text('slug').notNull().unique('service_packages_slug_unique'),
+    // Home-page featured strip flag; owner-controlled via seed until the M5 CMS.
+    isFeatured: boolean('is_featured').notNull().default(false),
     priceCents: integer('price_cents').notNull(),
     // The catalog specifies no durations; availability (ADR-0005) ignores
     // duration. Nullable until the client supplies real values.

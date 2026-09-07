@@ -2,6 +2,7 @@ export * from './addon-services.js';
 export * from './appointment-addon-services.js';
 export * from './appointments.js';
 export * from './attires.js';
+export * from './branch-studio-services.js';
 export * from './branches.js';
 export * from './frames.js';
 export * from './package-inclusion-attires.js';
@@ -9,6 +10,8 @@ export * from './package-inclusions.js';
 export * from './print-sizes.js';
 export * from './relations.js';
 export * from './service-packages.js';
+export * from './studio-service-addon-services.js';
+export * from './studio-services.js';
 
 // TODO: BetterAuth tables (users, sessions, accounts) will be generated via
 // `pnpm --filter @sevendays/db exec betterauth-cli generate` once auth is wired up.

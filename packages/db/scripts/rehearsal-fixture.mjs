@@ -23,8 +23,8 @@ const [branch] = await sql`
   insert into branches (name, address, phone, accepts_walk_ins)
   values ('Rehearsal Branch', 'Rehearsal Address', '+63 900 000 000', false) returning *`;
 const [pkg] = await sql`
-  insert into service_packages (name, description, price_cents)
-  values ('Rehearsal Package', 'Rehearsal description', 99000) returning *`;
+  insert into service_packages (name, description, price_cents, slug)
+  values ('Rehearsal Package', 'Rehearsal description', 99000, 'rehearsal-package') returning *`;
 const [addon] = await sql`
   insert into addon_services (name, description, price_cents)
   values ('Rehearsal Add-on', 'Rehearsal add-on', 6000) returning *`;

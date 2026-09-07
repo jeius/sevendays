@@ -4,7 +4,7 @@
 // junction rows, which cascade).
 // Run: pnpm --filter @sevendays/db db:seed
 import process from 'node:process';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import {
   assertAllKnownAttires,
   buildFrameRowValues,
@@ -14,25 +14,32 @@ import {
   type InclusionEntry,
   type PictureEntry,
   type PrivilegeEntry,
+  slugifyName,
 } from '../src/catalog-rows.js';
 import {
   addonServices,
   attires,
   branches,
+  branchStudioServices,
   createDbClient,
   frames,
   packageInclusionAttires,
   packageInclusions,
   printSizes,
   servicePackages,
+  studioServiceAddonServices,
+  studioServices,
 } from '../src/index.js';
 import {
   addonServiceSeeds,
   attireSeeds,
   branchSeeds,
+  featuredPackageNames,
   packageSeeds,
   printSizeSeeds,
   privilegeSeeds,
+  studioServiceApplicableAddons,
+  studioServiceSeeds,
 } from './catalog.js';
 
 const url = process.env.DATABASE_MIGRATE_URL ?? process.env.DATABASE_URL;
@@ -95,15 +102,106 @@ try {
         });
     }
 
+    // M2 ticket 01 — Studio Services + junctions. Natural-key upsert by name;
+    // junctions rebuild delete-then-insert per service so the DB stays
+    // exactly in sync with scripts/catalog.ts on every run.
+    const studioServiceIdByName = new Map<string, string>();
+    for (const svc of studioServiceSeeds) {
+      const [row] = await tx
+        .insert(studioServices)
+        .values(svc)
+        .onConflictDoUpdate({
+          target: studioServices.name,
+          set: { description: svc.description, priceCents: svc.priceCents, isActive: true },
+        })
+        .returning({ id: studioServices.id });
+      if (!row) throw new Error(`seed: upsert returned no row for studio service ${svc.name}`);
+      studioServiceIdByName.set(svc.name, row.id);
+    }
+
+    const branchRows = await tx.select({ id: branches.id, name: branches.name }).from(branches);
+
+    // Bookability: every seeded service bookable at every branch (spec
+    // ruling — the prototype's not-Calamba Portraits stub was demo-only).
+    for (const svc of studioServiceSeeds) {
+      const serviceId = studioServiceIdByName.get(svc.name);
+      if (!serviceId) throw new Error(`seed: no id for studio service ${svc.name}`);
+      await tx
+        .delete(branchStudioServices)
+        .where(eq(branchStudioServices.studioServiceId, serviceId));
+      await tx
+        .insert(branchStudioServices)
+        .values(branchRows.map((b) => ({ studioServiceId: serviceId, branchId: b.id })));
+    }
+
+    // Applicability: only the add-ons listed per service get junction rows;
+    // an unknown add-on name fails loudly (a typo can't silently shrink the
+    // matrix the booking form and API will trust).
+    const addonRows = await tx
+      .select({ id: addonServices.id, name: addonServices.name })
+      .from(addonServices);
+    const addonIdByName = new Map(addonRows.map((r) => [r.name, r.id]));
+    for (const svc of studioServiceSeeds) {
+      const serviceId = studioServiceIdByName.get(svc.name);
+      if (!serviceId) throw new Error(`seed: no id for studio service ${svc.name}`);
+      await tx
+        .delete(studioServiceAddonServices)
+        .where(eq(studioServiceAddonServices.studioServiceId, serviceId));
+      const applicable = studioServiceApplicableAddons[svc.name] ?? [];
+      if (applicable.length === 0) continue;
+      const values = applicable.map((addonName) => {
+        const addonId = addonIdByName.get(addonName);
+        if (!addonId)
+          throw new Error(`seed: applicability references unknown add-on "${addonName}"`);
+        return { studioServiceId: serviceId, addonServiceId: addonId };
+      });
+      await tx.insert(studioServiceAddonServices).values(values);
+    }
+
+    // M2 ticket 01: resolve every slug up front and fail loudly on a
+    // duplicate (two names slugifying identically would otherwise trip the
+    // unique constraint mid-transaction).
+    const slugByPackageName = new Map<string, string>();
+    for (const pkg of packageSeeds) {
+      const slug = slugifyName(pkg.name);
+      for (const [owner, existing] of slugByPackageName) {
+        if (existing === slug)
+          throw new Error(
+            `seed: slug collision — "${pkg.name}" and "${owner}" both slugify to "${slug}"`
+          );
+      }
+      slugByPackageName.set(pkg.name, slug);
+    }
+    const featuredNames = new Set<string>(featuredPackageNames);
+
     // Packages — upsert by unique name. Deliberately does NOT touch
     // coverImageKey (Milestone 5 uploads it; reseeding must not null it).
+    // slug backfills a NULL (first post-0002 seed) but never rewrites an
+    // existing slug — /packages/:slug URLs survive catalog renames.
     for (const pkg of packageSeeds) {
       const [row] = await tx
         .insert(servicePackages)
-        .values({ name: pkg.name, description: pkg.description, priceCents: pkg.priceCents })
+        .values({
+          name: pkg.name,
+          description: pkg.description,
+          priceCents: pkg.priceCents,
+          // Every packageSeeds entry has a resolved slug (the up-front loop
+          // above guarantees it) — the guard only satisfies noUncheckedIndexedAccess.
+          slug:
+            slugByPackageName.get(pkg.name) ??
+            (() => {
+              throw new Error(`seed: no slug resolved for package ${pkg.name}`);
+            })(),
+          isFeatured: featuredNames.has(pkg.name),
+        })
         .onConflictDoUpdate({
           target: servicePackages.name,
-          set: { description: pkg.description, priceCents: pkg.priceCents },
+          set: {
+            description: pkg.description,
+            priceCents: pkg.priceCents,
+            isFeatured: featuredNames.has(pkg.name),
+            slug: sql`coalesce(${servicePackages.slug}, excluded.slug)`,
+          },
         })
         .returning({ id: servicePackages.id });
       if (!row) throw new Error(`seed: upsert returned no row for package ${pkg.name}`);
@@ -190,7 +288,7 @@ try {
   });
 
   console.log(
-    `[ok] seeded: ${branchSeeds.length} branches, ${printSizeSeeds.length} print sizes, ${attireSeeds.length} attires, ${addonServiceSeeds.length} add-on services, ${packageSeeds.length} packages with frames and inclusions`
+    `[ok] seeded: ${branchSeeds.length} branches, ${printSizeSeeds.length} print sizes, ${attireSeeds.length} attires, ${addonServiceSeeds.length} add-on services, ${studioServiceSeeds.length} studio services, ${packageSeeds.length} packages with frames and inclusions`
   );
 } finally {
   await db.$client.end();

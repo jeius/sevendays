@@ -14,6 +14,11 @@ export const servicePackageSchema = z.object({
   durationMinutes: z.number().int().positive().nullable(),
   isActive: z.boolean().default(true),
   coverImageKey: z.string().nullable(),
+  // Stable shareable identifier (M2 ticket 01): URL key for /packages/:slug.
+  // Seed/server-assigned from the name — never rewritten on rename.
+  slug: z.string().min(1),
+  // Home-page featured strip flag; seed-controlled until the M5 CMS.
+  isFeatured: z.boolean().default(false),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
@@ -22,6 +27,7 @@ export type ServicePackage = z.infer<typeof servicePackageSchema>;
 
 export const createServicePackageSchema = servicePackageSchema.omit({
   id: true,
+  slug: true,
   createdAt: true,
   updatedAt: true,
 });
