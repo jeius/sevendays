@@ -29,6 +29,13 @@
       "when": 1788774681667,
       "tag": "0003_free_thaddeus_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788788805196,
+      "tag": "0004_supreme_magdalene",
+      "breakpoints": true
     }
   ]
 }
