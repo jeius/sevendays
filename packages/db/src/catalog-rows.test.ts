@@ -5,6 +5,7 @@ import {
   buildFrameRowValues,
   buildInclusionRowValues,
   buildJunctionPairs,
+  slugifyName,
 } from './catalog-rows.js';
 
 // Synthetic lookups — the builders are data-agnostic (spec: they shape real
@@ -249,6 +250,28 @@ describe('assertAllKnownAttires', () => {
         attireId,
       })
     ).toThrow('Unknown attire name: Saya');
+  });
+});
+
+describe('slugifyName', () => {
+  it('slugifies a simple name', () => {
+    expect(slugifyName('Basic Package')).toBe('basic-package');
+  });
+
+  it('strips punctuation and collapses whitespace', () => {
+    expect(slugifyName('Customize Package (CP-1)')).toBe('customize-package-cp-1');
+    expect(slugifyName('Tarpaulin & Bulletin Printing')).toBe('tarpaulin-bulletin-printing');
+  });
+
+  it('keeps intra-word hyphens and digits', () => {
+    expect(slugifyName('Package A')).toBe('package-a');
+    expect(slugifyName('CP-2')).toBe('cp-2');
+  });
+
+  it('falls back to a prefixed suffix when nothing alphanumeric survives', () => {
+    const slug = slugifyName('???');
+    expect(slug.startsWith('package-')).toBe(true);
+    expect(slug.length).toBeGreaterThan('package-'.length);
   });
 });
 

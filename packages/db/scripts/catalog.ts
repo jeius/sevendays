@@ -544,6 +544,53 @@ export const packageSeeds: PackageSeed[] = [
   },
 ];
 
+// M2 ticket 01 — Studio Services. Names verbatim from the spec / CONTEXT.md
+// glossary; descriptions + prices from the prototype's owner-seen stubs
+// (prototype-booking-data.ts). Prices are TODO(seed) placeholders — same
+// user-sanctioned posture as the branch phones.
+export const studioServiceSeeds = [
+  {
+    name: 'Photo Recovery',
+    description: 'Restore scanned or damaged photographs.',
+    priceCents: 150000,
+  },
+  {
+    name: 'Tarpaulin & Bulletin Printing',
+    description: 'Large-format tarpaulin and bulletin printing.',
+    priceCents: 80000,
+  },
+  {
+    name: 'Portraits & ID Photo',
+    description: 'Studio portraits and ID photos.',
+    priceCents: 50000,
+  },
+  {
+    name: 'Picture Framing',
+    description: 'Custom framing for prints and artwork.',
+    priceCents: 120000,
+  },
+] as const;
+
+// Applicability matrix seeds (M2 ticket 01): add-on NAMES that apply to each
+// Studio Service. Makeup + Hairstyle apply to Portraits & ID photo only; the
+// other three services list none. Names must match addonServiceSeeds — the
+// seed fails loudly on an unknown name.
+export const studioServiceApplicableAddons: Record<string, string[]> = {
+  'Photo Recovery': [],
+  'Tarpaulin & Bulletin Printing': [],
+  'Portraits & ID Photo': ['Makeup', 'Hairstyle'],
+  'Picture Framing': [],
+};
+
+// Home-page featured strip (M2 ticket 01): the owner-pinned set. Seed-only
+// until the M5 CMS featured toggle.
+export const featuredPackageNames: readonly string[] = [
+  'Basic Package',
+  'Package A',
+  'Package B',
+  'Package C',
+];
+
 // Canonical inclusion signature: `kind|quantity|printSizeCode|attireNames` for
 // pictures/prints, `privilege|0|<attireNames or ->|<description>` for
 // privileges. attireNames joins with '/' in catalog order — byte-identical to
