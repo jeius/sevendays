@@ -7,7 +7,7 @@ import { unwrap } from '../unwrap.js';
 type BySlugEndpoint = RpcClient['api']['v1']['service-packages'][':slug']['$get'];
 
 /**
- * The by-slug endpoint's declared input: `{ slug: string }` (the route
+ * The by-slug endpoint's declared input: `{ param: { slug: string } }` (the route
  * takes no param schema — slug is an opaque text key). Inferred, not
  * hand-typed, so the RPC surface remains the drift-kill.
  */
