@@ -15,6 +15,20 @@
       "when": 1788246732172,
       "tag": "0001_nice_firebrand",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788773625745,
+      "tag": "0002_icy_blazing_skull",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788774681667,
+      "tag": "0003_free_thaddeus_ross",
+      "breakpoints": true
     }
   ]
 }

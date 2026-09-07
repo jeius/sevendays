@@ -17,8 +17,8 @@ async function seedProbeFixtures(sql: postgres.Sql) {
     values ('11111111-1111-4111-8111-111111111111', 'Probe Branch', 'Test Address', '+63 900 000 0000', false)
     returning id`;
   const [pkg] = await sql`
-    insert into service_packages (id, name, description, price_cents)
-    values ('22222222-2222-4222-8222-222222222222', 'Probe Package', 'Probe description', 150000)
+    insert into service_packages (id, name, description, price_cents, slug)
+    values ('22222222-2222-4222-8222-222222222222', 'Probe Package', 'Probe description', 150000, 'probe-package')
     returning id`;
   const [addon] = await sql`
     insert into addon_services (id, name, description, price_cents)

@@ -5,23 +5,30 @@
 // Run: pnpm --filter @sevendays/db db:verify-seed   — exit 0 = verified.
 import process from 'node:process';
 import { eq } from 'drizzle-orm';
+import { slugifyName } from '../src/catalog-rows.js';
 import {
   addonServices,
   attires,
   branches,
+  branchStudioServices,
   createDbClient,
   frames,
   packageInclusionAttires,
   packageInclusions,
   printSizes,
   servicePackages,
+  studioServiceAddonServices,
+  studioServices,
 } from '../src/index.js';
 import {
   addonServiceSeeds,
   attireSeeds,
   branchSeeds,
+  featuredPackageNames,
   inclusionSignatures,
   packageSeeds,
+  studioServiceApplicableAddons,
+  studioServiceSeeds,
 } from './catalog.js';
 
 const url = process.env.DATABASE_MIGRATE_URL ?? process.env.DATABASE_URL;
@@ -112,6 +119,21 @@ for (const seed of packageSeeds) {
   else if (row.priceCents !== seed.priceCents)
     fail(`service package ${seed.name}: price ${row.priceCents} != catalog ${seed.priceCents}`);
   else pass(`service package ${seed.name} ₱${(seed.priceCents / 100).toFixed(2)}`);
+
+  // M2 ticket 01: slug backfilled, format-canonical, and featured flag on-set.
+  if (row) {
+    const expectedSlug = slugifyName(seed.name);
+    row.slug === expectedSlug
+      ? pass(`service package ${seed.name} slug "${row.slug}"`)
+      : fail(
+          `service package ${seed.name}: slug "${row.slug ?? 'null'}" != expected "${expectedSlug}"`
+        );
+
+    const expectedFeatured = featuredPackageNames.includes(seed.name);
+    row.isFeatured === expectedFeatured
+      ? pass(`service package ${seed.name}: is_featured ${row.isFeatured}`)
+      : fail(`service package ${seed.name}: is_featured ${row.isFeatured} != ${expectedFeatured}`);
+  }
 }
 
 // Line-for-line inclusion comparison per package.
@@ -183,6 +205,52 @@ for (const seed of packageSeeds) {
   barePictures.length === 0
     ? pass(`${seed.name}: all ${pictureRows.length} picture inclusions carry attire context`)
     : fail(`${seed.name}: ${barePictures.length} picture inclusions have no attire`);
+}
+
+// M2 ticket 01 — Studio Services: rows, prices, bookability (all 3 branches),
+// applicability (Makeup + Hairstyle → Portraits & ID Photo only).
+const studioServiceRows = await db.select().from(studioServices);
+studioServiceRows.length === studioServiceSeeds.length
+  ? pass(`studio_services: ${studioServiceRows.length}/${studioServiceSeeds.length}`)
+  : fail(`studio_services: ${studioServiceRows.length} != ${studioServiceSeeds.length}`);
+
+for (const seed of studioServiceSeeds) {
+  const row = studioServiceRows.find((r) => r.name === seed.name);
+  if (!row) {
+    fail(`studio service ${seed.name}: missing`);
+    continue;
+  }
+  row.priceCents === seed.priceCents
+    ? pass(
+        `studio service ${seed.name} ₱${(seed.priceCents / 100).toFixed(2)} (TODO(seed) placeholder)`
+      )
+    : fail(`studio service ${seed.name}: price ${row.priceCents} != catalog ${seed.priceCents}`);
+
+  const bookableRows = await db
+    .select({ branchId: branchStudioServices.branchId })
+    .from(branchStudioServices)
+    .where(eq(branchStudioServices.studioServiceId, row.id));
+  bookableRows.length === branchRows.length
+    ? pass(
+        `studio service ${seed.name}: bookable at ${bookableRows.length}/${branchRows.length} branches`
+      )
+    : fail(
+        `studio service ${seed.name}: bookable at ${bookableRows.length} branches != ${branchRows.length}`
+      );
+
+  const applicableRows = await db
+    .select({ addonName: addonServices.name })
+    .from(studioServiceAddonServices)
+    .innerJoin(addonServices, eq(studioServiceAddonServices.addonServiceId, addonServices.id))
+    .where(eq(studioServiceAddonServices.studioServiceId, row.id));
+  const actualApplicable = applicableRows.map((r) => r.addonName).sort();
+  const expectedApplicable = [...(studioServiceApplicableAddons[seed.name] ?? [])].sort();
+  actualApplicable.length === expectedApplicable.length &&
+  actualApplicable.every((name, i) => name === expectedApplicable[i])
+    ? pass(`studio service ${seed.name}: applicable add-ons [${actualApplicable.join(', ')}]`)
+    : fail(
+        `studio service ${seed.name}: applicable add-ons [${actualApplicable.join(', ')}] != [${expectedApplicable.join(', ')}]`
+      );
 }
 
 // Spot rows (public seed data — safe to print).

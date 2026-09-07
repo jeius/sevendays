@@ -138,3 +138,21 @@ function resolvePrintSize(code: string | null, lookup: PrintSizeIdLookup): strin
   if (!id) throw new Error(`Unknown print size code: ${code}`);
   return id;
 }
+
+// Stable URL identifier from a display name (M2 ticket 01): lowercase, strip
+// everything but letters/digits/hyphens, collapse whitespace to single
+// hyphens. The seed generates once and backfills with coalesce — a later
+// catalog rename must never rewrite an existing slug (/packages/:slug URLs
+// survive renames). The random fallback covers a name with no alphanumeric
+// characters; the unique constraint (checked in the seed before insert)
+// makes a collision impossible to commit silently.
+export function slugifyName(name: string): string {
+  const base = name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  return base === '' ? `package-${Math.random().toString(36).slice(2, 10)}` : base;
+}

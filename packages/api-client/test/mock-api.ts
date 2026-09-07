@@ -49,6 +49,8 @@ const PACKAGES = [
     durationMinutes: null,
     isActive: true,
     coverImageKey: null,
+    slug: 'basic-package',
+    isFeatured: true,
     createdAt: NOW,
     updatedAt: NOW,
     inclusions: [

@@ -122,6 +122,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
       name: 'Combined Package',
       description: 'Framed picture with prints and privileges',
       priceCents: 150000,
+      slug: 'combined-package',
       isActive: true,
     })
     .returning({ id: servicePackages.id });
@@ -131,6 +132,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
       name: 'Simple Package',
       description: 'Prints only',
       priceCents: 90000,
+      slug: 'simple-package',
       isActive: true,
     })
     .returning({ id: servicePackages.id });
@@ -140,6 +142,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
       name: 'Retired Package',
       description: 'No longer offered',
       priceCents: 100000,
+      slug: 'retired-package',
       isActive: false,
     })
     .returning({ id: servicePackages.id });
