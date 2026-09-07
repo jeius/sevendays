@@ -105,7 +105,7 @@
     "semantic_hash": ""
   },
   "apps/api/src/routes/appointments.ts": {
-    "mtime": 1788804069.0892181,
+    "mtime": 1788807887.6503189,
     "ast_hash": "4acae7c6f434e9b87bac6416bfd878a1",
     "semantic_hash": ""
   },
@@ -115,12 +115,12 @@
     "semantic_hash": ""
   },
   "apps/api/src/routes/service-packages.ts": {
-    "mtime": 1788803938.918214,
+    "mtime": 1788807887.6503189,
     "ast_hash": "d1153ae621d0325461158d47a8a4f7c0",
     "semantic_hash": ""
   },
   "apps/api/src/routes/v1.ts": {
-    "mtime": 1788804830.1279285,
+    "mtime": 1788807887.6543007,
     "ast_hash": "c1c1afc1c73d124ba59d458b784cc784",
     "semantic_hash": ""
   },
@@ -130,8 +130,8 @@
     "semantic_hash": "fd5e6169e813a9a46fba14c92d7d1f45"
   },
   "apps/api/src/services/appointments.ts": {
-    "mtime": 1788803926.3712406,
-    "ast_hash": "d5245e170c1303315d5fd548ec2840e4",
+    "mtime": 1788811508.4559202,
+    "ast_hash": "4a572b4d0df1fdc36af53a5a4ad29b00",
     "semantic_hash": ""
   },
   "apps/api/src/services/branches.ts": {
@@ -145,17 +145,17 @@
     "semantic_hash": ""
   },
   "apps/api/src/services/errors.ts": {
-    "mtime": 1788803742.7260244,
+    "mtime": 1788807887.6543007,
     "ast_hash": "35df278a93383d4d532856040feb16b7",
     "semantic_hash": ""
   },
   "apps/api/src/services/service-packages.ts": {
-    "mtime": 1788804147.7312367,
+    "mtime": 1788807887.6543007,
     "ast_hash": "7b1f3ba0d0a659c1b604b2f9f9e3e50c",
     "semantic_hash": ""
   },
   "apps/api/src/services/validator.ts": {
-    "mtime": 1788803737.3414557,
+    "mtime": 1788807887.6543007,
     "ast_hash": "e662ac57bcaf0e5dd994b7c62a9c4a1a",
     "semantic_hash": ""
   },
@@ -165,8 +165,8 @@
     "semantic_hash": "8454ea40b25fd611ef122919d1f1ffe9"
   },
   "apps/api/test/appointments.test.ts": {
-    "mtime": 1788804246.5869944,
-    "ast_hash": "df83c43671e7d87b2fd970adea84ad54",
+    "mtime": 1788811508.464031,
+    "ast_hash": "4bf41144c85d12aed4a7d7fc8d49f4f1",
     "semantic_hash": ""
   },
   "apps/api/test/branches.test.ts": {
@@ -185,8 +185,8 @@
     "semantic_hash": "db500d6629e210e78aebea2de95496b8"
   },
   "apps/api/test/helpers/fixtures.ts": {
-    "mtime": 1788804734.018036,
-    "ast_hash": "eabe42478b6d6fadbce0863b60ef3d6a",
+    "mtime": 1788811101.704844,
+    "ast_hash": "8dea6fc72547cfdd1a90426430618bb2",
     "semantic_hash": ""
   },
   "apps/api/test/helpers/truncate.ts": {
@@ -195,7 +195,7 @@
     "semantic_hash": ""
   },
   "apps/api/test/service-packages.test.ts": {
-    "mtime": 1788803639.5032556,
+    "mtime": 1788807887.6543007,
     "ast_hash": "b355e4bd328f73311df7c6a975376561",
     "semantic_hash": ""
   },
@@ -855,13 +855,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1788751195.4696126,
-    "ast_hash": "1af42361f16e8dc588b46a0b11a4fb89",
+    "mtime": 1788812030.1314535,
+    "ast_hash": "621d39bb8c69ef9de3254018e80eb4e3",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1788797034.4946852,
-    "ast_hash": "fced9717065aefa8e8ada6d6cfe321d9",
+    "mtime": 1788812075.1228302,
+    "ast_hash": "4c59670c88101226d64bb6d77137054e",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -1330,7 +1330,7 @@
     "semantic_hash": ""
   },
   "packages/api-client/src/index.ts": {
-    "mtime": 1788805334.483546,
+    "mtime": 1788807887.6941195,
     "ast_hash": "d5a5915c7a476e8532d316d3921d3f71",
     "semantic_hash": ""
   },
@@ -1345,7 +1345,7 @@
     "semantic_hash": ""
   },
   "packages/api-client/src/routes/appointments.ts": {
-    "mtime": 1788805980.7164276,
+    "mtime": 1788807887.6941195,
     "ast_hash": "0b063e7c73495bc30f1229326b3e0abd",
     "semantic_hash": ""
   },
@@ -1355,8 +1355,8 @@
     "semantic_hash": ""
   },
   "packages/api-client/src/routes/service-packages.ts": {
-    "mtime": 1788805980.7164276,
-    "ast_hash": "7cc56b48fa4bd09418b3fa2d8c01058c",
+    "mtime": 1788807887.6941195,
+    "ast_hash": "186f62e9d7fa79cdbdfbb26db78f7195",
     "semantic_hash": ""
   },
   "packages/api-client/src/unwrap.test.ts": {
@@ -1370,12 +1370,12 @@
     "semantic_hash": ""
   },
   "packages/api-client/test/loopback.test.ts": {
-    "mtime": 1788805847.0106673,
+    "mtime": 1788807887.6941195,
     "ast_hash": "0920a47791224745c623b39c6dd4399e",
     "semantic_hash": ""
   },
   "packages/api-client/test/mock-api.ts": {
-    "mtime": 1788805980.7244337,
+    "mtime": 1788807887.6941195,
     "ast_hash": "34b1322b55f0a6bb7590a8ee681c15f3",
     "semantic_hash": ""
   },
@@ -2475,22 +2475,22 @@
     "semantic_hash": ""
   },
   "apps/api/src/routes/studio-services.ts": {
-    "mtime": 1788804898.7890754,
+    "mtime": 1788807887.6543007,
     "ast_hash": "0fac1bc6ff1744bc9304d52a9cbf7017",
     "semantic_hash": ""
   },
   "apps/api/src/services/studio-services.ts": {
-    "mtime": 1788804898.7930849,
+    "mtime": 1788807887.6543007,
     "ast_hash": "f3a051fba99233b87663c7f0386d6536",
     "semantic_hash": ""
   },
   "apps/api/test/studio-services.test.ts": {
-    "mtime": 1788804898.7930849,
-    "ast_hash": "6914c16850d25d1b57c8eb4ace5c9d11",
+    "mtime": 1788811178.0905223,
+    "ast_hash": "c1ce68bb024e08e42ea5c2f724515ef2",
     "semantic_hash": ""
   },
   "packages/api-client/src/routes/studio-services.ts": {
-    "mtime": 1788805980.7124245,
+    "mtime": 1788807887.6941195,
     "ast_hash": "606e6745a1263052559bfae1bd5e476a",
     "semantic_hash": ""
   },
@@ -2540,12 +2540,12 @@
     "semantic_hash": ""
   },
   "packages/types/src/studio-service.test.ts": {
-    "mtime": 1788800244.1228118,
+    "mtime": 1788807887.6981015,
     "ast_hash": "003c50d962bbcbe44753d3873fed2542",
     "semantic_hash": ""
   },
   "packages/types/src/studio-service.ts": {
-    "mtime": 1788800253.374546,
+    "mtime": 1788807887.6981015,
     "ast_hash": "7dbe35258b333f210e87f4eae9f6fd1e",
     "semantic_hash": ""
   },
@@ -2570,8 +2570,13 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-08-m2-04-read-endpoints.md": {
-    "mtime": 1788804553.5984364,
+    "mtime": 1788807887.6543007,
     "ast_hash": "3116ac188f778d94ff56292634063f65",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-09-08-m2-03-service-path-intake.md": {
+    "mtime": 1788810291.752489,
+    "ast_hash": "8f50e26038c435842b6796de45a8a2b6",
     "semantic_hash": ""
   }
 }
