@@ -334,6 +334,7 @@ describe.runIf(process.env.TEST_DATABASE_URL)('live insert-compatibility', async
           name: 'BuilderProbe Package',
           description: 'probe',
           priceCents: 1,
+          slug: 'builderprobe-package',
           isActive: false,
         })
         .returning({ id: servicePackages.id });

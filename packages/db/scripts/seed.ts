@@ -185,7 +185,13 @@ try {
           name: pkg.name,
           description: pkg.description,
           priceCents: pkg.priceCents,
-          slug: slugByPackageName.get(pkg.name),
+          // Every packageSeeds entry has a resolved slug (the up-front loop
+          // above guarantees it) — the guard only satisfies noUncheckedIndexedAccess.
+          slug:
+            slugByPackageName.get(pkg.name) ??
+            (() => {
+              throw new Error(`seed: no slug resolved for package ${pkg.name}`);
+            })(),
           isFeatured: featuredNames.has(pkg.name),
         })
         .onConflictDoUpdate({
