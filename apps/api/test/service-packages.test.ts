@@ -30,6 +30,11 @@ describe('GET /api/v1/service-packages', () => {
     expect(simple).toBeDefined();
     expect(body.some((p) => p.id === ids.packageRetired)).toBe(false);
 
+    // M2 ticket 01: the wire shape carries the new catalog fields (the client
+    // unwrap() requires slug — prove the API serves it before types ship).
+    expect(simple?.slug).toBe('simple-package');
+    expect(simple?.isFeatured).toBe(false);
+
     const framed = combined?.inclusions.find((i) => i.kind === 'framed_picture');
     expect(framed).toBeDefined();
     expect(framed?.printSize?.code).toBe('11x14');
