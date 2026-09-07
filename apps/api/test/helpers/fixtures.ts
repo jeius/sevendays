@@ -24,6 +24,8 @@ export type FixtureIds = {
   addonHairstyle: string;
   addonRetired: string;
   servicePortrait: string;
+  serviceRetired: string;
+  serviceBranchLinks: string[];
 };
 
 export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
@@ -34,6 +36,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     printSizes,
     attires,
     addonServices,
+    branchStudioServices,
     servicePackages,
     studioServices,
     frames,
@@ -131,6 +134,30 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
       isActive: true,
     })
     .returning({ id: studioServices.id });
+  const [serviceRetired] = await db
+    .insert(studioServices)
+    .values({
+      name: 'Retired Studio Service',
+      description: 'No longer offered.',
+      priceCents: 60000,
+      isActive: false,
+    })
+    .returning({ id: studioServices.id });
+
+  // Bookability rows (ticket 01's presence-row junction): portrait bookable
+  // at BOTH branches; the retired service linked to branchA only — the
+  // inactive filter must hide it from the read even though its link exists.
+  await db.insert(branchStudioServices).values([
+    { studioServiceId: servicePortrait.id, branchId: branchA.id },
+    { studioServiceId: servicePortrait.id, branchId: branchB.id },
+    { studioServiceId: serviceRetired.id, branchId: branchA.id },
+  ]);
+
+  const serviceBranchLinks = [
+    { studioServiceId: servicePortrait.id, branchId: branchA.id },
+    { studioServiceId: servicePortrait.id, branchId: branchB.id },
+    { studioServiceId: serviceRetired.id, branchId: branchA.id },
+  ];
 
   const [packageCombined] = await db
     .insert(servicePackages)
@@ -285,5 +312,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     addonHairstyle: addonHairstyle.id,
     addonRetired: addonRetired.id,
     servicePortrait: servicePortrait.id,
+    serviceRetired: serviceRetired.id,
+    serviceBranchLinks: serviceBranchLinks.map((l) => l.branchId),
   };
 }

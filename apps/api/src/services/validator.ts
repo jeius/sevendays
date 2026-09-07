@@ -41,3 +41,24 @@ export const validatedQuery = <S extends ZodSchema>(schema: S) =>
       );
     }
   });
+
+// Third member (M2 ticket 04): path params. Same literal-target rationale as
+// above — zValidator's Target must be an exact literal for Hono RPC input
+// inference. Pre-plan spike (hono 4.13.5 + @hono/zod-validator 0.4.x): a
+// generic validatedParam keeps c.req.valid('param') typed and the chained
+// ':id' route infers { param: { id: string } } through hc<AppType>.
+export const validatedParam = <S extends ZodSchema>(schema: S) =>
+  zValidator('param', schema, (result, c) => {
+    if (!result.success) {
+      return c.json(
+        {
+          error: 'Invalid request payload.',
+          details: result.error.issues.map((issue) => ({
+            path: issue.path,
+            message: issue.message,
+          })),
+        },
+        400
+      );
+    }
+  });

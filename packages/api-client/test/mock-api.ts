@@ -1,7 +1,7 @@
 import { zValidator } from '@hono/zod-validator';
 import { createAppointmentSchema } from '@sevendays/types';
 import { Hono } from 'hono';
-import type { ZodSchema } from 'zod';
+import { type ZodSchema, z } from 'zod';
 
 // Fixture rows shaped to the shared schemas (valid v4 uuids — zod's z.uuid()
 // enforces RFC 4122 version/variant bits, so all-ones constants fail parse).
@@ -80,6 +80,42 @@ const PACKAGES = [
   },
 ];
 
+const BRANCH_LINKS = [
+  {
+    studioServiceId: '55555555-5555-4555-8555-555555555555',
+    branchId: '11111111-1111-4111-8111-111111111111',
+  },
+  {
+    studioServiceId: '55555555-5555-4555-8555-555555555555',
+    branchId: '22222222-2222-4222-8222-222222222222',
+  },
+  {
+    studioServiceId: 'e0000000-0000-4000-8000-000000000000',
+    branchId: '11111111-1111-4111-8111-111111111111',
+  },
+];
+
+const STUDIO_SERVICES = [
+  {
+    id: '55555555-5555-4555-8555-555555555555',
+    name: 'Portraits & ID Photo',
+    description: 'Studio portraits and ID photos.',
+    priceCents: 50000,
+    isActive: true,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 'e0000000-0000-4000-8000-000000000000',
+    name: 'Retired Studio Service',
+    description: 'No longer offered.',
+    priceCents: 60000,
+    isActive: false,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+];
+
 const APPOINTMENTS = [
   {
     id: '99999999-9999-4999-8999-999999999999',
@@ -96,7 +132,7 @@ const APPOINTMENTS = [
     notes: null,
     createdAt: NOW,
     updatedAt: NOW,
-    addonServices: [] as { addonServiceId: string; name: string; priceCents: number }[],
+    addonServiceIds: ['33333333-3333-4333-8333-333333333333'],
   },
 ];
 
@@ -131,13 +167,76 @@ const makeApi = ({ brokenBranches = false }: { brokenBranches?: boolean } = {}) 
     )
   );
 
-  const servicePackages = new Hono<MockEnv>().get('/', (c) => c.json(PACKAGES));
+  const servicePackages = new Hono<MockEnv>()
+    .get('/', (c) => c.json(PACKAGES))
+    .get('/:slug', (c) => {
+      const slug = c.req.param('slug');
+      const pkg = PACKAGES.find((p) => p.slug === slug);
+      if (!pkg) {
+        return c.json({ error: 'Package not found.' }, 404);
+      }
+      return c.json(pkg);
+    });
+
   const addonServices = new Hono<MockEnv>().get('/', (c) => c.json(ADDONS));
+
+  const studioServices = new Hono<MockEnv>().get('/', (c) =>
+    c.json(
+      STUDIO_SERVICES.filter((s) => s.isActive).map((s) => ({
+        ...s,
+        bookableBranchIds: BRANCH_LINKS.filter((l) => l.studioServiceId === s.id).map(
+          (l) => l.branchId
+        ),
+      }))
+    )
+  );
 
   const appointments = new Hono<MockEnv>()
     .get('/', (c) => {
       const branchId = c.req.query('branchId');
-      return c.json(branchId ? APPOINTMENTS.filter((a) => a.branchId === branchId) : APPOINTMENTS);
+      const rows = branchId ? APPOINTMENTS.filter((a) => a.branchId === branchId) : APPOINTMENTS;
+      // Populate addonServices from addonServiceIds for each record.
+      return c.json(
+        rows.map((record) => ({
+          ...record,
+          addonServices: (record.addonServiceIds ?? []).map((addonId) => {
+            const addon = ADDONS.find((a) => a.id === addonId);
+            return {
+              addonServiceId: addonId,
+              name: addon?.name ?? 'Unknown Add-on',
+              priceCents: addon?.priceCents ?? 0,
+            };
+          }),
+        }))
+      );
+    })
+    .get('/:id', (c) => {
+      const id = c.req.param('id');
+      // The real API z.uuid()-validates this param; the mock mirrors the
+      // validator's exact 400 envelope (same wording + details shape).
+      if (!z.uuid().safeParse(id).success) {
+        return c.json(
+          {
+            error: 'Invalid request payload.',
+            details: [{ path: ['id'], message: 'Invalid UUID' }],
+          },
+          400
+        );
+      }
+      const record = APPOINTMENTS.find((a) => a.id === id);
+      if (!record) {
+        return c.json({ error: 'Appointment not found.' }, 404);
+      }
+      // Populate addonServices from addonServiceIds (mirrors the real API join).
+      const addonServices = (record.addonServiceIds ?? []).map((addonId) => {
+        const addon = ADDONS.find((a) => a.id === addonId);
+        return {
+          addonServiceId: addonId,
+          name: addon?.name ?? 'Unknown Add-on',
+          priceCents: addon?.priceCents ?? 0,
+        };
+      });
+      return c.json({ ...record, addonServices });
     })
     .post('/', validatedJson(createAppointmentSchema), async (c) => {
       const input = c.req.valid('json');
@@ -177,6 +276,7 @@ const makeApi = ({ brokenBranches = false }: { brokenBranches?: boolean } = {}) 
     })
     .route('/branches', branches)
     .route('/service-packages', servicePackages)
+    .route('/studio-services', studioServices)
     .route('/addon-services', addonServices)
     .route('/visits', appointments);
 

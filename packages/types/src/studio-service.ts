@@ -22,3 +22,14 @@ export const createStudioServiceSchema = studioServiceSchema.omit({
 });
 
 export type CreateStudioServiceInput = z.infer<typeof createStudioServiceSchema>;
+
+// Read shape for GET /api/v1/studio-services (M2 ticket 04): active Studio
+// Services with the branches they are bookable at, embedded as bare branch
+// ids — the booking form's branch step filters by membership and the
+// services page joins names from the branches read. Extends the row mirror
+// (a plain object schema, no refine — the zod v4 chain rule is not at play).
+export const studioServiceWithBranchesSchema = studioServiceSchema.extend({
+  bookableBranchIds: z.array(z.uuid()),
+});
+
+export type StudioServiceWithBranches = z.infer<typeof studioServiceWithBranchesSchema>;
