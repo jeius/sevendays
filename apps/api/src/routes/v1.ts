@@ -5,6 +5,7 @@ import { addonServices } from './addon-services.js';
 import { appointments } from './appointments.js';
 import { branches } from './branches.js';
 import { servicePackages } from './service-packages.js';
+import { studioServices } from './studio-services.js';
 
 // Acquisition middleware (candidate D): runs for every /api/v1 request,
 // creates the per-request db handle and stores it in context. A missing
@@ -24,4 +25,5 @@ export const v1 = new Hono<ApiEnv>()
   .route('/branches', branches)
   .route('/appointments', appointments)
   .route('/service-packages', servicePackages)
+  .route('/studio-services', studioServices)
   .route('/addon-services', addonServices);
