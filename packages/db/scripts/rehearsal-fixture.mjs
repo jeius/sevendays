@@ -30,9 +30,9 @@ const [addon] = await sql`
   values ('Rehearsal Add-on', 'Rehearsal add-on', 6000) returning *`;
 const [appt] = await sql`
   insert into appointments
-    (branch_id, service_package_id, customer_name, customer_email, customer_phone,
-     scheduled_at, status, kind, package_price_cents, notes)
-  values (${branch.id}, ${pkg.id}, 'M1.5 Rehearsal', 'rehearsal@example.com', '+63 900 000 000',
+    (branch_id, service_package_id, studio_service_id, customer_name, customer_email, customer_phone,
+     scheduled_at, status, kind, booked_price_cents, notes)
+  values (${branch.id}, ${pkg.id}, NULL, 'M1.5 Rehearsal', 'rehearsal@example.com', '+63 900 000 000',
           '2026-10-01 09:00:00+08', 'pending', 'scheduled', 99000, 'rehearsal')
   returning id`;
 // The probe's confirm mode asserts the add-on join rows too — the fixture
@@ -53,7 +53,7 @@ console.log(
     scheduledAt: new Date('2026-10-01T01:00:00.000Z').toISOString(),
     status: 'pending',
     kind: 'scheduled',
-    packagePriceCents: 99000,
+    bookedPriceCents: 99000,
     notes: 'rehearsal',
     addonServices: [{ addonServiceId: addon.id, name: 'Rehearsal Add-on', priceCents: 6000 }],
   })
