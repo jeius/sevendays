@@ -105,6 +105,6 @@ describe('servicePackageSchema slug/isFeatured (M2 ticket 01)', () => {
       coverImageKey: null,
       slug: 'should-be-ignored',
     });
-    expect(parsed.slug).toBeUndefined();
+    expect('slug' in parsed).toBe(false);
   });
 });
