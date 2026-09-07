@@ -224,6 +224,73 @@ describe('GET /api/v1/appointments', () => {
   });
 });
 
+describe('GET /api/v1/appointments/:id', () => {
+  it('returns a single appointment with stitched add-on entries (200)', async () => {
+    const created = (await createViaApi(
+      payload({
+        addonServiceIds: [ids.addonMakeup, ids.addonHairstyle],
+      })
+    )) as { id: string };
+    const res = await app.request(`/api/v1/appointments/${created.id}`, undefined, {
+      DATABASE_URL: url,
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.id).toBe(created.id);
+    expect(body.bookedPriceCents).toBe(150000);
+    // Set-assert the entries: intake writes both junction rows in ONE insert,
+    // so their createdAt ties and the stitch's orderBy gives no order
+    // guarantee between them — the SHAPE is what's pinned, not entry order.
+    expect(body.addonServices).toHaveLength(2);
+    const byId = new Map(
+      (body.addonServices as { addonServiceId: string; name: string; priceCents: number }[]).map(
+        (e) => [e.addonServiceId, e]
+      )
+    );
+    expect(byId.get(ids.addonMakeup)).toEqual({
+      addonServiceId: ids.addonMakeup,
+      name: 'Makeup',
+      priceCents: 12000,
+    });
+    expect(byId.get(ids.addonHairstyle)).toEqual({
+      addonServiceId: ids.addonHairstyle,
+      name: 'Hairstyle',
+      priceCents: 6000,
+    });
+  });
+
+  it('returns 404 with the uniform envelope for an unknown id', async () => {
+    const res = await app.request(`/api/v1/appointments/${MISSING_UUID}`, undefined, {
+      DATABASE_URL: url,
+    });
+    expect(res.status).toBe(404);
+    expect((await res.json()).error).toBe('Appointment not found.');
+  });
+
+  it('rejects a non-uuid id with the uniform 400 envelope', async () => {
+    const res = await app.request('/api/v1/appointments/not-a-uuid', undefined, {
+      DATABASE_URL: url,
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(typeof body.error).toBe('string');
+    expect(body.error.length).toBeGreaterThan(0);
+  });
+
+  it('returns the same shape as the list endpoint (single-get parity)', async () => {
+    const created = (await createViaApi(payload())) as { id: string };
+    const single = await (
+      await app.request(`/api/v1/appointments/${created.id}`, undefined, { DATABASE_URL: url })
+    ).json();
+    const listed = await (
+      await app.request('/api/v1/appointments', undefined, { DATABASE_URL: url })
+    ).json();
+    const fromList = (listed as { id: string }[]).find((a) => a.id === created.id);
+    expect(fromList).toBeDefined();
+    expect(Object.keys(single).sort()).toEqual(Object.keys(fromList).sort());
+  });
+});
+
 // Seam 1 of the intake spec — the module's interface is the only place
 // intake behavior is proven: rejection failures carry the module-owned
 // message, and the happy path commits record + junction rows in one
