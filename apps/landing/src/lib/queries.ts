@@ -1,5 +1,10 @@
 import { queryOptions } from '@tanstack/react-query';
-import { getBranches, getServicePackageBySlug, getServicePackages } from './api.functions';
+import {
+  getBranches,
+  getServicePackageBySlug,
+  getServicePackages,
+  getStudioServices,
+} from './api.functions';
 
 // Query key factory (one resource today; grows with the booking flow).
 export const branchQueries = {
@@ -27,5 +32,13 @@ export const servicePackageQueries = {
       queryFn: () => getServicePackageBySlug({ data: slug }),
       retry: false,
       staleTime: Infinity,
+    }),
+};
+
+export const studioServiceQueries = {
+  all: () =>
+    queryOptions({
+      queryKey: ['studio-services'],
+      queryFn: () => getStudioServices(),
     }),
 };
