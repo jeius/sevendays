@@ -30,3 +30,9 @@ export const getServicePackageBySlug = createServerFn()
       return getApiClient().servicePackages.bySlug({ param: { slug: data } });
     });
   });
+
+export const getStudioServices = createServerFn().handler(async () => {
+  return startSpan({ name: 'GET /api/v1/studio-services' }, async () => {
+    return getApiClient().studioServices.list();
+  });
+});

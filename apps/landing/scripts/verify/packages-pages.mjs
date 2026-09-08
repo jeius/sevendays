@@ -43,7 +43,11 @@ async function main() {
   );
   check('home: Book-now CTA deep-links /book', heroCta === true);
   check('home: featured heading (live catalog has flags)', home.includes('Featured packages'));
-  const homeCards = await evaluate(`document.querySelectorAll('article').length`);
+  // Ticket 06 added services/branches strips to home; count cards inside the
+  // featured strip's section only (data-strip='featured').
+  const homeCards = await evaluate(
+    `document.querySelector("section[data-strip='featured']")?.querySelectorAll('article').length ?? 0`
+  );
   check(
     'home: strip shows the expected featured cards',
     homeCards === strip.length,

@@ -9,9 +9,18 @@ export function SiteHeader() {
         Sevendays Photography
       </Link>
       <nav className='flex items-center gap-6'>
-        {/* Plain anchor: /book arrives with ticket #45; convert to typed Links then. */}
+        {/* Plain anchors: /book arrives with ticket #45; convert to typed Links then. */}
         <a href='/packages' className='hover:underline'>
           Packages
+        </a>
+        <a href='/services' className='hover:underline'>
+          Services
+        </a>
+        <a href='/branches' className='hover:underline'>
+          Branches
+        </a>
+        <a href='/about' className='hover:underline'>
+          About
         </a>
         <a href='/book' className='rounded-md bg-neutral-900 px-4 py-2 text-white'>
           Book now
