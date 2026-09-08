@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { getBranches } from './api.functions';
+import { getBranches, getServicePackageBySlug, getServicePackages } from './api.functions';
 
 // Query key factory (one resource today; grows with the booking flow).
 export const branchQueries = {
@@ -7,5 +7,25 @@ export const branchQueries = {
     queryOptions({
       queryKey: ['branches'],
       queryFn: () => getBranches(),
+    }),
+};
+
+export const servicePackageQueries = {
+  all: () =>
+    queryOptions({
+      queryKey: ['service-packages'],
+      queryFn: () => getServicePackages(),
+    }),
+  /**
+   * Detail by slug. `retry: false` + `staleTime: Infinity` encode the 404
+   * contract: an unknown slug must never be cached (revisit = re-fetch, the
+   * 404 stays a 404), while a fetched package lives for the session.
+   */
+  bySlug: (slug: string) =>
+    queryOptions({
+      queryKey: ['service-packages', 'by-slug', slug],
+      queryFn: () => getServicePackageBySlug({ data: slug }),
+      retry: false,
+      staleTime: Infinity,
     }),
 };

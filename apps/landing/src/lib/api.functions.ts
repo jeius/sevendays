@@ -10,3 +10,23 @@ export const getBranches = createServerFn().handler(async () => {
     return getApiClient().branches.list();
   });
 });
+
+export const getServicePackages = createServerFn().handler(async () => {
+  return startSpan({ name: 'GET /api/v1/service-packages' }, async () => {
+    return getApiClient().servicePackages.list();
+  });
+});
+
+/**
+ * Package detail by slug. Callers pass the start-fn payload ({ data: slug });
+ * the api-client RPC shape ({ param: { slug } }) is wrapped here.
+ * Unknown/inactive slugs reject with ApiClientError(404) — the loader maps
+ * that to the router's notFound().
+ */
+export const getServicePackageBySlug = createServerFn()
+  .validator((input: string) => input)
+  .handler(async ({ data }) => {
+    return startSpan({ name: 'GET /api/v1/service-packages/:slug' }, async () => {
+      return getApiClient().servicePackages.bySlug({ param: { slug: data } });
+    });
+  });
