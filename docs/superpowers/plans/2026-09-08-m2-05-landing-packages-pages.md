@@ -837,6 +837,8 @@ git commit -m "feat(landing): /packages list + slug detail with uniform not-foun
 
 ### Task 6: Scripted CDP verification harness (committed, tickets 06–10 extend it)
 
+> **AMENDED AT EXECUTION (2026-09-08):** the scenario snippet below originally hard-coded `peso(90000)` and `'Basic Package'` — contradicting this task's own "never hard-codes catalog values" Interfaces line (plan defect; caught in review). The committed harness derives both: `cheapest = Math.min(...packages.map(p => p.priceCents))` and `basic.name` from the live API response. Snippet corrected accordingly. The scenario ships **12 checks** (the 10/11 counts in the File Structure and Interfaces lines are stale; committed file is the truth).
+
 **Files:**
 - Create: `apps/landing/scripts/verify/lib.mjs`, `apps/landing/scripts/verify/packages-pages.mjs`
 
@@ -943,6 +945,8 @@ function selectFeatured(packages) {
   return [...packages].sort(byPrice).slice(0, 4);
 }
 
+const cheapest = Math.min(...packages.map((p) => p.priceCents));
+
 const peso = (cents) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(
     cents / 100,
@@ -1000,7 +1004,7 @@ async function main() {
   );
   check(
     '/packages: full details (cheapest price + inclusions visible)',
-    listText.includes(peso(90000)) && listText.includes('Inclusions'),
+    listText.includes(peso(cheapest)) && listText.includes('Inclusions')
   );
 
   // /packages/:slug: by-slug detail + deep link
@@ -1008,10 +1012,10 @@ async function main() {
   const detail = await text();
   check(
     '/packages/:slug renders by slug (name, price, cover placeholder, inclusions)',
-    detail.includes('Basic Package') &&
+    detail.includes(basic.name) &&
       detail.includes(peso(basic.priceCents)) &&
       detail.includes('Cover photo coming soon') &&
-      detail.includes('Inclusions'),
+      detail.includes('Inclusions')
   );
   const detailLink = await evaluate(
     `[...document.querySelectorAll('a[href^="/book?package="]')].map(a => a.getAttribute('href'))[0] ?? null`,
