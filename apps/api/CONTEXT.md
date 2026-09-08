@@ -17,11 +17,15 @@ A fixed item or privilege bundled with a Service Package at no extra charge — 
 _Avoid_: freebie, bundle, "what's included" (in prose)
 
 **Add-on Service**:
-An optional paid extra — hairstyle, makeup — attached to an Appointment at booking time. Always an addition to a Service Package, never bookable instead of one.
+An optional paid extra — hairstyle, makeup — attached to an Appointment at booking time. An addition to whatever the Appointment books, never bookable instead of it; on Studio Service bookings, only the add-ons configured to apply to that service are offered.
 _Avoid_: service (unqualified), extra, option
 
+**Studio Service**:
+A standalone studio offering bookable in its own right at Branches where it is enabled (photo recovery, tarpaulin & bulletin printing, portraits & ID photo, picture framing). Not a Service Package (which bundles Inclusions) and not an Add-on Service (which attaches to a booking).
+_Avoid_: service (unqualified), other service, ancillary service
+
 **Appointment**:
-A customer's reserved time at a Branch for a Service Package, optionally with Add-on Services; the record a booking creates.
+A customer's reserved time at a Branch for a Service Package or a Studio Service, optionally with Add-on Services; the record a booking creates.
 _Avoid_: reservation, order, booking (as a noun for the record)
 
 **Status**:
@@ -77,3 +81,7 @@ _Avoid_: free slots, open times
 **Deactivated (Service Package)**:
 Hidden from the landing site and new bookings, while existing Appointments on it remain valid and fulfillable. A catalog action, never a destructive one.
 _Avoid_: deleted, archived, cancelled (for packages)
+
+**Deactivated (Studio Service)**:
+The same catalog action as a deactivated Service Package: hidden from the landing site and new bookings; existing Appointments on it remain valid. Independent of Branch bookability — a service can be active yet bookable at only some Branches.
+_Avoid_: deleted, archived, cancelled (for catalog offerings)
