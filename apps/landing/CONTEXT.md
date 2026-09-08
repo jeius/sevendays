@@ -9,8 +9,16 @@ A booking completed without an account — the only kind in v1.
 _Avoid_: anonymous user, public booking
 
 **Booking flow**:
-The customer journey: Branch → Service Package → date/time Slot → contact info → Confirmation.
+The customer journey: Branch → the booked offering (a Service Package, or a Studio Service bookable at that Branch) → optional Add-on Services → date/time Slot → contact info → Confirmation.
 _Avoid_: checkout, funnel (except in analytics event names)
+
+**Studio Service**:
+A standalone studio offering (photo recovery, tarpaulin & bulletin printing, portraits & ID photo, picture framing) showcased on the Services page and bookable through the Booking flow at Branches where enabled. Distinct from an Add-on Service, which only attaches to a booking.
+_Avoid_: service (unqualified), other service
+
+**Services page**:
+The landing page showcasing Studio Services. Never a list of Add-on Services — those appear only inside the Booking flow.
+_Avoid_: offerings page
 
 **Confirmation**:
 The end state of the Booking flow — the on-site confirmation state plus the email the API sends.
