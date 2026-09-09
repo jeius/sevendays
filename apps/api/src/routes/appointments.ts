@@ -6,6 +6,7 @@ import {
   getAppointmentWithAddons,
   listAppointments,
 } from '../services/appointments.js';
+import { scheduleConfirmationEmail } from '../services/confirmation-email.js';
 import type { ApiEnv } from '../services/db.js';
 import { badRequest, notFound } from '../services/errors.js';
 import { validatedJson, validatedParam, validatedQuery } from '../services/validator.js';
@@ -41,5 +42,8 @@ export const appointments = new Hono<ApiEnv>()
     if (!result.ok) {
       return badRequest(c, result.message);
     }
+    // Fire-and-forget (issue #47): the booking is committed; the email is
+    // scheduled past the response — its failure never fails the booking.
+    scheduleConfirmationEmail(c.executionCtx, c.env, db, result.record);
     return c.json(result.record, 201);
   });
