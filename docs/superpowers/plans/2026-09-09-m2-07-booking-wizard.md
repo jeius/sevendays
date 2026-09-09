@@ -1779,7 +1779,7 @@ async function main() {
   // 3 — unknown deep-link ids drop silently (no error card, all branches)
   await go(`${LANDING}/book?branch=99999999-9999-4999-8999-999999999999&package=99999999-9999-4999-8999-999999999999`);
   const step1Clean = await stepText(1);
-  const noCard = evaluate(`document.querySelector('[data-rejection-card]') === null`);
+  const noCard = await evaluate(`document.querySelector('[data-rejection-card]') === null`);
   check(
     'book: stale deep-link ids drop silently',
     step1Clean !== null && branches.every((b) => step1Clean.includes(b.name)) && noCard
