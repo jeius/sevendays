@@ -5,6 +5,7 @@
 - `apps/landing` — public marketing site + appointment booking (TanStack Start)
 - `apps/admin` — internal dashboard for managing content and appointments (TanStack Start)
 - `apps/api` — shared backend API (Hono on Cloudflare Workers)
+- `packages/api-client` — shared API client: a Hono RPC wrapper over the API's exported `AppType` that Zod-parses every response (ADR-0006); the only supported path from the frontends to the API
 - `packages/db` — Drizzle schema + client, shared by `api` (and by `admin`/`landing` server functions where needed)
 - `packages/types` — Zod schemas + inferred types, shared across all apps
 - `packages/ui` — shadcn/ui design tokens (CSS variables); apps are Tailwind v4 and own their `@theme` styles
@@ -17,7 +18,7 @@ Each app is a **separate deployment** (Cloudflare Workers for all three — `lan
 Run from the repo root unless noted. All commands are powered by Turborepo and fan out to every app/package that defines the script.
 
 - Install: `pnpm install`
-- Build packages: `pnpm build:packages`
+- Build packages: `pnpm build:packages` — on a fresh clone, also run `pnpm --filter @sevendays/api build` before `pnpm check` (the shared client resolves the API's `AppType` from the built `dist/`)
 - Dev (all apps): `pnpm dev`
 - Dev (single app): `pnpm --filter @sevendays/api dev` (or `@sevendays/landing`, `@sevendays/admin`)
 - Build: `pnpm build`
@@ -32,14 +33,15 @@ Run from the repo root unless noted. All commands are powered by Turborepo and f
 ### Current status of `pnpm test`
 
 - `apps/api` has real vitest tests.
-- `apps/landing` and `apps/admin` currently have a no-op `test` script — no test setup yet. Do not treat a passing `pnpm test` in those apps as real coverage until this is addressed (see `docs/progress.md`).
+- `apps/landing` runs a real vitest suite (lib-seam tests, since M2 ticket 05).
+- `apps/admin` still has a no-op `test` script — no test setup yet. Don't treat a passing `pnpm test` in admin as real coverage until this is addressed (see `docs/progress.md`).
 
 ## Engineering Rules
 
 - **Never commit secrets.** `DATABASE_URL`, `BETTER_AUTH_SECRET`, `RESEND_API_KEY`, `SENTRY_DSN`, `POSTHOG_API_KEY` are set via `wrangler secret put` per environment, never in `wrangler.toml`/`.env` files that get committed.
 - **Validate all external input with Zod.** Use the schemas in `packages/types` rather than redefining shapes per app. If a new shape is needed, add it to `packages/types`, not inline in a route/component.
 - **Database access goes through `packages/db`.** Don't hand-write SQL or open a second Postgres client elsewhere. Schema changes are Drizzle migrations, generated via `db:generate`, never edited by hand in `packages/db/migrations`.
-- **The DB is provisioned and the catalog is seeded.** `packages/db`'s client works against the live Supabase database (migrations 0000 + 0001 applied, catalog seeded + verified). BetterAuth is still not wired in — don't build features that assume a logged-in admin user until `docs/progress.md` says otherwise.
+- **The DB is provisioned and the catalog is seeded.** `packages/db`'s client works against the live Supabase database (migrations 0000–0004 applied, catalog seeded + verified). BetterAuth is still not wired in — don't build features that assume a logged-in admin user until `docs/progress.md` says otherwise.
 - **Keep route handlers thin.** In `apps/api`, business logic belongs in a service/module, not inline in the Hono route. Routes: parse/validate input, call a function, return a response.
 - **Use `async`/`await`** exclusively; avoid raw Promise chains or callbacks.
 - **Each app owns its UI**, but shared tokens live in `packages/ui` (shadcn CSS variables). Apps are Tailwind v4 (CSS-first) — theme via `@theme` in each app's `styles.css`; don't duplicate token definitions between `landing` and `admin`.
@@ -68,6 +70,7 @@ sevendays/
 │   ├── admin/            # TanStack Start — dashboard + CMS
 │   └── api/              # Hono on Cloudflare Workers
 └── packages/
+    ├── api-client/        # shared API client — Hono RPC over the API's AppType (ADR-0006)
     ├── db/               # Drizzle schema + client (live DB: migrations applied, catalog seeded)
     ├── types/             # Zod schemas, shared types
     ├── ui/               # shadcn tokens (CSS variables)

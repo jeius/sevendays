@@ -1,7 +1,7 @@
 {
   "extends": "@sevendays/config/ts/node",
   "compilerOptions": {
-    "types": ["@cloudflare/workers-types"]
+    "types": ["@cloudflare/workers-types", "node"]
   },
   "include": ["src", "worker-configuration.d.ts", "**.config.ts"],
   "exclude": ["node_modules", "dist", ".turbo", "coverage"]
