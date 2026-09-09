@@ -1,4 +1,5 @@
 import type { Branch } from '@sevendays/types';
+import { Link } from '@tanstack/react-router';
 import { WalkInBadge } from './walk-in-badge';
 
 // Full branch card (/branches): address, phone, walk-in badge, and the
@@ -12,13 +13,13 @@ export function BranchCard({ branch }: { branch: Branch }) {
       <p className='text-neutral-700'>{branch.address}</p>
       <p className='text-neutral-700'>{branch.phone}</p>
       <WalkInBadge acceptsWalkIns={branch.acceptsWalkIns} />
-      {/* Plain anchor: /visit arrives with ticket #45; convert to typed Links then. */}
-      <a
-        href={`/visit?branch=${branch.id}`}
+      <Link
+        to='/visit'
+        search={{ branch: branch.id }}
         className='rounded-md bg-neutral-900 px-4 py-2 text-center text-white'
       >
         Book at this branch
-      </a>
+      </Link>
     </article>
   );
 }

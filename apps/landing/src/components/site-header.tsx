@@ -22,9 +22,9 @@ export function SiteHeader() {
         <a href='/about' className='hover:underline'>
           About
         </a>
-        <a href='/visit' className='rounded-md bg-neutral-900 px-4 py-2 text-white'>
+        <Link to='/visit' className='rounded-md bg-neutral-900 px-4 py-2 text-white'>
           Book now
-        </a>
+        </Link>
       </nav>
     </header>
   );

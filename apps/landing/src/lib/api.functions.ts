@@ -1,4 +1,6 @@
 import { startSpan } from '@sentry/tanstackstart-react';
+import type { CreateVisitArgs } from '@sevendays/api-client';
+import type { AppointmentWithAddons } from '@sevendays/types';
 import { createServerFn } from '@tanstack/react-start';
 import { getApiClient } from './api.server';
 
@@ -36,3 +38,23 @@ export const getStudioServices = createServerFn().handler(async () => {
     return getApiClient().studioServices.list();
   });
 });
+
+export const getAddonServices = createServerFn().handler(async () => {
+  return startSpan({ name: 'GET /api/v1/addon-services' }, async () => {
+    return getApiClient().addonServices.list();
+  });
+});
+
+/**
+ * Guest booking POST. Callers pass the start-fn payload ({ data: input });
+ * the api-client RPC shape ({ json }) is wrapped here. Rejections reject
+ * with ApiClientError(400) whose details carry the API's module-owned
+ * message — src/lib/visit.ts maps it to the typed rejection card.
+ */
+export const createStudioVisit = createServerFn()
+  .validator((input: CreateVisitArgs) => input)
+  .handler(async ({ data }): Promise<AppointmentWithAddons> => {
+    return startSpan({ name: 'POST /api/v1/visits' }, async () => {
+      return getApiClient().appointments.create(data);
+    });
+  });
