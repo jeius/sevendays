@@ -206,6 +206,17 @@ async function main() {
     `expected total ${peso(expectedTotal)} (${pkg.name} + ${addons[0].name}); uniform package add-ons: ${totalAddonsForPackage}`
   );
 
+  // 15 — ticket 08: the confirmation route exists; an unknown id renders
+  // the uniform not-found (status + rendered text, packages-pages precedent).
+  const missingRes = await fetch(`${LANDING}/booking/00000000-0000-4000-8000-000000000000`);
+  const missingHtml = await missingRes.text();
+  check(
+    'book: unknown booking id renders the uniform not-found (heading + recovery link)',
+    missingRes.status === 404 &&
+      missingHtml.includes('Booking not found.') &&
+      missingHtml.includes('Start a new booking')
+  );
+
   close();
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} checks passed`);

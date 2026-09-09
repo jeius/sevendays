@@ -58,3 +58,17 @@ export const createAppointment = createServerFn()
       return getApiClient().appointments.create(data);
     });
   });
+
+/**
+ * Confirmation read-back (ticket 08). Callers pass the start-fn payload
+ * ({ data: id }); the api-client RPC shape ({ param: { id } }) is wrapped
+ * here. Unknown ids reject with ApiClientError(404) — the loader maps that
+ * to the router's not-found via lib/api-404.ts.
+ */
+export const getAppointment = createServerFn()
+  .validator((input: string) => input)
+  .handler(async ({ data }) => {
+    return startSpan({ name: 'GET /api/v1/appointments/:id' }, async () => {
+      return getApiClient().appointments.get({ param: { id: data } });
+    });
+  });
