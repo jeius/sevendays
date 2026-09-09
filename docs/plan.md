@@ -88,6 +88,8 @@ Real slot logic behind the booking form: branch business hours + per-slot capaci
 
 ## Milestone 4 — Admin Auth + Dashboard
 
+**Versioned-delivery note (2026-09-10):** under the v1/v2 delivery ruling (issue #62), BetterAuth stays v1-track and the appointments dashboard below is **v2-track** — this milestone splits at the post-M2 delivery-versions charting.
+
 - [ ] BetterAuth wired into `apps/admin` (staff login), with BetterAuth's tables generated into `packages/db/src/schema/` and a migration
 - [ ] Set `BETTER_AUTH_SECRET` for `apps/api` and `apps/admin` (`wrangler secret put`)
 - [ ] `apps/api` verifies BetterAuth sessions on mutating routes by checking the session token against the shared auth tables (ADR-0004 — no cross-domain cookies)
@@ -109,6 +111,8 @@ Real slot logic behind the booking form: branch business hours + per-slot capaci
 **Exit criteria:** an admin can change a package's price or add a new one, and it appears on the landing site immediately.
 
 ## Milestone 6 — Production Hardening
+
+**Versioned-delivery note (2026-09-10):** booking-specific items below — booking-endpoint rate limiting, Resend sending domain + email check, booking-funnel PostHog events — are **v2-track** under the v1/v2 delivery ruling (issue #62); domains, CORS, logging, and Sentry are the v1 production slice. This milestone splits at the post-M2 delivery-versions charting.
 
 - [ ] Real logging via Loglayer + Pino in `apps/api`
 - [ ] Sentry wired into `apps/api` (Workers SDK)
@@ -137,5 +141,6 @@ Plan notes:
 - These checkboxes are the single source of truth for milestone progress — `docs/progress.md` narrates verification and dates but does not mirror this list (decided 2026-08-30).
 - Milestone 3 (Booking Availability) was added after the original roadmap (2026-08-30); Milestones 4–6 were renumbered from 3–5.
 - Booking Availability was deferred out of the build scope by the owner (2026-09-09); the UI/UX design-system milestone (wayfinder map #55) is expected to take the M3 slot at its spec close-out.
+- Delivery is versioned (owner rulings, 2026-09-09/10): v1 = landing + admin auth + CMS as a booking-free artifact, handed over (repo + account) once the design milestone lands; v2 = booking + appointments admin + availability. Recorded in issue #62; M4/M6 split at the post-M2 delivery-versions charting.
 - Milestone 2's pre-flight block (shared API client, ADR-0006) was added 2026-08-30, decided at zero frontend call sites.
 - Milestone 2's booking-flow checkboxes were red-penciled 2026-09-07 per the M2 booking-flow spec (`docs/specs/2026-09-07-m2-booking-flow-spec.md`, GitHub issue #37) — the output of the M2 wayfinder map (#31). Original seven-checkbox shape (2026-08-30): landing pages (packages/services/branches), form branch → package → date/time → contact, past-date rejection, POST persistence, Resend integration, confirmation page/state, end-to-end verify.
