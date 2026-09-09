@@ -39,7 +39,8 @@ export async function listActiveStudioServicesWithBranches(
       branchId: branchStudioServices.branchId,
     })
     .from(branchStudioServices)
-    .where(inArray(branchStudioServices.studioServiceId, serviceIds));
+    .where(inArray(branchStudioServices.studioServiceId, serviceIds))
+    .orderBy(asc(branchStudioServices.createdAt), asc(branchStudioServices.id));
 
   const branchesByService = groupChildren(linkRows, (row) => row.studioServiceId);
 
@@ -62,7 +63,8 @@ export async function listActiveStudioServicesWithBranches(
         inArray(studioServiceAddonServices.studioServiceId, serviceIds),
         eq(addonServices.isActive, true)
       )
-    );
+    )
+    .orderBy(asc(studioServiceAddonServices.createdAt), asc(studioServiceAddonServices.id));
 
   const addonsByService = groupChildren(applicabilityRows, (row) => row.studioServiceId);
 
