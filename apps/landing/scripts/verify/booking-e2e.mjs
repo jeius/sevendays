@@ -1,7 +1,8 @@
 // MUTATING end-to-end (issue #45 AC 1): drives two REAL bookings through
 // /book — one package (with an add-on) and one studio service — against the
-// live seeded stack, then reads each back through the public single-get and
-// asserts the server snapshot (bookedPriceCents, add-on entries, status).
+// live seeded stack, then reads each back through the public single-get AND
+// its /booking/:id page, asserting the server snapshot (bookedPriceCents,
+// add-on entries, status) and the rendered read-back (ticket 08).
 // Rows persist in the compose db by design (tiny volume; the studio
 // reconciles manually until M3 availability). Run at verification time:
 //   node apps/landing/scripts/verify/booking-e2e.mjs
@@ -24,6 +25,8 @@ function check(name, ok, detail = '') {
   results.push({ name, ok });
   console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}`);
 }
+const peso = (cents) =>
+  new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
 const phDate = (days) =>
   new Date(Date.now() + days * 86400_000).toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
 
@@ -107,8 +110,27 @@ async function main() {
       pkgRecord.addonServices[0].addonServiceId === addons[0].id &&
       pkgRecord.addonServices[0].priceCents === addons[0].priceCents
   );
-  const confRes = await fetch(`${LANDING}${pkgPath}`);
-  check('confirmation page 404s until #46 (the expected boundary)', confRes.status === 404);
+  // Ticket 08: the read-back page is live — assert the rendered snapshot
+  // (names joined from the sibling reads; prices from the record only).
+  // React SSR splits interpolated text nodes with <!-- --> markers, so
+  // strip them before plain-substring matching (live-run finding).
+  const stripSsrMarkers = (html) => html.replace(/<!-- -->/g, '');
+  const confHtml = stripSsrMarkers(await (await fetch(`${LANDING}${pkgPath}`)).text());
+  const expectedTotal = peso(
+    pkgRecord.bookedPriceCents + pkgRecord.addonServices.reduce((s, a) => s + a.priceCents, 0)
+  );
+  check(
+    'package read-back renders the booked snapshot (heading, names, PHT schedule, snapshot total, email line)',
+    confHtml.includes('Booking confirmed ✓') &&
+      confHtml.includes(pkg.name) &&
+      confHtml.includes(branch.name) &&
+      confHtml.includes(addons[0].name) &&
+      confHtml.includes(expectedTotal) &&
+      confHtml.includes('(PHT)') &&
+      confHtml.includes('A confirmation email was sent to e2e@example.com.') &&
+      confHtml.includes('Need to change something? Call the branch.'),
+    `expected total ${expectedTotal}`
+  );
 
   // Booking 2 — studio service (no applicable add-ons ⇒ skips the step)
   await go(`${LANDING}/book?service=${svc.id}&branch=${branch.id}`);
@@ -129,6 +151,19 @@ async function main() {
       svcRecord?.servicePackageId === null &&
       svcRecord?.bookedPriceCents === svc.priceCents &&
       svcRecord?.addonServices?.length === 0
+  );
+
+  // Ticket 08: the service read-back — no add-on rows render when the
+  // booking carries none (the page's 'Add-on' rows are the only source of
+  // that string).
+  const svcHtml = stripSsrMarkers(await (await fetch(`${LANDING}${svcPath}`)).text());
+  check(
+    'service read-back renders the booked snapshot with no add-on rows',
+    svcHtml.includes('Booking confirmed ✓') &&
+      svcHtml.includes(svc.name) &&
+      svcHtml.includes(branch.name) &&
+      !svcHtml.includes('Add-on') &&
+      svcHtml.includes(peso(svcRecord.bookedPriceCents))
   );
 
   close();
