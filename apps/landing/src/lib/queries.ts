@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import {
   getAddonServices,
+  getAppointment,
   getBranches,
   getServicePackageBySlug,
   getServicePackages,
@@ -49,5 +50,21 @@ export const addonServiceQueries = {
     queryOptions({
       queryKey: ['addon-services'],
       queryFn: () => getAddonServices(),
+    }),
+};
+
+export const appointmentQueries = {
+  /**
+   * Confirmation read-back (ticket 08). Posture per the spec residual —
+   * no special cache posture: the default staleTime keeps every visit a
+   * fresh server-function read; `retry: false` only stops the default
+   * retry loop from re-firing the deterministic 404 an unknown id
+   * produces (retry is not caching — nothing here outlives the visit).
+   */
+  byId: (id: string) =>
+    queryOptions({
+      queryKey: ['appointments', 'by-id', id],
+      queryFn: () => getAppointment({ data: id }),
+      retry: false,
     }),
 };
