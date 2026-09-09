@@ -49,7 +49,7 @@ apps/landing/src/lib/queries.ts                    (mod, Task 2) + addonServiceQ
 apps/landing/src/lib/format.ts                     (mod, Task 2) + phDateTime
 apps/landing/src/lib/format.test.ts                (mod, Task 2) phDateTime pinned outputs (3 → 5 tests)
 apps/landing/src/lib/booking.ts                    (new, Task 3) pure wizard logic + thin useBookingWizard hook
-apps/landing/src/lib/booking.test.ts               (new, Task 3) 22 lib-seam tests (mocked clock)
+apps/landing/src/lib/booking.test.ts               (new, Task 3) 30 lib-seam tests (mocked clock)
 apps/landing/src/routes/book.tsx                   (new, Task 4) /book — variant C one-question-per-screen
 apps/landing/src/components/booking/rejection-card.tsx (new, Task 4) typed rejection card
 apps/landing/src/components/booking/summary-rail.tsx   (new, Task 4) sticky "Your booking" rail
@@ -1735,7 +1735,7 @@ async function main() {
   const totalAddonsForPackage = addons.length;
 
   const page = await connect();
-  const { go, text, evaluate, close } = page;
+  const { go, evaluate, close } = page;
   const q = (sel) => JSON.stringify(sel);
   const click = async (sel) =>
     evaluate(`document.querySelector(${q(sel)})?.click() ?? 'missing'`);
@@ -1814,7 +1814,7 @@ async function main() {
   // 7 — a service with no applicable add-ons skips straight to date/time
   await go(`${LANDING}/book?service=${svcNoAddons.id}`);
   await click(`section[data-step='1'] button`);
-  await click(`section[data-step='2'] button`);
+  await click(`section[data-step='2'] button[data-offering='${svcNoAddons.id}']`);
   const step4Direct = await stepText(4);
   const noStep3 = await evaluate(`document.querySelector("section[data-step='3']") === null`);
   check(
@@ -1843,7 +1843,7 @@ async function main() {
   check('book: future pick clears the hint', hintGone);
 
   // 11 — Continue reaches the contact step
-  await click(`section[data-step='4'] button:last-of-type`);
+  await click(`section[data-step='4'] > button`);
   const step5 = await stepText(5);
   check('book: date/time Continue reaches the contact step', step5 !== null);
 
@@ -1865,13 +1865,19 @@ async function main() {
   await click('[data-back]');
   await setInput(`section[data-step='4'] input[type='date']`, phDate(-1));
   await click(`section[data-step='4'] button`);
-  await click(`section[data-step='4'] button:last-of-type`);
+  await click(`section[data-step='4'] > button`);
   await click(confirmSel);
-  await page.wait(1200);
-  const card = await text();
+  // Dev-stack server fns take ~2-3s (wrangler + SSR round-trip) — poll for
+  // the card instead of a fixed sleep (a fixed 1.2s false-failed this check).
+  let card = null;
+  for (let i = 0; i < 20; i++) {
+    await page.wait(500);
+    card = await evaluate(`document.querySelector('[data-rejection-card]')?.innerText ?? null`);
+    if (card !== null) break;
+  }
   check(
     'book: past-slot submit renders the typed rejection card (friendly + API reason)',
-    card.includes('already passed in the Philippines') && card.includes('API reason:')
+    card !== null && card.includes('already passed in the Philippines') && card.includes('API reason:')
   );
 
   // 14 — the rail shows branch/offering/total derived from live data
@@ -2008,13 +2014,18 @@ async function main() {
     await setInput(`section[data-step='5'] input[placeholder='Email']`, 'e2e@example.com');
     await setInput(`section[data-step='5'] input[placeholder='Phone (+63…)']`, '+63 917 000 0000');
     await click(`section[data-step='5'] button[type='button']:last-of-type`);
-    await wait(1500);
+    // Dev server-fn round-trip ≈ 2.6s — poll for the redirect (check-13 precedent).
+    for (let i = 0; i < 20; i++) {
+      await wait(500);
+      const path = await evaluate(`location.pathname`);
+      if (/^\/booking\//.test(path)) return path;
+    }
     return evaluate(`location.pathname`);
   }
   async function pickDate() {
     await setInput(`section[data-step='4'] input[type='date']`, phDate(2));
     await click(`section[data-step='4'] button`); // first chip
-    await click(`section[data-step='4'] button:last-of-type`); // Continue
+    await click(`section[data-step='4'] > button`); // Continue
   }
 
   // Booking 1 — package + first add-on
@@ -2022,7 +2033,7 @@ async function main() {
   await click(`section[data-step='1'] button`); // branch (prefilled, confirm the pick)
   await click(`section[data-step='2'] button[data-offering='${pkg.id}']`); // the preselected package card
   await click(`section[data-step='3'] button`); // first add-on
-  await click(`section[data-step='3'] button[type='button']:last-of-type`); // Continue · total
+  await click(`section[data-step='3'] > button`); // Continue · total
   await pickDate();
   const pkgPath = await fillContactAndConfirm();
   check(
