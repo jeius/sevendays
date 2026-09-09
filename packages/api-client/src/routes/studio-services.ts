@@ -6,7 +6,7 @@ import { unwrap } from '../unwrap.js';
 /** Studio Service wrappers: GET /api/v1/studio-services (the only method today). */
 export function studioServicesRoutes(raw: RpcClient) {
   return {
-    /** GET /api/v1/studio-services — active services with bookableBranchIds. */
+    /** GET /api/v1/studio-services — active services with bookableBranchIds and applicableAddonServiceIds (active add-ons only). */
     async list(): Promise<StudioServiceWithBranches[]> {
       const res = await raw.api.v1['studio-services'].$get();
       return unwrap(res, studioServiceWithBranchesSchema.array());
