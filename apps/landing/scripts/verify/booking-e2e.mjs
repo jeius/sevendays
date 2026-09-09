@@ -1,0 +1,143 @@
+// MUTATING end-to-end (issue #45 AC 1): drives two REAL bookings through
+// /book — one package (with an add-on) and one studio service — against the
+// live seeded stack, then reads each back through the public single-get and
+// asserts the server snapshot (bookedPriceCents, add-on entries, status).
+// Rows persist in the compose db by design (tiny volume; the studio
+// reconciles manually until M3 availability). Run at verification time:
+//   node apps/landing/scripts/verify/booking-e2e.mjs
+//
+// Controller-ruled deviations from the plan snippet (mirroring the Task 5
+// scenario fixes, live-proven there): (1) step-4 Continue is
+// `section[data-step='4'] > button` — `button:last-of-type` matches the last
+// hour chip per CSS per-parent semantics; (2) step-3 Continue is
+// `section[data-step='3'] > button` for the same reason (the add-on cards
+// are buttons inside a sibling grid div); (3) fillContactAndConfirm polls
+// location.pathname for /booking/<uuid> instead of a fixed 1.5s wait — the
+// dev server-fn round-trip measured ~2.6s (Task 5 check 13).
+import { connect } from './lib.mjs';
+
+const LANDING = process.env.LANDING_VERIFY_URL ?? 'http://localhost:3000';
+const API = process.env.API_VERIFY_URL ?? 'http://127.0.0.1:8787';
+
+const results = [];
+function check(name, ok, detail = '') {
+  results.push({ name, ok });
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}`);
+}
+const phDate = (days) =>
+  new Date(Date.now() + days * 86400_000).toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
+
+async function main() {
+  const [pkgRes, svcRes, addonRes, branchRes] = await Promise.all([
+    fetch(`${API}/api/v1/service-packages`),
+    fetch(`${API}/api/v1/studio-services`),
+    fetch(`${API}/api/v1/addon-services`),
+    fetch(`${API}/api/v1/branches`),
+  ]);
+  const packages = await pkgRes.json();
+  const services = await svcRes.json();
+  const addons = await addonRes.json();
+  const branches = await branchRes.json();
+  const pkg = packages[0];
+  const svc = services.find((s) => s.applicableAddonServiceIds.length === 0);
+  const branch = branches[0];
+
+  const page = await connect();
+  const { go, evaluate, wait, close } = page;
+  const q = (s) => JSON.stringify(s);
+  const click = async (sel) => evaluate(`document.querySelector(${q(sel)})?.click() ?? 'missing'`);
+  const setInput = async (sel, value) =>
+    evaluate(`
+      (() => {
+        const el = document.querySelector(${q(sel)});
+        if (!el) return false;
+        const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+        setter.call(el, ${q(value)});
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        return true;
+      })()
+    `);
+  async function fillContactAndConfirm() {
+    await setInput(`section[data-step='5'] input[placeholder='Full name']`, 'E2E Booking');
+    await setInput(`section[data-step='5'] input[placeholder='Email']`, 'e2e@example.com');
+    await setInput(`section[data-step='5'] input[placeholder='Phone (+63…)']`, '+63 917 000 0000');
+    await click(`section[data-step='5'] button[type='button']:last-of-type`);
+    // Dev server-fn round-trip ≈ 2.6s — poll for the redirect (check-13 precedent).
+    for (let i = 0; i < 20; i++) {
+      await wait(500);
+      const path = await evaluate(`location.pathname`);
+      if (/^\/booking\//.test(path)) return path;
+    }
+    return evaluate(`location.pathname`);
+  }
+  async function pickDate() {
+    await setInput(`section[data-step='4'] input[type='date']`, phDate(2));
+    await click(`section[data-step='4'] button`); // first chip
+    await click(`section[data-step='4'] > button`); // Continue
+  }
+
+  // Booking 1 — package + first add-on
+  await go(`${LANDING}/book?package=${pkg.id}&branch=${branch.id}`);
+  await click(`section[data-step='1'] button`); // branch (prefilled, confirm the pick)
+  await click(`section[data-step='2'] button[data-offering='${pkg.id}']`); // the preselected package card
+  await click(`section[data-step='3'] button`); // first add-on
+  await click(`section[data-step='3'] > button`); // Continue · total
+  await pickDate();
+  const pkgPath = await fillContactAndConfirm();
+  check(
+    'package booking redirects to /booking/:id',
+    /^\/booking\/[0-9a-f-]{36}$/.test(pkgPath),
+    pkgPath
+  );
+  const pkgId = pkgPath?.split('/').pop();
+  const pkgRes2 = await fetch(`${API}/api/v1/appointments/${pkgId}`);
+  const pkgRecord = await pkgRes2.json();
+  check(
+    'package booking snapshot: pending, package ref, booking-time price',
+    pkgRecord?.status === 'pending' &&
+      pkgRecord?.servicePackageId === pkg.id &&
+      pkgRecord?.studioServiceId === null &&
+      pkgRecord?.bookedPriceCents === pkg.priceCents,
+    `bookedPriceCents ${pkgRecord?.bookedPriceCents} vs live ${pkg.priceCents}`
+  );
+  check(
+    'package booking carries the selected add-on with snapshot price',
+    pkgRecord?.addonServices?.length === 1 &&
+      pkgRecord.addonServices[0].addonServiceId === addons[0].id &&
+      pkgRecord.addonServices[0].priceCents === addons[0].priceCents
+  );
+  const confRes = await fetch(`${LANDING}${pkgPath}`);
+  check('confirmation page 404s until #46 (the expected boundary)', confRes.status === 404);
+
+  // Booking 2 — studio service (no applicable add-ons ⇒ skips the step)
+  await go(`${LANDING}/book?service=${svc.id}&branch=${branch.id}`);
+  await click(`section[data-step='1'] button`);
+  await click(`section[data-step='2'] button[data-offering='${svc.id}']`);
+  await pickDate();
+  const svcPath = await fillContactAndConfirm();
+  check(
+    'service booking redirects to /booking/:id',
+    /^\/booking\/[0-9a-f-]{36}$/.test(svcPath),
+    svcPath
+  );
+  const svcId = svcPath?.split('/').pop();
+  const svcRecord = await (await fetch(`${API}/api/v1/appointments/${svcId}`)).json();
+  check(
+    'service booking snapshot: service ref, exactly-one, snapshot price',
+    svcRecord?.studioServiceId === svc.id &&
+      svcRecord?.servicePackageId === null &&
+      svcRecord?.bookedPriceCents === svc.priceCents &&
+      svcRecord?.addonServices?.length === 0
+  );
+
+  close();
+  const failed = results.filter((r) => !r.ok);
+  console.log(`\n${results.length - failed.length}/${results.length} checks passed`);
+  process.exit(failed.length ? 1 : 0);
+}
+
+main().catch((e) => {
+  console.error('E2E ERROR:', e.message);
+  process.exit(1);
+});
