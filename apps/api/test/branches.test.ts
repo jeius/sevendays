@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
 import { createTestDb } from './helpers/db.js';
+import { testEnv } from './helpers/env.js';
 import type { FixtureIds } from './helpers/fixtures.js';
 import { loadFixtures } from './helpers/fixtures.js';
 import { truncateAll } from './helpers/truncate.js';
@@ -16,7 +17,7 @@ beforeEach(async () => {
 
 describe('GET /api/v1/branches', () => {
   it('returns real branch rows', async () => {
-    const res = await app.request('/api/v1/branches', undefined, { DATABASE_URL: url });
+    const res = await app.request('/api/v1/branches', undefined, testEnv(url));
     expect(res.status).toBe(200);
     const body = (await res.json()) as { id: string; name: string }[];
     expect(body).toHaveLength(2);

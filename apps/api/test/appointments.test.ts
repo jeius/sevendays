@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import app from '../src/index.js';
 import { createAppointment } from '../src/services/appointments.js';
 import { createTestDb } from './helpers/db.js';
+import { testEnv } from './helpers/env.js';
 import type { FixtureIds } from './helpers/fixtures.js';
 import { loadFixtures } from './helpers/fixtures.js';
 import { truncateAll } from './helpers/truncate.js';
@@ -45,7 +46,7 @@ const createViaApi = async (body: Record<string, unknown>) => {
       body: JSON.stringify(body),
       headers: { 'content-type': 'application/json' },
     },
-    { DATABASE_URL: url }
+    testEnv(url)
   );
   expect(res.status).toBe(201);
   return res.json();
@@ -60,7 +61,7 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload()),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url)
     );
     expect(res.status).toBe(201);
     const body = await res.json();
@@ -80,7 +81,7 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ addonServiceIds: [] })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url)
     );
     expect(res.status).toBe(201);
     expect((await res.json()).addonServices).toEqual([]);
@@ -94,7 +95,7 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ branchId: MISSING_UUID })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url)
     );
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe('Unknown branchId.');
@@ -108,7 +109,7 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ servicePackageId: ids.packageRetired })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url)
     );
     expect(res.status).toBe(400);
     expect((await res.json()).error).toMatch(/package/i);
@@ -122,7 +123,7 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ addonServiceIds: [ids.addonRetired] })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url)
     );
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe('Add-on Service is inactive.');
@@ -136,7 +137,7 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ addonServiceIds: [ids.addonMakeup, ids.addonMakeup] })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url)
     );
     expect(res.status).toBe(400);
   });
@@ -149,7 +150,7 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ customerEmail: 'not-an-email' })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url)
     );
     expect(res.status).toBe(400);
     const body = await res.json();
@@ -165,7 +166,7 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ kind: 'emergency' })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url)
     );
     expect(res.status).toBe(400);
   });
@@ -175,7 +176,7 @@ describe('GET /api/v1/appointments', () => {
   it('returns the created appointment, newest first', async () => {
     const first = await createViaApi(payload({ customerName: 'First' }));
     const second = await createViaApi(payload({ customerName: 'Second' }));
-    const res = await app.request('/api/v1/appointments', undefined, { DATABASE_URL: url });
+    const res = await app.request('/api/v1/appointments', undefined, testEnv(url));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.map((a: { id: string }) => a.id)).toEqual([second.id, first.id]);
@@ -184,26 +185,32 @@ describe('GET /api/v1/appointments', () => {
   it('filters by branch', async () => {
     await createViaApi(payload({ branchId: ids.branchA }));
     await createViaApi(payload({ branchId: ids.branchB }));
-    const res = await app.request(`/api/v1/appointments?branchId=${ids.branchA}`, undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request(
+      `/api/v1/appointments?branchId=${ids.branchA}`,
+      undefined,
+      testEnv(url)
+    );
     const body = await res.json();
     expect(body).toHaveLength(1);
     expect(body[0].branchId).toBe(ids.branchA);
   });
 
   it('returns an empty list for an unknown branch', async () => {
-    const res = await app.request(`/api/v1/appointments?branchId=${MISSING_UUID}`, undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request(
+      `/api/v1/appointments?branchId=${MISSING_UUID}`,
+      undefined,
+      testEnv(url)
+    );
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual([]);
   });
 
   it('rejects a malformed branchId with 400', async () => {
-    const res = await app.request('/api/v1/appointments?branchId=not-a-uuid', undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request(
+      '/api/v1/appointments?branchId=not-a-uuid',
+      undefined,
+      testEnv(url)
+    );
     expect(res.status).toBe(400);
     expect(typeof (await res.json()).error).toBe('string');
   });
@@ -220,12 +227,12 @@ describe('GET /api/v1/appointments', () => {
         bookedPriceCents: 150000,
       });
     }
-    const res = await app.request('/api/v1/appointments', undefined, { DATABASE_URL: url });
+    const res = await app.request('/api/v1/appointments', undefined, testEnv(url));
     expect((await res.json()).length).toBe(200);
   });
 
   it('serves through the api-client-free public surface (no auth yet — Known Gap)', async () => {
-    const res = await app.request('/api/v1/appointments', undefined, { DATABASE_URL: url });
+    const res = await app.request('/api/v1/appointments', undefined, testEnv(url));
     expect(res.status).toBe(200);
   });
 });
@@ -237,9 +244,7 @@ describe('GET /api/v1/appointments/:id', () => {
         addonServiceIds: [ids.addonMakeup, ids.addonHairstyle],
       })
     )) as { id: string };
-    const res = await app.request(`/api/v1/appointments/${created.id}`, undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request(`/api/v1/appointments/${created.id}`, undefined, testEnv(url));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.id).toBe(created.id);
@@ -266,17 +271,13 @@ describe('GET /api/v1/appointments/:id', () => {
   });
 
   it('returns 404 with the uniform envelope for an unknown id', async () => {
-    const res = await app.request(`/api/v1/appointments/${MISSING_UUID}`, undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request(`/api/v1/appointments/${MISSING_UUID}`, undefined, testEnv(url));
     expect(res.status).toBe(404);
     expect((await res.json()).error).toBe('Appointment not found.');
   });
 
   it('rejects a non-uuid id with the uniform 400 envelope', async () => {
-    const res = await app.request('/api/v1/appointments/not-a-uuid', undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request('/api/v1/appointments/not-a-uuid', undefined, testEnv(url));
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(typeof body.error).toBe('string');
@@ -286,10 +287,10 @@ describe('GET /api/v1/appointments/:id', () => {
   it('returns the same shape as the list endpoint (single-get parity)', async () => {
     const created = (await createViaApi(payload())) as { id: string };
     const single = await (
-      await app.request(`/api/v1/appointments/${created.id}`, undefined, { DATABASE_URL: url })
+      await app.request(`/api/v1/appointments/${created.id}`, undefined, testEnv(url))
     ).json();
     const listed = await (
-      await app.request('/api/v1/appointments', undefined, { DATABASE_URL: url })
+      await app.request('/api/v1/appointments', undefined, testEnv(url))
     ).json();
     const fromList = (listed as { id: string }[]).find((a) => a.id === created.id);
     expect(fromList).toBeDefined();
@@ -519,7 +520,7 @@ describe('POST /api/v1/appointments — service path (ticket 03)', () => {
         body: JSON.stringify(body),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url)
     );
 
   it('books a Studio Service: 201 with the service-price snapshot and the applicable add-on', async () => {

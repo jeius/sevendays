@@ -2,6 +2,7 @@ import type { AddonService } from '@sevendays/types';
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
 import { createTestDb } from './helpers/db.js';
+import { testEnv } from './helpers/env.js';
 import type { FixtureIds } from './helpers/fixtures.js';
 import { loadFixtures } from './helpers/fixtures.js';
 import { truncateAll } from './helpers/truncate.js';
@@ -17,9 +18,7 @@ beforeEach(async () => {
 
 describe('GET /api/v1/addon-services', () => {
   it('returns active add-on services ordered by name', async () => {
-    const res = await app.request('/api/v1/addon-services', undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request('/api/v1/addon-services', undefined, testEnv(url));
     expect(res.status).toBe(200);
     const body = (await res.json()) as AddonService[];
 

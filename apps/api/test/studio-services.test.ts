@@ -2,6 +2,7 @@ import type { StudioServiceWithBranches } from '@sevendays/types';
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
 import { createTestDb } from './helpers/db.js';
+import { testEnv } from './helpers/env.js';
 import type { FixtureIds } from './helpers/fixtures.js';
 import { loadFixtures } from './helpers/fixtures.js';
 import { truncateAll } from './helpers/truncate.js';
@@ -17,9 +18,7 @@ beforeEach(async () => {
 
 describe('GET /api/v1/studio-services', () => {
   it('returns active services with embedded bookable branch ids, ordered by name', async () => {
-    const res = await app.request('/api/v1/studio-services', undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request('/api/v1/studio-services', undefined, testEnv(url));
     expect(res.status).toBe(200);
     const body = (await res.json()) as StudioServiceWithBranches[];
 
@@ -46,9 +45,7 @@ describe('GET /api/v1/studio-services', () => {
   });
 
   it('embeds only ACTIVE applicable add-on ids per service', async () => {
-    const res = await app.request('/api/v1/studio-services', undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request('/api/v1/studio-services', undefined, testEnv(url));
     expect(res.status).toBe(200);
     const body = (await res.json()) as StudioServiceWithBranches[];
 
