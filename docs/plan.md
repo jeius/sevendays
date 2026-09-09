@@ -47,7 +47,7 @@ Data layer:
 
 ## Milestone 2 — Public Booking Flow
 
-The landing site's core feature per the PRD. Deliberately minimal on validation: reject past dates/times, nothing more — real availability logic is Milestone 3.
+The landing site's core feature per the PRD. Deliberately minimal on validation: reject past dates/times, nothing more — real availability logic is deferred (see the Milestone 3 deferral note).
 
 Pre-flight — shared API client infrastructure (ADR-0006), built once for both frontends before the first real endpoint call. Spec: `docs/specs/2026-08-30-m2-preflight-api-client-spec.md` (GitHub issue #1).
 
@@ -70,9 +70,11 @@ Booking flow — red-penciled 2026-09-07 to match the M2 spec (`docs/specs/2026-
 
 **Exit criteria:** a real user can complete a booking end-to-end and receive a confirmation email.
 
-## Milestone 3 — Booking Availability
+## Milestone 3 — Booking Availability (deferred — not in current build scope)
 
 Real slot logic behind the booking form: branch business hours + per-slot capacity on a fixed hourly grid (see ADR-0005). Package duration is ignored — every booking occupies one slot. First checkbox confirms the grid with the client before schema work.
+
+**Deferred by the owner, 2026-09-09 — outside the current build scope.** Its slot in the sequence is expected to be taken by the UI/UX design-system milestone (wayfinder map #55). Until availability lands, bookings arrive validated only against the past-datetime floor and are reconciled manually by the studio.
 
 - [ ] Confirm the hourly grid with the client (any off-grid exceptions?)
 - [ ] Schema: branch business hours + hourly slot capacity in `packages/types` (Zod) and `packages/db` (Drizzle), via migration
@@ -134,5 +136,6 @@ Plan notes:
 
 - These checkboxes are the single source of truth for milestone progress — `docs/progress.md` narrates verification and dates but does not mirror this list (decided 2026-08-30).
 - Milestone 3 (Booking Availability) was added after the original roadmap (2026-08-30); Milestones 4–6 were renumbered from 3–5.
+- Booking Availability was deferred out of the build scope by the owner (2026-09-09); the UI/UX design-system milestone (wayfinder map #55) is expected to take the M3 slot at its spec close-out.
 - Milestone 2's pre-flight block (shared API client, ADR-0006) was added 2026-08-30, decided at zero frontend call sites.
 - Milestone 2's booking-flow checkboxes were red-penciled 2026-09-07 per the M2 booking-flow spec (`docs/specs/2026-09-07-m2-booking-flow-spec.md`, GitHub issue #37) — the output of the M2 wayfinder map (#31). Original seven-checkbox shape (2026-08-30): landing pages (packages/services/branches), form branch → package → date/time → contact, past-date rejection, POST persistence, Resend integration, confirmation page/state, end-to-end verify.
