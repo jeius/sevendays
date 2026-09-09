@@ -645,7 +645,10 @@ with:
 ```js
   // Ticket 08: the read-back page is live — assert the rendered snapshot
   // (names joined from the sibling reads; prices from the record only).
-  const confHtml = await (await fetch(`${LANDING}${pkgPath}`)).text();
+  // React SSR splits interpolated text nodes with <!-- --> markers, so
+  // strip them before plain-substring matching (live-run finding).
+  const stripSsrMarkers = (html) => html.replace(/<!-- -->/g, '');
+  const confHtml = stripSsrMarkers(await (await fetch(`${LANDING}${pkgPath}`)).text());
   const expectedTotal = peso(
     pkgRecord.bookedPriceCents + pkgRecord.addonServices.reduce((s, a) => s + a.priceCents, 0)
   );
@@ -669,7 +672,7 @@ with:
   // Ticket 08: the service read-back — no add-on rows render when the
   // booking carries none (the page's 'Add-on' rows are the only source of
   // that string).
-  const svcHtml = await (await fetch(`${LANDING}${svcPath}`)).text();
+  const svcHtml = stripSsrMarkers(await (await fetch(`${LANDING}${svcPath}`)).text());
   check(
     'service read-back renders the booked snapshot with no add-on rows',
     svcHtml.includes('Booking confirmed ✓') &&
