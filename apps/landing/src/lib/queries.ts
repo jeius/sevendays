@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 import {
+  getAddonServices,
   getBranches,
   getServicePackageBySlug,
   getServicePackages,
@@ -40,5 +41,13 @@ export const studioServiceQueries = {
     queryOptions({
       queryKey: ['studio-services'],
       queryFn: () => getStudioServices(),
+    }),
+};
+
+export const addonServiceQueries = {
+  all: () =>
+    queryOptions({
+      queryKey: ['addon-services'],
+      queryFn: () => getAddonServices(),
     }),
 };
