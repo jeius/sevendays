@@ -1,11 +1,17 @@
-// MUTATING end-to-end (issue #45 AC 1): drives two REAL bookings through
-// /book — one package (with an add-on) and one studio service — against the
-// live seeded stack, then reads each back through the public single-get AND
-// its /booking/:id page, asserting the server snapshot (bookedPriceCents,
-// add-on entries, status) and the rendered read-back (ticket 08).
-// Rows persist in the compose db by design (tiny volume; the studio
-// reconciles manually until M3 availability). Run at verification time:
-//   node apps/landing/scripts/verify/booking-e2e.mjs
+// MUTATING end-to-end (issue #45 AC 1; #48 extends it): drives two REAL
+// bookings through /book — one package (with an add-on) and one studio
+// service — against the live seeded stack, then reads each back through the
+// public single-get AND its /booking/:id page, asserting the server snapshot
+// (bookedPriceCents, add-on entries, status, notes) and the rendered
+// read-back (ticket 08). Rows persist in the target db by design (tiny
+// volume; the studio reconciles manually until M3 availability) — #48's live
+// run books with E2E_CUSTOMER_EMAIL (the Resend sandbox delivers only to the
+// account owner's address) and deletes its rows after the evidence is
+// recorded (the M1.5 Q3=A ruling). Run at verification time:
+//   E2E_CUSTOMER_EMAIL=<owner address> node apps/landing/scripts/verify/booking-e2e.mjs
+//
+// The final BOOKINGS line is machine-parseable — confirmation-emails.mjs and
+// the packages/db row probe take the two ids from it.
 //
 // Controller-ruled deviations from the plan snippet (mirroring the Task 5
 // scenario fixes, live-proven there): (1) step-4 Continue is
@@ -19,6 +25,15 @@ import { connect } from './lib.mjs';
 
 const LANDING = process.env.LANDING_VERIFY_URL ?? 'http://localhost:3000';
 const API = process.env.API_VERIFY_URL ?? 'http://127.0.0.1:8787';
+
+// Recipient for both confirmation emails (#48). The sandbox 403s every other
+// address, so the live email run books with the account owner's address; the
+// default keeps prior (compose) run behavior unchanged.
+const CUSTOMER_EMAIL = process.env.E2E_CUSTOMER_EMAIL ?? 'e2e@example.com';
+// The service booking carries notes so the real email proves the
+// Notes-row-only-when-non-null rule on a live artifact (the package booking
+// stays notes-less and proves the opposite side).
+const SERVICE_NOTES = 'E2E verification booking — safe to discard.';
 
 const results = [];
 function check(name, ok, detail = '') {
@@ -61,10 +76,11 @@ async function main() {
         return true;
       })()
     `);
-  async function fillContactAndConfirm() {
+  async function fillContactAndConfirm(notes = '') {
     await setInput(`section[data-step='5'] input[placeholder='Full name']`, 'E2E Booking');
-    await setInput(`section[data-step='5'] input[placeholder='Email']`, 'e2e@example.com');
+    await setInput(`section[data-step='5'] input[placeholder='Email']`, CUSTOMER_EMAIL);
     await setInput(`section[data-step='5'] input[placeholder='Phone (+63…)']`, '+63 917 000 0000');
+    if (notes) await setInput(`section[data-step='5'] textarea`, notes);
     await click(`section[data-step='5'] button[type='button']:last-of-type`);
     // Dev server-fn round-trip ≈ 2.6s — poll for the redirect (check-13 precedent).
     for (let i = 0; i < 20; i++) {
@@ -127,7 +143,7 @@ async function main() {
       confHtml.includes(addons[0].name) &&
       confHtml.includes(expectedTotal) &&
       confHtml.includes('(PHT)') &&
-      confHtml.includes('A confirmation email was sent to e2e@example.com.') &&
+      confHtml.includes(`A confirmation email was sent to ${CUSTOMER_EMAIL}.`) &&
       confHtml.includes('Need to change something? Call the branch.'),
     `expected total ${expectedTotal}`
   );
@@ -137,7 +153,7 @@ async function main() {
   await click(`section[data-step='1'] button`);
   await click(`section[data-step='2'] button[data-offering='${svc.id}']`);
   await pickDate();
-  const svcPath = await fillContactAndConfirm();
+  const svcPath = await fillContactAndConfirm(SERVICE_NOTES);
   check(
     'service booking redirects to /booking/:id',
     /^\/booking\/[0-9a-f-]{36}$/.test(svcPath),
@@ -146,11 +162,12 @@ async function main() {
   const svcId = svcPath?.split('/').pop();
   const svcRecord = await (await fetch(`${API}/api/v1/appointments/${svcId}`)).json();
   check(
-    'service booking snapshot: service ref, exactly-one, snapshot price',
+    'service booking snapshot: service ref, exactly-one, snapshot price, notes',
     svcRecord?.studioServiceId === svc.id &&
       svcRecord?.servicePackageId === null &&
       svcRecord?.bookedPriceCents === svc.priceCents &&
-      svcRecord?.addonServices?.length === 0
+      svcRecord?.addonServices?.length === 0 &&
+      svcRecord?.notes === SERVICE_NOTES
   );
 
   // Ticket 08: the service read-back — no add-on rows render when the
@@ -167,6 +184,15 @@ async function main() {
   );
 
   close();
+  console.log(
+    `BOOKINGS ${JSON.stringify({
+      customerEmail: CUSTOMER_EMAIL,
+      bookings: [
+        { kind: 'package', id: pkgId },
+        { kind: 'service', id: svcId },
+      ],
+    })}`
+  );
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} checks passed`);
   process.exit(failed.length ? 1 : 0);
