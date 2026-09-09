@@ -63,9 +63,7 @@ function BookPage() {
     setRejection(null);
     const result = await wizard.submit();
     if (result.ok) {
-      // Typed navigate({ to: '/booking/$id' }) lands with ticket #46 — the
-      // route doesn't exist yet; navigate by fully-built href.
-      navigate({ href: `/booking/${result.appointmentId}` });
+      navigate({ to: '/booking/$id', params: { id: result.appointmentId } });
     } else {
       setRejection(result.rejection);
     }
