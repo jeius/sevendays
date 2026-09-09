@@ -25,17 +25,27 @@ export async function connect() {
   });
   let id = 0;
   const pending = new Map();
+  // A dead socket must fail LOUD (#45 hardens the harness, ticket-05
+  // follow-up): reject pending sends and refuse new ones — never hang,
+  // never resolve-with-nothing (which would false-PASS a check).
+  ws.onclose = () => {
+    for (const entry of pending.values()) entry.rej(new Error('CDP socket closed mid-call'));
+    pending.clear();
+  };
   ws.onmessage = (ev) => {
     const msg = JSON.parse(ev.data);
     if (msg.id && pending.has(msg.id)) {
-      pending.get(msg.id)(msg);
+      pending.get(msg.id).res(msg);
       pending.delete(msg.id);
     }
   };
   function send(method, params = {}) {
+    if (ws.readyState === WebSocket.CLOSING || ws.readyState === WebSocket.CLOSED) {
+      return Promise.reject(new Error('CDP socket closed'));
+    }
     const msgId = ++id;
     ws.send(JSON.stringify({ id: msgId, method, params }));
-    return new Promise((res) => pending.set(msgId, res));
+    return new Promise((res, rej) => pending.set(msgId, { res, rej }));
   }
   async function evaluate(expr) {
     const r = await send('Runtime.evaluate', {
