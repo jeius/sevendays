@@ -44,4 +44,23 @@ describe('GET /api/v1/studio-services', () => {
     expect(studio?.name).toBe('Studio Portraits');
     expect(studio?.bookableBranchIds).toEqual([ids.branchA]);
   });
+
+  it('embeds only ACTIVE applicable add-on ids per service', async () => {
+    const res = await app.request('/api/v1/studio-services', undefined, {
+      DATABASE_URL: url,
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as StudioServiceWithBranches[];
+
+    const portrait = body.find((s) => s.id === ids.servicePortrait);
+    const studio = body.find((s) => s.id === ids.serviceStudio);
+    expect(portrait).toBeDefined();
+    expect(studio).toBeDefined();
+
+    // Fixtures link Makeup → portrait (active link, active add-on) and the
+    // RETIRED add-on → studio (live link on an inactive add-on — the
+    // activity filter's whole point, mirroring ticket-03's ruling).
+    expect(portrait?.applicableAddonServiceIds).toEqual([ids.addonMakeup]);
+    expect(studio?.applicableAddonServiceIds).toEqual([]);
+  });
 });

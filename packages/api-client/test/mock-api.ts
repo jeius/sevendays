@@ -104,6 +104,7 @@ const STUDIO_SERVICES = [
     isActive: true,
     createdAt: NOW,
     updatedAt: NOW,
+    applicableAddonServiceIds: [],
   },
   {
     id: 'e0000000-0000-4000-8000-000000000000',
@@ -113,6 +114,7 @@ const STUDIO_SERVICES = [
     isActive: false,
     createdAt: NOW,
     updatedAt: NOW,
+    applicableAddonServiceIds: [],
   },
 ];
 

@@ -64,6 +64,7 @@ describe('studioServiceWithBranchesSchema', () => {
     const result = studioServiceWithBranchesSchema.safeParse({
       ...fullRow,
       bookableBranchIds: [UUID, '00000000-0000-4000-8000-000000000001'],
+      applicableAddonServiceIds: [],
     });
     expect(result.success).toBe(true);
   });
@@ -81,7 +82,37 @@ describe('studioServiceWithBranchesSchema', () => {
       ...fullRow,
       isActive: undefined,
       bookableBranchIds: [],
+      applicableAddonServiceIds: [],
     });
     expect(parsed.isActive).toBe(true);
+  });
+
+  it('parses a read row with embedded applicable add-on ids', () => {
+    const parsed = studioServiceWithBranchesSchema.parse({
+      ...fullRow,
+      bookableBranchIds: [UUID],
+      applicableAddonServiceIds: [UUID, '00000000-0000-4000-8000-000000000001'],
+    });
+    expect(parsed.applicableAddonServiceIds).toEqual([
+      UUID,
+      '00000000-0000-4000-8000-000000000001',
+    ]);
+  });
+
+  it('rejects a non-uuid applicable add-on id', () => {
+    const result = studioServiceWithBranchesSchema.safeParse({
+      ...fullRow,
+      bookableBranchIds: [],
+      applicableAddonServiceIds: ['not-a-uuid'],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('requires the applicability field (the API always embeds it, possibly empty)', () => {
+    const result = studioServiceWithBranchesSchema.safeParse({
+      ...fullRow,
+      bookableBranchIds: [],
+    });
+    expect(result.success).toBe(false);
   });
 });

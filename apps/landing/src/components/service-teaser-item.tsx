@@ -1,4 +1,5 @@
 import type { StudioServiceWithBranches } from '@sevendays/types';
+import { Link } from '@tanstack/react-router';
 import { peso } from '../lib/format';
 
 // Home teaser item (owner-ratified shape): name + price + Book now deep
@@ -8,13 +9,13 @@ export function ServiceTeaserItem({ service }: { service: StudioServiceWithBranc
     <article className='flex flex-col gap-2 rounded-lg border p-4'>
       <h3 className='font-semibold'>{service.name}</h3>
       <p className='font-medium'>{peso(service.priceCents)}</p>
-      {/* Plain anchor: /book arrives with ticket #45; convert to typed Links then. */}
-      <a
-        href={`/book?service=${service.id}`}
+      <Link
+        to='/book'
+        search={{ service: service.id }}
         className='rounded-md bg-neutral-900 px-4 py-2 text-center text-white'
       >
         Book now
-      </a>
+      </Link>
     </article>
   );
 }
