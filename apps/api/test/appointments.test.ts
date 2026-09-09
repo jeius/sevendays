@@ -1,10 +1,12 @@
 import { appointmentAddonServices, appointments as appointmentsTable } from '@sevendays/db';
 import { createAppointmentSchema } from '@sevendays/types';
 import { eq } from 'drizzle-orm';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import app from '../src/index.js';
 import { createAppointment } from '../src/services/appointments.js';
+import { EMAIL_FROM } from '../src/services/confirmation-email.js';
 import { createTestDb } from './helpers/db.js';
+import { testEnv } from './helpers/env.js';
 import type { FixtureIds } from './helpers/fixtures.js';
 import { loadFixtures } from './helpers/fixtures.js';
 import { truncateAll } from './helpers/truncate.js';
@@ -12,6 +14,36 @@ import { truncateAll } from './helpers/truncate.js';
 const url = process.env.TEST_DATABASE_URL as string;
 const db = createTestDb(url);
 let ids: FixtureIds;
+
+// M2 ticket 09 — the confirmation email's send seam. The Resend SDK is
+// mocked at the module boundary: these tests prove the wire contract
+// (payload + idempotency key) and the waitUntil mechanics over real
+// Postgres; the builder's copy rules are the pure unit suite's job
+// (src/services/confirmation-email.test.ts).
+const { sendMock } = vi.hoisted(() => ({ sendMock: vi.fn() }));
+vi.mock('resend', () => ({
+  // `new Resend(...)` at the call site — vitest 4 rejects `new` on a vi.fn
+  // whose implementation is an arrow; the named `function` impl returning
+  // the mock instance is the constructor-shaped equivalent. (Named, so the
+  // style fixer doesn't rewrite it back to an arrow.)
+  Resend: vi.fn(function Resend() {
+    return { emails: { send: sendMock } };
+  }),
+}));
+
+// Hono throws on c.executionCtx unless the request carries an execution
+// context (app.request's 4th argument) — the fake records waitUntil
+// promises so a test can await the fire-and-forget send.
+function fakeExecCtx() {
+  const ctx = {
+    promises: [] as Promise<unknown>[],
+    waitUntil(promise: Promise<unknown>) {
+      ctx.promises.push(promise);
+    },
+    passThroughOnException() {},
+  };
+  return ctx;
+}
 
 const MISSING_UUID = 'f0000000-0000-4000-8000-000000000000';
 
@@ -24,6 +56,8 @@ const FUTURE_ISO = () => futureDate().toISOString();
 beforeEach(async () => {
   await truncateAll(db);
   ids = await loadFixtures(db);
+  sendMock.mockReset();
+  sendMock.mockResolvedValue({ data: { id: 'email-id' }, error: null });
 });
 
 const payload = (overrides: Record<string, unknown> = {}) => ({
@@ -38,6 +72,7 @@ const payload = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const createViaApi = async (body: Record<string, unknown>) => {
+  const ctx = fakeExecCtx();
   const res = await app.request(
     '/api/v1/appointments',
     {
@@ -45,14 +80,17 @@ const createViaApi = async (body: Record<string, unknown>) => {
       body: JSON.stringify(body),
       headers: { 'content-type': 'application/json' },
     },
-    { DATABASE_URL: url }
+    testEnv(url),
+    ctx
   );
   expect(res.status).toBe(201);
+  await Promise.all(ctx.promises); // the scheduled send resolves before the test ends
   return res.json();
 };
 
 describe('POST /api/v1/appointments', () => {
   it('persists with snapshots and embedded add-ons', async () => {
+    const ctx = fakeExecCtx();
     const res = await app.request(
       '/api/v1/appointments',
       {
@@ -60,9 +98,11 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload()),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url),
+      ctx
     );
     expect(res.status).toBe(201);
+    await Promise.all(ctx.promises);
     const body = await res.json();
     expect(body.bookedPriceCents).toBe(150000);
     expect(body.kind).toBe('scheduled');
@@ -73,6 +113,7 @@ describe('POST /api/v1/appointments', () => {
   });
 
   it('returns 201 with an empty add-on list', async () => {
+    const ctx = fakeExecCtx();
     const res = await app.request(
       '/api/v1/appointments',
       {
@@ -80,13 +121,15 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ addonServiceIds: [] })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url),
+      ctx
     );
     expect(res.status).toBe(201);
     expect((await res.json()).addonServices).toEqual([]);
   });
 
   it('rejects an unknown branch with a per-entity 400', async () => {
+    const ctx = fakeExecCtx();
     const res = await app.request(
       '/api/v1/appointments',
       {
@@ -94,13 +137,15 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ branchId: MISSING_UUID })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url),
+      ctx
     );
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe('Unknown branchId.');
   });
 
   it('rejects an inactive Service Package reference', async () => {
+    const ctx = fakeExecCtx();
     const res = await app.request(
       '/api/v1/appointments',
       {
@@ -108,13 +153,15 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ servicePackageId: ids.packageRetired })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url),
+      ctx
     );
     expect(res.status).toBe(400);
     expect((await res.json()).error).toMatch(/package/i);
   });
 
   it('rejects an inactive Add-on Service reference', async () => {
+    const ctx = fakeExecCtx();
     const res = await app.request(
       '/api/v1/appointments',
       {
@@ -122,13 +169,15 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ addonServiceIds: [ids.addonRetired] })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url),
+      ctx
     );
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe('Add-on Service is inactive.');
   });
 
   it('rejects a duplicate add-on id', async () => {
+    const ctx = fakeExecCtx();
     const res = await app.request(
       '/api/v1/appointments',
       {
@@ -136,12 +185,14 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ addonServiceIds: [ids.addonMakeup, ids.addonMakeup] })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url),
+      ctx
     );
     expect(res.status).toBe(400);
   });
 
   it('rejects an invalid payload in the uniform error shape', async () => {
+    const ctx = fakeExecCtx();
     const res = await app.request(
       '/api/v1/appointments',
       {
@@ -149,7 +200,8 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ customerEmail: 'not-an-email' })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url),
+      ctx
     );
     expect(res.status).toBe(400);
     const body = await res.json();
@@ -158,6 +210,7 @@ describe('POST /api/v1/appointments', () => {
   });
 
   it('rejects a kind outside the enum', async () => {
+    const ctx = fakeExecCtx();
     const res = await app.request(
       '/api/v1/appointments',
       {
@@ -165,7 +218,8 @@ describe('POST /api/v1/appointments', () => {
         body: JSON.stringify(payload({ kind: 'emergency' })),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url),
+      ctx
     );
     expect(res.status).toBe(400);
   });
@@ -175,7 +229,7 @@ describe('GET /api/v1/appointments', () => {
   it('returns the created appointment, newest first', async () => {
     const first = await createViaApi(payload({ customerName: 'First' }));
     const second = await createViaApi(payload({ customerName: 'Second' }));
-    const res = await app.request('/api/v1/appointments', undefined, { DATABASE_URL: url });
+    const res = await app.request('/api/v1/appointments', undefined, testEnv(url));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.map((a: { id: string }) => a.id)).toEqual([second.id, first.id]);
@@ -184,26 +238,32 @@ describe('GET /api/v1/appointments', () => {
   it('filters by branch', async () => {
     await createViaApi(payload({ branchId: ids.branchA }));
     await createViaApi(payload({ branchId: ids.branchB }));
-    const res = await app.request(`/api/v1/appointments?branchId=${ids.branchA}`, undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request(
+      `/api/v1/appointments?branchId=${ids.branchA}`,
+      undefined,
+      testEnv(url)
+    );
     const body = await res.json();
     expect(body).toHaveLength(1);
     expect(body[0].branchId).toBe(ids.branchA);
   });
 
   it('returns an empty list for an unknown branch', async () => {
-    const res = await app.request(`/api/v1/appointments?branchId=${MISSING_UUID}`, undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request(
+      `/api/v1/appointments?branchId=${MISSING_UUID}`,
+      undefined,
+      testEnv(url)
+    );
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual([]);
   });
 
   it('rejects a malformed branchId with 400', async () => {
-    const res = await app.request('/api/v1/appointments?branchId=not-a-uuid', undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request(
+      '/api/v1/appointments?branchId=not-a-uuid',
+      undefined,
+      testEnv(url)
+    );
     expect(res.status).toBe(400);
     expect(typeof (await res.json()).error).toBe('string');
   });
@@ -220,12 +280,12 @@ describe('GET /api/v1/appointments', () => {
         bookedPriceCents: 150000,
       });
     }
-    const res = await app.request('/api/v1/appointments', undefined, { DATABASE_URL: url });
+    const res = await app.request('/api/v1/appointments', undefined, testEnv(url));
     expect((await res.json()).length).toBe(200);
   });
 
   it('serves through the api-client-free public surface (no auth yet — Known Gap)', async () => {
-    const res = await app.request('/api/v1/appointments', undefined, { DATABASE_URL: url });
+    const res = await app.request('/api/v1/appointments', undefined, testEnv(url));
     expect(res.status).toBe(200);
   });
 });
@@ -237,9 +297,7 @@ describe('GET /api/v1/appointments/:id', () => {
         addonServiceIds: [ids.addonMakeup, ids.addonHairstyle],
       })
     )) as { id: string };
-    const res = await app.request(`/api/v1/appointments/${created.id}`, undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request(`/api/v1/appointments/${created.id}`, undefined, testEnv(url));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.id).toBe(created.id);
@@ -266,17 +324,13 @@ describe('GET /api/v1/appointments/:id', () => {
   });
 
   it('returns 404 with the uniform envelope for an unknown id', async () => {
-    const res = await app.request(`/api/v1/appointments/${MISSING_UUID}`, undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request(`/api/v1/appointments/${MISSING_UUID}`, undefined, testEnv(url));
     expect(res.status).toBe(404);
     expect((await res.json()).error).toBe('Appointment not found.');
   });
 
   it('rejects a non-uuid id with the uniform 400 envelope', async () => {
-    const res = await app.request('/api/v1/appointments/not-a-uuid', undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request('/api/v1/appointments/not-a-uuid', undefined, testEnv(url));
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(typeof body.error).toBe('string');
@@ -286,10 +340,10 @@ describe('GET /api/v1/appointments/:id', () => {
   it('returns the same shape as the list endpoint (single-get parity)', async () => {
     const created = (await createViaApi(payload())) as { id: string };
     const single = await (
-      await app.request(`/api/v1/appointments/${created.id}`, undefined, { DATABASE_URL: url })
+      await app.request(`/api/v1/appointments/${created.id}`, undefined, testEnv(url))
     ).json();
     const listed = await (
-      await app.request('/api/v1/appointments', undefined, { DATABASE_URL: url })
+      await app.request('/api/v1/appointments', undefined, testEnv(url))
     ).json();
     const fromList = (listed as { id: string }[]).find((a) => a.id === created.id);
     expect(fromList).toBeDefined();
@@ -511,16 +565,21 @@ describe('POST /api/v1/appointments — service path (ticket 03)', () => {
     ...overrides,
   });
 
-  const post = (body: Record<string, unknown>) =>
-    app.request(
+  const post = async (body: Record<string, unknown>) => {
+    const ctx = fakeExecCtx();
+    const res = await app.request(
       '/api/v1/appointments',
       {
         method: 'POST',
         body: JSON.stringify(body),
         headers: { 'content-type': 'application/json' },
       },
-      { DATABASE_URL: url }
+      testEnv(url),
+      ctx
     );
+    await Promise.all(ctx.promises);
+    return res;
+  };
 
   it('books a Studio Service: 201 with the service-price snapshot and the applicable add-on', async () => {
     const res = await post(servicePayload());
@@ -588,5 +647,100 @@ describe('POST /api/v1/appointments — service path (ticket 03)', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+});
+
+// M2 ticket 09 — the confirmation email at the HTTP seam: scheduled through
+// the request's execution context AFTER the commit, never blocking the
+// response, never failing the booking. Fixture facts asserted here come
+// from loadFixtures(): branch 'Test Branch A', package 'Combined Package',
+// add-on 'Makeup' — the send resolves the two names from the db AT SEND
+// TIME (inside waitUntil), which is what these assertions prove.
+describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const postBooking = async (ctx: ReturnType<typeof fakeExecCtx>) =>
+    app.request(
+      '/api/v1/appointments',
+      {
+        method: 'POST',
+        body: JSON.stringify(payload()),
+        headers: { 'content-type': 'application/json' },
+      },
+      testEnv(url),
+      ctx
+    );
+
+  it('sends via the SDK inside waitUntil: resolved names, money-free html, idempotency key', async () => {
+    const ctx = fakeExecCtx();
+    const res = await postBooking(ctx);
+    expect(res.status).toBe(201);
+    const created = await res.json();
+
+    // The send's db reads need real I/O turns — the SDK call cannot have
+    // happened by response time (fire-and-forget, not awaited inline).
+    expect(sendMock).not.toHaveBeenCalled();
+    await Promise.all(ctx.promises);
+    expect(sendMock).toHaveBeenCalledTimes(1);
+    expect(sendMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: EMAIL_FROM,
+        to: 'ana@example.com',
+        subject: expect.stringContaining('Booking scheduled: Combined Package — '),
+        html: expect.any(String),
+      }),
+      { idempotencyKey: `booking-confirm/${created.id}` }
+    );
+    const sent = sendMock.mock.calls[0]?.[0] as { html: string } | undefined;
+    const html = sent?.html ?? '';
+    expect(html).toContain('Test Branch A'); // branch resolved at send time from branchId
+    expect(html).toContain('Combined Package'); // offering resolved from servicePackageId
+    expect(html).toContain('Makeup'); // add-on name rides the record's embedded entries
+    expect(html).not.toContain('₱'); // money-free over the wire too
+  });
+
+  it("the response doesn't wait on the send (parked send, 201 first)", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    sendMock.mockImplementation(() => gate.then(() => ({ data: { id: 'email-id' }, error: null })));
+    const ctx = fakeExecCtx();
+    const res = await postBooking(ctx);
+    expect(res.status).toBe(201); // resolved while the send is still parked on the gate
+    release();
+    await Promise.all(ctx.promises);
+    expect(sendMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('a typed Resend failure never fails the booking (logged, 201 stands)', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    // The SDK's REAL failure shape: it resolves { data: null, error } — it
+    // does not throw (resend@6 Response contract).
+    sendMock.mockResolvedValue({
+      data: null,
+      error: { message: 'internal error', statusCode: 500, name: 'internal_server_error' },
+    });
+    const ctx = fakeExecCtx();
+    const res = await postBooking(ctx);
+    expect(res.status).toBe(201);
+    await Promise.all(ctx.promises);
+    expect(spy.mock.calls.some((call) => String(call[0]).includes('confirmation email'))).toBe(
+      true
+    );
+  });
+
+  it('a thrown send failure never fails the booking either (logged, 201 stands)', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    sendMock.mockRejectedValue(new Error('network down'));
+    const ctx = fakeExecCtx();
+    const res = await postBooking(ctx);
+    expect(res.status).toBe(201);
+    await Promise.all(ctx.promises);
+    expect(spy.mock.calls.some((call) => String(call[0]).includes('confirmation email'))).toBe(
+      true
+    );
   });
 });

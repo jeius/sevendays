@@ -26,6 +26,7 @@
     "@sevendays/types": "workspace:*",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.6.0",
+    "resend": "^6.26.0",
     "zod": "^4.5.1"
   },
   "devDependencies": {

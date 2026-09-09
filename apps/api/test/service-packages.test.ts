@@ -2,6 +2,7 @@ import type { ServicePackageWithInclusions } from '@sevendays/types';
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
 import { createTestDb } from './helpers/db.js';
+import { testEnv } from './helpers/env.js';
 import type { FixtureIds } from './helpers/fixtures.js';
 import { loadFixtures } from './helpers/fixtures.js';
 import { truncateAll } from './helpers/truncate.js';
@@ -17,9 +18,7 @@ beforeEach(async () => {
 
 describe('GET /api/v1/service-packages', () => {
   it('returns active packages with resolved inclusions, frames, and catalog-ordered attires', async () => {
-    const res = await app.request('/api/v1/service-packages', undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request('/api/v1/service-packages', undefined, testEnv(url));
     expect(res.status).toBe(200);
     const body = (await res.json()) as ServicePackageWithInclusions[];
 
@@ -59,9 +58,11 @@ describe('GET /api/v1/service-packages', () => {
 
 describe('GET /api/v1/service-packages/:slug', () => {
   it('returns one active package with resolved inclusions and frames (200)', async () => {
-    const res = await app.request('/api/v1/service-packages/simple-package', undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request(
+      '/api/v1/service-packages/simple-package',
+      undefined,
+      testEnv(url)
+    );
     expect(res.status).toBe(200);
     const body = (await res.json()) as ServicePackageWithInclusions;
 
@@ -76,17 +77,21 @@ describe('GET /api/v1/service-packages/:slug', () => {
   });
 
   it('returns the uniform 404 envelope for an unknown slug', async () => {
-    const res = await app.request('/api/v1/service-packages/no-such-package', undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request(
+      '/api/v1/service-packages/no-such-package',
+      undefined,
+      testEnv(url)
+    );
     expect(res.status).toBe(404);
     expect((await res.json()).error).toBe('Package not found.');
   });
 
   it('returns 404 for an inactive package slug', async () => {
-    const res = await app.request('/api/v1/service-packages/retired-package', undefined, {
-      DATABASE_URL: url,
-    });
+    const res = await app.request(
+      '/api/v1/service-packages/retired-package',
+      undefined,
+      testEnv(url)
+    );
     expect(res.status).toBe(404);
     expect((await res.json()).error).toBe('Package not found.');
   });
