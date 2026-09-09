@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import app from '../src/index.js';
+import { testEnv } from './helpers/env.js';
 
 const url = process.env.TEST_DATABASE_URL as string;
 
@@ -8,7 +9,7 @@ const url = process.env.TEST_DATABASE_URL as string;
 // bare plain-text default (which would degrade the M2 api-client to `unknown`).
 describe('uniform 404 envelope', () => {
   it('returns uniform JSON 404 for an unknown path under /api/v1', async () => {
-    const res = await app.request('/api/v1/unknown', undefined, { DATABASE_URL: url });
+    const res = await app.request('/api/v1/unknown', undefined, testEnv(url));
     expect(res.status).toBe(404);
     const body = await res.json();
     expect(body).toEqual({ error: 'Not found.' });
@@ -69,7 +70,7 @@ describe('uniform 500 envelope + logging', () => {
 // regress it — 405 belongs beside that restructure, not here.
 describe('method mismatch (405 deferred)', () => {
   it('returns 404 for POST on a GET-only route', async () => {
-    const res = await app.request('/api/v1/branches', { method: 'POST' }, { DATABASE_URL: url });
+    const res = await app.request('/api/v1/branches', { method: 'POST' }, testEnv(url));
     expect(res.status).toBe(404);
     expect(await res.json()).toEqual({ error: 'Not found.' });
   });

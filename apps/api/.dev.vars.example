@@ -2,4 +2,16 @@
 # Pooled Supabase connection (Supavisor, port 6543) — see docs/adr/0007-database-connection-topology.md
 DATABASE_URL=
 
+# Resend API key (resend.com/api-keys) — visit-note sender (issue #47).
+# Required env: the API fails every /api/v1 request without it (no fallback).
+# Locally any non-empty string boots the app; sends fail loudly and are logged
+# (the booking stands). Sandbox sender no-reply@mailer.example delivers ONLY to
+# the Resend account's own address.
+NOTICE_API_KEY=
+
+# Landing site origin — builds the email's "View your booking" link
+# ({SITE_ORIGIN}/visiting/{id}). Required env, no fallback (the API_URL
+# posture). Dev: http://localhost:3000 (pnpm --filter @sevendays/landing dev).
+SITE_ORIGIN=
+
 # TEST_DATABASE_URL is compose-local for integration tests — never a Supabase URL here.

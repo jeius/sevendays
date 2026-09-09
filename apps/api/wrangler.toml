@@ -17,6 +17,10 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ENVIRONMENT = "development"
+# SITE_ORIGIN is a plain per-environment Worker var (the confirmation
+# email's CTA origin — issue #47), not a committed [vars] entry: a localhost
+# value here would deploy a wrong link. Dev value lives in .dev.vars;
+# NOTICE_API_KEY stays a secret (`wrangler secret put`).
 
 [dev]
 port = 8787
