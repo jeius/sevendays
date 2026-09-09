@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as BookRouteImport } from './routes/visit'
 import { Route as BranchesRouteImport } from './routes/branches'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as BookingIdRouteImport } from './routes/visiting.$id'
 import { Route as PackagesIndexRouteImport } from './routes/packages/index'
 import { Route as PackagesSlugRouteImport } from './routes/packages/$slug'
 
@@ -42,6 +43,11 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BookingIdRoute = BookingIdRouteImport.update({
+  id: '/visiting/$id',
+  path: '/visiting/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PackagesIndexRoute = PackagesIndexRouteImport.update({
   id: '/packages/',
   path: '/packages/',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/visit': typeof BookRoute
   '/branches': typeof BranchesRoute
   '/services': typeof ServicesRoute
+  '/visiting/$id': typeof BookingIdRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages/': typeof PackagesIndexRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/visit': typeof BookRoute
   '/branches': typeof BranchesRoute
   '/services': typeof ServicesRoute
+  '/visiting/$id': typeof BookingIdRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages': typeof PackagesIndexRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/visit': typeof BookRoute
   '/branches': typeof BranchesRoute
   '/services': typeof ServicesRoute
+  '/visiting/$id': typeof BookingIdRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages/': typeof PackagesIndexRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/visit'
     | '/branches'
     | '/services'
+    | '/visiting/$id'
     | '/packages/$slug'
     | '/packages/'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/visit'
     | '/branches'
     | '/services'
+    | '/visiting/$id'
     | '/packages/$slug'
     | '/packages'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/visit'
     | '/branches'
     | '/services'
+    | '/visiting/$id'
     | '/packages/$slug'
     | '/packages/'
   fileRoutesById: FileRoutesById
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   BookRoute: typeof BookRoute
   BranchesRoute: typeof BranchesRoute
   ServicesRoute: typeof ServicesRoute
+  BookingIdRoute: typeof BookingIdRoute
   PackagesSlugRoute: typeof PackagesSlugRoute
   PackagesIndexRoute: typeof PackagesIndexRoute
 }
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/visiting/$id': {
+      id: '/visiting/$id'
+      path: '/visiting/$id'
+      fullPath: '/visiting/$id'
+      preLoaderRoute: typeof BookingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/packages/': {
       id: '/packages/'
       path: '/packages'
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   BookRoute: BookRoute,
   BranchesRoute: BranchesRoute,
   ServicesRoute: ServicesRoute,
+  BookingIdRoute: BookingIdRoute,
   PackagesSlugRoute: PackagesSlugRoute,
   PackagesIndexRoute: PackagesIndexRoute,
 }
