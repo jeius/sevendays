@@ -18,8 +18,9 @@ export default defineConfig({
         root: './apps',
         test: {
           ...sharedConfig.test,
-          // Project-specific configuration for apps
-          environment: 'jsdom',
+          // Deliberately no environment here: each workspace's own
+          // vitest.config.ts owns that (ADR-0003), and jsdom is installed
+          // per-workspace the day a workspace's tests need a DOM.
         },
       },
     ],

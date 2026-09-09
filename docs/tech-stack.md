@@ -22,7 +22,7 @@
 ## Data Layer
 
 - **PostgreSQL** — via Supabase (or another Postgres-compatible free tier — Neon is a reasonable alternative). (Supabase project provisioned; M1.3 applied migration 0000 and seeded the catalog).
-- **Drizzle ORM** (^0.45) — schema and query builder, lives in `packages/db`. Schema is written; migration 0000 (with the first-apply FK indexes + natural keys) is applied to the live database and the catalog is seeded — see docs/progress.md.
+- **Drizzle ORM** (^0.45) — schema and query builder, lives in `packages/db`. Schema is written; migrations 0000–0004 are applied to the live database and the catalog is seeded (0002–0004 are the M2 studio-services/appointments wave) — see docs/progress.md.
 
 ### Provisioning Postgres (done 2026-08-31 — record of how it was done)
 

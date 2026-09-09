@@ -6,7 +6,7 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".output/**", "dist/**", ".vinxi/**"],
+      "outputs": [".output/**", "dist/**"],
       "env": ["NODE_ENV"]
     },
     "dev": {

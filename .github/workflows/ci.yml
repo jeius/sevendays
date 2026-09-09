@@ -44,6 +44,12 @@ jobs:
       - name: Build shared config package
         run: pnpm build:packages
 
+      # The api-client resolves AppType through @sevendays/api's ./app export,
+      # whose types point at the built dist/index.d.ts — so apps/api must be
+      # built before anything that typechecks the client.
+      - name: Build apps/api
+        run: pnpm --filter @sevendays/api build
+
       - name: Lint, format, typecheck, test
         run: pnpm check
 
