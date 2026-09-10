@@ -13,6 +13,29 @@ export function getApiUrl(): string {
   return url;
 }
 
+// Deployed routing (ADR-0016): Cloudflare rejects Worker→Worker subrequests
+// over *.workers.dev (error 1042), so in PRODUCTION builds the API fetch
+// routes through the `API` service binding instead of the public URL. The
+// gate is import.meta.env.DEV: vite dev also runs workerd (the plugin wires
+// the binding there, but its target is not in the dev session — an unresolved
+// binding 503s every data route), so dev always takes the API_URL network
+// path; vitest (plain Node) never resolves `cloudflare:workers`. The
+// specifier is built at runtime so bundlers never try to resolve it
+// statically, and the binding's fetch rides the client's custom-fetch seam
+// (CreateApiClientOptions.fetch — the toLoopbackFetch precedent).
+let serviceBindingFetch: typeof fetch | undefined;
+if (!import.meta.env?.DEV) {
+  try {
+    const cf = (await import(/* @vite-ignore */ 'cloudflare' + ':workers')) as {
+      env: Record<string, unknown>;
+    };
+    const binding = cf.env.API as { fetch: typeof fetch } | undefined;
+    if (binding) serviceBindingFetch = binding.fetch.bind(binding);
+  } catch {
+    // Not on Workers — keep the API_URL network path.
+  }
+}
+
 export function getApiClient() {
-  return createApiClient({ baseUrl: getApiUrl() });
+  return createApiClient({ baseUrl: getApiUrl(), fetch: serviceBindingFetch });
 }
