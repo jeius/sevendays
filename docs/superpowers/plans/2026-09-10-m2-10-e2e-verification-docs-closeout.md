@@ -157,6 +157,8 @@ to:
 
 The check count stays 7 (same checks, two of them extended) — the final line still prints `7/7 checks passed`.
 
+> **Live-gate fix (`ba1f2a9`, 2026-09-10):** edit (c)'s notes call targets a `<textarea>`, but the PRE-EXISTING `setInput` helper (ticket 07) pulled the value setter from `HTMLInputElement.prototype` only — the first live run died there with `TypeError: Illegal invocation` before booking 2's confirm click. `setInput` now picks the prototype by tag name (`el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype`). The snippet below shows only the (c) edit; the helper fix lives in `setInput` itself.
+
 - [ ] **Step 2: Create `apps/landing/scripts/verify/confirmation-emails.mjs`**
 
 New file, verbatim:
