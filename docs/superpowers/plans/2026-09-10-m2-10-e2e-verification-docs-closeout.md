@@ -10,6 +10,8 @@
 
 **Spec:** `docs/specs/2026-09-07-m2-booking-flow-spec.md` (GitHub issue #37 — "Documentation duties at build time" + user story 38). Ticket: jeius/sevendays#48 (scratch copy `.scratch/m2-booking-flow-tickets/10.md`), parent #37 (stays OPEN + untouched). Roadmap: Milestone 2 booking-flow block in `docs/plan.md` — its single unticked checkbox (line 69, the "Verify:" box) is this ticket's; every other M2 box is already ticked with annotations. Predecessor plans (all landed): `2026-09-07-m2-01` … `2026-09-10-m2-09`.
 
+**Amendment (owner ruling, mid-execution 2026-09-10):** the Resend account owner's address is **pahamajulius@gmail.com** — the julius.porferio.pahama@gmail.com pin (spec/issue text) has no Resend account behind it. Every operational `E2E_CUSTOMER_EMAIL` value in this plan uses pahamajulius@gmail.com; occurrences that QUOTE the roadmap/issue text (pre-plan fact 2, the Task 5 tick's original checkbox text) keep the old literal as a quotation, and the Task 5 tick annotation records the correction.
+
 ## Global Constraints
 
 - Node >= 24 (v26.7.0 on this machine, full ICU); pnpm 11 workspace; run repo commands from the repo root unless noted. Fresh clone prep: `pnpm install` → `pnpm build:packages` → `pnpm --filter @sevendays/api build` before `pnpm check`.
@@ -461,10 +463,10 @@ Expected: all three exit 0 with their `N/N checks passed` lines — packages-pag
 - [ ] **Step 4: The mutating end-to-end — both offering kinds, recipient = the owner's address**
 
 ```bash
-E2E_CUSTOMER_EMAIL=julius.porferio.pahama@gmail.com \
+E2E_CUSTOMER_EMAIL=pahamajulius@gmail.com \
   node apps/landing/scripts/verify/booking-e2e.mjs 2>&1 | tee /tmp/m2-e2e-run.txt
 ```
-Expected: exit 0, `7/7 checks passed`, and a final line `BOOKINGS {"customerEmail":"julius.porferio.pahama@gmail.com","bookings":[{"kind":"package","id":"<pkgId>"},{"kind":"service","id":"<svcId>"}]}`. Record `<pkgId>`/`<svcId>` — every later step uses them. The wizard drove the real stack: browser → `/book` steps → landing server fn → `@sevendays/api-client` → API → live db; both emails were scheduled past the responses via `waitUntil`.
+Expected: exit 0, `7/7 checks passed`, and a final line `BOOKINGS {"customerEmail":"pahamajulius@gmail.com","bookings":[{"kind":"package","id":"<pkgId>"},{"kind":"service","id":"<svcId>"}]}`. Record `<pkgId>`/`<svcId>` — every later step uses them. The wizard drove the real stack: browser → `/book` steps → landing server fn → `@sevendays/api-client` → API → live db; both emails were scheduled past the responses via `waitUntil`.
 
 Watch Terminal A: expected is the ABSENCE of `[api] confirmation email for appointment … failed:` lines (success is silent — pre-plan fact 9). If the failure line appears, the send path failed: read the logged error, fix the cause (almost always the key), and re-run from Step 4 after the retry-hygiene note below.
 
@@ -488,7 +490,7 @@ Expected: both print `CONFIRM: PASS — appointment <id> matches every expected 
 set -a
 source <(grep -E '^(RESEND_API_KEY|LANDING_ORIGIN)=' apps/api/.dev.vars)
 set +a
-E2E_CUSTOMER_EMAIL=julius.porferio.pahama@gmail.com \
+E2E_CUSTOMER_EMAIL=pahamajulius@gmail.com \
   node apps/landing/scripts/verify/confirmation-emails.mjs <pkgId> <svcId> 2>&1 | tee /tmp/m2-email-evidence.txt
 ```
 (The source-and-set pattern loads the values into env without printing them; nothing in the output may echo the key.)
@@ -672,7 +674,7 @@ Replace:
 ```
 with:
 ```markdown
-- [✅] Verify: complete a real booking end-to-end and receive the confirmation email at the Resend account owner's address (julius.porferio.pahama@gmail.com — the sandbox 403s every other recipient) _(2026-09-10: verified live on the local stack — API dev (8787, live Supabase db) + landing dev (3000) + the committed CDP harness: one package booking (with an add-on) and one studio-service booking (with notes) through the real /book wizard, 7/7 harness checks after the read-only regressions stayed green; both rows confirmed in Postgres via `verify-appointment-row.mjs`; both confirmation emails retrieved from Resend — exact envelope/subject, money-free HTML, add-on name-only rows / section omitted + Notes row, CTA href from LANDING_ORIGIN, `last_event` delivered; rows deleted after the evidence was recorded (M1.5 Q3=A); ADR-0013 + ADR-0014 recorded; see #48.)_
+- [✅] Verify: complete a real booking end-to-end and receive the confirmation email at the Resend account owner's address (julius.porferio.pahama@gmail.com — the sandbox 403s every other recipient) _(2026-09-10: verified live on the local stack — API dev (8787, live Supabase db) + landing dev (3000) + the committed CDP harness: one package booking (with an add-on) and one studio-service booking (with notes) through the real /book wizard, 7/7 harness checks after the read-only regressions stayed green; both rows confirmed in Postgres via `verify-appointment-row.mjs`; both confirmation emails retrieved from Resend — exact envelope/subject, money-free HTML, add-on name-only rows / section omitted + Notes row, CTA href from LANDING_ORIGIN, `last_event` delivered to pahamajulius@gmail.com (owner-corrected 2026-09-10 — the roadmap line's julius.porferio.pahama@gmail.com pin has no Resend account; correction recorded in this annotation and in progress.md); rows deleted after the evidence was recorded (M1.5 Q3=A); ADR-0013 + ADR-0014 recorded; see #48.)_
 ```
 
 Then confirm nothing else moved: `git diff --stat docs/plan.md` → exactly 1 file, 1 insertion, 1 deletion.
