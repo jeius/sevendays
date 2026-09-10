@@ -143,7 +143,7 @@ Pre-handover (owner):
 - [ ] Real branch phones from the client replace the `TODO(seed)` placeholders (handover-blocking — every "Call us" CTA funnels to `/branches`)
 - [ ] Handover doc written: the client's duty list, the invite → accept → demote sequence, the client's lockout lever (revoke the owner's memberships — instant, zero outage), billing from handover day, and the Sentry-stays-owner-org disclosure
 - [ ] Export prepared: a plain single-branch clone of `v1` (`git clone --single-branch --branch v1`)
-- [ ] Export audit: `git log -S/-G` token sweeps keyed to the absence inventory (spec § The v1 Absence Boundary) over the exported artifact — zero hits
+- [ ] Export audit: `git log -S/-G` token sweeps keyed to the absence inventory (spec § The v1 Absence Boundary) over the exported artifact — zero hits (instrument: `scripts/audit-v1-absence.mjs`, #78 — `node scripts/audit-v1-absence.mjs HEAD --repo <export-clone>`; exit 0 is the gate)
 - [ ] Dry-runs: the `v1` continuous private deploy is green through the polish window; `wrangler deploy` succeeds under the owner's scoped roles (fallback: `Administrator` if an operation proves role-starved)
 
 Client guided work (clickable, owner-guided):
