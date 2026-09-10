@@ -69,7 +69,9 @@ async function main() {
       (() => {
         const el = document.querySelector(${q(sel)});
         if (!el) return false;
-        const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+        const proto =
+          el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+        const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
         setter.call(el, ${q(value)});
         el.dispatchEvent(new Event('input', { bubbles: true }));
         el.dispatchEvent(new Event('change', { bubbles: true }));
