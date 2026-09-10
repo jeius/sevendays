@@ -13,8 +13,9 @@
 //   E2E_CUSTOMER_EMAIL=<owner address> \
 //     node apps/landing/scripts/verify/confirmation-emails.mjs <pkgId> <svcId>
 // Exit 0 = both emails found, content proven, delivered. 1 = a check failed.
-// 2 = the Resend list endpoint is unavailable on this account (machine
-// evidence impossible — the owner's inbox check becomes the recorded proof).
+// 2 = the Resend list endpoint is unavailable on this account (401/403/404 —
+// e.g. a send-only API key; machine evidence impossible — the owner's inbox
+// check becomes the recorded proof).
 
 const API = process.env.API_VERIFY_URL ?? 'http://127.0.0.1:8787';
 const RESEND_API_KEY = process.env.RESEND_API_KEY ?? '';
@@ -73,9 +74,9 @@ async function listEmails() {
     // this run's (bookings are sequential; see the plan's retry note).
     return data.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
   } catch (err) {
-    if (err.status === 403 || err.status === 404) {
+    if (err.status === 401 || err.status === 403 || err.status === 404) {
       console.error(
-        `RESEND LIST UNAVAILABLE (HTTP ${err.status}) — this account can't enumerate sends. ` +
+        `RESEND LIST UNAVAILABLE (HTTP ${err.status}) — this account can't enumerate sends (send-only API keys answer 401 restricted_api_key). ` +
           'Fall back: confirm both emails in the Resend dashboard / the owner inbox and record that as the proof (plan Task 2, Step 6 note).'
       );
       process.exit(2);
