@@ -1,10 +1,14 @@
 name: CI
 
+# CI is the first of ADR-0015's two locks: it runs on main and on the v1
+# branch (the v1 triggers are dormant until the seed creates the branch, and
+# the typed cascade then fails any incomplete booking cut). The second lock —
+# the branch-keyed continuous deploy — lives in the deploy jobs below.
 on:
   push:
-    branches: [main]
+    branches: [main, v1]
   pull_request:
-    branches: [main]
+    branches: [main, v1]
 
 permissions:
   contents: read
