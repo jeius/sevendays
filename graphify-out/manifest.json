@@ -80,12 +80,12 @@
     "semantic_hash": "7c56dad295e65a982a55028df71181cb"
   },
   "apps/api/package.json": {
-    "mtime": 1788986027.7846336,
+    "mtime": 1788989495.2543828,
     "ast_hash": "e3b21695e29e728d4099109bf0c5b00c",
     "semantic_hash": ""
   },
   "apps/api/src/env.ts": {
-    "mtime": 1788984727.6911275,
+    "mtime": 1788989495.2543828,
     "ast_hash": "ef4e6e5ba6872396dee1455235a6a08b",
     "semantic_hash": ""
   },
@@ -105,7 +105,7 @@
     "semantic_hash": ""
   },
   "apps/api/src/routes/appointments.ts": {
-    "mtime": 1788986239.5211325,
+    "mtime": 1788989495.2543828,
     "ast_hash": "cc55bc5b514ef0510ffcbb1dbdcb9eae",
     "semantic_hash": ""
   },
@@ -160,17 +160,17 @@
     "semantic_hash": ""
   },
   "apps/api/test/addon-services.test.ts": {
-    "mtime": 1788984801.7378476,
+    "mtime": 1788989495.2543828,
     "ast_hash": "439859a334b51920196b91fd94285384",
     "semantic_hash": ""
   },
   "apps/api/test/appointments.test.ts": {
-    "mtime": 1788986563.5856051,
+    "mtime": 1788989495.2543828,
     "ast_hash": "50d48798c8431466372b8326ecad4e26",
     "semantic_hash": ""
   },
   "apps/api/test/branches.test.ts": {
-    "mtime": 1788984801.7378476,
+    "mtime": 1788989495.258496,
     "ast_hash": "231a86a4c35e344e84b4a76b438cb899",
     "semantic_hash": ""
   },
@@ -195,7 +195,7 @@
     "semantic_hash": ""
   },
   "apps/api/test/service-packages.test.ts": {
-    "mtime": 1788984801.7378476,
+    "mtime": 1788989495.258496,
     "ast_hash": "2d35537a0dbbcf265da784857bcd0215",
     "semantic_hash": ""
   },
@@ -855,13 +855,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1788987661.1226194,
-    "ast_hash": "f75c4a47ec55bd05d471063dd11b1b25",
+    "mtime": 1789017679.8699903,
+    "ast_hash": "3ca42586f8358696880cc42825d72ee9",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1788987675.848265,
-    "ast_hash": "cd668bd9c0bef50b308246cf6cc1ec0c",
+    "mtime": 1789017740.5522916,
+    "ast_hash": "c6190e10b08664443e097d6e0aecf2af",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -1260,7 +1260,7 @@
     "semantic_hash": ""
   },
   "apps/api/src/env.test.ts": {
-    "mtime": 1788984703.4262662,
+    "mtime": 1788989495.2543828,
     "ast_hash": "93a5bf7336e20a60809c003b4f85a55a",
     "semantic_hash": ""
   },
@@ -1275,7 +1275,7 @@
     "semantic_hash": ""
   },
   "apps/api/test/error-seam.test.ts": {
-    "mtime": 1788984758.395294,
+    "mtime": 1788989495.258496,
     "ast_hash": "385810a968f89267870be497cf17fc50",
     "semantic_hash": ""
   },
@@ -2485,7 +2485,7 @@
     "semantic_hash": ""
   },
   "apps/api/test/studio-services.test.ts": {
-    "mtime": 1788984801.7378476,
+    "mtime": 1788989495.258496,
     "ast_hash": "c38f37762edc31e91a57e3805ff96391",
     "semantic_hash": ""
   },
@@ -2580,23 +2580,23 @@
     "semantic_hash": ""
   },
   "apps/api/src/services/confirmation-email.test.ts": {
-    "mtime": 1788985430.4457164,
+    "mtime": 1788989495.2543828,
     "ast_hash": "141cb0795b798bd3760bc5bd25ffd8e8",
     "semantic_hash": ""
   },
   "apps/api/src/services/confirmation-email.ts": {
-    "mtime": 1788986239.5252552,
+    "mtime": 1788989495.2543828,
     "ast_hash": "80258b4cd1221111d762c22d58ba199d",
     "semantic_hash": ""
   },
   "apps/api/test/helpers/env.ts": {
-    "mtime": 1788984727.7115953,
+    "mtime": 1788989495.258496,
     "ast_hash": "af3f13ee2362e316ed32c1c1a0edb659",
     "semantic_hash": ""
   },
   "apps/landing/scripts/verify/booking-e2e.mjs": {
-    "mtime": 1788981138.9871638,
-    "ast_hash": "62914fa258f22fac1bbf20f2b2475dfe",
+    "mtime": 1789016684.8330674,
+    "ast_hash": "da47d1972e0b32f44e52498ef1a963fa",
     "semantic_hash": ""
   },
   "apps/landing/scripts/verify/booking-wizard.mjs": {
@@ -2800,8 +2800,28 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-10-m2-09-confirmation-email.md": {
-    "mtime": 1788984151.6444058,
+    "mtime": 1788989495.258496,
     "ast_hash": "c8a77f03e253ac7774d18ef71cd760a4",
+    "semantic_hash": ""
+  },
+  "apps/landing/scripts/verify/confirmation-emails.mjs": {
+    "mtime": 1789017237.0261607,
+    "ast_hash": "f1f908429c5ed199fc785d6562f7b88e",
+    "semantic_hash": ""
+  },
+  "docs/adr/0013-generalized-appointment-model.md": {
+    "mtime": 1788992847.819743,
+    "ast_hash": "a8efb02441de3ff2a5272b764e4a8bb7",
+    "semantic_hash": ""
+  },
+  "docs/adr/0014-confirmation-email-send-topology.md": {
+    "mtime": 1788992857.5927851,
+    "ast_hash": "4b32fc0c347760944c43c8c7a62f0453",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-09-10-m2-10-e2e-verification-docs-closeout.md": {
+    "mtime": 1789017398.547668,
+    "ast_hash": "0df2b1f3b61207d328bcf7c11e552769",
     "semantic_hash": ""
   }
 }
