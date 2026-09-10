@@ -1,0 +1,23 @@
+# The v1 seed's blob content rules (#80; ADR-0015). Applied to EVERY blob at
+# EVERY commit: no revision of v1 may contain an absence-inventory token.
+# Historical revisions need not typecheck (ADR-0015) — the seed content
+# commit makes HEAD coherent. Replacement vocabulary is pinned: booking→visit,
+# appointment→visit, email→notice, Resend→mailer. The /book rule is a regex
+# with (?!able) so the ruled-kept bookable module's import paths survive.
+regex:\bcreateAppointment\b==>createStudioVisit
+appointmentQueries==>visitQueries
+getAppointment==>getVisit
+CreateAppointmentArgs==>CreateVisitArgs
+phDateTime==>phTimeStamp
+lib/booking==>lib/visit
+components/booking==>components/visit
+regex:/book(?!able)==>/visit
+/api/v1/appointments==>/api/v1/visits
+'/appointments==>'/visits
+routes/appointments==>routes/visits
+confirmation-email==>visit-note
+RESEND_API_KEY==>NOTICE_API_KEY
+LANDING_ORIGIN==>SITE_ORIGIN
+from 'resend'==>from 'mailer'
+"resend":==>"mailer":
+onboarding@resend.dev==>no-reply@mailer.example
