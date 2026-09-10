@@ -100,6 +100,8 @@ locks — the branch-keyed continuous deploy lands next in this branch."
 
 ### Task 2: The branch-keyed continuous deploy legs
 
+> **Execution amendment (controller ruling, 2026-09-11, Task 2 review):** both `DATABASE_URL` sync steps now carry an explicit `--name` pin (`sevendays-api` / `sevendays-v1-api`). The review caught that an unpinned `wrangler secret put` resolves its Worker target from the checked-out config's `name` field — so until the seed renames the v1 branch's configs, the v1 leg's sync would have written the v1 environment's secret onto the **teaser** Worker. `wrangler secret put --name` is help-verified on wrangler 4.127.1 ("If this is not specified, it will default to the name specified in your Wrangler config file"). The deploy steps were already pinned; with this, all eight Worker-targeting commands are config-independent.
+
 **Files:**
 - Modify: `.github/workflows/ci.yml` (append two jobs; nothing else moves)
 
@@ -173,7 +175,7 @@ Append to the end of `.github/workflows/ci.yml` (exactly one blank line between 
             echo '::error::DATABASE_URL secret missing from the teaser GitHub environment'
             exit 1
           fi
-          printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL
+          printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL --name sevendays-api
 
       - name: Deploy landing (sevendays-landing)
         working-directory: apps/landing
@@ -231,7 +233,7 @@ Append to the end of `.github/workflows/ci.yml` (exactly one blank line between 
             echo '::error::DATABASE_URL secret missing from the v1 GitHub environment'
             exit 1
           fi
-          printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL
+          printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL --name sevendays-v1-api
 
       - name: Deploy landing (sevendays-v1-landing)
         working-directory: apps/landing
