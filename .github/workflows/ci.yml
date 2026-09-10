@@ -59,3 +59,130 @@ jobs:
 
       - name: Build all apps and packages
         run: pnpm build
+
+  # ADR-0015's second lock: the branch-keyed continuous deploy. Each leg is
+  # gated on the same push's check job (needs:), fires only on its branch's
+  # push, and draws its secrets from its own GitHub environment — the teaser
+  # (main, the owner's booking-bearing deployment) and v1 (the private
+  # booking-free deploy, dormant until the seed lands). The legs never share
+  # a Worker target, a token, or a DATABASE_URL: the --name flags pin the six
+  # targets and the environment scopes do the isolation. When M6 provisions
+  # the dedicated accounts, the v1 leg rotates by swapping the v1
+  # environment's secret values (token + DATABASE_URL + API_URL var) — no
+  # workflow edit.
+  deploy-teaser:
+    name: Deploy teaser (main)
+    needs: check
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    environment: teaser
+    concurrency:
+      group: deploy-teaser
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      API_URL: ${{ vars.API_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared config package
+        run: pnpm build:packages
+
+      # Same proven prefix as the check job (see its in-file comment).
+      - name: Build apps/api
+        run: pnpm --filter @sevendays/api build
+
+      - name: Build landing and admin
+        run: |
+          pnpm --filter @sevendays/landing run build
+          pnpm --filter @sevendays/admin run build
+
+      - name: Deploy api (sevendays-api)
+        working-directory: apps/api
+        run: pnpm exec wrangler deploy --name sevendays-api
+
+      - name: Sync api DATABASE_URL from the environment secret
+        working-directory: apps/api
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo '::error::DATABASE_URL secret missing from the teaser GitHub environment'
+            exit 1
+          fi
+          printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL
+
+      - name: Deploy landing (sevendays-landing)
+        working-directory: apps/landing
+        run: pnpm exec wrangler deploy --name sevendays-landing --var "API_URL:$API_URL"
+
+      - name: Deploy admin (sevendays-admin)
+        working-directory: apps/admin
+        run: pnpm exec wrangler deploy --name sevendays-admin --var "API_URL:$API_URL"
+
+  deploy-v1:
+    name: Deploy v1 (private)
+    needs: check
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/v1' }}
+    runs-on: ubuntu-latest
+    environment: v1
+    concurrency:
+      group: deploy-v1
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      API_URL: ${{ vars.API_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared config package
+        run: pnpm build:packages
+
+      - name: Build apps/api
+        run: pnpm --filter @sevendays/api build
+
+      - name: Build landing and admin
+        run: |
+          pnpm --filter @sevendays/landing run build
+          pnpm --filter @sevendays/admin run build
+
+      - name: Deploy api (sevendays-v1-api)
+        working-directory: apps/api
+        run: pnpm exec wrangler deploy --name sevendays-v1-api
+
+      - name: Sync api DATABASE_URL from the environment secret
+        working-directory: apps/api
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo '::error::DATABASE_URL secret missing from the v1 GitHub environment'
+            exit 1
+          fi
+          printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL
+
+      - name: Deploy landing (sevendays-v1-landing)
+        working-directory: apps/landing
+        run: pnpm exec wrangler deploy --name sevendays-v1-landing --var "API_URL:$API_URL"
+
+      - name: Deploy admin (sevendays-v1-admin)
+        working-directory: apps/admin
+        run: pnpm exec wrangler deploy --name sevendays-v1-admin --var "API_URL:$API_URL"
