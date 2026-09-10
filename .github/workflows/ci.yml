@@ -119,7 +119,7 @@ jobs:
             echo '::error::DATABASE_URL secret missing from the teaser GitHub environment'
             exit 1
           fi
-          printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL
+          printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL --name sevendays-api
 
       - name: Deploy landing (sevendays-landing)
         working-directory: apps/landing
@@ -177,7 +177,7 @@ jobs:
             echo '::error::DATABASE_URL secret missing from the v1 GitHub environment'
             exit 1
           fi
-          printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL
+          printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL --name sevendays-v1-api
 
       - name: Deploy landing (sevendays-v1-landing)
         working-directory: apps/landing
