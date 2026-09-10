@@ -1,8 +1,8 @@
 # Progress
 
-_Last updated: 2026-09-10 (M2 close-out #48 — live end-to-end verification + docs: real bookings for both offering kinds through the wizard, confirmation emails received at the account owner's address, ADR-0013 + ADR-0014 recorded, plan.md's last M2 checkbox ticked. Prior 2026-09-10: M2 ticket 09 — confirmation email builder + Resend send-after-commit. Prior 2026-09-10: M2 ticket 08 —_
+_Last updated: 2026-09-11 (delivery-versions map close-out #74 — the v1/v2 editions written into the repo: spec `docs/specs/2026-09-11-delivery-versions-spec.md` published as issue #76 `ready-for-agent`, `docs/plan.md` restructured (editions manifest, design milestone seated in the M3 slot, M4/M6 v1-track/v2-track splits made real, v1 artifact seed block, new Milestone 7 Handover, v2 collection), ADR-0015 recorded, #62 closed as absorbed. Prior 2026-09-10: M2 close-out #48 — live end-to-end verification + docs: real bookings for both offering kinds through the wizard, confirmation emails received at the account owner's address, ADR-0013 + ADR-0014 recorded, plan.md's last M2 checkbox ticked._
 
-## Current Milestone: 2 — Public Booking Flow (complete — exit criteria verified live 2026-09-10, issue #48; next up: the UI/UX design-system milestone — spec task #61, wayfinder map #55)
+## Current Milestone: v1 edition — next up the v1 artifact seed + Milestone 3 (UI/UX design system — spec task #61, wayfinder map #55). M2 (Public Booking Flow) is complete (exit criteria verified live 2026-09-10, issue #48); its build is v2's payload, complete on main. Delivery is versioned per the 2026-09-11 editions restructure (spec issue #76, ADR-0015).
 
 ## Gate status (all verified live on 2026-08-30)
 
@@ -39,6 +39,8 @@ _Last updated: 2026-09-10 (M2 close-out #48 — live end-to-end verification + d
   secret gap closed by observation.
 
 ## What Exists
+
+- **Delivery-versions editions restructure (2026-09-11, wayfinder map #67 close-out #74):** the v1/v2 delivery model is decided and written. Spec: `docs/specs/2026-09-11-delivery-versions-spec.md` (issue #76, `ready-for-agent`) consolidates all seven map rulings — the v1 absence boundary (per-file: landing booking cluster + API mount/email/env-shed + api-client group absent; db + types inert-kept; shared landing surfaces transformed), the booking-off direction (hybrid contact-forward, `/branches` as conversion hub, dead routes 404 by absence), the artifact mechanism (ADR-0015: one filter-repo seed of a long-lived `v1` branch + per-PR cherry-picks with CI + continuous private deploy as locks; export = single-branch clone sharing SHAs; v2 = fresh change-set), handover mechanics (inherit-in-place on ship-time-dedicated accounts, client's duty all clickable, owner operates v1 scoped), and the v2 offer sheet (content + money-free boundary; produced at commissioning, `docs/client/v2-offer-sheet.md` main-only). `docs/plan.md` restructured to match: editions manifest, v1 artifact seed block, design milestone seated as M3, M4 auth-only (dashboard → v2), M6 v1 slice + ship-time provisioning, new M7 Handover, v2 collection (dashboard + booking re-integration + former-M3 availability with its deferral annotation + booking hardening). #62 closed as absorbed; map #55's booking-off fog was already graduated into #60 (cross-referenced). Nothing is built yet — the seed is the first takeable v1 work.
 
 - **M1.5 exit verification (feat/m1.5-exit-verification):** the M1 gate ran live on 2026-09-02 against the
   deployed Worker. Probe tooling: `packages/db/scripts/verify-appointment-row.mjs` (psql-equivalent
@@ -176,7 +178,7 @@ _Last updated: 2026-09-10 (M2 close-out #48 — live end-to-end verification + d
 
 ## Immediate Next Steps (in order)
 
-1. **UI/UX design-system milestone** — M2 is closed (exit criteria verified live 2026-09-10, #48). The M3 slot is taken by the design-system milestone per the owner's 2026-09-09 deferral: next is the milestone spec (#61, from wayfinder map #55) with the landing-refactor grilling (#60), then the red-pencil of `docs/plan.md`. The v1/v2 delivery ruling (#62) stands: v1 = landing + admin auth + CMS as a booking-free artifact; booking + appointments admin + availability stay v2-track. (M6's production slice re-verifies the confirmation email on the real sending domain.)
+1. **v1 edition — v1 artifact seed + the design milestone.** The delivery-versions map (#67) closed 2026-09-11: `docs/plan.md` now carries the editions manifest, the v1 artifact seed block (ADR-0015 — filter-repo seed + cherry-pick discipline + CI on `v1` + continuous private deploy + teaser on main), and the v1 sequence (M3 design → M4 auth → M5 CMS → M6 v1 slice + provisioning → M7 Handover). Next takeable work, independent of each other: the v1 artifact seed (spec issue #76, `ready-for-agent` — wants doing while the absence inventory is fresh) and the design milestone's spec (#61, from map #55, with #60's landing-refactor grilling). The v2 collection (appointments dashboard, availability, booking hardening) is uncommissioned — its offer sheet is produced only at commissioning (#73). (The old "M6 re-verifies the email on the real sending domain" note moved with it: the Resend domain + email check are v2's hardening block now.)
 
 ## Notes for Future Sessions
 
