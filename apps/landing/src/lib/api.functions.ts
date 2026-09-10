@@ -1,6 +1,4 @@
 import { startSpan } from '@sentry/tanstackstart-react';
-import type { CreateVisitArgs } from '@sevendays/api-client';
-import type { AppointmentWithAddons } from '@sevendays/types';
 import { createServerFn } from '@tanstack/react-start';
 import { getApiClient } from './api.server';
 
@@ -44,31 +42,3 @@ export const getAddonServices = createServerFn().handler(async () => {
     return getApiClient().addonServices.list();
   });
 });
-
-/**
- * Guest booking POST. Callers pass the start-fn payload ({ data: input });
- * the api-client RPC shape ({ json }) is wrapped here. Rejections reject
- * with ApiClientError(400) whose details carry the API's module-owned
- * message — src/lib/visit.ts maps it to the typed rejection card.
- */
-export const createStudioVisit = createServerFn()
-  .validator((input: CreateVisitArgs) => input)
-  .handler(async ({ data }): Promise<AppointmentWithAddons> => {
-    return startSpan({ name: 'POST /api/v1/visits' }, async () => {
-      return getApiClient().appointments.create(data);
-    });
-  });
-
-/**
- * Confirmation read-back (ticket 08). Callers pass the start-fn payload
- * ({ data: id }); the api-client RPC shape ({ param: { id } }) is wrapped
- * here. Unknown ids reject with ApiClientError(404) — the loader maps that
- * to the router's not-found via lib/api-404.ts.
- */
-export const getVisit = createServerFn()
-  .validator((input: string) => input)
-  .handler(async ({ data }) => {
-    return startSpan({ name: 'GET /api/v1/visits/:id' }, async () => {
-      return getApiClient().appointments.get({ param: { id: data } });
-    });
-  });

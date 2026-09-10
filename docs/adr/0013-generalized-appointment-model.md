@@ -3,13 +3,15 @@
 **Status:** Accepted
 **Date:** 2026-09-10
 
+> **Note:** the `appointments` tables ship in `packages/db` as inert schema — documentation of the data model; no runtime path reads or writes them. This ADR is kept because it explains those tables.
+
 ## Context
 
 The PRD's "services offered" turned out to be a distinct entity — Studio Services (photo recovery, tarpaulin & bulletin printing, portraits & ID photo, picture framing) — not the catalog's Add-on Services, and until M2 the `appointments` table could represent only Service Package bookings (`service_package_id` NOT NULL; snapshot column `package_price_cents`). The M2 booking flow records either offering kind through one guest flow, the intake must stay one transaction (M1.4), and catalog prices change over time while each booking must keep the price the customer was quoted (M2 spec user story 23). The table was young — zero production rows when the model moved (migration 0004, 2026-09-09).
 
 ## Decision
 
-One `appointments` table books both kinds: `service_package_id` became nullable, a nullable `studio_service_id` FK joined it, and the snapshot column renamed to `booked_price_cents` — server-written at intake from the live catalog price. Exactly-one offering is enforced on both the Zod and SQL sides (ADR-0012's subject, not repeated here). Add-on selections remain junction rows carrying per-row `price_cents` snapshots; which add-ons may attach is uniform for packages (any active add-on) and matrix-gated for services (`studio_service_addon_services`). Every later read — the `/visiting/:id` page, the confirmation email, the future admin — renders names by joining the referenced rows and prices only from the snapshots: a catalog edit never rewrites a booked row's facts.
+One `appointments` table books both kinds: `service_package_id` became nullable, a nullable `studio_service_id` FK joined it, and the snapshot column renamed to `booked_price_cents` — server-written at intake from the live catalog price. Exactly-one offering is enforced on both the Zod and SQL sides (ADR-0012's subject, not repeated here). Add-on selections remain junction rows carrying per-row `price_cents` snapshots; which add-ons may attach is uniform for packages (any active add-on) and matrix-gated for services (`studio_service_addon_services`). Every later read renders names by joining the referenced rows and prices only from the snapshots: a catalog edit never rewrites a booked row's facts.
 
 ## Alternatives Considered
 
@@ -19,7 +21,7 @@ One `appointments` table books both kinds: `service_package_id` became nullable,
 
 ## Consequences
 
-- Names always join at read time (the confirmation page pulls them from the sibling reads; the email resolves them at send time keyed by the stored ids) — every consumer needs the record AND the catalog reads to render.
+- Names always join at read time (consumers pull them from the sibling catalog reads) — every consumer needs the record AND the catalog reads to render.
 - Deactivating a package or service (M5 CMS) leaves booked rows untouched and fulfillable — the snapshot design buys that for free.
 - The expand half of expand–contract shipped while the table was empty; the contract half (NOT NULL restoration) never became necessary and would now cost the populated-table two-step.
 - A third offering kind would mean a new nullable ref plus extending the exactly-one formula in both its mirrors (ADR-0012) — deliberate friction.

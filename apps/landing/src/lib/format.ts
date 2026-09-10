@@ -1,15 +1,6 @@
-// Money + schedule display for the landing site — promoted verbatim from the
-// prototype (wayfinder #33, spec residual). Cent-denominated ints in, peso
-// string out; ISO instants in, Philippine-wall-clock strings out.
+// Money display for the landing site: cent-denominated ints in, peso string
+// out.
 
 export function peso(cents: number): string {
   return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
-}
-
-export function phTimeStamp(iso: string): string {
-  return new Date(iso).toLocaleString('en-PH', {
-    timeZone: 'Asia/Manila',
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
 }

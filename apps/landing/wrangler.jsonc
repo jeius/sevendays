@@ -1,8 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "sevendays-landing",
+  "name": "sevendays-v1-landing",
   "compatibility_date": "2025-09-02",
   "compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
   "main": "@tanstack/react-start/server-entry",
-  "services": [{ "binding": "API", "service": "sevendays-api" }]
+  "services": [{ "binding": "API", "service": "sevendays-v1-api" }]
 }

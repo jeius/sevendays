@@ -11,10 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
-import { Route as BookRouteImport } from './routes/visit'
 import { Route as BranchesRouteImport } from './routes/branches'
 import { Route as ServicesRouteImport } from './routes/services'
-import { Route as BookingIdRouteImport } from './routes/visiting.$id'
 import { Route as PackagesIndexRouteImport } from './routes/packages/index'
 import { Route as PackagesSlugRouteImport } from './routes/packages/$slug'
 
@@ -28,11 +26,6 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BookRoute = BookRouteImport.update({
-  id: '/visit',
-  path: '/visit',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const BranchesRoute = BranchesRouteImport.update({
   id: '/branches',
   path: '/branches',
@@ -41,11 +34,6 @@ const BranchesRoute = BranchesRouteImport.update({
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BookingIdRoute = BookingIdRouteImport.update({
-  id: '/visiting/$id',
-  path: '/visiting/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PackagesIndexRoute = PackagesIndexRouteImport.update({
@@ -62,20 +50,16 @@ const PackagesSlugRoute = PackagesSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/visit': typeof BookRoute
   '/branches': typeof BranchesRoute
   '/services': typeof ServicesRoute
-  '/visiting/$id': typeof BookingIdRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages/': typeof PackagesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/visit': typeof BookRoute
   '/branches': typeof BranchesRoute
   '/services': typeof ServicesRoute
-  '/visiting/$id': typeof BookingIdRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages': typeof PackagesIndexRoute
 }
@@ -83,10 +67,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/visit': typeof BookRoute
   '/branches': typeof BranchesRoute
   '/services': typeof ServicesRoute
-  '/visiting/$id': typeof BookingIdRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages/': typeof PackagesIndexRoute
 }
@@ -95,30 +77,19 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/visit'
     | '/branches'
     | '/services'
-    | '/visiting/$id'
     | '/packages/$slug'
     | '/packages/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/about'
-    | '/visit'
-    | '/branches'
-    | '/services'
-    | '/visiting/$id'
-    | '/packages/$slug'
-    | '/packages'
+    '/' | '/about' | '/branches' | '/services' | '/packages/$slug' | '/packages'
   id:
     | '__root__'
     | '/'
     | '/about'
-    | '/visit'
     | '/branches'
     | '/services'
-    | '/visiting/$id'
     | '/packages/$slug'
     | '/packages/'
   fileRoutesById: FileRoutesById
@@ -126,10 +97,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  BookRoute: typeof BookRoute
   BranchesRoute: typeof BranchesRoute
   ServicesRoute: typeof ServicesRoute
-  BookingIdRoute: typeof BookingIdRoute
   PackagesSlugRoute: typeof PackagesSlugRoute
   PackagesIndexRoute: typeof PackagesIndexRoute
 }
@@ -150,13 +119,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/visit': {
-      id: '/visit'
-      path: '/visit'
-      fullPath: '/visit'
-      preLoaderRoute: typeof BookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/branches': {
       id: '/branches'
       path: '/branches'
@@ -169,13 +131,6 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/visiting/$id': {
-      id: '/visiting/$id'
-      path: '/visiting/$id'
-      fullPath: '/visiting/$id'
-      preLoaderRoute: typeof BookingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/packages/': {
@@ -198,10 +153,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  BookRoute: BookRoute,
   BranchesRoute: BranchesRoute,
   ServicesRoute: ServicesRoute,
-  BookingIdRoute: BookingIdRoute,
   PackagesSlugRoute: PackagesSlugRoute,
   PackagesIndexRoute: PackagesIndexRoute,
 }

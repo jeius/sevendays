@@ -24,7 +24,8 @@ function ServicesPage() {
       <SiteHeader />
       <h1 className='mt-10 font-bold text-4xl'>Services</h1>
       <p className='mt-2 text-neutral-700'>
-        Looking for add-ons? Makeup, hairstyle, and more can attach to your booking.
+        Looking for add-ons? Makeup, hairstyle, and more are available in-studio — call or visit a
+        branch that offers your service.
       </p>
       <div className='mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2'>
         {services.map((s) => (

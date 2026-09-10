@@ -9,7 +9,7 @@ One of the studio's three physical photography locations.
 _Avoid_: store, location, studio (unqualified)
 
 **Service Package**:
-A bookable offering with a name, description, price, duration, and cover image. Its fixed contents are its Inclusions; paid extras are attached at booking as Add-on Services.
+A catalog offering with a name, description, price, duration, and cover image. Its fixed contents are its Inclusions; paid extras attach as Add-on Services.
 _Avoid_: plan, product, offering, package (unqualified — collides with npm packages)
 
 **Inclusion**:
@@ -17,16 +17,16 @@ A fixed item or privilege bundled with a Service Package at no extra charge — 
 _Avoid_: freebie, bundle, "what's included" (in prose)
 
 **Add-on Service**:
-An optional paid extra — hairstyle, makeup — attached to an Appointment at booking time. An addition to whatever the Appointment books, never bookable instead of it; on Studio Service bookings, only the add-ons configured to apply to that service are offered.
+An optional paid extra — hairstyle, makeup — that can be attached to an offering; only the add-ons configured to apply to a Studio Service apply to it (the applicability matrix ships in the schema).
 _Avoid_: service (unqualified), extra, option
 
 **Studio Service**:
-A standalone studio offering bookable in its own right at Branches where it is enabled (photo recovery, tarpaulin & bulletin printing, portraits & ID photo, picture framing). Not a Service Package (which bundles Inclusions) and not an Add-on Service (which attaches to a booking).
+A standalone studio offering offered at the Branches where it is enabled (photo recovery, tarpaulin & bulletin printing, portraits & ID photo, picture framing). Not a Service Package (which bundles Inclusions) and not an Add-on Service (which attaches to an offering).
 _Avoid_: service (unqualified), other service, ancillary service
 
 **Appointment**:
-A customer's reserved time at a Branch for a Service Package or a Studio Service, optionally with Add-on Services; the record a booking creates.
-_Avoid_: reservation, order, booking (as a noun for the record)
+The record type for a customer's reserved time at a Branch for a Service Package or a Studio Service, optionally with Add-on Services. The tables ship as inert schema — documentation of the data model; no runtime path reads or writes them.
+_Avoid_: reservation, order
 
 **Status**:
 The lifecycle state of an Appointment — the closed set pending, confirmed, completed, cancelled, no-show, defined in `packages/types`.
@@ -60,28 +60,10 @@ _Avoid_: framed picture (that is the Inclusion inside a Frame), frame size (that
 The shared package (`@sevendays/api-client`) through which both apps call this API — the only supported path; frontends never hand-roll calls to it.
 _Avoid_: SDK, fetcher, wrapper
 
-## Availability (ADR-0005)
-
-**Slot**:
-One fixed hour of a Branch's schedule. Every Appointment occupies exactly one Slot, regardless of the Service Package's duration.
-_Avoid_: timeslot, time window
-
-**Branch hours**:
-A Branch's weekly opening hours, defining which Slots exist on a given day.
-_Avoid_: business hours, schedule
-
-**Slot capacity**:
-The maximum number of Appointments a Branch accepts in one Slot.
-_Avoid_: quota, limit
-
-**Availability**:
-The Slots of a Branch on a date, within Branch hours, that still have remaining Slot capacity.
-_Avoid_: free slots, open times
-
 **Deactivated (Service Package)**:
-Hidden from the landing site and new bookings, while existing Appointments on it remain valid and fulfillable. A catalog action, never a destructive one.
+Hidden from the landing site by catalog action, never destructive — historical records referencing it stay untouched.
 _Avoid_: deleted, archived, cancelled (for packages)
 
 **Deactivated (Studio Service)**:
-The same catalog action as a deactivated Service Package: hidden from the landing site and new bookings; existing Appointments on it remain valid. Independent of Branch bookability — a service can be active yet bookable at only some Branches.
+The same catalog action for a Studio Service. Independent of Branch applicability — a service can be active yet offered at only some Branches.
 _Avoid_: deleted, archived, cancelled (for catalog offerings)

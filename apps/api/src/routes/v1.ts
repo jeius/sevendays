@@ -2,7 +2,6 @@ import { Hono } from 'hono';
 import { parseEnv } from '../env.js';
 import { type ApiEnv, createApiDb } from '../services/db.js';
 import { addonServices } from './addon-services.js';
-import { appointments } from './appointments.js';
 import { branches } from './branches.js';
 import { servicePackages } from './service-packages.js';
 import { studioServices } from './studio-services.js';
@@ -23,7 +22,6 @@ export const acquireDb = async (c: import('hono').Context<ApiEnv>, next: () => P
 export const v1 = new Hono<ApiEnv>()
   .use('*', acquireDb)
   .route('/branches', branches)
-  .route('/visits', appointments)
   .route('/service-packages', servicePackages)
   .route('/studio-services', studioServices)
   .route('/addon-services', addonServices);

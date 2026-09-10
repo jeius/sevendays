@@ -37,52 +37,9 @@ it('addonServices.list returns active add-ons', async () => {
   expect(rows[0]?.name).toBe('Makeup');
 });
 
-it('appointments.create returns the created record with add-ons (201)', async () => {
-  const client = clientFor(mockApi);
-  const record = await client.appointments.create({
-    branchId: '11111111-1111-4111-8111-111111111111',
-    servicePackageId: '44444444-4444-4444-8444-444444444444',
-    customerName: 'Ada Lovelace',
-    customerEmail: 'ada@example.com',
-    customerPhone: '+63 917 222 2222',
-    scheduledAt: '2026-10-01T09:00:00.000Z',
-    addonServiceIds: ['33333333-3333-4333-8333-333333333333'],
-  });
-  expect(record.bookedPriceCents).toBe(250000); // server snapshot, not caller input
-  expect(record.addonServices[0]?.name).toBe('Makeup');
-  expect(record.createdAt).toBeInstanceOf(Date);
-});
-
-it('appointments.list filters by branch', async () => {
-  const client = clientFor(mockApi);
-  const all = await client.appointments.list();
-  const filtered = await client.appointments.list({
-    query: { branchId: '22222222-2222-4222-8222-222222222222' },
-  });
-  expect(all).toHaveLength(1);
-  expect(filtered).toHaveLength(0);
-});
-
 it('a schema-mismatched 2xx payload throws ZodError through the wrapper', async () => {
   const client = clientFor(mockApiBrokenBranches);
   await expect(client.branches.list()).rejects.toBeInstanceOf(ZodError);
-});
-
-it('a 400 envelope surfaces as ApiClientError with status + details', async () => {
-  const client = clientFor(mockApi);
-  const err = await client.appointments
-    .create({
-      branchId: '99999999-9999-4999-8999-999999999999',
-      servicePackageId: '44444444-4444-4444-8444-444444444444',
-      customerName: 'X',
-      customerEmail: 'x@example.com',
-      customerPhone: 'P',
-      scheduledAt: '2026-10-01T09:00:00.000Z',
-    })
-    .catch((e) => e);
-  expect(err).toBeInstanceOf(ApiClientError);
-  expect((err as ApiClientError).status).toBe(400);
-  expect((err as ApiClientError).details).toEqual({ error: 'Unknown branchId.' });
 });
 
 it('a 404 envelope surfaces as ApiClientError through the unwrap gate', async () => {
@@ -113,39 +70,6 @@ it('servicePackages.bySlug surfaces the uniform 404 as ApiClientError', async ()
   expect(err).toBeInstanceOf(ApiClientError);
   expect((err as ApiClientError).status).toBe(404);
   expect((err as ApiClientError).details).toEqual({ error: 'Package not found.' });
-});
-
-it('appointments.get returns the record with add-on entries', async () => {
-  const client = clientFor(mockApi);
-  const record = await client.appointments.get({
-    param: { id: '99999999-9999-4999-8999-999999999999' },
-  });
-  expect(record.bookedPriceCents).toBe(250000);
-  expect(record.servicePackageId).toBe('44444444-4444-4444-8444-444444444444');
-  expect(record.studioServiceId).toBeNull();
-  expect(record.addonServices[0]?.name).toBe('Makeup');
-  expect(record.createdAt).toBeInstanceOf(Date);
-});
-
-it('appointments.get surfaces the uniform 404 as ApiClientError', async () => {
-  const client = clientFor(mockApi);
-  const err = await client.appointments
-    .get({ param: { id: 'f0000000-0000-4000-8000-000000000000' } })
-    .catch((e) => e);
-  expect(err).toBeInstanceOf(ApiClientError);
-  expect((err as ApiClientError).status).toBe(404);
-  expect((err as ApiClientError).details).toEqual({ error: 'Appointment not found.' });
-});
-
-it('appointments.get rejects a non-uuid id with the uniform 400 as ApiClientError', async () => {
-  const client = clientFor(mockApi);
-  const err = await client.appointments.get({ param: { id: 'not-a-uuid' } }).catch((e) => e);
-  expect(err).toBeInstanceOf(ApiClientError);
-  expect((err as ApiClientError).status).toBe(400);
-  // The mock mirrors the real validator envelope (error + details); assert
-  // the error wording via toMatchObject so the exact details payload can
-  // evolve without weakening the seam.
-  expect((err as ApiClientError).details).toMatchObject({ error: 'Invalid request payload.' });
 });
 
 it('studioServices.list returns active services with bookable branch ids', async () => {

@@ -9,7 +9,6 @@ export function SiteHeader() {
         Sevendays Photography
       </Link>
       <nav className='flex items-center gap-6'>
-        {/* Plain anchors: /visit arrives with ticket #45; convert to typed Links then. */}
         <a href='/packages' className='hover:underline'>
           Packages
         </a>
@@ -22,9 +21,11 @@ export function SiteHeader() {
         <a href='/about' className='hover:underline'>
           About
         </a>
-        <Link to='/visit' className='rounded-md bg-neutral-900 px-4 py-2 text-white'>
-          Book now
-        </Link>
+        {/* The primary CTA funnels to /branches — the conversion hub, where
+            each branch card carries its phone. */}
+        <a href='/branches' className='rounded-md bg-neutral-900 px-4 py-2 text-white'>
+          Call us
+        </a>
       </nav>
     </header>
   );

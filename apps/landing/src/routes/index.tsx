@@ -1,5 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { BranchStripItem } from '../components/branch-strip-item';
 import { PackageCard } from '../components/package-card';
 import { ServiceTeaserItem } from '../components/service-teaser-item';
@@ -30,12 +30,20 @@ function Home() {
       <SiteHeader />
       <section className='mt-10 flex flex-col gap-4'>
         <h1 className='font-bold text-5xl'>Sevendays Photography</h1>
-        <Link
-          to='/visit'
-          className='rounded-md bg-neutral-900 px-6 py-3 text-center text-white text-xl'
-        >
-          Book now
-        </Link>
+        <div className='flex flex-wrap gap-4'>
+          <a
+            href='/branches'
+            className='rounded-md bg-neutral-900 px-6 py-3 text-center text-white text-xl'
+          >
+            Call Us
+          </a>
+          <a
+            href='/services'
+            className='rounded-md border border-neutral-900 px-6 py-3 text-center text-neutral-900 text-xl'
+          >
+            Services
+          </a>
+        </div>
       </section>
       {/* TODO(owner-copy): placeholder blurb — replaced when the client supplies copy. */}
       <p className='mt-8 text-neutral-700'>Our studio blurb is coming soon.</p>

@@ -1,5 +1,4 @@
 import type { StudioServiceWithBranches } from '@sevendays/types';
-import { Link } from '@tanstack/react-router';
 import { peso } from '../lib/format';
 
 // Studio Service card (/services): description + price + per-branch
@@ -25,13 +24,6 @@ export function ServiceCard({
           </span>
         ))}
       </div>
-      <Link
-        to='/visit'
-        search={{ service: service.id }}
-        className='rounded-md bg-neutral-900 px-4 py-2 text-center text-white'
-      >
-        Book now
-      </Link>
     </article>
   );
 }
