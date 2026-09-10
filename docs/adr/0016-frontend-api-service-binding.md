@@ -20,5 +20,5 @@ Each frontend's wrangler config carries a **service binding** — `"services": [
 ## Consequences
 
 - Deployment targets must keep the binding's service name and the API worker's name in lockstep — on `main` and on the `v1` branch (after the seed's rename), and at the M6 dedicated-account rotation (worker names carry over, so the binding carries over).
-- Dev, preview, and vitest are unaffected: no binding exists there, and the fallback path is the one they always used.
+- **Dev is gated explicitly.** `vite dev` runs workerd via the vite plugin, and the plugin wires the binding there too — but the binding's target is not in the dev session, where it 503s every data route (found by the final review's dev-stack probe). The resolution therefore only runs in production builds (`import.meta.env.DEV` false): dev always takes the `API_URL` network path, and vitest (plain Node) never resolves `cloudflare:workers` at all. `vite preview` serves the production build, so its data routes have the production posture — the binding needs its target; serving the api alongside the preview session is the preview analogue of production.
 - The 1042 constraint is now written down where the next posture change (custom domains at handover) will meet it: once the API has a real domain, the binding remains valid and the URL path remains the documented fallback.
