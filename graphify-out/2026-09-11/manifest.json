@@ -855,13 +855,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1789017679.8699903,
-    "ast_hash": "3ca42586f8358696880cc42825d72ee9",
+    "mtime": 1789061392.6883175,
+    "ast_hash": "f4c127067e15d4bddff42929ee5181b5",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1789017740.5522916,
-    "ast_hash": "c6190e10b08664443e097d6e0aecf2af",
+    "mtime": 1789061435.495692,
+    "ast_hash": "243cd14b1b87e8c60700b50a7799f8e1",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2595,7 +2595,7 @@
     "semantic_hash": ""
   },
   "apps/landing/scripts/verify/booking-e2e.mjs": {
-    "mtime": 1789016684.8330674,
+    "mtime": 1789018713.5072775,
     "ast_hash": "da47d1972e0b32f44e52498ef1a963fa",
     "semantic_hash": ""
   },
@@ -2805,23 +2805,38 @@
     "semantic_hash": ""
   },
   "apps/landing/scripts/verify/confirmation-emails.mjs": {
-    "mtime": 1789017237.0261607,
+    "mtime": 1789018713.5072775,
     "ast_hash": "f1f908429c5ed199fc785d6562f7b88e",
     "semantic_hash": ""
   },
   "docs/adr/0013-generalized-appointment-model.md": {
-    "mtime": 1788992847.819743,
+    "mtime": 1789018713.5072775,
     "ast_hash": "a8efb02441de3ff2a5272b764e4a8bb7",
     "semantic_hash": ""
   },
   "docs/adr/0014-confirmation-email-send-topology.md": {
-    "mtime": 1788992857.5927851,
+    "mtime": 1789018713.5072775,
     "ast_hash": "4b32fc0c347760944c43c8c7a62f0453",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-10-m2-10-e2e-verification-docs-closeout.md": {
-    "mtime": 1789017398.547668,
+    "mtime": 1789018713.5072775,
     "ast_hash": "0df2b1f3b61207d328bcf7c11e552769",
+    "semantic_hash": ""
+  },
+  "docs/adr/0015-two-edition-artifact-mechanism.md": {
+    "mtime": 1789061109.218884,
+    "ast_hash": "e346910b6c11c69c6c279f21c6a9cc6d",
+    "semantic_hash": ""
+  },
+  "docs/drafts/2026-09-10-v2-offer-sheet-PROTOTYPE.md": {
+    "mtime": 1789053338.5522268,
+    "ast_hash": "2225e3a8c48fb6b83d084b5385b65065",
+    "semantic_hash": ""
+  },
+  "docs/specs/2026-09-11-delivery-versions-spec.md": {
+    "mtime": 1789061234.9373658,
+    "ast_hash": "b498c623fe220759c800ab3fffc01647",
     "semantic_hash": ""
   }
 }
