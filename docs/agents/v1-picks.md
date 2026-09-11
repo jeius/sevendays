@@ -136,3 +136,4 @@ One row per squash merge to main since the seed point, in main order. `v1 SHA` i
 | 2026-09-10 (pre-seed) | #65 | `abfa9d2` | skip (example) | — | booking PR worked retrospectively: paths SPLIT (12 v1-paths + 29 main-only), content pass drops all 12 (env pair / resend dep incl. its lockfile entries / helpers-env) → SKIP; rewritten form already in v1 as `0c01531` |
 | 2026-09-11 | #86 | `fb92ef9` | skip | — | seed PR: ruleset + audit token fix + docs/graph — 18 paths, all main-only |
 | 2026-09-11 | #87 | `f29ce87` | skip | — | #81 close-out: plan/progress ticks + plan file + graph — all main-only |
+| 2026-09-11 (drill) | — | `d447716` (local) | split (drill) | `48ce4f3` (local, deleted) | synthetic mixed commit: about.tsx comment (v1-path) + booking.ts edit + new booking-drill.ts (booking cluster); classifier SPLIT 1+2; both main-only paths dropped (`A` + `DU`); footprint about.tsx only; audit PASS; never pushed |
