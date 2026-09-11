@@ -1,0 +1,39 @@
+# The v1 seed's invert-paths list (#80; ADR-0015; spec § The v1 Absence
+# Boundary). One literal path or directory per line. This file is the RECORD
+# of the one rewrite — re-running it against origin is forbidden after the
+# v1 push; before that, local re-runs are free (re-clone, re-filter).
+#
+# Landing pure-booking cluster:
+apps/landing/src/routes/book.tsx
+apps/landing/src/routes/booking.$id.tsx
+apps/landing/src/lib/booking.ts
+apps/landing/src/lib/booking.test.ts
+apps/landing/src/lib/booking-read.ts
+apps/landing/src/lib/booking-read.test.ts
+apps/landing/src/components/booking
+# API cluster (env shed rides the content rules; the resend dep rides the
+# seed content commit):
+apps/api/src/routes/appointments.ts
+apps/api/src/services/appointments.ts
+apps/api/src/services/confirmation-email.ts
+apps/api/src/services/confirmation-email.test.ts
+apps/api/test/appointments.test.ts
+# api-client group (the typed-cascade cut lands in the seed content commit):
+packages/api-client/src/routes/appointments.ts
+# Owner tooling + edition mechanics (ruled in #80, recorded in progress.md):
+apps/landing/scripts/verify
+scripts
+skills-lock.json
+.agents
+graphify-out
+# Docs scrubbed to the client-safe set (spec § The v1 Absence Boundary):
+docs/plan.md
+docs/progress.md
+docs/specs
+docs/agents
+docs/superpowers
+docs/drafts
+docs/adr/0005-hourly-slot-grid-capacity.md
+docs/adr/0012-exactly-one-booked-offering.md
+docs/adr/0014-confirmation-email-send-topology.md
+docs/adr/0015-two-edition-artifact-mechanism.md

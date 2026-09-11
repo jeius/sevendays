@@ -45,6 +45,16 @@
 // be absent from v1. Adding a token requires re-proving it against the kept
 // set; `peso` and `bookableBranch*` stay shared by ruling and are
 // deliberately NOT tokens.
+//
+// Re-derivation (2026-09-11, #80's re-verification): the original
+// `/appointments` and `/book` literals false-hit the ruled-kept set — the db
+// schema barrel imports './appointments.js' (inert tables ship verbatim) and
+// the landing bookable module imports './bookable-branches' (chips stay, no
+// internal rename). Tokens must be absent-cluster-specific against the KEPT
+// set, so each split into a quoted-code form and a URL/prose form:
+// '/appointments' + '/api/v1/appointments', '/book' + '/booking'. Both
+// halves were re-proven on main's history (hits) and against the kept set
+// (zero) before landing; the self-test fixtures pin the near-misses.
 
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -68,10 +78,12 @@ const TOKENS = [
   { mode: 'S', token: 'phDateTime' },
   { mode: 'S', token: 'lib/booking' },
   { mode: 'S', token: 'components/booking' },
-  { mode: 'S', token: '/book' }, // /book, /booking/:id, routes/booking.$id imports
+  { mode: 'S', token: "'/book" }, // quoted route literals (to='/book'); ./bookable-… can't match
+  { mode: 'S', token: '/booking' }, // prose/route forms (/booking/:id, {ORIGIN}/booking/{id})
   // — api cluster, env shed included —
   { mode: 'S', token: 'routes/appointments' }, // v1.ts mount + api-client registration
-  { mode: 'S', token: '/appointments' }, // URL path class (architecture.md describes it today)
+  { mode: 'S', token: "'/appointments" }, // quoted mount literals (.route('/appointments', …))
+  { mode: 'S', token: '/api/v1/appointments' }, // URL/prose forms (architecture.md, span names)
   { mode: 'S', token: 'confirmation-email' },
   { mode: 'S', token: 'RESEND_API_KEY' },
   { mode: 'S', token: 'LANDING_ORIGIN' },
@@ -172,6 +184,11 @@ function selfTest() {
     ['catalog.ts', "export const bookableBranchNames = ['north', 'south', 'east'];\n"],
     // The kept-types near-miss: must NOT trip the \bcreateAppointment\b token.
     ['appointment-types.ts', "export const createAppointmentSchema = 'inert-kept';\n"],
+    // The ruled-kept near-misses (found by #80's re-verification): the db
+    // schema barrel's inert-table import and the bookable module's import
+    // path must NOT trip the split tokens.
+    ['db-schema.ts', "export * from './appointments.js';\n"],
+    ['bookable.ts', "import { bookableBranchNames } from './bookable-branches';\n"],
   ];
   const DIRTY_FILES = [
     // Two planted inventory tokens in one absent-cluster-shaped file.
@@ -203,7 +220,8 @@ function selfTest() {
       process.exit(1);
     }
     console.log('SELF-TEST PASS — clean fixture exit 0 (no false alarms, incl. the');
-    console.log('createAppointmentSchema near-miss); dirty fixture exit 1 with');
+    console.log('createAppointmentSchema + schema-import + bookable-import');
+    console.log('near-misses); dirty fixture exit 1 with');
     console.log('appointmentQueries named; fixtures discarded.');
   } finally {
     rmSync(parent, { recursive: true, force: true });
