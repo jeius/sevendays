@@ -124,7 +124,7 @@ A hit means: stop picking, record the hit in the ledger's notes, and bring it to
 
 - **#86 `fb92ef9` — SKIP.** The seed's own PR: `scripts/seed-v1/*`, `scripts/audit-v1-absence.mjs`, `docs/plan.md`, `docs/progress.md`, a plan file, `graphify-out/*` — 18 paths, all main-only. Nothing to read.
 - **#65 `abfa9d2` (confirmation email + Resend; pre-seed, worked retrospectively) — SPLIT on paths, SKIP on content.** Path pass: 12 v1-paths (`pnpm-lock.yaml`, `apps/api/src/env.ts`, `env.test.ts`, `package.json`, `.dev.vars.example`, `wrangler.toml`, `test/helpers/env.ts`, five api test files) beside 29 booking-cluster and docs/graph main-only paths. Content pass: every v1-path hunk adds the `RESEND_API_KEY`/`LANDING_ORIGIN` pair, the `resend` dependency (the `pnpm-lock.yaml` hunk is its lockfile resolution entries), or routes the pair into test envs via `helpers/env` — nothing stands alone as booking-free value. Final: SKIP. (Its rewritten form already lives in `v1`'s history as `0c01531`; this is the example, not an executed skip.)
-- **The route-titles PR (#TITLES_PR) — PICK.** Five landing route files, all v1-paths, no tokens; the first real pick (ledger).
+- **The route-titles PR (#88) — PICK.** Five landing route files, all v1-paths, no tokens; the first real pick (ledger).
 - **The split drill — SPLIT.** A synthetic mixed commit (a v1-path comment + a booking-cluster edit + a new booking-cluster file), split on a local branch of the checkout, never pushed: `git diff --stat v1..HEAD` showed the v1-path only; the audit passed; both branches deleted.
 
 ## Ledger
