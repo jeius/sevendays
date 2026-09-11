@@ -94,6 +94,7 @@ Time-box: if a single pick's conflict work passes one hour, or the resolution am
 - `check` green on the `v1` run (`pnpm check` + `pnpm build` — the typed cascade fails any incomplete cut).
 - `Deploy v1 (private)` success and `Deploy teaser (main)` **skipped** on that run — the pick touched only `v1`'s pipeline; the teaser lives on main's own runs.
 - Export audit exit 0 over `v1`'s full history (run before the push; re-runnable any time).
+- Live curl once the deploy leg lands: the picked content is served on `https://sevendays-v1-landing.pahamajulius.workers.dev`, `/book` is still 404 there, and the teaser still serves `/book` 200 — the deployed artifact is booking-free and the teaser is untouched by the pick.
 - Superset check (any time): every `(cherry picked from commit <sha>)` on `v1` after the seed names a commit reachable from `origin/main` —
 
   ```bash
@@ -119,7 +120,7 @@ A hit means: stop picking, record the hit in the ledger's notes, and bring it to
 ## Worked examples
 
 - **#86 `fb92ef9` — SKIP.** The seed's own PR: `scripts/seed-v1/*`, `scripts/audit-v1-absence.mjs`, `docs/plan.md`, `docs/progress.md`, a plan file, `graphify-out/*` — 18 paths, all main-only. Nothing to read.
-- **#65 `abfa9d2` (confirmation email + Resend; pre-seed, worked retrospectively) — SPLIT on paths, SKIP on content.** Path pass: 11 v1-paths (`apps/api/src/env.ts`, `env.test.ts`, `package.json`, `.dev.vars.example`, `wrangler.toml`, `test/helpers/env.ts`, five api test files) beside the booking-cluster and docs/graph main-only paths. Content pass: every v1-path hunk adds the `RESEND_API_KEY`/`LANDING_ORIGIN` pair, the `resend` dependency, or routes the pair into test envs via `helpers/env` — nothing stands alone as booking-free value. Final: SKIP. (Its rewritten form already lives in `v1`'s history as `0c01531`; this is the example, not an executed skip.)
+- **#65 `abfa9d2` (confirmation email + Resend; pre-seed, worked retrospectively) — SPLIT on paths, SKIP on content.** Path pass: 12 v1-paths (`pnpm-lock.yaml`, `apps/api/src/env.ts`, `env.test.ts`, `package.json`, `.dev.vars.example`, `wrangler.toml`, `test/helpers/env.ts`, five api test files) beside 29 booking-cluster and docs/graph main-only paths. Content pass: every v1-path hunk adds the `RESEND_API_KEY`/`LANDING_ORIGIN` pair, the `resend` dependency (the `pnpm-lock.yaml` hunk is its lockfile resolution entries), or routes the pair into test envs via `helpers/env` — nothing stands alone as booking-free value. Final: SKIP. (Its rewritten form already lives in `v1`'s history as `0c01531`; this is the example, not an executed skip.)
 - **The route-titles PR (#TITLES_PR) — PICK.** Five landing route files, all v1-paths, no tokens; the first real pick (ledger).
 - **The split drill — SPLIT.** A synthetic mixed commit (a v1-path comment + a booking-cluster edit + a new booking-cluster file), split on a local branch of the checkout, never pushed: `git diff --stat v1..HEAD` showed the v1-path only; the audit passed; both branches deleted.
 
