@@ -70,10 +70,13 @@ git status --short                     # A = new main-only file, DU = absent on 
 git rm -qrf --ignore-unmatch -- <main-only path> [<main-only path> …]
 git commit -F - <<EOF
 $(git log -1 --format=%B <main-sha>)
+
 (cherry picked from commit $(git rev-parse <main-sha>))
 Split: main-only paths dropped — <path>, <path>
 EOF
 ```
+
+The blank line after the `%B` line is load-bearing: `$( )` strips `%B`'s trailing newlines, so without it a subject-only commit's provenance glues onto its subject line.
 
 Then the same locks as a PICK (gates, audit, push, run). A v1-path hunk the content pass rejected (a booking-coupled edit to a shared file) is reverted before the commit with `git restore --staged --worktree --source=HEAD -- <path>` and named in the `Split:` line as `content-dropped: <path>`.
 

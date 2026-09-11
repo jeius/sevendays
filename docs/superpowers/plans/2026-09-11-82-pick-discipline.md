@@ -351,10 +351,13 @@ git status --short                     # A = new main-only file, DU = absent on 
 git rm -qrf --ignore-unmatch -- <main-only path> [<main-only path> …]
 git commit -F - <<EOF
 $(git log -1 --format=%B <main-sha>)
+
 (cherry picked from commit $(git rev-parse <main-sha>))
 Split: main-only paths dropped — <path>, <path>
 EOF
 ```
+
+The blank line after the `%B` line is load-bearing: `$( )` strips `%B`'s trailing newlines, so without it a subject-only commit's provenance glues onto its subject line.
 
 Then the same locks as a PICK (gates, audit, push, run). A v1-path hunk the content pass rejected (a booking-coupled edit to a shared file) is reverted before the commit with `git restore --staged --worktree --source=HEAD -- <path>` and named in the `Split:` line as `content-dropped: <path>`.
 
@@ -537,8 +540,8 @@ printf 'export const drill = true;\n' > apps/landing/src/lib/booking-drill.ts
 git add -A apps/landing/src/routes/about.tsx apps/landing/src/lib/booking.ts apps/landing/src/lib/booking-drill.ts
 git commit -m "feat(landing): drill mixed change (#0)"
 MIXED_SHA=$(git rev-parse HEAD); echo "MIXED_SHA=$MIXED_SHA"
+git switch feat/82-pick-discipline   # the classifier lives on PR B's branch — switch back before classifying
 node scripts/v1-triage.mjs "$MIXED_SHA"
-git switch feat/82-pick-discipline
 ```
 
 Expected: the classifier prints `v1-path    apps/landing/src/routes/about.tsx`, `MAIN-ONLY  apps/landing/src/lib/booking-drill.ts`, `MAIN-ONLY  apps/landing/src/lib/booking.ts`, and `VERDICT SPLIT — 1 v1-path(s) + 2 main-only; drop the main-only paths` (plan-time output, exact). Record `MIXED_SHA`. The workspace is back on PR B's branch with a clean tree.
@@ -571,6 +574,7 @@ git rm -qrf --ignore-unmatch -- apps/landing/src/lib/booking.ts apps/landing/src
 git status --short
 git commit -F - <<EOF
 $(git log -1 --format=%B "$MIXED_SHA")
+
 (cherry picked from commit $MIXED_SHA)
 Split: main-only paths dropped — apps/landing/src/lib/booking.ts, apps/landing/src/lib/booking-drill.ts
 EOF
