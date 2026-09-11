@@ -12,6 +12,9 @@ export const Route = createFileRoute('/packages/$slug')({
       throw toNotFoundError(err);
     }
   },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.name ?? 'Package'} | Sevendays Photography` }],
+  }),
   component: PackageDetail,
   // Unknown/inactive slug → uniform not-found (owner-ratified copy).
   notFoundComponent: () => (

@@ -5,6 +5,7 @@ import { SiteHeader } from '../../components/site-header';
 import { servicePackageQueries } from '../../lib/queries';
 
 export const Route = createFileRoute('/packages/')({
+  head: () => ({ meta: [{ title: 'Packages | Sevendays Photography' }] }),
   // Prefetch during SSR/navigation; useSuspenseQuery below reads the cache.
   loader: async ({ context: { queryClient } }) => {
     await queryClient.ensureQueryData(servicePackageQueries.all());

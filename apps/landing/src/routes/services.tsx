@@ -6,6 +6,7 @@ import { bookableBranchNames } from '../lib/bookable-branches';
 import { branchQueries, studioServiceQueries } from '../lib/queries';
 
 export const Route = createFileRoute('/services')({
+  head: () => ({ meta: [{ title: 'Services | Sevendays Photography' }] }),
   loader: async ({ context: { queryClient } }) => {
     await Promise.all([
       queryClient.ensureQueryData(studioServiceQueries.all()),
