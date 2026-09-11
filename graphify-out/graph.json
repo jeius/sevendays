@@ -2543,8 +2543,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_primitive",
-      "community": 334,
-      "community_name": "primitive",
+      "community": 170,
+      "community_name": "radius",
       "norm_label": "primitive"
     },
     {
@@ -3181,8 +3181,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_1",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 514,
+      "community_name": "1",
       "norm_label": "1"
     },
     {
@@ -3192,8 +3192,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_1_value",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 514,
+      "community_name": "1",
       "norm_label": "$value"
     },
     {
@@ -3203,8 +3203,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_1_type",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 514,
+      "community_name": "1",
       "norm_label": "$type"
     },
     {
@@ -3247,8 +3247,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_3",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 515,
+      "community_name": "3",
       "norm_label": "3"
     },
     {
@@ -3258,8 +3258,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_3_value",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 515,
+      "community_name": "3",
       "norm_label": "$value"
     },
     {
@@ -3269,8 +3269,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_3_type",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 515,
+      "community_name": "3",
       "norm_label": "$type"
     },
     {
@@ -3379,8 +3379,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_8",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 516,
+      "community_name": "8",
       "norm_label": "8"
     },
     {
@@ -3390,8 +3390,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_8_value",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 516,
+      "community_name": "8",
       "norm_label": "$value"
     },
     {
@@ -3401,8 +3401,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_8_type",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 516,
+      "community_name": "8",
       "norm_label": "$type"
     },
     {
@@ -3478,8 +3478,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_16",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 513,
+      "community_name": "16",
       "norm_label": "16"
     },
     {
@@ -3489,8 +3489,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_16_value",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 513,
+      "community_name": "16",
       "norm_label": "$value"
     },
     {
@@ -3500,8 +3500,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_16_type",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 513,
+      "community_name": "16",
       "norm_label": "$type"
     },
     {
@@ -3555,8 +3555,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_fontsize_sm",
-      "community": 170,
-      "community_name": "radius",
+      "community": 509,
+      "community_name": "sm",
       "norm_label": "sm"
     },
     {
@@ -3566,8 +3566,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_sm_value",
-      "community": 170,
-      "community_name": "radius",
+      "community": 509,
+      "community_name": "sm",
       "norm_label": "$value"
     },
     {
@@ -3577,8 +3577,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_sm_type",
-      "community": 170,
-      "community_name": "radius",
+      "community": 509,
+      "community_name": "sm",
       "norm_label": "$type"
     },
     {
@@ -3621,8 +3621,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_fontsize_lg",
-      "community": 170,
-      "community_name": "radius",
+      "community": 508,
+      "community_name": "lg",
       "norm_label": "lg"
     },
     {
@@ -3632,8 +3632,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_lg_value",
-      "community": 170,
-      "community_name": "radius",
+      "community": 508,
+      "community_name": "lg",
       "norm_label": "$value"
     },
     {
@@ -3643,8 +3643,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_lg_type",
-      "community": 170,
-      "community_name": "radius",
+      "community": 508,
+      "community_name": "lg",
       "norm_label": "$type"
     },
     {
@@ -3654,8 +3654,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_fontsize_xl",
-      "community": 223,
-      "community_name": "fontSize",
+      "community": 511,
+      "community_name": "xl",
       "norm_label": "xl"
     },
     {
@@ -3665,8 +3665,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_xl_value",
-      "community": 223,
-      "community_name": "fontSize",
+      "community": 511,
+      "community_name": "xl",
       "norm_label": "$value"
     },
     {
@@ -3676,8 +3676,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_xl_type",
-      "community": 223,
-      "community_name": "fontSize",
+      "community": 511,
+      "community_name": "xl",
       "norm_label": "$type"
     },
     {
@@ -3797,8 +3797,8 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_radius_none",
-      "community": 170,
-      "community_name": "radius",
+      "community": 512,
+      "community_name": "none",
       "norm_label": "none"
     },
     {
@@ -3808,8 +3808,8 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_none_value",
-      "community": 170,
-      "community_name": "radius",
+      "community": 512,
+      "community_name": "none",
       "norm_label": "$value"
     },
     {
@@ -3819,8 +3819,8 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_none_type",
-      "community": 170,
-      "community_name": "radius",
+      "community": 512,
+      "community_name": "none",
       "norm_label": "$type"
     },
     {
@@ -3830,8 +3830,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_radius_sm",
-      "community": 170,
-      "community_name": "radius",
+      "community": 509,
+      "community_name": "sm",
       "norm_label": "sm"
     },
     {
@@ -3907,8 +3907,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_radius_lg",
-      "community": 170,
-      "community_name": "radius",
+      "community": 508,
+      "community_name": "lg",
       "norm_label": "lg"
     },
     {
@@ -3918,8 +3918,8 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_radius_xl",
-      "community": 223,
-      "community_name": "fontSize",
+      "community": 511,
+      "community_name": "xl",
       "norm_label": "xl"
     },
     {
@@ -3973,8 +3973,8 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_shadow_none",
-      "community": 170,
-      "community_name": "radius",
+      "community": 512,
+      "community_name": "none",
       "norm_label": "none"
     },
     {
@@ -3984,8 +3984,8 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_shadow_sm",
-      "community": 170,
-      "community_name": "radius",
+      "community": 509,
+      "community_name": "sm",
       "norm_label": "sm"
     },
     {
@@ -4017,8 +4017,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_shadow_lg",
-      "community": 170,
-      "community_name": "radius",
+      "community": 508,
+      "community_name": "lg",
       "norm_label": "lg"
     },
     {
@@ -4029,7 +4029,7 @@
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_primitive_duration",
       "community": 334,
-      "community_name": "primitive",
+      "community_name": "duration",
       "norm_label": "duration"
     },
     {
@@ -4040,7 +4040,7 @@
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_duration_fast",
       "community": 334,
-      "community_name": "primitive",
+      "community_name": "duration",
       "norm_label": "fast"
     },
     {
@@ -4051,7 +4051,7 @@
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_fast_value",
       "community": 334,
-      "community_name": "primitive",
+      "community_name": "duration",
       "norm_label": "$value"
     },
     {
@@ -4062,7 +4062,7 @@
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_fast_type",
       "community": 334,
-      "community_name": "primitive",
+      "community_name": "duration",
       "norm_label": "$type"
     },
     {
@@ -4073,7 +4073,7 @@
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_duration_normal",
       "community": 334,
-      "community_name": "primitive",
+      "community_name": "duration",
       "norm_label": "normal"
     },
     {
@@ -4084,7 +4084,7 @@
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_normal_value",
       "community": 334,
-      "community_name": "primitive",
+      "community_name": "duration",
       "norm_label": "$value"
     },
     {
@@ -4095,7 +4095,7 @@
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_normal_type",
       "community": 334,
-      "community_name": "primitive",
+      "community_name": "duration",
       "norm_label": "$type"
     },
     {
@@ -4106,7 +4106,7 @@
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_duration_slow",
       "community": 334,
-      "community_name": "primitive",
+      "community_name": "duration",
       "norm_label": "slow"
     },
     {
@@ -4117,7 +4117,7 @@
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_slow_value",
       "community": 334,
-      "community_name": "primitive",
+      "community_name": "duration",
       "norm_label": "$value"
     },
     {
@@ -4128,7 +4128,7 @@
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_slow_type",
       "community": 334,
-      "community_name": "primitive",
+      "community_name": "duration",
       "norm_label": "$type"
     },
     {
@@ -4226,8 +4226,8 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_primary",
-      "community": 134,
-      "community_name": "color",
+      "community": 519,
+      "community_name": "primary",
       "norm_label": "primary"
     },
     {
@@ -4237,8 +4237,8 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_primary_value",
-      "community": 134,
-      "community_name": "color",
+      "community": 519,
+      "community_name": "primary",
       "norm_label": "$value"
     },
     {
@@ -4248,8 +4248,8 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_primary_type",
-      "community": 134,
-      "community_name": "color",
+      "community": 519,
+      "community_name": "primary",
       "norm_label": "$type"
     },
     {
@@ -4292,8 +4292,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_primary_foreground",
-      "community": 134,
-      "community_name": "color",
+      "community": 520,
+      "community_name": "primary-foreground",
       "norm_label": "primary-foreground"
     },
     {
@@ -4303,8 +4303,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_primary_foreground_value",
-      "community": 134,
-      "community_name": "color",
+      "community": 520,
+      "community_name": "primary-foreground",
       "norm_label": "$value"
     },
     {
@@ -4314,8 +4314,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_primary_foreground_type",
-      "community": 134,
-      "community_name": "color",
+      "community": 520,
+      "community_name": "primary-foreground",
       "norm_label": "$type"
     },
     {
@@ -4358,8 +4358,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_secondary_foreground",
-      "community": 134,
-      "community_name": "color",
+      "community": 523,
+      "community_name": "secondary-foreground",
       "norm_label": "secondary-foreground"
     },
     {
@@ -4369,8 +4369,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_secondary_foreground_value",
-      "community": 134,
-      "community_name": "color",
+      "community": 523,
+      "community_name": "secondary-foreground",
       "norm_label": "$value"
     },
     {
@@ -4380,8 +4380,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_secondary_foreground_type",
-      "community": 134,
-      "community_name": "color",
+      "community": 523,
+      "community_name": "secondary-foreground",
       "norm_label": "$type"
     },
     {
@@ -4391,8 +4391,8 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_muted",
-      "community": 134,
-      "community_name": "color",
+      "community": 518,
+      "community_name": "muted",
       "norm_label": "muted"
     },
     {
@@ -4402,8 +4402,8 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_muted_value",
-      "community": 134,
-      "community_name": "color",
+      "community": 518,
+      "community_name": "muted",
       "norm_label": "$value"
     },
     {
@@ -4413,8 +4413,8 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_muted_type",
-      "community": 134,
-      "community_name": "color",
+      "community": 518,
+      "community_name": "muted",
       "norm_label": "$type"
     },
     {
@@ -4490,8 +4490,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_destructive_foreground",
-      "community": 134,
-      "community_name": "color",
+      "community": 517,
+      "community_name": "destructive-foreground",
       "norm_label": "destructive-foreground"
     },
     {
@@ -4501,8 +4501,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_destructive_foreground_value",
-      "community": 134,
-      "community_name": "color",
+      "community": 517,
+      "community_name": "destructive-foreground",
       "norm_label": "$value"
     },
     {
@@ -4512,8 +4512,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_destructive_foreground_type",
-      "community": 134,
-      "community_name": "color",
+      "community": 517,
+      "community_name": "destructive-foreground",
       "norm_label": "$type"
     },
     {
@@ -4556,8 +4556,8 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_ring",
-      "community": 134,
-      "community_name": "color",
+      "community": 522,
+      "community_name": "ring",
       "norm_label": "ring"
     },
     {
@@ -4567,8 +4567,8 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_ring_value",
-      "community": 134,
-      "community_name": "color",
+      "community": 522,
+      "community_name": "ring",
       "norm_label": "$value"
     },
     {
@@ -4578,8 +4578,8 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_ring_type",
-      "community": 134,
-      "community_name": "color",
+      "community": 522,
+      "community_name": "ring",
       "norm_label": "$type"
     },
     {
@@ -4787,8 +4787,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_button_padding_x",
-      "community": 502,
-      "community_name": "button",
+      "community": 510,
+      "community_name": "padding-x",
       "norm_label": "padding-x"
     },
     {
@@ -4798,8 +4798,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_padding_x_value",
-      "community": 502,
-      "community_name": "button",
+      "community": 510,
+      "community_name": "padding-x",
       "norm_label": "$value"
     },
     {
@@ -4809,8 +4809,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_padding_x_type",
-      "community": 502,
-      "community_name": "button",
+      "community": 510,
+      "community_name": "padding-x",
       "norm_label": "$type"
     },
     {
@@ -4820,8 +4820,8 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_button_padding_y",
-      "community": 502,
-      "community_name": "button",
+      "community": 506,
+      "community_name": "input",
       "norm_label": "padding-y"
     },
     {
@@ -4831,8 +4831,8 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_padding_y_value",
-      "community": 502,
-      "community_name": "button",
+      "community": 506,
+      "community_name": "input",
       "norm_label": "$value"
     },
     {
@@ -4842,8 +4842,8 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_padding_y_type",
-      "community": 502,
-      "community_name": "button",
+      "community": 506,
+      "community_name": "input",
       "norm_label": "$type"
     },
     {
@@ -4853,8 +4853,8 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_button_radius",
-      "community": 502,
-      "community_name": "button",
+      "community": 507,
+      "community_name": "radius",
       "norm_label": "radius"
     },
     {
@@ -4864,8 +4864,8 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_radius_value",
-      "community": 502,
-      "community_name": "button",
+      "community": 507,
+      "community_name": "radius",
       "norm_label": "$value"
     },
     {
@@ -4875,8 +4875,8 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_radius_type",
-      "community": 502,
-      "community_name": "button",
+      "community": 507,
+      "community_name": "radius",
       "norm_label": "$type"
     },
     {
@@ -4919,8 +4919,8 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_component_input",
-      "community": 502,
-      "community_name": "button",
+      "community": 506,
+      "community_name": "input",
       "norm_label": "input"
     },
     {
@@ -4952,8 +4952,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_input_focus_ring",
-      "community": 502,
-      "community_name": "button",
+      "community": 506,
+      "community_name": "input",
       "norm_label": "focus-ring"
     },
     {
@@ -4963,8 +4963,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_focus_ring_value",
-      "community": 502,
-      "community_name": "button",
+      "community": 506,
+      "community_name": "input",
       "norm_label": "$value"
     },
     {
@@ -4974,8 +4974,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_focus_ring_type",
-      "community": 502,
-      "community_name": "button",
+      "community": 506,
+      "community_name": "input",
       "norm_label": "$type"
     },
     {
@@ -4985,8 +4985,8 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_input_padding_x",
-      "community": 502,
-      "community_name": "button",
+      "community": 510,
+      "community_name": "padding-x",
       "norm_label": "padding-x"
     },
     {
@@ -4996,8 +4996,8 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_input_padding_y",
-      "community": 502,
-      "community_name": "button",
+      "community": 506,
+      "community_name": "input",
       "norm_label": "padding-y"
     },
     {
@@ -5007,8 +5007,8 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_input_radius",
-      "community": 502,
-      "community_name": "button",
+      "community": 507,
+      "community_name": "radius",
       "norm_label": "radius"
     },
     {
@@ -5117,8 +5117,8 @@
       "source_location": "L128",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_card_radius",
-      "community": 502,
-      "community_name": "button",
+      "community": 507,
+      "community_name": "radius",
       "norm_label": "radius"
     },
     {
@@ -6711,8 +6711,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_tailwindconfiggenerator_generate_config_string",
-      "community": 242,
-      "community_name": "main",
+      "community": 302,
+      "community_name": ".generate_config_string",
       "norm_label": ".generate_config_string()"
     },
     {
@@ -6724,7 +6724,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_tailwindconfiggenerator_generate_typescript",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "._generate_typescript()"
     },
     {
@@ -6736,7 +6736,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_tailwindconfiggenerator_generate_javascript",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "._generate_javascript()"
     },
     {
@@ -6748,7 +6748,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_tailwindconfiggenerator_format_plugins",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "._format_plugins()"
     },
     {
@@ -6760,7 +6760,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_tailwindconfiggenerator_indent_json",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "._indent_json()"
     },
     {
@@ -6771,8 +6771,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_tailwindconfiggenerator_write_config",
-      "community": 242,
-      "community_name": "main",
+      "community": 302,
+      "community_name": ".generate_config_string",
       "norm_label": ".write_config()"
     },
     {
@@ -6938,8 +6938,8 @@
       "source_location": "L192",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_rationale_192",
-      "community": 242,
-      "community_name": "main",
+      "community": 302,
+      "community_name": ".generate_config_string",
       "norm_label": "generate configuration file content. returns: configuration file as string"
     },
     {
@@ -6950,7 +6950,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_rationale_203",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "generate typescript configuration."
     },
     {
@@ -6961,7 +6961,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_rationale_224",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "generate javascript configuration."
     },
     {
@@ -6972,7 +6972,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_rationale_239",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "format plugins array for config. validates each plugin name against a strict..."
     },
     {
@@ -6983,7 +6983,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_rationale_260",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "add indentation to json string."
     },
     {
@@ -6993,8 +6993,8 @@
       "source_location": "L268",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_rationale_268",
-      "community": 242,
-      "community_name": "main",
+      "community": 302,
+      "community_name": ".generate_config_string",
       "norm_label": "write configuration to file. returns: tuple of (success, message)"
     },
     {
@@ -16002,8 +16002,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_api_src_routes_service_packages",
-      "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community": 396,
+      "community_name": "api/src/routes/appointments.ts",
       "norm_label": "api/src/routes/service-packages.ts"
     },
     {
@@ -16013,8 +16013,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "apps_api_src_routes_service_packages_servicepackages",
-      "community": 15,
-      "community_name": "v1.ts",
+      "community": 396,
+      "community_name": "api/src/routes/appointments.ts",
       "norm_label": "servicepackages"
     },
     {
@@ -16024,8 +16024,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "apps_api_src_routes_service_packages_ts_docref_adr_0006",
-      "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community": 396,
+      "community_name": "api/src/routes/appointments.ts",
       "norm_label": "adr-0006"
     },
     {
@@ -16036,7 +16036,7 @@
       "_origin": "ast",
       "id": "apps_api_src_routes_studio_services",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "api/src/routes/studio-services.ts"
     },
     {
@@ -16058,7 +16058,7 @@
       "_origin": "ast",
       "id": "apps_api_src_routes_studio_services_ts_docref_adr_0006",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "adr-0006"
     },
     {
@@ -16136,7 +16136,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_api_src_services_appointments",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "services/appointments.ts"
     },
@@ -16147,7 +16147,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "apps_api_src_services_appointments_rejection_messages",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "rejection_messages"
     },
@@ -16160,7 +16160,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_api_src_services_appointments_createreason",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "createreason"
     },
@@ -16173,7 +16173,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_api_src_services_appointments_createappointmentresult",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "createappointmentresult"
     },
@@ -16185,7 +16185,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_appointments_fail",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "fail()"
     },
@@ -16196,7 +16196,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "apps_api_src_services_appointments_appointmentprojection",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "appointmentprojection"
     },
@@ -16208,7 +16208,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_appointments_createappointment",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "createappointment()"
     },
@@ -16220,7 +16220,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_appointments_fetchaddonentries",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "fetchaddonentries()"
     },
@@ -16232,7 +16232,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_appointments_listappointments",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "listappointments()"
     },
@@ -16244,7 +16244,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_appointments_getappointmentwithaddons",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "getappointmentwithaddons()"
     },
@@ -16255,7 +16255,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "apps_api_src_services_appointments_ts_docref_adr_0005",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "adr-0005"
     },
@@ -16266,7 +16266,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "apps_api_src_services_appointments_ts_docref_adr_0011",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "adr-0011"
     },
@@ -16277,7 +16277,7 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "apps_api_src_services_appointments_ts_docref_adr_0007",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "adr-0007"
     },
@@ -16619,7 +16619,7 @@
       "_origin": "ast",
       "id": "apps_api_src_services_group_children_test",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "group-children.test.ts"
     },
     {
@@ -16632,7 +16632,7 @@
       "_origin": "ast",
       "id": "apps_api_src_services_group_children_test_row",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "row"
     },
     {
@@ -16643,7 +16643,7 @@
       "_origin": "ast",
       "id": "apps_api_src_services_group_children",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "group-children.ts"
     },
     {
@@ -16655,7 +16655,7 @@
       "_origin": "ast",
       "id": "apps_api_src_services_group_children_groupchildren",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "groupchildren()"
     },
     {
@@ -16666,7 +16666,7 @@
       "_origin": "ast",
       "id": "apps_api_src_services_group_children_ts_docref_adr_0009",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "adr-0009"
     },
     {
@@ -16677,7 +16677,7 @@
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "services/service-packages.ts"
     },
     {
@@ -16690,7 +16690,7 @@
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_junctionrow",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "junctionrow"
     },
     {
@@ -16702,7 +16702,7 @@
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_assemblepackageread",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "assemblepackageread()"
     },
     {
@@ -16714,7 +16714,7 @@
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_listactivepackageswithinclusions",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "listactivepackageswithinclusions()"
     },
     {
@@ -16726,7 +16726,7 @@
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_getactivepackagewithinclusionsbyslug",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "getactivepackagewithinclusionsbyslug()"
     },
     {
@@ -16737,7 +16737,7 @@
       "_origin": "ast",
       "id": "apps_api_src_services_studio_services",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "services/studio-services.ts"
     },
     {
@@ -16749,7 +16749,7 @@
       "_origin": "ast",
       "id": "apps_api_src_services_studio_services_listactivestudioserviceswithbranches",
       "community": 97,
-      "community_name": "api/src/routes/service-packages.ts",
+      "community_name": "services/appointments.ts",
       "norm_label": "listactivestudioserviceswithbranches()"
     },
     {
@@ -19384,8 +19384,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_components_booking_rejection_card",
-      "community": 243,
-      "community_name": "book.tsx",
+      "community": 79,
+      "community_name": "booking.ts",
       "norm_label": "rejection-card.tsx"
     },
     {
@@ -19477,7 +19477,7 @@
       "_origin": "ast",
       "id": "apps_landing_src_components_cover_panel",
       "community": 444,
-      "community_name": "package-card.tsx",
+      "community_name": "$slug.tsx",
       "norm_label": "cover-panel.tsx"
     },
     {
@@ -19489,7 +19489,7 @@
       "_origin": "ast",
       "id": "apps_landing_src_components_cover_panel_coverpanel",
       "community": 444,
-      "community_name": "package-card.tsx",
+      "community_name": "$slug.tsx",
       "norm_label": "coverpanel()"
     },
     {
@@ -19500,7 +19500,7 @@
       "_origin": "ast",
       "id": "apps_landing_src_components_inclusions_list",
       "community": 444,
-      "community_name": "package-card.tsx",
+      "community_name": "$slug.tsx",
       "norm_label": "inclusions-list.tsx"
     },
     {
@@ -19512,7 +19512,7 @@
       "_origin": "ast",
       "id": "apps_landing_src_components_inclusions_list_inclusionslist",
       "community": 444,
-      "community_name": "package-card.tsx",
+      "community_name": "$slug.tsx",
       "norm_label": "inclusionslist()"
     },
     {
@@ -19524,7 +19524,7 @@
       "_origin": "ast",
       "id": "apps_landing_src_components_inclusions_list_inclusionline",
       "community": 444,
-      "community_name": "package-card.tsx",
+      "community_name": "$slug.tsx",
       "norm_label": "inclusionline()"
     },
     {
@@ -19535,7 +19535,7 @@
       "_origin": "ast",
       "id": "apps_landing_src_components_inclusions_list_tsx_docref_adr_0009",
       "community": 444,
-      "community_name": "package-card.tsx",
+      "community_name": "$slug.tsx",
       "norm_label": "adr-0009"
     },
     {
@@ -19546,7 +19546,7 @@
       "_origin": "ast",
       "id": "apps_landing_src_components_package_card",
       "community": 444,
-      "community_name": "package-card.tsx",
+      "community_name": "$slug.tsx",
       "norm_label": "package-card.tsx"
     },
     {
@@ -19558,7 +19558,7 @@
       "_origin": "ast",
       "id": "apps_landing_src_components_package_card_packagecard",
       "community": 444,
-      "community_name": "package-card.tsx",
+      "community_name": "$slug.tsx",
       "norm_label": "packagecard()"
     },
     {
@@ -19614,8 +19614,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_components_site_header",
-      "community": 229,
-      "community_name": "landing/src/routes/index.tsx",
+      "community": 444,
+      "community_name": "$slug.tsx",
       "norm_label": "site-header.tsx"
     },
     {
@@ -19626,8 +19626,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_components_site_header_siteheader",
-      "community": 229,
-      "community_name": "landing/src/routes/index.tsx",
+      "community": 444,
+      "community_name": "$slug.tsx",
       "norm_label": "siteheader()"
     },
     {
@@ -19696,8 +19696,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_lib_api_404",
-      "community": 399,
-      "community_name": "landing/src/lib/queries.ts",
+      "community": 444,
+      "community_name": "$slug.tsx",
       "norm_label": "api-404.ts"
     },
     {
@@ -19708,8 +19708,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_lib_api_404_tonotfounderror",
-      "community": 399,
-      "community_name": "landing/src/lib/queries.ts",
+      "community": 444,
+      "community_name": "$slug.tsx",
       "norm_label": "tonotfounderror()"
     },
     {
@@ -20499,8 +20499,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_landing_src_lib_booking_rejectionreason",
-      "community": 243,
-      "community_name": "book.tsx",
+      "community": 79,
+      "community_name": "booking.ts",
       "norm_label": "rejectionreason"
     },
     {
@@ -20510,8 +20510,8 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "apps_landing_src_lib_booking_rejection_copy",
-      "community": 243,
-      "community_name": "book.tsx",
+      "community": 79,
+      "community_name": "booking.ts",
       "norm_label": "rejection_copy"
     },
     {
@@ -20833,8 +20833,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_lib_package_slug",
-      "community": 399,
-      "community_name": "landing/src/lib/queries.ts",
+      "community": 444,
+      "community_name": "$slug.tsx",
       "norm_label": "package-slug.ts"
     },
     {
@@ -21442,8 +21442,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_routes_packages_slug",
-      "community": 399,
-      "community_name": "landing/src/lib/queries.ts",
+      "community": 444,
+      "community_name": "$slug.tsx",
       "norm_label": "$slug.tsx"
     },
     {
@@ -21453,8 +21453,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "apps_landing_src_routes_packages_slug_route",
-      "community": 399,
-      "community_name": "landing/src/lib/queries.ts",
+      "community": 444,
+      "community_name": "$slug.tsx",
       "norm_label": "route"
     },
     {
@@ -21465,8 +21465,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_routes_packages_slug_packagedetail",
-      "community": 399,
-      "community_name": "landing/src/lib/queries.ts",
+      "community": 444,
+      "community_name": "$slug.tsx",
       "norm_label": "packagedetail()"
     },
     {
@@ -21477,7 +21477,7 @@
       "_origin": "ast",
       "id": "apps_landing_src_routes_packages_index",
       "community": 444,
-      "community_name": "package-card.tsx",
+      "community_name": "$slug.tsx",
       "norm_label": "packages/index.tsx"
     },
     {
@@ -21488,7 +21488,7 @@
       "_origin": "ast",
       "id": "apps_landing_src_routes_packages_index_route",
       "community": 444,
-      "community_name": "package-card.tsx",
+      "community_name": "$slug.tsx",
       "norm_label": "route"
     },
     {
@@ -21500,7 +21500,7 @@
       "_origin": "ast",
       "id": "apps_landing_src_routes_packages_index_packagespage",
       "community": 444,
-      "community_name": "package-card.tsx",
+      "community_name": "$slug.tsx",
       "norm_label": "packagespage()"
     },
     {
@@ -27421,7 +27421,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "packages_db_src_client_database",
-      "community": 172,
+      "community": 97,
       "community_name": "services/appointments.ts",
       "norm_label": "database"
     },
@@ -53135,8 +53135,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_advanced_rolldown_options",
-      "community": 124,
-      "community_name": "tsdown/SKILL.md",
+      "community": 239,
+      "community_name": "Customizing Rolldown Options",
       "norm_label": "advanced-rolldown-options.md"
     },
     {
@@ -56116,8 +56116,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_option_lint",
-      "community": 298,
-      "community_name": "CI Environment Support",
+      "community": 240,
+      "community_name": "Package Validation (publint & attw)",
       "norm_label": "option-lint.md"
     },
     {
@@ -71475,6 +71475,248 @@
       "community": 482,
       "community_name": "File Structure",
       "norm_label": "task 8: main-side close-out \u2014 the tick, the record, the graph"
+    },
+    {
+      "label": "2026-09-11-81-v1-first-light.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_81_v1_first_light",
+      "community": 172,
+      "community_name": "File Structure",
+      "norm_label": "2026-09-11-81-v1-first-light.md"
+    },
+    {
+      "label": "#81 \u2014 v1 First Light: CI Green + Continuous Private Deploy, Verified Booking-Free \u2014 Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_81_v1_first_light_81_v1_first_light_ci_green_continuous_private_deploy_verified_booking_free_implementation_plan",
+      "community": 172,
+      "community_name": "File Structure",
+      "norm_label": "#81 \u2014 v1 first light: ci green + continuous private deploy, verified booking-free \u2014 implementation plan"
+    },
+    {
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_81_v1_first_light_global_constraints",
+      "community": 172,
+      "community_name": "File Structure",
+      "norm_label": "global constraints"
+    },
+    {
+      "label": "File Structure",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_81_v1_first_light_file_structure",
+      "community": 172,
+      "community_name": "File Structure",
+      "norm_label": "file structure"
+    },
+    {
+      "label": "Task 1: Pre-flight \u2014 baseline and drift check",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L52",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_1_pre_flight_baseline_and_drift_check",
+      "community": 172,
+      "community_name": "File Structure",
+      "norm_label": "task 1: pre-flight \u2014 baseline and drift check"
+    },
+    {
+      "label": "Task 2: The live booking-free battery on `sevendays-v1-*` (AC 2)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L102",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_2_the_live_booking_free_battery_on_sevendays_v1_ac_2",
+      "community": 172,
+      "community_name": "File Structure",
+      "norm_label": "task 2: the live booking-free battery on `sevendays-v1-*` (ac 2)"
+    },
+    {
+      "label": "Task 3: The env-shed in production shape (AC 3)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L192",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_3_the_env_shed_in_production_shape_ac_3",
+      "community": 172,
+      "community_name": "File Structure",
+      "norm_label": "task 3: the env-shed in production shape (ac 3)"
+    },
+    {
+      "label": "Task 4: Teaser (main) untouched and still booking-present (AC 4)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L226",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_4_teaser_main_untouched_and_still_booking_present_ac_4",
+      "community": 172,
+      "community_name": "File Structure",
+      "norm_label": "task 4: teaser (main) untouched and still booking-present (ac 4)"
+    },
+    {
+      "label": "Task 5: CI green + deploy history on `v1` from the first push (AC 1 + AC 5)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L278",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_5_ci_green_deploy_history_on_v1_from_the_first_push_ac_1_ac_5",
+      "community": 172,
+      "community_name": "File Structure",
+      "norm_label": "task 5: ci green + deploy history on `v1` from the first push (ac 1 + ac 5)"
+    },
+    {
+      "label": "Task 6: Main-side close-out \u2014 the two ticks, the record, the graph",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L325",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_6_main_side_close_out_the_two_ticks_the_record_the_graph",
+      "community": 172,
+      "community_name": "File Structure",
+      "norm_label": "task 6: main-side close-out \u2014 the two ticks, the record, the graph"
+    },
+    {
+      "label": "Task 7: Report + hand-off (the owner's gates)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L414",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_7_report_hand_off_the_owner_s_gates",
+      "community": 172,
+      "community_name": "File Structure",
+      "norm_label": "task 7: report + hand-off (the owner's gates)"
+    },
+    {
+      "label": "2026-09-11-82-pick-discipline.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_82_pick_discipline",
+      "community": 503,
+      "community_name": "File Structure",
+      "norm_label": "2026-09-11-82-pick-discipline.md"
+    },
+    {
+      "label": "#82 \u2014 Pick Discipline Stood Up: Runbook + First Real Picks \u2014 Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_82_pick_discipline_82_pick_discipline_stood_up_runbook_first_real_picks_implementation_plan",
+      "community": 503,
+      "community_name": "File Structure",
+      "norm_label": "#82 \u2014 pick discipline stood up: runbook + first real picks \u2014 implementation plan"
+    },
+    {
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_82_pick_discipline_global_constraints",
+      "community": 503,
+      "community_name": "File Structure",
+      "norm_label": "global constraints"
+    },
+    {
+      "label": "File Structure",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_82_pick_discipline_file_structure",
+      "community": 503,
+      "community_name": "File Structure",
+      "norm_label": "file structure"
+    },
+    {
+      "label": "Task 1: Pre-flight \u2014 SHAs, the `v1` checkout, the backlog, the branches",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L70",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_1_pre_flight_shas_the_v1_checkout_the_backlog_the_branches",
+      "community": 503,
+      "community_name": "File Structure",
+      "norm_label": "task 1: pre-flight \u2014 shas, the `v1` checkout, the backlog, the branches"
+    },
+    {
+      "label": "Task 2: The classifier, the runbook, the `AGENTS.md` pointer (PR B's first commit)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L137",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_2_the_classifier_the_runbook_the_agents_md_pointer_pr_b_s_first_commit",
+      "community": 503,
+      "community_name": "File Structure",
+      "norm_label": "task 2: the classifier, the runbook, the `agents.md` pointer (pr b's first commit)"
+    },
+    {
+      "label": "Task 3: Backlog triage + the booking worked example (ledger rows)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L458",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_3_backlog_triage_the_booking_worked_example_ledger_rows",
+      "community": 503,
+      "community_name": "File Structure",
+      "norm_label": "task 3: backlog triage + the booking worked example (ledger rows)"
+    },
+    {
+      "label": "Task 4: The split drill \u2014 a synthetic mixed commit, split per the runbook (local only)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L515",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_4_the_split_drill_a_synthetic_mixed_commit_split_per_the_runbook_local_only",
+      "community": 503,
+      "community_name": "File Structure",
+      "norm_label": "task 4: the split drill \u2014 a synthetic mixed commit, split per the runbook (local only)"
+    },
+    {
+      "label": "Task 5: PR A \u2014 per-route page titles on the five shared landing routes (the pick source)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L617",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_5_pr_a_per_route_page_titles_on_the_five_shared_landing_routes_the_pick_source",
+      "community": 503,
+      "community_name": "File Structure",
+      "norm_label": "task 5: pr a \u2014 per-route page titles on the five shared landing routes (the pick source)"
+    },
+    {
+      "label": "Task 6: The first real pick \u2014 `-x` to `v1`, gates + audit, push, run green, deploy updated, teaser untouched",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L790",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_6_the_first_real_pick_x_to_v1_gates_audit_push_run_green_deploy_updated_teaser_untouched",
+      "community": 503,
+      "community_name": "File Structure",
+      "norm_label": "task 6: the first real pick \u2014 `-x` to `v1`, gates + audit, push, run green, deploy updated, teaser untouched"
+    },
+    {
+      "label": "Task 7: Close-out \u2014 rebase, the tick, the record, the graph, PR B, the report",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L899",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_7_close_out_rebase_the_tick_the_record_the_graph_pr_b_the_report",
+      "community": 503,
+      "community_name": "File Structure",
+      "norm_label": "task 7: close-out \u2014 rebase, the tick, the record, the graph, pr b, the report"
     },
     {
       "label": "2026-09-11-edition-aware-pipelines.md",
@@ -164736,6 +164978,226 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_81_v1_first_light",
+      "target": "docs_superpowers_plans_2026_09_11_81_v1_first_light_81_v1_first_light_ci_green_continuous_private_deploy_verified_booking_free_implementation_plan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_81_v1_first_light_81_v1_first_light_ci_green_continuous_private_deploy_verified_booking_free_implementation_plan",
+      "target": "docs_superpowers_plans_2026_09_11_81_v1_first_light_file_structure",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_81_v1_first_light_81_v1_first_light_ci_green_continuous_private_deploy_verified_booking_free_implementation_plan",
+      "target": "docs_superpowers_plans_2026_09_11_81_v1_first_light_global_constraints",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L52",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_81_v1_first_light_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_1_pre_flight_baseline_and_drift_check",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L102",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_81_v1_first_light_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_2_the_live_booking_free_battery_on_sevendays_v1_ac_2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L192",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_81_v1_first_light_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_3_the_env_shed_in_production_shape_ac_3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L226",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_81_v1_first_light_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_4_teaser_main_untouched_and_still_booking_present_ac_4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L278",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_81_v1_first_light_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_5_ci_green_deploy_history_on_v1_from_the_first_push_ac_1_ac_5",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L325",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_81_v1_first_light_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_6_main_side_close_out_the_two_ticks_the_record_the_graph",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-81-v1-first-light.md",
+      "source_location": "L414",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_81_v1_first_light_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_81_v1_first_light_task_7_report_hand_off_the_owner_s_gates",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_82_pick_discipline",
+      "target": "docs_superpowers_plans_2026_09_11_82_pick_discipline_82_pick_discipline_stood_up_runbook_first_real_picks_implementation_plan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_82_pick_discipline_82_pick_discipline_stood_up_runbook_first_real_picks_implementation_plan",
+      "target": "docs_superpowers_plans_2026_09_11_82_pick_discipline_file_structure",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_82_pick_discipline_82_pick_discipline_stood_up_runbook_first_real_picks_implementation_plan",
+      "target": "docs_superpowers_plans_2026_09_11_82_pick_discipline_global_constraints",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L70",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_82_pick_discipline_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_1_pre_flight_shas_the_v1_checkout_the_backlog_the_branches",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L137",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_82_pick_discipline_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_2_the_classifier_the_runbook_the_agents_md_pointer_pr_b_s_first_commit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L458",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_82_pick_discipline_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_3_backlog_triage_the_booking_worked_example_ledger_rows",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L515",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_82_pick_discipline_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_4_the_split_drill_a_synthetic_mixed_commit_split_per_the_runbook_local_only",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L617",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_82_pick_discipline_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_5_pr_a_per_route_page_titles_on_the_five_shared_landing_routes_the_pick_source",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L790",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_82_pick_discipline_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_6_the_first_real_pick_x_to_v1_gates_audit_push_run_green_deploy_updated_teaser_untouched",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-11-82-pick-discipline.md",
+      "source_location": "L899",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_11_82_pick_discipline_file_structure",
+      "target": "docs_superpowers_plans_2026_09_11_82_pick_discipline_task_7_close_out_rebase_the_tick_the_record_the_graph_pr_b_the_report",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "docs/superpowers/plans/2026-09-11-edition-aware-pipelines.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -173281,5 +173743,5 @@
       "source_file": "docs/superpowers/plans/2026-08-31-m1.3-provision-migrate-seed.md"
     }
   ],
-  "built_at_commit": "9be2120f3159ecc84f1873764490aae2ecf9b1c2"
+  "built_at_commit": "9934548db1812161dfb8ef9baa3c7aabce0eb4ac"
 }

@@ -855,13 +855,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1789097510.4646788,
-    "ast_hash": "5c9136be9abbc88cf02b276f6959f98b",
+    "mtime": 1789140311.5667677,
+    "ast_hash": "7d7b346a5ae1eeaec0df6783ceea2b3d",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1789097510.4688723,
-    "ast_hash": "07f601c3f157b6acb7a49879c5900a5d",
+    "mtime": 1789140358.263894,
+    "ast_hash": "4d160ce57a53bb7b0cb267bda5260f0d",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2840,7 +2840,7 @@
     "semantic_hash": ""
   },
   "scripts/audit-v1-absence.mjs": {
-    "mtime": 1789081671.401996,
+    "mtime": 1789100666.6063147,
     "ast_hash": "d61dd247b032e44c93080c1cf6aa8766",
     "semantic_hash": ""
   },
@@ -2860,23 +2860,33 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-11-80-seed-v1-branch.md": {
-    "mtime": 1789083228.5601745,
-    "ast_hash": "74a12447ba3222d9d7267fc7c46e9d64",
+    "mtime": 1789100666.5683875,
+    "ast_hash": "080ab6f32a97dc9c791d9d9e03799070",
     "semantic_hash": ""
   },
   "scripts/seed-v1/paths.txt": {
-    "mtime": 1789083334.7661996,
+    "mtime": 1789100666.6063147,
     "ast_hash": "ad0c4c637839d7ca6e60c6de8cd2172f",
     "semantic_hash": ""
   },
   "scripts/seed-v1/replace-message.txt": {
-    "mtime": 1789083334.8029106,
+    "mtime": 1789100666.6063147,
     "ast_hash": "9468d503a86eacf63d39cfdc328d4505",
     "semantic_hash": ""
   },
   "scripts/seed-v1/replace-text.txt": {
-    "mtime": 1789083334.7825155,
+    "mtime": 1789100666.610529,
     "ast_hash": "66a6b535df68f494d8fb0bd896f36bc8",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-09-11-81-v1-first-light.md": {
+    "mtime": 1789140047.5146532,
+    "ast_hash": "057b3dccfc02d49fa68a09cea60fad86",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-09-11-82-pick-discipline.md": {
+    "mtime": 1789132019.9128723,
+    "ast_hash": "3d6704ca6139a5f6219401610c568de8",
     "semantic_hash": ""
   }
 }
