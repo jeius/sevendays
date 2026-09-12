@@ -23,7 +23,7 @@ function PrototypeTokensPage() {
         </h1>
         <p className='text-foreground mt-3 max-w-prose'>
           Display headings render in Fraunces via <code>font-serif</code>; this body copy renders in
-          Manrope via <code>font-sans</code>. Every color below is a semantic token — react to the
+          Figtree via <code>font-sans</code>. Every color below is a semantic token — react to the
           mapping, not to individual hex values.
         </p>
       </header>
