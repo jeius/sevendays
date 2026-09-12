@@ -25,8 +25,8 @@
     "semantic_hash": "2866588561e865ba99fd805d821ad7d8"
   },
   "apps/admin/package.json": {
-    "mtime": 1788585368.1672568,
-    "ast_hash": "fc84701037f5f4057f672241baee2370",
+    "mtime": 1789179127.3459306,
+    "ast_hash": "91df524b1e89392dbc8c8eac64ac4c7d",
     "semantic_hash": ""
   },
   "apps/admin/src/integrations/posthog/provider.tsx": {
@@ -235,9 +235,9 @@
     "semantic_hash": "b59d3ebf855dd64abb18d7e869d4bc65"
   },
   "apps/landing/components.json": {
-    "mtime": 1787995828.2757761,
-    "ast_hash": "2d558ea6768378d47430042223209f3a",
-    "semantic_hash": "2d558ea6768378d47430042223209f3a"
+    "mtime": 1789179127.3459306,
+    "ast_hash": "66fe113be93c5fff70970256924a022b",
+    "semantic_hash": ""
   },
   "apps/landing/instrument.server.mjs": {
     "mtime": 1787988284.431909,
@@ -245,8 +245,8 @@
     "semantic_hash": "2866588561e865ba99fd805d821ad7d8"
   },
   "apps/landing/package.json": {
-    "mtime": 1788866003.3567894,
-    "ast_hash": "c6f5056b77f0c7260c8afaa35403120b",
+    "mtime": 1789179127.3459306,
+    "ast_hash": "504e4bf9084f9c70b891cec79e8290fd",
     "semantic_hash": ""
   },
   "apps/landing/src/integrations/posthog/provider.tsx": {
@@ -260,8 +260,8 @@
     "semantic_hash": "41f6393a4fca51d9fe994cc3d11abbea"
   },
   "apps/landing/src/routeTree.gen.ts": {
-    "mtime": 1788981138.9911432,
-    "ast_hash": "ae3be50337882291ae1172f3e385d99a",
+    "mtime": 1789179127.350073,
+    "ast_hash": "3baea6396d84373962326d4a8a8e1636",
     "semantic_hash": ""
   },
   "apps/landing/src/router.tsx": {
@@ -700,9 +700,9 @@
     "semantic_hash": "2077bb15fc47a469f5809a08b64ccf4c"
   },
   "packages/ui/package.json": {
-    "mtime": 1788051117.4492338,
-    "ast_hash": "59fb095f2ab0ad69f2983f59b2d7f2e7",
-    "semantic_hash": "59fb095f2ab0ad69f2983f59b2d7f2e7"
+    "mtime": 1789179127.350073,
+    "ast_hash": "f0f27768f8bd5d535297464cb703010d",
+    "semantic_hash": ""
   },
   "skills-lock.json": {
     "mtime": 1787972453.0109012,
@@ -725,7 +725,7 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1789146117.7865694,
+    "mtime": 1789147657.317715,
     "ast_hash": "fe444d674acebd0d8dbf1b67b37d7f3a",
     "semantic_hash": ""
   },
@@ -855,13 +855,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1789146158.0803263,
+    "mtime": 1789147657.317715,
     "ast_hash": "4d9adf8af63813297678a48fc63d3d41",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1789146189.583606,
-    "ast_hash": "9b6b79bb37a8fb64f2b60671a7977fd3",
+    "mtime": 1789179127.350073,
+    "ast_hash": "d3b11bf49e39e6a6e6281b8295a8863c",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2885,18 +2885,28 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-11-82-pick-discipline.md": {
-    "mtime": 1789146117.81137,
+    "mtime": 1789147657.317715,
     "ast_hash": "ab1fa063c893bb4e3f5dcdbd854785db",
     "semantic_hash": ""
   },
   "scripts/v1-triage.mjs": {
-    "mtime": 1789146117.7865694,
+    "mtime": 1789147657.3425806,
     "ast_hash": "c8d511f1a8476099555861aba1127b4f",
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1789146117.8320372,
-    "ast_hash": "624b7ec21e3edda89ec6ab02aca71701",
+    "mtime": 1789147657.317715,
+    "ast_hash": "2c49ef88aa8a1951aa4fae43ae0112d9",
+    "semantic_hash": ""
+  },
+  "apps/landing/src/routes/prototype-tokens.tsx": {
+    "mtime": 1789179127.350073,
+    "ast_hash": "4252674bf9396b596b2b81c570d2036b",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
+    "mtime": 1789179127.350073,
+    "ast_hash": "95b86dd11a1a13c22e7aca3fad196962",
     "semantic_hash": ""
   }
 }
