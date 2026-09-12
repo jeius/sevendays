@@ -91,6 +91,10 @@ Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `
 
 Multi-context: root `CONTEXT-MAP.md` pointing at per-context `CONTEXT.md` files. See `docs/agents/domain.md`.
 
+### v1 pick discipline
+
+Every PR squash-merged to `main` is triaged pick / skip / split for the booking-free `v1` branch (ADR-0015). Runbook + ledger: `docs/agents/v1-picks.md` — main-only, never picked.
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.

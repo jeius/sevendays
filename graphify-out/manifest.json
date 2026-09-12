@@ -725,8 +725,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1788949690.0862103,
-    "ast_hash": "7ea99998ecf16d2efdfb49d5483ad66a",
+    "mtime": 1789146117.7865694,
+    "ast_hash": "fe444d674acebd0d8dbf1b67b37d7f3a",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -855,13 +855,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1789140311.5667677,
-    "ast_hash": "7d7b346a5ae1eeaec0df6783ceea2b3d",
+    "mtime": 1789146158.0803263,
+    "ast_hash": "4d9adf8af63813297678a48fc63d3d41",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1789140358.263894,
-    "ast_hash": "4d160ce57a53bb7b0cb267bda5260f0d",
+    "mtime": 1789146189.583606,
+    "ast_hash": "9b6b79bb37a8fb64f2b60671a7977fd3",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2705,7 +2705,7 @@
     "semantic_hash": ""
   },
   "apps/landing/src/lib/booking.ts": {
-    "mtime": 1788969315.7299054,
+    "mtime": 1789144377.3366728,
     "ast_hash": "ed4493cbdd2ae4c77a89aafc14433631",
     "semantic_hash": ""
   },
@@ -2740,8 +2740,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/routes/about.tsx": {
-    "mtime": 1788877107.942244,
-    "ast_hash": "5493a79a2d3abbab0f6439f158225eb2",
+    "mtime": 1789146117.765902,
+    "ast_hash": "88ce8a833bad506d963788bc6da826ab",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/book.tsx": {
@@ -2755,23 +2755,23 @@
     "semantic_hash": ""
   },
   "apps/landing/src/routes/branches.tsx": {
-    "mtime": 1788877107.942244,
-    "ast_hash": "31439277180c629bf80db8729d468b47",
+    "mtime": 1789146117.765902,
+    "ast_hash": "a603f4824cfc873a145b39a7791ca402",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/packages/$slug.tsx": {
-    "mtime": 1788866003.3609898,
-    "ast_hash": "e48bd610d2b6a2c72fa0553ebd1e5161",
+    "mtime": 1789146117.765902,
+    "ast_hash": "ea5e7065d12465167fb1f0b6227befe7",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/packages/index.tsx": {
-    "mtime": 1788866003.3609898,
-    "ast_hash": "d87420e4ef35299fcf677c2aaf737243",
+    "mtime": 1789146117.765902,
+    "ast_hash": "8d819c04f5a5ecdc8867e6491785a22d",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/services.tsx": {
-    "mtime": 1788877107.942244,
-    "ast_hash": "505276f2bc850b6e2c41a59c2ad658e6",
+    "mtime": 1789146117.765902,
+    "ast_hash": "9c5e3d4c984dbc57eee47a7ba8437ab0",
     "semantic_hash": ""
   },
   "apps/landing/vitest.config.ts": {
@@ -2880,13 +2880,23 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-11-81-v1-first-light.md": {
-    "mtime": 1789140047.5146532,
+    "mtime": 1789141718.1543553,
     "ast_hash": "057b3dccfc02d49fa68a09cea60fad86",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-11-82-pick-discipline.md": {
-    "mtime": 1789132019.9128723,
-    "ast_hash": "3d6704ca6139a5f6219401610c568de8",
+    "mtime": 1789146117.81137,
+    "ast_hash": "ab1fa063c893bb4e3f5dcdbd854785db",
+    "semantic_hash": ""
+  },
+  "scripts/v1-triage.mjs": {
+    "mtime": 1789146117.7865694,
+    "ast_hash": "c8d511f1a8476099555861aba1127b4f",
+    "semantic_hash": ""
+  },
+  "docs/agents/v1-picks.md": {
+    "mtime": 1789146117.8320372,
+    "ast_hash": "624b7ec21e3edda89ec6ab02aca71701",
     "semantic_hash": ""
   }
 }

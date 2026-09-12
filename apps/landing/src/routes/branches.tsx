@@ -5,6 +5,7 @@ import { SiteHeader } from '../components/site-header';
 import { branchQueries } from '../lib/queries';
 
 export const Route = createFileRoute('/branches')({
+  head: () => ({ meta: [{ title: 'Branches | Sevendays Photography' }] }),
   loader: async ({ context: { queryClient } }) => {
     await queryClient.ensureQueryData(branchQueries.all());
   },
