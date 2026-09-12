@@ -127,7 +127,7 @@
   --sidebar-accent: oklch(0.946 0.014 148.8); /* sand */
   --sidebar-accent-foreground: oklch(0.325 0.041 210.2);
   --sidebar-border: var(--border);
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Fraunces", Georgia, serif;
 }
 
