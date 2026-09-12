@@ -177,7 +177,7 @@ function PrototypeTokensPage() {
 
       <section className='mt-10'>
         <h2 className='text-foreground font-serif text-2xl font-semibold'>
-          Brand primitives (fixed inputs)
+          Starter palette (brand undecided)
         </h2>
         <div className='mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7'>
           <Swatch cls='bg-sea-ink' label='sea-ink' sub='text' />
