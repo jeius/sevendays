@@ -1153,7 +1153,7 @@ export function VariantCRail() {
         </span>
         <nav className='flex flex-1 flex-col items-center gap-1'>
           {railItems.map((item) => {
-            const divider = item.group !== lastGroup;
+            const divider = lastGroup !== -1 && item.group !== lastGroup;
             lastGroup = item.group;
             return (
               <div key={item.id} className='flex flex-col items-center'>
