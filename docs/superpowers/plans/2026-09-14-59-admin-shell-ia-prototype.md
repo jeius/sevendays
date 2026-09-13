@@ -362,9 +362,14 @@ export function formatPeso(cents: number): string {
 }
 
 export function dayOffsetOf(date: Date): number {
+  // Normalize BOTH sides to local midnight before diffing: carrying
+  // time-of-day in the numerator mislabels afternoon rows by a day
+  // (review finding, Task 2 round 1). Clone first — never mutate the row.
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  return Math.round((date.getTime() - today.getTime()) / 86_400_000);
+  const target = new Date(date);
+  target.setHours(0, 0, 0, 0);
+  return Math.round((target.getTime() - today.getTime()) / 86_400_000);
 }
 
 export function formatDayLabel(date: Date): string {
