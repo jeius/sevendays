@@ -6,7 +6,7 @@
 
 **Architecture:** The official shadcn monorepo pattern (docs: <https://ui.shadcn.com/docs/monorepo>, verified live 2026-09-14): the routing switch is the **app-side `components.json` aliases** — `"ui": "@sevendays/ui/components"` and `"utils": "@sevendays/ui/lib/utils"` — so the CLI writes primitives into `packages/ui` while app-composed blocks stay in the requesting app. `packages/ui` ships **source** (exports point at `src/*.tsx`/`src/*.ts`, the `api-client` precedent; ADR-0017: primitives ship as source, no build-publishing dance) and gains the house check pipeline (tsc typecheck + a compile-gate build, Biome lint/format — mirroring `packages/types`' script set). The tracer: `shadcn@4.21.0 add button` run from landing lands `packages/ui/src/components/button.tsx`, imported and rendered in landing's `/prototype-tokens` gallery (the milestone's living gallery, sanctioned to live until close-out #101) and on admin's probe index page (replaced by the shell in #100).
 
-**Tech Stack:** shadcn CLI pinned `4.21.0`, Base UI (`@base-ui/react`), `cn` npm package (`^0.3.0`, shadcn-ui org), Tailwind v4 CSS-first, TanStack Start on Vite, pnpm workspaces + Turborepo, Biome, TypeScript via `@sevendays/config`.
+**Tech Stack:** shadcn CLI pinned `4.21.0`, Base UI (`@base_ui/react`), `cn` npm package (`^0.3.0`, shadcn-ui org), Tailwind v4 CSS-first, TanStack Start on Vite, pnpm workspaces + Turborepo, Biome, TypeScript via `@sevendays/config`.
 
 **Spec:** This plan implements ticket [#95 "M3 ticket 01 — packages/ui becomes the shared primitive library (ADR-0017 infra)"](https://github.com/jeius/sevendays/issues/95) under spec [#94 (Milestone 3 — UI/UX Design System)](https://github.com/jeius/sevendays/issues/94); ruling record ADR-0017; distribution research on branch `research/shadcn-distribution-56` (`docs/research/2026-09-09-shadcn-distribution.md`). Key spec facts and recon findings:
 
@@ -20,7 +20,7 @@
 - **Branch:** `feat/95-ui-shared-library` off `main`, in the main checkout (`/home/jeius/Projects/sevendays`). This is main-landing work (not a throwaway worktree branch). Expected starting state: `git status` clean apart from the known untracked `graphify-out/cache/` file. The plan file itself is the branch's first commit.
 - **Every `shadcn` invocation pins the version**: `pnpm dlx shadcn@4.21.0 …` — one CLI version across workspaces (ADR-0017 consequence). Never `shadcn@latest`. The CLI version that ran the #57 apply; `apps/landing` also carries it as a dependency (`shadcn@^4.21.0`), unused by this plan.
 - **The style trio is `base-rhea` / `lucide` / `zinc`** in all three `components.json` files. Rationale (recorded here and surfaced in the PR body for owner review): `base-*` is the only family that generates on Base UI (the ticket's hard AC); within it, rhea is the look landing's file already records via `radix-rhea`; `zinc` is the apps' actual on-disk `baseColor` (the spec's "neutral" prose described the docs template, not the apps — the AC's "apps' current posture" governs). **Override path:** if the owner rules a different `base-*` style before execution, change the literal in the three Task-2 files and proceed — nothing else in the plan depends on the specific look. Do not proceed with any non-`base-*` style; it breaks the Base-UI AC.
-- **No Radix anywhere this ticket introduces:** after generation, `packages/ui` must depend on `@base-ui/react` (exact spelling — hyphenated, as the generated imports show), never `@radix-ui/*` or `radix-ui`. The pre-existing, unused `radix-ui@^1.6.7` dependency in `apps/landing/package.json` stays untouched (fenced out — #96/#101 cleanup, not infra).
+- **No Radix anywhere this ticket introduces:** after generation, `packages/ui` must depend on `@base_ui/react` (exact spelling — underscored, per the registry item's literal import and the npm package name; corrected during execution — an earlier draft said hyphenated), never `@radix-ui/*` or `radix-ui`. The pre-existing, unused `radix-ui@^1.6.7` dependency in `apps/landing/package.json` stays untouched (fenced out — #96/#101 cleanup, not infra).
 - **Tier-1 primitives are registry-verbatim:** no hand edits to generated component source. The only permitted transformation is `pnpm --filter @sevendays/ui fix` (Biome quote/format normalization — the repo's standing format gate), which must not be skipped or the repo check fails.
 - **Token ground is frozen:** no value changes in `packages/ui/src/tokens.css`, `apps/*/src/styles.css`, or any `--*` token. If any `shadcn` command writes or appends to a CSS file (it should not — both stylesheets carry the full v4 token set from the #57 apply), record it in the commit message and `git checkout -- <file>` to revert, then re-verify the render steps; token content is #96's.
 - **`packages/ui` ships source:** its `exports` point into `src/`; the `build` script (tsc → `dist/`, gitignored) is a compile gate only — nothing consumes `dist`. No component unit tests ship for Tier-1 generated source (spec testing decision 3), so the package gets **no `test` script** — Turbo skips it naturally.
@@ -39,7 +39,7 @@
 - Delete: `packages/ui/src/globals.css` (dead Tailwind v3-era file, zero references)
 
 **Interfaces:**
-- Consumes: `@sevendays/config/ts/react` (base `moduleResolution: Bundler` + `jsx: react-jsx`), `@sevendays/config/biome/{base,vite}`, npm `cn@^0.3.0`, `class-variance-authority@^0.7.1` (the deps generated primitives import; `@base-ui/react` arrives via the CLI in Task 3).
+- Consumes: `@sevendays/config/ts/react` (base `moduleResolution: Bundler` + `jsx: react-jsx`), `@sevendays/config/biome/{base,vite}`, npm `cn@^0.3.0`, `class-variance-authority@^0.7.1` (the deps generated primitives import; `@base_ui/react` arrives via the CLI in Task 3).
 - Produces: package `@sevendays/ui` with exports `./tokens.css` (unchanged), `./components/*` → `./src/components/*.tsx`, `./lib/*` → `./src/lib/*.ts`, `./hooks/*` → `./src/hooks/*.ts` (dirs may not exist yet — glob exports are inert until they do); scripts `build`/`typecheck`/`lint`/`format`/`fix`/`fix:unsafe` so Tasks 3–6 and `pnpm check`/`pnpm build:packages` cover the package.
 
 **Not here:** no `components.json` yet (Task 2), no primitives (Task 3), no token changes (#96), no app changes (Tasks 4–5).
@@ -300,7 +300,7 @@ base. baseColor zinc = the apps' on-disk posture (spec's 'neutral' was docs-temp
 
 **Files:**
 - Created by the CLI (not by hand): `packages/ui/src/components/button.tsx`
-- Modified by the CLI: `packages/ui/package.json` (primitive deps — expected `@base-ui/react`), `pnpm-lock.yaml`
+- Modified by the CLI: `packages/ui/package.json` (primitive deps — expected `@base_ui/react`), `pnpm-lock.yaml`
 
 **Interfaces:**
 - Consumes: the Task-2 routing (run from the landing workspace so its `components.json` drives the CLI).
@@ -325,8 +325,8 @@ git diff packages/ui/package.json
 ```
 
 Record in the commit message (these facts gate the next steps):
-1. The generated file's import lines — expect `@base-ui/react/button` (Base UI; the registry item's literal import), `cn`, `class-variance-authority`, React types.
-2. What `packages/ui/package.json` gained — expected `@base-ui/react`; the CLI installs the primitive's dependencies into the package it writes to.
+1. The generated file's import lines — expect `@base_ui/react/button` (Base UI; the registry item's literal import), `cn`, `class-variance-authority`, React types.
+2. What `packages/ui/package.json` gained — expected `@base_ui/react`; the CLI installs the primitive's dependencies into the package it writes to.
 3. Whether ANY file under `apps/` changed — expected: none (routing proof; a `button.tsx` under `apps/landing/src/components/` means the aliases were not picked up — STOP and re-check Task 2).
 4. Whether any CSS file changed — expected: none. If the CLI appended tokens anywhere, revert per Global Constraints (`git checkout -- <file>`) and record it.
 
@@ -334,10 +334,10 @@ Record in the commit message (these facts gate the next steps):
 
 ```bash
 grep -in "radix" packages/ui/src/components/button.tsx packages/ui/package.json || echo "NO RADIX — OK"
-grep -n "@base-ui/react" packages/ui/src/components/button.tsx packages/ui/package.json
+grep -n "@base_ui/react" packages/ui/src/components/button.tsx packages/ui/package.json
 ```
 
-Expected: "NO RADIX — OK" from the first command; the second shows the hyphenated `@base-ui/react` in both the import and the manifest. Any radix hit: STOP and report — do not hand-patch generated code.
+Expected: "NO RADIX — OK" from the first command; the second shows the underscored `@base_ui/react` in both the import and the manifest. Any radix hit: STOP and report — do not hand-patch generated code.
 
 - [ ] **Step 4: House-format, then run the package pipeline over the generated TSX**
 
@@ -346,7 +346,7 @@ pnpm --filter @sevendays/ui fix
 pnpm --filter @sevendays/ui lint && pnpm --filter @sevendays/ui format && pnpm --filter @sevendays/ui typecheck && pnpm --filter @sevendays/ui build
 ```
 
-Expected: all green (the `fix` run normalizes the CLI's double quotes to the repo's Biome style — the only permitted transformation; `typecheck` proves the package compiles the TSX against its `ts/react` config; `build` emits it into the ignored `dist/`). If typecheck flags missing types for `@base-ui/react` or `cn`, confirm the versions installed in Step 2 ship `.d.ts` files (`ls node_modules/@base-ui/react/*.d.ts` from the workspace root's linked path) and report rather than adding shims.
+Expected: all green (the `fix` run normalizes the CLI's double quotes to the repo's Biome style — the only permitted transformation; `typecheck` proves the package compiles the TSX against its `ts/react` config; `build` emits it into the ignored `dist/`). If typecheck flags missing types for `@base_ui/react` or `cn`, confirm the versions installed in Step 2 ship `.d.ts` files (`ls node_modules/@base_ui/react/*.d.ts` from the workspace root's linked path) and report rather than adding shims.
 
 - [ ] **Step 5: Prove the admin route reaches the shared package too (dry run)**
 
@@ -597,7 +597,7 @@ gh pr create --base main --head feat/95-ui-shared-library \
 
 ## What landed
 - **components.json trio** (landing, admin, packages/ui): identical style/iconLibrary/baseColor, app aliases route \`shadcn add\` primitives into \`packages/ui\` while composed blocks stay app-local.
-- **\`button\` tracer** generated via \`shadcn@4.21.0\` on the **Base UI base** (\`@base-ui/react\`; zero radix deps introduced) and rendered in both apps through \`@sevendays/ui/components/button\` (landing gallery section \`data-tier1-tracer\` + admin probe page) — the CLI → package → app-import → check-pipeline path proven end to end, including built-CSS utility generation (with \`@source\` fallback where needed) and SSR smoke.
+- **\`button\` tracer** generated via \`shadcn@4.21.0\` on the **Base UI base** (\`@base_ui/react\`; zero radix deps introduced) and rendered in both apps through \`@sevendays/ui/components/button\` (landing gallery section \`data-tier1-tracer\` + admin probe page) — the CLI → package → app-import → check-pipeline path proven end to end, including built-CSS utility generation (with \`@source\` fallback where needed) and SSR smoke.
 - **\`cn@0.3.0\`** replaces both apps' hand-rolled \`lib/utils\` helpers (deleted; \`clsx\` + \`tailwind-merge\` dropped; zero-import proven by grep).
 - **\`packages/ui\` joins the check pipeline**: tsc build gate + typecheck + Biome over its TSX source; source-shipping exports (\`api-client\` precedent); no Tier-1 unit tests (spec testing decision); dead v3-era \`globals.css\` + export deleted.
 
