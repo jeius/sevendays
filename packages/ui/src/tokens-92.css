@@ -1,0 +1,110 @@
+/* PROTOTYPE (wayfinder #92) — candidate token layer built from the owner's
+   logo palette (decision #90). Throwaway: this file never merges to main;
+   the milestone spec (#61) adopts the values, not the file. It shadows the
+   interim preset layer (tokens.css, preset b1uGsTYZ6) by redefining the
+   same-named shadcn custom properties later in the cascade — imported
+   AFTER tokens.css in each app's styles.css. Dark mode is parked for v1:
+   no .dark block here; tokens.css's .dark stays as-found. */
+
+:root {
+  /* — Fixed brand points (#90; hexes are canonical, oklch conversions
+       round-trip verified to the identical rendered color) — */
+  --brand-primary: oklch(0.5076 0.09475 225.078); /* #06708e */
+  --brand-ink: oklch(0.185 0.0164 256.833); /* #0e131a */
+  --brand-deep: oklch(0.3553 0.06561 228.722); /* #084257 */
+  --brand-gray-light: oklch(0.9006 0 89.876); /* #dedede */
+  --brand-gray-mid: oklch(0.5956 0.0012 197.124); /* #7e7f7f */
+  --brand-gray-cool: oklch(0.7761 0.01046 212.527); /* #afb8ba */
+
+  /* — Derived brand ramp (adds tones around primary; hue held at primary's
+       225.078, chroma peaking at 600; 600 IS the fixed primary; deep petrol
+       stays its own fixed token — different hue, not ramp-800) — */
+  --brand-50: oklch(0.97 0.012 225.078); /* #edf7fb */
+  --brand-100: oklch(0.945 0.02 225.078); /* #dff0f7 */
+  --brand-200: oklch(0.9 0.032 225.078); /* #c9e3ee */
+  --brand-300: oklch(0.84 0.05 225.078); /* #a8d2e3 */
+  --brand-400: oklch(0.7 0.075 225.078); /* #69a9c2 */
+  --brand-500: oklch(0.6 0.09 225.078); /* #398ba9 */
+  --brand-600: var(--brand-primary); /* #06708e */
+  --brand-700: oklch(0.42 0.08 225.078); /* #00566e */
+  --brand-800: oklch(0.355 0.0656 225.078); /* #034356 */
+  --brand-900: oklch(0.28 0.05 225.078); /* #042e3b */
+
+  /* — Derived interaction states (adds only) — */
+  --brand-primary-hover: var(--brand-700); /* #00566e, white on it 8.22:1 */
+  --brand-primary-active: var(--brand-800); /* #034356, white on it 10.82:1 */
+  --brand-focus-ring: var(--brand-400); /* #69a9c2, non-text indicator */
+  --muted-text: oklch(0.52 0.0012 197.1); /* #686969, 4.59:1 on the darkest wash */
+
+  /* — Landing atmosphere defaults (functional names) — */
+  --wash-base: oklch(0.975 0.008 225.078); /* #f1f8fb */
+  --wash-a: oklch(0.965 0.015 225.078); /* #e9f6fb */
+  --wash-b: oklch(0.935 0.025 225.078); /* #d9eef6 */
+  --surface-glass: oklch(1 0 0 / 74%); /* white glass over wash */
+  --surface-strong: oklch(1 0 0 / 90%);
+  --line-soft: oklch(0.7761 0.01046 212.527 / 50%); /* cool-gray hairline */
+
+  /* — shadcn semantic layer, candidate mapping (same names as tokens.css;
+       cascade order makes these win) — */
+  --background: var(--wash-base);
+  --foreground: var(--brand-ink);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--brand-ink);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--brand-ink);
+  --primary: var(--brand-primary);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: var(--brand-gray-light); /* ink on it 13.85:1 */
+  --secondary-foreground: var(--brand-ink);
+  --muted: var(--brand-100); /* ink on it 15.93:1 */
+  --muted-foreground: var(--muted-text);
+  --accent: var(--brand-100);
+  --accent-foreground: var(--brand-ink);
+  --destructive: oklch(0.577 0.245 27.325); /* shadcn default, carried — only warm semantic */
+  --border: var(--brand-gray-cool);
+  --input: var(--brand-gray-cool);
+  --ring: var(--brand-focus-ring);
+  --chart-1: var(--brand-300);
+  --chart-2: var(--brand-400);
+  --chart-3: var(--brand-600);
+  --chart-4: var(--brand-700);
+  --chart-5: var(--brand-800);
+  --radius: 0.625rem; /* unchanged from interim preset — #92 decides color, not shape */
+  --sidebar: oklch(1 0 0); /* admin tool-neutral */
+  --sidebar-foreground: var(--brand-ink);
+  --sidebar-primary: var(--brand-primary);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: var(--brand-gray-light);
+  --sidebar-accent-foreground: var(--brand-ink);
+  --sidebar-border: var(--brand-gray-cool);
+  --sidebar-ring: var(--brand-focus-ring);
+}
+
+@theme inline {
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-gray-light: var(--brand-gray-light);
+  --color-brand-gray-mid: var(--brand-gray-mid);
+  --color-brand-gray-cool: var(--brand-gray-cool);
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-brand-primary-hover: var(--brand-primary-hover);
+  --color-brand-primary-active: var(--brand-primary-active);
+  --color-brand-focus-ring: var(--brand-focus-ring);
+  --color-muted-text: var(--muted-text);
+  --color-wash-base: var(--wash-base);
+  --color-wash-a: var(--wash-a);
+  --color-wash-b: var(--wash-b);
+  --color-surface-glass: var(--surface-glass);
+  --color-surface-strong: var(--surface-strong);
+  --color-line-soft: var(--line-soft);
+}

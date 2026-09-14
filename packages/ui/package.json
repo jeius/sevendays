@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     "./globals.css": "./src/globals.css",
-    "./tokens.css": "./src/tokens.css"
+    "./tokens.css": "./src/tokens.css",
+    "./tokens-92.css": "./src/tokens-92.css"
   },
   "scripts": {
     "lint": "biome lint",
