@@ -50,7 +50,7 @@
 grep -rn "globals.css" apps packages --include='*.ts' --include='*.tsx' --include='*.css' --include='*.json' --include='*.html' | grep -v node_modules | grep -v "tokens.css"
 ```
 
-Expected: the only hit is `packages/ui/package.json`'s own `"./globals.css"` export line (recon-verified 2026-09-14). If anything else references it, STOP and report — do not delete. Then:
+Expected: exactly two hits, both owned by this task — (1) `packages/ui/package.json`'s own `"./globals.css"` export line (Step 2 removes it) and (2) `packages/ui/biome.json`'s lint override `"includes": ["src/globals.css"]` (Step 4's rewrite removes it — a lint-config reference, not a consumer; ruling recorded during execution 2026-09-14). Any OTHER hit (a real import/consumer in app or package code): STOP and report — do not delete. Then:
 
 ```bash
 git rm packages/ui/src/globals.css
