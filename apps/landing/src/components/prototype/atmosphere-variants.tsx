@@ -36,13 +36,13 @@ export function AtmosphereVariants() {
             <div className='mt-5 flex flex-wrap gap-3'>
               <button
                 type='button'
-                className='bg-brand-600 hover:bg-brand-primary-hover focus-visible:ring-brand-focus-ring rounded-md px-4 py-2 text-sm font-medium text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
+                className='bg-brand-600 hover:bg-brand-primary-hover focus-visible:ring-brand-focus-ring rounded-md px-4 py-2 text-sm font-medium text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none cursor-pointer transition-colors'
               >
                 Book a session
               </button>
               <button
                 type='button'
-                className='border-line-soft bg-surface-glass text-brand-ink rounded-md border px-4 py-2 text-sm font-medium'
+                className='border-line-soft bg-surface-glass text-brand-ink rounded-md border px-4 py-2 text-sm font-medium cursor-pointer transition-colors'
               >
                 View packages
               </button>
@@ -73,13 +73,13 @@ export function AtmosphereVariants() {
             <div className='mt-5 flex flex-wrap gap-3'>
               <button
                 type='button'
-                className='rounded-md bg-white px-4 py-2 text-sm font-medium text-brand-deep hover:bg-white/90'
+                className='rounded-md bg-white px-4 py-2 text-sm font-medium text-brand-deep hover:bg-white/90 cursor-pointer transition-colors'
               >
                 Book a session
               </button>
               <button
                 type='button'
-                className='rounded-md border border-white/30 px-4 py-2 text-sm font-medium text-white'
+                className='rounded-md border border-white/30 px-4 py-2 text-sm font-medium text-white cursor-pointer transition-colors'
               >
                 View packages
               </button>
@@ -110,13 +110,13 @@ export function AtmosphereVariants() {
             <div className='mt-5 flex flex-wrap gap-3'>
               <button
                 type='button'
-                className='bg-brand-600 hover:bg-brand-primary-hover focus-visible:ring-brand-focus-ring rounded-md px-4 py-2 text-sm font-medium text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
+                className='bg-brand-600 hover:bg-brand-primary-hover focus-visible:ring-brand-focus-ring rounded-md px-4 py-2 text-sm font-medium text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none cursor-pointer transition-colors'
               >
                 Book a session
               </button>
               <button
                 type='button'
-                className='border-brand-gray-cool bg-card text-brand-ink rounded-md border px-4 py-2 text-sm font-medium'
+                className='border-brand-gray-cool bg-card text-brand-ink rounded-md border px-4 py-2 text-sm font-medium cursor-pointer transition-colors'
               >
                 View packages
               </button>

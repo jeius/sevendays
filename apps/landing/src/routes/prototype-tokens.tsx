@@ -80,31 +80,34 @@ function PrototypeTokensPage() {
         <div className='mt-4 flex flex-wrap items-center gap-3'>
           <button
             type='button'
-            className='bg-brand-600 hover:bg-brand-primary-hover focus-visible:ring-brand-focus-ring rounded-md px-4 py-2 text-sm font-medium text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
+            className='bg-brand-600 hover:bg-brand-primary-hover focus-visible:ring-brand-focus-ring rounded-md px-4 py-2 text-sm font-medium text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none cursor-pointer transition-colors'
           >
             Default · hover to 700
           </button>
           <button
             type='button'
-            className='bg-brand-primary-hover rounded-md px-4 py-2 text-sm font-medium text-white'
+            className='bg-brand-primary-hover rounded-md px-4 py-2 text-sm font-medium text-white cursor-pointer transition-colors'
           >
             Hover value (700)
           </button>
           <button
             type='button'
-            className='bg-brand-primary-active rounded-md px-4 py-2 text-sm font-medium text-white'
+            className='bg-brand-primary-active rounded-md px-4 py-2 text-sm font-medium text-white cursor-pointer transition-colors'
           >
             Active value (800)
           </button>
-          {/* biome-ignore lint/a11y/useValidAnchor: prototype demo anchor shows link contrast, no navigation target */}
-          <a href='#' className='text-brand-700 text-sm font-medium underline underline-offset-4'>
+          <a
+            // biome-ignore lint/a11y/useValidAnchor: prototype demo anchor shows link contrast, no navigation target
+            href='#'
+            className='text-brand-700 text-sm font-medium underline underline-offset-4 cursor-pointer transition-colors'
+          >
             Link (700 · 8.22:1)
           </a>
           <input
             aria-label='Focus ring demo'
             type='text'
             placeholder='Focus me: ring = 400'
-            className='border-input bg-card text-foreground placeholder:text-muted-foreground focus-visible:ring-ring rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none'
+            className='border-input bg-card text-foreground placeholder:text-muted-foreground focus-visible:ring-ring rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none transition-colors'
           />
         </div>
         <div className='border-border mt-4 grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2'>
@@ -126,38 +129,38 @@ function PrototypeTokensPage() {
         <div className='mt-4 flex flex-wrap items-center gap-3'>
           <button
             type='button'
-            className='bg-primary text-primary-foreground focus-visible:ring-ring rounded-md px-4 py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
+            className='bg-primary text-primary-foreground focus-visible:ring-ring rounded-md px-4 py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none cursor-pointer transition-colors'
           >
             Book now
           </button>
           <button
             type='button'
-            className='bg-secondary text-secondary-foreground rounded-md px-4 py-2 text-sm font-medium'
+            className='bg-secondary text-secondary-foreground rounded-md px-4 py-2 text-sm font-medium cursor-pointer transition-colors'
           >
             Secondary
           </button>
           <button
             type='button'
-            className='border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-md border px-4 py-2 text-sm font-medium'
+            className='border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-md border px-4 py-2 text-sm font-medium cursor-pointer transition-colors'
           >
             Outline
           </button>
           <button
             type='button'
-            className='text-foreground hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2 text-sm font-medium'
+            className='text-foreground hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2 text-sm font-medium cursor-pointer transition-colors'
           >
             Ghost
           </button>
           <button
             type='button'
-            className='rounded-md bg-destructive px-4 py-2 text-sm font-medium text-white'
+            className='rounded-md bg-destructive px-4 py-2 text-sm font-medium text-white cursor-pointer transition-colors'
           >
             Destructive (shadcn default)
           </button>
           <button
             type='button'
             disabled
-            className='bg-primary text-primary-foreground rounded-md px-4 py-2 text-sm font-medium opacity-50'
+            className='bg-primary text-primary-foreground rounded-md px-4 py-2 text-sm font-medium opacity-50 cursor-pointer transition-colors'
           >
             Disabled
           </button>
@@ -174,7 +177,7 @@ function PrototypeTokensPage() {
             </p>
             <button
               type='button'
-              className='bg-primary text-primary-foreground mt-2 rounded-md px-4 py-2 text-center text-sm font-medium'
+              className='bg-primary text-primary-foreground mt-2 rounded-md px-4 py-2 text-center text-sm font-medium cursor-pointer transition-colors'
             >
               Book now
             </button>
@@ -189,7 +192,7 @@ function PrototypeTokensPage() {
                 id='proto-name'
                 type='text'
                 placeholder='Juan dela Cruz'
-                className='border-input bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-ring rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none'
+                className='border-input bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-ring rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none transition-colors'
               />
               <p className='text-muted-foreground text-xs'>
                 Helper text in muted-foreground (derived #686969).
@@ -203,7 +206,7 @@ function PrototypeTokensPage() {
                 id='proto-email'
                 type='email'
                 defaultValue='not-an-email'
-                className='rounded-md border border-destructive bg-background px-3 py-2 text-sm text-destructive focus-visible:ring-destructive focus-visible:ring-2 focus-visible:outline-none'
+                className='rounded-md border border-destructive bg-background px-3 py-2 text-sm text-destructive focus-visible:ring-destructive focus-visible:ring-2 focus-visible:outline-none transition-colors'
               />
               <p className='text-xs text-destructive'>Enter a valid email address.</p>
             </div>
