@@ -44,7 +44,7 @@
 
 **Not here:** no `components.json` yet (Task 2), no primitives (Task 3), no token changes (#96), no app changes (Tasks 4–5).
 
-- [ ] **Step 1: Prove `globals.css` is dead, then delete it**
+- [✅] **Step 1: Prove `globals.css` is dead, then delete it**
 
 ```bash
 grep -rn "globals.css" apps packages --include='*.ts' --include='*.tsx' --include='*.css' --include='*.json' --include='*.html' | grep -v node_modules | grep -v "tokens.css"
@@ -56,7 +56,7 @@ Expected: exactly two hits, both owned by this task — (1) `packages/ui/package
 git rm packages/ui/src/globals.css
 ```
 
-- [ ] **Step 2: Rewrite `packages/ui/package.json`**
+- [✅] **Step 2: Rewrite `packages/ui/package.json`**
 
 Replace the whole file with exactly:
 
@@ -99,7 +99,7 @@ Replace the whole file with exactly:
 
 Notes: the `./globals.css` export is gone with its file; `tailwindcss` devDep is retained (present today; #96's token work may want it); `react` is both peer (consumers provide it — both apps run `react@^19.2.0`) and devDep (the package's own typecheck compiles TSX); `typescript` matches sibling packages (`^6.0.3`, as in `packages/types`).
 
-- [ ] **Step 3: Create the tsconfigs**
+- [✅] **Step 3: Create the tsconfigs**
 
 `packages/ui/tsconfig.json`:
 
@@ -129,7 +129,7 @@ Notes: the `./globals.css` export is gone with its file; `tailwindcss` devDep is
 
 (`packages/types`' build pattern; the emitted `dist/` is a compile gate — nothing imports it.)
 
-- [ ] **Step 4: Rewrite `packages/ui/biome.json`**
+- [✅] **Step 4: Rewrite `packages/ui/biome.json`**
 
 Replace the whole file with exactly (react tier instead of node — the package gains TSX; the globals.css at-rule override dies with the file):
 
@@ -140,7 +140,7 @@ Replace the whole file with exactly (react tier instead of node — the package 
 }
 ```
 
-- [ ] **Step 5: Create `packages/ui/src/lib/utils.ts`**
+- [✅] **Step 5: Create `packages/ui/src/lib/utils.ts`**
 
 Exactly:
 
@@ -150,7 +150,7 @@ Exactly:
 export { cn } from 'cn';
 ```
 
-- [ ] **Step 6: Install and run the package pipeline**
+- [✅] **Step 6: Install and run the package pipeline**
 
 ```bash
 pnpm install
@@ -159,7 +159,7 @@ pnpm --filter @sevendays/ui lint && pnpm --filter @sevendays/ui format && pnpm -
 
 Expected: all green over the one-file TS source; `packages/ui/dist/` appears (gitignored). If `typecheck` fails resolving `cn`, check `node_modules/cn` exists after install and that its package exports TypeScript types — record what's missing and report rather than working around.
 
-- [ ] **Step 7: Commit**
+- [✅] **Step 7: Commit**
 
 ```bash
 git add packages/ui pnpm-lock.yaml
@@ -186,7 +186,7 @@ git commit -m "build(ui): packages/ui joins the check pipeline as a source-shipp
 
 **Not here:** no generation (Task 3), no app code changes (Tasks 4–5). The `tailwind.css` field change below is a pointer change only — no CSS file content changes (#96's ground).
 
-- [ ] **Step 1: Create `packages/ui/components.json`**
+- [✅] **Step 1: Create `packages/ui/components.json`**
 
 Exactly:
 
@@ -214,7 +214,7 @@ Exactly:
 }
 ```
 
-- [ ] **Step 2: Rewrite `apps/admin/components.json`**
+- [✅] **Step 2: Rewrite `apps/admin/components.json`**
 
 Exactly:
 
@@ -242,7 +242,7 @@ Exactly:
 }
 ```
 
-- [ ] **Step 3: Rewrite `apps/landing/components.json`**
+- [✅] **Step 3: Rewrite `apps/landing/components.json`**
 
 Exactly (same trio values as admin; the extra `rtl`/`menuColor`/`menuAccent`/`registries` keys are the CLI's own from the #57 apply — kept verbatim to avoid config churn):
 
@@ -276,7 +276,7 @@ Exactly (same trio values as admin; the extra `rtl`/`menuColor`/`menuAccent`/`re
 
 Design notes, so the executor isn't tempted to "fix" them: `tailwind.css` points at the shared package's stylesheet (docs pattern — the CLI's token detection/writes, if any, target the shared layer, never an app-local file); `rsc: false` (TanStack Start, not React Server Components); both apps' tsconfig already map `#/*` → `./src/*`, so the app-local aliases resolve unchanged.
 
-- [ ] **Step 4: Sanity-check the trio and commit**
+- [✅] **Step 4: Sanity-check the trio and commit**
 
 ```bash
 grep -h '"style"\|"baseColor"\|"iconLibrary"' apps/landing/components.json apps/admin/components.json packages/ui/components.json
@@ -308,7 +308,7 @@ base. baseColor zinc = the apps' on-disk posture (spec's 'neutral' was docs-temp
 
 **Not here:** the other 18 pull-list primitives — #100 generates them through this same path; generating any of them now crosses the sibling fence. No hand edits to the generated file (Biome `fix` only).
 
-- [ ] **Step 1: Generate from the landing workspace**
+- [✅] **Step 1: Generate from the landing workspace**
 
 ```bash
 pnpm dlx shadcn@4.21.0 add button -y -c apps/landing
@@ -316,7 +316,7 @@ pnpm dlx shadcn@4.21.0 add button -y -c apps/landing
 
 Expected: output naming the file written to the shared package path. If the CLI errors resolving the `-c` path, the fallback form is `cd apps/landing && pnpm dlx shadcn@4.21.0 add button -y` (then return to the repo root — the rest of the plan assumes root).
 
-- [ ] **Step 2: Inspect and record what the CLI did**
+- [✅] **Step 2: Inspect and record what the CLI did**
 
 ```bash
 git status --short
@@ -330,7 +330,7 @@ Record in the commit message (these facts gate the next steps):
 3. Whether ANY file under `apps/` changed — expected: none (routing proof; a `button.tsx` under `apps/landing/src/components/` means the aliases were not picked up — STOP and re-check Task 2).
 4. Whether any CSS file changed — expected: none. If the CLI appended tokens anywhere, revert per Global Constraints (`git checkout -- <file>`) and record it.
 
-- [ ] **Step 3: Assert the Base-UI/no-Radix invariant**
+- [✅] **Step 3: Assert the Base-UI/no-Radix invariant**
 
 ```bash
 grep -in "radix" packages/ui/src/components/button.tsx packages/ui/package.json || echo "NO RADIX — OK"
@@ -339,7 +339,7 @@ grep -n "@base-ui/react" packages/ui/src/components/button.tsx packages/ui/packa
 
 Expected: "NO RADIX — OK" from the first command; the second shows the hyphenated `@base-ui/react` in both the import and the manifest. Any radix hit: STOP and report — do not hand-patch generated code.
 
-- [ ] **Step 4: House-format, then run the package pipeline over the generated TSX**
+- [✅] **Step 4: House-format, then run the package pipeline over the generated TSX**
 
 ```bash
 pnpm --filter @sevendays/ui fix
@@ -348,7 +348,7 @@ pnpm --filter @sevendays/ui lint && pnpm --filter @sevendays/ui format && pnpm -
 
 Expected: all green (the `fix` run normalizes the CLI's double quotes to the repo's Biome style — the only permitted transformation; `typecheck` proves the package compiles the TSX against its `ts/react` config; `build` emits it into the ignored `dist/`). If typecheck flags missing types for `@base-ui/react` or `cn`, confirm the versions installed in Step 2 ship `.d.ts` files (`ls node_modules/@base-ui/react/*.d.ts` from the workspace root's linked path) and report rather than adding shims.
 
-- [ ] **Step 5: Prove the admin route reaches the shared package too (dry run)**
+- [✅] **Step 5: Prove the admin route reaches the shared package too (dry run)**
 
 ```bash
 pnpm dlx shadcn@4.21.0 add button -y --dry-run -c apps/admin
@@ -356,7 +356,7 @@ pnpm dlx shadcn@4.21.0 add button -y --dry-run -c apps/admin
 
 Expected: the dry-run plans the same destination — `packages/ui/src/components/button.tsx` — with no writes under `apps/admin/` (satisfies the "from either app" half of AC 2 without a second generation or an overwrite prompt). Record the printed destination in the commit message.
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add packages/ui pnpm-lock.yaml
@@ -380,7 +380,7 @@ no-app-writes confirmation, any CSS revert; plus Step 5's dry-run destination>"
 
 **Not here:** no restyling of any existing surface, no swap of hand-rolled buttons for the shared one anywhere else, no booking-flow components (#99).
 
-- [ ] **Step 1: Add the shared-primitives section to the landing gallery**
+- [✅] **Step 1: Add the shared-primitives section to the landing gallery**
 
 In `apps/landing/src/routes/prototype-tokens.tsx`, add the import after the existing `SiteHeader` import (line 6):
 
@@ -408,7 +408,7 @@ Then insert a new section directly **before** the `<section className='mt-10 gri
 
 If the app's typecheck rejects `variant='outline'` (the variant union is whatever the registry generated in Task 3), drop that line — the tracer needs at least the default variant rendered; record the union's actual names in the commit message.
 
-- [ ] **Step 2: Render one Button on the admin probe page**
+- [✅] **Step 2: Render one Button on the admin probe page**
 
 In `apps/admin/src/routes/index.tsx`, add the import after the existing `branchQueries` import:
 
@@ -427,7 +427,7 @@ Then, immediately after the closing `</ul>` of the branches list and before the 
 
 (Same variant rule as Step 1: drop `variant='outline'` if the generated union lacks it.)
 
-- [ ] **Step 3: Build both apps and prove the utilities landed in the built CSS**
+- [✅] **Step 3: Build both apps and prove the utilities landed in the built CSS**
 
 ```bash
 pnpm --filter @sevendays/landing build && pnpm --filter @sevendays/admin build
@@ -444,7 +444,7 @@ grep -c "translate-y-px" <file>
 
 `translate-y-px` comes from the generated button's `active:…:translate-y-px` class — if Tailwind scanned the package, the count is ≥ 1 in each app's CSS. **Fallback if the count is 0:** add `@source "../../../packages/ui/src";` on its own line directly after the `@import "@sevendays/ui/tokens.css";` line in that app's `src/styles.css`, rebuild that app, re-grep. Record which apps needed the fallback (it is a legitimate outcome, not an error — but the fallback line itself is the only permitted styles.css change; #96's freeze covers values, and this line adds none).
 
-- [ ] **Step 4: SSR render smoke on both apps**
+- [✅] **Step 4: SSR render smoke on both apps**
 
 ```bash
 pnpm --filter @sevendays/landing dev &
@@ -461,7 +461,7 @@ kill %1
 
 Notes: check each dev server's startup output for its actual port (Vite defaults to 5173; if landing holds it, admin prints the next one — adjust the second pair of curls). Expected: every grep prints a match — `data-tier1-tracer` proves the section rendered, `group/button` (the base-rhea button's own class string, present verbatim in SSR HTML) and the admin label prove the **shared component** rendered through each app's pipeline, not just static markup. If SSR HTML lacks `group/button` while the build succeeded, report — do not swap in a hand-rolled button.
 
-- [ ] **Step 5: Commit**
+- [✅] **Step 5: Commit**
 
 ```bash
 git add apps/landing/src/routes/prototype-tokens.tsx apps/admin/src/routes/index.tsx apps/landing/src/styles.css apps/admin/src/styles.css
@@ -489,7 +489,7 @@ fallback; the curl grep results>"
 
 **Not here:** landing's unused `radix-ui@^1.6.7` dependency stays (pre-existing from #91, fenced in Global Constraints); no `lib/utils.ts` re-export shims in the apps — the canonical utils alias target is `@sevendays/ui/lib/utils` (Task 1).
 
-- [ ] **Step 1: Re-assert zero usage, then delete the helpers**
+- [✅] **Step 1: Re-assert zero usage, then delete the helpers**
 
 ```bash
 grep -rn "lib/utils" apps --include='*.ts' --include='*.tsx'
@@ -501,7 +501,7 @@ Expected: no output (recon-verified 2026-09-14; Tasks 1–4 added no such import
 git rm apps/landing/src/lib/utils.ts apps/admin/src/lib/utils.ts
 ```
 
-- [ ] **Step 2: Swap the dependencies in both apps' package.json**
+- [✅] **Step 2: Swap the dependencies in both apps' package.json**
 
 In `apps/landing/package.json` `dependencies`: delete the `"clsx": "^2.1.1"` and `"tailwind-merge": "^3.6.0"` lines; change `"cn": "^0.2.6"` to `"cn": "^0.3.0"` (keep keys alphabetized as the file has them).
 
@@ -515,7 +515,7 @@ pnpm install
 
 Expected: lockfile updated, no resolution errors; `pnpm why clsx` and `pnpm why tailwind-merge` at the root report no remaining dependents among the workspaces this ticket touches (transitive dependents elsewhere in the tree are out of scope — record, don't chase).
 
-- [ ] **Step 3: Verify both apps still typecheck and build**
+- [✅] **Step 3: Verify both apps still typecheck and build**
 
 ```bash
 pnpm --filter @sevendays/landing typecheck && pnpm --filter @sevendays/admin typecheck && pnpm --filter @sevendays/landing build && pnpm --filter @sevendays/admin build
@@ -523,7 +523,7 @@ pnpm --filter @sevendays/landing typecheck && pnpm --filter @sevendays/admin typ
 
 Expected: all green (pure deletion — nothing referenced the removed files or deps).
 
-- [ ] **Step 4: Commit**
+- [✅] **Step 4: Commit**
 
 ```bash
 git add apps/landing apps/admin pnpm-lock.yaml
@@ -546,7 +546,7 @@ git commit -m "refactor(ui): both apps on the cn package — hand-rolled helpers
 
 **Not here:** #96+#100+#101 stay untouched in every doc; the v1-picks ledger gets this PR's row at merge time by the standing discipline (paths here are `packages/ui` + shared-infra — main-only; expected verdict skip, but that call belongs to the triager, not this plan).
 
-- [ ] **Step 1: Update the AGENTS.md `packages/ui` bullet**
+- [✅] **Step 1: Update the AGENTS.md `packages/ui` bullet**
 
 Replace:
 
@@ -560,7 +560,7 @@ with:
 - `packages/ui` — the shared design system (ADR-0017): semantic token layer (`@sevendays/ui/tokens.css`, imported by both apps) plus the shared shadcn/Base-UI primitive library — M3 #95 wired `shadcn add` from either app to route primitives here (`components.json` trio pinned `base-rhea`/lucide/zinc; `button` live; `cn` comes from the `cn` package). Apps are Tailwind v4 and own their `@theme` styles
 ```
 
-- [ ] **Step 2: Add the progress.md entry**
+- [✅] **Step 2: Add the progress.md entry**
 
 In `docs/progress.md`, at the end of the `## What Exists` section's list (immediately before the `## Known Gaps / Not Yet Done` heading), add:
 
@@ -568,7 +568,7 @@ In `docs/progress.md`, at the end of the `## What Exists` section's list (immedi
 - **M3 ticket 01 — packages/ui shared primitive library (#95):** the shadcn monorepo pattern (ADR-0017) is live end to end: one `components.json` per workspace (landing, admin, `packages/ui`) all pinning `base-rhea`/lucide/zinc — an agent ruling (CLI 4.21 encodes the headless base in the `style` value; base-rhea keeps landing's rhea look on the mandated Base UI base; owner-overridable, recorded in the PR), app aliases `ui`/`utils` routing `shadcn@4.21.0 add` output into `packages/ui`, the `button` tracer generated on Base UI and rendered in both apps through `@sevendays/ui/components/button` (landing `/prototype-tokens` gallery + admin probe index), `cn@0.3.0` replacing both apps' deleted hand-rolled `lib/utils` helpers (clsx/tailwind-merge dropped), and `packages/ui` in the check pipeline (tsc build/typecheck + Biome over TSX source; source-shipping exports; no Tier-1 unit tests per spec). NOT landed: the remaining 18 pull-list primitives + admin shell (#100), the logo-palette token swap (#96), surface restyles (#97–#99).
 ```
 
-- [ ] **Step 3: Tick this plan's boxes and format the docs**
+- [✅] **Step 3: Tick this plan's boxes and format the docs**
 
 Tick every completed step in this plan file with `- [✅]`. Then:
 
@@ -576,7 +576,7 @@ Tick every completed step in this plan file with `- [✅]`. Then:
 pnpm exec biome check --write AGENTS.md docs/progress.md docs/superpowers/plans/2026-09-14-95-ui-shared-primitive-library.md
 ```
 
-- [ ] **Step 4: graphify + full check**
+- [✅] **Step 4: graphify + full check**
 
 ```bash
 graphify update .
@@ -585,7 +585,7 @@ pnpm check
 
 Expected: graph refresh touches `graphify-out/` only; `pnpm check` green across all workspaces (`@sevendays/admin`'s test remains a documented no-op — expected; `packages/ui` has no test script by design). Any failure: fix at the source and re-run — do not commit red.
 
-- [ ] **Step 5: Commit, push, open the PR**
+- [✅] **Step 5: Commit, push, open the PR**
 
 ```bash
 git add AGENTS.md docs/progress.md docs/superpowers/plans/2026-09-14-95-ui-shared-primitive-library.md graphify-out
@@ -610,7 +610,7 @@ AC 1 trio identical/pinned → Task 2 · AC 2 routing both directions → Tasks 
 Standing v1-picks discipline applies to this PR at merge (paths are main-only shared infra; expected skip — triager's call)."
 ```
 
-- [ ] **Step 6: The completion report — then STOP**
+- [✅] **Step 6: The completion report — then STOP**
 
 One message to the owner, containing:
 
