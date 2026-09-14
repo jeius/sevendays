@@ -8,7 +8,7 @@
 - `packages/api-client` — shared API client: a Hono RPC wrapper over the API's exported `AppType` that Zod-parses every response (ADR-0006); the only supported path from the frontends to the API
 - `packages/db` — Drizzle schema + client, shared by `api` (and by `admin`/`landing` server functions where needed)
 - `packages/types` — Zod schemas + inferred types, shared across all apps
-- `packages/ui` — shadcn/ui design tokens (CSS variables); apps are Tailwind v4 and own their `@theme` styles
+- `packages/ui` — the shared design system (ADR-0017): semantic token layer (`@sevendays/ui/tokens.css`, imported by both apps) live today; the shared shadcn/Base-UI primitive library lands with M3. Apps are Tailwind v4 and own their `@theme` styles
 - `packages/config` — shared tooling configs: `ts/{base,node,react,vite}.json` tsconfig variants, `biome/{base,vite,node,worker}.json` tier configs, and a built `@sevendays/config/vitest` entry (run `pnpm build:packages` after a fresh clone — `dist/` is gitignored). Consumers extend via package exports (`@sevendays/config/ts/node`, `@sevendays/config/biome/base` + tier fragment); see `packages/config/AGENTS.md`.
 
 Each app is a **separate deployment** (Cloudflare Workers for all three — `landing`/`admin` are Worker-based TanStack Start via `@cloudflare/vite-plugin`, not Pages). See `docs/architecture.md` for how they connect.
@@ -44,7 +44,7 @@ Run from the repo root unless noted. All commands are powered by Turborepo and f
 - **The DB is provisioned and the catalog is seeded.** `packages/db`'s client works against the live Supabase database (migrations 0000–0004 applied, catalog seeded + verified). BetterAuth is still not wired in — don't build features that assume a logged-in admin user until `docs/progress.md` says otherwise.
 - **Keep route handlers thin.** In `apps/api`, business logic belongs in a service/module, not inline in the Hono route. Routes: parse/validate input, call a function, return a response.
 - **Use `async`/`await`** exclusively; avoid raw Promise chains or callbacks.
-- **Each app owns its UI**, but shared tokens live in `packages/ui` (shadcn CSS variables). Apps are Tailwind v4 (CSS-first) — theme via `@theme` in each app's `styles.css`; don't duplicate token definitions between `landing` and `admin`.
+- **Shared UI primitives + semantic tokens live in `packages/ui`** — the shadcn monorepo pattern (ADR-0017): `shadcn add` generates shared primitives there on the Base UI base, with one `components.json` per workspace. Brand and page-specific (composed) components stay in each app, app-local and PascalCase. Apps are Tailwind v4 (CSS-first) — theme via `@theme` in each app's `styles.css`; don't duplicate token definitions between `landing` and `admin`.
 - **Do not commit code that fails `pnpm check`** (lint + format + typecheck + test) for the packages/apps you touched.
 - **Update `docs/progress.md`** at the end of any task that changes what's implemented vs. stubbed, so the next session (human or agent) doesn't have to rediscover it.
 - **Tick checklist boxes in `docs/*.md` with the ✅ emoji (`- [✅]`), never plain `[x]`.**
@@ -73,7 +73,7 @@ sevendays/
     ├── api-client/        # shared API client — Hono RPC over the API's AppType (ADR-0006)
     ├── db/               # Drizzle schema + client (live DB: migrations applied, catalog seeded)
     ├── types/             # Zod schemas, shared types
-    ├── ui/               # shadcn tokens (CSS variables)
+    ├── ui/               # shared design system — tokens + shadcn/Base-UI primitives (ADR-0017)
     └── config/           # shared ts/biome/vitest configs
 ```
 
