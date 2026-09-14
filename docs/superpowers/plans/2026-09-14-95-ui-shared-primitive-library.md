@@ -131,12 +131,24 @@ Notes: the `./globals.css` export is gone with its file; `tailwindcss` devDep is
 
 - [✅] **Step 4: Rewrite `packages/ui/biome.json`**
 
-Replace the whole file with exactly (react tier instead of node — the package gains TSX; the globals.css at-rule override dies with the file):
+Shipped form (amended at final review to match execution: the plan originally pinned an extends-only block, but the vite biome tier sets `performance.noBarrelFile: "error"` and `src/lib/utils.ts` is a barrel by construction — Step 6's pipeline cannot go green without an override; deviation ruled at Task 1, verified minimal and file-scoped):
 
 ```json
 {
   "root": false,
-  "extends": ["@sevendays/config/biome/base", "@sevendays/config/biome/vite"]
+  "extends": ["@sevendays/config/biome/base", "@sevendays/config/biome/vite"],
+  "overrides": [
+    {
+      "includes": ["src/lib/utils.ts"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noBarrelFile": "off"
+          }
+        }
+      }
+    }
+  ]
 }
 ```
 
