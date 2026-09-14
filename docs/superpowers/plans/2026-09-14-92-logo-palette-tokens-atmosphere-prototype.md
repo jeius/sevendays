@@ -731,10 +731,8 @@ function PrototypeTokensPage() {
           >
             Active value (800)
           </button>
-          <a
-            href='#'
-            className='text-brand-700 text-sm font-medium underline underline-offset-4'
-          >
+          {/* biome-ignore lint/a11y/useValidAnchor: prototype demo anchor shows link contrast, no navigation target */}
+          <a href='#' className='text-brand-700 text-sm font-medium underline underline-offset-4'>
             Link (700 · 8.22:1)
           </a>
           <input
