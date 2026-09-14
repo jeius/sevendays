@@ -7,6 +7,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { AdminNeutralStrip } from '../components/prototype/admin-neutral';
 import { AtmosphereVariants } from '../components/prototype/atmosphere-variants';
+import { CompositionMock } from '../components/prototype/composition-mock';
 import { SiteHeader } from '../components/site-header';
 
 export const Route = createFileRoute('/prototype-tokens')({
@@ -27,11 +28,14 @@ function PrototypeTokensPage() {
         </h1>
         <p className='text-foreground mt-3 max-w-prose'>
           Headings render in Roboto Slab via <code>font-serif</code>; body copy in Figtree via{' '}
-          <code>font-sans</code>; labels in Geist Mono via <code>font-mono</code>. The six logo
-          hexes are fixed points; everything else on this page is derived from them. React to the
-          derivation and the atmosphere, not to individual hex values.
+          <code>font-sans</code>; labels in Geist Mono via <code>font-mono</code>. Per the owner's
+          2026-09-14 rulings: the fixed brand points are <strong>primary and ink</strong> (white is
+          the system constant), the other four logo tones are reference values, and the landing
+          atmosphere is the ink-led + neutral-tint mix rendered first below.
         </p>
       </header>
+
+      <CompositionMock />
 
       <section className='mx-auto mt-10 max-w-5xl px-6'>
         <h2 className='text-foreground font-serif text-2xl font-semibold'>
