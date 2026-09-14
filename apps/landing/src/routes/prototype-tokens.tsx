@@ -1,8 +1,12 @@
-// PROTOTYPE (throwaway) — wayfinder #57: brand → shadcn token unification.
-// Renders representative shadcn-style components using ONLY semantic tokens
-// so the preset mapping can be judged on real UI. Not linked from any nav.
-// Delete this file when the design-system milestone work lands.
+// M3 living token gallery — renders the live layer (post-swap #96):
+// fixed points, derived ramp/states, semantic components, the admin
+// tool-neutral reference, and the #92 owner-approved composition +
+// atmosphere variants. Not linked from any nav. The close-out ticket
+// (#101) deletes this route with the rest of the gallery.
 import { createFileRoute } from '@tanstack/react-router';
+import { AdminNeutralStrip } from '../components/prototype/admin-neutral';
+import { AtmosphereVariants } from '../components/prototype/atmosphere-variants';
+import { CompositionMock } from '../components/prototype/composition-mock';
 import { SiteHeader } from '../components/site-header';
 
 export const Route = createFileRoute('/prototype-tokens')({
@@ -11,70 +15,162 @@ export const Route = createFileRoute('/prototype-tokens')({
 
 function PrototypeTokensPage() {
   return (
-    <div className='mx-auto max-w-5xl p-6 pb-24' data-prototype-tokens>
+    <div className='bg-background min-h-screen pb-24' data-92-frame>
       <SiteHeader />
 
-      <header className='mt-10'>
-        <p className='text-muted-foreground text-xs font-bold tracking-[0.16em] uppercase'>
-          Wayfinder #57 · Preset b1uGsTYZ6
+      <header className='mx-auto mt-10 max-w-5xl px-6'>
+        <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
+          M3 · The live token layer
         </p>
         <h1 className='text-foreground mt-2 font-serif text-5xl font-bold'>
           Sevendays Photography
         </h1>
         <p className='text-foreground mt-3 max-w-prose'>
-          Display headings render in Roboto Slab via <code>font-serif</code>; this body copy renders
-          in Figtree via <code>font-sans</code>. Every color below is a semantic token — react to
-          the mapping, not to individual hex values.
+          Headings render in Roboto Slab via <code>font-serif</code>; body copy in Figtree via{' '}
+          <code>font-sans</code>; labels in Geist Mono via <code>font-mono</code>. Per the owner's
+          2026-09-14 rulings: the fixed brand points are <strong>primary and ink</strong> (white is
+          the system constant), the other four logo tones are reference values, and the landing
+          atmosphere is the ink-led + neutral-tint mix rendered first below.
         </p>
       </header>
 
-      <section className='mt-10'>
-        <h2 className='text-foreground font-serif text-2xl font-semibold'>Buttons</h2>
+      <CompositionMock />
+
+      <section className='mx-auto mt-10 max-w-5xl px-6'>
+        <h2 className='text-foreground font-serif text-2xl font-semibold'>
+          Fixed brand points (#90 — never nudged)
+        </h2>
+        <div className='mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6'>
+          <Swatch cls='bg-brand-primary' label='primary' sub='#06708e · white 5.65:1' />
+          <Swatch cls='bg-brand-ink' label='ink' sub='#0e131a · 18.64:1 on white' />
+          <Swatch cls='bg-brand-deep' label='deep petrol' sub='#084257 · white 10.90:1' />
+          <Swatch cls='bg-brand-gray-light' label='light neutral' sub='#dedede · ink 13.85:1' />
+          <Swatch cls='bg-brand-gray-mid' label='mid gray' sub='#7e7f7f · large text only' />
+          <Swatch cls='bg-brand-gray-cool' label='cool gray' sub='#afb8ba · borders, inputs' />
+        </div>
+        <p className='text-muted-foreground mt-2 text-xs'>
+          Each token stores its hex as the canonical comment beside a full-precision oklch
+          conversion that round-trips to the identical color.
+        </p>
+      </section>
+
+      <section className='mx-auto mt-10 max-w-5xl px-6'>
+        <h2 className='text-foreground font-serif text-2xl font-semibold'>
+          Derived ramp — brand 50–900
+        </h2>
+        <div className='mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-10'>
+          <Swatch cls='bg-brand-50' label='50' sub='#edf7fb' />
+          <Swatch cls='bg-brand-100' label='100' sub='#dff0f7' />
+          <Swatch cls='bg-brand-200' label='200' sub='#c9e3ee' />
+          <Swatch cls='bg-brand-300' label='300' sub='#a8d2e3' />
+          <Swatch cls='bg-brand-400' label='400' sub='#69a9c2' />
+          <Swatch cls='bg-brand-500' label='500' sub='#398ba9' />
+          <Swatch cls='bg-brand-600' label='600' sub='primary · 5.65:1' />
+          <Swatch cls='bg-brand-700' label='700' sub='hover · 8.22:1' />
+          <Swatch cls='bg-brand-800' label='800' sub='#034356 · 10.82:1' />
+          <Swatch cls='bg-brand-900' label='900' sub='#042e3b' />
+        </div>
+        <p className='text-muted-foreground mt-2 text-xs'>
+          Hue held at the primary's 225.078; chroma peaks at 600. 600 IS the fixed primary. Deep
+          petrol keeps its own token (its hue is 228.722 — a sibling, not a ramp step).
+        </p>
+      </section>
+
+      <section className='mx-auto mt-10 max-w-5xl px-6'>
+        <h2 className='text-foreground font-serif text-2xl font-semibold'>
+          Interaction states + muted text
+        </h2>
         <div className='mt-4 flex flex-wrap items-center gap-3'>
           <button
             type='button'
-            className='bg-primary text-primary-foreground focus-visible:ring-ring rounded-md px-4 py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
+            className='bg-brand-600 hover:bg-brand-primary-hover focus-visible:ring-brand-focus-ring rounded-md px-4 py-2 text-sm font-medium text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none cursor-pointer transition-colors'
+          >
+            Default · hover to 700
+          </button>
+          <button
+            type='button'
+            className='bg-brand-primary-hover rounded-md px-4 py-2 text-sm font-medium text-white cursor-pointer transition-colors'
+          >
+            Hover value (700)
+          </button>
+          <button
+            type='button'
+            className='bg-brand-primary-active rounded-md px-4 py-2 text-sm font-medium text-white cursor-pointer transition-colors'
+          >
+            Active value (800)
+          </button>
+          <a
+            // biome-ignore lint/a11y/useValidAnchor: prototype demo anchor shows link contrast, no navigation target
+            href='#'
+            className='text-brand-700 text-sm font-medium underline underline-offset-4 cursor-pointer transition-colors'
+          >
+            Link (700 · 8.22:1)
+          </a>
+          <input
+            aria-label='Focus ring demo'
+            type='text'
+            placeholder='Focus me: ring = 400'
+            className='border-input bg-card text-foreground placeholder:text-muted-foreground focus-visible:ring-ring rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none transition-colors'
+          />
+        </div>
+        <div className='border-border mt-4 grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2'>
+          <p className='text-muted-text text-sm'>
+            Muted text on white card — #686969, 5.51:1. Derived darker than the logo's mid gray
+            (#7e7f7f, ~4.0:1 — small-text fail).
+          </p>
+          <p className='bg-wash-b text-muted-text rounded-lg p-3 text-sm'>
+            Same muted text on the darkest wash — still 4.59:1. The derivation targets the wash, not
+            white, because the atmosphere sets text on washes.
+          </p>
+        </div>
+      </section>
+
+      <section className='mx-auto mt-10 max-w-5xl px-6'>
+        <h2 className='text-foreground font-serif text-2xl font-semibold'>
+          Semantic components (candidate mapping)
+        </h2>
+        <div className='mt-4 flex flex-wrap items-center gap-3'>
+          <button
+            type='button'
+            className='bg-primary text-primary-foreground focus-visible:ring-ring rounded-md px-4 py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none cursor-pointer transition-colors'
           >
             Book now
           </button>
           <button
             type='button'
-            className='bg-secondary text-secondary-foreground rounded-md px-4 py-2 text-sm font-medium'
+            className='bg-secondary text-secondary-foreground rounded-md px-4 py-2 text-sm font-medium cursor-pointer transition-colors'
           >
             Secondary
           </button>
           <button
             type='button'
-            className='border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-md border px-4 py-2 text-sm font-medium'
+            className='border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-md border px-4 py-2 text-sm font-medium cursor-pointer transition-colors'
           >
             Outline
           </button>
           <button
             type='button'
-            className='text-foreground hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2 text-sm font-medium'
+            className='text-foreground hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2 text-sm font-medium cursor-pointer transition-colors'
           >
             Ghost
           </button>
           <button
             type='button'
-            className='rounded-md bg-destructive px-4 py-2 text-sm font-medium text-white'
+            className='rounded-md bg-destructive px-4 py-2 text-sm font-medium text-white cursor-pointer transition-colors'
           >
-            Destructive
+            Destructive (shadcn default)
           </button>
           <button
             type='button'
             disabled
-            className='bg-primary text-primary-foreground rounded-md px-4 py-2 text-sm font-medium opacity-50'
+            className='bg-primary text-primary-foreground rounded-md px-4 py-2 text-sm font-medium opacity-50 cursor-pointer transition-colors'
           >
             Disabled
           </button>
         </div>
-      </section>
 
-      <section className='mt-10 grid gap-6 md:grid-cols-2'>
-        <div>
-          <h2 className='text-foreground font-serif text-2xl font-semibold'>Package card</h2>
-          <article className='bg-card text-card-foreground mt-4 flex flex-col gap-3 rounded-xl border p-6 shadow-sm'>
+        <div className='mt-6 grid gap-6 md:grid-cols-2'>
+          <article className='bg-card text-card-foreground flex flex-col gap-3 rounded-xl border p-6 shadow-sm'>
             <div className='bg-secondary aspect-[4/3] rounded-lg' />
             <h3 className='font-serif text-2xl font-semibold'>Signature Portrait</h3>
             <p className='text-foreground text-lg font-semibold'>₱3,500</p>
@@ -84,16 +180,13 @@ function PrototypeTokensPage() {
             </p>
             <button
               type='button'
-              className='bg-primary text-primary-foreground mt-2 rounded-md px-4 py-2 text-center text-sm font-medium'
+              className='bg-primary text-primary-foreground mt-2 rounded-md px-4 py-2 text-center text-sm font-medium cursor-pointer transition-colors'
             >
               Book now
             </button>
           </article>
-        </div>
 
-        <div>
-          <h2 className='text-foreground font-serif text-2xl font-semibold'>Form</h2>
-          <div className='mt-4 flex flex-col gap-4'>
+          <div className='flex flex-col gap-4'>
             <div className='flex flex-col gap-2'>
               <label htmlFor='proto-name' className='text-foreground text-sm font-medium'>
                 Full name
@@ -102,9 +195,11 @@ function PrototypeTokensPage() {
                 id='proto-name'
                 type='text'
                 placeholder='Juan dela Cruz'
-                className='border-input bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-ring rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none'
+                className='border-input bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-ring rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none transition-colors'
               />
-              <p className='text-muted-foreground text-xs'>Helper text in muted-foreground.</p>
+              <p className='text-muted-foreground text-xs'>
+                Helper text in muted-foreground (derived #686969).
+              </p>
             </div>
             <div className='flex flex-col gap-2'>
               <label htmlFor='proto-email' className='text-foreground text-sm font-medium'>
@@ -114,86 +209,34 @@ function PrototypeTokensPage() {
                 id='proto-email'
                 type='email'
                 defaultValue='not-an-email'
-                className='rounded-md border border-destructive bg-background px-3 py-2 text-sm text-destructive focus-visible:ring-destructive focus-visible:ring-2 focus-visible:outline-none'
+                className='rounded-md border border-destructive bg-background px-3 py-2 text-sm text-destructive focus-visible:ring-destructive focus-visible:ring-2 focus-visible:outline-none transition-colors'
               />
               <p className='text-xs text-destructive'>Enter a valid email address.</p>
             </div>
-          </div>
-
-          <h2 className='text-foreground mt-8 font-serif text-2xl font-semibold'>Badges</h2>
-          <div className='mt-4 flex flex-wrap gap-2'>
-            <span className='bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 text-xs font-medium'>
-              Confirmed
-            </span>
-            <span className='bg-secondary text-secondary-foreground rounded-full px-2.5 py-0.5 text-xs font-medium'>
-              Pending
-            </span>
-            <span className='border-border text-foreground rounded-full border px-2.5 py-0.5 text-xs font-medium'>
-              Walk-in
-            </span>
+            <div className='flex flex-wrap gap-2'>
+              <span className='bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 text-xs font-medium'>
+                Confirmed
+              </span>
+              <span className='bg-secondary text-secondary-foreground rounded-full px-2.5 py-0.5 text-xs font-medium'>
+                Pending
+              </span>
+              <span className='border-border text-foreground rounded-full border px-2.5 py-0.5 text-xs font-medium'>
+                Walk-in
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className='mt-10'>
-        <h2 className='text-foreground font-serif text-2xl font-semibold'>
-          Chart palette (CSS stand-in)
-        </h2>
-        <div className='bg-card mt-4 flex h-40 items-end gap-3 rounded-xl border p-6'>
-          <div className='bg-chart-1 h-3/5 w-full rounded-t-sm' title='chart-1' />
-          <div className='bg-chart-2 h-2/5 w-full rounded-t-sm' title='chart-2' />
-          <div className='bg-chart-3 h-4/5 w-full rounded-t-sm' title='chart-3' />
-          <div className='bg-chart-4 h-3/5 w-full rounded-t-sm' title='chart-4' />
-          <div className='bg-chart-5 h-2/5 w-full rounded-t-sm' title='chart-5' />
-        </div>
-        <p className='text-muted-foreground mt-2 text-xs'>
-          chart-1…chart-5, left to right. The brand has no five-hue ramp — these fallbacks are a
-          brand tonal ramp unless the preset supplied its own.
-        </p>
-      </section>
+      <AdminNeutralStrip />
 
-      <section className='mt-10'>
-        <h2 className='text-foreground font-serif text-2xl font-semibold'>Admin sidebar mock</h2>
-        <aside className='bg-sidebar mt-4 w-64 rounded-xl border border-sidebar-border p-3'>
-          <div className='bg-sidebar-primary text-sidebar-primary-foreground rounded-lg px-3 py-2 font-serif font-bold'>
-            Sevendays Admin
-          </div>
-          <nav className='mt-3 flex flex-col gap-1'>
-            <span className='bg-sidebar-accent text-sidebar-accent-foreground rounded-md px-3 py-2 text-sm font-medium'>
-              Dashboard
-            </span>
-            <span className='text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md px-3 py-2 text-sm'>
-              Appointments
-            </span>
-            <span className='text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md px-3 py-2 text-sm'>
-              Packages
-            </span>
-            <span className='text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md px-3 py-2 text-sm'>
-              Branches
-            </span>
-          </nav>
-        </aside>
-      </section>
+      <AtmosphereVariants />
 
-      <section className='mt-10'>
-        <h2 className='text-foreground font-serif text-2xl font-semibold'>
-          Starter palette (brand undecided)
-        </h2>
-        <div className='mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7'>
-          <Swatch cls='bg-sea-ink' label='sea-ink' sub='text' />
-          <Swatch cls='bg-sea-ink-soft' label='sea-ink-soft' sub='muted text' />
-          <Swatch cls='bg-lagoon' label='lagoon' sub='bright accent' />
-          <Swatch cls='bg-lagoon-deep' label='lagoon-deep' sub='interactive' />
-          <Swatch cls='bg-palm' label='palm' sub='kicker green' />
-          <Swatch cls='bg-sand' label='sand' sub='soft surface' />
-          <Swatch cls='bg-foam' label='foam' sub='lightest surface' />
-        </div>
-      </section>
-
-      <footer className='mt-12 border-t border-border pt-4'>
+      <footer className='mx-auto mt-12 max-w-5xl border-t border-border px-6 pt-4'>
         <p className='text-muted-foreground text-xs'>
-          Prototype for wayfinder #57 — preset b1uGsTYZ6 applied 2026-09-12. Throwaway: this route
-          never ships.
+          Living token gallery (M3) — this route renders the live shared layer both apps import.
+          Values adopted from the validated #92 candidate; the chart ramp was dropped at the swap
+          (no chart tokens ship — data-viz is the v2 effort's). Deleted at milestone close-out.
         </p>
       </footer>
     </div>
@@ -203,7 +246,7 @@ function PrototypeTokensPage() {
 function Swatch({ cls, label, sub }: { cls: string; label: string; sub: string }) {
   return (
     <figure>
-      <div className={`h-16 rounded-lg border border-border ${cls}`} />
+      <div className={`border-border h-16 rounded-lg border ${cls}`} />
       <figcaption className='mt-1 text-xs'>
         <span className='text-foreground font-medium'>{label}</span>{' '}
         <span className='text-muted-foreground'>({sub})</span>
