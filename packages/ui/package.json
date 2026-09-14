@@ -4,17 +4,31 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./globals.css": "./src/globals.css",
-    "./tokens.css": "./src/tokens.css"
+    "./tokens.css": "./src/tokens.css",
+    "./components/*": "./src/components/*.tsx",
+    "./lib/*": "./src/lib/*.ts",
+    "./hooks/*": "./src/hooks/*.ts"
   },
   "scripts": {
+    "build": "tsc --project tsconfig.build.json",
     "lint": "biome lint",
     "format": "biome format",
     "fix": "biome check --fix .",
-    "fix:unsafe": "biome check --fix --unsafe ."
+    "fix:unsafe": "biome check --fix --unsafe .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "cn": "^0.3.0"
+  },
+  "peerDependencies": {
+    "react": "^19.2.0"
   },
   "devDependencies": {
     "@sevendays/config": "workspace:*",
-    "tailwindcss": "^4.3.3"
+    "@types/react": "^19.2.0",
+    "react": "^19.2.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3"
   }
 }
