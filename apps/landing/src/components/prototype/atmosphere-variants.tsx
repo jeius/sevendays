@@ -56,18 +56,18 @@ export function AtmosphereVariants() {
         </div>
       </div>
 
-      {/* Variant B — deep petrol led */}
-      <div data-92-variant-b className='bg-brand-deep'>
+      {/* Variant B — ink led (owner trial: band = brand-ink, deep petrol kept as accent) */}
+      <div data-92-variant-b className='bg-brand-ink'>
         <div className='mx-auto flex max-w-5xl flex-col gap-8 px-6 py-14 md:flex-row md:items-center'>
           <div className='flex-1'>
             <p className='font-mono text-xs font-bold tracking-[0.16em] text-white/85 uppercase'>
-              B · deep-led
+              B · ink-led
             </p>
             <h3 className='mt-3 font-serif text-4xl font-bold text-white'>
               Studio depth behind every frame.
             </h3>
             <p className='mt-3 max-w-prose text-white/85'>
-              Hero and footer carry the deep petrol band; the page opens dark and settles into light
+              Hero and footer carry the ink band; the page opens dark and settles into light
               sections. Strongest contrast reading.
             </p>
             <div className='mt-5 flex flex-wrap gap-3'>
