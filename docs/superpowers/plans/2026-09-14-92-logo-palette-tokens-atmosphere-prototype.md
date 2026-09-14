@@ -62,6 +62,8 @@
 - **Dark mode is parked:** the candidate layer defines **no** `.dark` block; `tokens.css`'s `.dark` stays as-found and wins in any dark context. Do not design or delete it.
 - **Do not touch** the island primitives (`--sea-ink`…`--hero-b`) or any app-specific CSS (`island-shell`, hero gradients, `body` rules) — those die with the milestone; this branch leaves them alone. Other pages on this branch will render mixed (old island app-CSS over candidate semantics) — expected cosmetic noise on a throwaway branch; the reaction surface is `/prototype-tokens`, which controls its own canvas.
 - **Leave `packages/ui/src/globals.css` and its export untouched** (stale v3-era file; cleanup is milestone work).
+- **Interactive elements carry shadcn-default hover behavior** (ui-ux-pro-max: hover transitions 150–300ms; #90: motion = shadcn defaults): every `<button>`, link, and input in the showcase gets `cursor-pointer` and `transition-colors` appended to its pinned className (buttons/links only for `cursor-pointer`). Mechanical class append, not a redesign.
+- **Token discipline in showcase markup** (ui-ux-pro-max: token-driven theming, no per-screen hardcoded colors): decorative gradient swatches use the ramp variables, e.g. `bg-[linear-gradient(135deg,var(--brand-500),var(--brand-300),var(--brand-50))]` — never literal hexes — EXCEPT the photography-recede stand-in, whose off-brand hexes are deliberate (it simulates arbitrary photography).
 - pnpm-only, `async`/`await` style, single-quoted imports, 2-space indent (Biome enforces; run `pnpm --filter @sevendays/landing fix` if formatting complains).
 
 ## File Structure
@@ -337,6 +339,8 @@ imported by both apps (admin build = derivability gate)"
 - Consumes: utilities from Task 1 (`bg-brand-*`, `bg-wash-*`, `bg-surface-glass`, `border-line-soft`, `text-muted-text`, `text-brand-700`, semantic utilities) — no props; these are presentational sections.
 - Produces: `AtmosphereVariants()` and `AdminNeutralStrip()` (named exports, no props) that Task 3's route imports from `../components/prototype/atmosphere-variants` and `../components/prototype/admin-neutral`. Markers `data-92-variant-a/b/c`, `data-92-recede`, `data-92-admin` are what Task 3's smoke test greps for. Components live under `src/components/prototype/` (not `routes/`) so TanStack route generation ignores them.
 
+Art-direction notes (from the ui-ux-pro-max / banner-design pass, 2026-09-14): the three variants map to recognizable directions — A ≈ glassmorphism/gradient, B ≈ editorial photo-depth, C ≈ minimalist neutral — so the owner's reaction can anchor on a named style, not just "lighter vs darker". Each band stays text-lean with one media slot (ui-ux-pro-max's photography-studio anti-pattern: "heavy text + poor image showcase"). Banner rules applied where they fit web heroes: safe zone (content sits in the centered `max-w-5xl` column), one primary CTA per band (secondary is a ghost), headline ≥32px (`text-4xl` = 36px), 4.5:1 contrast (measured pairs). Banner rules deliberately superseded: max-2-typefaces (the owner's trio is a fixed #90/#57 input and demonstrating its harmony is a #92 quality bar), 44px CTA height (ad-banner rule; the system ships shadcn defaults per #90's quality bar).
+
 - [ ] **Step 1: Create `apps/landing/src/components/prototype/atmosphere-variants.tsx` with exactly this content**
 
 ```tsx
@@ -391,7 +395,7 @@ export function AtmosphereVariants() {
             </div>
           </div>
           <div className='border-line-soft bg-surface-glass w-full rounded-xl border p-4 shadow-sm md:w-80'>
-            <div className='h-36 rounded-lg bg-[linear-gradient(135deg,#398ba9,#a8d2e3,#e9f6fb)]' />
+            <div className='h-36 rounded-lg bg-[linear-gradient(135deg,var(--brand-500),var(--brand-300),var(--brand-50))]' />
             <p className='text-brand-ink mt-3 text-sm font-semibold'>Signature Portrait</p>
             <p className='text-muted-text text-sm'>₱3,500 · 90 minutes · 20 photos</p>
           </div>
@@ -428,7 +432,7 @@ export function AtmosphereVariants() {
             </div>
           </div>
           <div className='w-full rounded-xl border border-white/20 bg-surface-glass p-4 shadow-sm md:w-80'>
-            <div className='h-36 rounded-lg bg-[linear-gradient(135deg,#69a9c2,#06708e,#084257)]' />
+            <div className='h-36 rounded-lg bg-[linear-gradient(135deg,var(--brand-400),var(--brand-600),var(--brand-deep))]' />
             <p className='text-brand-ink mt-3 text-sm font-semibold'>Signature Portrait</p>
             <p className='text-muted-text text-sm'>₱3,500 · 90 minutes · 20 photos</p>
           </div>
@@ -1013,6 +1017,7 @@ git push
 - **Placeholder scan:** every code step pins full file content; the only conditional text is Task 1 Step 5's find/grep (defensive against unknown build output layout) with an explicit fallback. No TBD/TODO/"add appropriate" anywhere. ✓
 - **Type consistency:** `AtmosphereVariants` / `AdminNeutralStrip` exports match Task 3's imports (names + relative paths); all utilities used by Tasks 2–3 are produced by Task 1's `@theme inline` or already exist via `tokens.css`'s mapping (same semantic token names); marker names `data-92-*` are identical between Task 2/3 code and the Task 3 smoke loop. `createFileRoute('/prototype-tokens')` matches the existing route path so `routeTree.gen.ts` stays unchanged. ✓
 - **Counted checks:** smoke loop greps exactly six markers; verify script prints 6 RT lines + 9 ramp lines + 1 muted line + 5 muted-contrast lines + 5 pair lines — expected output block enumerates them all, so a missing line is visible. ✓
+- **Design-skill pass (2026-09-14, post-draft):** `ui-ux-pro-max` design-system search (photography studio / elegant / editorial) validates the serif-display + clean-sans pairing (Roboto Slab + Figtree) and the text-lean, image-forward bands; its zinc/dark palette and motion-driven effects are superseded by the fixed #90 brand and the motion = shadcn-defaults ruling — recorded in the Task 2 art-direction notes. Two concrete adoptions: `cursor-pointer` + `transition-colors` on all showcase clickables (constraint), and ramp variables instead of literal hexes in decorative gradients (except the deliberate off-brand photo stand-in). `banner-design` contributes the style-vocabulary mapping (A glassmorphism/gradient, B editorial depth, C minimalist) and the safe-zone/CTA/headline-size/contrast checks; its 2-typeface and 44px-CTA rules are deliberately superseded (owner's trio is fixed; shadcn defaults govern). ✓
 
 
 
