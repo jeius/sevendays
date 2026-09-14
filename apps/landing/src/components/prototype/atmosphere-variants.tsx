@@ -88,7 +88,7 @@ export function AtmosphereVariants() {
           <div className='w-full rounded-xl border border-white/20 bg-surface-glass p-4 shadow-sm md:w-80'>
             <div className='h-36 rounded-lg bg-[linear-gradient(135deg,var(--brand-400),var(--brand-600),var(--brand-deep))]' />
             <p className='text-brand-ink mt-3 text-sm font-semibold'>Signature Portrait</p>
-            <p className='text-muted-text text-sm'>₱3,500 · 90 minutes · 20 photos</p>
+            <p className='text-brand-ink text-sm'>₱3,500 · 90 minutes · 20 photos</p>
           </div>
         </div>
       </div>
@@ -140,7 +140,7 @@ export function AtmosphereVariants() {
             <div className='absolute inset-y-0 left-0 w-1/2 bg-wash-b/60' />
             <div className='border-line-soft bg-surface-glass absolute top-1/2 left-1/2 w-64 -translate-x-1/2 -translate-y-1/2 rounded-lg border p-4 shadow-sm'>
               <p className='text-brand-ink text-sm font-semibold'>Glass panel</p>
-              <p className='text-muted-text text-xs'>Ink and muted text stay AA on glass.</p>
+              <p className='text-brand-ink text-xs'>Ink text stays AA on glass over any photo.</p>
             </div>
             <div className='bg-card border-brand-gray-cool absolute right-6 bottom-6 rounded-lg border p-3 shadow-sm'>
               <p className='text-brand-ink text-sm font-semibold'>White card</p>
