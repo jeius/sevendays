@@ -1,6 +1,7 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { branchQueries } from '../lib/queries';
+import { Button } from '@sevendays/ui/components/button';
 
 export const Route = createFileRoute('/')({
   // Prefetch during SSR/navigation; useSuspenseQuery below reads the cache.
@@ -26,6 +27,10 @@ function Home() {
           </li>
         ))}
       </ul>
+      {/* M3 #95 tracer — proves the shared-primitive distribution path; replaced by the shell (#100). */}
+      <div className='mt-6'>
+        <Button variant='outline'>Tier-1 tracer</Button>
+      </div>
     </div>
   );
 }

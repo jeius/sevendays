@@ -4,6 +4,7 @@
 // Delete this file when the design-system milestone work lands.
 import { createFileRoute } from '@tanstack/react-router';
 import { SiteHeader } from '../components/site-header';
+import { Button } from '@sevendays/ui/components/button';
 
 export const Route = createFileRoute('/prototype-tokens')({
   component: PrototypeTokensPage,
@@ -68,6 +69,20 @@ function PrototypeTokensPage() {
           >
             Disabled
           </button>
+        </div>
+      </section>
+
+      <section className='mt-10' data-tier1-tracer>
+        <h2 className='text-foreground font-serif text-2xl font-semibold'>
+          Shared primitives (<code>@sevendays/ui</code>)
+        </h2>
+        <p className='text-muted-foreground mt-1 text-sm'>
+          Tier-1 tracer (M3 #95): the registry <code>button</code>, generated into packages/ui and
+          imported through the shared package — the distribution-path proof, not a restyle.
+        </p>
+        <div className='mt-4 flex flex-wrap items-center gap-3'>
+          <Button>Tier-1 default</Button>
+          <Button variant='outline'>Tier-1 outline</Button>
         </div>
       </section>
 

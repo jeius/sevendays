@@ -4,6 +4,7 @@
 @import "@sevendays/ui/tokens.css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/figtree";
+@source "../../../packages/ui/src";
 
 @plugin "@tailwindcss/typography";
 

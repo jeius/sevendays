@@ -3,6 +3,7 @@
 @import "tw-animate-css";
 @import "@sevendays/ui/tokens.css";
 @import "@fontsource-variable/figtree";
+@source "../../../packages/ui/src";
 
 @plugin "@tailwindcss/typography";
 
