@@ -72,7 +72,7 @@
 - Consumes: `@base-ui/react/collapsible` (already a `packages/ui` dependency at `^1.8.0`); the `#95` `components.json` wiring (landing's `ui` alias → `@sevendays/ui/components`) that routes CLI output into the package.
 - Produces: `@sevendays/ui/components/collapsible` exporting `Collapsible`, `CollapsibleTrigger`, `CollapsibleContent` — thin wrappers over Base UI's `Collapsible.Root` / `.Trigger` / `.Panel` carrying `data-slot` attributes. Downstream: Task 2's `MobileNav` (disclosure semantics — `aria-expanded`/`aria-controls` — come from the Base UI primitive). Registry name verbatim (`collapsible`), ADR-0017 tiering intact.
 
-- [ ] **Step 1: Generate the primitive with the pinned CLI version**
+- [✅] **Step 1: Generate the primitive with the pinned CLI version**
 
 From `apps/landing` (the `#95` wiring routes it into `packages/ui`):
 
@@ -88,7 +88,7 @@ git status --short
 
 Expected: exactly `?? packages/ui/src/components/collapsible.tsx` and nothing else. If `tokens.css` shows as modified, restore it (`git checkout -- packages/ui/src/tokens.css`) — the token layer is maintained directly and this ticket must not touch it.
 
-- [ ] **Step 2: Confirm the generated file matches this content (after `fix` normalizes quotes)**
+- [✅] **Step 2: Confirm the generated file matches this content (after `fix` normalizes quotes)**
 
 ```bash
 cd ../.. && pnpm --filter @sevendays/ui fix
@@ -116,7 +116,7 @@ export { Collapsible, CollapsibleTrigger, CollapsibleContent }
 
 If the CLI produced different structure (a registry drift), STOP and reconcile with the registry output before continuing — do not hand-edit beyond quote/style normalization.
 
-- [ ] **Step 3: Typecheck the package**
+- [✅] **Step 3: Typecheck the package**
 
 ```bash
 pnpm --filter @sevendays/ui typecheck
@@ -124,7 +124,7 @@ pnpm --filter @sevendays/ui typecheck
 
 Expected: clean.
 
-- [ ] **Step 4: Commit**
+- [✅] **Step 4: Commit**
 
 ```bash
 git add packages/ui/src/components/collapsible.tsx
@@ -146,7 +146,7 @@ registry-verbatim, routed into packages/ui by the #95 wiring; MobileNav
 - Consumes: Task 1's `@sevendays/ui/components/collapsible`; `buttonVariants` from `@sevendays/ui/components/button`; `cn` from `cn`; `Menu`/`X` from `lucide-react` (installed); the #96 token utilities; TanStack Router `Link` (typed routes + automatic `aria-current="page"`/`data-status="active"` on the active link — no active-detection code anywhere).
 - Produces: the app's entire chrome vocabulary. `NAV_LINKS` is the single source of the four nav links (order owner-ruled: Packages, Services, Branches, About). `MobileNav` takes the links as a prop (literal `to` union keeps `Link` typed). NOT rendered anywhere yet — Task 3 mounts the header/footer; the MobileNav renders inside the header. Downstream: #98 composes surfaces under this chrome; the v1 pick re-skins these files around call-forward CTAs.
 
-- [ ] **Step 1: Create `apps/landing/src/lib/nav.ts` with exactly this content**
+- [✅] **Step 1: Create `apps/landing/src/lib/nav.ts` with exactly this content**
 
 ```ts
 // The four primary nav links (M3 #97), shared by SiteHeader, MobileNav, and
@@ -160,7 +160,7 @@ export const NAV_LINKS = [
 ] as const;
 ```
 
-- [ ] **Step 2: Replace `apps/landing/src/components/site-header.tsx` with exactly this content**
+- [✅] **Step 2: Replace `apps/landing/src/components/site-header.tsx` with exactly this content**
 
 Desktop row structure unchanged from M2 (brand / four links / CTA — now typed `Link`s instead of plain anchors); the band is ink-led per the #92 composition. Sans brand text (the mock's serif is gallery-specimen-only).
 
@@ -215,7 +215,7 @@ export function SiteHeader() {
 }
 ```
 
-- [ ] **Step 3: Create `apps/landing/src/components/mobile-nav.tsx` with exactly this content**
+- [✅] **Step 3: Create `apps/landing/src/components/mobile-nav.tsx` with exactly this content**
 
 ```tsx
 import { Link } from '@tanstack/react-router';
@@ -278,7 +278,7 @@ export function MobileNav({ links }: { links: typeof NAV_LINKS }) {
 
 Notes for the executor (already reflected above — do not deviate): the trigger's `aria-label` stays STATIC ("Menu"); open/closed state is conveyed by the primitive's `aria-expanded` and the swapped icon, which is why the component is controlled (`open`/`onOpenChange`) — the icon swap needs the state anyway. `size-10` is the 40px touch target. The trigger is a plain `CollapsibleTrigger` (not a shared `Button`) because the Button primitive's ghost hover paints light-muted fills that read wrong on ink.
 
-- [ ] **Step 4: Create `apps/landing/src/components/site-footer.tsx` with exactly this content**
+- [✅] **Step 4: Create `apps/landing/src/components/site-footer.tsx` with exactly this content**
 
 No booking CTA on purpose (identical pre/post v1-scrub); no city tagline (the #92 mock's "Makati, Quezon City, and BGC" was invented placeholder copy — the seed's branches are Calamba/Iligan/Dipolog; owner copy can arrive at #101's acceptance).
 
@@ -335,7 +335,7 @@ export function SiteFooter() {
 }
 ```
 
-- [ ] **Step 5: Lint-format and typecheck**
+- [✅] **Step 5: Lint-format and typecheck**
 
 ```bash
 pnpm --filter @sevendays/landing fix && pnpm --filter @sevendays/landing typecheck
@@ -343,7 +343,7 @@ pnpm --filter @sevendays/landing fix && pnpm --filter @sevendays/landing typeche
 
 Expected: clean (Biome may reorder the `mobile-nav.tsx` import block — accept its ordering). NOTE: `site-header.tsx` and `site-footer.tsx` are not imported by any route yet — that is Task 3; typecheck still passes because the files are self-contained modules.
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/landing/src/lib/nav.ts apps/landing/src/components/site-header.tsx apps/landing/src/components/mobile-nav.tsx apps/landing/src/components/site-footer.tsx
@@ -367,7 +367,7 @@ all band CTAs on buttonVariants with the full-opacity brand focus ring"
 
 Blast-radius facts (verified 2026-09-15): `SiteHeader` is rendered in 9 files / 11 spots — seven route files render it once inside their own `mx-auto max-w-5xl p-6` container, `packages/$slug.tsx` and `booking.$id.tsx` render it in BOTH their `notFoundComponent` and their component, and `prototype-tokens.tsx` (the gallery) renders it once. No other component imports `SiteHeader`. `book.tsx`'s wrapper is `mx-auto min-h-screen max-w-4xl p-6` — the `min-h-screen` must die with the per-page header or the footer lands a full viewport below the wizard on `/book`.
 
-- [ ] **Step 1: Wire the chrome into `__root.tsx`**
+- [✅] **Step 1: Wire the chrome into `__root.tsx`**
 
 Two edits. First, add the imports (Biome order shown — `../components/*` sorts before `../integrations/*`):
 
@@ -404,7 +404,7 @@ Second, wrap the routed children inside `RootDocument`'s `PostHogProvider` — t
 
 (Everything else in the file — `head`, meta, the stylesheet link, `RouterContext` — stays byte-identical.)
 
-- [ ] **Step 2: Remove the eleven per-route SiteHeader renders**
+- [✅] **Step 2: Remove the eleven per-route SiteHeader renders**
 
 In each file below: delete the `import { SiteHeader } from '…';` line and every `      <SiteHeader />` JSX line. Change NOTHING else (wrappers, headings, spacing stay — #98 owns per-surface restructure):
 
@@ -420,14 +420,14 @@ In each file below: delete the `import { SiteHeader } from '…';` line and ever
 | `routes/booking.$id.tsx` | 2 (component + `notFoundComponent`) |
 | `routes/prototype-tokens.tsx` | 1 (the gallery's own render — root chrome now frames it; do NOT touch anything else in the gallery) |
 
-- [ ] **Step 3: Prove the sweep mechanically**
+- [✅] **Step 3: Prove the sweep mechanically**
 
 ```bash
 grep -rn "SiteHeader" apps/landing/src/routes/   # expect ZERO output
 grep -c "aria-label='Primary'" apps/landing/src/components/site-header.tsx   # expect 1
 ```
 
-- [ ] **Step 4: Lint-format and typecheck**
+- [✅] **Step 4: Lint-format and typecheck**
 
 ```bash
 pnpm --filter @sevendays/landing fix && pnpm --filter @sevendays/landing typecheck
@@ -435,7 +435,7 @@ pnpm --filter @sevendays/landing fix && pnpm --filter @sevendays/landing typeche
 
 Expected: clean. Unused-import errors would mean a render was missed — fix the removal, not the import.
 
-- [ ] **Step 5: Render smoke — chrome once per page, on every page**
+- [✅] **Step 5: Render smoke — chrome once per page, on every page**
 
 ```bash
 pnpm --filter @sevendays/landing dev   # note the printed port (3000 unless taken)
@@ -453,7 +453,7 @@ grep -o 'bg-brand-ink' /tmp/97-page.html | wc -l   # expect ≥2 (header + foote
 
 All seven pages must show all four expectations. (`/packages/<seed-slug>` and `/booking/<id>` share the page shell — the smoke covers the frame, not data.) Then stop the dev server.
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/landing/src/routes/
@@ -476,7 +476,7 @@ drops its min-h-screen so the footer doesn't land a viewport below"
 
 Component fence (surface-level ONLY — structure is #98's): the strip items get the white-card ground (`bg-card border-brand-gray-cool rounded-xl shadow-sm`), their existing "Book now" links get the system CTA skin, and `CoverPanel` gets the gradient. Headings, grids, inclusions, badge internals, and the "View all services" anchor stay exactly as they are.
 
-- [ ] **Step 1: Restructure `index.tsx`'s Home component onto the ground**
+- [✅] **Step 1: Restructure `index.tsx`'s Home component onto the ground**
 
 The imports gain (Biome order alongside the existing ones):
 
@@ -565,7 +565,7 @@ The whole `return` of `Home` becomes exactly (queries/`selectFeaturedPackages` l
   );
 ```
 
-- [ ] **Step 2: White-card ground on the three strip items + gradient cover**
+- [✅] **Step 2: White-card ground on the three strip items + gradient cover**
 
 Four small edits, nothing else in these files:
 
@@ -598,7 +598,7 @@ export function CoverPanel({ name }: { name: string }) {
 }
 ```
 
-- [ ] **Step 3: Seam guards (the CDP contract, checked before anything runs)**
+- [✅] **Step 3: Seam guards (the CDP contract, checked before anything runs)**
 
 ```bash
 grep -c "data-strip='featured'\|data-strip='services'\|data-strip='branches'" apps/landing/src/routes/index.tsx   # expect 3
@@ -609,7 +609,7 @@ grep -c 'search={{ service: service.id }}' apps/landing/src/components/service-t
 grep -c 'Walk-ins welcome' apps/landing/src/components/walk-in-badge.tsx   # expect 1 (file untouched)
 ```
 
-- [ ] **Step 4: Lint-format, typecheck, build**
+- [✅] **Step 4: Lint-format, typecheck, build**
 
 ```bash
 pnpm --filter @sevendays/landing fix && pnpm --filter @sevendays/landing typecheck && pnpm --filter @sevendays/landing build
@@ -617,7 +617,7 @@ pnpm --filter @sevendays/landing fix && pnpm --filter @sevendays/landing typeche
 
 Expected: all green.
 
-- [ ] **Step 5: Commit**
+- [✅] **Step 5: Commit**
 
 ```bash
 git add apps/landing/src/routes/index.tsx apps/landing/src/components/package-card.tsx apps/landing/src/components/service-teaser-item.tsx apps/landing/src/components/branch-strip-item.tsx apps/landing/src/components/cover-panel.tsx
@@ -632,7 +632,7 @@ gray-light demoted to the closing call-or-visit emphasis strip"
 
 **Files:** none modified — verification only. A failure here means an earlier task drifted; fix at the source, never in this task.
 
-- [ ] **Step 1: The starter-neutral palette is gone from everything #97 touched**
+- [✅] **Step 1: The starter-neutral palette is gone from everything #97 touched**
 
 ```bash
 grep -rn 'neutral-' \
@@ -645,7 +645,7 @@ grep -rn 'neutral-' \
 
 Expected: zero output. (`book.tsx` still carries `bg-neutral-200`/`bg-neutral-900` in the wizard progress bar — that is #99's, deliberately untouched; `routes/services.tsx`'s `text-neutral-700` and the other pages' grays are #98's per-surface pass.)
 
-- [ ] **Step 2: Contrast pairs re-measured (band pairs + the #92 table)**
+- [✅] **Step 2: Contrast pairs re-measured (band pairs + the #92 table)**
 
 Write `/tmp/97-verify.mjs`:
 
@@ -672,7 +672,7 @@ console.log('muted-on-wash     :', contrast('#686969', '#d9eef6'), '(expect 4.59
 
 Run `node /tmp/97-verify.mjs` — every line must match.
 
-- [ ] **Step 3: Landing lib-seam tests pass unchanged (AC 6, first half)**
+- [✅] **Step 3: Landing lib-seam tests pass unchanged (AC 6, first half)**
 
 ```bash
 pnpm --filter @sevendays/landing test && git diff --name-only main -- apps/landing/src/lib
@@ -680,7 +680,7 @@ pnpm --filter @sevendays/landing test && git diff --name-only main -- apps/landi
 
 Expected: suite green; the diff names exactly one file — `apps/landing/src/lib/nav.ts` (this branch's only lib change; zero edits to any existing lib module or test).
 
-- [ ] **Step 4: M2 CDP read-only regressions against the live stack (AC 6, second half)**
+- [✅] **Step 4: M2 CDP read-only regressions against the live stack (AC 6, second half)**
 
 Boot the stack (M2 harness precedent — Chrome/Chromium must exist locally):
 
@@ -703,7 +703,7 @@ node apps/landing/scripts/verify/booking-wizard.mjs   # read-only; /book keeps i
 
 Expected: every check `PASS`, each script exit 0. Any FAIL here means a seam moved — fix the chrome/ground, never the script. Then tear down Chrome (kill the headless process) and the dev servers.
 
-- [ ] **Step 5: The repo gate (AC 7)**
+- [✅] **Step 5: The repo gate (AC 7)**
 
 ```bash
 pnpm check
@@ -711,7 +711,7 @@ pnpm check
 
 Expected: green (baseline was green at the same main state on 2026-09-15).
 
-- [ ] **Step 6: Keyboard + responsive pass (AC 5 — informal bar, concrete checklist)**
+- [✅] **Step 6: Keyboard + responsive pass (AC 5 — informal bar, concrete checklist)**
 
 Open the landing dev server in a real browser and work the checklist (the owner's formal screenshot acceptance is #101's; capture screenshots here for the PR):
 
@@ -727,11 +727,11 @@ Open the landing dev server in a real browser and work the checklist (the owner'
 - Modify: `docs/progress.md`
 - Modify: `docs/plan.md`
 
-- [ ] **Step 1: Update `docs/progress.md`'s "Last updated" header**
+- [✅] **Step 1: Update `docs/progress.md`'s "Last updated" header**
 
 Edit the header line: replace its opening `_Last updated: 2026-09-15 (#96 M3 token swap` with `_Last updated: 2026-09-15 (#97 M3 landing chrome + atmosphere — ink-led SiteHeader + new SiteFooter mounted as root chrome on every route, MobileNav disclosure panel over the shared `collapsible` primitive, home on the petrol-wash ground with white-card strips + the gray-light call-or-visit emphasis band; band CTAs normalized on buttonVariants with full-opacity brand rings; CDP read-only regressions green unchanged.. Prior 2026-09-15: #96 M3 token swap` — i.e. the new segment is prepended and the previous content (from `#96 M3 token swap` onward) is preserved byte-identical after `Prior 2026-09-15: `.
 
-- [ ] **Step 2: Add the landed-state bullet to `docs/progress.md`'s "What Exists" list**
+- [✅] **Step 2: Add the landed-state bullet to `docs/progress.md`'s "What Exists" list**
 
 Insert this bullet next to the other M3 bullets (after the `packages/ui` bullet that documents #95/#96):
 
@@ -739,11 +739,11 @@ Insert this bullet next to the other M3 bullets (after the `packages/ui` bullet 
 - **M3 landing chrome + atmosphere (2026-09-15, #97):** every landing route is framed by the owner-ruled #92 atmosphere — `SiteHeader` rebuilt ink-led (ink band, white text, petrol action color, desktop row unchanged) and the new `SiteFooter` (brand line, four nav links, "Call or visit a branch" → `/branches`; deliberately NO booking CTA so it is identical pre/post v1-scrub, and no city tagline — the mock's was placeholder copy) mounted ONCE as root chrome in `__root.tsx` (`min-h-screen` flex column + `<main>` landmark; the 11 per-route `<SiteHeader />` renders are gone). `MobileNav` — hamburger trigger + Base UI collapsible panel over the new shared `collapsible` Tier-1 primitive — carries the four links plus the variant CTA ("Book now" on main; the v1 scrub swaps it per the conflict policy, never runtime logic); current-page semantics ride TanStack `Link`'s automatic `aria-current="page"`. Home sits on the petrol-wash ground: hairline-separated strips (`data-strip` seams unchanged), white-card strip items (`PackageCard`/`ServiceTeaserItem`/`BranchStripItem` surface-level only), `CoverPanel` on the deep-petrol media gradient, and the gray-light "Not sure which session fits?" emphasis strip closing the page (new seam `data-strip='call-visit'`). All band CTAs are `buttonVariants`-styled with the full-opacity brand-400 focus ring; headings stay sans (the #92 mock's serif is gallery-specimen-only). New band pairs measured: white-on-ink 18.64, white/85-on-ink 13.57, white/70-on-ink 9.39, ring-on-ink 7.15 (non-text), brand-700-on-gray-light 6.11, ink-on-wash 17.36. The blurb placeholder, "View all services", teaser `/book?service=` deep-links, and `WalkInBadge` copy untouched — content-pages/packages-pages/booking-wizard CDP regressions green unchanged; no new tests (milestone bar: invariants + visual acceptance).
 ```
 
-- [ ] **Step 3: Tick the roadmap checkbox in `docs/plan.md`**
+- [✅] **Step 3: Tick the roadmap checkbox in `docs/plan.md`**
 
 In the Milestone 3 section, change exactly the line beginning `- [ ] Landing atmosphere + chrome:` to `- [✅] Landing atmosphere + chrome:` (keep the rest of the line byte-identical). Every OTHER Milestone 3 checkbox stays as it is (#95/#96 already ✅; #98–#101's stay unticked).
 
-- [ ] **Step 4: Refresh the knowledge graph + commit**
+- [✅] **Step 4: Refresh the knowledge graph + commit**
 
 ```bash
 graphify update .
