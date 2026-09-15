@@ -7,7 +7,7 @@ export function BranchStripItem({ branch }: { branch: Branch }) {
   return (
     <article className='flex flex-col gap-2 rounded-xl border border-brand-gray-cool bg-card p-4 shadow-sm'>
       <h3 className='font-semibold'>{branch.name}</h3>
-      <p className='text-neutral-700'>{branch.address}</p>
+      <p className='text-muted-text'>{branch.address}</p>
       <WalkInBadge acceptsWalkIns={branch.acceptsWalkIns} />
     </article>
   );

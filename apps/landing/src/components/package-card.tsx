@@ -14,7 +14,7 @@ export function PackageCard({ pkg }: { pkg: ServicePackageWithInclusions }) {
       <CoverPanel name={pkg.name} />
       <h3 className='font-semibold text-xl'>{pkg.name}</h3>
       <p className='font-medium text-lg'>{peso(pkg.priceCents)}</p>
-      <p className='text-neutral-700'>{pkg.description}</p>
+      <p className='text-muted-text'>{pkg.description}</p>
       <InclusionsList pkg={pkg} />
       <Link to='/book' search={{ package: pkg.id }} className={buttonVariants()}>
         Book now
