@@ -47,7 +47,7 @@
 
 **Not here:** no admin code (Tasks 3–5), no token edits (frozen), no rendering of the non-shell primitives (they are validated by generation + the package pipeline — spec testing decision 3: no component unit tests for Tier-1; the shell-borne ones — sidebar, sheet, button, input, separator, badge, sonner, tooltip — get validated by use in Tasks 4–5).
 
-- [ ] **Step 1: Dry-run gate — confirm the plan-time plan still holds**
+- [✅] **Step 1: Dry-run gate — confirm the plan-time plan still holds**
 
 ```bash
 cd packages/ui && pnpm dlx shadcn@4.21.0 add card input label textarea field select checkbox dialog alert-dialog table badge skeleton sonner dropdown-menu sidebar sheet progress separator --dry-run -y; cd ../..
@@ -55,13 +55,13 @@ cd packages/ui && pnpm dlx shadcn@4.21.0 add card input label textarea field sel
 
 Expected (plan-time output, 2026-09-15): `Files (21) +20 new, ~1 overwrite` — every `src/components/*.tsx` path relative to `packages/ui` (the 18 names + `tooltip` + `~ button.tsx` overwrite) plus `src/hooks/use-mobile.ts`; `Dependencies (3): cn, sonner, next-themes`. If the output differs (registry drift): proceed only if every requested name still lands under `packages/ui/src/components/` — otherwise STOP and report the drift.
 
-- [ ] **Step 2: Generate for real**
+- [✅] **Step 2: Generate for real**
 
 ```bash
 cd packages/ui && pnpm dlx shadcn@4.21.0 add card input label textarea field select checkbox dialog alert-dialog table badge skeleton sonner dropdown-menu sidebar sheet progress separator -y; cd ../..
 ```
 
-- [ ] **Step 3: Inspect and record what the CLI did**
+- [✅] **Step 3: Inspect and record what the CLI did**
 
 ```bash
 git status --short
@@ -75,7 +75,7 @@ grep -n 'hooks/use-mobile' packages/ui/src/components/sidebar.tsx
 
 Record in the commit message (these facts gate the next steps): (1) `git status` shows writes ONLY under `packages/ui` + `pnpm-lock.yaml` — any write under `apps/` is a routing failure: STOP; (2) the `package.json` diff — expected exactly `sonner` + `next-themes` added to dependencies (anything else: record; if it's a Radix package, STOP — Global Constraints); (3) the component file list — 21 `.tsx` files (20 new + `button.tsx`) + `use-mobile.ts`; (4) the sidebar export list (Task 4's authoritative surface); (5) `aria-current` count in sidebar.tsx — expected `0` (TanStack Link owns it); (6) no leftover `@/registry`/`@/app(` paths; (7) sidebar imports its hook as `@sevendays/ui/hooks/use-mobile` (self-reference, resolvable through the package's own exports).
 
-- [ ] **Step 4: Assert the Base-UI/no-Radix invariant across everything generated**
+- [✅] **Step 4: Assert the Base-UI/no-Radix invariant across everything generated**
 
 ```bash
 grep -ri radix packages/ui/src packages/ui/package.json || echo "NO RADIX — OK"
@@ -84,7 +84,7 @@ grep -rn '@base-ui/react' packages/ui/src/components/sidebar.tsx | head -3
 
 Expected: `NO RADIX — OK`, and Base UI subpath imports in the sidebar source. Any radix hit: STOP and report.
 
-- [ ] **Step 5: House-format, prove the button overwrite is idempotent, run the package pipeline**
+- [✅] **Step 5: House-format, prove the button overwrite is idempotent, run the package pipeline**
 
 ```bash
 pnpm --filter @sevendays/ui fix
@@ -94,7 +94,7 @@ pnpm --filter @sevendays/ui lint && pnpm --filter @sevendays/ui format && pnpm -
 
 Expected: after `fix`, the button diff is **empty** (the CLI rewrote the file to the same content #95 generated; Biome re-normalized it to the landed form). If the button diff is non-empty after `fix`: record it verbatim in the commit — do not hand-edit toward "clean"; registry drift is an owner-review fact. `lint`/`format`/`typecheck`/`build` all green over the 21-file source (typecheck is where an unresolved CLI import would surface — the Global Constraints exception rule applies if it does).
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add packages/ui pnpm-lock.yaml
@@ -117,7 +117,7 @@ git commit -m "feat(ui): the Tier-1 pull-list into packages/ui — 18 names + tr
 
 **Not here:** no forms on any screen, no login (M4), no `@tanstack/zod-form-adapter` (banned by Global Constraints — zod-3 peers), no permanent example files (the spike's evidence is the commit message + this plan; a living example would be dead code until M4).
 
-- [ ] **Step 1: Install the dependency**
+- [✅] **Step 1: Install the dependency**
 
 ```bash
 pnpm --filter @sevendays/admin add '@tanstack/react-form@^1.33.5'
@@ -125,7 +125,7 @@ pnpm --filter @sevendays/admin add '@tanstack/react-form@^1.33.5'
 
 Expected: `apps/admin/package.json` gains `"@tanstack/react-form": "^1.33.5"` in alphabetical position (after `@tanstack/react-devtools`, before `@tanstack/react-query` — keep the file's existing key order convention); lockfile updated. Probed latest at plan time: 1.33.5.
 
-- [ ] **Step 2: Write the spike**
+- [✅] **Step 2: Write the spike**
 
 Create `apps/admin/src/spike-form-substrate.tsx` with exactly:
 
@@ -181,7 +181,7 @@ export function SpikeFormSubstrate() {
 
 What tsc proves by compiling this: the zod-4 schema type-flows into `validators.onChange` (the claim that replaces the un-installable adapter), `form.Field name='email'` is literal-typed against the schema's keys, and `field.state.meta.errors` maps into `FieldError`'s `Array<{ message?: string }>` shape. Note `e.currentTarget.value` is read synchronously, never inside an updater — the #59 currentTarget minor's pattern rule, honored from the first line of form code. _(Execution correction 2026-09-15: form-core 1.33.5 exposes field errors only at `field.state.meta.errors` (`FieldLikeMetaDerived`, `types.d.ts:238`, errors member at :242) — the original snippet's `field.state.errors` no longer exists; M4/M5 forms read field errors at `meta.errors`.)_
 
-- [ ] **Step 3: Run the typecheck gate**
+- [✅] **Step 3: Run the typecheck gate**
 
 ```bash
 pnpm --filter @sevendays/admin typecheck
@@ -189,7 +189,7 @@ pnpm --filter @sevendays/admin typecheck
 
 Expected: PASS. Two pinned fallbacks, both recorded in the commit if they fire: (a) if the `FieldError` errors-prop typing rejects the mapped array, render errors as children instead — `<FieldError>{field.state.errors.map(String).join(', ')}</FieldError>` — the validator claim is unaffected; (b) if `validators: { onChange: spikeSchema }` itself does not typecheck against zod 4, STOP and report — the substrate ruling (Global Constraints) reopens as an owner decision, do not improvise an adapter install.
 
-- [ ] **Step 4: Delete the spike**
+- [✅] **Step 4: Delete the spike**
 
 ```bash
 rm apps/admin/src/spike-form-substrate.tsx
@@ -198,7 +198,7 @@ git status --short
 
 Expected: only `apps/admin/package.json` + `pnpm-lock.yaml` changed.
 
-- [ ] **Step 5: Commit**
+- [✅] **Step 5: Commit**
 
 ```bash
 git add apps/admin/package.json pnpm-lock.yaml
@@ -227,7 +227,7 @@ admin typecheck and deleted per plan <record: which fallbacks fired, if any>"
 
 **Not here:** no shell chrome (Task 4 — this task's `_shell.tsx` is a deliberate passthrough), no landing files, no gallery.
 
-- [ ] **Step 1: Create `stub-screen.tsx`**
+- [✅] **Step 1: Create `stub-screen.tsx`**
 
 Exactly:
 
@@ -263,7 +263,7 @@ export function StubScreen({ title, blurb, milestone }: StubScreenProps) {
 
 (`border-dashed` + `bg-card/50` is the prototype's stub posture, token-fit. If the generated `badge` variant union lacks `outline`, drop the `variant` prop and record the actual union in the commit — the badge is decorative here, its presence is the point.)
 
-- [ ] **Step 2: Create the passthrough `_shell.tsx`**
+- [✅] **Step 2: Create the passthrough `_shell.tsx`**
 
 Exactly (Task 4 replaces only the `component` body):
 
@@ -283,7 +283,7 @@ function ShellLayout() {
 }
 ```
 
-- [ ] **Step 3: Create the seven route files**
+- [✅] **Step 3: Create the seven route files**
 
 `apps/admin/src/routes/_shell.index.tsx`:
 
@@ -444,7 +444,7 @@ function SettingsPage() {
 
 If the router plugin rewrites any `createFileRoute` string on generation (check `routeTree.gen.ts` after the Step 5 build — the plugin owns these literals), accept its spelling and record it; the URLs above are the contract.
 
-- [ ] **Step 4: Delete the probe index route**
+- [✅] **Step 4: Delete the probe index route**
 
 ```bash
 git rm apps/admin/src/routes/index.tsx
@@ -452,7 +452,7 @@ git rm apps/admin/src/routes/index.tsx
 
 The branches-list probe (connectivity + parse verification, #24) and the #95 button tracer die here by design — #95's plan scheduled this page for shell replacement. `src/lib/queries.ts` and its seam stay (M4/M5's first reads go through them).
 
-- [ ] **Step 5: Format, typecheck, build**
+- [✅] **Step 5: Format, typecheck, build**
 
 ```bash
 pnpm --filter @sevendays/admin fix
@@ -461,7 +461,7 @@ pnpm --filter @sevendays/admin typecheck && pnpm --filter @sevendays/admin build
 
 Expected: all green; `routeTree.gen.ts` regenerates with the seven `_shell` routes and no `/` conflict (the old `index.tsx` is gone).
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/admin/src
@@ -489,7 +489,7 @@ button tracer #95) deleted per plan — lib seam stays for M4/M5."
 
 **Not here:** no auth (user card is placeholder data until M4), no real search/notifications wiring (nothing to search until CMS/auth — present-but-inert is the ruled IA), no `dropdown-menu` usage (generates in Task 1 for M4/M5; the prototype's bell was a bare button and stays one).
 
-- [ ] **Step 1: Create `admin-sidebar.tsx`**
+- [✅] **Step 1: Create `admin-sidebar.tsx`**
 
 Exactly:
 
@@ -643,7 +643,7 @@ export function AdminSidebar() {
 
 Two pinned fallbacks, recorded in the commit if they fire: (a) if `SidebarGroupSeparator` is not in Task 1's recorded export list, replace its usage with `<Separator className='my-1' />` from `@sevendays/ui/components/separator`; (b) if `useMatchRoute` rejects the `fuzzy` option spelling in the installed router version, use `matchRoute({ to: item.to })` for non-root items and `matchRoute({ to: '/', fuzzy: false })` for Dashboard — never drop Dashboard's exact match (a fuzzy `/` highlights everywhere). _(Execution notes 2026-09-15: fallback (a) fired — the primitive exports `SidebarSeparator`, no `SidebarGroupSeparator` — and the two text wrappers carry `group-data-[collapsible=icon]:hidden` per the T4 review: `SidebarHeader`/`SidebarFooter` don't clip in the rail posture, unlike `SidebarContent`; fallback (b) is dead — `fuzzy?: boolean` exists on the installed router.)_
 
-- [ ] **Step 2: Create `admin-topbar.tsx`**
+- [✅] **Step 2: Create `admin-topbar.tsx`**
 
 Exactly:
 
@@ -679,7 +679,7 @@ export function AdminTopbar() {
 
 (If the generated `SidebarTrigger` already exposes accessible text of its own — check its source — drop nothing here; the extra `aria-label` on `Button`/`Input` stands either way. The `border-b` + `bg-background/95 backdrop-blur` posture is the prototype's sticky-bar posture on semantic tokens.)
 
-- [ ] **Step 3: Compose the shell in `_shell.tsx`**
+- [✅] **Step 3: Compose the shell in `_shell.tsx`**
 
 Replace the Task-3 passthrough — the route id and file path stay, only the component changes:
 
@@ -717,7 +717,7 @@ function ShellLayout() {
 
 (The generated `SidebarInset` renders the `<main>` element — the wrapper div keeps the content padding off it. If Task 1's recorded sidebar source shows `SidebarInset` is a `div` instead, wrap the content in `<main className='flex-1 space-y-6 p-6' data-shell-main>` and keep the div out — exactly one `<main>` per screen either way.)
 
-- [ ] **Step 4: Mount the Toaster in `__root.tsx`**
+- [✅] **Step 4: Mount the Toaster in `__root.tsx`**
 
 In `apps/admin/src/routes/__root.tsx`: add the import after the `PostHogProvider` import:
 
@@ -734,7 +734,7 @@ Then inside `RootDocument`'s `<PostHogProvider>` block, immediately after `{chil
 
 (App-wide by construction — every future screen, inside or outside the shell, toasts through one mount. The registry wrapper's `next-themes` `useTheme` resolves to `'system'` with no provider; light-only is the ruling, so nothing to configure.)
 
-- [ ] **Step 5: Format, typecheck, build**
+- [✅] **Step 5: Format, typecheck, build**
 
 ```bash
 pnpm --filter @sevendays/admin fix
@@ -743,7 +743,7 @@ pnpm --filter @sevendays/admin typecheck && pnpm --filter @sevendays/admin build
 
 Expected: all green. If typecheck rejects a `render={<Link … />}` composition detail (prop merge on the delegated element), fix it at the composition site (this file) — never inside the generated primitive.
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/admin/src
@@ -769,7 +769,7 @@ rail (tooltips + group dividers) via the trigger; wordmark + user card
 
 **Not here:** no M2 CDP regressions (landing-scoped — those run under #97–#99/#101), no dark mode, no mobile-Sheet interaction automation (client-side; covered by the primitive's Base UI semantics + the owner pass).
 
-- [ ] **Step 1: Bring the dev env into the worktree**
+- [✅] **Step 1: Bring the dev env into the worktree**
 
 ```bash
 cp /home/jeius/Projects/sevendays/apps/admin/.env.local apps/admin/.env.local
@@ -778,7 +778,7 @@ git check-ignore -q apps/admin/.env.local && echo "ignored — OK"
 
 Expected: `ignored — OK` (it holds `API_URL` only; it must never be committed).
 
-- [ ] **Step 2: Build admin**
+- [✅] **Step 2: Build admin**
 
 ```bash
 pnpm --filter @sevendays/admin build
@@ -786,7 +786,7 @@ pnpm --filter @sevendays/admin build
 
 Expected: green (TanStack Start emits `dist/`).
 
-- [ ] **Step 3: SSR smoke over every route**
+- [✅] **Step 3: SSR smoke over every route**
 
 ```bash
 pnpm --filter @sevendays/admin dev &
@@ -811,7 +811,7 @@ kill %1
 
 Expected per route: sidebar count `1` (the shell renders everywhere), aria-current count **exactly `1`** (the active nav link — the dual-aria-current minor's proof), one `arrives with …` line matching the route's milestone (`/` and `/appointments` → v2; `/packages`, `/add-ons`, `/studio-services`, `/branches` → M5; `/settings` → M4). Plus on `/`: `data-sonner-toaster`, `data-slot="sidebar-trigger"`, `Studio Owner`; on `/appointments`: the `<title>` string. Any count off: fix in the file the assertion names and re-run — the aria-current count is the one most likely to catch a hand-set duplicate (delete the duplicate, never the Link's).
 
-- [ ] **Step 4: A11y source gates**
+- [✅] **Step 4: A11y source gates**
 
 ```bash
 grep -rn 'aria-current' apps/admin/src --include='*.tsx' || echo "NO HAND-SET ARIA-CURRENT — OK"
@@ -822,7 +822,7 @@ grep -rn '<h1' apps/admin/src/components/stub-screen.tsx
 
 Expected: no hand-set `aria-current` anywhere in admin source (Link-native only); sidebar primitive count `0`; the search input's label present; exactly one `<h1` in `stub-screen.tsx` (one per screen).
 
-- [ ] **Step 5: Look gates — tool-neutral, island-free, chart-free**
+- [✅] **Step 5: Look gates — tool-neutral, island-free, chart-free**
 
 ```bash
 grep -rni 'island' apps/admin/src apps/admin/components.json packages/ui/src || echo "NO ISLAND VOCABULARY — OK"
@@ -835,7 +835,7 @@ grep -c 'sidebar' packages/ui/src/tokens.css
 
 Expected: all four "— OK" lines print plus a `--chart` count of `0` (the island grep was already zero on main — this re-proof is the AC's gate; note `tokens.css`'s header comment legitimately says "No `--chart-*` tokens ship" — that's why the chart gates split by what they check: admin source, component source, and actual token declarations); `tokens.css` sidebar count `≥ 8` (the `--sidebar-*` mapping lines — the tool-neutral surface the shell wears, landed with #96; zero would mean the token file drifted — STOP and check git history before touching anything).
 
-- [ ] **Step 6: The four #59 minors — final proof**
+- [✅] **Step 6: The four #59 minors — final proof**
 
 ```bash
 grep -rn 'currentTarget' apps/admin/src --include='*.tsx' --include='*.ts' || echo "NO CURRENTTARGET SITES — OK"
@@ -843,7 +843,7 @@ grep -rn 'currentTarget' apps/admin/src --include='*.tsx' --include='*.ts' || ec
 
 Expected: `NO CURRENTTARGET SITES — OK`. The four minors stand resolved as: (1) currentTarget-in-updater — offender sites unshipped (prototype filter/status selects, #93); zero shipped sites (this grep) + the pattern honored in the Task-2 spike's handler; (2) Catalog nav semantics — real `Link`s to real routes (Step 3's 200s); (3) dual aria-current — zero hand-set (Step 4) + HTML count exactly 1 (Step 3); (4) catalog-toggle — variant B unshipped, nothing ported. All four go in the PR body's AC mapping verbatim.
 
-- [ ] **Step 7: Full check**
+- [✅] **Step 7: Full check**
 
 ```bash
 pnpm check
@@ -877,7 +877,7 @@ If no gate failed, skip — the evidence pack rides Task 6's PR body with no ext
 
 **Not here:** `docs/plan.md` lines 99–101 + 103 stay unticked (#97–#99, #101 own them); the v1-picks ledger row is the triager's at merge (expected pick — admin is in the artifact — but never this plan's call); `.cta.json`/`.prettierignore` stay (tooling metadata, not look); CONTEXT.md untouched (spec ruling).
 
-- [ ] **Step 1: Replace the starter README**
+- [✅] **Step 1: Replace the starter README**
 
 Replace the whole of `apps/admin/README.md` with exactly:
 
@@ -897,7 +897,7 @@ Deployed as a Cloudflare Worker (TanStack Start on `@cloudflare/vite-plugin`) �
 The UI is the shared design system: Tier-1 primitives live in `packages/ui` (ADR-0017) on the Base UI base; app components here compose them app-locally. Dev requires `apps/admin/.env.local` (`API_URL`) — see `.env.example`.
 ```
 
-- [ ] **Step 2: Update the AGENTS.md `packages/ui` bullet**
+- [✅] **Step 2: Update the AGENTS.md `packages/ui` bullet**
 
 Replace:
 
@@ -911,7 +911,7 @@ with:
 - `packages/ui` — the shared design system (ADR-0017): semantic token layer (`@sevendays/ui/tokens.css`, imported by both apps) plus the shared shadcn/Base-UI primitive library — M3 #95 wired `shadcn add` from either app to route primitives here (`components.json` trio pinned `base-rhea`/lucide/zinc; the full Tier-1 pull-list live — 19 registry names plus the transitive `tooltip` primitive and `use-mobile` hook, #100; `cn` comes from the `cn` package). Apps are Tailwind v4 and own their `@theme` styles
 ```
 
-- [ ] **Step 3: Add the progress.md entry**
+- [✅] **Step 3: Add the progress.md entry**
 
 In `docs/progress.md`, immediately after the `M3 ticket 01 — packages/ui shared primitive library (#95)` bullet (the last entry of `## What Exists`), add:
 
@@ -919,7 +919,7 @@ In `docs/progress.md`, immediately after the `M3 ticket 01 — packages/ui share
 - **M3 ticket 06 — admin shell + IA + the Tier-1 pull-list (#100):** admin wears its decided shell — variant A labeled sidebar (Overview / Catalog / Studio taxonomy, #59) collapsing to the icon-rail posture (tooltips + group dividers) via the top-bar trigger (`sidebar_state` cookie), sticky top bar (search + notifications, present-but-inert), wordmark + placeholder user card (real identity with M4); every non-dashboard destination is a clickable stub naming its owning milestone, and the dashboard is the honest v2 empty state (#93 — no KPI/filter/table/`StatCard`, no chart vocabulary, `grep`-gated). The full Tier-1 pull-list is live in `packages/ui` — 18 names generated this ticket (`button` was #95's) plus the transitive `tooltip` primitive and `use-mobile` hook, all Base UI, registry-verbatim, with `sonner` + `next-themes` as registry-required deps and the Toaster mounted app-wide. The decided form substrate shipped as `@tanstack/react-form` + zod-4 Standard Schema validators + `field` — `@tanstack/zod-form-adapter` is zod-3-only and was NOT installed (owner review point in the PR; spike-proven under admin typecheck). The four #59 deferred minors resolved: real `Link`s fix Catalog semantics; single native `aria-current` (Link-owned, never hand-set — SSR count exactly 1); variant B's catalog toggle and the filter-select `currentTarget`-in-updater sites die unshipped (#93) — the hoisting pattern stays the rule for every future handler (v2's dashboard annex inherits the note). Flat URLs + the `_shell` pathless layout are agent rulings surfaced in the PR. NOT landed: M4 auth, M5 CMS surfaces, any dashboard content (v2).
 ```
 
-- [ ] **Step 4: Tick the roadmap checkbox**
+- [✅] **Step 4: Tick the roadmap checkbox**
 
 In `docs/plan.md`, replace:
 
@@ -933,7 +933,7 @@ with:
 - [✅] Admin shell (variant A, per prototype #59): collapsible labeled sidebar + sticky top bar, grouped nav taxonomy (Overview / Catalog / Studio), user card; stub screens named for their owning milestones incl. the v2-stub dashboard (no KPI cards, no table — #93); Tier-1 pull-list generated into `packages/ui`; `Toaster` mounted; the #59 deferred prototype minors fixed at build _(2026-09-15: ticket 06 (#100) — 18 names generated this ticket + `button` from #95, transitively landing `tooltip` + the `use-mobile` hook; Toaster mounted; flat URLs + `_shell` pathless layout + the zod-4 Standard-Schema form substrate are agent rulings surfaced in the PR)_
 ```
 
-- [ ] **Step 5: Tick this plan's boxes and format the docs**
+- [✅] **Step 5: Tick this plan's boxes and format the docs**
 
 Tick every completed step in this plan file with `- [✅]`. Then:
 
@@ -941,7 +941,7 @@ Tick every completed step in this plan file with `- [✅]`. Then:
 pnpm exec biome check --write AGENTS.md docs/progress.md docs/plan.md docs/superpowers/plans/2026-09-15-100-admin-shell-ia-tier1-pull-list.md apps/admin/README.md
 ```
 
-- [ ] **Step 6: graphify + full check**
+- [✅] **Step 6: graphify + full check**
 
 ```bash
 graphify update .
