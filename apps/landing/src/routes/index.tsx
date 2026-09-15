@@ -3,7 +3,6 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { BranchStripItem } from '../components/branch-strip-item';
 import { PackageCard } from '../components/package-card';
 import { ServiceTeaserItem } from '../components/service-teaser-item';
-import { SiteHeader } from '../components/site-header';
 import { selectFeaturedPackages } from '../lib/featured';
 import { branchQueries, servicePackageQueries, studioServiceQueries } from '../lib/queries';
 
@@ -27,7 +26,6 @@ function Home() {
 
   return (
     <div className='mx-auto max-w-5xl p-6'>
-      <SiteHeader />
       <section className='mt-10 flex flex-col gap-4'>
         <h1 className='font-bold text-5xl'>Sevendays Photography</h1>
         <Link

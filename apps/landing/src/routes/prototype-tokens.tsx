@@ -3,12 +3,12 @@
 // tool-neutral reference, and the #92 owner-approved composition +
 // atmosphere variants. Not linked from any nav. The close-out ticket
 // (#101) deletes this route with the rest of the gallery.
+
+import { Button } from '@sevendays/ui/components/button';
 import { createFileRoute } from '@tanstack/react-router';
 import { AdminNeutralStrip } from '../components/prototype/admin-neutral';
 import { AtmosphereVariants } from '../components/prototype/atmosphere-variants';
 import { CompositionMock } from '../components/prototype/composition-mock';
-import { SiteHeader } from '../components/site-header';
-import { Button } from '@sevendays/ui/components/button';
 
 export const Route = createFileRoute('/prototype-tokens')({
   component: PrototypeTokensPage,
@@ -17,8 +17,6 @@ export const Route = createFileRoute('/prototype-tokens')({
 function PrototypeTokensPage() {
   return (
     <div className='bg-background min-h-screen pb-24' data-92-frame>
-      <SiteHeader />
-
       <header className='mx-auto mt-10 max-w-5xl px-6'>
         <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
           M3 · The live token layer

@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { SiteHeader } from '../components/site-header';
 import { toNotFoundError } from '../lib/api-404';
 import { branchNameFor, confirmationTotalCents, offeringNameFor } from '../lib/booking-read';
 import { peso, phDateTime } from '../lib/format';
@@ -34,7 +33,6 @@ export const Route = createFileRoute('/booking/$id')({
   // Unknown id → uniform not-found (copy veto-flagged at PR review).
   notFoundComponent: () => (
     <div className='mx-auto max-w-5xl p-6'>
-      <SiteHeader />
       <div className='mt-16 flex flex-col items-center gap-4'>
         <h1 className='font-semibold text-2xl'>Booking not found.</h1>
         {/* Plain anchor: keeps the not-found page dependency-free. */}
@@ -54,7 +52,6 @@ function BookingConfirmation() {
 
   return (
     <div className='mx-auto max-w-5xl p-6'>
-      <SiteHeader />
       <div className='mx-auto mt-8 max-w-lg rounded-xl border p-6'>
         <p className='font-semibold text-lg'>Booking confirmed ✓</p>
         <dl className='mt-4 space-y-2 text-sm'>
