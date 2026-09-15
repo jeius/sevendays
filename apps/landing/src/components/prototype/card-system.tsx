@@ -200,8 +200,15 @@ export function PrototypeServiceImageCard({
         className='absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-105'
         loading='lazy'
       />
+      {/* Owner ruling (#111, variant D reaction): tints so the labels stay
+          legible even when the photo's color matches the text. Two layers:
+          a uniform ink wash dims the whole image, then a bottom-heavy ink
+          scrim anchors the text zone — stacked worst case (pure-white
+          photo) still leaves the label area ≈ ink, i.e. the measured
+          white-on-ink 18.64:1 pair, never below AA in the text band. */}
+      <div className='bg-brand-ink/35 absolute inset-0' aria-hidden='true' />
       <div
-        className='from-brand-ink via-brand-ink/45 to-brand-ink/10 absolute inset-0 bg-gradient-to-t'
+        className='from-brand-ink via-brand-ink/60 to-transparent absolute inset-0 bg-gradient-to-t'
         aria-hidden='true'
       />
       <div className='absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5'>
