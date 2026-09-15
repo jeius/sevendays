@@ -12,7 +12,7 @@ import { MobileNav } from './mobile-nav';
 export function SiteHeader() {
   return (
     <header className='bg-brand-ink'>
-      <div className='mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4'>
+      <div className='relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4'>
         <Link
           to='/'
           className='focus-visible:ring-brand-focus-ring rounded-sm font-bold text-xl text-white focus-visible:ring-3 focus-visible:outline-none'

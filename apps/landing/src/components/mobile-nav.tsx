@@ -27,7 +27,7 @@ export function MobileNav({ links }: { links: typeof NAV_LINKS }) {
       >
         {open ? <X className='size-5' /> : <Menu className='size-5' />}
       </CollapsibleTrigger>
-      <CollapsibleContent className='border-t border-white/15'>
+      <CollapsibleContent className='absolute inset-x-0 top-full z-10 border-t border-white/15 bg-brand-ink'>
         <nav className='mx-auto flex max-w-5xl flex-col gap-1 px-6 py-4' aria-label='Mobile'>
           {links.map((link) => (
             <Link
