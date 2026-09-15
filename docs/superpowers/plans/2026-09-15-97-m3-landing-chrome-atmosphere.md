@@ -755,7 +755,7 @@ git commit -m "docs(#97): landing chrome + atmosphere landed — progress update
 
 ### Task 7: PR, merge, v1 pick, ticket close
 
-- [ ] **Step 1: Open the PR**
+- [✅] **Step 1: Open the PR**
 
 ```bash
 gh pr create --title "feat(ui): #97 M3 landing chrome + atmosphere — ink bands, SiteFooter, MobileNav, wash ground" --body-file <(cat <<'EOF'
@@ -779,7 +779,7 @@ EOF
 
 Attach the Task 5 Step 6 screenshots, then squash-merge per repo convention.
 
-- [ ] **Step 2: Triage the merge for v1 (standing discipline — ADR-0015)**
+- [✅] **Step 2: Triage the merge for v1 (standing discipline — ADR-0015)**
 
 After the squash merge, from the main checkout:
 
@@ -789,7 +789,7 @@ node scripts/v1-triage.mjs <main-sha>
 
 Expected shape (the SCRIPT decides, not this plan): every path is a landing/`packages/ui` v1-path (`site-footer.tsx`, `mobile-nav.tsx`, `nav.ts`, `collapsible.tsx` are new v1-path files; `book.tsx`/`booking.$id.tsx` edits touch booking-cluster files that are absent on `v1` → likely SPLIT with those dropped as `DU`), so the verdict is PICK or SPLIT — never SKIP. Conflict expectations for the pick, per `docs/agents/v1-picks.md` § Conflict policy ("Landing booking-off surfaces"): `site-header.tsx`, `package-card.tsx`, `service-teaser-item.tsx`, and `routes/index.tsx` are transformed surfaces — keep `v1`'s call-forward content (the header/panel CTA is "Call us" → `/branches` there; catalog cards carry no booking CTAs) and re-apply this PR's ink-band styling, structure, and copy around it; the footer and `MobileNav`'s structure apply as-is with the CTA swapped. `routes/index.tsx` on `v1` has no "Book now" hero CTA — re-apply the ground (hairlines, white cards, emphasis strip) around `v1`'s ruling. If a hunk's substance IS the booking CTA, drop it and record the split. Execute the printed verdict per the runbook (pick/split procedure in `~/Projects/sevendays-v1-seed`, the four locks, then the ledger row in `docs/agents/v1-picks.md` via its own main PR — itself a skip).
 
-- [ ] **Step 3: Close the ticket**
+- [✅] **Step 3: Close the ticket**
 
 All ACs are mechanically verified in Task 5 (header ink-led + focus rings; footer on every surface; MobileNav disclosure + current-page + variant CTA; wash ground with white cards/hairlines/emphasis strip/accent-only deep petrol; keyboard + responsive pass; regressions green; `pnpm check` green). Close #97 referencing the PR. Visual fine-tuning the owner wants lands as #98 feedback or #101's screenshot acceptance — this ticket's scope ends at the chrome + ground.
 
