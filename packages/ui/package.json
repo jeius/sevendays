@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./globals.css": "./src/globals.css"
+    "./globals.css": "./src/globals.css",
+    "./tokens.css": "./src/tokens.css"
   },
   "scripts": {
     "lint": "biome lint",
