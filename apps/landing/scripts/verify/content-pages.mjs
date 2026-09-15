@@ -100,7 +100,7 @@ async function main() {
   check(
     '/services: one-line add-on cross-reference visible',
     servicesText.includes(
-      'Looking for add-ons? Makeup, hairstyle, and more can attach to your booking.'
+      'Looking for add-ons? Makeup, hairstyle, and more are available with any session.'
     )
   );
   const svcLinks = await evaluate(
