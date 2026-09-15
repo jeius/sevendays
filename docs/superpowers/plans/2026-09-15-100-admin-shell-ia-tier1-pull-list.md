@@ -164,10 +164,10 @@ export function SpikeFormSubstrate() {
               name={field.name}
               value={field.state.value}
               onChange={(e) => field.handleChange(e.currentTarget.value)}
-              aria-invalid={field.state.errors.length > 0}
+              aria-invalid={field.state.meta.errors.length > 0}
             />
             <FieldError
-              errors={field.state.errors.map((error) =>
+              errors={field.state.meta.errors.map((error) =>
                 typeof error === 'string' ? { message: error } : error
               )}
             />
@@ -179,7 +179,7 @@ export function SpikeFormSubstrate() {
 }
 ```
 
-What tsc proves by compiling this: the zod-4 schema type-flows into `validators.onChange` (the claim that replaces the un-installable adapter), `form.Field name='email'` is literal-typed against the schema's keys, and `field.state.errors` maps into `FieldError`'s `Array<{ message?: string }>` shape. Note `e.currentTarget.value` is read synchronously, never inside an updater — the #59 currentTarget minor's pattern rule, honored from the first line of form code.
+What tsc proves by compiling this: the zod-4 schema type-flows into `validators.onChange` (the claim that replaces the un-installable adapter), `form.Field name='email'` is literal-typed against the schema's keys, and `field.state.meta.errors` maps into `FieldError`'s `Array<{ message?: string }>` shape. Note `e.currentTarget.value` is read synchronously, never inside an updater — the #59 currentTarget minor's pattern rule, honored from the first line of form code. _(Execution correction 2026-09-15: form-core 1.33.5 exposes field errors only at `field.state.meta.errors` (`FieldLikeMetaDerived`, `types.d.ts:238`, errors member at :242) — the original snippet's `field.state.errors` no longer exists; M4/M5 forms read field errors at `meta.errors`.)_
 
 - [ ] **Step 3: Run the typecheck gate**
 
