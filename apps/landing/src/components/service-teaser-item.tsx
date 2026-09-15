@@ -1,4 +1,5 @@
 import type { StudioServiceWithBranches } from '@sevendays/types';
+import { buttonVariants } from '@sevendays/ui/components/button';
 import { Link } from '@tanstack/react-router';
 import { peso } from '../lib/format';
 
@@ -6,14 +7,10 @@ import { peso } from '../lib/format';
 // link — user story 7 (book from any page via service deep links).
 export function ServiceTeaserItem({ service }: { service: StudioServiceWithBranches }) {
   return (
-    <article className='flex flex-col gap-2 rounded-lg border p-4'>
+    <article className='flex flex-col gap-2 rounded-xl border border-brand-gray-cool bg-card p-4 shadow-sm'>
       <h3 className='font-semibold'>{service.name}</h3>
       <p className='font-medium'>{peso(service.priceCents)}</p>
-      <Link
-        to='/book'
-        search={{ service: service.id }}
-        className='rounded-md bg-neutral-900 px-4 py-2 text-center text-white'
-      >
+      <Link to='/book' search={{ service: service.id }} className={buttonVariants()}>
         Book now
       </Link>
     </article>

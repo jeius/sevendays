@@ -1,31 +1,48 @@
+import { buttonVariants } from '@sevendays/ui/components/button';
 import { Link } from '@tanstack/react-router';
+import { cn } from 'cn';
+import { NAV_LINKS } from '../lib/nav';
+import { MobileNav } from './mobile-nav';
 
-// Site-wide header: brand + primary nav. M2's bar is data-complete,
-// visually-rough — plain flex, no design pass (spec non-goal).
+// Site chrome, ink-led band (M3 #97 / the #92 composition): ink background,
+// white text, petrol as the action color. Desktop row structure unchanged
+// from M2; mobile gets the MobileNav hamburger panel. Every interactive
+// control carries the full-opacity brand focus ring — the band-CTA
+// normalization the spec rules (7.15:1 non-text on ink).
 export function SiteHeader() {
   return (
-    <header className='flex items-center justify-between p-6'>
-      <Link to='/' className='font-bold text-xl'>
-        Sevendays Photography
-      </Link>
-      <nav className='flex items-center gap-6'>
-        {/* Plain anchors: /book arrives with ticket #45; convert to typed Links then. */}
-        <a href='/packages' className='hover:underline'>
-          Packages
-        </a>
-        <a href='/services' className='hover:underline'>
-          Services
-        </a>
-        <a href='/branches' className='hover:underline'>
-          Branches
-        </a>
-        <a href='/about' className='hover:underline'>
-          About
-        </a>
-        <Link to='/book' className='rounded-md bg-neutral-900 px-4 py-2 text-white'>
-          Book now
+    <header className='bg-brand-ink'>
+      <div className='relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4'>
+        <Link
+          to='/'
+          className='focus-visible:ring-brand-focus-ring rounded-sm font-bold text-xl text-white focus-visible:ring-3 focus-visible:outline-none'
+        >
+          Sevendays Photography
         </Link>
-      </nav>
+        <div className='flex items-center gap-4 md:gap-6'>
+          <nav className='hidden items-center gap-6 md:flex' aria-label='Primary'>
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className='focus-visible:ring-brand-focus-ring rounded-sm text-sm text-white/85 transition-colors hover:text-white focus-visible:ring-3 focus-visible:outline-none aria-[current=page]:text-white'
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+          <Link
+            to='/book'
+            className={cn(
+              buttonVariants(),
+              'focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
+            )}
+          >
+            Book now
+          </Link>
+          <MobileNav links={NAV_LINKS} />
+        </div>
+      </div>
     </header>
   );
 }

@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { SiteHeader } from '../components/site-header';
 
 export const Route = createFileRoute('/about')({
   head: () => ({ meta: [{ title: 'About | Sevendays Photography' }] }),
@@ -9,7 +8,6 @@ export const Route = createFileRoute('/about')({
 function AboutPage() {
   return (
     <div className='mx-auto max-w-5xl p-6'>
-      <SiteHeader />
       <h1 className='mt-10 font-bold text-4xl'>About</h1>
       {/* TODO(owner-copy): static studio story — replaced when the client supplies copy. */}
       <p className='mt-4 text-neutral-700'>Our studio story is coming soon.</p>
