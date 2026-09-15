@@ -19,7 +19,7 @@ export function ServiceCard({
 }) {
   return (
     <article className='flex flex-col gap-2 rounded-xl border border-brand-gray-cool bg-card p-6 shadow-sm'>
-      <h3 className='text-brand-ink font-semibold text-xl'>{service.name}</h3>
+      <h3 className='font-semibold text-brand-ink text-xl'>{service.name}</h3>
       <p className='font-medium text-lg'>{peso(service.priceCents)}</p>
       <p className='text-muted-text'>{service.description}</p>
       <div className='flex flex-wrap gap-1'>
@@ -34,7 +34,7 @@ export function ServiceCard({
         search={{ service: service.id }}
         className={cn(
           buttonVariants(),
-          'focus-visible:ring-brand-focus-ring focus-visible:ring-3 self-start'
+          'self-start focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
         )}
       >
         Book now

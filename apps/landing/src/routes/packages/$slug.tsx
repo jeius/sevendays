@@ -20,8 +20,8 @@ export const Route = createFileRoute('/packages/$slug')({
   // Unknown/inactive slug → uniform not-found (owner-ratified copy).
   notFoundComponent: () => (
     <div className='mx-auto max-w-5xl px-6'>
-      <div className='bg-card border-brand-gray-cool mt-16 flex flex-col items-center gap-4 rounded-xl border p-10 text-center shadow-sm'>
-        <h1 className='text-brand-ink font-semibold text-2xl'>Package not found.</h1>
+      <div className='mt-16 flex flex-col items-center gap-4 rounded-xl border border-brand-gray-cool bg-card p-10 text-center shadow-sm'>
+        <h1 className='font-semibold text-2xl text-brand-ink'>Package not found.</h1>
         <p className='text-muted-text text-sm'>
           The package you are looking for does not exist or is no longer offered.
         </p>
@@ -29,7 +29,7 @@ export const Route = createFileRoute('/packages/$slug')({
           to='/packages'
           className={cn(
             buttonVariants({ variant: 'outline' }),
-            'focus-visible:ring-brand-focus-ring focus-visible:ring-3'
+            'focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
           )}
         >
           Browse all packages

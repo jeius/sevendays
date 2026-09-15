@@ -15,7 +15,7 @@ export function SiteFooter() {
       <div className='mx-auto max-w-5xl px-6 py-10'>
         <div className='flex flex-col justify-between gap-8 md:flex-row md:items-center'>
           <div>
-            <p className='font-bold text-xl text-white'>Sevendays Photography</p>
+            <p className='font-bold text-white text-xl'>Sevendays Photography</p>
           </div>
           <nav
             className='flex flex-col gap-2 md:flex-row md:items-center md:gap-6'
@@ -25,7 +25,7 @@ export function SiteFooter() {
               <Link
                 key={link.to}
                 to={link.to}
-                className='focus-visible:ring-brand-focus-ring rounded-sm text-sm text-white/85 transition-colors hover:text-white focus-visible:ring-3 focus-visible:outline-none aria-[current=page]:text-white'
+                className='rounded-sm text-sm text-white/85 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring aria-[current=page]:text-white'
               >
                 {link.label}
               </Link>
@@ -41,8 +41,8 @@ export function SiteFooter() {
             Call or visit a branch
           </Link>
         </div>
-        <div className='mt-8 border-t border-white/20 pt-4'>
-          <p className='text-xs text-white/70'>© 2026 Sevendays Photography</p>
+        <div className='mt-8 border-white/20 border-t pt-4'>
+          <p className='text-white/70 text-xs'>© 2026 Sevendays Photography</p>
         </div>
       </div>
     </footer>

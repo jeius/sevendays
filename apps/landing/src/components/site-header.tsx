@@ -15,7 +15,7 @@ export function SiteHeader() {
       <div className='relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4'>
         <Link
           to='/'
-          className='focus-visible:ring-brand-focus-ring rounded-sm font-bold text-xl text-white focus-visible:ring-3 focus-visible:outline-none'
+          className='rounded-sm font-bold text-white text-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
         >
           Sevendays Photography
         </Link>
@@ -25,7 +25,7 @@ export function SiteHeader() {
               <Link
                 key={link.to}
                 to={link.to}
-                className='focus-visible:ring-brand-focus-ring rounded-sm text-sm text-white/85 transition-colors hover:text-white focus-visible:ring-3 focus-visible:outline-none aria-[current=page]:text-white'
+                className='rounded-sm text-sm text-white/85 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring aria-[current=page]:text-white'
               >
                 {link.label}
               </Link>

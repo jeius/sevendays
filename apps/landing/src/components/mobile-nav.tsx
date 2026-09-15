@@ -23,18 +23,18 @@ export function MobileNav({ links }: { links: typeof NAV_LINKS }) {
     <Collapsible open={open} onOpenChange={setOpen} className='md:hidden'>
       <CollapsibleTrigger
         aria-label='Menu'
-        className='focus-visible:ring-brand-focus-ring inline-flex size-10 items-center justify-center rounded-md text-white transition-colors hover:bg-white/10 focus-visible:ring-3 focus-visible:outline-none'
+        className='inline-flex size-10 items-center justify-center rounded-md text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
       >
         {open ? <X className='size-5' /> : <Menu className='size-5' />}
       </CollapsibleTrigger>
-      <CollapsibleContent className='absolute inset-x-0 top-full z-10 border-t border-white/15 bg-brand-ink'>
+      <CollapsibleContent className='absolute inset-x-0 top-full z-10 border-white/15 border-t bg-brand-ink'>
         <nav className='mx-auto flex max-w-5xl flex-col gap-1 px-6 py-4' aria-label='Mobile'>
           {links.map((link) => (
             <Link
               key={link.to}
               to={link.to}
               onClick={() => setOpen(false)}
-              className='focus-visible:ring-brand-focus-ring rounded-md px-3 py-2.5 text-base text-white/85 transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-3 focus-visible:outline-none aria-[current=page]:bg-white/10 aria-[current=page]:text-white'
+              className='rounded-md px-3 py-2.5 text-base text-white/85 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring aria-[current=page]:bg-white/10 aria-[current=page]:text-white'
             >
               {link.label}
             </Link>

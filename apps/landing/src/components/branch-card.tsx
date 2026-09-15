@@ -15,7 +15,7 @@ import { WalkInBadge } from './walk-in-badge';
 export function BranchCard({ branch }: { branch: Branch }) {
   return (
     <article className='flex flex-col gap-2 rounded-xl border border-brand-gray-cool bg-card p-6 shadow-sm'>
-      <h3 className='text-brand-ink font-semibold text-xl'>{branch.name}</h3>
+      <h3 className='font-semibold text-brand-ink text-xl'>{branch.name}</h3>
       <p className='text-muted-text'>{branch.address}</p>
       <p className='text-muted-text'>{branch.phone}</p>
       <WalkInBadge acceptsWalkIns={branch.acceptsWalkIns} />
@@ -24,7 +24,7 @@ export function BranchCard({ branch }: { branch: Branch }) {
           href={`tel:${branch.phone.replace(/\s+/g, '')}`}
           className={cn(
             buttonVariants({ variant: 'outline' }),
-            'focus-visible:ring-brand-focus-ring focus-visible:ring-3'
+            'focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
           )}
         >
           Call {branch.name}
@@ -34,7 +34,7 @@ export function BranchCard({ branch }: { branch: Branch }) {
           search={{ branch: branch.id }}
           className={cn(
             buttonVariants(),
-            'focus-visible:ring-brand-focus-ring focus-visible:ring-3'
+            'focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
           )}
         >
           Book at this branch

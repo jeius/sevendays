@@ -24,8 +24,8 @@ function ServicesPage() {
   return (
     <div>
       <section className='mx-auto max-w-5xl px-6 pt-12'>
-        <h1 className='text-brand-ink font-bold text-4xl'>Services</h1>
-        <p className='text-muted-foreground mt-2 max-w-prose'>
+        <h1 className='font-bold text-4xl text-brand-ink'>Services</h1>
+        <p className='mt-2 max-w-prose text-muted-foreground'>
           Looking for add-ons? Makeup, hairstyle, and more are available with any session.
         </p>
         <div className='mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2'>
@@ -38,15 +38,15 @@ function ServicesPage() {
           pattern; new seam value, asserted by no script. Call-or-visit
           flavored: no booking presupposition on either edition. */}
       <section
-        className='mt-12 border-t border-line-soft bg-brand-gray-light'
+        className='mt-12 border-line-soft border-t bg-brand-gray-light'
         data-strip='call-visit'
       >
         <div className='mx-auto flex max-w-5xl flex-col items-start justify-between gap-4 px-6 py-8 md:flex-row md:items-center'>
           <div>
-            <h2 className='text-brand-ink font-semibold text-xl'>
+            <h2 className='font-semibold text-brand-ink text-xl'>
               Need a service at one of our branches?
             </h2>
-            <p className='text-brand-700 mt-1 text-sm'>
+            <p className='mt-1 text-brand-700 text-sm'>
               Call or visit a branch — we will confirm availability.
             </p>
           </div>
@@ -54,7 +54,7 @@ function ServicesPage() {
             to='/branches'
             className={cn(
               buttonVariants({ variant: 'outline' }),
-              'focus-visible:ring-brand-focus-ring focus-visible:ring-3'
+              'focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
             )}
           >
             Find a branch

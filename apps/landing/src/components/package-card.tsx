@@ -24,7 +24,7 @@ export function PackageCard({
   return (
     <article className='flex flex-col gap-3 rounded-xl border border-brand-gray-cool bg-card p-6 shadow-sm'>
       <CoverPanel name={pkg.name} />
-      <h3 className='text-brand-ink font-semibold text-xl'>{pkg.name}</h3>
+      <h3 className='font-semibold text-brand-ink text-xl'>{pkg.name}</h3>
       <p className='font-medium text-lg'>{peso(pkg.priceCents)}</p>
       <p className='text-muted-text'>{pkg.description}</p>
       <InclusionsList pkg={pkg} />
@@ -34,7 +34,7 @@ export function PackageCard({
           search={{ package: pkg.id }}
           className={cn(
             buttonVariants(),
-            'focus-visible:ring-brand-focus-ring focus-visible:ring-3 self-start'
+            'self-start focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
           )}
         >
           {cta === 'detail' ? 'Book this package' : 'Book now'}
