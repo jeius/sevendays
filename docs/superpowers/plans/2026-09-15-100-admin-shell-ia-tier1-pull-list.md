@@ -585,7 +585,7 @@ export function AdminSidebar() {
           <span className='bg-sidebar-primary text-sidebar-primary-foreground flex size-9 items-center justify-center rounded-lg font-mono text-sm font-bold'>
             7d
           </span>
-          <div>
+          <div className='group-data-[collapsible=icon]:hidden'>
             <p className='text-sm leading-tight font-semibold'>Sevendays</p>
             <p className='text-sidebar-foreground/60 font-mono text-[0.65rem] tracking-widest uppercase'>
               Admin
@@ -630,7 +630,7 @@ export function AdminSidebar() {
           <span className='bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-full text-xs font-semibold'>
             SO
           </span>
-          <div>
+          <div className='group-data-[collapsible=icon]:hidden'>
             <p className='text-sm leading-tight font-medium'>Studio Owner</p>
             <p className='text-sidebar-foreground/60 text-xs'>Owner</p>
           </div>
@@ -641,7 +641,7 @@ export function AdminSidebar() {
 }
 ```
 
-Two pinned fallbacks, recorded in the commit if they fire: (a) if `SidebarGroupSeparator` is not in Task 1's recorded export list, replace its usage with `<Separator className='my-1' />` from `@sevendays/ui/components/separator`; (b) if `useMatchRoute` rejects the `fuzzy` option spelling in the installed router version, use `matchRoute({ to: item.to })` for non-root items and `matchRoute({ to: '/', fuzzy: false })` for Dashboard — never drop Dashboard's exact match (a fuzzy `/` highlights everywhere).
+Two pinned fallbacks, recorded in the commit if they fire: (a) if `SidebarGroupSeparator` is not in Task 1's recorded export list, replace its usage with `<Separator className='my-1' />` from `@sevendays/ui/components/separator`; (b) if `useMatchRoute` rejects the `fuzzy` option spelling in the installed router version, use `matchRoute({ to: item.to })` for non-root items and `matchRoute({ to: '/', fuzzy: false })` for Dashboard — never drop Dashboard's exact match (a fuzzy `/` highlights everywhere). _(Execution notes 2026-09-15: fallback (a) fired — the primitive exports `SidebarSeparator`, no `SidebarGroupSeparator` — and the two text wrappers carry `group-data-[collapsible=icon]:hidden` per the T4 review: `SidebarHeader`/`SidebarFooter` don't clip in the rail posture, unlike `SidebarContent`; fallback (b) is dead — `fuzzy?: boolean` exists on the installed router.)_
 
 - [ ] **Step 2: Create `admin-topbar.tsx`**
 
