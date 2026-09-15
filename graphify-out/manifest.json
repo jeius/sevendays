@@ -255,13 +255,13 @@
     "semantic_hash": ""
   },
   "apps/landing/src/routes/__root.tsx": {
-    "mtime": 1789472086.091041,
-    "ast_hash": "beeef4d005c359fb85c1231ca6123dcc",
+    "mtime": 1789485669.3320615,
+    "ast_hash": "e8c0d9e79d9dda1991fa0e8559226192",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/index.tsx": {
-    "mtime": 1789472086.0952084,
-    "ast_hash": "2fa895e506180cb75520f0dfdbeb7917",
+    "mtime": 1789485669.3320615,
+    "ast_hash": "f3f3194143bb093e8da9e880f07906cd",
     "semantic_hash": ""
   },
   "apps/landing/tsconfig.json": {
@@ -840,13 +840,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1789480873.0052845,
-    "ast_hash": "532da1b603ee749ec60bb4861dae9f53",
+    "mtime": 1789485669.336343,
+    "ast_hash": "c6f63542659af9a447df6fc48b1ac3aa",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1789480858.5156617,
-    "ast_hash": "4845f8fab0edf76a69f37022a7664d08",
+    "mtime": 1789485776.189865,
+    "ast_hash": "e46618c666ca9b91accfed348fcec74e",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2620,13 +2620,13 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/branch-strip-item.tsx": {
-    "mtime": 1789472086.0827065,
-    "ast_hash": "b6635303ce61fc38c73c68480c33420f",
+    "mtime": 1789485669.32778,
+    "ast_hash": "f8ff91c66232b3d5be928f5c02bd6123",
     "semantic_hash": ""
   },
   "apps/landing/src/components/cover-panel.tsx": {
-    "mtime": 1789472086.0827065,
-    "ast_hash": "dc319eb846a8c8f056be0594ef9a874c",
+    "mtime": 1789485669.32778,
+    "ast_hash": "fd656acff05973a812e55f3f55627dd2",
     "semantic_hash": ""
   },
   "apps/landing/src/components/inclusions-list.tsx": {
@@ -2635,8 +2635,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/package-card.tsx": {
-    "mtime": 1789472086.0868738,
-    "ast_hash": "9da105b7b8ad7876304c30a2393a51f6",
+    "mtime": 1789485669.3320615,
+    "ast_hash": "e8df4a00522722ec6c98ef73f6b29faf",
     "semantic_hash": ""
   },
   "apps/landing/src/components/service-card.tsx": {
@@ -2645,13 +2645,13 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/service-teaser-item.tsx": {
-    "mtime": 1789472086.0868738,
-    "ast_hash": "09a05c3d75bc9d1d6c0137780fac5045",
+    "mtime": 1789485669.3320615,
+    "ast_hash": "60d788e5b59788b4b3675b8791c326d4",
     "semantic_hash": ""
   },
   "apps/landing/src/components/site-header.tsx": {
-    "mtime": 1789472086.0868738,
-    "ast_hash": "3c410740c0c1727d7e0770e56ca1d602",
+    "mtime": 1789485669.3320615,
+    "ast_hash": "5aacedd591efbbd5cccd5ba23f9246a1",
     "semantic_hash": ""
   },
   "apps/landing/src/components/walk-in-badge.tsx": {
@@ -2725,38 +2725,38 @@
     "semantic_hash": ""
   },
   "apps/landing/src/routes/about.tsx": {
-    "mtime": 1789472086.091041,
-    "ast_hash": "88ce8a833bad506d963788bc6da826ab",
+    "mtime": 1789485669.3320615,
+    "ast_hash": "a73b7519cf921b30be81f0054c919e17",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/book.tsx": {
-    "mtime": 1789472086.0952084,
-    "ast_hash": "d5f70958742f36e6af02706d98887ddc",
+    "mtime": 1789485669.3320615,
+    "ast_hash": "708d8ef65a3968ae113f7d5d91d3ec24",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/booking.$id.tsx": {
-    "mtime": 1789472086.0952084,
-    "ast_hash": "877df8ae4dbfc4b45ca1dd80b400124d",
+    "mtime": 1789485669.3320615,
+    "ast_hash": "77db21332a8b7bc76bf6cb1f7e4e100f",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/branches.tsx": {
-    "mtime": 1789472086.0952084,
-    "ast_hash": "a603f4824cfc873a145b39a7791ca402",
+    "mtime": 1789485669.3320615,
+    "ast_hash": "2a2639fc8b6dec9f39ffdd474b3a0eeb",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/packages/$slug.tsx": {
-    "mtime": 1789472086.0952084,
-    "ast_hash": "ea5e7065d12465167fb1f0b6227befe7",
+    "mtime": 1789485669.3320615,
+    "ast_hash": "35cc106c83fe58a2c4e147670f272532",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/packages/index.tsx": {
-    "mtime": 1789472086.0952084,
-    "ast_hash": "8d819c04f5a5ecdc8867e6491785a22d",
+    "mtime": 1789485669.3320615,
+    "ast_hash": "6df361428fe0ff4bdd8ace2ac15f50b4",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/services.tsx": {
-    "mtime": 1789472086.0952084,
-    "ast_hash": "9c5e3d4c984dbc57eee47a7ba8437ab0",
+    "mtime": 1789485669.3320615,
+    "ast_hash": "560e52aad3171c6624c5fd713cbb625b",
     "semantic_hash": ""
   },
   "apps/landing/vitest.config.ts": {
@@ -2880,13 +2880,13 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1789472086.0993757,
-    "ast_hash": "c9daed70863cbe69c958ebb85fdba7cf",
+    "mtime": 1789485669.336343,
+    "ast_hash": "a05b2b16d1f6816d28ba826d09c246c2",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/prototype-tokens.tsx": {
-    "mtime": 1789472086.0952084,
-    "ast_hash": "36b3b57b7dd332ea47a05859d8df1299",
+    "mtime": 1789485669.3320615,
+    "ast_hash": "96cea08d70c2ef98c7f5587403c01768",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -2952,6 +2952,31 @@
   "docs/superpowers/plans/2026-09-14-96-m3-token-swap.md": {
     "mtime": 1789472086.116045,
     "ast_hash": "5aedab00628f539637b3939de176a7fe",
+    "semantic_hash": ""
+  },
+  "apps/landing/src/components/mobile-nav.tsx": {
+    "mtime": 1789485669.3320615,
+    "ast_hash": "90afc29124b01b905ae97ebb93923fca",
+    "semantic_hash": ""
+  },
+  "apps/landing/src/components/site-footer.tsx": {
+    "mtime": 1789485669.3320615,
+    "ast_hash": "0be46530dfc66759bc494a94ea904b99",
+    "semantic_hash": ""
+  },
+  "apps/landing/src/lib/nav.ts": {
+    "mtime": 1789485669.3320615,
+    "ast_hash": "c62677675dc4a90c5c8035e453d568dc",
+    "semantic_hash": ""
+  },
+  "packages/ui/src/components/collapsible.tsx": {
+    "mtime": 1789485669.3620317,
+    "ast_hash": "ed30a98566341b4a1d1d2ffe67962e20",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-09-15-97-m3-landing-chrome-atmosphere.md": {
+    "mtime": 1789485669.336343,
+    "ast_hash": "d91947326cb33ca2a01fb795f9b89c20",
     "semantic_hash": ""
   },
   "apps/admin/src/components/admin-sidebar.tsx": {
@@ -3110,8 +3135,8 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-15-100-admin-shell-ia-tier1-pull-list.md": {
-    "mtime": 1789480893.8703249,
-    "ast_hash": "eb49ed7a41acfe8eaf19372e926001de",
+    "mtime": 1789481843.7976384,
+    "ast_hash": "c7754a461d896062942682b1b09cc53c",
     "semantic_hash": ""
   }
 }

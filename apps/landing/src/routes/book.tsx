@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { z } from 'zod';
 import { RejectionCard } from '../components/booking/rejection-card';
 import { SummaryRail } from '../components/booking/summary-rail';
-import { SiteHeader } from '../components/site-header';
 import { createAppointment } from '../lib/api.functions';
 import { phDateInputMin, type RejectionReason, TIME_SLOTS, useBookingWizard } from '../lib/booking';
 import { peso } from '../lib/format';
@@ -78,8 +77,7 @@ function BookPage() {
     wizard.phone.trim() !== '';
 
   return (
-    <div className='mx-auto min-h-screen max-w-4xl p-6'>
-      <SiteHeader />
+    <div className='mx-auto max-w-4xl p-6'>
       <div className='mt-6 h-1.5 rounded-full bg-neutral-200'>
         <div
           className='h-full rounded-full bg-neutral-900 transition-all'
