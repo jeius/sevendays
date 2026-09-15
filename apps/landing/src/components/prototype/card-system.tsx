@@ -167,6 +167,58 @@ function serviceIcon(name: string) {
   return Camera;
 }
 
+// Variant D's full-image service-card backgrounds (stand-ins; M5 swaps for
+// the studio's own service shots).
+export function serviceBackground(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes('recover')) return '/photos/service-recovery.jpg';
+  if (n.includes('fram')) return '/photos/service-framing.jpg';
+  if (n.includes('id') || n.includes('portrait')) return '/photos/service-id.jpg';
+  if (n.includes('print') || n.includes('tarp')) return '/photos/service-printing.jpg';
+  return '/photos/cover-portrait.jpg';
+}
+
+// The variant-D service treatment: the photo IS the card — full-image
+// background, ink gradient for legibility, system mechanics kept (1-line
+// title, fixed height, one affordance, deep link preserved).
+export function PrototypeServiceImageCard({
+  service,
+}: {
+  service: StudioServiceWithBranches;
+}) {
+  return (
+    <Link
+      to='/book'
+      search={{ service: service.id }}
+      aria-label={`Book ${service.name} (₱${(service.priceCents / 100).toFixed(0)})`}
+      className='group border-line-soft relative block h-64 overflow-hidden rounded-xl border shadow-sm focus-visible:ring-brand-focus-ring focus-visible:ring-3 focus-visible:outline-none'
+    >
+      <img
+        src={serviceBackground(service.name)}
+        alt=''
+        aria-hidden='true'
+        className='absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-105'
+        loading='lazy'
+      />
+      <div
+        className='from-brand-ink via-brand-ink/45 to-brand-ink/10 absolute inset-0 bg-gradient-to-t'
+        aria-hidden='true'
+      />
+      <div className='absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5'>
+        <div className='min-w-0'>
+          <h3 className='truncate font-serif text-xl font-semibold text-white'>
+            {service.name}
+          </h3>
+          <p className='text-brand-200 mt-1 font-mono text-sm'>{peso(service.priceCents)}</p>
+        </div>
+        <span className='shrink-0 rounded-md border border-white/40 bg-brand-ink/60 px-3 py-1.5 text-sm font-medium text-white transition-colors group-hover:bg-brand-ink/80'>
+          Book
+        </span>
+      </div>
+    </Link>
+  );
+}
+
 export function packageChips(pkg: ServicePackageWithInclusions): string[] {
   const framed = pkg.inclusions.filter((i) => i.kind === 'framed_picture');
   const prints = pkg.inclusions.filter((i) => i.kind === 'print');

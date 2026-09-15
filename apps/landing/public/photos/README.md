@@ -26,6 +26,10 @@ required). Source photo IDs (prefix `https://unsplash.com/photos/`):
 | `cover-portrait.jpg` | PackageCard media stand-in | `1493863641943-9b68992a8d07` |
 | `cover-event.jpg` | PackageCard media stand-in | `1606216794074-735e91aa2c92` |
 | `cover-commercial.jpg` | PackageCard media stand-in | `1523275335684-37898b6baf30` |
+| `service-recovery.jpg` | ServiceCard full-image bg (variant D) | `1461360370896-922624d12aa1` |
+| `service-framing.jpg` | ServiceCard full-image bg (variant D) | `1518481852452-9415b262eba4` |
+| `service-id.jpg` | ServiceCard full-image bg (variant D) | `1590086782957-93c06ef21604` |
+| `service-printing.jpg` | ServiceCard full-image bg (variant D) — weakest match (desk/bulletins), swap first | `1562564055-71e051d33c19` |
 
 Photos were chosen to match the fixed atmosphere (#90): ink/petrol-led, moody
 light. People depicted are stock models, not clients or staff.
