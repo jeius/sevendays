@@ -34,7 +34,7 @@
   | ink-on-wash | `#0e131a` on `#f1f8fb` | 17.36 | text (outline CTA label on its wash fill) ✓ |
 
   Existing #92 pairs that must still hold (re-run in Task 5): white-on-primary 5.65, ink-on-light 13.85, link-on-white 8.22, muted-on-wash 4.59.
-- **Band-CTA pattern (used verbatim by Tasks 2 and 4):** a navigating CTA is a `<Link>` whose className is `cn(buttonVariants({ … }), 'focus-visible:ring-3 focus-visible:ring-brand-focus-ring')` — `buttonVariants` imported from `@sevendays/ui/components/button`. The two override classes re-color the Button primitive's `focus-visible:ring-ring/30` to full-opacity brand-400 (`cn` is tailwind-merge-backed, so the later ring-color wins); everything else about the primitive's focus treatment is inherited. Never wrap a `Button` inside a `Link` (invalid nesting) and never hand-roll a new focus treatment.
+- **Band-CTA pattern (used by Tasks 2 and 4's strip CTA):** a band CTA (header, footer, mobile panel, emphasis strip) is a `<Link>` whose className is `cn(buttonVariants({ … }), 'focus-visible:ring-3 focus-visible:ring-brand-focus-ring')` — `buttonVariants` imported from `@sevendays/ui/components/button`. The two override classes re-color the Button primitive's `focus-visible:ring-ring/30` to full-opacity brand-400 (`cn` is tailwind-merge-backed, so the later ring-color wins); everything else about the primitive's focus treatment is inherited. Body CTAs (the home hero zone — #98 rebuilds it) keep the Button primitive's default ring: that IS "the treatment the body CTAs already have" the spec references. Never wrap a `Button` inside a `Link` (invalid nesting) and never hand-roll a new focus treatment.
 - **No token/CSS changes.** `packages/ui/src/tokens.css` and both apps' `styles.css` are complete from #96 and UNTOUCHED here — the utilities this plan needs (`bg-brand-ink`, `bg-brand-gray-light`, `bg-card`, `bg-wash-base`, `border-line-soft`, `ring-brand-focus-ring`, `text-white/85`, `aria-[current=page]:`) all exist on the current layer. If a value seems missing, stop — that is a spec deviation to raise, not a plan liberty. Landing's `styles.css` already carries `@source "../../../packages/ui/src"` (from #95), so classes referenced inside `packages/ui` are seen by the compiler.
 - **CDP seam contract (verified against the committed scripts — these must survive byte-for-byte in behavior):** home keeps `section[data-strip='featured']` containing the featured `article`s (packages-pages counts them inside that section); home keeps the services/branches strips' `data-strip` values and ALL text the page-wide includes-checks read (`Our studio blurb is coming soon.`, `View all services` with `href='/services'`, walk-in badge texts via `WalkInBadge`, every service name / branch address); teaser items keep the `a[href^="/book?service="]` deep-links; `/services` keeps its add-on cross-reference line verbatim. New sections may be ADDED (none of the checks are absence-based) — the closing emphasis strip uses the NEW seam value `data-strip='call-visit'`, asserted by no M2 script.
 - **Not here — sibling fences (each sibling owns its deliverable; do not land any of it in this ticket):**
@@ -228,6 +228,7 @@ import {
 import { cn } from 'cn';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import type { NAV_LINKS } from '../lib/nav';
 
 // Mobile chrome (M3 #97): hamburger trigger + collapsible panel — proper
 // disclosure navigation over the shared Base UI collapsible (the primitive
@@ -235,11 +236,7 @@ import { useState } from 'react';
 // current page). Carries the four nav links plus the variant CTA: "Book
 // now" on main; the v1 scrub swaps it for "Call us" → /branches at pick
 // time (never a runtime branch). Hidden at md+ where the desktop nav lives.
-export function MobileNav({
-  links,
-}: {
-  links: ReadonlyArray<{ to: string; label: string }>;
-}) {
+export function MobileNav({ links }: { links: typeof NAV_LINKS }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -496,10 +493,7 @@ The whole `return` of `Home` becomes exactly (queries/`selectFeaturedPackages` l
       <section className='mx-auto flex max-w-5xl flex-col items-start gap-4 px-6 pt-12'>
         <h1 className='font-bold text-5xl'>Sevendays Photography</h1>
         {/* CTA re-skinned onto the system button; #98 rebuilds this zone as the ruled two-CTA hero band. */}
-        <Link
-          to='/book'
-          className={cn(buttonVariants({ size: 'lg' }), 'px-6 py-3 text-base')}
-        >
+        <Link to='/book' className={buttonVariants({ size: 'lg' })}>
           Book now
         </Link>
       </section>
