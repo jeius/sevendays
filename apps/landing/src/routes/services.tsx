@@ -1,7 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { ServiceCard } from '../components/service-card';
-import { SiteHeader } from '../components/site-header';
 import { bookableBranchNames } from '../lib/bookable-branches';
 import { branchQueries, studioServiceQueries } from '../lib/queries';
 
@@ -22,7 +21,6 @@ function ServicesPage() {
 
   return (
     <div className='mx-auto max-w-5xl p-6'>
-      <SiteHeader />
       <h1 className='mt-10 font-bold text-4xl'>Services</h1>
       <p className='mt-2 text-neutral-700'>
         Looking for add-ons? Makeup, hairstyle, and more are available in-studio — call or visit a
