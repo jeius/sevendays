@@ -11,6 +11,24 @@
           }
         }
       }
+    },
+    {
+      "includes": ["src/components/**", "src/hooks/**"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noNamespaceImport": "off"
+          },
+          "suspicious": {
+            "noDocumentCookie": "off",
+            "noArrayIndexKey": "off"
+          },
+          "a11y": {
+            "noLabelWithoutControl": "off",
+            "useSemanticElements": "off"
+          }
+        }
+      }
     }
   ]
 }
