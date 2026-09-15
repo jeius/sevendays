@@ -9,204 +9,50 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ShellRouteImport } from './routes/_shell'
-import { Route as ShellIndexRouteImport } from './routes/_shell.index'
-import { Route as ShellAddOnsRouteImport } from './routes/_shell.add-ons'
-import { Route as ShellAppointmentsRouteImport } from './routes/_shell.appointments'
-import { Route as ShellBranchesRouteImport } from './routes/_shell.branches'
-import { Route as ShellPackagesRouteImport } from './routes/_shell.packages'
-import { Route as ShellSettingsRouteImport } from './routes/_shell.settings'
-import { Route as ShellStudioServicesRouteImport } from './routes/_shell.studio-services'
+import { Route as IndexRouteImport } from './routes/index'
 
-const ShellRoute = ShellRouteImport.update({
-  id: '/_shell',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ShellIndexRoute = ShellIndexRouteImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => ShellRoute,
-} as any)
-const ShellAddOnsRoute = ShellAddOnsRouteImport.update({
-  id: '/add-ons',
-  path: '/add-ons',
-  getParentRoute: () => ShellRoute,
-} as any)
-const ShellAppointmentsRoute = ShellAppointmentsRouteImport.update({
-  id: '/appointments',
-  path: '/appointments',
-  getParentRoute: () => ShellRoute,
-} as any)
-const ShellBranchesRoute = ShellBranchesRouteImport.update({
-  id: '/branches',
-  path: '/branches',
-  getParentRoute: () => ShellRoute,
-} as any)
-const ShellPackagesRoute = ShellPackagesRouteImport.update({
-  id: '/packages',
-  path: '/packages',
-  getParentRoute: () => ShellRoute,
-} as any)
-const ShellSettingsRoute = ShellSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => ShellRoute,
-} as any)
-const ShellStudioServicesRoute = ShellStudioServicesRouteImport.update({
-  id: '/studio-services',
-  path: '/studio-services',
-  getParentRoute: () => ShellRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof ShellIndexRoute
-  '/add-ons': typeof ShellAddOnsRoute
-  '/appointments': typeof ShellAppointmentsRoute
-  '/branches': typeof ShellBranchesRoute
-  '/packages': typeof ShellPackagesRoute
-  '/settings': typeof ShellSettingsRoute
-  '/studio-services': typeof ShellStudioServicesRoute
+  '/': typeof IndexRoute
 }
 export interface FileRoutesByTo {
-  '/add-ons': typeof ShellAddOnsRoute
-  '/appointments': typeof ShellAppointmentsRoute
-  '/branches': typeof ShellBranchesRoute
-  '/packages': typeof ShellPackagesRoute
-  '/settings': typeof ShellSettingsRoute
-  '/studio-services': typeof ShellStudioServicesRoute
-  '/': typeof ShellIndexRoute
+  '/': typeof IndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_shell': typeof ShellRouteWithChildren
-  '/_shell/add-ons': typeof ShellAddOnsRoute
-  '/_shell/appointments': typeof ShellAppointmentsRoute
-  '/_shell/branches': typeof ShellBranchesRoute
-  '/_shell/packages': typeof ShellPackagesRoute
-  '/_shell/settings': typeof ShellSettingsRoute
-  '/_shell/studio-services': typeof ShellStudioServicesRoute
-  '/_shell/': typeof ShellIndexRoute
+  '/': typeof IndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/add-ons'
-    | '/appointments'
-    | '/branches'
-    | '/packages'
-    | '/settings'
-    | '/studio-services'
+  fullPaths: '/'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/add-ons'
-    | '/appointments'
-    | '/branches'
-    | '/packages'
-    | '/settings'
-    | '/studio-services'
-    | '/'
-  id:
-    | '__root__'
-    | '/_shell'
-    | '/_shell/add-ons'
-    | '/_shell/appointments'
-    | '/_shell/branches'
-    | '/_shell/packages'
-    | '/_shell/settings'
-    | '/_shell/studio-services'
-    | '/_shell/'
+  to: '/'
+  id: '__root__' | '/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  ShellRoute: typeof ShellRouteWithChildren
+  IndexRoute: typeof IndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_shell': {
-      id: '/_shell'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof ShellRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_shell/': {
-      id: '/_shell/'
+    '/': {
+      id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof ShellIndexRouteImport
-      parentRoute: typeof ShellRoute
-    }
-    '/_shell/add-ons': {
-      id: '/_shell/add-ons'
-      path: '/add-ons'
-      fullPath: '/add-ons'
-      preLoaderRoute: typeof ShellAddOnsRouteImport
-      parentRoute: typeof ShellRoute
-    }
-    '/_shell/appointments': {
-      id: '/_shell/appointments'
-      path: '/appointments'
-      fullPath: '/appointments'
-      preLoaderRoute: typeof ShellAppointmentsRouteImport
-      parentRoute: typeof ShellRoute
-    }
-    '/_shell/branches': {
-      id: '/_shell/branches'
-      path: '/branches'
-      fullPath: '/branches'
-      preLoaderRoute: typeof ShellBranchesRouteImport
-      parentRoute: typeof ShellRoute
-    }
-    '/_shell/packages': {
-      id: '/_shell/packages'
-      path: '/packages'
-      fullPath: '/packages'
-      preLoaderRoute: typeof ShellPackagesRouteImport
-      parentRoute: typeof ShellRoute
-    }
-    '/_shell/settings': {
-      id: '/_shell/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof ShellSettingsRouteImport
-      parentRoute: typeof ShellRoute
-    }
-    '/_shell/studio-services': {
-      id: '/_shell/studio-services'
-      path: '/studio-services'
-      fullPath: '/studio-services'
-      preLoaderRoute: typeof ShellStudioServicesRouteImport
-      parentRoute: typeof ShellRoute
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface ShellRouteChildren {
-  ShellAddOnsRoute: typeof ShellAddOnsRoute
-  ShellAppointmentsRoute: typeof ShellAppointmentsRoute
-  ShellBranchesRoute: typeof ShellBranchesRoute
-  ShellPackagesRoute: typeof ShellPackagesRoute
-  ShellSettingsRoute: typeof ShellSettingsRoute
-  ShellStudioServicesRoute: typeof ShellStudioServicesRoute
-  ShellIndexRoute: typeof ShellIndexRoute
-}
-
-const ShellRouteChildren: ShellRouteChildren = {
-  ShellAddOnsRoute: ShellAddOnsRoute,
-  ShellAppointmentsRoute: ShellAppointmentsRoute,
-  ShellBranchesRoute: ShellBranchesRoute,
-  ShellPackagesRoute: ShellPackagesRoute,
-  ShellSettingsRoute: ShellSettingsRoute,
-  ShellStudioServicesRoute: ShellStudioServicesRoute,
-  ShellIndexRoute: ShellIndexRoute,
-}
-
-const ShellRouteWithChildren = ShellRoute._addFileChildren(ShellRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
-  ShellRoute: ShellRouteWithChildren,
+  IndexRoute: IndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

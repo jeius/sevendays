@@ -1,8 +1,5 @@
 {
   "extends": "@sevendays/config/ts/react",
   "include": ["src"],
-  "exclude": ["node_modules", "dist", ".turbo", "coverage"],
-  "compilerOptions": {
-    "lib": ["ES2022", "DOM", "DOM.Iterable"]
-  }
+  "exclude": ["node_modules", "dist", ".turbo", "coverage"]
 }
