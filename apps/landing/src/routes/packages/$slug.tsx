@@ -1,4 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { buttonVariants } from '@sevendays/ui/components/button';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { cn } from 'cn';
 import { PackageCard } from '../../components/package-card';
 import { toNotFoundError } from '../../lib/package-slug';
 import { servicePackageQueries } from '../../lib/queries';
@@ -17,13 +19,21 @@ export const Route = createFileRoute('/packages/$slug')({
   component: PackageDetail,
   // Unknown/inactive slug → uniform not-found (owner-ratified copy).
   notFoundComponent: () => (
-    <div className='mx-auto max-w-5xl p-6'>
-      <div className='mt-16 flex flex-col items-center gap-4'>
-        <h1 className='font-semibold text-2xl'>Package not found.</h1>
-        {/* Plain anchor: keeps the not-found page dependency-free. */}
-        <a href='/packages' className='underline'>
+    <div className='mx-auto max-w-5xl px-6'>
+      <div className='bg-card border-brand-gray-cool mt-16 flex flex-col items-center gap-4 rounded-xl border p-10 text-center shadow-sm'>
+        <h1 className='text-brand-ink font-semibold text-2xl'>Package not found.</h1>
+        <p className='text-muted-text text-sm'>
+          The package you are looking for does not exist or is no longer offered.
+        </p>
+        <Link
+          to='/packages'
+          className={cn(
+            buttonVariants({ variant: 'outline' }),
+            'focus-visible:ring-brand-focus-ring focus-visible:ring-3'
+          )}
+        >
           Browse all packages
-        </a>
+        </Link>
       </div>
     </div>
   ),
@@ -33,10 +43,12 @@ function PackageDetail() {
   const pkg = Route.useLoaderData();
 
   return (
-    <div className='mx-auto max-w-5xl p-6'>
-      <div className='mx-auto mt-10 max-w-2xl'>
-        <PackageCard pkg={pkg} />
-      </div>
+    <div>
+      <section className='mx-auto max-w-5xl px-6 pt-12'>
+        <div className='mx-auto max-w-2xl'>
+          <PackageCard pkg={pkg} cta='detail' />
+        </div>
+      </section>
     </div>
   );
 }

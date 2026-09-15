@@ -18,13 +18,15 @@ function PackagesPage() {
   const { data: packages } = useSuspenseQuery(servicePackageQueries.all());
 
   return (
-    <div className='mx-auto max-w-5xl p-6'>
-      <h1 className='mt-10 font-bold text-4xl'>Packages</h1>
-      <div className='mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2'>
-        {packages.map((p) => (
-          <PackageCard key={p.id} pkg={p} />
-        ))}
-      </div>
+    <div>
+      <section className='mx-auto max-w-5xl px-6 pt-12'>
+        <h1 className='text-brand-ink font-bold text-4xl'>Packages</h1>
+        <div className='mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2'>
+          {packages.map((p) => (
+            <PackageCard key={p.id} pkg={p} />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

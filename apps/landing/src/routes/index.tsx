@@ -28,17 +28,46 @@ function Home() {
 
   return (
     <div>
-      <section className='mx-auto flex max-w-5xl flex-col items-start gap-4 px-6 pt-12'>
-        <h1 className='font-bold text-5xl'>Sevendays Photography</h1>
-        {/* CTA re-skinned onto the system button; #98 rebuilds this zone as the ruled two-CTA hero band. */}
-        <Link to='/book' className={buttonVariants({ size: 'lg' })}>
-          Book now
-        </Link>
+      {/* Hero band — the ruled #92 composition (data-92-comp-body), sans
+          headings per the #94 ruling. Blurb slot stays placeholder-marked;
+          the literal is CDP-asserted (content-pages). Secondary CTA is
+          system-styled; the v1 scrub swaps BOTH CTAs for "Call Us" +
+          "Services" at pick time — never a runtime branch (the #97
+          convention, mobile-nav.tsx). */}
+      <section className='border-line-soft border-b'>
+        <div className='mx-auto max-w-5xl px-6 py-12'>
+          <div className='bg-card border-brand-gray-cool rounded-xl border p-8 shadow-sm'>
+            <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
+              Sevendays Photography
+            </p>
+            <h1 className='text-brand-ink mt-3 max-w-2xl font-bold text-4xl'>
+              Three branches. One standard of light.
+            </h1>
+            {/* TODO(owner-copy): placeholder blurb — replaced when the client supplies copy. */}
+            <p className='text-muted-text mt-3 max-w-prose'>Our studio blurb is coming soon.</p>
+            <div className='mt-5 flex flex-wrap gap-3'>
+              <Link
+                to='/book'
+                className={cn(
+                  buttonVariants({ size: 'lg' }),
+                  'focus-visible:ring-brand-focus-ring focus-visible:ring-3'
+                )}
+              >
+                Book now
+              </Link>
+              <Link
+                to='/services'
+                className={cn(
+                  buttonVariants({ variant: 'outline', size: 'lg' }),
+                  'focus-visible:ring-brand-focus-ring focus-visible:ring-3'
+                )}
+              >
+                View services
+              </Link>
+            </div>
+          </div>
+        </div>
       </section>
-      {/* TODO(owner-copy): placeholder blurb — replaced when the client supplies copy. */}
-      <p className='mx-auto mt-8 max-w-5xl px-6 text-muted-foreground'>
-        Our studio blurb is coming soon.
-      </p>
       <section
         className='mx-auto mt-12 max-w-5xl border-t border-line-soft px-6 pt-12'
         data-strip='featured'
@@ -46,7 +75,7 @@ function Home() {
         <h2 className='font-semibold text-2xl'>{heading}</h2>
         <div className='mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2'>
           {strip.map((p) => (
-            <PackageCard key={p.id} pkg={p} />
+            <PackageCard key={p.id} pkg={p} cta='card' />
           ))}
         </div>
       </section>
@@ -60,10 +89,9 @@ function Home() {
             <ServiceTeaserItem key={s.id} service={s} />
           ))}
         </div>
-        {/* Plain anchor (renders the href the CDP check reads); #98 sweeps to typed Links. */}
-        <a href='/services' className='mt-4 inline-block underline'>
+        <Link to='/services' className='text-brand-700 mt-4 inline-block underline'>
           View all services
-        </a>
+        </Link>
       </section>
       <section
         className='mx-auto mt-12 max-w-5xl border-t border-line-soft px-6 pt-12'
