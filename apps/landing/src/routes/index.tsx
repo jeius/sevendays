@@ -75,7 +75,7 @@ function Home() {
         <h2 className='font-semibold text-2xl'>{heading}</h2>
         <div className='mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2'>
           {strip.map((p) => (
-            <PackageCard key={p.id} pkg={p} />
+            <PackageCard key={p.id} pkg={p} cta='card' />
           ))}
         </div>
       </section>
