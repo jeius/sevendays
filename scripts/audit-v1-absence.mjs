@@ -82,7 +82,7 @@ const TOKENS = [
   { mode: 'S', token: '/booking' }, // prose/route forms (/booking/:id, {ORIGIN}/booking/{id})
   // — api cluster, env shed included —
   { mode: 'S', token: 'routes/appointments' }, // v1.ts mount + api-client registration
-  { mode: 'S', token: "'/appointments" }, // quoted mount literals (.route('/appointments', …))
+  { mode: 'S', token: ".route('/appointments'" }, // api mount registration call (the quoted-literal form false-hit the admin shell's ruled v1 stub literals — owner ruling 2026-09-16)
   { mode: 'S', token: '/api/v1/appointments' }, // URL/prose forms (architecture.md, span names)
   { mode: 'S', token: 'confirmation-email' },
   { mode: 'S', token: 'RESEND_API_KEY' },
