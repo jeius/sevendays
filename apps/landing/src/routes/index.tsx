@@ -12,6 +12,7 @@ import { BranchStripItem } from '../components/branch-strip-item';
 import { PackageCard } from '../components/package-card';
 import { HomeVariantA } from '../components/prototype/home-variant-a';
 import { HomeVariantB } from '../components/prototype/home-variant-b';
+import { HomeVariantC } from '../components/prototype/home-variant-c';
 import { DevOnlySwitcher } from '../components/prototype/prototype-switcher';
 import { ServiceTeaserItem } from '../components/service-teaser-item';
 import { selectFeaturedPackages } from '../lib/featured';
@@ -19,12 +20,12 @@ import { branchQueries, servicePackageQueries, studioServiceQueries } from '../l
 
 // PROTOTYPE (#111): the default route renders exactly as landed (#98 — the
 // CDP seam contract holds: same URL, seams verbatim, scripts read-only).
-// `?variant=a|b` renders the two image-led home compositions (Track 1);
+// `?variant=a|b|c` renders the image-led home compositions (Track 1);
 // the param is validated by validateSearch, the render swap is dev-only,
 // and the switcher bar never ships outside dev builds.
 
 const variantSearchSchema = z.object({
-  variant: z.enum(['a', 'b']).optional(),
+  variant: z.enum(['a', 'b', 'c']).optional(),
 });
 
 export const Route = createFileRoute('/')({
@@ -53,6 +54,7 @@ function Home() {
     <>
       {devVariant === 'a' && <HomeVariantA packages={data.packages} services={data.services} />}
       {devVariant === 'b' && <HomeVariantB packages={data.packages} services={data.services} />}
+      {devVariant === 'c' && <HomeVariantC packages={data.packages} services={data.services} />}
       {!devVariant && (
         <HomeCurrent packages={data.packages} services={data.services} branches={data.branches} />
       )}
@@ -62,6 +64,7 @@ function Home() {
           { key: 'base', name: '#98 composition' },
           { key: 'a', name: 'Cinema' },
           { key: 'b', name: 'Editorial mat' },
+          { key: 'c', name: 'the combination' },
         ]}
       />
     </>

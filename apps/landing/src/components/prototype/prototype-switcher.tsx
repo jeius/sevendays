@@ -9,7 +9,7 @@ export function PrototypeSwitcher({
   variants,
 }: {
   current: string;
-  variants: { key: 'base' | 'a' | 'b'; name: string }[];
+  variants: { key: 'base' | 'a' | 'b' | 'c'; name: string }[];
 }) {
   const navigate = useNavigate();
   const [hint, setHint] = useState(true);
@@ -99,7 +99,7 @@ export function PrototypeSwitcher({
 // stray-merge guard).
 export function DevOnlySwitcher(props: {
   current: string;
-  variants: { key: 'base' | 'a' | 'b'; name: string }[];
+  variants: { key: 'base' | 'a' | 'b' | 'c'; name: string }[];
 }) {
   if (!import.meta.env.DEV) return null;
   return <PrototypeSwitcher {...props} />;
