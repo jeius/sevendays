@@ -1,13 +1,13 @@
 {
   "root": false,
-  "extends": ["@sevendays/config/biome/base", "@sevendays/config/biome/node"],
+  "extends": ["@sevendays/config/biome/base", "@sevendays/config/biome/vite"],
   "overrides": [
     {
-      "includes": ["src/globals.css"],
+      "includes": ["src/lib/utils.ts"],
       "linter": {
         "rules": {
-          "suspicious": {
-            "noUnknownAtRules": "off"
+          "performance": {
+            "noBarrelFile": "off"
           }
         }
       }

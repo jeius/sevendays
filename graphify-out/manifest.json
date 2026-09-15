@@ -15,9 +15,9 @@
     "semantic_hash": "b59d3ebf855dd64abb18d7e869d4bc65"
   },
   "apps/admin/components.json": {
-    "mtime": 1789398378.1563735,
-    "ast_hash": "2d558ea6768378d47430042223209f3a",
-    "semantic_hash": "2d558ea6768378d47430042223209f3a"
+    "mtime": 1789434776.9786959,
+    "ast_hash": "169f5925ac8593e97e9203fca187407d",
+    "semantic_hash": ""
   },
   "apps/admin/instrument.server.mjs": {
     "mtime": 1789398378.1563735,
@@ -25,19 +25,14 @@
     "semantic_hash": "2866588561e865ba99fd805d821ad7d8"
   },
   "apps/admin/package.json": {
-    "mtime": 1789399776.030366,
-    "ast_hash": "be046862988007e20fc069b53786dc58",
+    "mtime": 1789434776.9786959,
+    "ast_hash": "3ce6296f716ae5f1684ee7e2e9d9af1e",
     "semantic_hash": ""
   },
   "apps/admin/src/integrations/posthog/provider.tsx": {
     "mtime": 1789398378.1563735,
     "ast_hash": "a648f14485559c8d15a9668bf875f35d",
     "semantic_hash": "a648f14485559c8d15a9668bf875f35d"
-  },
-  "apps/admin/src/lib/utils.ts": {
-    "mtime": 1789398378.1605577,
-    "ast_hash": "41f6393a4fca51d9fe994cc3d11abbea",
-    "semantic_hash": "41f6393a4fca51d9fe994cc3d11abbea"
   },
   "apps/admin/src/routeTree.gen.ts": {
     "mtime": 1789398378.1605577,
@@ -55,8 +50,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/routes/index.tsx": {
-    "mtime": 1789398378.1605577,
-    "ast_hash": "3006f9647ffc87ad3d147733ec4a0193",
+    "mtime": 1789434776.9786959,
+    "ast_hash": "0fbcf6a7e80147f186be93894d53d475",
     "semantic_hash": ""
   },
   "apps/admin/tsconfig.json": {
@@ -235,8 +230,8 @@
     "semantic_hash": "b59d3ebf855dd64abb18d7e869d4bc65"
   },
   "apps/landing/components.json": {
-    "mtime": 1789398378.1772954,
-    "ast_hash": "66fe113be93c5fff70970256924a022b",
+    "mtime": 1789434776.982843,
+    "ast_hash": "e7a5e6e2ef042641e604151081f49abe",
     "semantic_hash": ""
   },
   "apps/landing/instrument.server.mjs": {
@@ -245,19 +240,14 @@
     "semantic_hash": "2866588561e865ba99fd805d821ad7d8"
   },
   "apps/landing/package.json": {
-    "mtime": 1789399775.9974434,
-    "ast_hash": "7f647cf869c3fbb5eb7619fe3983f4da",
+    "mtime": 1789434776.982843,
+    "ast_hash": "2ee2cf90caa0653f732525513a7340bd",
     "semantic_hash": ""
   },
   "apps/landing/src/integrations/posthog/provider.tsx": {
     "mtime": 1789398378.18148,
     "ast_hash": "a648f14485559c8d15a9668bf875f35d",
     "semantic_hash": "a648f14485559c8d15a9668bf875f35d"
-  },
-  "apps/landing/src/lib/utils.ts": {
-    "mtime": 1789398378.1856644,
-    "ast_hash": "41f6393a4fca51d9fe994cc3d11abbea",
-    "semantic_hash": "41f6393a4fca51d9fe994cc3d11abbea"
   },
   "apps/landing/src/routeTree.gen.ts": {
     "mtime": 1789398378.1856644,
@@ -695,13 +685,13 @@
     "semantic_hash": "653ab29b84fc2da57ac85ba9e7f9a6d6"
   },
   "packages/ui/biome.json": {
-    "mtime": 1789398378.4660199,
-    "ast_hash": "2077bb15fc47a469f5809a08b64ccf4c",
-    "semantic_hash": "2077bb15fc47a469f5809a08b64ccf4c"
+    "mtime": 1789434777.007726,
+    "ast_hash": "cbb602116437981ad86310fd736be0f4",
+    "semantic_hash": ""
   },
   "packages/ui/package.json": {
-    "mtime": 1789398378.4660199,
-    "ast_hash": "f0f27768f8bd5d535297464cb703010d",
+    "mtime": 1789434777.011873,
+    "ast_hash": "1f1371bf4da1b95a97c4dd400bcfa007",
     "semantic_hash": ""
   },
   "skills-lock.json": {
@@ -725,8 +715,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1789398378.1563735,
-    "ast_hash": "f0facb82f480c4b9f3a293f27e2d6c7b",
+    "mtime": 1789434776.9786959,
+    "ast_hash": "ba3dfffe6a6871f79c9db881274d1d93",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -855,13 +845,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1789433014.4249043,
-    "ast_hash": "61a19d638e98b029d6839718f3ceb58d",
+    "mtime": 1789435187.770419,
+    "ast_hash": "551e4bc41b8664591ff88a456399e5e9",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1789433014.4207714,
-    "ast_hash": "cc9d335827df7a9b97a7cca2d8525194",
+    "mtime": 1789435187.770419,
+    "ast_hash": "d9d47b08e2a48abf4dca8939bd94e004",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2895,18 +2885,58 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1789398378.1982176,
-    "ast_hash": "fb7ef2ed60d7bb476c79706e37e8b6ba",
+    "mtime": 1789434776.982843,
+    "ast_hash": "07a93be9db50004afe2bd270817cdfd0",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/prototype-tokens.tsx": {
-    "mtime": 1789401252.6253612,
-    "ast_hash": "af737e426e902482c793d3d564d64c03",
+    "mtime": 1789435019.2823534,
+    "ast_hash": "36b3b57b7dd332ea47a05859d8df1299",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
     "mtime": 1789398378.2191396,
     "ast_hash": "95b86dd11a1a13c22e7aca3fad196962",
+    "semantic_hash": ""
+  },
+  "packages/ui/components.json": {
+    "mtime": 1789434777.007726,
+    "ast_hash": "fcc60d418d74d8324e45c02d8d62bfce",
+    "semantic_hash": ""
+  },
+  "packages/ui/src/components/button.tsx": {
+    "mtime": 1789434777.011873,
+    "ast_hash": "048b2c102892543c049879f2e3b322bb",
+    "semantic_hash": ""
+  },
+  "packages/ui/src/lib/utils.ts": {
+    "mtime": 1789434777.011873,
+    "ast_hash": "589d526b5bd7ec6f0c4d717f41cb8ace",
+    "semantic_hash": ""
+  },
+  "packages/ui/tsconfig.build.json": {
+    "mtime": 1789434777.011873,
+    "ast_hash": "e45b7129a0e54bf18cd09a87ca2a1db8",
+    "semantic_hash": ""
+  },
+  "packages/ui/tsconfig.json": {
+    "mtime": 1789434777.011873,
+    "ast_hash": "bbb792dc28cfc2e79b5a4ba17e4e2b40",
+    "semantic_hash": ""
+  },
+  "docs/adr/0017-shared-ui-package-shadcn-monorepo-pattern.md": {
+    "mtime": 1789398378.1982176,
+    "ast_hash": "ccdbbbf53f902fdbf233984776bb5111",
+    "semantic_hash": ""
+  },
+  "docs/specs/2026-09-14-ui-ux-design-system-spec.md": {
+    "mtime": 1789398378.2024019,
+    "ast_hash": "8158df3994d0dfcf3f840328c0fe2274",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-09-14-95-ui-shared-primitive-library.md": {
+    "mtime": 1789434776.982843,
+    "ast_hash": "2f0d34043b691ee0c439d0a11dca40f8",
     "semantic_hash": ""
   },
   "apps/landing/src/components/prototype/admin-neutral.tsx": {
@@ -2924,19 +2954,9 @@
     "ast_hash": "04122b66912974afce2ba83f6c4d88cc",
     "semantic_hash": ""
   },
-  "docs/adr/0017-shared-ui-package-shadcn-monorepo-pattern.md": {
-    "mtime": 1789398378.1982176,
-    "ast_hash": "ccdbbbf53f902fdbf233984776bb5111",
-    "semantic_hash": ""
-  },
-  "docs/specs/2026-09-14-ui-ux-design-system-spec.md": {
-    "mtime": 1789398378.2024019,
-    "ast_hash": "8158df3994d0dfcf3f840328c0fe2274",
-    "semantic_hash": ""
-  },
   "docs/superpowers/plans/2026-09-14-96-m3-token-swap.md": {
-    "mtime": 1789402461.6126378,
-    "ast_hash": "a329698082cfa95609cade2a23691d4d",
+    "mtime": 1789434093.0121615,
+    "ast_hash": "5aedab00628f539637b3939de176a7fe",
     "semantic_hash": ""
   }
 }

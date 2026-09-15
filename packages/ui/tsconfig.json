@@ -1,0 +1,5 @@
+{
+  "extends": "@sevendays/config/ts/react",
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", ".turbo", "coverage"]
+}

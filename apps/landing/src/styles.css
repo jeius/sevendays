@@ -5,6 +5,7 @@
 @import "@fontsource-variable/figtree";
 @import "@fontsource-variable/roboto-slab";
 @import "@fontsource-variable/geist-mono";
+@source "../../../packages/ui/src";
 
 @plugin "@tailwindcss/typography";
 
