@@ -569,11 +569,11 @@ The whole `return` of `Home` becomes exactly (queries/`selectFeaturedPackages` l
 
 Four small edits, nothing else in these files:
 
-`package-card.tsx` — the `article` className `'flex flex-col gap-3 rounded-lg border p-6'` becomes `'flex flex-col gap-3 rounded-xl border border-brand-gray-cool bg-card p-6 shadow-sm'`; the "Book now" `Link` className `'rounded-md bg-neutral-900 px-4 py-2 text-center text-white'` becomes `{buttonVariants()}` (add the `import { buttonVariants } from '@sevendays/ui/components/button';` line). The card renders on the home strip, `/packages`, and `/packages/:slug` — all three get the white card from this one edit.
+`package-card.tsx` — the `article` className `'flex flex-col gap-3 rounded-lg border p-6'` becomes `'flex flex-col gap-3 rounded-xl border border-brand-gray-cool bg-card p-6 shadow-sm'`; the "Book now" `Link` className `'rounded-md bg-neutral-900 px-4 py-2 text-center text-white'` becomes `{buttonVariants()}` (add the `import { buttonVariants } from '@sevendays/ui/components/button';` line); the description paragraph `text-neutral-700` becomes `text-muted-text` (amended pre-flight-plus: the Task 5 zero-grep requires the starter gray gone from touched files, and muted-text is the mock's card-copy token — 5.51:1 on the white card). The card renders on the home strip, `/packages`, and `/packages/:slug` — all three get the white card from this one edit.
 
 `service-teaser-item.tsx` — the `article` className `'flex flex-col gap-2 rounded-lg border p-4'` becomes `'flex flex-col gap-2 rounded-xl border border-brand-gray-cool bg-card p-4 shadow-sm'`; its "Book now" `Link` className `'rounded-md bg-neutral-900 px-4 py-2 text-center text-white'` becomes `{buttonVariants()}` (same import added). The `/book?service=` deep-link `search` prop is UNTOUCHED.
 
-`branch-strip-item.tsx` — the `article` className `'flex flex-col gap-2 rounded-lg border p-4'` becomes `'flex flex-col gap-2 rounded-xl border border-brand-gray-cool bg-card p-4 shadow-sm'`. `WalkInBadge` and the address text are untouched.
+`branch-strip-item.tsx` — the `article` className `'flex flex-col gap-2 rounded-lg border p-4'` becomes `'flex flex-col gap-2 rounded-xl border border-brand-gray-cool bg-card p-4 shadow-sm'`; the address paragraph `text-neutral-700` becomes `text-muted-text` (same Task 5 zero-grep consistency). `WalkInBadge` internals are untouched.
 
 `cover-panel.tsx` — replace the comment block and the three classNames so the component reads exactly:
 
