@@ -42,7 +42,7 @@
 
 **Not here:** strips below the hero stay as #97 landed them (rhythm + seams); no `/services` copy changes (Task 2); no CTA label changes on `PackageCard` (Task 3).
 
-- [ ] **Step 1: Seam guard — pin every asserted literal before touching the file**
+- [✅] **Step 1: Seam guard — pin every asserted literal before touching the file**
 
 ```bash
 grep -n "coming soon\|View all services\|data-strip\|href=" apps/landing/scripts/verify/content-pages.mjs apps/landing/scripts/verify/packages-pages.mjs | head -30
@@ -50,7 +50,7 @@ grep -n "coming soon\|View all services\|data-strip\|href=" apps/landing/scripts
 
 Record the output in the commit message. Anything these scripts assert on `/` (blurb text, `View all services`, strip sections + article counts, hrefs) is frozen through the rewrite. If the scripts assert the hero `h1` text `Sevendays Photography` (they are not expected to — record either way), the eyebrow keeps that exact string as its accessible text.
 
-- [ ] **Step 2: Rebuild the hero zone**
+- [✅] **Step 2: Rebuild the hero zone**
 
 Replace the first `<section>` and the blurb `<p>` (index.tsx lines 31–41) with exactly:
 
@@ -101,7 +101,7 @@ Replace the first `<section>` and the blurb `<p>` (index.tsx lines 31–41) with
 
 (The h1 moves from the old first section into the hero card — one h1 per page survives; the eyebrow is a `<p>`. `size: 'lg'` keeps the hero CTAs the zone's dominant actions; `lg` is in the generated size union — verified live: `default`/`xs`/`sm`/`lg`/`icon`/`icon-xs`/`icon-sm`/`icon-lg`, and home's landed hero CTA already uses `size: 'lg'`.)
 
-- [ ] **Step 3: Sweep the typed Links**
+- [✅] **Step 3: Sweep the typed Links**
 
 Replace the plain anchor (index.tsx:64) with exactly:
 
@@ -113,7 +113,7 @@ Replace the plain anchor (index.tsx:64) with exactly:
 
 (TanStack `Link` renders `href='/services'` — the CDP check's selector keeps matching. The `text-brand-700` is the #92 link pair, 8.22:1 on white.)
 
-- [ ] **Step 4: Format + typecheck + build**
+- [✅] **Step 4: Format + typecheck + build**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -122,7 +122,7 @@ pnpm --filter @sevendays/landing typecheck && pnpm --filter @sevendays/landing b
 
 Expected: all green (typed `to='/services'` must pass the router's typed-Links check — `/services` is a registered route).
 
-- [ ] **Step 5: Lib-seam tests stay green**
+- [✅] **Step 5: Lib-seam tests stay green**
 
 ```bash
 pnpm --filter @sevendays/landing test
@@ -130,7 +130,7 @@ pnpm --filter @sevendays/landing test
 
 Expected: green unchanged (the route's loader/queries are untouched).
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/landing/src/routes/index.tsx
@@ -154,7 +154,7 @@ pick-time scrub (#97 convention). <record: the Step 1 seam-guard output>"
 
 **Not here:** no `ServiceCard` changes (Task 4 owns its restyle + badge chips); no new tests.
 
-- [ ] **Step 1: Seam guard — confirm the asserted add-on sentence**
+- [✅] **Step 1: Seam guard — confirm the asserted add-on sentence**
 
 ```bash
 grep -n "attach\|add-on\|Makeup" apps/landing/scripts/verify/content-pages.mjs
@@ -162,7 +162,7 @@ grep -n "attach\|add-on\|Makeup" apps/landing/scripts/verify/content-pages.mjs
 
 Pinned fact (verified against the committed script, `content-pages.mjs:100-105`): the check asserts the ENTIRE old sentence verbatim — `servicesText.includes('Looking for add-ons? Makeup, hairstyle, and more can attach to your booking.')`. A neutral rewrite cannot contain that sentence (it presupposes a booking — spec user story 15: "copy that never presupposes online booking"), so keeping the assertion untouched is impossible under the #60 ruling. Resolution (ruled in this plan, surfaced in the PR): the copy changes AND the script's single expectation follows it in the same commit (Step 2b) — the updated check stays a real assertion pinning the new ruled copy. If the guard grep shows the assertion moved or changed shape, re-pin Step 2b's edit to the actual lines before proceeding.
 
-- [ ] **Step 2: Rewrite the page**
+- [✅] **Step 2: Rewrite the page**
 
 Replace `services.tsx`'s return block with exactly:
 
@@ -221,7 +221,7 @@ import { cn } from 'cn';
 
 (The strip structure mirrors home's landed `data-strip='call-visit'` — one pattern, two surfaces. `Link`/`cn`/`buttonVariants` may partially duplicate existing imports; merge alphabetically.)
 
-- [ ] **Step 2b: The script expectation follows the ruled copy**
+- [✅] **Step 2b: The script expectation follows the ruled copy**
 
 In `apps/landing/scripts/verify/content-pages.mjs` (the add-on check, ~lines 100–105), replace exactly:
 
@@ -247,7 +247,7 @@ with:
 
 This is the ticket's ONLY script edit (the Global Constraints' single ruled exception) — it lands in the same commit as the copy change and keeps the check a real assertion on the new ruled copy.
 
-- [ ] **Step 3: Format, typecheck, tests, commit**
+- [✅] **Step 3: Format, typecheck, tests, commit**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -275,7 +275,7 @@ only script edit). <record: the Step 1 guard output>"
 
 **Not here:** the detail page gains no second affordance; the v1 "Call us" detail variant is a pick-time scrub swapping the single CTA (comment convention), not a second rendered affordance; no `InclusionsList`/`CoverPanel` changes (transients token-fit only — #97 already took them; nothing left this ticket).
 
-- [ ] **Step 1: The `cta` prop in `PackageCard`**
+- [✅] **Step 1: The `cta` prop in `PackageCard`**
 
 Rewrite `package-card.tsx` with exactly:
 
@@ -327,7 +327,7 @@ export function PackageCard({
 }
 ```
 
-- [ ] **Step 2: The index goes CTA-less; the strip keeps its funnel CTA**
+- [✅] **Step 2: The index goes CTA-less; the strip keeps its funnel CTA**
 
 In `apps/landing/src/routes/packages/index.tsx`, the grid call stays `<PackageCard key={p.id} pkg={p} />` — with the prop optional, the index is now CTA-less by default. Add no prop here. In `apps/landing/src/routes/index.tsx`, the home strip call becomes `<PackageCard key={p.id} pkg={p} cta='card' />`.
 
@@ -348,7 +348,7 @@ Then sweep the index page shell to the system (replace its return block):
   );
 ```
 
-- [ ] **Step 3: The detail affordance + the not-found**
+- [✅] **Step 3: The detail affordance + the not-found**
 
 In `apps/landing/src/routes/packages/$slug.tsx`:
 
@@ -396,7 +396,7 @@ And `notFoundComponent` becomes:
 
 with imports gaining `buttonVariants`, `Link`, `cn` (the plain anchor's dependency-free posture ends here — the page now uses the shared primitives per the AC; the literal `Package not found.` is CDP-asserted by `packages-pages.mjs` and survives verbatim).
 
-- [ ] **Step 4: Format, typecheck, tests, build**
+- [✅] **Step 4: Format, typecheck, tests, build**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -405,7 +405,7 @@ pnpm --filter @sevendays/landing typecheck && pnpm --filter @sevendays/landing t
 
 Expected: all green. If `packages-pages.mjs`'s not-found check asserts the old plain-anchor `href='/packages'` via `<a`, note that TanStack `Link` renders the same `href` — the selector keeps matching (Task 6's live run proves it).
 
-- [ ] **Step 5: Commit**
+- [✅] **Step 5: Commit**
 
 ```bash
 git add apps/landing/src/components/package-card.tsx apps/landing/src/routes/packages/index.tsx apps/landing/src/routes/packages/\$slug.tsx apps/landing/src/routes/index.tsx
@@ -430,7 +430,7 @@ scrub documented at pick time; not-found wears the system card."
 
 **Not here:** the wizard's pill (`book.tsx:118`) is #99's — fenced; `branch-strip-item.tsx` already uses `WalkInBadge` and needs no edit; no new shared primitives (the wrapper is landing-local per ADR-0017).
 
-- [ ] **Step 1: `WalkInBadge` — the thin wrapper**
+- [✅] **Step 1: `WalkInBadge` — the thin wrapper**
 
 Rewrite `walk-in-badge.tsx` with exactly:
 
@@ -448,7 +448,7 @@ export function WalkInBadge({ acceptsWalkIns }: { acceptsWalkIns: boolean }) {
 }
 ```
 
-- [ ] **Step 2: `BranchCard` — token sweep + the `tel:` affordance**
+- [✅] **Step 2: `BranchCard` — token sweep + the `tel:` affordance**
 
 Rewrite `branch-card.tsx` with exactly:
 
@@ -502,7 +502,7 @@ export function BranchCard({ branch }: { branch: Branch }) {
 
 (Ruling recorded: the `tel:` affordance renders on both editions as the quiet secondary — a phone number is useful on main too — and becomes v1's primary when the scrub drops the booking CTA. The `card`-on-`outline` pairing mirrors the #92 emphasis-strip buttons. If `content-pages.mjs` asserts `Book at this branch`, it survives verbatim; the new `Call {name}` anchor is additive.)
 
-- [ ] **Step 3: `ServiceCard` — chips onto `badge`, token sweep**
+- [✅] **Step 3: `ServiceCard` — chips onto `badge`, token sweep**
 
 Rewrite `service-card.tsx` with exactly:
 
@@ -555,7 +555,7 @@ export function ServiceCard({
 
 (The `teaser items keep the `a[href^="/book?service="]` deep-links` seam is a `ServiceTeaserItem` concern — untouched. `ServiceCard`'s own Link is already typed and keeps its `search`.)
 
-- [ ] **Step 4: Format, typecheck, tests, commit**
+- [✅] **Step 4: Format, typecheck, tests, commit**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -581,7 +581,7 @@ tel: rendered on both editions as quiet secondary — v1's primary post-scrub
 
 **Not here:** no copy invention (all copy stays placeholder-marked); no portfolio/testimonial content.
 
-- [ ] **Step 1: Rewrite the page shell**
+- [✅] **Step 1: Rewrite the page shell**
 
 Replace `about.tsx`'s `AboutPage` body with exactly:
 
@@ -611,7 +611,7 @@ function AboutPage() {
 
 (One consistent rhythm with home's strips: `mx-auto mt-12 max-w-5xl border-t border-line-soft px-6 pt-12`. Asserted literals — if `content-pages.mjs` reads any `/about` text, it survives; nothing here is expected to be asserted. `data-portfolio-grid` is the M5 contract — byte-for-byte.)
 
-- [ ] **Step 2: Format, typecheck, tests, commit**
+- [✅] **Step 2: Format, typecheck, tests, commit**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -636,11 +636,11 @@ Slots + TODO(owner-copy) markers intact; data-portfolio-grid byte-for-byte."
 
 **Not here:** no test/script edits ever; booking-e2e/confirmation-emails are M2 live-suite scripts (not this ticket's read-only set — #97 ran booking-wizard only; this ticket runs the same three).
 
-- [ ] **Step 1: Env + browser readiness (controller)**
+- [✅] **Step 1: Env + browser readiness (controller)**
 
 Copy the gitignored env files from the main checkout (never commit them): `apps/landing/.env.local` (`API_URL`) and `apps/api/.dev.vars`. Resolve the headless Chrome binary per the #97 precedent — `google-chrome` if present, else the Playwright headless shell (`find ~/.cache/ms-playwright -name chrome-headless-shell -type f | head -1`, nested per-version dir — glob the cache root, never a remembered path). Verify port 9222 is not already held (`ss -tlnp`).
 
-- [ ] **Step 2: Boot the three-terminal stack**
+- [✅] **Step 2: Boot the three-terminal stack**
 
 ```bash
 pnpm --filter @sevendays/api dev      # terminal 1 — port 8787, seeded catalog
@@ -650,7 +650,7 @@ pnpm --filter @sevendays/landing dev  # terminal 2 — port 3000; confirm from i
 
 Sandbox/WSL fallbacks per the SDD channel quirks: servers run as background tasks; grep each log for its actual port before probing.
 
-- [ ] **Step 3: The read-only regressions**
+- [✅] **Step 3: The read-only regressions**
 
 ```bash
 node apps/landing/scripts/verify/content-pages.mjs    # strips, blurb, view-all, badges
@@ -660,7 +660,7 @@ node apps/landing/scripts/verify/booking-wizard.mjs   # /book chrome-only read-o
 
 Expected: every check `PASS`, exit 0 — the hero rebuild, the CTA-less index, the not-found card, and the tel: affordance moved no seam. Any FAIL: the surface broke a seam — fix the surface, never the script; re-run.
 
-- [ ] **Step 4: The static gates**
+- [✅] **Step 4: The static gates**
 
 ```bash
 grep -rn 'text-neutral-\|bg-neutral-' apps/landing/src/routes apps/landing/src/components --include='*.tsx' | grep -v prototype || echo "NO ISLAND COLORS IN SURFACES — OK"
@@ -670,7 +670,7 @@ grep -c 'data-portfolio-grid' apps/landing/src/routes/about.tsx
 
 Expected: the island grep matches ONLY `book.tsx` lines (15 line matches — fenced to #99; the `NO ISLAND COLORS … OK` fallback must NOT fire, and any non-`book.tsx` match is a leftover this ticket missed); the pill grep prints `NO HAND-ROLLED PILLS IN COMPONENTS — OK` (its scope is `components/`, which excludes the fenced `routes/book.tsx` pill); `data-portfolio-grid` count 1.
 
-- [ ] **Step 5: The repo gate**
+- [✅] **Step 5: The repo gate**
 
 ```bash
 pnpm check
@@ -678,7 +678,7 @@ pnpm check
 
 Expected: green across all workspaces (35/35 turbo tasks at the #97 baseline).
 
-- [ ] **Step 6: Evidence file + teardown**
+- [✅] **Step 6: Evidence file + teardown**
 
 Write `.superpowers/sdd/2026-09-15-98-landing-surfaces-both-variants/task-6-evidence.md` (per-gate results, check counts, any fallback that fired). Kill Chrome + both dev servers. If (and only if) a gate forced a fix: commit it under `fix(landing): …` with the gate named; otherwise no commit.
 
@@ -696,15 +696,15 @@ Write `.superpowers/sdd/2026-09-15-98-landing-surfaces-both-variants/task-6-evid
 
 **Not here:** plan.md lines 99/101/103 (siblings); the v1-picks ledger (triager's at merge — landing surfaces are the known split class: content pass drops booking hunks; the #105 row's order-gating precedent applies).
 
-- [ ] **Step 1: The progress.md entries**
+- [✅] **Step 1: The progress.md entries**
 
 Prepend to the `Last updated` header line: `2026-09-15 (#98 M3 ticket 04 — landing surfaces onto the system, both variants styled: the ruled two-CTA hero band, /services neutral add-on line + closing call-or-visit strip, CTA-less /packages index + the single "Book this package" detail affordance, BranchCard tel: affordance + token sweep, WalkInBadge + ServiceCard chips onto the shared badge, system not-found, /about skeleton polish — PR <NN>.. Prior 2026-09-15: ` (keeping the existing #100 entry as the new Prior). Add the What-Exists bullet after the ticket-06 bullet (pinned copy authored at execution — it records what landed, the cta-prop ruling, the tel: ruling, and the fenced wizard pill).
 
-- [ ] **Step 2: Tick the roadmap checkbox**
+- [✅] **Step 2: Tick the roadmap checkbox**
 
 `docs/plan.md` line 100 `- [ ] Landing surfaces onto the system, both variants styled …` → `- [✅]` with a dated annotation naming the ticket's landed facts (hero band, neutral copy + strip, CTA-less index, detail affordance, tel:, badge collapse, not-found, /about).
 
-- [ ] **Step 3: Tick this plan + graphify + full check**
+- [✅] **Step 3: Tick this plan + graphify + full check**
 
 Tick every completed step (`- [✅]`), then:
 
@@ -713,7 +713,7 @@ graphify update .
 pnpm check
 ```
 
-- [ ] **Step 4: Commit, push, open the PR**
+- [✅] **Step 4: Commit, push, open the PR**
 
 ```bash
 git add docs/ graphify-out
@@ -726,7 +726,7 @@ gh pr create --base main --head feat/98-landing-surfaces \
 
 Body sections: Summary · AC→evidence mapping (the ticket's 9 ACs) · execution rulings (hero sans-headings + placeholder blurb, tel:-on-both-editions, cta prop, third pill fenced to #99, the Task 2 add-on-line ruling — neutral copy + its single pinned script-expectation follow, the not-found supporting sentence as agent-authored copy) · verification (CDP counts + pnpm check) · deferred minors · scope fence · Closes #98 · standing v1-picks note (landing split class).
 
-- [ ] **Step 5: The completion report — then STOP**
+- [✅] **Step 5: The completion report — then STOP**
 
 Evidence pack + AC mapping + state + flags to the owner. Then STOP.
 
