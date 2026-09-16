@@ -213,7 +213,9 @@ export function PrototypeServiceImageCard({
       />
       <div className='absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5'>
         <div className='min-w-0'>
-          <h3 className='truncate font-serif text-xl font-semibold text-white'>
+          {/* D ruling: card titles go sans (Figtree) — serif stays for
+              page-level h1/h2 and the Track-2 density comparison. */}
+          <h3 className='truncate text-xl font-semibold text-white'>
             {service.name}
           </h3>
           <p className='text-brand-200 mt-1 font-mono text-sm'>{peso(service.priceCents)}</p>
@@ -223,6 +225,51 @@ export function PrototypeServiceImageCard({
         </span>
       </div>
     </Link>
+  );
+}
+
+// The variant-D package treatment (owner: "cover photos drive the cards"):
+// the cover is the card's hero — edge-to-edge media with title + price
+// overlaid on the same two-layer ink tint as the service cards — while the
+// text-heavy body (description, chips, +K popover, CTA) stays on white.
+// Deliberately NOT full-image-with-all-text: too much text for a photo
+// (clutter + unpredictable legibility per cover). Sans titles per D.
+export function PrototypePackageCoverCard({
+  pkg,
+  demoOpen,
+}: {
+  pkg: ServicePackageWithInclusions;
+  demoOpen?: boolean;
+}) {
+  return (
+    <article className='bg-card border-brand-gray-cool flex flex-col overflow-hidden rounded-xl border shadow-sm'>
+      <div className='border-line-soft relative h-56 shrink-0 overflow-hidden border-b'>
+        <img
+          src={packageCover(pkg.id)}
+          alt={`Cover for ${pkg.name} — stand-in until R2 assets arrive`}
+          className='absolute inset-0 size-full object-cover'
+          loading='lazy'
+        />
+        <div className='bg-brand-ink/35 absolute inset-0' aria-hidden='true' />
+        <div
+          className='from-brand-ink via-brand-ink/55 to-transparent absolute inset-0 bg-gradient-to-t'
+          aria-hidden='true'
+        />
+        <div className='absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5'>
+          <div className='min-w-0'>
+            <h3 className='truncate text-xl font-semibold text-white'>{pkg.name}</h3>
+            <p className='text-brand-200 mt-1 font-mono text-sm'>{peso(pkg.priceCents)}</p>
+          </div>
+        </div>
+      </div>
+      <div className='flex flex-col gap-3 p-5'>
+        <p className='text-muted-text line-clamp-2 text-sm'>{pkg.description}</p>
+        <ChipCluster chips={packageChips(pkg)} density='d92' demoOpen={demoOpen} />
+        <div className='mt-auto'>
+          <BookNow id={pkg.id} kind='package' />
+        </div>
+      </div>
+    </article>
   );
 }
 

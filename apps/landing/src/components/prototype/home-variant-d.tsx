@@ -5,7 +5,7 @@ import { cn } from 'cn';
 import { selectFeaturedPackages } from '../../lib/featured';
 import {
   CARD_GRID,
-  PrototypePackageCard,
+  PrototypePackageCoverCard,
   PrototypeServiceImageCard,
 } from './card-system';
 import {
@@ -20,7 +20,9 @@ import {
 // PROTOTYPE (#111) Track 1 — Home variant D, owner-specified mix:
 //   1 hero:         A (full-bleed cinema)
 //   2 gallery:      B (masonry wall)
-//   3 packages:     A (3-col unified cards, #92 density)
+//   3 packages:     cover-driven (photo heroes the card; title + price
+//                   overlaid on the tinted cover, text-heavy body on
+//                   white) + SANS card titles per the D reaction
 //   4 services:     NEW — cards with FULL IMAGE backgrounds (photo IS the
 //                   card; ink gradient carries legibility; system mechanics
 //                   kept: 1-line title, fixed height, single affordance)
@@ -115,7 +117,9 @@ export function HomeVariantD({
         </div>
       </section>
 
-      {/* 3 — Featured packages: A's 3-col unified grid (#92 density). */}
+      {/* 3 — Featured packages: cover-driven cards (owner ruling) — the
+            photo is the card's hero, title + price overlaid on the two-layer
+            tint, text-heavy body on white. Sans titles per D. */}
       <section className='mx-auto max-w-5xl px-6 py-16' data-strip='featured'>
         <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
           {KICKERS_DRAFT.packages}
@@ -125,7 +129,7 @@ export function HomeVariantD({
         </h2>
         <div className={cn(CARD_GRID.d92, 'mt-8')}>
           {strip.map((p) => (
-            <PrototypePackageCard key={p.id} pkg={p} density='d92' />
+            <PrototypePackageCoverCard key={p.id} pkg={p} />
           ))}
         </div>
       </section>
