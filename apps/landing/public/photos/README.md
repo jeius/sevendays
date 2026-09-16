@@ -8,6 +8,13 @@ supplied (the ticket's intake step was pending when the prototype ran — the
 documented fallback applies: free-license stock matching the petrol/ink
 atmosphere).
 
+## Brand assets (owner-supplied — NOT stand-ins)
+
+- `sd.png` — the official SD monogram, rendered in the chrome (header +
+  footer wordmark chip) per the 2026-09-16 ruling. Ship a properly sized
+  export at build time; the 2048px `logo.png` full lockup stays here as
+  the source art.
+
 ## Source & license
 
 All images from Unsplash (https://unsplash.com/license — free for commercial

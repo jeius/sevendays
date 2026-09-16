@@ -280,8 +280,10 @@ export function ChromeVariants() {
       </div>
 
       <p className='mt-6 text-muted-foreground text-xs'>
-        Footer + live-page treatments inherit the winning register (the bands above are the ruling
-        surface). Device screenshots of the real chrome come at the #101 gate.
+        RULED 2026-09-16 (owner reaction): <strong>Treatment B + Mobile panel B</strong> are the
+        endorsed chrome — the live header, footer, and mobile panel now render B on this branch,
+        with the owner's logo mark leading the wordmark. The bands above stay as the ruling
+        evidence. Device screenshots of the final chrome come at the #101 gate.
       </p>
     </section>
   );
