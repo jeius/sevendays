@@ -1,7 +1,8 @@
 // Read-only database-state probe. Prints record counts and table names only —
 // never a connection string. Run: node --env-file=.env scripts/db-state.mjs
-import postgres from 'postgres';
+
 import dns from 'node:dns/promises';
+import postgres from 'postgres';
 
 const url = process.env.DATABASE_MIGRATE_URL;
 if (!url) {

@@ -4,20 +4,30 @@ import { cn } from 'cn';
 import { NAV_LINKS } from '../lib/nav';
 import { MobileNav } from './mobile-nav';
 
-// Site chrome, ink-led band (M3 #97 / the #92 composition): ink background,
-// white text, petrol as the action color. Desktop row structure unchanged
-// from M2; mobile gets the MobileNav hamburger panel. Every interactive
-// control carries the full-opacity brand focus ring — the band-CTA
-// normalization the spec rules (7.15:1 non-text on ink).
+// Site chrome — Treatment B "rebalanced" RULED 2026-09-16 (#111 owner
+// reaction on the prototype bands): links rest soft at brand-200 (13.94:1
+// on ink), sharpen to white on hover; the current page is white + medium
+// with a petrol tick; the CTA drops to deep petrol with a wide-tracked
+// label (10.90:1). The owner's logo mark leads the wordmark (the owner-supplied
+// sd.png monogram — the full lockup's wordmark is illegible at chip size).
+// Mobile panel carries the ruled Mobile panel B treatment.
 export function SiteHeader() {
   return (
     <header className='bg-brand-ink'>
       <div className='relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4'>
         <Link
           to='/'
-          className='focus-visible:ring-brand-focus-ring rounded-sm font-bold text-xl text-white focus-visible:ring-3 focus-visible:outline-none'
+          className='flex items-center gap-3 rounded-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
         >
-          Sevendays Photography
+          <span className='relative size-10 shrink-0 overflow-hidden border-line-soft/40 flex items-center'>
+            <img src='/photos/sd.png' alt='' aria-hidden='true' />
+          </span>
+          <span className='flex items-baseline gap-2.5'>
+            <span className='font-bold font-serif text-white text-xl'>Sevendays</span>
+            <span className='hidden font-mono text-[10px] text-brand-300 uppercase tracking-[0.18em] sm:inline'>
+              Photography
+            </span>
+          </span>
         </Link>
         <div className='flex items-center gap-4 md:gap-6'>
           <nav className='hidden items-center gap-6 md:flex' aria-label='Primary'>
@@ -25,8 +35,12 @@ export function SiteHeader() {
               <Link
                 key={link.to}
                 to={link.to}
-                className='focus-visible:ring-brand-focus-ring rounded-sm text-sm text-white/85 transition-colors hover:text-white focus-visible:ring-3 focus-visible:outline-none aria-[current=page]:text-white'
+                className='inline-flex items-center gap-1.5 rounded-sm text-brand-200 text-sm transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring aria-[current=page]:font-medium aria-[current=page]:text-white'
               >
+                <span
+                  className='hidden size-1.5 rounded-full bg-primary aria-[current=page]:inline-block'
+                  aria-hidden='true'
+                />
                 {link.label}
               </Link>
             ))}
@@ -35,7 +49,7 @@ export function SiteHeader() {
             to='/book'
             className={cn(
               buttonVariants(),
-              'focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
+              'bg-brand-deep tracking-wide hover:bg-brand-primary-hover focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
             )}
           >
             Book now
