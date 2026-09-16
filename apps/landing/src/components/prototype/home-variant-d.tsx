@@ -82,7 +82,7 @@ export function HomeVariantD({
             </Link>
           </div>
           <p className='text-white/60 mt-10 font-mono text-[11px]'>
-            Stand-in image — the studio's own portfolio arrives at M5.
+            Photo from the studio — more of our work arrives at M5.
           </p>
         </div>
       </section>

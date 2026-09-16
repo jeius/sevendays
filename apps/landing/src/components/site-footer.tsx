@@ -18,12 +18,11 @@ export function SiteFooter() {
             to='/'
             className='flex items-center gap-3 rounded-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
           >
-            <span className='border-line-soft/40 relative block size-10 shrink-0 overflow-hidden rounded-md'>
+            <span className='border-line-soft/40 relative flex items-center size-10 shrink-0 overflow-hidden rounded-md'>
               <img
                 src='/photos/sd.png'
                 alt=''
                 aria-hidden='true'
-                className='absolute inset-0 size-full object-cover'
               />
             </span>
             <span className='flex items-baseline gap-2.5'>

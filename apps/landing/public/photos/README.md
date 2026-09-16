@@ -8,7 +8,10 @@ supplied (the ticket's intake step was pending when the prototype ran — the
 documented fallback applies: free-license stock matching the petrol/ink
 atmosphere).
 
-## Brand assets (owner-supplied — NOT stand-ins)
+## Brand assets + owner photos (NOT stand-ins)
+
+- `cover_photo.jpg` — owner-supplied studio photo (photographer + Canon
+  DSLR, studio logo burned in). Now the HERO image on every variant.
 
 - `sd.png` — the official SD monogram, rendered in the chrome (header +
   footer wordmark chip) per the 2026-09-16 ruling. Ship a properly sized

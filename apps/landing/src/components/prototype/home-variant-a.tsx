@@ -75,7 +75,7 @@ export function HomeVariantA({
             </Link>
           </div>
           <p className='mt-10 font-mono text-[11px] text-white/60'>
-            Stand-in image — the studio's own portfolio arrives at M5.
+            Photo from the studio — more of our work arrives at M5.
           </p>
         </div>
       </section>

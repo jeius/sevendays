@@ -8,6 +8,7 @@ import { packageChips, packageCover } from './card-system';
 import {
   GALLERY_DRAFT,
   HERO_BLURB_DRAFT,
+  HERO_CAPTION_DRAFT,
   HERO_PHOTO,
   HERO_PHOTO_ALT,
   KICKERS_DRAFT,
@@ -32,7 +33,7 @@ export function HomeVariantB({
   services: StudioServiceWithBranches[];
 }) {
   const { heading, packages: strip } = selectFeaturedPackages(packages);
-  const [tall, ...rest] = GALLERY_DRAFT;
+  const [, ...rest] = GALLERY_DRAFT;
 
   return (
     <div>
@@ -70,7 +71,7 @@ export function HomeVariantB({
               </Link>
             </div>
             <p className='mt-10 font-mono text-[11px] text-muted-text'>
-              Stand-in imagery — the studio's own portfolio arrives at M5.
+              Hero: the studio's own photo — the full portfolio arrives at M5.
             </p>
           </div>
           <div className='grid grid-cols-2 gap-3 md:col-span-7'>
@@ -83,7 +84,7 @@ export function HomeVariantB({
                 />
               </div>
               <figcaption className='mt-2 font-mono text-[11px] text-muted-text'>
-                {tall.caption}
+                {HERO_CAPTION_DRAFT}
               </figcaption>
             </figure>
             {rest.slice(0, 2).map((item) => (

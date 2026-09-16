@@ -19,12 +19,11 @@ export function SiteHeader() {
           to='/'
           className='flex items-center gap-3 rounded-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
         >
-          <span className='relative block size-10 shrink-0 overflow-hidden rounded-md border-line-soft/40'>
+          <span className='relative size-10 shrink-0 overflow-hidden border-line-soft/40 flex items-center'>
             <img
-              src='/photos/logo.png'
+              src='/photos/sd.png'
               alt=''
               aria-hidden='true'
-              className='absolute top-[-65%] left-1/2 w-[330%] max-w-none -translate-x-1/2'
             />
           </span>
           <span className='flex items-baseline gap-2.5'>

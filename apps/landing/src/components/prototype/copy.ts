@@ -28,9 +28,12 @@ export const GALLERY_DRAFT = [
   { src: '/photos/gallery-06-bts.jpg', caption: 'Behind the scenes · stand-in' },
 ] as const;
 
-export const HERO_PHOTO = '/photos/hero-primary.jpg';
+export const HERO_PHOTO = '/photos/cover_photo.jpg';
 export const HERO_PHOTO_ALT =
-  'Portrait session lit with a cool gel — stand-in until the studio’s own portfolio arrives';
+  'Photographer holding a Canon DSLR by the studio window — the studio’s own photo';
+
+// DRAFT — caption for hero-photo slots in collages (variant B's tall mat).
+export const HERO_CAPTION_DRAFT = 'At work in the studio · owner photo';
 
 // CLEARLY-FAKE placeholder testimonials (owner ruling: render placeholders
 // now, real content at M5). Names are placeholders by construction.
