@@ -242,12 +242,15 @@ export function PrototypePackageCoverCard({
   demoOpen?: boolean;
 }) {
   return (
-    <article className='bg-card border-brand-gray-cool flex flex-col overflow-hidden rounded-xl border shadow-sm'>
+    // Hover (owner ask, D): one idea, layered — the card lifts while the
+    // cover slowly zooms ("the photograph opens up"). Transforms only (no
+    // layout shift), and both still under prefers-reduced-motion.
+    <article className='group bg-card border-brand-gray-cool flex flex-col overflow-hidden rounded-xl border shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0'>
       <div className='border-line-soft relative h-56 shrink-0 overflow-hidden border-b'>
         <img
           src={packageCover(pkg.id)}
           alt={`Cover for ${pkg.name} — stand-in until R2 assets arrive`}
-          className='absolute inset-0 size-full object-cover'
+          className='absolute inset-0 size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100'
           loading='lazy'
         />
         <div className='bg-brand-ink/35 absolute inset-0' aria-hidden='true' />
