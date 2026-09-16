@@ -1,6 +1,7 @@
 import type { StudioServiceWithBranches } from '@sevendays/types';
 import { buttonVariants } from '@sevendays/ui/components/button';
 import { Link } from '@tanstack/react-router';
+import { cn } from 'cn';
 import { peso } from '../lib/format';
 
 // Home teaser item (owner-ratified shape): name + price + Book now deep
@@ -10,7 +11,11 @@ export function ServiceTeaserItem({ service }: { service: StudioServiceWithBranc
     <article className='flex flex-col gap-2 rounded-xl border border-brand-gray-cool bg-card p-4 shadow-sm'>
       <h3 className='font-semibold'>{service.name}</h3>
       <p className='font-medium'>{peso(service.priceCents)}</p>
-      <Link to='/book' search={{ service: service.id }} className={buttonVariants()}>
+      <Link
+        to='/book'
+        search={{ service: service.id }}
+        className={cn(buttonVariants(), 'focus-visible:ring-3 focus-visible:ring-brand-focus-ring')}
+      >
         Book now
       </Link>
     </article>

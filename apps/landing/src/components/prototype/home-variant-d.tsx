@@ -3,11 +3,7 @@ import { buttonVariants } from '@sevendays/ui/components/button';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
 import { selectFeaturedPackages } from '../../lib/featured';
-import {
-  CARD_GRID,
-  PrototypePackageCoverCard,
-  PrototypeServiceImageCard,
-} from './card-system';
+import { CARD_GRID, PrototypePackageCoverCard, PrototypeServiceImageCard } from './card-system';
 import {
   GALLERY_DRAFT,
   HERO_BLURB_DRAFT,
@@ -93,9 +89,7 @@ export function HomeVariantD({
           <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
             {KICKERS_DRAFT.gallery}
           </p>
-          <h2 className='text-brand-ink mt-2 font-serif text-3xl font-semibold'>
-            The work
-          </h2>
+          <h2 className='text-brand-ink mt-2 font-serif text-3xl font-semibold'>The work</h2>
           <div className='mt-8 columns-2 gap-4 md:columns-3 [&>figure]:mb-4'>
             {GALLERY_DRAFT.map((item) => (
               <figure
@@ -124,9 +118,7 @@ export function HomeVariantD({
         <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
           {KICKERS_DRAFT.packages}
         </p>
-        <h2 className='text-brand-ink mt-2 font-serif text-3xl font-semibold'>
-          {heading}
-        </h2>
+        <h2 className='text-brand-ink mt-2 font-serif text-3xl font-semibold'>{heading}</h2>
         <div className={cn(CARD_GRID.d92, 'mt-8')}>
           {strip.map((p) => (
             <PrototypePackageCoverCard key={p.id} pkg={p} />
@@ -136,10 +128,7 @@ export function HomeVariantD({
 
       {/* 4 — Services: full-image-background cards (the NEW treatment the
             owner asked to see). */}
-      <section
-        className='border-line-soft bg-wash-a border-y'
-        data-strip='services'
-      >
+      <section className='border-line-soft bg-wash-a border-y' data-strip='services'>
         <div className='mx-auto max-w-5xl px-6 py-16'>
           <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
             {KICKERS_DRAFT.services}
@@ -200,10 +189,7 @@ export function HomeVariantD({
       </section>
 
       {/* 6 — Emphasis strip: the ratified #92 gray-light band. */}
-      <section
-        className='bg-brand-gray-light border-line-soft border-t'
-        data-strip='call-visit'
-      >
+      <section className='bg-brand-gray-light border-line-soft border-t' data-strip='call-visit'>
         <div className='mx-auto flex max-w-5xl flex-col items-start justify-between gap-4 px-6 py-8 md:flex-row md:items-center'>
           <div>
             <h2 className='text-brand-ink font-serif text-xl font-semibold'>

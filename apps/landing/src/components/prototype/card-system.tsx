@@ -181,11 +181,7 @@ export function serviceBackground(name: string): string {
 // The variant-D service treatment: the photo IS the card — full-image
 // background, ink gradient for legibility, system mechanics kept (1-line
 // title, fixed height, one affordance, deep link preserved).
-export function PrototypeServiceImageCard({
-  service,
-}: {
-  service: StudioServiceWithBranches;
-}) {
+export function PrototypeServiceImageCard({ service }: { service: StudioServiceWithBranches }) {
   return (
     <Link
       to='/book'
@@ -215,9 +211,7 @@ export function PrototypeServiceImageCard({
         <div className='min-w-0'>
           {/* D ruling: card titles go sans (Figtree) — serif stays for
               page-level h1/h2 and the Track-2 density comparison. */}
-          <h3 className='truncate text-xl font-semibold text-white'>
-            {service.name}
-          </h3>
+          <h3 className='truncate text-xl font-semibold text-white'>{service.name}</h3>
           <p className='text-brand-200 mt-1 font-mono text-sm'>{peso(service.priceCents)}</p>
         </div>
         <span className='shrink-0 rounded-md border border-white/40 bg-brand-ink/60 px-3 py-1.5 text-sm font-medium text-white transition-colors group-hover:bg-brand-ink/80'>

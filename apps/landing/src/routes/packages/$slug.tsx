@@ -19,10 +19,10 @@ export const Route = createFileRoute('/packages/$slug')({
   component: PackageDetail,
   // Unknown/inactive slug → uniform not-found (owner-ratified copy).
   notFoundComponent: () => (
-    <div className='mx-auto max-w-5xl px-6'>
-      <div className='mt-16 flex flex-col items-center gap-4 rounded-xl border border-brand-gray-cool bg-card p-10 text-center shadow-sm'>
-        <h1 className='font-semibold text-2xl text-brand-ink'>Package not found.</h1>
-        <p className='text-muted-text text-sm'>
+    <div className='mx-auto max-w-5xl px-6 pt-12'>
+      <div className='flex flex-col items-center gap-4 rounded-xl border border-brand-gray-cool bg-card p-10 text-center shadow-sm'>
+        <h1 className='font-bold text-3xl text-brand-ink'>Package not found.</h1>
+        <p className='text-muted-text text-base'>
           The package you are looking for does not exist or is no longer offered.
         </p>
         <Link

@@ -20,11 +20,7 @@ export function SiteHeader() {
           className='flex items-center gap-3 rounded-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
         >
           <span className='relative size-10 shrink-0 overflow-hidden border-line-soft/40 flex items-center'>
-            <img
-              src='/photos/sd.png'
-              alt=''
-              aria-hidden='true'
-            />
+            <img src='/photos/sd.png' alt='' aria-hidden='true' />
           </span>
           <span className='flex items-baseline gap-2.5'>
             <span className='font-bold font-serif text-white text-xl'>Sevendays</span>
