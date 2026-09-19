@@ -1,11 +1,26 @@
+import { buttonVariants } from '@sevendays/ui/components/button';
+import { Input } from '@sevendays/ui/components/input';
+import { Label } from '@sevendays/ui/components/label';
+import { Textarea } from '@sevendays/ui/components/textarea';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { cn } from 'cn';
 import { useState } from 'react';
 import { z } from 'zod';
+import { ChoiceCard } from '../components/booking/choice-card';
+import { HourChipGrid } from '../components/booking/hour-chip-grid';
 import { RejectionCard } from '../components/booking/rejection-card';
+import { StepProgress } from '../components/booking/step-progress';
 import { SummaryRail } from '../components/booking/summary-rail';
+import { WalkInBadge } from '../components/walk-in-badge';
 import { createAppointment } from '../lib/api.functions';
-import { phDateInputMin, type RejectionReason, TIME_SLOTS, useBookingWizard } from '../lib/booking';
+import {
+  contactFieldErrors,
+  contactSchema,
+  phDateInputMin,
+  type RejectionReason,
+  useBookingWizard,
+} from '../lib/booking';
 import { peso } from '../lib/format';
 import {
   addonServiceQueries,
@@ -57,6 +72,11 @@ function BookPage() {
     reason: RejectionReason;
     apiMessage: string;
   } | null>(null);
+  // Inline Zod errors (#58 ruling): a field shows its message only after the
+  // customer blurs it still-invalid — display-only state, never part of the
+  // gate. The gate itself is the M2 predicate restated as contactSchema
+  // (booking-contact.test.ts pins the equivalence).
+  const [touched, setTouched] = useState({ name: false, email: false, phone: false });
 
   async function handleSubmit() {
     setRejection(null);
@@ -68,58 +88,59 @@ function BookPage() {
     }
   }
 
+  const contactFields = {
+    name: wizard.name,
+    email: wizard.email,
+    phone: wizard.phone,
+    notes: wizard.notes,
+  };
   const canConfirm =
     wizard.branchId !== null &&
     wizard.offering !== null &&
     wizard.scheduledAt !== null &&
-    wizard.name.trim() !== '' &&
-    wizard.email.trim() !== '' &&
-    wizard.phone.trim() !== '';
+    contactSchema.safeParse(contactFields).success;
+  const contactErrors = contactFieldErrors(contactFields);
 
   return (
-    <div className='mx-auto max-w-4xl p-6'>
-      <div className='mt-6 h-1.5 rounded-full bg-neutral-200'>
-        <div
-          className='h-full rounded-full bg-neutral-900 transition-all'
-          style={{ width: `${(wizard.step / 5) * 100}%` }}
-        />
-      </div>
+    <div className='mx-auto max-w-5xl px-6 py-12'>
+      {/* Position frozen (M2): the bar sits above the rail grid, full
+          container width. */}
+      <StepProgress step={wizard.step} className='mt-6' />
+      {/* Layout frozen (M2): 1fr + 16rem rail. The step content moves onto
+          the white card (#92 atmosphere) — which also puts every
+          destructive-bearing text (past hint, inline errors, rejection
+          card) on a card surface per the spec placement rule. */}
       <div className='mt-6 grid gap-8 md:grid-cols-[1fr_16rem]'>
-        <div>
+        <div className='rounded-xl border border-brand-gray-cool bg-card p-6 shadow-sm'>
           {wizard.step > 1 && (
             <button
               type='button'
               data-back
               onClick={wizard.goBack}
-              className='mb-4 text-neutral-500 text-sm underline'
+              className='text-muted-foreground mb-4 text-sm underline'
             >
               ← Back
             </button>
           )}
-          <h2 className='font-bold text-2xl'>{QUESTIONS[wizard.step - 1]}</h2>
+          <h2 className='text-brand-ink font-bold text-2xl'>{QUESTIONS[wizard.step - 1]}</h2>
 
           {wizard.step === 1 && (
             <section data-step='1' className='mt-5 grid gap-3 sm:grid-cols-2'>
               {wizard.branchChoices.map((b) => (
-                <button
+                <ChoiceCard
                   key={b.id}
-                  type='button'
-                  onClick={() => {
+                  selected={wizard.branchId === b.id}
+                  onSelect={() => {
                     wizard.setBranch(b.id);
                     wizard.goNext();
                   }}
-                  className={`rounded-xl border p-4 text-left ${
-                    wizard.branchId === b.id ? 'border-neutral-900 ring-2 ring-neutral-900' : ''
-                  }`}
                 >
-                  <span className='font-semibold'>{b.name}</span>
-                  <span className='mt-1 block text-neutral-500 text-sm'>{b.address}</span>
+                  <span className='text-brand-ink block font-semibold'>{b.name}</span>
+                  <span className='text-muted-foreground mt-1 block text-sm'>{b.address}</span>
                   <span className='mt-2 block'>
-                    <span className='rounded-full border px-2 py-0.5 text-xs'>
-                      {b.acceptsWalkIns ? 'Walk-ins welcome' : 'No walk-ins'}
-                    </span>
+                    <WalkInBadge acceptsWalkIns={b.acceptsWalkIns} />
                   </span>
-                </button>
+                </ChoiceCard>
               ))}
             </section>
           )}
@@ -127,32 +148,27 @@ function BookPage() {
           {wizard.step === 2 && (
             <section data-step='2' className='mt-5 space-y-6'>
               <div>
-                <p className='font-medium text-neutral-500 text-sm'>Service Packages</p>
+                <p className='text-muted-foreground text-sm font-medium'>Service Packages</p>
                 <div className='mt-2 grid gap-3 sm:grid-cols-2'>
                   {packages.map((p) => (
-                    <button
+                    <ChoiceCard
                       key={p.id}
-                      type='button'
-                      data-offering={p.id}
-                      onClick={() => wizard.chooseOffering({ kind: 'package', id: p.id })}
-                      className={`rounded-xl border p-4 text-left ${
-                        wizard.offering?.kind === 'package' && wizard.offering.id === p.id
-                          ? 'border-neutral-900 ring-2 ring-neutral-900'
-                          : ''
-                      }`}
+                      offeringId={p.id}
+                      selected={wizard.offering?.kind === 'package' && wizard.offering.id === p.id}
+                      onSelect={() => wizard.chooseOffering({ kind: 'package', id: p.id })}
                     >
-                      <span className='font-semibold'>{p.name}</span>
+                      <span className='text-brand-ink block font-semibold'>{p.name}</span>
                       <span className='mt-1 block font-semibold'>{peso(p.priceCents)}</span>
-                    </button>
+                    </ChoiceCard>
                   ))}
                 </div>
               </div>
               <div>
-                <p className='font-medium text-neutral-500 text-sm'>
+                <p className='text-muted-foreground text-sm font-medium'>
                   Studio Services {wizard.branchId ? `at ${wizard.branchName}` : ''}
                 </p>
                 {!wizard.branchId ? (
-                  <p className='mt-2 text-neutral-500 text-sm'>
+                  <p className='text-muted-foreground mt-2 text-sm'>
                     Choose a branch first — services are bookable per branch.
                   </p>
                 ) : (
@@ -163,20 +179,17 @@ function BookPage() {
                           wizard.branchId !== null && s.bookableBranchIds.includes(wizard.branchId)
                       )
                       .map((s) => (
-                        <button
+                        <ChoiceCard
                           key={s.id}
-                          type='button'
-                          data-offering={s.id}
-                          onClick={() => wizard.chooseOffering({ kind: 'service', id: s.id })}
-                          className={`rounded-xl border p-4 text-left ${
+                          offeringId={s.id}
+                          selected={
                             wizard.offering?.kind === 'service' && wizard.offering.id === s.id
-                              ? 'border-neutral-900 ring-2 ring-neutral-900'
-                              : ''
-                          }`}
+                          }
+                          onSelect={() => wizard.chooseOffering({ kind: 'service', id: s.id })}
                         >
-                          <span className='font-semibold'>{s.name}</span>
+                          <span className='text-brand-ink block font-semibold'>{s.name}</span>
                           <span className='mt-1 block font-semibold'>{peso(s.priceCents)}</span>
-                        </button>
+                        </ChoiceCard>
                       ))}
                   </div>
                 )}
@@ -187,32 +200,35 @@ function BookPage() {
           {wizard.step === 3 && (
             <section data-step='3' className='mt-5'>
               {wizard.applicableAddons.length === 0 ? (
-                <p className='text-neutral-500'>No add-ons apply to this booking.</p>
+                <p className='text-muted-foreground'>No add-ons apply to this booking.</p>
               ) : (
                 <div className='grid gap-3 sm:grid-cols-2'>
                   {wizard.applicableAddons.map((a) => (
-                    <button
+                    <ChoiceCard
                       key={a.id}
-                      type='button'
-                      onClick={() => wizard.toggleAddon(a.id)}
-                      className={`rounded-xl border p-4 text-left ${
-                        wizard.addonIds.includes(a.id)
-                          ? 'border-neutral-900 ring-2 ring-neutral-900'
-                          : ''
-                      }`}
+                      selected={wizard.addonIds.includes(a.id)}
+                      onSelect={() => wizard.toggleAddon(a.id)}
                     >
-                      <span className='font-semibold'>{a.name}</span>
-                      <span className='mt-1 block text-neutral-500 text-sm'>{a.description}</span>
+                      <span className='text-brand-ink block font-semibold'>{a.name}</span>
+                      <span className='text-muted-foreground mt-1 block text-sm'>
+                        {a.description}
+                      </span>
                       <span className='mt-1 block font-medium'>{peso(a.priceCents)}</span>
-                    </button>
+                    </ChoiceCard>
                   ))}
                 </div>
               )}
+              {/* Exactly one of these renders (M2 behavior) — both must stay
+                  DIRECT children of the section: the e2e clicks
+                  `section[data-step='3'] > button` for Continue. */}
               {wizard.addonIds.length > 0 ? (
                 <button
                   type='button'
                   onClick={wizard.goNext}
-                  className='mt-4 rounded-md bg-neutral-900 px-4 py-2 text-primary-foreground text-sm text-white'
+                  className={cn(
+                    buttonVariants(),
+                    'focus-visible:ring-brand-focus-ring mt-4 focus-visible:ring-3'
+                  )}
                 >
                   Continue · {peso(wizard.totalCents)}
                 </button>
@@ -220,7 +236,7 @@ function BookPage() {
                 <button
                   type='button'
                   onClick={wizard.goNext}
-                  className='mt-4 text-neutral-500 text-sm underline'
+                  className='text-muted-foreground mt-4 text-sm underline'
                 >
                   Skip — no add-ons
                 </button>
@@ -230,40 +246,32 @@ function BookPage() {
 
           {wizard.step === 4 && (
             <section data-step='4' className='mt-5'>
-              <input
+              <Input
                 type='date'
-                className='rounded-md border px-3 py-2'
                 value={wizard.date}
                 min={phDateInputMin(new Date())}
                 onChange={(e) => wizard.setDate(e.target.value)}
               />
-              <div className='mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5'>
-                {TIME_SLOTS.map((t) => (
-                  <button
-                    key={t}
-                    type='button'
-                    onClick={() => wizard.setTime(t)}
-                    className={`rounded-lg border px-2 py-2 text-sm ${
-                      wizard.time === t ? 'border-neutral-900 bg-neutral-900 text-white' : ''
-                    }`}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
-              <p className='mt-2 text-neutral-500 text-xs'>
+              <HourChipGrid value={wizard.time} onSelect={wizard.setTime} />
+              <p className='text-muted-foreground mt-2 text-xs'>
                 All times are Philippine time (PHT, UTC+8). Bookings in the past are rejected.
               </p>
               {wizard.isPast && (
-                <p data-past-hint className='mt-2 text-destructive text-sm'>
+                <p data-past-hint className='text-destructive mt-2 text-sm'>
                   That time has already passed — pick a later slot.
                 </p>
               )}
+              {/* DIRECT child of the section — the scripts click
+                  `section[data-step='4'] > button`; the chips live inside
+                  HourChipGrid's wrapping div. */}
               <button
                 type='button'
                 disabled={wizard.scheduledAt === null}
                 onClick={wizard.goNext}
-                className='mt-4 rounded-md bg-neutral-900 px-4 py-2 text-sm text-white disabled:opacity-50'
+                className={cn(
+                  buttonVariants(),
+                  'focus-visible:ring-brand-focus-ring mt-4 focus-visible:ring-3'
+                )}
               >
                 Continue
               </button>
@@ -272,31 +280,76 @@ function BookPage() {
 
           {wizard.step === 5 && (
             <section data-step='5' className='mt-5 grid gap-3'>
-              <input
-                className='rounded-md border px-3 py-2'
-                placeholder='Full name'
-                value={wizard.name}
-                onChange={(e) => wizard.setName(e.target.value)}
-              />
-              <input
-                className='rounded-md border px-3 py-2'
-                placeholder='Email'
-                type='email'
-                value={wizard.email}
-                onChange={(e) => wizard.setEmail(e.target.value)}
-              />
-              <input
-                className='rounded-md border px-3 py-2'
-                placeholder='Phone (+63…)'
-                value={wizard.phone}
-                onChange={(e) => wizard.setPhone(e.target.value)}
-              />
-              <textarea
-                className='rounded-md border px-3 py-2'
-                placeholder='Notes (optional — tell the studio anything useful)'
-                value={wizard.notes}
-                onChange={(e) => wizard.setNotes(e.target.value)}
-              />
+              {/* Contact step (#58): plain primitives + inline Zod errors, no
+                  bespoke wrapper. Labels are new copy (veto-flagged);
+                  placeholders are CDP-frozen byte-for-byte. */}
+              <div className='grid gap-1.5'>
+                <Label htmlFor='contact-name'>Full name</Label>
+                <Input
+                  id='contact-name'
+                  placeholder='Full name'
+                  value={wizard.name}
+                  aria-invalid={touched.name && contactErrors.name !== undefined}
+                  aria-describedby={
+                    touched.name && contactErrors.name ? 'contact-name-error' : undefined
+                  }
+                  onBlur={() => setTouched((prev) => ({ ...prev, name: true }))}
+                  onChange={(e) => wizard.setName(e.target.value)}
+                />
+                {touched.name && contactErrors.name && (
+                  <p id='contact-name-error' className='text-destructive text-sm'>
+                    {contactErrors.name}
+                  </p>
+                )}
+              </div>
+              <div className='grid gap-1.5'>
+                <Label htmlFor='contact-email'>Email</Label>
+                <Input
+                  id='contact-email'
+                  type='email'
+                  placeholder='Email'
+                  value={wizard.email}
+                  aria-invalid={touched.email && contactErrors.email !== undefined}
+                  aria-describedby={
+                    touched.email && contactErrors.email ? 'contact-email-error' : undefined
+                  }
+                  onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+                  onChange={(e) => wizard.setEmail(e.target.value)}
+                />
+                {touched.email && contactErrors.email && (
+                  <p id='contact-email-error' className='text-destructive text-sm'>
+                    {contactErrors.email}
+                  </p>
+                )}
+              </div>
+              <div className='grid gap-1.5'>
+                <Label htmlFor='contact-phone'>Phone</Label>
+                <Input
+                  id='contact-phone'
+                  placeholder='Phone (+63…)'
+                  value={wizard.phone}
+                  aria-invalid={touched.phone && contactErrors.phone !== undefined}
+                  aria-describedby={
+                    touched.phone && contactErrors.phone ? 'contact-phone-error' : undefined
+                  }
+                  onBlur={() => setTouched((prev) => ({ ...prev, phone: true }))}
+                  onChange={(e) => wizard.setPhone(e.target.value)}
+                />
+                {touched.phone && contactErrors.phone && (
+                  <p id='contact-phone-error' className='text-destructive text-sm'>
+                    {contactErrors.phone}
+                  </p>
+                )}
+              </div>
+              <div className='grid gap-1.5'>
+                <Label htmlFor='contact-notes'>Notes (optional)</Label>
+                <Textarea
+                  id='contact-notes'
+                  placeholder='Notes (optional — tell the studio anything useful)'
+                  value={wizard.notes}
+                  onChange={(e) => wizard.setNotes(e.target.value)}
+                />
+              </div>
               {rejection && (
                 <RejectionCard reason={rejection.reason} apiMessage={rejection.apiMessage} />
               )}
@@ -304,7 +357,10 @@ function BookPage() {
                 type='button'
                 disabled={!canConfirm || wizard.submitting}
                 onClick={handleSubmit}
-                className='mt-1 rounded-md bg-neutral-900 px-4 py-3 font-medium text-white disabled:opacity-50'
+                className={cn(
+                  buttonVariants({ size: 'lg' }),
+                  'focus-visible:ring-brand-focus-ring mt-1 focus-visible:ring-3'
+                )}
               >
                 {wizard.submitting ? 'Booking…' : `Confirm booking · ${peso(wizard.totalCents)}`}
               </button>
