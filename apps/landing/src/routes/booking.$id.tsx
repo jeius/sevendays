@@ -1,8 +1,10 @@
+import { buttonVariants } from '@sevendays/ui/components/button';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { cn } from 'cn';
+import { ConfirmationCard } from '../components/booking/confirmation-card';
 import { toNotFoundError } from '../lib/api-404';
-import { branchNameFor, confirmationTotalCents, offeringNameFor } from '../lib/booking-read';
-import { peso, phDateTime } from '../lib/format';
+import { branchNameFor, offeringNameFor } from '../lib/booking-read';
 import {
   appointmentQueries,
   branchQueries,
@@ -30,15 +32,26 @@ export const Route = createFileRoute('/booking/$id')({
     }
   },
   component: BookingConfirmation,
-  // Unknown id → uniform not-found (copy veto-flagged at PR review).
+  // Unknown id → uniform not-found (copy veto-flagged at PR review). The
+  // plain anchor's dependency-free posture ends here — the state wears the
+  // system card like the package not-found (#98 precedent); the literals
+  // are CDP-asserted and byte-identical.
   notFoundComponent: () => (
-    <div className='mx-auto max-w-5xl p-6'>
-      <div className='mt-16 flex flex-col items-center gap-4'>
-        <h1 className='font-semibold text-2xl'>Booking not found.</h1>
-        {/* Plain anchor: keeps the not-found page dependency-free. */}
-        <a href='/book' className='underline'>
+    <div className='mx-auto max-w-5xl px-6'>
+      <div className='mt-16 flex flex-col items-center gap-4 rounded-xl border border-brand-gray-cool bg-card p-10 text-center shadow-sm'>
+        <h1 className='text-brand-ink font-semibold text-2xl'>Booking not found.</h1>
+        <p className='text-muted-text text-sm'>
+          This booking doesn't exist or is no longer available.
+        </p>
+        <Link
+          to='/book'
+          className={cn(
+            buttonVariants({ variant: 'outline' }),
+            'focus-visible:ring-brand-focus-ring focus-visible:ring-3'
+          )}
+        >
           Start a new booking
-        </a>
+        </Link>
       </div>
     </div>
   ),
@@ -51,44 +64,12 @@ function BookingConfirmation() {
   const { data: services } = useSuspenseQuery(studioServiceQueries.all());
 
   return (
-    <div className='mx-auto max-w-5xl p-6'>
-      <div className='mx-auto mt-8 max-w-lg rounded-xl border p-6'>
-        <p className='font-semibold text-lg'>Booking confirmed ✓</p>
-        <dl className='mt-4 space-y-2 text-sm'>
-          <div className='flex justify-between gap-4'>
-            <dt className='text-muted-foreground'>Confirmation #</dt>
-            <dd className='font-mono'>{record.id}</dd>
-          </div>
-          <div className='flex justify-between gap-4'>
-            <dt className='text-muted-foreground'>Branch</dt>
-            <dd>{branchNameFor(record, branches)}</dd>
-          </div>
-          <div className='flex justify-between gap-4'>
-            <dt className='text-muted-foreground'>Booking</dt>
-            <dd>{offeringNameFor(record, { packages, services })}</dd>
-          </div>
-          {record.addonServices.map((a) => (
-            <div key={a.addonServiceId} className='flex justify-between gap-4'>
-              <dt className='text-muted-foreground'>Add-on</dt>
-              <dd>
-                {a.name} · {peso(a.priceCents)}
-              </dd>
-            </div>
-          ))}
-          <div className='flex justify-between gap-4'>
-            <dt className='text-muted-foreground'>Schedule</dt>
-            <dd>{phDateTime(record.scheduledAt.toISOString())} (PHT)</dd>
-          </div>
-          <div className='flex justify-between gap-4 border-t pt-2 font-semibold'>
-            <dt>Total</dt>
-            <dd>{peso(confirmationTotalCents(record))}</dd>
-          </div>
-        </dl>
-        <p className='mt-4 text-sm'>A confirmation email was sent to {record.customerEmail}.</p>
-        <p className='mt-1 text-muted-foreground text-sm'>
-          Need to change something? Call the branch.
-        </p>
-      </div>
+    <div className='mx-auto max-w-5xl px-6 py-12'>
+      <ConfirmationCard
+        record={record}
+        branchName={branchNameFor(record, branches)}
+        offeringName={offeringNameFor(record, { packages, services })}
+      />
     </div>
   );
 }
