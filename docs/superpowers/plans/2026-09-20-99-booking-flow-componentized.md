@@ -47,7 +47,7 @@
 
 **Not here:** no route changes (Tasks 3–4); no UI (the messages' rendering is Task 3); the six existing lib-seam test files are not touched — the new suite is a separate file so "tests pass unchanged" stays literally true.
 
-- [ ] **Step 1: Seam guard — pin the contract before touching anything**
+- [✅] **Step 1: Seam guard — pin the contract before touching anything**
 
 ```bash
 grep -n "data-step\|data-back\|data-offering\|data-past-hint\|data-rejection-card\|data-summary-rail\|placeholder=\|last-of-type\|> button\|textarea" apps/landing/scripts/verify/booking-wizard.mjs apps/landing/scripts/verify/booking-e2e.mjs
@@ -57,7 +57,7 @@ pnpm --filter @sevendays/landing test 2>&1 | grep -E "Test Files|Tests "
 
 Record all three outputs in the Task 1 commit message (the selector inventory, the literal inventory, and the baseline `6 passed (6)` / `56 passed (56)`). Any selector or literal these greps surface is frozen through the rewrite — the recon table above is the expectation; if a grep shows something moved, re-pin the affected Task 3/4 snippet to the actual line before proceeding.
 
-- [ ] **Step 2: The schema in the lib**
+- [✅] **Step 2: The schema in the lib**
 
 In `apps/landing/src/lib/booking.ts`, add `import { z } from 'zod';` directly below `import { useMemo, useState } from 'react';`, then insert this block directly above `export type WizardSubmitResult`:
 
@@ -93,7 +93,7 @@ export function contactFieldErrors(fields: unknown): Partial<Record<ContactField
 }
 ```
 
-- [ ] **Step 3: The equivalence suite (new file — the existing six stay untouched)**
+- [✅] **Step 3: The equivalence suite (new file — the existing six stay untouched)**
 
 Create `apps/landing/src/lib/booking-contact.test.ts` with exactly:
 
@@ -153,7 +153,7 @@ describe('contactSchema (the step-5 gate)', () => {
 });
 ```
 
-- [ ] **Step 4: Run + commit**
+- [✅] **Step 4: Run + commit**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -187,7 +187,7 @@ Expected: `Test Files 7 passed (7)` / `Tests 62 passed (62)` — the 56 baseline
 
 **Not here:** no route consumes these yet (Tasks 3–4 wire them); no `WalkInBadge` edits (the live wrapper is consumed as-is in Task 3); no shared-package changes.
 
-- [ ] **Step 1: `ChoiceCard`**
+- [✅] **Step 1: `ChoiceCard`**
 
 Create `apps/landing/src/components/booking/choice-card.tsx` with exactly:
 
@@ -234,7 +234,7 @@ export function ChoiceCard({
 
 (`data-offering={undefined}` omits the attribute — React drops undefined props — so branch/add-on cards render without it.)
 
-- [ ] **Step 2: `HourChipGrid` + `HourChip`**
+- [✅] **Step 2: `HourChipGrid` + `HourChip`**
 
 Create `apps/landing/src/components/booking/hour-chip-grid.tsx` with exactly:
 
@@ -289,7 +289,7 @@ export function HourChip({
 }
 ```
 
-- [ ] **Step 3: `StepProgress`**
+- [✅] **Step 3: `StepProgress`**
 
 Create `apps/landing/src/components/booking/step-progress.tsx` with exactly:
 
@@ -312,7 +312,7 @@ export function StepProgress({ step, className }: { step: number; className?: st
 }
 ```
 
-- [ ] **Step 4: `ConfirmationCard`**
+- [✅] **Step 4: `ConfirmationCard`**
 
 Create `apps/landing/src/components/booking/confirmation-card.tsx` with exactly:
 
@@ -375,7 +375,7 @@ export function ConfirmationCard({
 }
 ```
 
-- [ ] **Step 5: `SummaryRail` + `RejectionCard` restyles**
+- [✅] **Step 5: `SummaryRail` + `RejectionCard` restyles**
 
 In `apps/landing/src/components/booking/summary-rail.tsx`, replace the `<aside>` opening tag and the heading line with exactly (everything between them — the `<dl>` rows — is untouched):
 
@@ -395,7 +395,7 @@ In `apps/landing/src/components/booking/rejection-card.tsx`, replace the `<div>`
 
 (The white-card surface is the ticket's destructive-placement ruling: the card renders inside the step-5 white card after Task 3, and the `text-destructive` heading measures 4.77:1 on it. The texts, `role='alert'`, and `data-rejection-card` are untouched.)
 
-- [ ] **Step 6: Format + typecheck + tests + commit**
+- [✅] **Step 6: Format + typecheck + tests + commit**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -423,7 +423,7 @@ Expected: typecheck green (the new files are unwired but must compile), tests 62
 
 **Not here:** `booking.$id.tsx` (Task 4); no loader/query/search-param edits; no copy changes beyond the pinned contact labels/errors; no new state beyond the per-field `touched` map.
 
-- [ ] **Step 1: Rewrite the file**
+- [✅] **Step 1: Rewrite the file**
 
 Replace the ENTIRE file `apps/landing/src/routes/book.tsx` with exactly:
 
@@ -809,7 +809,7 @@ function BookPage() {
 
 Structural notes the typecheck cannot catch (each maps to a script selector — Task 5 proves them live): `TIME_SLOTS` is no longer imported here (the grid owns it); the step-3 Continue/Skip pair stays exclusively rendered and directly under the section; the step-4 Continue stays a direct section child; the step-5 confirm remains the section's only button; `data-back` renders only at step > 1, outside the sections.
 
-- [ ] **Step 2: Format + typecheck + tests + build**
+- [✅] **Step 2: Format + typecheck + tests + build**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -818,7 +818,7 @@ pnpm --filter @sevendays/landing typecheck && pnpm --filter @sevendays/landing t
 
 Expected: all green — 62/62 tests (no lib change), typecheck over the new component wiring, SSR build over the restyle.
 
-- [ ] **Step 3: Commit**
+- [✅] **Step 3: Commit**
 
 ```bash
 git add apps/landing/src/routes/book.tsx
@@ -844,7 +844,7 @@ literal verbatim."
 
 **Not here:** no loader/query/404-mapping edits; no copy changes to the card (Task 2 pinned it frozen); the not-found's supporting sentence is the ticket's one new string (veto-flagged).
 
-- [ ] **Step 1: Rewrite the file**
+- [✅] **Step 1: Rewrite the file**
 
 Replace the ENTIRE file `apps/landing/src/routes/booking.$id.tsx` with exactly:
 
@@ -928,7 +928,7 @@ function BookingConfirmation() {
 
 (TanStack `Link` renders `href='/book'` — the CDP not-found check matches on the rendered text anyway, and the route is registered.)
 
-- [ ] **Step 2: Format + typecheck + tests + build + commit**
+- [✅] **Step 2: Format + typecheck + tests + build + commit**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -955,11 +955,11 @@ veto-flagged)."
 
 **Not here:** no script or test edits ever — a FAIL means a surface broke a seam; fix the surface. The e2e writes two real rows to the live Supabase dev stack (by design since M2 — tiny volume, studio reconciles); record both booking ids in the evidence; the M2 close-out precedent (delete after evidence) is the controller's call, noted either way.
 
-- [ ] **Step 1: Env + browser readiness (controller)**
+- [✅] **Step 1: Env + browser readiness (controller)**
 
 Copy the gitignored env files from the main checkout (never commit them): `apps/landing/.env.local` (`API_URL`) and `apps/api/.dev.vars`. Resolve the headless Chrome binary per the #97/#98 precedent — `google-chrome` if present, else the Playwright headless shell (`find ~/.cache/ms-playwright -name chrome-headless-shell -type f | head -1`, nested per-version dir — glob the cache root, never a remembered path). Verify port 9222 is not already held (`ss -tlnp`).
 
-- [ ] **Step 2: Boot the three-terminal stack**
+- [✅] **Step 2: Boot the three-terminal stack**
 
 ```bash
 pnpm --filter @sevendays/api dev      # terminal 1 — port 8787, seeded catalog
@@ -969,7 +969,7 @@ pnpm --filter @sevendays/landing dev  # terminal 2 — port 3000; confirm from i
 
 Sandbox/WSL fallbacks per the SDD channel quirks: servers run as background tasks; grep each log for its actual port before probing.
 
-- [ ] **Step 3: The read-only regressions**
+- [✅] **Step 3: The read-only regressions**
 
 ```bash
 node apps/landing/scripts/verify/booking-wizard.mjs   # THE ticket's scenario — 15/15
@@ -979,7 +979,7 @@ node apps/landing/scripts/verify/packages-pages.mjs   # sibling regression — 1
 
 Expected: every check `PASS`, exit 0 — the component extraction moved no seam. Any FAIL: the surface broke a seam — fix the surface, never the script; re-run. (The likely failure shapes are all designed against: a button before the first choice card, the Continue buttons wrapped off the section's direct children, a placeholder rewrite, a `data-offering` drop, or a rail/rejection text change.)
 
-- [ ] **Step 4: The mutating e2e (AC: "the mutating e2e is not broken")**
+- [✅] **Step 4: The mutating e2e (AC: "the mutating e2e is not broken")**
 
 ```bash
 node apps/landing/scripts/verify/booking-e2e.mjs      # 7/7 — writes 2 real rows
@@ -987,7 +987,7 @@ node apps/landing/scripts/verify/booking-e2e.mjs      # 7/7 — writes 2 real ro
 
 Expected: both bookings redirect, snapshot, and read back green — the `section[data-step='3'] > button` Continue, the step-5 `textarea`, and the confirmation literals all survive. Record the two booking ids from the `BOOKINGS` tail in the evidence file.
 
-- [ ] **Step 5: The static gates**
+- [✅] **Step 5: The static gates**
 
 ```bash
 grep -rn 'text-neutral-\|bg-neutral-\|ring-neutral-' apps/landing/src/routes apps/landing/src/components --include='*.tsx' | grep -v prototype || echo "NO ISLAND COLORS IN SURFACES — OK"
@@ -999,7 +999,7 @@ grep -n "QUESTIONS\[wizard.step - 1\]" apps/landing/src/routes/book.tsx
 
 Expected: the island grep prints `NO ISLAND COLORS IN SURFACES — OK` (book.tsx was the last holder — the fallback MUST fire now); the pill grep prints `NO HAND-ROLLED PILLS — OK` (the third pill died onto `WalkInBadge`); `data-step` count 5; the choice-card `data-offering` line present; the QUESTIONS line present.
 
-- [ ] **Step 6: The repo gate**
+- [✅] **Step 6: The repo gate**
 
 ```bash
 pnpm check
@@ -1007,7 +1007,7 @@ pnpm check
 
 Expected: green across all workspaces.
 
-- [ ] **Step 7: Evidence file + teardown**
+- [✅] **Step 7: Evidence file + teardown**
 
 Write `.superpowers/sdd/2026-09-20-99-booking-flow-componentized/task-5-evidence.md` (per-gate results, check counts 15/16/12/7, the two booking ids, any fallback that fired). Kill Chrome + both dev servers. If (and only if) a gate forced a fix: commit it under `fix(landing): …` with the gate named; otherwise no commit.
 
@@ -1025,15 +1025,15 @@ Write `.superpowers/sdd/2026-09-20-99-booking-flow-componentized/task-5-evidence
 
 **Not here:** `docs/plan.md` lines 100/103 (siblings — 100 is #98's, already ticked; 103 is #101's, stays unticked until close-out); the v1-picks ledger (the triager's at merge — this ticket's paths don't exist on `v1`, the skip-class row is mechanical); `/prototype-tokens` (#101).
 
-- [ ] **Step 1: The progress.md entries**
+- [✅] **Step 1: The progress.md entries**
 
 Prepend to the `Last updated` header line: `2026-09-20 (#99 M3 ticket 05 — booking wizard componentized, zero flow changes: ChoiceCard / HourChipGrid + HourChip / StepProgress / ConfirmationCard extracted, SummaryRail + RejectionCard on the system, contact gate restated as contactSchema (predicate unchanged), third pill collapsed onto WalkInBadge, white-card step surface + rejection card on white — PR <NN>.. Prior 2026-09-16: ` (keeping the existing #111 entry as the new Prior). Add the What-Exists bullet after the #111 remediation bullet (pinned structure: what landed, the contact-gate equivalence ruling, the aria-pressed adjudication, the not-found sentence + contact copy veto-flags, CDP + e2e + check evidence).
 
-- [ ] **Step 2: Tick the roadmap checkbox**
+- [✅] **Step 2: Tick the roadmap checkbox**
 
 `docs/plan.md` line 101 `- [ ] Booking flow componentized onto the #58 vocabulary …` → `- [✅]` with a dated annotation naming the landed facts (the four extracts, rail/rejection restyles, zero flow changes, seams verbatim, CDP 15/15 + e2e 7/7). Verify the line number first: `grep -n "Booking flow componentized" docs/plan.md`.
 
-- [ ] **Step 3: Tick this plan + graphify + full check**
+- [✅] **Step 3: Tick this plan + graphify + full check**
 
 Tick every completed step (`- [✅]`), then:
 
@@ -1042,7 +1042,7 @@ graphify update .
 pnpm check
 ```
 
-- [ ] **Step 4: Commit, push, open the PR**
+- [✅] **Step 4: Commit, push, open the PR**
 
 ```bash
 git add docs/ graphify-out
@@ -1055,7 +1055,7 @@ gh pr create --base main --head feat/99-booking-flow \
 
 Body sections: Summary · AC→evidence mapping (the ticket's 6 ACs) · screenshots of `/book` (each step) + `/booking/:id` on main · execution rulings (aria-pressed toggle-button adjudication, contact labels + error copy + not-found sentence as veto-flagged agent copy, max-w-5xl rhythm adoption, contact-gate-as-schema with equivalence suite, white-card step surface satisfying the destructive-placement rule) · verification (CDP 15/15 + 16/16 + 12/12, e2e 7/7 with the two booking ids, tests 62/62, `pnpm check` green, island-grep OK) · deferred minors · scope fence · Closes #99 · standing v1-picks note (booking paths absent on v1 — triager's row at merge).
 
-- [ ] **Step 5: The completion report — then STOP**
+- [✅] **Step 5: The completion report — then STOP**
 
 Evidence pack + AC mapping + state + flags to the owner. Then STOP.
 
