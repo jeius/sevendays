@@ -44,14 +44,21 @@ async function main() {
     'home: services teaser strip renders the live services',
     services.every((s) => home.includes(s.name))
   );
-  check(
-    'home: branches strip renders all branches',
-    branches.every((b) => home.includes(b.address))
+  // Ruled edit (#101, this ticket's one script exception): the #111
+  // variant D composition drops the branches body strip — footer +
+  // emphasis carry branches (both asserted here); walk-in badges stay
+  // fully covered by the /branches check below.
+  const homeBranchLinks = await evaluate(
+    `[...document.querySelectorAll("a[href='/branches']")].length`
   );
   check(
-    'home: walk-in badges show both states (live seed has both)',
-    home.includes('Walk-ins welcome') && home.includes('No walk-ins')
+    'home: branches carried by footer + emphasis strip (variant D)',
+    homeBranchLinks >= 2 && home.includes('Call or visit a branch')
   );
+  const galleryFigures = await evaluate(
+    `document.querySelectorAll("[data-strip='gallery'] figure").length`
+  );
+  check('home: gallery wall renders (variant D stand-in strip)', galleryFigures >= 6);
   const teaserLinks = await evaluate(
     `[...document.querySelectorAll('a[href^="/book?service="]')].map(a => a.getAttribute('href'))`
   );
@@ -64,8 +71,10 @@ async function main() {
   );
   check('home: strip-end View all services links /services', viewAll === true);
   check(
-    'home: credibility blurb placeholder visible',
-    home.includes('Our studio blurb is coming soon.')
+    'home: ratified hero blurb visible (#111 resolution; ruled edit #101)',
+    home.includes(
+      'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.'
+    )
   );
 
   // /services: the offerings with bookability
