@@ -47,6 +47,7 @@ Run from the repo root unless noted. All commands are powered by Turborepo and f
 - **Keep route handlers thin.** In `apps/api`, business logic belongs in a service/module, not inline in the Hono route. Routes: parse/validate input, call a function, return a response.
 - **Use `async`/`await`** exclusively; avoid raw Promise chains or callbacks.
 - **Shared UI primitives + semantic tokens live in `packages/ui`** — the shadcn monorepo pattern (ADR-0017): `shadcn add` generates shared primitives there on the Base UI base, with one `components.json` per workspace. Brand and page-specific (composed) components stay in each app, app-local and PascalCase. Apps are Tailwind v4 (CSS-first) — theme via `@theme` in each app's `styles.css`; don't duplicate token definitions between `landing` and `admin`.
+- **UI work loads the installed UI/UX skill set at execution time** (`prototype` + `ui-ux-pro-max`, plus `design` / `design-system` / `ui-styling` as relevant) — every UI-bearing ticket names its skill set, and new compositions get rendered variants the owner reacts to (spec #94 amendment, ruled in #111).
 - **Do not commit code that fails `pnpm check`** (lint + format + typecheck + test) for the packages/apps you touched.
 - **Log decisions.** Any nontrivial architectural choice (e.g. how auth sessions are shared across `landing`/`admin`/`api`, or how R2-stored images are served) gets an ADR in `docs/adr/`. Numbering gaps in the ADR directory are known and accepted.
 

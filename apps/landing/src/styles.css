@@ -25,14 +25,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  color: var(--brand-700); /* link pair: 8.22:1 on white — the #92 measured table */
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-}
+/* PROTOTYPE F1 (#111): this pair used to sit UNLAYERED, and unlayered author
+   styles beat every Tailwind utility layer — so `a { color }` hijacked the
+   text color of every link-shaped control on the site: chrome nav links
+   (text-white/85) and solid CTAs (text-primary-foreground) all rendered
+   brand-700 petrol regardless of their classes (measured 2026-09-16:
+   brand-700 on ink ≈ 1.6:1; brand-700 on primary ≈ 1.2:1 — the owner's
+   "chrome texts don't follow proper contrasts"). Moved into @layer base so
+   the declared utilities win again; content links without a color class
+   still get the #92-measured 8.22:1 pair. */
+@layer base {
+  a {
+    color: var(--brand-700); /* link pair: 8.22:1 on white — the #92 measured table */
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
 
-a:hover {
-  color: var(--brand-800);
+  a:hover {
+    color: var(--brand-800);
+  }
 }
 
 code {

@@ -45,7 +45,7 @@ function Home() {
         Our studio blurb is coming soon.
       </p>
       <section
-        className='mx-auto mt-12 max-w-5xl border-t border-line-soft px-6 pt-12'
+        className='mx-auto mt-12 max-w-5xl border-line-soft border-t px-6 pt-12'
         data-strip='featured'
       >
         <h2 className='font-semibold text-2xl'>{heading}</h2>
@@ -56,7 +56,7 @@ function Home() {
         </div>
       </section>
       <section
-        className='mx-auto mt-12 max-w-5xl border-t border-line-soft px-6 pt-12'
+        className='mx-auto mt-12 max-w-5xl border-line-soft border-t px-6 pt-12'
         data-strip='services'
       >
         <h2 className='font-semibold text-2xl'>Our services</h2>
@@ -65,13 +65,12 @@ function Home() {
             <ServiceTeaserItem key={s.id} service={s} />
           ))}
         </div>
-        {/* Plain anchor (renders the href the CDP check reads); #98 sweeps to typed Links. */}
-        <a href='/services' className='mt-4 inline-block underline'>
+        <Link to='/services' className='mt-4 inline-block text-brand-700 underline'>
           View all services
-        </a>
+        </Link>
       </section>
       <section
-        className='mx-auto mt-12 max-w-5xl border-t border-line-soft px-6 pt-12'
+        className='mx-auto mt-12 max-w-5xl border-line-soft border-t px-6 pt-12'
         data-strip='branches'
       >
         <h2 className='font-semibold text-2xl'>Our branches</h2>
@@ -83,13 +82,13 @@ function Home() {
       </section>
       {/* Emphasis strip — gray-light's one remaining job per the #92 composition: the closing call-or-visit band. New seam value; no M2 script asserts it. Copy is the owner-approved mock's. */}
       <section
-        className='mt-12 border-t border-line-soft bg-brand-gray-light'
+        className='mt-12 border-line-soft border-t bg-brand-gray-light'
         data-strip='call-visit'
       >
         <div className='mx-auto flex max-w-5xl flex-col items-start justify-between gap-4 px-6 py-8 md:flex-row md:items-center'>
           <div>
-            <h2 className='text-brand-ink font-semibold text-xl'>Not sure which session fits?</h2>
-            <p className='text-brand-700 mt-1 text-sm'>
+            <h2 className='font-semibold text-brand-ink text-xl'>Not sure which session fits?</h2>
+            <p className='mt-1 text-brand-700 text-sm'>
               Call or visit a branch — we will help you choose.
             </p>
           </div>
