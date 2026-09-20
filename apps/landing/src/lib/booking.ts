@@ -16,6 +16,7 @@ import type {
   StudioServiceWithBranches,
 } from '@sevendays/types';
 import { useMemo, useState } from 'react';
+import { z } from 'zod';
 
 /** One wizard read snapshot — the four reads the route loader prefetches. */
 export interface BookingCatalog {
@@ -226,6 +227,36 @@ export function buildCreatePayload(details: BookingDetails): CreateAppointmentAr
     addonServiceIds: details.addonIds,
     notes: details.notes ? details.notes : undefined,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Contact step (#99): the M2 confirm gate restated as a schema. The
+// predicate is UNCHANGED — name/email/phone non-empty after trim, notes
+// never gates — and the messages feed the step's inline Zod errors (#58
+// ruling: plain primitives + inline errors, no bespoke wrapper).
+// booking-contact.test.ts pins the equivalence with the old expression.
+// ---------------------------------------------------------------------------
+export const contactSchema = z.object({
+  name: z.string().trim().min(1, 'Please enter your full name.'),
+  email: z.string().trim().min(1, 'Please enter your email — your confirmation goes there.'),
+  phone: z.string().trim().min(1, 'Please enter a phone number.'),
+  notes: z.string(),
+});
+
+export type ContactField = 'name' | 'email' | 'phone';
+
+/** Field → first Zod message for the invalid contact fields (notes never errors). */
+export function contactFieldErrors(fields: unknown): Partial<Record<ContactField, string>> {
+  const result = contactSchema.safeParse(fields);
+  if (result.success) return {};
+  const errors: Partial<Record<ContactField, string>> = {};
+  for (const issue of result.error.issues) {
+    const key = issue.path[0];
+    if (key === 'name' || key === 'email' || key === 'phone') {
+      errors[key] ??= issue.message;
+    }
+  }
+  return errors;
 }
 
 export type WizardSubmitResult =

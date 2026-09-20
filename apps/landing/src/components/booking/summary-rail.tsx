@@ -3,8 +3,11 @@ import { peso, phDateTime } from '../../lib/format';
 
 export function SummaryRail({ wizard }: { wizard: BookingWizard }) {
   return (
-    <aside data-summary-rail className='h-fit rounded-xl border p-4 md:sticky md:top-6'>
-      <p className='font-semibold text-sm'>Your booking</p>
+    <aside
+      data-summary-rail
+      className='md:sticky md:top-6 h-fit rounded-xl border border-brand-gray-cool bg-card p-4 shadow-sm'
+    >
+      <p className='text-brand-ink font-semibold text-sm'>Your booking</p>
       <dl className='mt-3 space-y-2 text-sm'>
         <div className='flex justify-between gap-3'>
           <dt className='text-muted-foreground'>Branch</dt>

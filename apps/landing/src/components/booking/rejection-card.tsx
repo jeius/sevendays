@@ -11,7 +11,7 @@ export function RejectionCard({
     <div
       role='alert'
       data-rejection-card
-      className='mt-4 rounded-lg border border-destructive bg-destructive/10 p-4'
+      className='mt-4 rounded-xl border border-destructive/50 bg-card p-4 shadow-sm'
     >
       <p className='font-semibold text-destructive'>We couldn't complete that booking</p>
       <p className='mt-1 text-sm'>{REJECTION_COPY[reason]}</p>
