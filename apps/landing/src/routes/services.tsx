@@ -24,7 +24,7 @@ function ServicesPage() {
   return (
     <div>
       <section className='mx-auto max-w-5xl px-6 pt-12'>
-        <h1 className='font-bold text-4xl text-brand-ink'>Services</h1>
+        <h1 className='font-bold font-serif text-4xl text-brand-ink'>Services</h1>
         <p className='mt-2 max-w-prose text-muted-foreground'>
           Looking for add-ons? Makeup, hairstyle, and more are available with any session.
         </p>
@@ -43,7 +43,7 @@ function ServicesPage() {
       >
         <div className='mx-auto flex max-w-5xl flex-col items-start justify-between gap-4 px-6 py-8 md:flex-row md:items-center'>
           <div>
-            <h2 className='font-semibold text-brand-ink text-xl'>
+            <h2 className='font-semibold font-serif text-brand-ink text-xl'>
               Need a service at one of our branches?
             </h2>
             <p className='mt-1 text-brand-700 text-sm'>
