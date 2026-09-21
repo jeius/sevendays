@@ -2,31 +2,26 @@ import type { ServicePackageWithInclusions, StudioServiceWithBranches } from '@s
 import { buttonVariants } from '@sevendays/ui/components/button';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
-import { selectFeaturedPackages } from '../../lib/featured';
-import { CARD_GRID, PrototypePackageCoverCard, PrototypeServiceImageCard } from './card-system';
+import { selectFeaturedPackages } from '../lib/featured';
+import { PackageCoverCard, ServiceImageCard } from './home-cards';
 import {
-  GALLERY_DRAFT,
-  HERO_BLURB_DRAFT,
+  GALLERY_STANDINS,
+  HERO_BLURB,
   HERO_PHOTO,
   HERO_PHOTO_ALT,
-  KICKERS_DRAFT,
+  KICKERS,
   TESTIMONIALS_PLACEHOLDER,
-} from './copy';
+} from './home-copy';
 
-// PROTOTYPE (#111) Track 1 — Home variant D, owner-specified mix:
-//   1 hero:         A (full-bleed cinema)
-//   2 gallery:      B (masonry wall)
-//   3 packages:     cover-driven (photo heroes the card; title + price
-//                   overlaid on the tinted cover, text-heavy body on
-//                   white) + SANS card titles per the D reaction
-//   4 services:     NEW — cards with FULL IMAGE backgrounds (photo IS the
-//                   card; ink gradient carries legibility; system mechanics
-//                   kept: 1-line title, fixed height, single affordance)
-//   5 testimonials: B (wash band, asymmetric pull-quote)
-//   6 emphasis:     A (the ratified #92 gray-light band)
-// Same seams and DRAFT copy as A/B/C; branches body strip stays dropped.
+// The owner-endorsed home composition (#111 resolution, variant D — ruled
+// flip #101). Slot map: 1 hero (full-bleed cinema, owner photo) → 2 gallery
+// (masonry wall, stand-ins) → 3 featured packages (cover-driven cards, sans
+// titles) → 4 services (full-image cards, ink gradients) → 5 testimonials
+// (wash band, clearly placeholder) → 6 the ratified #92 gray-light emphasis
+// band. The branches body strip is dropped BY RULING (footer + emphasis
+// carry branches). Serif at h1/h2 per the register ruling; card titles sans.
 
-export function HomeVariantD({
+export function HomeImageLed({
   packages,
   services,
 }: {
@@ -37,7 +32,7 @@ export function HomeVariantD({
 
   return (
     <div>
-      {/* 1 — Hero: A's full-bleed cinema opening. */}
+      {/* 1 — Hero: full-bleed cinema opening. */}
       <section className='bg-brand-ink relative isolate overflow-hidden'>
         <img
           src={HERO_PHOTO}
@@ -55,8 +50,7 @@ export function HomeVariantD({
           <h1 className='mt-4 max-w-2xl font-serif text-5xl font-bold text-white md:text-6xl'>
             Three branches. One standard of light.
           </h1>
-          {/* DRAFT blurb — owner ratifies verbatim (#111 draft-and-ratify). */}
-          <p className='mt-5 max-w-prose text-lg text-white/90'>{HERO_BLURB_DRAFT}</p>
+          <p className='mt-5 max-w-prose text-lg text-white/90'>{HERO_BLURB}</p>
           <div className='mt-8 flex flex-wrap gap-3'>
             <Link
               to='/book'
@@ -83,15 +77,15 @@ export function HomeVariantD({
         </div>
       </section>
 
-      {/* 2 — Gallery: B's masonry wall. */}
+      {/* 2 — Gallery: the masonry wall. */}
       <section className='border-line-soft border-b' data-strip='gallery'>
         <div className='mx-auto max-w-5xl px-6 py-16'>
           <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
-            {KICKERS_DRAFT.gallery}
+            {KICKERS.gallery}
           </p>
           <h2 className='text-brand-ink mt-2 font-serif text-3xl font-semibold'>The work</h2>
           <div className='mt-8 columns-2 gap-4 md:columns-3 [&>figure]:mb-4'>
-            {GALLERY_DRAFT.map((item) => (
+            {GALLERY_STANDINS.map((item) => (
               <figure
                 key={item.src}
                 className='border-line-soft bg-card break-inside-avoid overflow-hidden rounded-xl border shadow-sm'
@@ -111,31 +105,28 @@ export function HomeVariantD({
         </div>
       </section>
 
-      {/* 3 — Featured packages: cover-driven cards (owner ruling) — the
-            photo is the card's hero, title + price overlaid on the two-layer
-            tint, text-heavy body on white. Sans titles per D. */}
+      {/* 3 — Featured packages: cover-driven cards (owner ruling). */}
       <section className='mx-auto max-w-5xl px-6 py-16' data-strip='featured'>
         <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
-          {KICKERS_DRAFT.packages}
+          {KICKERS.packages}
         </p>
         <h2 className='text-brand-ink mt-2 font-serif text-3xl font-semibold'>{heading}</h2>
-        <div className={cn(CARD_GRID.d92, 'mt-8')}>
+        <div className='mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
           {strip.map((p) => (
-            <PrototypePackageCoverCard key={p.id} pkg={p} />
+            <PackageCoverCard key={p.id} pkg={p} />
           ))}
         </div>
       </section>
 
-      {/* 4 — Services: full-image-background cards (the NEW treatment the
-            owner asked to see). */}
+      {/* 4 — Services: full-image-background cards. */}
       <section className='border-line-soft bg-wash-a border-y' data-strip='services'>
         <div className='mx-auto max-w-5xl px-6 py-16'>
           <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
-            {KICKERS_DRAFT.services}
+            {KICKERS.services}
           </p>
           <div className='mt-8 grid gap-4 md:grid-cols-2'>
             {services.map((s) => (
-              <PrototypeServiceImageCard key={s.id} service={s} />
+              <ServiceImageCard key={s.id} service={s} />
             ))}
           </div>
           <Link
@@ -147,12 +138,12 @@ export function HomeVariantD({
         </div>
       </section>
 
-      {/* 5 — Testimonials: B's wash band + pull-quote hierarchy, CLEARLY
+      {/* 5 — Testimonials: wash band + pull-quote hierarchy, CLEARLY
             placeholder. */}
       <section className='bg-wash-b border-line-soft border-y' data-strip='testimonials'>
         <div className='mx-auto max-w-5xl px-6 py-16'>
           <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
-            {KICKERS_DRAFT.testimonials}
+            {KICKERS.testimonials}
           </p>
           <div className='mt-8 grid gap-8 md:grid-cols-5'>
             <figure className='md:col-span-3'>

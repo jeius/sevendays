@@ -20,7 +20,7 @@ function PackagesPage() {
   return (
     <div>
       <section className='mx-auto max-w-5xl px-6 pt-12'>
-        <h1 className='font-bold text-4xl text-brand-ink'>Packages</h1>
+        <h1 className='font-bold font-serif text-4xl text-brand-ink'>Packages</h1>
         <div className='mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2'>
           {packages.map((p) => (
             <PackageCard key={p.id} pkg={p} />

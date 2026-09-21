@@ -1,25 +1,25 @@
-// PROTOTYPE (#111) — DRAFT copy for the remediation variants. Every string
-// here is agent-drafted and awaits the owner's verbatim ratification (the
-// ticket's draft-and-ratify rule); none of it is settled. The wizard's
-// CDP-asserted literals are NOT touched by the prototype. Data-shaped facts
-// (branch cities, seven-day delivery) come from the live seeded catalog —
-// no invented facts.
+// Home copy (#111 remediation — ratified as rendered 2026-09-16, the
+// resolution's draft-and-ratify satisfied by the owner's per-piece
+// reactions). Gallery + testimonials are stand-in/placeholder content BY
+// RULING until M5's real photography and client words arrive. The wizard's
+// CDP-asserted literals are untouched by this file.
 
-// DRAFT — hero blurb (replaces the "coming soon" placeholder in variants
-// only; the default home keeps the CDP-asserted literal).
-export const HERO_BLURB_DRAFT =
+export const HERO_PHOTO = '/photos/cover_photo.jpg';
+export const HERO_PHOTO_ALT =
+  'Photographer holding a Canon DSLR by the studio window — the studio’s own photo';
+
+export const HERO_BLURB =
   'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.';
 
-// DRAFT — section kickers (mono, uppercase) per ruled lineup order.
-export const KICKERS_DRAFT = {
+export const KICKERS = {
   gallery: 'The work — stand-in portfolio',
   packages: 'Featured packages',
   services: 'What we do',
   testimonials: 'Kind words',
 } as const;
 
-// Stand-in gallery (M5 swaps in the owner's R2 photos). Captions are DRAFT.
-export const GALLERY_DRAFT = [
+// Stand-in gallery (M5 swaps in the owner's R2 photos). Captions ratified.
+export const GALLERY_STANDINS = [
   { src: '/photos/gallery-01-portrait.jpg', caption: 'Portrait 01 · stand-in' },
   { src: '/photos/gallery-02-portrait.jpg', caption: 'Portrait 02 · stand-in' },
   { src: '/photos/gallery-03-wedding.jpg', caption: 'Wedding · stand-in' },
@@ -27,13 +27,6 @@ export const GALLERY_DRAFT = [
   { src: '/photos/gallery-05-still.jpg', caption: 'Still life · stand-in' },
   { src: '/photos/gallery-06-bts.jpg', caption: 'Behind the scenes · stand-in' },
 ] as const;
-
-export const HERO_PHOTO = '/photos/cover_photo.jpg';
-export const HERO_PHOTO_ALT =
-  'Photographer holding a Canon DSLR by the studio window — the studio’s own photo';
-
-// DRAFT — caption for hero-photo slots in collages (variant B's tall mat).
-export const HERO_CAPTION_DRAFT = 'At work in the studio · owner photo';
 
 // CLEARLY-FAKE placeholder testimonials (owner ruling: render placeholders
 // now, real content at M5). Names are placeholders by construction.
