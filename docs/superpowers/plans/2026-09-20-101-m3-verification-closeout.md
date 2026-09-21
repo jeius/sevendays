@@ -47,7 +47,7 @@
 
 **Not here:** `index.tsx` is untouched (Task 2); `components/prototype/` is untouched (Task 4 deletes it — home-variant-a/b/c, the compare/chrome/gallery surfaces, AND the superseded originals of these three files still import `./card-system` + `./copy` until then, so they must survive this task); no script edits; no styling deltas.
 
-- [ ] **Step 1: `home-copy.ts` — the ratified copy, production names**
+- [✅] **Step 1: `home-copy.ts` — the ratified copy, production names**
 
 Create `apps/landing/src/components/home-copy.ts` with exactly:
 
@@ -105,7 +105,7 @@ export const TESTIMONIALS_PLACEHOLDER = [
 
 (Every string is byte-identical to `components/prototype/copy.ts` — only names and comments change; `HERO_CAPTION_DRAFT` was variant-B-only and dies here.)
 
-- [ ] **Step 2: `home-cards.tsx` — the two ruled card treatments, trimmed to what D consumes**
+- [✅] **Step 2: `home-cards.tsx` — the two ruled card treatments, trimmed to what D consumes**
 
 Create `apps/landing/src/components/home-cards.tsx` with exactly:
 
@@ -325,7 +325,7 @@ function privilegeLabel(p: ResolvedPackageInclusion): string {
 
 (`demoOpen` and every export the compare/gallery surfaces used — `PrototypePackageCard`, `PrototypeServiceCard`, `PrototypeBranchCard`, `PrototypeStripItem`, `inclusionLines`, `CARD_GRID`, the density system, `MediaFrame`, `serviceIcon` — die with Task 4's deletion; the `d92` grid class inlines into Task 1 Step 3.)
 
-- [ ] **Step 3: `home-image-led.tsx` — the variant D page body**
+- [✅] **Step 3: `home-image-led.tsx` — the variant D page body**
 
 Create `apps/landing/src/components/home-image-led.tsx` with exactly:
 
@@ -538,7 +538,7 @@ export function HomeImageLed({
 }
 ```
 
-- [ ] **Step 4: Format + typecheck + tests + commit**
+- [✅] **Step 4: Format + typecheck + tests + commit**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -567,7 +567,7 @@ Expected: all green — the three files compile unwired, tests stay 7 files / 62
 
 **Not here:** no other route or component changes (Task 3's serif is separate); the prototype routes still exist and still work until Task 4; no loader/query changes beyond dropping the now-unused branches prefetch (the ruled composition's single data delta — flag in the PR).
 
-- [ ] **Step 1: Rewrite `index.tsx`**
+- [✅] **Step 1: Rewrite `index.tsx`**
 
 Replace the ENTIRE file `apps/landing/src/routes/index.tsx` with exactly:
 
@@ -603,7 +603,7 @@ function HomePage() {
 
 (`BranchStripItem`, `PackageCard`, `ServiceTeaserItem`, `WalkInBadge`, the four variant imports, `DevOnlySwitcher`, `variantSearchSchema`, and `HomeCurrent` all leave this file. `BranchStripItem`/`ServiceTeaserItem` keep their files — #58-ruled keepers, `ServiceTeaserItem` still consumed by nothing else but cheap to keep; note both in the PR.)
 
-- [ ] **Step 2: The ruled content-pages edit (three checks, count stays 16)**
+- [✅] **Step 2: The ruled content-pages edit (three checks, count stays 16)**
 
 In `apps/landing/scripts/verify/content-pages.mjs`, make exactly these three replacements.
 
@@ -670,7 +670,7 @@ with:
   );
 ```
 
-- [ ] **Step 3: Format + typecheck + tests + build + commit**
+- [✅] **Step 3: Format + typecheck + tests + build + commit**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -704,7 +704,7 @@ Expected: all green at build time; the CDP live run happens in Task 5 (needs the
 
 **Not here:** the booking flow surfaces (`book.tsx` question headings, `booking.$id.tsx`, `ConfirmationCard`) stay sans — frozen-flow posture, flagged boundary for the owner gate; home is already serif via Task 1; the chrome wordmarks are already serif.
 
-- [ ] **Step 1: The eight heading edits**
+- [✅] **Step 1: The eight heading edits**
 
 | File:line | From | To |
 |---|---|---|
@@ -719,7 +719,7 @@ Expected: all green at build time; the CDP live run happens in Task 5 (needs the
 
 (Verify each line first: `grep -n '<h1\|<h2' apps/landing/src/routes/services.tsx apps/landing/src/routes/about.tsx apps/landing/src/routes/branches.tsx apps/landing/src/routes/packages/index.tsx apps/landing/src/routes/packages/\$slug.tsx` — the recon table is the expectation; if a line moved, re-locate by the quoted class string. innerText is untouched, so no CDP expectation moves.)
 
-- [ ] **Step 2: Format + typecheck + tests + commit**
+- [✅] **Step 2: Format + typecheck + tests + commit**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -748,7 +748,7 @@ boundary, flagged at the owner gate). Ruling B carried to the gate."
 
 **Not here:** `apps/landing/scripts/prototype-shot.mjs` + `prototype-contrast.mjs` survive until Task 8 (Tasks 5 and 7 still use them); `public/photos/` survives (production home consumes it); `packages/ui/popover.tsx` survives (production `home-cards.tsx` consumes it).
 
-- [ ] **Step 1: Delete + regenerate**
+- [✅] **Step 1: Delete + regenerate**
 
 ```bash
 git rm apps/landing/src/routes/prototype-tokens.tsx apps/landing/src/routes/prototype-remediation.tsx
@@ -756,7 +756,7 @@ git rm -r apps/landing/src/components/prototype/
 pnpm --filter @sevendays/landing generate-routes
 ```
 
-- [ ] **Step 2: Prove the tree is prototype-free**
+- [✅] **Step 2: Prove the tree is prototype-free**
 
 ```bash
 ls apps/landing/src/components/prototype 2>&1   # expect: No such file or directory
@@ -766,7 +766,7 @@ grep -rln 'components/prototype' apps/landing/src || echo "NO PROTOTYPE IMPORTS 
 
 Expected: the ls fails; both greps print their OK fallback (the regenerated tree drops `PrototypeTokensRoute` / `PrototypeRemediationRoute`; nothing imports the dead directory).
 
-- [ ] **Step 3: Format + full gates + commit**
+- [✅] **Step 3: Format + full gates + commit**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -797,7 +797,7 @@ Expected: typecheck green over the shrunk import graph, tests 7 files / 62, SSR 
 
 **Not here:** no script/test edits (Task 2 spent the one exception); the mutating e2e is NOT an AC here — it runs in Task 7 only to mint confirmation-page shots against the disposable local db; screenshots are Task 7.
 
-- [ ] **Step 1: Boot the fully-local compose stack (the #99 procedure)**
+- [✅] **Step 1: Boot the fully-local compose stack (the #99 procedure)**
 
 ```bash
 docker compose up -d          # postgres:17, localhost:5432/sevendays_test (postgres/postgres)
@@ -829,7 +829,7 @@ pnpm --filter @sevendays/landing dev  # terminal 2 — :3000; confirm from its l
 
 (Servers as background tasks; grep each log for its actual port before probing — the SDD channel quirk.)
 
-- [ ] **Step 2: The M2 CDP read-only regressions (AC 2)**
+- [✅] **Step 2: The M2 CDP read-only regressions (AC 2)**
 
 ```bash
 node apps/landing/scripts/verify/booking-wizard.mjs   # 15/15 — frozen flow untouched
@@ -839,14 +839,14 @@ node apps/landing/scripts/verify/packages-pages.mjs   # 12/12 — sibling regres
 
 Expected: every check PASS, exit 0. A FAIL in a non-ruled check means a surface broke a seam — fix the surface, never the script. The three ruled home checks failing means the composition drifted from the pinned variant D — fix the component, never the expectation.
 
-- [ ] **Step 3: The lib-seam suites + the repo gate (AC 1)**
+- [✅] **Step 3: The lib-seam suites + the repo gate (AC 1)**
 
 ```bash
 pnpm --filter @sevendays/landing test   # 7 files / 62 tests — byte-untouched
 pnpm check                              # 35/35 turbo tasks
 ```
 
-- [ ] **Step 4: The starter-theme static gates (AC 8)**
+- [✅] **Step 4: The starter-theme static gates (AC 8)**
 
 ```bash
 grep -rn 'text-neutral-\|bg-neutral-\|ring-neutral-' apps/landing/src apps/admin/src --include='*.tsx' || echo "NO ISLAND COLORS — OK"
@@ -858,7 +858,7 @@ grep -rln 'components/prototype' apps/landing/src || echo "NO PROTOTYPE IMPORTS 
 
 Expected: island + vocab + font-CDN greps print their OK fallbacks; the prototype grep prints `NO PROTOTYPE IMPORTS — OK` (the import-path check is the gate — the WORD "prototype" legitimately survives in historical comments: `lib/booking.ts` (M2 prototype-verbatim markers), `lib/format.ts:2`, `site-header.tsx:8` + `mobile-nav.tsx:14` (#111 prototype-band provenance), `confirmation-card.tsx:6`; live-verified 2026-09-20, none are starter-theme remnants). The chart grep prints exactly ONE hit — `packages/ui/src/tokens.css:8`, the comment documenting that no `--chart-*` tokens ship (a comment, not a token; record it as such in the evidence). If any other hit appears, that remnant is a fix in this ticket — remove it and re-run.
 
-- [ ] **Step 5: Contrast re-verification (AC 3 — the four #92 pairs + the #111 chrome family + muted-on-wash)**
+- [✅] **Step 5: Contrast re-verification (AC 3 — the four #92 pairs + the #111 chrome family + muted-on-wash)**
 
 ```bash
 node apps/landing/scripts/prototype-contrast.mjs
@@ -874,7 +874,7 @@ console.log('muted #686969 on wash-b #d9eef6 (darkest):', ratio(hexToRgb('#68696
 
 Expected: every pair ≥ 4.5 (AA). The load-bearing pins — ink/white ≈ 13.85+, white/primary 5.65, brand-700/white (link-on-white) 8.22, muted-on-wash-b ≈ 4.59 (tokens.css:40's recorded value), white/ink 18.64, brand-200/ink 13.94 (Treatment B nav links), white/deep 10.90 (Treatment B CTA). The two `F1 hijack — as-landed` rows print FAIL by design (they document the fixed bug's before-state) — record them as historical rows, not live pairs. Record ALL outputs verbatim in the evidence file.
 
-- [ ] **Step 6: Evidence + teardown**
+- [✅] **Step 6: Evidence + teardown**
 
 Write `.superpowers/sdd/2026-09-20-101-m3-verification-closeout/task-5-evidence.md` (topology, per-gate results with check counts 15/16/12, tests 7/62, `pnpm check` 35/35, every static-gate output incl. the one expected chart-comment hit, the full contrast table + the muted-on-wash lines). Kill Chrome + both dev servers; leave the compose db up (Task 7 reuses it). If (and only if) a gate forced a fix: commit it under `fix(landing): …` naming the gate; otherwise no commit.
 
@@ -892,7 +892,7 @@ Write `.superpowers/sdd/2026-09-20-101-m3-verification-closeout/task-5-evidence.
 
 **Not here:** no triage or pick of THIS ticket's merge (Task 9, post-merge); no ledger edits yet (Task 8); the three SKIP verdicts (#109 `d6d507e`, #112 `7d93829`, #113 `d775a2c`) are already classifier-proven — they need rows only, no v1 commits; if the pick's conflict work passes one hour, STOP per the runbook's time-box and bring it to the owner (the fallback-trigger protocol).
 
-- [ ] **Step 1: Pre-flight**
+- [✅] **Step 1: Pre-flight**
 
 ```bash
 cd ~/Projects/sevendays-v1-seed
@@ -903,7 +903,7 @@ git log --oneline -1 v1            # expect c2c1056 (#100's pick)
 node /home/jeius/Projects/sevendays/scripts/v1-triage.mjs 8c89d63   # re-confirm: SPLIT — 54 v1-path(s) + 18 main-only
 ```
 
-- [ ] **Step 2: The SPLIT (runbook § Executing a SPLIT, verbatim)**
+- [✅] **Step 2: The SPLIT (runbook § Executing a SPLIT, verbatim)**
 
 ```bash
 git cherry-pick -n 8c89d63         # exits 1 on "deleted by us" (DU) — expected
@@ -923,7 +923,7 @@ git rm -qrf --ignore-unmatch -- \
 
 (The graphify-out glob covers its whole footprint; `scripts/verify/content-pages.mjs` drops because `scripts/` is main-only on v1; the prototype surface + photos drop whole per the row's map — v1 has no consumer for them until this ticket's own pick. If `git status` shows additional `A`/`DU` paths beyond the row's 18 main-only list, `git rm` them the same way — the classifier output from Step 1 is the authoritative list.)
 
-- [ ] **Step 3: Resolve the transformed surfaces per the row's conflict map**
+- [✅] **Step 3: Resolve the transformed surfaces per the row's conflict map**
 
 The #110 ledger row pre-maps every conflict class — apply it exactly:
 
@@ -935,7 +935,7 @@ The #110 ledger row pre-maps every conflict class — apply it exactly:
 - `routeTree.gen.ts` — never resolved by hand: after the drops, `pnpm --filter @sevendays/landing generate-routes`.
 - `popover.tsx`'s keep-or-drop is audit-neutral (the row leaves it to the executor) — KEEP it: #101's own pick lands `home-cards.tsx` consuming it next.
 
-- [ ] **Step 4: Commit with provenance**
+- [✅] **Step 4: Commit with provenance**
 
 ```bash
 git commit -F - <<EOF
@@ -948,7 +948,7 @@ EOF
 
 (The blank line after the `%B` line is load-bearing — the runbook's provenance-formatting trap. If a v1-path hunk was content-dropped in Step 3, `git restore --staged --worktree --source=HEAD -- <path>` BEFORE this commit and name it in the `Split:` line as `content-dropped: <path>`.)
 
-- [ ] **Step 5: The locks (runbook § The locks, verbatim)**
+- [✅] **Step 5: The locks (runbook § The locks, verbatim)**
 
 ```bash
 pnpm install --frozen-lockfile && pnpm build:packages && pnpm --filter @sevendays/api build
@@ -961,7 +961,7 @@ gh run view <id> --json jobs --jq '.jobs[] | "\(.name): \(.conclusion)"'      # 
 
 If `pnpm install --frozen-lockfile` trips on the lockfile: take v1's lockfile (`git checkout v1 -- pnpm-lock.yaml` — pre-push, on the pick), `pnpm install`, commit the regenerated lockfile inside the pick; never hand-edit it. If `check` goes red for content reasons: `git revert` the pick on v1, push, re-triage — never force-push, never hot-fix on v1.
 
-- [ ] **Step 6: The live curls + record**
+- [✅] **Step 6: The live curls + record**
 
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' https://sevendays-v1-landing.pahamajulius.workers.dev/            # 200
@@ -987,7 +987,7 @@ Record in the evidence file: the v1 SHA of the pick, the CI run id + job conclus
 
 **Not here:** no script/test edits; no live-Supabase writes (the e2e below writes only to the disposable local compose db); Task 8's docs.
 
-- [ ] **Step 1: The click-through shooter (once, into /tmp)**
+- [✅] **Step 1: The click-through shooter (once, into /tmp)**
 
 Write `/tmp/101-shot-flow.mjs` with exactly:
 
@@ -1078,7 +1078,7 @@ console.log(`shot ${out} — title="${await evaluate('document.title')}"`);
 ws.close();
 ```
 
-- [ ] **Step 2: Main-variant desktop shots (local stack)**
+- [✅] **Step 2: Main-variant desktop shots (local stack)**
 
 ```bash
 L=http://localhost:3000; API=http://127.0.0.1:8787; S=.scratch/101-closeout-shots/main
@@ -1094,7 +1094,7 @@ node /tmp/101-shot-flow.mjs $L/book $S/book-step-2.png 1
 node /tmp/101-shot-flow.mjs $L/book $S/book-step-4.png 3
 ```
 
-- [ ] **Step 3: Mint the confirmation rows + the confirmation/not-found shots (local db only)**
+- [✅] **Step 3: Mint the confirmation rows + the confirmation/not-found shots (local db only)**
 
 ```bash
 node apps/landing/scripts/verify/booking-e2e.mjs    # 7/7 — writes 2 rows to the DISPOSABLE local compose db
@@ -1105,7 +1105,7 @@ node apps/landing/scripts/prototype-shot.mjs $L/booking/00000000-0000-0000-0000-
 
 (The e2e is NOT this ticket's AC — it re-proves the frozen flow post-close-out and mints the confirmation shot's id. The Resend placeholder key fails loudly by design; the bookings stand. Record both booking ids in the evidence.)
 
-- [ ] **Step 4: Mobile-viewport shots (390px — the #111 AC's mobile-only offenders)**
+- [✅] **Step 4: Mobile-viewport shots (390px — the #111 AC's mobile-only offenders)**
 
 ```bash
 M=.scratch/101-closeout-shots/main-mobile
@@ -1115,7 +1115,7 @@ node apps/landing/scripts/prototype-shot.mjs $L/book     $M/book.png      390 24
 node /tmp/101-shot-flow.mjs $L/ $M/home-panel-open.png 0 true 390
 ```
 
-- [ ] **Step 5: v1-variant shots (the picked deployment — AC 4's second half)**
+- [✅] **Step 5: v1-variant shots (the picked deployment — AC 4's second half)**
 
 ```bash
 V=https://sevendays-v1-landing.pahamajulius.workers.dev; SV=.scratch/101-closeout-shots/v1
@@ -1130,7 +1130,7 @@ node apps/landing/scripts/prototype-shot.mjs $V/               $SV/home-mobile.p
 
 (v1's home is its as-landed call-forward composition here — the variant D flip reaches v1 only through THIS ticket's own pick, Task 9. Say so in the evidence + the gate presentation; the post-pick v1 home shot lands in Task 9's addendum.)
 
-- [ ] **Step 6: THE OWNER GATE — present and STOP**
+- [✅] **Step 6: THE OWNER GATE — present and STOP**
 
 Write the Task 7 evidence file (the shot inventory with per-file titles/body-length sanity from the shooters' output, the two booking ids, the v1-home caveat). Present to the owner: the pack + the Task 5/6 evidence + this ticket's two carried rulings and boundaries — **Ruling A** (production home = variant D, judged against the #111 resolution; the ruled 3-check script edit), **Ruling B** (serif inner-page h1/h2), the **booking-flow headings stay sans** boundary, the **orphaned `BranchStripItem`/`ServiceTeaserItem`** note, and the **v1-home-flip-deferred-to-Task-9** note. The owner accepts per-surface or names fixes — fixes loop back into Tasks 1–5 and the gate re-runs. **Do not proceed to Task 8 without the owner's acceptance on record.**
 
@@ -1149,7 +1149,7 @@ Write the Task 7 evidence file (the shot inventory with per-file titles/body-len
 
 **Not here:** `docs/plan.md`'s other M3 lines (already ticked); Task 9's row (post-merge); any Milestone 4+ checkboxes.
 
-- [ ] **Step 1: The ledger rows**
+- [✅] **Step 1: The ledger rows**
 
 In `docs/agents/v1-picks.md`'s ledger table: **insert** the #109 row BEFORE the existing #110 row, **update** #110's row in place, and **append** #112 + #113 after it (main order). Row shapes — fill every `<…>` from the Task 6 evidence:
 
@@ -1160,13 +1160,13 @@ In `docs/agents/v1-picks.md`'s ledger table: **insert** the #109 row BEFORE the 
 | 2026-09-20 | #113 | `d775a2c` | skip | — | #99 booking-flow componentization — all 28 paths main-only (booking cluster + scripts/ + docs/graph; classifier). Mechanical skip; CDP/e2e evidence rode the ticket |
 ```
 
-- [ ] **Step 2: progress.md + plan.md**
+- [✅] **Step 2: progress.md + plan.md**
 
 Prepend to `docs/progress.md`'s `Last updated` header: `2026-09-20 (#101 M3 close-out — M3 VERIFIED + CLOSED: production home flipped to the #111-endorsed variant D composition (Ruling A; content-pages' 3 home expectations re-pinned by the ticket's one ruled script edit), inner-page h1/h2 on the ruled serif register (Ruling B), every prototype surface deleted (/prototype-tokens, /prototype-remediation, components/prototype/, the dev switcher; shot/contrast tooling retired), the v1 backlog drained (#110's pending split executed with the pre-mapped conflict expectations; #109/#112/#113 skip rows recorded), CDP read-only trio 15/16/12 + lib-seam 7/62 unchanged + `pnpm check` 35/35 + the AA pairs re-measured (four #92 pairs + the #111 white-on-ink chrome family + muted-on-wash 4.59), owner per-surface screenshots accepted on main + the picked v1 deployment incl. mobile — PR <NN>.. Prior 2026-09-20: ` (the #99 entry becomes the Prior). Add the What-Exists bullet after #99's naming: the two rulings as agent rulings accepted at the gate, the branches-prefetch drop, the orphaned keepers, the Task 9 pick as the loop's tail.
 
 Tick `docs/plan.md` line 103 (`grep -n "Verify: same URLs" docs/plan.md` to confirm the line first): `- [ ]` → `- [✅]` with a dated annotation naming: variant D flip + serif register (the two #101 rulings), CDP 15/16/12 + tests 7/62 + check 35/35, contrast pairs re-measured, both-variant owner screenshots incl. mobile, gallery deleted, v1 backlog drained.
 
-- [ ] **Step 3: Retire the throwaway tools + graphify + full check**
+- [✅] **Step 3: Retire the throwaway tools + graphify + full check**
 
 ```bash
 git rm apps/landing/scripts/prototype-shot.mjs apps/landing/scripts/prototype-contrast.mjs
@@ -1174,7 +1174,7 @@ graphify update .
 pnpm check
 ```
 
-- [ ] **Step 4: Tick this plan + commit + push + open the PR**
+- [✅] **Step 4: Tick this plan + commit + push + open the PR**
 
 ```bash
 # tick every completed step above with - [✅], then:
@@ -1188,7 +1188,7 @@ gh pr create --base main --head feat/101-m3-closeout \
 
 Body sections: Summary · AC→evidence mapping (the ticket's 8 ACs against Tasks 4/5/6/7/8) · **the two agent rulings** (A: variant D flip + the ruled 3-check script edit, argued from #111's acceptance bar; B: serif register) + the boundaries (booking-flow headings sans; orphaned keepers; the branches-prefetch drop; v1 home flip deferred to the post-merge pick) · screenshots pointer (the accepted pack) · verification (CDP 15/16/12, e2e 7/7 local, tests 7/62 unchanged, check 35/35, static gates incl. the one expected chart-comment hit, contrast table) · the v1 ledger state · Closes #101.
 
-- [ ] **Step 5: The completion report — then STOP for the owner's merge**
+- [✅] **Step 5: The completion report — then STOP for the owner's merge**
 
 Evidence pack + AC mapping + rulings + flags to the owner. The owner merges the PR. Task 9 begins only after the merge.
 
