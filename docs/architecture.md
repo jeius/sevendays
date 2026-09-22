@@ -13,7 +13,9 @@ Three independently deployed apps, all on **Cloudflare Workers** (`landing` and 
           └───────────┬───────────┘ └───────────┬───────────┘
                       │                         │
                       └────────────┬────────────┘
-                                   │ REST via @sevendays/api-client (server-to-server)
+                                   │ @sevendays/api-client, server-to-server (ADR-0006) —
+                                   │ production transport: the `API` service binding (ADR-0016);
+                                   │ dev + vitest: the API_URL network path
                                    ▼
                         ┌───────────────────────┐
                         │  apps/api             │  Cloudflare Workers
@@ -46,10 +48,10 @@ Three independently deployed apps, all on **Cloudflare Workers** (`landing` and 
 ## Data Flow: Booking a Shoot
 
 1. Customer fills out the booking form in `apps/landing` (branch, package, date/time, contact info).
-2. Form is validated client-side against `createAppointmentSchema` from `packages/types`.
-3. `apps/landing`'s server function calls `POST /api/appointments` on `apps/api` through `@sevendays/api-client` — the browser talks only to its own app; frontend→API calls are always server-to-server (ADR-0006).
-4. `apps/api` re-validates with the same Zod schema (never trust the client), writes the row via `packages/db`, and triggers a Resend confirmation email.
-5. Appointment appears in `apps/admin`'s dashboard, which fetches `GET /api/appointments` through `@sevendays/api-client` from its own server functions, cached by TanStack Query (ADR-0006).
+2. The wizard validates each step client-side with Zod schemas in `apps/landing/src/lib/booking.ts` (contact info, slot gating); the submit payload is typed as `CreateAppointmentArgs`, and the full shared-schema parse happens server-side (step 4).
+3. `apps/landing`'s server function calls `POST /api/v1/appointments` on `apps/api` (ADR-0010 path-versioned mount; `/health` stays top-level) through `@sevendays/api-client` — the browser talks only to its own app; frontend→API calls are always server-to-server (ADR-0006).
+4. `apps/api` re-validates the payload with `createAppointmentSchema` from `packages/types` (never trust the client), writes the appointment and its chosen offering in a single intake transaction via `packages/db`, and schedules the Resend confirmation email after the commit via `ctx.waitUntil` (ADR-0014) — the response never waits on the send.
+5. The customer lands on `/booking/:id`, which reads the appointment snapshot back through the public single-get endpoint (`appointments.get` via `apps/landing`'s server functions). The admin appointments dashboard is future work (v2): it will fetch `GET /api/v1/appointments` through the same `@sevendays/api-client` from its own server functions, cached by TanStack Query (ADR-0006).
 
 ## Auth (planned, not yet wired up)
 
@@ -63,12 +65,14 @@ Package cover images and portfolio photos are uploaded through `apps/api` (which
 
 - **Logging:** `apps/api` uses Loglayer + Pino for structured logs (planned for M6 — the API currently uses Hono's built-in `logger()` middleware as a placeholder; see `docs/progress.md`).
 - **Errors:** Sentry is scaffolded into all three apps via the TanStack CLI's `sentry` add-on (`landing`, `admin`) — `apps/api` will need Sentry added separately since it isn't a TanStack Start app.
-- **Analytics:** PostHog is scaffolded into `landing` and `admin` via the CLI add-on. The booking funnel (view package → start booking → complete booking) is the primary metric to instrument once the booking flow is built.
+- **Analytics:** PostHog is scaffolded into `landing` and `admin` via the CLI add-on. The booking funnel (view package → start booking → complete booking) is the primary metric to instrument — the flow itself is built (M2, closed 2026-09-10); the funnel events are not yet wired.
 
 ## Deployment Targets
 
 | App | Platform | Notes |
 |---|---|---|
-| `apps/landing` | Cloudflare Workers (via `@cloudflare/vite-plugin`, `wrangler deploy`) | Public, cacheable |
-| `apps/admin` | Cloudflare Workers (via `@cloudflare/vite-plugin`, `wrangler deploy`) | Auth-gated, separate deployment from landing |
-| `apps/api` | Cloudflare Workers (via Wrangler) | Bindings/secrets TODO — see `apps/api/wrangler.toml` |
+| `apps/landing` | Cloudflare Workers (via `@cloudflare/vite-plugin`), deployed by branch-keyed CI (`pnpm build`, then `wrangler deploy`) | Public, cacheable |
+| `apps/admin` | Cloudflare Workers (via `@cloudflare/vite-plugin`), deployed by branch-keyed CI (`pnpm build`, then `wrangler deploy`) | Auth-gated (staff auth arrives with M4), separate deployment from landing |
+| `apps/api` | Cloudflare Workers (via Wrangler), deployed by branch-keyed CI (`pnpm build`, then `wrangler deploy`) | Secrets set per environment via `wrangler secret put` — checklist in `docs/tech-stack.md` § Secrets Checklist; the R2 binding stays commented out until M5 (`apps/api/wrangler.toml`) |
+
+Deploys are branch-keyed CI: a push builds (`pnpm build`) and deploys (`wrangler deploy`) the Workers its branch owns, gated on the same push's CI green. The pipeline and its per-branch targets are detailed in `docs/tech-stack.md` § Continuous deploy.
