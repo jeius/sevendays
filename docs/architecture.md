@@ -13,7 +13,9 @@ Three independently deployed apps, all on **Cloudflare Workers** (`landing` and 
           └───────────┬───────────┘ └───────────┬───────────┘
                       │                         │
                       └────────────┬────────────┘
-                                   │ REST via @sevendays/api-client (server-to-server)
+                                   │ @sevendays/api-client, server-to-server (ADR-0006) —
+                                   │ production transport: the `API` service binding (ADR-0016);
+                                   │ dev + vitest: the API_URL network path
                                    ▼
                         ┌───────────────────────┐
                         │  apps/api             │  Cloudflare Workers
