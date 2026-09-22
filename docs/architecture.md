@@ -65,7 +65,7 @@ Package cover images and portfolio photos are uploaded through `apps/api` (which
 
 - **Logging:** `apps/api` uses Loglayer + Pino for structured logs (planned for M6 — the API currently uses Hono's built-in `logger()` middleware as a placeholder; see `docs/progress.md`).
 - **Errors:** Sentry is scaffolded into all three apps via the TanStack CLI's `sentry` add-on (`landing`, `admin`) — `apps/api` will need Sentry added separately since it isn't a TanStack Start app.
-- **Analytics:** PostHog is scaffolded into `landing` and `admin` via the CLI add-on. The booking funnel (view package → start booking → complete booking) is the primary metric to instrument once the booking flow is built.
+- **Analytics:** PostHog is scaffolded into `landing` and `admin` via the CLI add-on. The booking funnel (view package → start booking → complete booking) is the primary metric to instrument — the flow itself is built (M2, closed 2026-09-10); the funnel events are not yet wired.
 
 ## Deployment Targets
 
