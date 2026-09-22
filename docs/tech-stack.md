@@ -9,7 +9,7 @@
 ## Frontend (`apps/landing`, `apps/admin`)
 
 - **TanStack Start** — full-stack React framework (file-based routing via TanStack Router, SSR, server functions). Scaffolded with the official `@tanstack/cli create` tool, not hand-written, so it tracks upstream conventions.
-- **shadcn/ui** — components generated per-app via the shadcn CLI (`components.json` present in both apps), themed by shared CSS variables from `packages/ui` plus each app's Tailwind v4 `@theme` styles.
+- **shadcn/ui** — the shadcn monorepo pattern (ADR-0017): one `components.json` per workspace (both apps + `packages/ui`, all pinning the same style/iconLibrary/baseColor), so `shadcn add` routes shared primitives into `packages/ui` on the Base UI base (`cn` comes from the `cn` package); composed brand/page components stay app-local. Themed by the shared semantic token layer plus each app's Tailwind v4 `@theme` styles.
 - **Tailwind CSS v4** — as scaffolded by TanStack CLI (`@tailwindcss/vite`).
 - **Cloudflare Workers** — deploy target for all three apps (`landing`/`admin` are Worker-based TanStack Start, not Pages), via `@cloudflare/vite-plugin` + Wrangler (`wrangler.jsonc` in each app; `deploy` runs `wrangler deploy`). Builds emit to `dist/` (TanStack Start 1.168 layout: `dist/client` + `dist/server/wrangler.json` — the deployable config, which `wrangler deploy` follows through the vite plugin's `.wrangler/deploy/config.json` redirect; the scaffold's `.output/` paths are obsolete).
 

@@ -2,7 +2,7 @@
 
 ## System Overview
 
-Three independently deployed apps, all on **Cloudflare Workers** (`landing` and `admin` are Worker-based TanStack Start apps via `@cloudflare/vite-plugin`, not Pages). Every database touch goes through `apps/api` + `packages/db`; the frontends depend only on shared packages (`packages/types`, `packages/api-client`) and shared config, so data shapes stay consistent without the frontends ever touching the database or hand-rolling API calls.
+Three independently deployed apps, all on **Cloudflare Workers** (`landing` and `admin` are Worker-based TanStack Start apps via `@cloudflare/vite-plugin`, not Pages). Every database touch goes through `apps/api` + `packages/db`; the frontends depend only on shared packages (`packages/types`, `packages/api-client`, `packages/ui`) and shared config, so data shapes stay consistent without the frontends ever touching the database or hand-rolling API calls.
 
 ```text
    customers ─────────┐                         ┌───────── admin staff
@@ -40,7 +40,7 @@ Three independently deployed apps, all on **Cloudflare Workers** (`landing` and 
 - **`packages/db`** owns the Drizzle schema and exports a `createDbClient(connectionString)` factory — the only Postgres client, and the only home of table definitions. Query operators (`eq`, `asc`, …) may be imported from `drizzle-orm` directly (as `apps/api`'s services do); schemas and clients may not — those always come through this package so schema changes propagate everywhere.
 - **`packages/types`** owns Zod schemas and inferred TypeScript types for every domain object (`Branch`, `ServicePackage`, `Appointment`). Both the API (server-side validation) and the frontends (form validation) import from here so a schema change only happens in one place.
 - **`packages/api-client`** owns how the frontends call `apps/api`: a thin Hono RPC client (`createApiClient`) whose types are inferred from the API's exported `AppType` (type-only dependency — no runtime coupling with the app), Zod-parses every response against `packages/types` schemas, and throws a typed `ApiClientError` on non-2xx. Neither frontend hand-rolls fetch calls to the API (ADR-0006).
-- **`packages/ui`** owns the shadcn/ui CSS variables (`src/globals.css`) so `landing` and `admin` don't drift on tokens. Actual shadcn components are generated per-app (via the shadcn CLI) since they're copy-paste by design. Apps are Tailwind v4 (CSS-first): theme customization lives in each app's `styles.css` via `@theme`, and `packages/ui` holds shared variables only — there is no shared JS preset (the v3-era one was removed when the apps landed on v4).
+- **`packages/ui`** is the shared design-system library (ADR-0017, the shadcn monorepo pattern): the semantic token layer (`src/tokens.css`, imported by both apps) plus the shared shadcn/Base-UI primitive library, generated into the package by `shadcn add` (one `components.json` per workspace, all pinning the same style/iconLibrary/baseColor; `cn` from the `cn` package). Brand and page-specific (composed) components stay app-local. Apps are Tailwind v4 (CSS-first): theme customization lives in each app's `styles.css` via `@theme` — there is no shared JS preset (the v3-era one was removed when the apps landed on v4).
 - **`apps/landing`** and **`apps/admin`** each own their own routes, pages, and app-specific components. Neither should reach into the other's `src/`.
 
 ## Data Flow: Catalog Reads
