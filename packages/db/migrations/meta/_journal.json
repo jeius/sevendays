@@ -36,6 +36,13 @@
       "when": 1788788805196,
       "tag": "0004_supreme_magdalene",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790053387204,
+      "tag": "0005_aspiring_firelord",
+      "breakpoints": true
     }
   ]
 }

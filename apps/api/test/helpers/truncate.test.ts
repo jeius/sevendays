@@ -14,8 +14,9 @@ describe('publicTableNames', () => {
     expect(publicTableNames()).toEqual(fromBarrel);
   });
 
-  it('still truncates exactly the thirteen known public tables (migrations 0000-0003)', () => {
+  it('still truncates exactly the eighteen known public tables (migrations 0000-0005)', () => {
     expect(publicTableNames()).toEqual([
+      'account',
       'addon_services',
       'appointment_addon_services',
       'appointments',
@@ -26,9 +27,13 @@ describe('publicTableNames', () => {
       'package_inclusion_attires',
       'package_inclusions',
       'print_sizes',
+      'rate_limit',
       'service_packages',
+      'session',
       'studio_service_addon_services',
       'studio_services',
+      'user',
+      'verification',
     ]);
   });
 });

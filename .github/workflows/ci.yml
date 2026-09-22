@@ -83,6 +83,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       API_URL: ${{ vars.API_URL }}
+      BETTER_AUTH_URL: ${{ vars.BETTER_AUTH_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -127,7 +128,16 @@ jobs:
 
       - name: Deploy admin (sevendays-admin)
         working-directory: apps/admin
-        run: pnpm exec wrangler deploy --name sevendays-admin --var "API_URL:$API_URL"
+        run: pnpm exec wrangler deploy --name sevendays-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL"
+
+      - name: Sync admin DATABASE_URL from the environment secret
+        working-directory: apps/admin
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo '::error::DATABASE_URL secret missing from the teaser GitHub environment'
+            exit 1
+          fi
+          printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL --name sevendays-admin
 
   deploy-v1:
     name: Deploy v1 (private)
@@ -142,6 +152,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       API_URL: ${{ vars.API_URL }}
+      BETTER_AUTH_URL: ${{ vars.BETTER_AUTH_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -185,4 +196,13 @@ jobs:
 
       - name: Deploy admin (sevendays-v1-admin)
         working-directory: apps/admin
-        run: pnpm exec wrangler deploy --name sevendays-v1-admin --var "API_URL:$API_URL"
+        run: pnpm exec wrangler deploy --name sevendays-v1-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL"
+
+      - name: Sync admin DATABASE_URL from the environment secret
+        working-directory: apps/admin
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo '::error::DATABASE_URL secret missing from the v1 GitHub environment'
+            exit 1
+          fi
+          printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL --name sevendays-v1-admin
