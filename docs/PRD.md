@@ -14,6 +14,8 @@ Sevendays is a photography studio with 3 branches. The company previously only a
 
 ## V1 Scope (must-have)
 
+> _Delivery annotation (2026-09-22): "V1" below is the **product** v1 — the complete system this PRD describes. **Delivery** is versioned separately (owner rulings 2026-09-09/10, issue #62; `docs/specs/2026-09-11-delivery-versions-spec.md`, issue #76; ADR-0015): the free handover artifact "v1" is booking-free (landing + admin auth + CMS + the v1 production slice), while the booking flow and the appointments dashboard deliver as paid v2. The scope items below predate that split — read them through it._
+
 ### Landing site (`apps/landing`)
 
 - Home/marketing pages: packages, services offered, the 3 branches (with which accept walk-ins), credibility content (portfolio, testimonials).
