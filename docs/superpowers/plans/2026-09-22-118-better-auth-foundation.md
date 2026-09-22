@@ -450,12 +450,14 @@ Expected: a new `packages/db/migrations/0005_*.sql` plus `meta/0005_snapshot.jso
 
 ```bash
 grep -c 'CREATE TABLE' packages/db/migrations/0005_*.sql
-grep -n 'REFERENCES' packages/db/migrations/0005_*.sql
+grep -c 'ADD CONSTRAINT' packages/db/migrations/0005_*.sql
+grep -c 'ON DELETE cascade' packages/db/migrations/0005_*.sql
 grep -n 'session_userId_idx\|account_userId_idx\|verification_identifier_idx' packages/db/migrations/0005_*.sql
-grep -rn 'ALTER TABLE\|DROP' packages/db/migrations/0005_*.sql || echo "no alters/drops — greenfield CREATE only"
+grep -c 'DROP' packages/db/migrations/0005_*.sql || echo "0 drops"
+grep -cE 'appointments|branches|service_packages|attires|frames|print_sizes|studio_services|addon_services|package_inclusions|branch_studio' packages/db/migrations/0005_*.sql || echo "0 — no pre-existing table named"
 ```
 
-Expected: exactly 5 `CREATE TABLE` (`"user"`, `"session"`, `"account"`, `"verification"`, `"rate_limit"`); 2 `REFERENCES "user"."id"` FKs with `ON DELETE cascade` (session, account); all three named indexes present; zero ALTER/DROP (empty new tables — anything else is a STOP-and-report finding). `$onUpdate` is a drizzle runtime feature and correctly does NOT appear as SQL.
+Expected: exactly 5 `CREATE TABLE` (`account`, `rate_limit`, `session`, `user`, `verification`); exactly 2 `ADD CONSTRAINT` lines — the FK statements `account_user_id_user_id_fk` / `session_user_id_user_id_fk`, which drizzle-kit 0.31 emits as post-CREATE `ALTER TABLE … ADD CONSTRAINT … FOREIGN KEY` on tables created in the SAME migration (amended 2026-09-22 after the first implementer's literal-gate stop — the original zero-ALTER expectation misread drizzle-kit's emission style; the safety property is "no pre-existing table touched, nothing destructive", ledger-recorded) — each with `ON DELETE cascade`; all three named indexes present; 0 DROP; 0 mentions of any pre-existing catalog table. Unique constraints appear as named `CONSTRAINT … UNIQUE(...)` lines inside the CREATE TABLE bodies (`user_email_unique`, `session_token_unique`, `rate_limit_key_unique`) — expected, not findings. Anything else is a STOP-and-report finding. `$onUpdate` is a drizzle runtime feature and correctly does NOT appear as SQL.
 
 - [ ] **Step 3: Apply to the live database**
 
