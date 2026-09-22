@@ -1,6 +1,7 @@
 import { relations } from 'drizzle-orm';
 import { addonServices } from './addon-services.js';
 import { attires } from './attires.js';
+import { account, session, user } from './auth.js';
 import { branchStudioServices } from './branch-studio-services.js';
 import { branches } from './branches.js';
 import { frames } from './frames.js';
@@ -80,3 +81,22 @@ export const studioServiceAddonServicesRelations = relations(
     }),
   })
 );
+
+export const userRelations = relations(user, ({ many }) => ({
+  sessions: many(session),
+  accounts: many(account),
+}));
+
+export const sessionRelations = relations(session, ({ one }) => ({
+  user: one(user, {
+    fields: [session.userId],
+    references: [user.id],
+  }),
+}));
+
+export const accountRelations = relations(account, ({ one }) => ({
+  user: one(user, {
+    fields: [account.userId],
+    references: [user.id],
+  }),
+}));
