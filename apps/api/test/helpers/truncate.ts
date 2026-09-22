@@ -26,5 +26,13 @@ export function publicTableNames(): string[] {
 }
 
 export async function truncateAll(db: TestDb): Promise<void> {
-  await db.execute(sql.raw(`TRUNCATE ${publicTableNames().join(', ')} RESTART IDENTITY CASCADE`));
+  // Identifiers are quoted because the derived list now contains Postgres
+  // reserved words (BetterAuth's `user` table — 42601 unquoted).
+  await db.execute(
+    sql.raw(
+      `TRUNCATE ${publicTableNames()
+        .map((n) => `"${n}"`)
+        .join(', ')} RESTART IDENTITY CASCADE`
+    )
+  );
 }
