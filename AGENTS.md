@@ -108,3 +108,19 @@ Rules:
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+## Better Auth
+
+> The most comprehensive authentication framework for TypeScript
+
+Use the documentation version that matches the Better Auth version installed in the project. Find a relevant page in an index, then fetch its `.md` URL for clean Markdown. Cite the canonical URL without the `.md` suffix.
+
+## Documentation
+
+- [Current documentation index](https://better-auth.com/docs/llms.txt): All pages for the latest stable release.
+- [Documentation MCP server](https://mcp.better-auth.com/mcp): Search and retrieve Better Auth documentation from MCP-capable clients.
+
+## Versions
+
+- [v1.7 (Latest)](https://better-auth.com/docs/llms.txt): Documentation for the 1.7.x release line.
+- [v1.6](https://better-auth.com/docs/1.6/llms.txt): Documentation for the 1.6.x release line.
