@@ -21,6 +21,7 @@
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
+    "better-auth": "^1.7.5",
     "@hono/zod-validator": "^0.4.0",
     "@sevendays/db": "workspace:*",
     "@sevendays/types": "workspace:*",
