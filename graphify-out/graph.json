@@ -3148,8 +3148,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_0",
-      "community": 542,
-      "community_name": "0",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "0"
     },
     {
@@ -3159,8 +3159,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_0_value",
-      "community": 542,
-      "community_name": "0",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "$value"
     },
     {
@@ -3170,8 +3170,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_0_type",
-      "community": 542,
-      "community_name": "0",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "$type"
     },
     {
@@ -3214,8 +3214,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_2",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 558,
+      "community_name": "2",
       "norm_label": "2"
     },
     {
@@ -3225,8 +3225,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_2_value",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 558,
+      "community_name": "2",
       "norm_label": "$value"
     },
     {
@@ -3236,8 +3236,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_2_type",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 558,
+      "community_name": "2",
       "norm_label": "$type"
     },
     {
@@ -3247,8 +3247,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_3",
-      "community": 544,
-      "community_name": "3",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "3"
     },
     {
@@ -3258,8 +3258,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_3_value",
-      "community": 544,
-      "community_name": "3",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "$value"
     },
     {
@@ -3269,8 +3269,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_3_type",
-      "community": 544,
-      "community_name": "3",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "$type"
     },
     {
@@ -3313,8 +3313,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_5",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 564,
+      "community_name": "5",
       "norm_label": "5"
     },
     {
@@ -3324,8 +3324,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_5_value",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 564,
+      "community_name": "5",
       "norm_label": "$value"
     },
     {
@@ -3335,8 +3335,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_5_type",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 564,
+      "community_name": "5",
       "norm_label": "$type"
     },
     {
@@ -6313,8 +6313,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_shadcn_add",
-      "community": 227,
-      "community_name": ".add_components",
+      "community": 565,
+      "community_name": "test_shadcn_add.py",
       "norm_label": "shadcn_add.py"
     },
     {
@@ -7015,8 +7015,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add",
-      "community": 227,
-      "community_name": ".add_components",
+      "community": 565,
+      "community_name": "test_shadcn_add.py",
       "norm_label": "test_shadcn_add.py"
     },
     {
@@ -7063,8 +7063,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_init_default_project_root",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 213,
+      "community_name": "TestShadcnInstaller",
       "norm_label": ".test_init_default_project_root()"
     },
     {
@@ -7075,8 +7075,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_init_custom_project_root",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 213,
+      "community_name": "TestShadcnInstaller",
       "norm_label": ".test_init_custom_project_root()"
     },
     {
@@ -7087,8 +7087,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_init_dry_run",
-      "community": 555,
-      "community_name": ".test_init_dry_run",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": ".test_init_dry_run()"
     },
     {
@@ -7099,8 +7099,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_check_shadcn_config_exists",
-      "community": 213,
-      "community_name": "TestShadcnInstaller",
+      "community": 568,
+      "community_name": ".test_check_shadcn_config_exists",
       "norm_label": ".test_check_shadcn_config_exists()"
     },
     {
@@ -7123,8 +7123,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_get_installed_components_empty",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 569,
+      "community_name": ".test_get_installed_components_empty",
       "norm_label": ".test_get_installed_components_empty()"
     },
     {
@@ -7135,8 +7135,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_get_installed_components_with_files",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 570,
+      "community_name": ".test_get_installed_components_with_files",
       "norm_label": ".test_get_installed_components_with_files()"
     },
     {
@@ -7147,8 +7147,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_get_installed_components_no_config",
-      "community": 213,
-      "community_name": "TestShadcnInstaller",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": ".test_get_installed_components_no_config()"
     },
     {
@@ -7171,8 +7171,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_add_components_no_config",
-      "community": 553,
-      "community_name": ".test_add_components_no_config",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": ".test_add_components_no_config()"
     },
     {
@@ -7302,8 +7302,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_list_installed_no_config",
-      "community": 554,
-      "community_name": ".test_list_installed_no_config",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": ".test_list_installed_no_config()"
     },
     {
@@ -7337,8 +7337,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_1",
-      "community": 227,
-      "community_name": ".add_components",
+      "community": 565,
+      "community_name": "test_shadcn_add.py",
       "norm_label": "tests for shadcn_add.py"
     },
     {
@@ -7370,8 +7370,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_45",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 213,
+      "community_name": "TestShadcnInstaller",
       "norm_label": "test initialization with default project root."
     },
     {
@@ -7381,8 +7381,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_51",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 213,
+      "community_name": "TestShadcnInstaller",
       "norm_label": "test initialization with custom project root."
     },
     {
@@ -7392,8 +7392,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_56",
-      "community": 555,
-      "community_name": ".test_init_dry_run",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": "test initialization with dry run mode."
     },
     {
@@ -7403,8 +7403,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_61",
-      "community": 213,
-      "community_name": "TestShadcnInstaller",
+      "community": 568,
+      "community_name": ".test_check_shadcn_config_exists",
       "norm_label": "test checking for existing shadcn config."
     },
     {
@@ -7425,8 +7425,8 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_71",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 569,
+      "community_name": ".test_get_installed_components_empty",
       "norm_label": "test getting installed components when none exist."
     },
     {
@@ -7436,8 +7436,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_77",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 570,
+      "community_name": ".test_get_installed_components_with_files",
       "norm_label": "test getting installed components when files exist."
     },
     {
@@ -7447,8 +7447,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_90",
-      "community": 213,
-      "community_name": "TestShadcnInstaller",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": "test getting installed components without config."
     },
     {
@@ -7469,8 +7469,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_104",
-      "community": 553,
-      "community_name": ".test_add_components_no_config",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": "test adding components without shadcn config."
     },
     {
@@ -7579,8 +7579,8 @@
       "source_location": "L240",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_240",
-      "community": 554,
-      "community_name": ".test_list_installed_no_config",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": "test listing installed components without config."
     },
     {
@@ -13551,7 +13551,7 @@
       "_origin": "ast",
       "id": "apps_admin_package_scripts",
       "community": 277,
-      "community_name": "admin package.json scripts",
+      "community_name": "scripts",
       "norm_label": "scripts"
     },
     {
@@ -13562,7 +13562,7 @@
       "_origin": "ast",
       "id": "apps_admin_package_scripts_dev",
       "community": 277,
-      "community_name": "admin package.json scripts",
+      "community_name": "scripts",
       "norm_label": "dev"
     },
     {
@@ -13573,124 +13573,135 @@
       "_origin": "ast",
       "id": "apps_admin_package_scripts_generate_routes",
       "community": 277,
-      "community_name": "admin package.json scripts",
+      "community_name": "scripts",
       "norm_label": "generate-routes"
+    },
+    {
+      "label": "create-staff",
+      "file_type": "code",
+      "source_file": "apps/admin/package.json",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "apps_admin_package_scripts_create_staff",
+      "community": 277,
+      "community_name": "scripts",
+      "norm_label": "create-staff"
     },
     {
       "label": "build",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L11",
+      "source_location": "L12",
       "_origin": "ast",
       "id": "apps_admin_package_scripts_build",
       "community": 277,
-      "community_name": "admin package.json scripts",
+      "community_name": "scripts",
       "norm_label": "build"
     },
     {
       "label": "preview",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L12",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "apps_admin_package_scripts_preview",
       "community": 277,
-      "community_name": "admin package.json scripts",
+      "community_name": "scripts",
       "norm_label": "preview"
     },
     {
       "label": "start",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "apps_admin_package_scripts_start",
       "community": 277,
-      "community_name": "admin package.json scripts",
+      "community_name": "scripts",
       "norm_label": "start"
     },
     {
       "label": "lint",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L14",
+      "source_location": "L15",
       "_origin": "ast",
       "id": "apps_admin_package_scripts_lint",
       "community": 277,
-      "community_name": "admin package.json scripts",
+      "community_name": "scripts",
       "norm_label": "lint"
     },
     {
       "label": "format",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L15",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "apps_admin_package_scripts_format",
       "community": 277,
-      "community_name": "admin package.json scripts",
+      "community_name": "scripts",
       "norm_label": "format"
     },
     {
       "label": "fix",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L16",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "apps_admin_package_scripts_fix",
       "community": 277,
-      "community_name": "admin package.json scripts",
+      "community_name": "scripts",
       "norm_label": "fix"
     },
     {
       "label": "fix:unsafe",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L17",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "apps_admin_package_scripts_fix_unsafe",
       "community": 277,
-      "community_name": "admin package.json scripts",
+      "community_name": "scripts",
       "norm_label": "fix:unsafe"
     },
     {
       "label": "deploy",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L18",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "apps_admin_package_scripts_deploy",
       "community": 277,
-      "community_name": "admin package.json scripts",
+      "community_name": "scripts",
       "norm_label": "deploy"
     },
     {
       "label": "typecheck",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L19",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "apps_admin_package_scripts_typecheck",
       "community": 277,
-      "community_name": "admin package.json scripts",
+      "community_name": "scripts",
       "norm_label": "typecheck"
     },
     {
       "label": "test",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L20",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "apps_admin_package_scripts_test",
       "community": 277,
-      "community_name": "admin package.json scripts",
+      "community_name": "scripts",
       "norm_label": "test"
     },
     {
       "label": "dependencies",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L22",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies",
       "community": 9,
@@ -13701,7 +13712,7 @@
       "label": "@fontsource-variable/figtree",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L23",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_fontsource_variable_figtree",
       "community": 9,
@@ -13712,7 +13723,7 @@
       "label": "@fontsource-variable/figtree",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L23",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "apps_admin_package_json_fontsource_variable_figtree",
       "community": 9,
@@ -13723,7 +13734,7 @@
       "label": "@fontsource-variable/geist-mono",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L24",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_fontsource_variable_geist_mono",
       "community": 9,
@@ -13734,7 +13745,7 @@
       "label": "@fontsource-variable/geist-mono",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L24",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "apps_admin_package_json_fontsource_variable_geist_mono",
       "community": 9,
@@ -13745,7 +13756,7 @@
       "label": "@fontsource-variable/roboto-slab",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L25",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_fontsource_variable_roboto_slab",
       "community": 9,
@@ -13756,7 +13767,7 @@
       "label": "@fontsource-variable/roboto-slab",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L25",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "apps_admin_package_json_fontsource_variable_roboto_slab",
       "community": 9,
@@ -13767,7 +13778,7 @@
       "label": "@posthog/react",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L26",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_posthog_react",
       "community": 9,
@@ -13778,7 +13789,7 @@
       "label": "@posthog/react",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L26",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "apps_admin_package_json_posthog_react",
       "community": 9,
@@ -13789,29 +13800,29 @@
       "label": "@sentry/tanstackstart-react",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L27",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_sentry_tanstackstart_react",
-      "community": 9,
-      "community_name": "dependencies",
+      "community": 571,
+      "community_name": "@sentry/tanstackstart-react",
       "norm_label": "@sentry/tanstackstart-react"
     },
     {
       "label": "@sentry/tanstackstart-react",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L27",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "apps_admin_package_json_sentry_tanstackstart_react",
-      "community": 9,
-      "community_name": "dependencies",
+      "community": 571,
+      "community_name": "@sentry/tanstackstart-react",
       "norm_label": "@sentry/tanstackstart-react"
     },
     {
       "label": "@sevendays/api-client",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L28",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_sevendays_api_client",
       "community": 531,
@@ -13822,7 +13833,7 @@
       "label": "@sevendays/api-client",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L28",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "apps_admin_package_json_sevendays_api_client",
       "community": 531,
@@ -13833,7 +13844,7 @@
       "label": "@sevendays/db",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L29",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_sevendays_db",
       "community": 9,
@@ -13844,7 +13855,7 @@
       "label": "@sevendays/db",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L29",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "apps_admin_package_json_sevendays_db",
       "community": 9,
@@ -13855,7 +13866,7 @@
       "label": "@sevendays/types",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L30",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_sevendays_types",
       "community": 532,
@@ -13866,7 +13877,7 @@
       "label": "@sevendays/types",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L30",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "apps_admin_package_json_sevendays_types",
       "community": 532,
@@ -13877,7 +13888,7 @@
       "label": "@sevendays/ui",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L31",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_sevendays_ui",
       "community": 533,
@@ -13888,7 +13899,7 @@
       "label": "@sevendays/ui",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L31",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "apps_admin_package_json_sevendays_ui",
       "community": 533,
@@ -13899,7 +13910,7 @@
       "label": "@tailwindcss/vite",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L32",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_tailwindcss_vite",
       "community": 561,
@@ -13910,7 +13921,7 @@
       "label": "@tailwindcss/vite",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L32",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "apps_admin_package_json_tailwindcss_vite",
       "community": 561,
@@ -13921,29 +13932,29 @@
       "label": "better-auth",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L33",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_better_auth",
-      "community": 558,
-      "community_name": "better-auth",
+      "community": 9,
+      "community_name": "dependencies",
       "norm_label": "better-auth"
     },
     {
       "label": "better-auth",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L33",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "apps_admin_package_json_better_auth",
-      "community": 558,
-      "community_name": "better-auth",
+      "community": 9,
+      "community_name": "dependencies",
       "norm_label": "better-auth"
     },
     {
       "label": "@tanstack/react-devtools",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L34",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_tanstack_react_devtools",
       "community": 9,
@@ -13954,7 +13965,7 @@
       "label": "@tanstack/react-devtools",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L34",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "apps_admin_package_json_tanstack_react_devtools",
       "community": 9,
@@ -13965,7 +13976,7 @@
       "label": "@tanstack/react-form",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L35",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_tanstack_react_form",
       "community": 523,
@@ -13976,7 +13987,7 @@
       "label": "@tanstack/react-form",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L35",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "tanstack_react_form",
       "community": 523,
@@ -13987,7 +13998,7 @@
       "label": "@tanstack/react-query",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L36",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_tanstack_react_query",
       "community": 510,
@@ -13998,7 +14009,7 @@
       "label": "@tanstack/react-query",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L36",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "apps_admin_package_json_tanstack_react_query",
       "community": 510,
@@ -14009,7 +14020,7 @@
       "label": "@tanstack/react-router",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L37",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_tanstack_react_router",
       "community": 9,
@@ -14020,7 +14031,7 @@
       "label": "@tanstack/react-router",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L37",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "apps_admin_package_json_tanstack_react_router",
       "community": 9,
@@ -14031,7 +14042,7 @@
       "label": "@tanstack/react-router-devtools",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L38",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_tanstack_react_router_devtools",
       "community": 9,
@@ -14042,7 +14053,7 @@
       "label": "@tanstack/react-router-devtools",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L38",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "apps_admin_package_json_tanstack_react_router_devtools",
       "community": 9,
@@ -14053,7 +14064,7 @@
       "label": "@tanstack/react-router-ssr-query",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L39",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_tanstack_react_router_ssr_query",
       "community": 562,
@@ -14064,7 +14075,7 @@
       "label": "@tanstack/react-router-ssr-query",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L39",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "apps_admin_package_json_tanstack_react_router_ssr_query",
       "community": 562,
@@ -14075,7 +14086,7 @@
       "label": "@tanstack/react-start",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L40",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_tanstack_react_start",
       "community": 563,
@@ -14086,7 +14097,7 @@
       "label": "@tanstack/react-start",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L40",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "apps_admin_package_json_tanstack_react_start",
       "community": 563,
@@ -14097,7 +14108,7 @@
       "label": "class-variance-authority",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L41",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_class_variance_authority",
       "community": 552,
@@ -14108,7 +14119,7 @@
       "label": "class-variance-authority",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L41",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "apps_admin_package_json_class_variance_authority",
       "community": 552,
@@ -14119,7 +14130,7 @@
       "label": "cn",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L42",
+      "source_location": "L43",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_cn",
       "community": 9,
@@ -14130,7 +14141,7 @@
       "label": "cn",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L42",
+      "source_location": "L43",
       "_origin": "ast",
       "id": "apps_admin_package_json_cn",
       "community": 9,
@@ -14141,7 +14152,7 @@
       "label": "dotenv-cli",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L43",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_dotenv_cli",
       "community": 559,
@@ -14152,7 +14163,7 @@
       "label": "dotenv-cli",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L43",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "apps_admin_package_json_dotenv_cli",
       "community": 559,
@@ -14163,7 +14174,7 @@
       "label": "lucide-react",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L44",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_lucide_react",
       "community": 516,
@@ -14174,7 +14185,7 @@
       "label": "lucide-react",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L44",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "apps_admin_package_json_lucide_react",
       "community": 516,
@@ -14185,7 +14196,7 @@
       "label": "posthog-js",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L45",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_posthog_js",
       "community": 9,
@@ -14196,7 +14207,7 @@
       "label": "posthog-js",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L45",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "apps_admin_package_json_posthog_js",
       "community": 9,
@@ -14207,7 +14218,7 @@
       "label": "react",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L46",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_react",
       "community": 560,
@@ -14218,7 +14229,7 @@
       "label": "react",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L46",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "apps_admin_package_json_react",
       "community": 560,
@@ -14229,7 +14240,7 @@
       "label": "react-dom",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L47",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_react_dom",
       "community": 488,
@@ -14240,7 +14251,7 @@
       "label": "react-dom",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L47",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "apps_admin_package_json_react_dom",
       "community": 488,
@@ -14251,7 +14262,7 @@
       "label": "tailwindcss",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L48",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_tailwindcss",
       "community": 9,
@@ -14262,7 +14273,7 @@
       "label": "tailwindcss",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L48",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "apps_admin_package_json_tailwindcss",
       "community": 9,
@@ -14273,7 +14284,7 @@
       "label": "tw-animate-css",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L49",
+      "source_location": "L50",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_tw_animate_css",
       "community": 9,
@@ -14284,7 +14295,7 @@
       "label": "tw-animate-css",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L49",
+      "source_location": "L50",
       "_origin": "ast",
       "id": "apps_admin_package_json_tw_animate_css",
       "community": 9,
@@ -14295,7 +14306,7 @@
       "label": "zod",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L50",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_zod",
       "community": 499,
@@ -14306,7 +14317,7 @@
       "label": "zod",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L50",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "apps_admin_package_json_zod",
       "community": 499,
@@ -14317,7 +14328,7 @@
       "label": "devDependencies",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L52",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies",
       "community": 4,
@@ -14328,7 +14339,7 @@
       "label": "@cloudflare/vite-plugin",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L53",
+      "source_location": "L54",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies_cloudflare_vite_plugin",
       "community": 4,
@@ -14339,7 +14350,7 @@
       "label": "@cloudflare/vite-plugin",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L53",
+      "source_location": "L54",
       "_origin": "ast",
       "id": "apps_admin_package_json_cloudflare_vite_plugin",
       "community": 4,
@@ -14350,7 +14361,7 @@
       "label": "@sevendays/config",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L54",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies_sevendays_config",
       "community": 4,
@@ -14361,7 +14372,7 @@
       "label": "@sevendays/config",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L54",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "apps_admin_package_json_sevendays_config",
       "community": 4,
@@ -14372,7 +14383,7 @@
       "label": "@tailwindcss/typography",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L55",
+      "source_location": "L56",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies_tailwindcss_typography",
       "community": 4,
@@ -14383,7 +14394,7 @@
       "label": "@tailwindcss/typography",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L55",
+      "source_location": "L56",
       "_origin": "ast",
       "id": "apps_admin_package_json_tailwindcss_typography",
       "community": 4,
@@ -14394,7 +14405,7 @@
       "label": "@tanstack/devtools-vite",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L56",
+      "source_location": "L57",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies_tanstack_devtools_vite",
       "community": 4,
@@ -14405,7 +14416,7 @@
       "label": "@tanstack/devtools-vite",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L56",
+      "source_location": "L57",
       "_origin": "ast",
       "id": "apps_admin_package_json_tanstack_devtools_vite",
       "community": 4,
@@ -14416,7 +14427,7 @@
       "label": "@tanstack/router-cli",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L57",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies_tanstack_router_cli",
       "community": 4,
@@ -14427,7 +14438,7 @@
       "label": "@tanstack/router-cli",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L57",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "apps_admin_package_json_tanstack_router_cli",
       "community": 4,
@@ -14438,7 +14449,7 @@
       "label": "@tanstack/router-plugin",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L58",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies_tanstack_router_plugin",
       "community": 4,
@@ -14449,7 +14460,7 @@
       "label": "@tanstack/router-plugin",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L58",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "apps_admin_package_json_tanstack_router_plugin",
       "community": 4,
@@ -14460,7 +14471,7 @@
       "label": "@types/node",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L59",
+      "source_location": "L60",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies_types_node",
       "community": 4,
@@ -14471,7 +14482,7 @@
       "label": "@types/node",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L59",
+      "source_location": "L60",
       "_origin": "ast",
       "id": "apps_admin_package_json_types_node",
       "community": 4,
@@ -14482,7 +14493,7 @@
       "label": "@types/react",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L60",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies_types_react",
       "community": 4,
@@ -14493,7 +14504,7 @@
       "label": "@types/react",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L60",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "apps_admin_package_json_types_react",
       "community": 4,
@@ -14504,7 +14515,7 @@
       "label": "@types/react-dom",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L61",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies_types_react_dom",
       "community": 4,
@@ -14515,7 +14526,7 @@
       "label": "@types/react-dom",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L61",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "apps_admin_package_json_types_react_dom",
       "community": 4,
@@ -14526,7 +14537,7 @@
       "label": "@vitejs/plugin-react",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L62",
+      "source_location": "L63",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies_vitejs_plugin_react",
       "community": 4,
@@ -14537,7 +14548,7 @@
       "label": "@vitejs/plugin-react",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L62",
+      "source_location": "L63",
       "_origin": "ast",
       "id": "apps_admin_package_json_vitejs_plugin_react",
       "community": 4,
@@ -14548,7 +14559,7 @@
       "label": "typescript",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L63",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies_typescript",
       "community": 4,
@@ -14559,7 +14570,7 @@
       "label": "typescript",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L63",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "apps_admin_package_json_typescript",
       "community": 4,
@@ -14570,7 +14581,7 @@
       "label": "vite",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L64",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies_vite",
       "community": 4,
@@ -14581,7 +14592,7 @@
       "label": "vite",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L64",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "apps_admin_package_json_vite",
       "community": 4,
@@ -14592,7 +14603,7 @@
       "label": "wrangler",
       "file_type": "code",
       "source_file": "apps/admin/package.json",
-      "source_location": "L65",
+      "source_location": "L66",
       "_origin": "ast",
       "id": "apps_admin_package_devdependencies_wrangler",
       "community": 4,
@@ -14603,7 +14614,7 @@
       "label": "wrangler",
       "file_type": "concept",
       "source_file": "apps/admin/package.json",
-      "source_location": "L65",
+      "source_location": "L66",
       "_origin": "ast",
       "id": "apps_admin_package_json_wrangler",
       "community": 4,
@@ -14617,8 +14628,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_components_admin_sidebar",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 529,
+      "community_name": "admin-sidebar.tsx",
       "norm_label": "admin-sidebar.tsx"
     },
     {
@@ -14630,8 +14641,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_admin_src_components_admin_sidebar_navto",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 529,
+      "community_name": "admin-sidebar.tsx",
       "norm_label": "navto"
     },
     {
@@ -14643,8 +14654,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_admin_src_components_admin_sidebar_navitem",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 529,
+      "community_name": "admin-sidebar.tsx",
       "norm_label": "navitem"
     },
     {
@@ -14656,8 +14667,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_admin_src_components_admin_sidebar_navgroup",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 529,
+      "community_name": "admin-sidebar.tsx",
       "norm_label": "navgroup"
     },
     {
@@ -14667,8 +14678,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "apps_admin_src_components_admin_sidebar_navgroups",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 529,
+      "community_name": "admin-sidebar.tsx",
       "norm_label": "navgroups"
     },
     {
@@ -14713,8 +14724,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_components_stub_screen",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "stub-screen.tsx"
     },
     {
@@ -14726,8 +14737,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_admin_src_components_stub_screen_stubscreenprops",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "stubscreenprops"
     },
     {
@@ -14738,8 +14749,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_admin_src_components_stub_screen_stubscreen",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "stubscreen()"
     },
     {
@@ -14749,8 +14760,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_integrations_posthog_provider",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 553,
+      "community_name": "admin/src/routes/__root.tsx",
       "norm_label": "admin/src/integrations/posthog/provider.tsx"
     },
     {
@@ -14762,8 +14773,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_admin_src_integrations_posthog_provider_posthogproviderprops",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 553,
+      "community_name": "admin/src/routes/__root.tsx",
       "norm_label": "posthogproviderprops"
     },
     {
@@ -14774,8 +14785,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_admin_src_integrations_posthog_provider_posthogprovider",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 553,
+      "community_name": "admin/src/routes/__root.tsx",
       "norm_label": "posthogprovider()"
     },
     {
@@ -14785,8 +14796,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_lib_api_functions",
-      "community": 466,
-      "community_name": "compilerOptions",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "admin/src/lib/api.functions.ts"
     },
     {
@@ -14796,8 +14807,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "apps_admin_src_lib_api_functions_getbranches",
-      "community": 466,
-      "community_name": "compilerOptions",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "getbranches"
     },
     {
@@ -14807,8 +14818,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_lib_api_server",
-      "community": 466,
-      "community_name": "compilerOptions",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "admin/src/lib/api.server.ts"
     },
     {
@@ -14819,8 +14830,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_admin_src_lib_api_server_getapiurl",
-      "community": 466,
-      "community_name": "compilerOptions",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "getapiurl()"
     },
     {
@@ -14831,8 +14842,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_admin_src_lib_api_server_getapiclient",
-      "community": 466,
-      "community_name": "compilerOptions",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "getapiclient()"
     },
     {
@@ -14842,8 +14853,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "apps_admin_src_lib_api_server_ts_docref_adr_0006",
-      "community": 466,
-      "community_name": "compilerOptions",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "adr-0006"
     },
     {
@@ -14853,8 +14864,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_admin_src_lib_api_server_ts_docref_adr_0016",
-      "community": 466,
-      "community_name": "compilerOptions",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "adr-0016"
     },
     {
@@ -14865,7 +14876,7 @@
       "_origin": "ast",
       "id": "apps_admin_src_lib_auth_config",
       "community": 522,
-      "community_name": "auth.config.ts",
+      "community_name": "auth.functions.ts",
       "norm_label": "auth.config.ts"
     },
     {
@@ -14876,7 +14887,7 @@
       "_origin": "ast",
       "id": "apps_admin_src_lib_auth_config_auth",
       "community": 522,
-      "community_name": "auth.config.ts",
+      "community_name": "auth.functions.ts",
       "norm_label": "auth"
     },
     {
@@ -14887,7 +14898,51 @@
       "_origin": "ast",
       "id": "apps_admin_src_lib_auth_config_ts_docref_adr_0011",
       "community": 522,
-      "community_name": "auth.config.ts",
+      "community_name": "auth.functions.ts",
+      "norm_label": "adr-0011"
+    },
+    {
+      "label": "auth.functions.ts",
+      "file_type": "code",
+      "source_file": "apps/admin/src/lib/auth.functions.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_admin_src_lib_auth_functions",
+      "community": 522,
+      "community_name": "auth.functions.ts",
+      "norm_label": "auth.functions.ts"
+    },
+    {
+      "label": "getSession",
+      "file_type": "code",
+      "source_file": "apps/admin/src/lib/auth.functions.ts",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "apps_admin_src_lib_auth_functions_getsession",
+      "community": 522,
+      "community_name": "auth.functions.ts",
+      "norm_label": "getsession"
+    },
+    {
+      "label": "ensureSession",
+      "file_type": "code",
+      "source_file": "apps/admin/src/lib/auth.functions.ts",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "apps_admin_src_lib_auth_functions_ensuresession",
+      "community": 522,
+      "community_name": "auth.functions.ts",
+      "norm_label": "ensuresession"
+    },
+    {
+      "label": "ADR-0011",
+      "file_type": "concept",
+      "source_file": "apps/admin/src/lib/auth.functions.ts",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "apps_admin_src_lib_auth_functions_ts_docref_adr_0011",
+      "community": 522,
+      "community_name": "auth.functions.ts",
       "norm_label": "adr-0011"
     },
     {
@@ -14898,7 +14953,7 @@
       "_origin": "ast",
       "id": "apps_admin_src_lib_auth",
       "community": 522,
-      "community_name": "auth.config.ts",
+      "community_name": "auth.functions.ts",
       "norm_label": "lib/auth.ts"
     },
     {
@@ -14910,7 +14965,7 @@
       "_origin": "ast",
       "id": "apps_admin_src_lib_auth_createauth",
       "community": 522,
-      "community_name": "auth.config.ts",
+      "community_name": "auth.functions.ts",
       "norm_label": "createauth()"
     },
     {
@@ -14921,7 +14976,7 @@
       "_origin": "ast",
       "id": "apps_admin_src_lib_auth_ts_docref_adr_0011",
       "community": 522,
-      "community_name": "auth.config.ts",
+      "community_name": "auth.functions.ts",
       "norm_label": "adr-0011"
     },
     {
@@ -14931,8 +14986,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_lib_queries",
-      "community": 466,
-      "community_name": "compilerOptions",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "admin/src/lib/queries.ts"
     },
     {
@@ -14942,8 +14997,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "apps_admin_src_lib_queries_branchqueries",
-      "community": 466,
-      "community_name": "compilerOptions",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "branchqueries"
     },
     {
@@ -14961,7 +15016,7 @@
       "label": "ShellRoute",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "apps_admin_src_routetree_gen_shellroute",
       "community": 8,
@@ -14972,7 +15027,7 @@
       "label": "ShellIndexRoute",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L25",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "apps_admin_src_routetree_gen_shellindexroute",
       "community": 8,
@@ -14983,7 +15038,7 @@
       "label": "ShellAddOnsRoute",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L30",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "apps_admin_src_routetree_gen_shelladdonsroute",
       "community": 8,
@@ -14994,7 +15049,7 @@
       "label": "ShellAppointmentsRoute",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L35",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "apps_admin_src_routetree_gen_shellappointmentsroute",
       "community": 8,
@@ -15005,7 +15060,7 @@
       "label": "ShellBranchesRoute",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L40",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "apps_admin_src_routetree_gen_shellbranchesroute",
       "community": 8,
@@ -15016,7 +15071,7 @@
       "label": "ShellPackagesRoute",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L45",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "apps_admin_src_routetree_gen_shellpackagesroute",
       "community": 8,
@@ -15027,7 +15082,7 @@
       "label": "ShellSettingsRoute",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L50",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "apps_admin_src_routetree_gen_shellsettingsroute",
       "community": 8,
@@ -15038,7 +15093,7 @@
       "label": "ShellStudioServicesRoute",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L55",
+      "source_location": "L56",
       "_origin": "ast",
       "id": "apps_admin_src_routetree_gen_shellstudioservicesroute",
       "community": 8,
@@ -15046,10 +15101,21 @@
       "norm_label": "shellstudioservicesroute"
     },
     {
-      "label": "FileRoutesByFullPath",
+      "label": "ApiAuthSplatRoute",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
       "source_location": "L61",
+      "_origin": "ast",
+      "id": "apps_admin_src_routetree_gen_apiauthsplatroute",
+      "community": 8,
+      "community_name": "admin/src/routeTree.gen.ts",
+      "norm_label": "apiauthsplatroute"
+    },
+    {
+      "label": "FileRoutesByFullPath",
+      "file_type": "code",
+      "source_file": "apps/admin/src/routeTree.gen.ts",
+      "source_location": "L67",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -15062,7 +15128,7 @@
       "label": "FileRoutesByTo",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L70",
+      "source_location": "L77",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -15075,7 +15141,7 @@
       "label": "FileRoutesById",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L79",
+      "source_location": "L87",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -15088,7 +15154,7 @@
       "label": "FileRouteTypes",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L90",
+      "source_location": "L99",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -15101,7 +15167,7 @@
       "label": "RootRouteChildren",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L121",
+      "source_location": "L133",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -15114,7 +15180,7 @@
       "label": "@tanstack/react-router",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L125",
+      "source_location": "L138",
       "_origin": "ast",
       "id": "apps_admin_src_routetree_gen_tanstack_react_router",
       "community": 8,
@@ -15125,20 +15191,20 @@
       "label": "FileRoutesByPath",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L126",
+      "source_location": "L139",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_admin_src_routetree_gen_fileroutesbypath",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 544,
+      "community_name": "FileRoutesByPath",
       "norm_label": "fileroutesbypath"
     },
     {
       "label": "ShellRouteChildren",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L186",
+      "source_location": "L206",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -15151,7 +15217,7 @@
       "label": "ShellRouteWithChildren",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L206",
+      "source_location": "L226",
       "_origin": "ast",
       "id": "apps_admin_src_routetree_gen_shellroutewithchildren",
       "community": 8,
@@ -15162,36 +15228,12 @@
       "label": "routeTree",
       "file_type": "code",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L211",
+      "source_location": "L232",
       "_origin": "ast",
       "id": "apps_admin_src_routetree_gen_routetree",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 555,
+      "community_name": "admin/src/router.tsx",
       "norm_label": "routetree"
-    },
-    {
-      "label": "@tanstack/react-start",
-      "file_type": "code",
-      "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L217",
-      "_origin": "ast",
-      "id": "apps_admin_src_routetree_gen_tanstack_react_start",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
-      "norm_label": "@tanstack/react-start"
-    },
-    {
-      "label": "Register",
-      "file_type": "code",
-      "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L218",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "id": "apps_admin_src_routetree_gen_register",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
-      "norm_label": "register"
     },
     {
       "label": "admin/src/router.tsx",
@@ -15200,8 +15242,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_router",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 555,
+      "community_name": "admin/src/router.tsx",
       "norm_label": "admin/src/router.tsx"
     },
     {
@@ -15212,8 +15254,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_admin_src_router_getrouter",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 555,
+      "community_name": "admin/src/router.tsx",
       "norm_label": "getrouter()"
     },
     {
@@ -15223,8 +15265,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "apps_admin_src_router_tanstack_react_router",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 555,
+      "community_name": "admin/src/router.tsx",
       "norm_label": "@tanstack/react-router"
     },
     {
@@ -15236,8 +15278,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_admin_src_router_register",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 555,
+      "community_name": "admin/src/router.tsx",
       "norm_label": "register"
     },
     {
@@ -15247,8 +15289,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_routes_root",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 553,
+      "community_name": "admin/src/routes/__root.tsx",
       "norm_label": "admin/src/routes/__root.tsx"
     },
     {
@@ -15260,8 +15302,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_admin_src_routes_root_routercontext",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 553,
+      "community_name": "admin/src/routes/__root.tsx",
       "norm_label": "routercontext"
     },
     {
@@ -15283,8 +15325,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_admin_src_routes_root_rootdocument",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 553,
+      "community_name": "admin/src/routes/__root.tsx",
       "norm_label": "rootdocument()"
     },
     {
@@ -15294,8 +15336,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_add_ons",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "_shell.add-ons.tsx"
     },
     {
@@ -15305,8 +15347,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_add_ons_route",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 544,
+      "community_name": "FileRoutesByPath",
       "norm_label": "route"
     },
     {
@@ -15317,8 +15359,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_add_ons_addonspage",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "addonspage()"
     },
     {
@@ -15328,8 +15370,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_appointments",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 566,
+      "community_name": "_shell.appointments.tsx",
       "norm_label": "_shell.appointments.tsx"
     },
     {
@@ -15339,8 +15381,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_appointments_route",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 566,
+      "community_name": "_shell.appointments.tsx",
       "norm_label": "route"
     },
     {
@@ -15351,8 +15393,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_appointments_appointmentspage",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 566,
+      "community_name": "_shell.appointments.tsx",
       "norm_label": "appointmentspage()"
     },
     {
@@ -15362,8 +15404,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_branches",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 544,
+      "community_name": "FileRoutesByPath",
       "norm_label": "_shell.branches.tsx"
     },
     {
@@ -15373,8 +15415,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_branches_route",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 544,
+      "community_name": "FileRoutesByPath",
       "norm_label": "route"
     },
     {
@@ -15385,8 +15427,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_branches_branchespage",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 544,
+      "community_name": "FileRoutesByPath",
       "norm_label": "branchespage()"
     },
     {
@@ -15396,8 +15438,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_index",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "_shell.index.tsx"
     },
     {
@@ -15407,8 +15449,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_index_route",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "route"
     },
     {
@@ -15419,8 +15461,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_index_dashboardpage",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "dashboardpage()"
     },
     {
@@ -15430,8 +15472,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_packages",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 567,
+      "community_name": "_shell.packages.tsx",
       "norm_label": "_shell.packages.tsx"
     },
     {
@@ -15441,8 +15483,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_packages_route",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 567,
+      "community_name": "_shell.packages.tsx",
       "norm_label": "route"
     },
     {
@@ -15453,8 +15495,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_packages_packagespage",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 567,
+      "community_name": "_shell.packages.tsx",
       "norm_label": "packagespage()"
     },
     {
@@ -15464,8 +15506,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_settings",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 544,
+      "community_name": "FileRoutesByPath",
       "norm_label": "_shell.settings.tsx"
     },
     {
@@ -15475,8 +15517,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_settings_route",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 544,
+      "community_name": "FileRoutesByPath",
       "norm_label": "route"
     },
     {
@@ -15487,8 +15529,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_settings_settingspage",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 544,
+      "community_name": "FileRoutesByPath",
       "norm_label": "settingspage()"
     },
     {
@@ -15498,8 +15540,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_studio_services",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "_shell.studio-services.tsx"
     },
     {
@@ -15509,8 +15551,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_studio_services_route",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "route"
     },
     {
@@ -15521,8 +15563,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_studio_services_studioservicespage",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "studioservicespage()"
     },
     {
@@ -15543,8 +15585,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "apps_admin_src_routes_shell_route",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 544,
+      "community_name": "FileRoutesByPath",
       "norm_label": "route"
     },
     {
@@ -15558,6 +15600,39 @@
       "community": 495,
       "community_name": "admin-topbar.tsx",
       "norm_label": "shelllayout()"
+    },
+    {
+      "label": "$.ts",
+      "file_type": "code",
+      "source_file": "apps/admin/src/routes/api/auth/$.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_admin_src_routes_api_auth",
+      "community": 522,
+      "community_name": "auth.functions.ts",
+      "norm_label": "$.ts"
+    },
+    {
+      "label": "Route",
+      "file_type": "code",
+      "source_file": "apps/admin/src/routes/api/auth/$.ts",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "apps_admin_src_routes_api_auth_route",
+      "community": 522,
+      "community_name": "auth.functions.ts",
+      "norm_label": "route"
+    },
+    {
+      "label": "ADR-0011",
+      "file_type": "concept",
+      "source_file": "apps/admin/src/routes/api/auth/$.ts",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "apps_admin_src_routes_api_auth_ts_docref_adr_0011",
+      "community": 522,
+      "community_name": "auth.functions.ts",
+      "norm_label": "adr-0011"
     },
     {
       "label": "admin/tsconfig.json",
@@ -18876,8 +18951,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "apps_landing_package_dependencies_fontsource_variable_figtree",
-      "community": 10,
-      "community_name": "dependencies",
+      "community": 572,
+      "community_name": "@fontsource-variable/figtree",
       "norm_label": "@fontsource-variable/figtree"
     },
     {
@@ -18887,8 +18962,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "apps_landing_package_json_fontsource_variable_figtree",
-      "community": 10,
-      "community_name": "dependencies",
+      "community": 572,
+      "community_name": "@fontsource-variable/figtree",
       "norm_label": "@fontsource-variable/figtree"
     },
     {
@@ -19404,8 +19479,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "apps_landing_package_dependencies_tailwindcss",
-      "community": 536,
-      "community_name": "tailwindcss",
+      "community": 10,
+      "community_name": "dependencies",
       "norm_label": "tailwindcss"
     },
     {
@@ -19415,8 +19490,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "apps_landing_package_json_tailwindcss",
-      "community": 536,
-      "community_name": "tailwindcss",
+      "community": 10,
+      "community_name": "dependencies",
       "norm_label": "tailwindcss"
     },
     {
@@ -20230,8 +20305,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_components_booking_confirmation_card",
-      "community": 229,
-      "community_name": "home-cards.tsx",
+      "community": 244,
+      "community_name": "landing/src/lib/queries.ts",
       "norm_label": "confirmation-card.tsx"
     },
     {
@@ -20242,8 +20317,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_components_booking_confirmation_card_confirmationcard",
-      "community": 229,
-      "community_name": "home-cards.tsx",
+      "community": 244,
+      "community_name": "landing/src/lib/queries.ts",
       "norm_label": "confirmationcard()"
     },
     {
@@ -20334,8 +20409,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_components_booking_summary_rail",
-      "community": 229,
-      "community_name": "home-cards.tsx",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "summary-rail.tsx"
     },
     {
@@ -20346,8 +20421,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_components_booking_summary_rail_summaryrail",
-      "community": 229,
-      "community_name": "home-cards.tsx",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "summaryrail()"
     },
     {
@@ -20403,8 +20478,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_components_cover_panel",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "cover-panel.tsx"
     },
     {
@@ -20415,8 +20490,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_components_cover_panel_coverpanel",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "coverpanel()"
     },
     {
@@ -20644,8 +20719,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_components_inclusions_list",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "inclusions-list.tsx"
     },
     {
@@ -20656,8 +20731,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_components_inclusions_list_inclusionslist",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "inclusionslist()"
     },
     {
@@ -20668,8 +20743,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_components_inclusions_list_inclusionline",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "inclusionline()"
     },
     {
@@ -20679,8 +20754,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "apps_landing_src_components_inclusions_list_tsx_docref_adr_0009",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "adr-0009"
     },
     {
@@ -20713,8 +20788,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_components_package_card",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "package-card.tsx"
     },
     {
@@ -20725,8 +20800,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_components_package_card_packagecard",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "packagecard()"
     },
     {
@@ -20736,8 +20811,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_components_service_card",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "service-card.tsx"
     },
     {
@@ -20748,8 +20823,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_components_service_card_servicecard",
-      "community": 444,
-      "community_name": "buttonVariants",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "servicecard()"
     },
     {
@@ -20759,8 +20834,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_components_service_teaser_item",
-      "community": 229,
-      "community_name": "home-cards.tsx",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "service-teaser-item.tsx"
     },
     {
@@ -20771,8 +20846,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_components_service_teaser_item_serviceteaseritem",
-      "community": 229,
-      "community_name": "home-cards.tsx",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "serviceteaseritem()"
     },
     {
@@ -20998,8 +21073,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_lib_api_server",
-      "community": 244,
-      "community_name": "landing/src/lib/queries.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "landing/src/lib/api.server.ts"
     },
     {
@@ -21010,8 +21085,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_lib_api_server_getapiurl",
-      "community": 244,
-      "community_name": "landing/src/lib/queries.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "getapiurl()"
     },
     {
@@ -21022,8 +21097,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_lib_api_server_getapiclient",
-      "community": 244,
-      "community_name": "landing/src/lib/queries.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "getapiclient()"
     },
     {
@@ -21033,8 +21108,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "apps_landing_src_lib_api_server_ts_docref_adr_0006",
-      "community": 244,
-      "community_name": "landing/src/lib/queries.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "adr-0006"
     },
     {
@@ -21044,8 +21119,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_landing_src_lib_api_server_ts_docref_adr_0016",
-      "community": 244,
-      "community_name": "landing/src/lib/queries.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "adr-0016"
     },
     {
@@ -21055,8 +21130,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_lib_bookable_branches_test",
-      "community": 444,
-      "community_name": "buttonVariants",
+      "community": 536,
+      "community_name": "services.tsx",
       "norm_label": "bookable-branches.test.ts"
     },
     {
@@ -21067,8 +21142,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_lib_bookable_branches_test_branch",
-      "community": 444,
-      "community_name": "buttonVariants",
+      "community": 536,
+      "community_name": "services.tsx",
       "norm_label": "branch()"
     },
     {
@@ -21079,8 +21154,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_lib_bookable_branches_test_service",
-      "community": 444,
-      "community_name": "buttonVariants",
+      "community": 536,
+      "community_name": "services.tsx",
       "norm_label": "service()"
     },
     {
@@ -21090,8 +21165,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "apps_landing_src_lib_bookable_branches_test_calamba",
-      "community": 444,
-      "community_name": "buttonVariants",
+      "community": 536,
+      "community_name": "services.tsx",
       "norm_label": "calamba"
     },
     {
@@ -21101,8 +21176,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "apps_landing_src_lib_bookable_branches_test_iligan",
-      "community": 444,
-      "community_name": "buttonVariants",
+      "community": 536,
+      "community_name": "services.tsx",
       "norm_label": "iligan"
     },
     {
@@ -21112,8 +21187,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "apps_landing_src_lib_bookable_branches_test_dipolog",
-      "community": 444,
-      "community_name": "buttonVariants",
+      "community": 536,
+      "community_name": "services.tsx",
       "norm_label": "dipolog"
     },
     {
@@ -21123,8 +21198,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "apps_landing_src_lib_bookable_branches_test_branches",
-      "community": 444,
-      "community_name": "buttonVariants",
+      "community": 536,
+      "community_name": "services.tsx",
       "norm_label": "branches"
     },
     {
@@ -21134,8 +21209,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_lib_bookable_branches",
-      "community": 444,
-      "community_name": "buttonVariants",
+      "community": 536,
+      "community_name": "services.tsx",
       "norm_label": "bookable-branches.ts"
     },
     {
@@ -21146,8 +21221,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_lib_bookable_branches_bookablebranchnames",
-      "community": 444,
-      "community_name": "buttonVariants",
+      "community": 536,
+      "community_name": "services.tsx",
       "norm_label": "bookablebranchnames()"
     },
     {
@@ -21296,8 +21371,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_lib_booking_read_confirmationtotalcents",
-      "community": 229,
-      "community_name": "home-cards.tsx",
+      "community": 244,
+      "community_name": "landing/src/lib/queries.ts",
       "norm_label": "confirmationtotalcents()"
     },
     {
@@ -21833,8 +21908,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_landing_src_lib_booking_bookingwizard",
-      "community": 229,
-      "community_name": "home-cards.tsx",
+      "community": 79,
+      "community_name": "book.tsx",
       "norm_label": "bookingwizard"
     },
     {
@@ -21978,8 +22053,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_lib_format_test",
-      "community": 229,
-      "community_name": "home-cards.tsx",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "format.test.ts"
     },
     {
@@ -21989,8 +22064,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_lib_format",
-      "community": 229,
-      "community_name": "home-cards.tsx",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "format.ts"
     },
     {
@@ -22001,8 +22076,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_lib_format_peso",
-      "community": 229,
-      "community_name": "home-cards.tsx",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "peso()"
     },
     {
@@ -22013,8 +22088,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_lib_format_phdatetime",
-      "community": 229,
-      "community_name": "home-cards.tsx",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "phdatetime()"
     },
     {
@@ -22126,8 +22201,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "apps_landing_src_lib_queries_servicepackagequeries",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 244,
+      "community_name": "landing/src/lib/queries.ts",
       "norm_label": "servicepackagequeries"
     },
     {
@@ -22137,8 +22212,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "apps_landing_src_lib_queries_studioservicequeries",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 244,
+      "community_name": "landing/src/lib/queries.ts",
       "norm_label": "studioservicequeries"
     },
     {
@@ -22645,8 +22720,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_routes_index",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 244,
+      "community_name": "landing/src/lib/queries.ts",
       "norm_label": "routes/index.tsx"
     },
     {
@@ -22656,8 +22731,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "apps_landing_src_routes_index_route",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 244,
+      "community_name": "landing/src/lib/queries.ts",
       "norm_label": "route"
     },
     {
@@ -22668,8 +22743,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_routes_index_homepage",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 244,
+      "community_name": "landing/src/lib/queries.ts",
       "norm_label": "homepage()"
     },
     {
@@ -22679,8 +22754,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_routes_packages_slug",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 244,
+      "community_name": "landing/src/lib/queries.ts",
       "norm_label": "$slug.tsx"
     },
     {
@@ -22690,8 +22765,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "apps_landing_src_routes_packages_slug_route",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 244,
+      "community_name": "landing/src/lib/queries.ts",
       "norm_label": "route"
     },
     {
@@ -22702,8 +22777,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_routes_packages_slug_packagedetail",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 244,
+      "community_name": "landing/src/lib/queries.ts",
       "norm_label": "packagedetail()"
     },
     {
@@ -22713,8 +22788,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_routes_packages_index",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "packages/index.tsx"
     },
     {
@@ -22724,8 +22799,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "apps_landing_src_routes_packages_index_route",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "route"
     },
     {
@@ -22736,8 +22811,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_routes_packages_index_packagespage",
-      "community": 16,
-      "community_name": "landing/src/routeTree.gen.ts",
+      "community": 471,
+      "community_name": "peso",
       "norm_label": "packagespage()"
     },
     {
@@ -22747,8 +22822,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_landing_src_routes_services",
-      "community": 444,
-      "community_name": "buttonVariants",
+      "community": 536,
+      "community_name": "services.tsx",
       "norm_label": "services.tsx"
     },
     {
@@ -22770,8 +22845,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_landing_src_routes_services_servicespage",
-      "community": 444,
-      "community_name": "buttonVariants",
+      "community": 536,
+      "community_name": "services.tsx",
       "norm_label": "servicespage()"
     },
     {
@@ -24346,8 +24421,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_api_client_test_mock_api",
-      "community": 471,
-      "community_name": "mock-api.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "mock-api.ts"
     },
     {
@@ -24357,8 +24432,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "packages_api_client_test_mock_api_now",
-      "community": 471,
-      "community_name": "mock-api.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "now"
     },
     {
@@ -24368,8 +24443,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "packages_api_client_test_mock_api_branches",
-      "community": 471,
-      "community_name": "mock-api.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "branches"
     },
     {
@@ -24379,8 +24454,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "packages_api_client_test_mock_api_addons",
-      "community": 471,
-      "community_name": "mock-api.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "addons"
     },
     {
@@ -24390,8 +24465,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "packages_api_client_test_mock_api_packages",
-      "community": 471,
-      "community_name": "mock-api.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "packages"
     },
     {
@@ -24401,8 +24476,8 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "packages_api_client_test_mock_api_branch_links",
-      "community": 471,
-      "community_name": "mock-api.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "branch_links"
     },
     {
@@ -24412,8 +24487,8 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "packages_api_client_test_mock_api_studio_services",
-      "community": 471,
-      "community_name": "mock-api.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "studio_services"
     },
     {
@@ -24423,8 +24498,8 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "packages_api_client_test_mock_api_appointments",
-      "community": 471,
-      "community_name": "mock-api.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "appointments"
     },
     {
@@ -24435,8 +24510,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_api_client_test_mock_api_validatedjson",
-      "community": 471,
-      "community_name": "mock-api.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "validatedjson()"
     },
     {
@@ -24447,8 +24522,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_api_client_test_mock_api_makeapi",
-      "community": 471,
-      "community_name": "mock-api.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "makeapi()"
     },
     {
@@ -24460,8 +24535,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "packages_api_client_test_mock_api_mockapi",
-      "community": 471,
-      "community_name": "mock-api.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "mockapi"
     },
     {
@@ -24471,8 +24546,8 @@
       "source_location": "L299",
       "_origin": "ast",
       "id": "packages_api_client_test_mock_api_mockapibrokenbranches",
-      "community": 471,
-      "community_name": "mock-api.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "mockapibrokenbranches"
     },
     {
@@ -24482,8 +24557,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "docref_rfc_4122",
-      "community": 471,
-      "community_name": "mock-api.ts",
+      "community": 144,
+      "community_name": "api-client/src/index.ts",
       "norm_label": "rfc-4122"
     },
     {
@@ -32498,8 +32573,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_badge",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "badge.tsx"
     },
     {
@@ -32509,8 +32584,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "packages_ui_src_components_badge_badgevariants",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "badgevariants"
     },
     {
@@ -32521,8 +32596,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_badge_badge",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 473,
+      "community_name": "stub-screen.tsx",
       "norm_label": "badge()"
     },
     {
@@ -32532,8 +32607,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_button",
-      "community": 473,
-      "community_name": "button.tsx",
+      "community": 444,
+      "community_name": "buttonVariants",
       "norm_label": "button.tsx"
     },
     {
@@ -32555,8 +32630,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_button_button",
-      "community": 473,
-      "community_name": "button.tsx",
+      "community": 444,
+      "community_name": "buttonVariants",
       "norm_label": "button()"
     },
     {
@@ -32731,8 +32806,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_dialog",
-      "community": 473,
-      "community_name": "button.tsx",
+      "community": 444,
+      "community_name": "buttonVariants",
       "norm_label": "dialog.tsx"
     },
     {
@@ -32743,8 +32818,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_dialog_dialog",
-      "community": 473,
-      "community_name": "button.tsx",
+      "community": 444,
+      "community_name": "buttonVariants",
       "norm_label": "dialog()"
     },
     {
@@ -32755,8 +32830,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_dialog_dialogtrigger",
-      "community": 473,
-      "community_name": "button.tsx",
+      "community": 444,
+      "community_name": "buttonVariants",
       "norm_label": "dialogtrigger()"
     },
     {
@@ -32767,8 +32842,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_dialog_dialogportal",
-      "community": 473,
-      "community_name": "button.tsx",
+      "community": 444,
+      "community_name": "buttonVariants",
       "norm_label": "dialogportal()"
     },
     {
@@ -32779,8 +32854,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_dialog_dialogclose",
-      "community": 473,
-      "community_name": "button.tsx",
+      "community": 444,
+      "community_name": "buttonVariants",
       "norm_label": "dialogclose()"
     },
     {
@@ -32791,8 +32866,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_dialog_dialogoverlay",
-      "community": 473,
-      "community_name": "button.tsx",
+      "community": 444,
+      "community_name": "buttonVariants",
       "norm_label": "dialogoverlay()"
     },
     {
@@ -32803,8 +32878,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_dialog_dialogcontent",
-      "community": 473,
-      "community_name": "button.tsx",
+      "community": 444,
+      "community_name": "buttonVariants",
       "norm_label": "dialogcontent()"
     },
     {
@@ -32815,8 +32890,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_dialog_dialogheader",
-      "community": 473,
-      "community_name": "button.tsx",
+      "community": 444,
+      "community_name": "buttonVariants",
       "norm_label": "dialogheader()"
     },
     {
@@ -32827,8 +32902,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_dialog_dialogfooter",
-      "community": 473,
-      "community_name": "button.tsx",
+      "community": 444,
+      "community_name": "buttonVariants",
       "norm_label": "dialogfooter()"
     },
     {
@@ -32839,8 +32914,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_dialog_dialogtitle",
-      "community": 473,
-      "community_name": "button.tsx",
+      "community": 444,
+      "community_name": "buttonVariants",
       "norm_label": "dialogtitle()"
     },
     {
@@ -32851,8 +32926,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_dialog_dialogdescription",
-      "community": 473,
-      "community_name": "button.tsx",
+      "community": 444,
+      "community_name": "buttonVariants",
       "norm_label": "dialogdescription()"
     },
     {
@@ -33704,8 +33779,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_usesidebar",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 554,
+      "community_name": "useSidebar",
       "norm_label": "usesidebar()"
     },
     {
@@ -33716,8 +33791,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebarprovider",
-      "community": 556,
-      "community_name": "SidebarProvider",
+      "community": 84,
+      "community_name": "sidebar.tsx",
       "norm_label": "sidebarprovider()"
     },
     {
@@ -33728,8 +33803,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebar",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 554,
+      "community_name": "useSidebar",
       "norm_label": "sidebar()"
     },
     {
@@ -33740,8 +33815,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebartrigger",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 554,
+      "community_name": "useSidebar",
       "norm_label": "sidebartrigger()"
     },
     {
@@ -33752,8 +33827,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebarrail",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 554,
+      "community_name": "useSidebar",
       "norm_label": "sidebarrail()"
     },
     {
@@ -33788,8 +33863,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebarheader",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 529,
+      "community_name": "admin-sidebar.tsx",
       "norm_label": "sidebarheader()"
     },
     {
@@ -33800,8 +33875,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebarfooter",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 529,
+      "community_name": "admin-sidebar.tsx",
       "norm_label": "sidebarfooter()"
     },
     {
@@ -33824,8 +33899,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebarcontent",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 529,
+      "community_name": "admin-sidebar.tsx",
       "norm_label": "sidebarcontent()"
     },
     {
@@ -33836,8 +33911,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebargroup",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 529,
+      "community_name": "admin-sidebar.tsx",
       "norm_label": "sidebargroup()"
     },
     {
@@ -33848,8 +33923,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebargrouplabel",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 529,
+      "community_name": "admin-sidebar.tsx",
       "norm_label": "sidebargrouplabel()"
     },
     {
@@ -33872,8 +33947,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebargroupcontent",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 529,
+      "community_name": "admin-sidebar.tsx",
       "norm_label": "sidebargroupcontent()"
     },
     {
@@ -33884,8 +33959,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebarmenu",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 529,
+      "community_name": "admin-sidebar.tsx",
       "norm_label": "sidebarmenu()"
     },
     {
@@ -33896,8 +33971,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebarmenuitem",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 529,
+      "community_name": "admin-sidebar.tsx",
       "norm_label": "sidebarmenuitem()"
     },
     {
@@ -33907,8 +33982,8 @@
       "source_location": "L456",
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebarmenubuttonvariants",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 554,
+      "community_name": "useSidebar",
       "norm_label": "sidebarmenubuttonvariants"
     },
     {
@@ -33919,8 +33994,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sidebar_sidebarmenubutton",
-      "community": 84,
-      "community_name": "sidebar.tsx",
+      "community": 554,
+      "community_name": "useSidebar",
       "norm_label": "sidebarmenubutton()"
     },
     {
@@ -34025,8 +34100,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_sonner",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 553,
+      "community_name": "admin/src/routes/__root.tsx",
       "norm_label": "sonner.tsx"
     },
     {
@@ -34037,8 +34112,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_sonner_toaster",
-      "community": 8,
-      "community_name": "admin/src/routeTree.gen.ts",
+      "community": 553,
+      "community_name": "admin/src/routes/__root.tsx",
       "norm_label": "toaster()"
     },
     {
@@ -34178,8 +34253,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_tooltip",
-      "community": 529,
-      "community_name": "tooltip.tsx",
+      "community": 84,
+      "community_name": "sidebar.tsx",
       "norm_label": "tooltip.tsx"
     },
     {
@@ -34190,8 +34265,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_tooltip_tooltipprovider",
-      "community": 529,
-      "community_name": "tooltip.tsx",
+      "community": 84,
+      "community_name": "sidebar.tsx",
       "norm_label": "tooltipprovider()"
     },
     {
@@ -34202,8 +34277,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_tooltip_tooltip",
-      "community": 529,
-      "community_name": "tooltip.tsx",
+      "community": 84,
+      "community_name": "sidebar.tsx",
       "norm_label": "tooltip()"
     },
     {
@@ -34214,8 +34289,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_tooltip_tooltiptrigger",
-      "community": 529,
-      "community_name": "tooltip.tsx",
+      "community": 84,
+      "community_name": "sidebar.tsx",
       "norm_label": "tooltiptrigger()"
     },
     {
@@ -34226,8 +34301,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_components_tooltip_tooltipcontent",
-      "community": 529,
-      "community_name": "tooltip.tsx",
+      "community": 84,
+      "community_name": "sidebar.tsx",
       "norm_label": "tooltipcontent()"
     },
     {
@@ -34237,8 +34312,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_hooks_use_mobile",
-      "community": 556,
-      "community_name": "SidebarProvider",
+      "community": 84,
+      "community_name": "sidebar.tsx",
       "norm_label": "use-mobile.ts"
     },
     {
@@ -34249,8 +34324,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "packages_ui_src_hooks_use_mobile_useismobile",
-      "community": 556,
-      "community_name": "SidebarProvider",
+      "community": 84,
+      "community_name": "sidebar.tsx",
       "norm_label": "useismobile()"
     },
     {
@@ -56228,8 +56303,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_advanced_hooks",
-      "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community": 124,
+      "community_name": "tsdown/SKILL.md",
       "norm_label": "advanced-hooks.md"
     },
     {
@@ -56536,8 +56611,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_advanced_plugins",
-      "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community": 124,
+      "community_name": "tsdown/SKILL.md",
       "norm_label": "advanced-plugins.md"
     },
     {
@@ -56943,8 +57018,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_advanced_programmatic",
-      "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community": 124,
+      "community_name": "tsdown/SKILL.md",
       "norm_label": "advanced-programmatic.md"
     },
     {
@@ -57262,8 +57337,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_advanced_rolldown_options",
-      "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community": 124,
+      "community_name": "tsdown/SKILL.md",
       "norm_label": "advanced-rolldown-options.md"
     },
     {
@@ -57438,8 +57513,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_guide_getting_started",
-      "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community": 124,
+      "community_name": "tsdown/SKILL.md",
       "norm_label": "guide-getting-started.md"
     },
     {
@@ -57636,8 +57711,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_guide_introduction",
-      "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community": 124,
+      "community_name": "tsdown/SKILL.md",
       "norm_label": "guide-introduction.md"
     },
     {
@@ -57724,8 +57799,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_guide_migrate_from_tsup",
-      "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community": 124,
+      "community_name": "tsdown/SKILL.md",
       "norm_label": "guide-migrate-from-tsup.md"
     },
     {
@@ -64677,7 +64752,7 @@
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_recipe_solid",
       "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community_name": "Solid Support",
       "norm_label": "recipe-solid.md"
     },
     {
@@ -64688,7 +64763,7 @@
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_recipe_solid_solid_support",
       "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community_name": "Solid Support",
       "norm_label": "solid support"
     },
     {
@@ -64699,7 +64774,7 @@
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_recipe_solid_quick_start",
       "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community_name": "Solid Support",
       "norm_label": "quick start"
     },
     {
@@ -64710,7 +64785,7 @@
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_recipe_solid_configuration",
       "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community_name": "Solid Support",
       "norm_label": "configuration"
     },
     {
@@ -64721,7 +64796,7 @@
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_recipe_solid_dependencies",
       "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community_name": "Solid Support",
       "norm_label": "dependencies"
     },
     {
@@ -64732,7 +64807,7 @@
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_recipe_solid_key_points",
       "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community_name": "Solid Support",
       "norm_label": "key points"
     },
     {
@@ -64743,7 +64818,7 @@
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_recipe_solid_related",
       "community": 411,
-      "community_name": "advanced-plugins.md",
+      "community_name": "Solid Support",
       "norm_label": "related"
     },
     {
@@ -64753,8 +64828,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_tsdown_references_recipe_svelte",
-      "community": 406,
-      "community_name": "Svelte Support",
+      "community": 124,
+      "community_name": "tsdown/SKILL.md",
       "norm_label": "recipe-svelte.md"
     },
     {
@@ -69901,8 +69976,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_vitest_references_advanced_type_testing",
-      "community": 215,
-      "community_name": "vitest/SKILL.md",
+      "community": 232,
+      "community_name": "Type Testing",
       "norm_label": "advanced-type-testing.md"
     },
     {
@@ -72453,8 +72528,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_vitest_references_features_snapshots",
-      "community": 215,
-      "community_name": "vitest/SKILL.md",
+      "community": 247,
+      "community_name": "Snapshot Testing",
       "norm_label": "features-snapshots.md"
     },
     {
@@ -74128,6 +74203,61 @@
       "community": 81,
       "community_name": "Implementation Decisions",
       "norm_label": "references"
+    },
+    {
+      "label": "staff-provisioning.md",
+      "file_type": "document",
+      "source_file": "docs/staff-provisioning.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_staff_provisioning",
+      "community": 556,
+      "community_name": "Staff provisioning & password reset (v1)",
+      "norm_label": "staff-provisioning.md"
+    },
+    {
+      "label": "Staff provisioning & password reset (v1)",
+      "file_type": "document",
+      "source_file": "docs/staff-provisioning.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_staff_provisioning_staff_provisioning_password_reset_v1",
+      "community": 556,
+      "community_name": "Staff provisioning & password reset (v1)",
+      "norm_label": "staff provisioning & password reset (v1)"
+    },
+    {
+      "label": "Creating a staff user",
+      "file_type": "document",
+      "source_file": "docs/staff-provisioning.md",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "docs_staff_provisioning_creating_a_staff_user",
+      "community": 556,
+      "community_name": "Staff provisioning & password reset (v1)",
+      "norm_label": "creating a staff user"
+    },
+    {
+      "label": "Resetting a staff password",
+      "file_type": "document",
+      "source_file": "docs/staff-provisioning.md",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "docs_staff_provisioning_resetting_a_staff_password",
+      "community": 556,
+      "community_name": "Staff provisioning & password reset (v1)",
+      "norm_label": "resetting a staff password"
+    },
+    {
+      "label": "Verifying sign-in (dev)",
+      "file_type": "document",
+      "source_file": "docs/staff-provisioning.md",
+      "source_location": "L62",
+      "_origin": "ast",
+      "id": "docs_staff_provisioning_verifying_sign_in_dev",
+      "community": 556,
+      "community_name": "Staff provisioning & password reset (v1)",
+      "norm_label": "verifying sign-in (dev)"
     },
     {
       "label": "2026-09-02-acquisition-error-seam.md",
@@ -77800,6 +77930,127 @@
       "_origin": "ast",
       "id": "docs_superpowers_plans_2026_09_22_118_better_auth_foundation_self_review_recorded_at_planning_time",
       "community": 506,
+      "community_name": "Global Constraints",
+      "norm_label": "self-review (recorded at planning time)"
+    },
+    {
+      "label": "2026-09-22-119-admin-auth-server.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_22_119_admin_auth_server",
+      "community": 542,
+      "community_name": "Global Constraints",
+      "norm_label": "2026-09-22-119-admin-auth-server.md"
+    },
+    {
+      "label": "M4 Ticket 02 \u2014 Admin Auth Server Live (/api/auth routes, per-request instances, create-staff CLI) Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_m4_ticket_02_admin_auth_server_live_api_auth_routes_per_request_instances_create_staff_cli_implementation_plan",
+      "community": 542,
+      "community_name": "Global Constraints",
+      "norm_label": "m4 ticket 02 \u2014 admin auth server live (/api/auth routes, per-request instances, create-staff cli) implementation plan"
+    },
+    {
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_global_constraints",
+      "community": 542,
+      "community_name": "Global Constraints",
+      "norm_label": "global constraints"
+    },
+    {
+      "label": "Task 1: The `/api/auth/*` catch-all route \u2014 BetterAuth's handler, per request",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_1_the_api_auth_catch_all_route_betterauth_s_handler_per_request",
+      "community": 542,
+      "community_name": "Global Constraints",
+      "norm_label": "task 1: the `/api/auth/*` catch-all route \u2014 betterauth's handler, per request"
+    },
+    {
+      "label": "Task 2: The session server functions \u2014 `getSession` / `ensureSession`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L126",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_2_the_session_server_functions_getsession_ensuresession",
+      "community": 542,
+      "community_name": "Global Constraints",
+      "norm_label": "task 2: the session server functions \u2014 `getsession` / `ensuresession`"
+    },
+    {
+      "label": "Task 3: The `create-staff` script + the in-repo provisioning/reset runbook",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L197",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_3_the_create_staff_script_the_in_repo_provisioning_reset_runbook",
+      "community": 542,
+      "community_name": "Global Constraints",
+      "norm_label": "task 3: the `create-staff` script + the in-repo provisioning/reset runbook"
+    },
+    {
+      "label": "Task 4: Local dev env values (gitignored \u2014 this task has NO commit)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L331",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_4_local_dev_env_values_gitignored_this_task_has_no_commit",
+      "community": 542,
+      "community_name": "Global Constraints",
+      "norm_label": "task 4: local dev env values (gitignored \u2014 this task has no commit)"
+    },
+    {
+      "label": "Task 5: The live dev verification \u2014 probe, refusal, provisioning, sign-in, Postgres rows",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L375",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_5_the_live_dev_verification_probe_refusal_provisioning_sign_in_postgres_rows",
+      "community": 542,
+      "community_name": "Global Constraints",
+      "norm_label": "task 5: the live dev verification \u2014 probe, refusal, provisioning, sign-in, postgres rows"
+    },
+    {
+      "label": "Task 6: Full gate, docs rotation, PR, merge, and the watched deploy",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L461",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_6_full_gate_docs_rotation_pr_merge_and_the_watched_deploy",
+      "community": 542,
+      "community_name": "Global Constraints",
+      "norm_label": "task 6: full gate, docs rotation, pr, merge, and the watched deploy"
+    },
+    {
+      "label": "Task 7: v1 pick + ledger row + issue close (the runbook tail)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L567",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_7_v1_pick_ledger_row_issue_close_the_runbook_tail",
+      "community": 542,
+      "community_name": "Global Constraints",
+      "norm_label": "task 7: v1 pick + ledger row + issue close (the runbook tail)"
+    },
+    {
+      "label": "Self-Review (recorded at planning time)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L623",
+      "_origin": "ast",
+      "id": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_self_review_recorded_at_planning_time",
+      "community": 542,
       "community_name": "Global Constraints",
       "norm_label": "self-review (recorded at planning time)"
     },
@@ -106830,7 +107081,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L22",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package",
@@ -106841,7 +107092,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L52",
+      "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package",
@@ -106907,7 +107158,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_scripts",
@@ -106918,7 +107169,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L18",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_package_scripts",
+      "target": "apps_admin_package_scripts_create_staff",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/package.json",
+      "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_scripts",
@@ -106940,7 +107202,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_scripts",
@@ -106951,7 +107213,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L17",
+      "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_scripts",
@@ -106962,7 +107224,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_scripts",
@@ -106984,7 +107246,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_scripts",
@@ -106995,7 +107257,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L12",
+      "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_scripts",
@@ -107006,7 +107268,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L13",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_scripts",
@@ -107017,7 +107279,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L20",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_scripts",
@@ -107028,7 +107290,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L19",
+      "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_scripts",
@@ -107039,7 +107301,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L33",
+      "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107050,7 +107312,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L41",
+      "source_location": "L42",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107061,7 +107323,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L42",
+      "source_location": "L43",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107072,7 +107334,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L43",
+      "source_location": "L44",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107083,7 +107345,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L23",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107094,7 +107356,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L24",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107105,7 +107367,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L25",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107116,7 +107378,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L44",
+      "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107127,7 +107389,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L45",
+      "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107138,7 +107400,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L26",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107149,7 +107411,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L46",
+      "source_location": "L47",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107160,7 +107422,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L47",
+      "source_location": "L48",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107171,7 +107433,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107182,7 +107444,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L28",
+      "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107193,7 +107455,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107204,7 +107466,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L30",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107215,7 +107477,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L31",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107226,7 +107488,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L48",
+      "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107237,7 +107499,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L32",
+      "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107248,7 +107510,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L34",
+      "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107259,7 +107521,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107270,7 +107532,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L36",
+      "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107281,7 +107543,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L37",
+      "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107292,7 +107554,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L38",
+      "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107303,7 +107565,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L39",
+      "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107314,7 +107576,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L40",
+      "source_location": "L41",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107325,7 +107587,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L49",
+      "source_location": "L50",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107336,7 +107598,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L50",
+      "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_dependencies",
@@ -107347,7 +107609,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L23",
+      "source_location": "L24",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107359,7 +107621,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L24",
+      "source_location": "L25",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107371,7 +107633,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L25",
+      "source_location": "L26",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107383,7 +107645,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L26",
+      "source_location": "L27",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107395,7 +107657,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107407,7 +107669,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L28",
+      "source_location": "L29",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107419,7 +107681,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107431,7 +107693,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L30",
+      "source_location": "L31",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107443,7 +107705,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L31",
+      "source_location": "L32",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107455,7 +107717,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L32",
+      "source_location": "L33",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107467,7 +107729,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L33",
+      "source_location": "L34",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107479,7 +107741,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L34",
+      "source_location": "L35",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107491,7 +107753,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107503,7 +107765,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L36",
+      "source_location": "L37",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107515,7 +107777,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L37",
+      "source_location": "L38",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107527,7 +107789,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L38",
+      "source_location": "L39",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107539,7 +107801,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L39",
+      "source_location": "L40",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107551,7 +107813,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L40",
+      "source_location": "L41",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107563,7 +107825,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L41",
+      "source_location": "L42",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107575,7 +107837,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L42",
+      "source_location": "L43",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107587,7 +107849,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L43",
+      "source_location": "L44",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107599,7 +107861,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L44",
+      "source_location": "L45",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107611,7 +107873,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L45",
+      "source_location": "L46",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107623,7 +107885,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L46",
+      "source_location": "L47",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107635,7 +107897,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L47",
+      "source_location": "L48",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107647,7 +107909,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L48",
+      "source_location": "L49",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107659,7 +107921,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L49",
+      "source_location": "L50",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107671,7 +107933,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L50",
+      "source_location": "L51",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107683,7 +107945,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L53",
+      "source_location": "L54",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_devdependencies",
@@ -107694,7 +107956,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_devdependencies",
@@ -107705,7 +107967,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L55",
+      "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_devdependencies",
@@ -107716,7 +107978,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L56",
+      "source_location": "L57",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_devdependencies",
@@ -107727,7 +107989,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L57",
+      "source_location": "L58",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_devdependencies",
@@ -107738,7 +108000,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L58",
+      "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_devdependencies",
@@ -107749,7 +108011,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L59",
+      "source_location": "L60",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_devdependencies",
@@ -107760,7 +108022,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L60",
+      "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_devdependencies",
@@ -107771,7 +108033,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L61",
+      "source_location": "L62",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_devdependencies",
@@ -107782,7 +108044,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L63",
+      "source_location": "L64",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_devdependencies",
@@ -107793,7 +108055,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L64",
+      "source_location": "L65",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_devdependencies",
@@ -107804,7 +108066,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L62",
+      "source_location": "L63",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_devdependencies",
@@ -107815,7 +108077,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_package_devdependencies",
@@ -107826,7 +108088,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L53",
+      "source_location": "L54",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107838,7 +108100,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107850,7 +108112,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L55",
+      "source_location": "L56",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107862,7 +108124,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L56",
+      "source_location": "L57",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107874,7 +108136,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L57",
+      "source_location": "L58",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107886,7 +108148,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L58",
+      "source_location": "L59",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107898,7 +108160,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L59",
+      "source_location": "L60",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107910,7 +108172,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L60",
+      "source_location": "L61",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107922,7 +108184,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L61",
+      "source_location": "L62",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107934,7 +108196,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L62",
+      "source_location": "L63",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107946,7 +108208,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L63",
+      "source_location": "L64",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107958,7 +108220,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L64",
+      "source_location": "L65",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -107970,7 +108232,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/package.json",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -108838,6 +109100,75 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/src/lib/auth.functions.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_src_lib_auth_functions",
+      "target": "apps_admin_src_lib_auth",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/src/lib/auth.functions.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_src_lib_auth_functions",
+      "target": "apps_admin_src_lib_auth_createauth",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/src/lib/auth.functions.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_src_lib_auth_functions",
+      "target": "apps_admin_src_lib_auth_functions_ensuresession",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/src/lib/auth.functions.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_src_lib_auth_functions",
+      "target": "apps_admin_src_lib_auth_functions_getsession",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "cites",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/src/lib/auth.functions.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_src_lib_auth_functions",
+      "target": "apps_admin_src_lib_auth_functions_ts_docref_adr_0011",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/src/lib/auth.functions.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_src_lib_auth_functions",
+      "target": "ref_tanstack_react_start",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/lib/auth.ts",
@@ -108857,6 +109188,30 @@
       "_origin": "ast",
       "source": "apps_admin_src_lib_auth",
       "target": "apps_admin_src_lib_auth_ts_docref_adr_0011",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/src/routes/api/auth/$.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_src_routes_api_auth",
+      "target": "apps_admin_src_lib_auth",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/src/routes/api/auth/$.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_src_routes_api_auth",
+      "target": "apps_admin_src_lib_auth_createauth",
       "confidence_score": 1.0
     },
     {
@@ -108883,15 +109238,27 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/src/routeTree.gen.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_src_routetree_gen",
+      "target": "apps_admin_src_routes_api_auth",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L215",
+      "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
-      "target": "apps_admin_src_router_getrouter",
+      "target": "apps_admin_src_routes_api_auth_route",
       "confidence_score": 1.0
     },
     {
@@ -109118,6 +109485,17 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
+      "target": "apps_admin_src_routetree_gen_apiauthsplatroute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/src/routeTree.gen.ts",
+      "source_location": "L67",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_src_routetree_gen",
       "target": "apps_admin_src_routetree_gen_fileroutesbyfullpath",
       "confidence_score": 1.0
     },
@@ -109125,7 +109503,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L79",
+      "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109136,7 +109514,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L126",
+      "source_location": "L139",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109147,7 +109525,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L70",
+      "source_location": "L77",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109158,7 +109536,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L90",
+      "source_location": "L99",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109169,18 +109547,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L218",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_admin_src_routetree_gen",
-      "target": "apps_admin_src_routetree_gen_register",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L208",
+      "source_location": "L228",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109191,7 +109558,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L211",
+      "source_location": "L232",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109202,7 +109569,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L30",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109213,7 +109580,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109224,7 +109591,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L40",
+      "source_location": "L41",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109235,7 +109602,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L25",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109246,7 +109613,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L45",
+      "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109257,7 +109624,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109268,7 +109635,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L196",
+      "source_location": "L216",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109279,7 +109646,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L206",
+      "source_location": "L226",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109290,7 +109657,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L50",
+      "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109301,7 +109668,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L55",
+      "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109312,7 +109679,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L125",
+      "source_location": "L138",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen",
@@ -109320,34 +109687,11 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L217",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_admin_src_routetree_gen",
-      "target": "apps_admin_src_routetree_gen_tanstack_react_start",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L216",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_admin_src_routetree_gen",
-      "target": "ref_tanstack_react_start",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "references",
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L80",
+      "source_location": "L88",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen_fileroutesbyid",
@@ -109359,7 +109703,19 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L127",
+      "source_location": "L196",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_src_routetree_gen_fileroutesbypath",
+      "target": "apps_admin_src_routes_api_auth_route",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/src/routeTree.gen.ts",
+      "source_location": "L140",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen_fileroutesbypath",
@@ -109371,7 +109727,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L141",
+      "source_location": "L154",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen_fileroutesbypath",
@@ -109383,7 +109739,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L148",
+      "source_location": "L161",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen_fileroutesbypath",
@@ -109395,7 +109751,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L155",
+      "source_location": "L168",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen_fileroutesbypath",
@@ -109407,7 +109763,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L134",
+      "source_location": "L147",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen_fileroutesbypath",
@@ -109419,7 +109775,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L162",
+      "source_location": "L175",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen_fileroutesbypath",
@@ -109431,7 +109787,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L127",
+      "source_location": "L140",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen_fileroutesbypath",
@@ -109443,7 +109799,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L169",
+      "source_location": "L182",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen_fileroutesbypath",
@@ -109455,7 +109811,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L176",
+      "source_location": "L189",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_admin_src_routetree_gen_fileroutesbypath",
@@ -109472,18 +109828,6 @@
       "_origin": "ast",
       "source": "apps_admin_src_router",
       "target": "apps_admin_src_routetree_gen_routetree",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "context": "generic_arg",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/admin/src/routeTree.gen.ts",
-      "source_location": "L220",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_admin_src_routetree_gen_register",
-      "target": "apps_admin_src_router_getrouter",
       "confidence_score": 1.0
     },
     {
@@ -109795,6 +110139,28 @@
       "_origin": "ast",
       "source": "apps_admin_src_routes_shell",
       "target": "packages_ui_src_components_sidebar_sidebarprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/src/routes/api/auth/$.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_src_routes_api_auth",
+      "target": "apps_admin_src_routes_api_auth_route",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "cites",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/src/routes/api/auth/$.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_admin_src_routes_api_auth",
+      "target": "apps_admin_src_routes_api_auth_ts_docref_adr_0011",
       "confidence_score": 1.0
     },
     {
@@ -175543,6 +175909,50 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "docs/staff-provisioning.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_staff_provisioning",
+      "target": "docs_staff_provisioning_staff_provisioning_password_reset_v1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/staff-provisioning.md",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_staff_provisioning_staff_provisioning_password_reset_v1",
+      "target": "docs_staff_provisioning_creating_a_staff_user",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/staff-provisioning.md",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_staff_provisioning_staff_provisioning_password_reset_v1",
+      "target": "docs_staff_provisioning_resetting_a_staff_password",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/staff-provisioning.md",
+      "source_location": "L62",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_staff_provisioning_staff_provisioning_password_reset_v1",
+      "target": "docs_staff_provisioning_verifying_sign_in_dev",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "docs/superpowers/plans/2026-09-02-acquisition-error-seam.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -178849,6 +179259,116 @@
       "_origin": "ast",
       "source": "docs_superpowers_plans_2026_09_22_118_better_auth_foundation_global_constraints",
       "target": "docs_superpowers_plans_2026_09_22_118_better_auth_foundation_task_7_v1_pick_ledger_rows_the_runbook_tail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_22_119_admin_auth_server",
+      "target": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_m4_ticket_02_admin_auth_server_live_api_auth_routes_per_request_instances_create_staff_cli_implementation_plan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_m4_ticket_02_admin_auth_server_live_api_auth_routes_per_request_instances_create_staff_cli_implementation_plan",
+      "target": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_global_constraints",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L623",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_m4_ticket_02_admin_auth_server_live_api_auth_routes_per_request_instances_create_staff_cli_implementation_plan",
+      "target": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_self_review_recorded_at_planning_time",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L38",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_1_the_api_auth_catch_all_route_betterauth_s_handler_per_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L126",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_2_the_session_server_functions_getsession_ensuresession",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L197",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_3_the_create_staff_script_the_in_repo_provisioning_reset_runbook",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L331",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_4_local_dev_env_values_gitignored_this_task_has_no_commit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L375",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_5_the_live_dev_verification_probe_refusal_provisioning_sign_in_postgres_rows",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L461",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_6_full_gate_docs_rotation_pr_merge_and_the_watched_deploy",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md",
+      "source_location": "L567",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_22_119_admin_auth_server_task_7_v1_pick_ledger_row_issue_close_the_runbook_tail",
       "confidence_score": 1.0
     },
     {
@@ -187289,5 +187809,5 @@
       "source_file": "docs/superpowers/plans/2026-08-31-m1.3-provision-migrate-seed.md"
     }
   ],
-  "built_at_commit": "264b183920b2c1172bef72b3a2b2d564cfecb86f"
+  "built_at_commit": "369e813a17a61992a020af26e6d7e2665b4db698"
 }
