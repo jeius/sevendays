@@ -25,8 +25,8 @@
     "semantic_hash": "2866588561e865ba99fd805d821ad7d8"
   },
   "apps/admin/package.json": {
-    "mtime": 1790051157.2774343,
-    "ast_hash": "2b4b27120c54d194a848da5c28a43a79",
+    "mtime": 1790075975.2559354,
+    "ast_hash": "2f9e5497c293d8109368cc84e66ab163",
     "semantic_hash": ""
   },
   "apps/admin/src/integrations/posthog/provider.tsx": {
@@ -35,8 +35,8 @@
     "semantic_hash": "a648f14485559c8d15a9668bf875f35d"
   },
   "apps/admin/src/routeTree.gen.ts": {
-    "mtime": 1789489137.646315,
-    "ast_hash": "b78ca9968c3d035ca64941d3d1e02982",
+    "mtime": 1790077370.4258287,
+    "ast_hash": "4729cfd8dee1b745e4754056eb7df7f6",
     "semantic_hash": ""
   },
   "apps/admin/src/router.tsx": {
@@ -70,7 +70,7 @@
     "semantic_hash": "7c56dad295e65a982a55028df71181cb"
   },
   "apps/api/package.json": {
-    "mtime": 1790051157.3294344,
+    "mtime": 1790057886.5598059,
     "ast_hash": "e679adac7989f0c56eab39d6c3c4d338",
     "semantic_hash": ""
   },
@@ -180,7 +180,7 @@
     "semantic_hash": ""
   },
   "apps/api/test/helpers/truncate.ts": {
-    "mtime": 1790055600.4845927,
+    "mtime": 1790057886.5598059,
     "ast_hash": "4bb65fcde1b1c1e329254c81b6a0dcba",
     "semantic_hash": ""
   },
@@ -395,7 +395,7 @@
     "semantic_hash": "beadb76ef595ed4eded5f13a615cae7f"
   },
   "packages/db/migrations/meta/_journal.json": {
-    "mtime": 1790053387.200576,
+    "mtime": 1790057886.637806,
     "ast_hash": "d652534096a9cd8c87e8440a8ce1a8ae",
     "semantic_hash": ""
   },
@@ -505,7 +505,7 @@
     "semantic_hash": "f8e5f218f33a3d1d5f6737f304824faf"
   },
   "packages/db/src/schema/index.ts": {
-    "mtime": 1790052453.891926,
+    "mtime": 1790057886.6421392,
     "ast_hash": "f687ca319374bd793089da8195df27c9",
     "semantic_hash": ""
   },
@@ -525,7 +525,7 @@
     "semantic_hash": "d585ce2b867b516d3a52fdcdd343204e"
   },
   "packages/db/src/schema/relations.ts": {
-    "mtime": 1790052448.261243,
+    "mtime": 1790057886.6421392,
     "ast_hash": "da4fb60229d38c69ae338fdd92de6f8f",
     "semantic_hash": ""
   },
@@ -705,7 +705,7 @@
     "semantic_hash": ""
   },
   ".github/workflows/ci.yml": {
-    "mtime": 1790054592.6907797,
+    "mtime": 1790057886.5598059,
     "ast_hash": "c6440067cbc4e3c827a28df487fa41bd",
     "semantic_hash": ""
   },
@@ -840,13 +840,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1790047688.8281147,
-    "ast_hash": "ebe228c0dd3569732db79a584b4faf3f",
+    "mtime": 1790057886.5598059,
+    "ast_hash": "03e93c57f87d3ceabbb09a2c99a841b2",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1790047700.7057786,
-    "ast_hash": "f02364b1b81588fb4936f7e8c14de52a",
+    "mtime": 1790057886.5641394,
+    "ast_hash": "06cf8c510e2c9f3dba0f1bdabcf15547",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -1265,7 +1265,7 @@
     "semantic_hash": ""
   },
   "apps/api/test/helpers/truncate.test.ts": {
-    "mtime": 1790055719.8543594,
+    "mtime": 1790057886.5598059,
     "ast_hash": "ce0aaa995ad14f7aefdf9a78ab1173b8",
     "semantic_hash": ""
   },
@@ -2880,8 +2880,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1790041867.5282073,
-    "ast_hash": "aea089a53591cc46bb933a2e2e71aa79",
+    "mtime": 1790058646.9021928,
+    "ast_hash": "71c5e378c7f097f37e9520464bd859e4",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -3270,27 +3270,27 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/auth.config.ts": {
-    "mtime": 1790052399.491531,
+    "mtime": 1790057886.5598059,
     "ast_hash": "a2663af89a87a8b6496bd56fc211f2f9",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/auth.ts": {
-    "mtime": 1790052533.2587888,
+    "mtime": 1790057886.5598059,
     "ast_hash": "55d6de2f997329a1fd8a8eb3d305388b",
     "semantic_hash": ""
   },
   "packages/db/migrations/0005_aspiring_firelord.sql": {
-    "mtime": 1790053387.2049093,
+    "mtime": 1790057886.637806,
     "ast_hash": "591909e2122eee336c0a535e30eec97d",
     "semantic_hash": ""
   },
   "packages/db/migrations/meta/0005_snapshot.json": {
-    "mtime": 1790053387.200576,
+    "mtime": 1790057886.637806,
     "ast_hash": "e45b92f5e6dcb35cea3a7981863acca7",
     "semantic_hash": ""
   },
   "packages/db/src/schema/auth.ts": {
-    "mtime": 1790052469.1409223,
+    "mtime": 1790057886.637806,
     "ast_hash": "4850a2c7d8e9cf3d3e149cb015aa993c",
     "semantic_hash": ""
   },
@@ -3305,8 +3305,28 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-22-118-better-auth-foundation.md": {
-    "mtime": 1790053613.2542214,
+    "mtime": 1790057886.5641394,
     "ast_hash": "717a9c441082863f41bb0c725518dadd",
+    "semantic_hash": ""
+  },
+  "apps/admin/src/lib/auth.functions.ts": {
+    "mtime": 1790075435.079829,
+    "ast_hash": "4dd5a58c8105d7f8a8602d19a9585686",
+    "semantic_hash": ""
+  },
+  "apps/admin/src/routes/api/auth/$.ts": {
+    "mtime": 1790074429.9692037,
+    "ast_hash": "017b2a17ca80ef92c5a8fecbeef8f182",
+    "semantic_hash": ""
+  },
+  "docs/staff-provisioning.md": {
+    "mtime": 1790075990.4955432,
+    "ast_hash": "4eb07005121103ea14b7aafe2e61b858",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md": {
+    "mtime": 1790077414.8215253,
+    "ast_hash": "8987c5552f220ea7dddf7eac96a6c462",
     "semantic_hash": ""
   }
 }

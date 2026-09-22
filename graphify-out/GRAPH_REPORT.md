@@ -1,16 +1,16 @@
 # Graph Report - sevendays  (2026-09-22)
 
 ## Corpus Check
-- 636 files · ~884,083 words
+- 640 files · ~892,418 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 7557 nodes · 9046 edges · 564 communities (490 shown, 74 thin omitted)
+- 7580 nodes · 9070 edges · 573 communities (498 shown, 75 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 138 edges (avg confidence: 0.68)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `264b1839`
+- Built from commit: `369e813a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -282,7 +282,7 @@
 - pnpm/SKILL.md
 - Executable - `exe`
 - vitest: projects
-- admin package.json scripts
+- scripts
 - landing package.json scripts
 - Plan: M1.4 file structure
 - Plan: intake deepening file structure
@@ -416,7 +416,7 @@
 - vitest: test tags
 - Spec: booking flow decisions
 - slides skill overview
-- advanced-plugins.md
+- Solid Support
 - tsdown CLI: build options
 - tsdown CLI: monorepo
 - field.tsx
@@ -475,9 +475,9 @@
 - landing dep: @sentry/tanstackstart-react
 - compilerOptions
 - landing dep: @tanstack/react-router
-- mock-api.ts
+- peso
 - Plan: M2-08 booking confirmation
-- button.tsx
+- stub-screen.tsx
 - Plan: M2-09 confirmation email
 - Verify script: confirmation emails
 - App READMEs (admin & landing)
@@ -519,28 +519,28 @@
 - @tanstack/react-router-devtools
 - v1 triage classifier script
 - api/package.json
-- auth.config.ts
+- auth.functions.ts
 - @tanstack/react-form
 - linter
 - $type
 - radius
 - lg
-- tooltip.tsx
+- admin-sidebar.tsx
 - padding-y
 - @sevendays/api-client
 - @sevendays/types
 - @sevendays/ui
 - sm
 - react-dom
-- tailwindcss
+- services.tsx
 - @tailwindcss/vite
 - tw-animate-css
 - zod
 - /public/photos — PROTOTYPE stand-ins (#111)
 - none
-- 0
+- Global Constraints
 - 16
-- 3
+- FileRoutesByPath
 - 8
 - destructive
 - destructive-foreground
@@ -549,17 +549,26 @@
 - primary-foreground
 - secondary-foreground
 - class-variance-authority
-- .test_add_components_no_config
-- .test_list_installed_no_config
-- .test_init_dry_run
-- SidebarProvider
+- admin/src/routes/__root.tsx
+- useSidebar
+- admin/src/router.tsx
+- Staff provisioning & password reset (v1)
 - react
-- better-auth
+- 2
 - dotenv-cli
 - react
 - @tailwindcss/vite
 - @tanstack/react-router-ssr-query
 - @tanstack/react-start
+- 5
+- test_shadcn_add.py
+- _shell.appointments.tsx
+- _shell.packages.tsx
+- .test_check_shadcn_config_exists
+- .test_get_installed_components_empty
+- .test_get_installed_components_with_files
+- @sentry/tanstackstart-react
+- @fontsource-variable/figtree
 
 ## God Nodes (most connected - your core abstractions)
 1. `TailwindConfigGenerator` - 58 edges
@@ -599,7 +608,7 @@
 - **2026-09-02 Architecture Review Candidates (A-D)** — docs_specs_2026_09_02_acquisition_error_seam_spec_acquisition_error_seam, docs_specs_2026_09_02_catalog_row_shaping_module_spec_catalog_row_shaping_module, docs_specs_2026_09_02_deepen_appointment_intake_spec_deepen_appointment_intake, docs_specs_2026_09_02_extract_read_stitch_module_spec_extract_read_stitch_module, docs_superpowers_plans_2026_09_02_deepen_appointment_intake_deepen_appointment_intake_plan [EXTRACTED 0.85]
 - **Database Connection Topology + Seed Infrastructure** — docs_specs_2026_08_30_m1_real_data_layer_spec_two_connection_topology, docs_specs_2026_08_30_m1_real_data_layer_spec_adr_0007, docs_superpowers_plans_2026_08_31_m1_3_provision_migrate_seed_session_mode_pooler, docs_superpowers_plans_2026_08_31_m1_3_provision_migrate_seed_check_env_gate, docs_superpowers_plans_2026_08_31_m1_3_provision_migrate_seed_seed_upsert, docs_superpowers_plans_2026_08_31_m1_3_provision_migrate_seed_fk_indexes_natural_keys [INFERRED 0.85]
 
-## Communities (564 total, 74 thin omitted)
+## Communities (573 total, 75 thin omitted)
 
 ### Community 0 - "Sevendays Service Catalog"
 Cohesion: 0.14
@@ -634,16 +643,16 @@ Cohesion: 0.13
 Nodes (15): devDependencies, @cloudflare/workers-types, postgres, @sevendays/config, @types/node, typescript, vitest, wrangler (+7 more)
 
 ### Community 8 - "admin/src/routeTree.gen.ts"
-Cohesion: 0.05
-Nodes (40): StubScreen(), StubScreenProps, PostHogProvider(), PostHogProviderProps, getRouter(), Register, @tanstack/react-router, Route (+32 more)
+Cohesion: 0.11
+Nodes (18): Route, ApiAuthSplatRoute, FileRoutesByFullPath, FileRoutesById, FileRoutesByTo, FileRouteTypes, RootRouteChildren, ShellAddOnsRoute (+10 more)
 
 ### Community 9 - "dependencies"
 Cohesion: 0.07
-Nodes (27): dependencies, cn, @fontsource-variable/figtree, @fontsource-variable/geist-mono, @fontsource-variable/roboto-slab, posthog-js, @posthog/react, @sentry/tanstackstart-react (+19 more)
+Nodes (27): dependencies, better-auth, cn, @fontsource-variable/figtree, @fontsource-variable/geist-mono, @fontsource-variable/roboto-slab, posthog-js, @posthog/react (+19 more)
 
 ### Community 10 - "dependencies"
 Cohesion: 0.07
-Nodes (29): dependencies, class-variance-authority, cn, dotenv-cli, @fontsource-variable/figtree, @fontsource-variable/geist-mono, @fontsource-variable/roboto-slab, posthog-js (+21 more)
+Nodes (29): dependencies, class-variance-authority, cn, dotenv-cli, @fontsource-variable/geist-mono, @fontsource-variable/roboto-slab, posthog-js, @posthog/react (+21 more)
 
 ### Community 11 - "api/src/index.ts"
 Cohesion: 0.14
@@ -666,8 +675,8 @@ Cohesion: 0.11
 Nodes (20): Env, envSchema, parseEnv(), ADR-0007, addonServices, ADR-0006, appointments, branches (+12 more)
 
 ### Community 16 - "landing/src/routeTree.gen.ts"
-Cohesion: 0.06
-Nodes (35): CoverPanel(), InclusionsList(), ADR-0009, PackageCard(), servicePackageQueries, studioServiceQueries, getRouter(), Register (+27 more)
+Cohesion: 0.09
+Nodes (26): getRouter(), Register, @tanstack/react-router, Route, Route, Route, Route, Route (+18 more)
 
 ### Community 17 - "Shared appointment schemas (types)"
 Cohesion: 0.09
@@ -911,7 +920,7 @@ Nodes (3): AppointmentProbeAddon, AppointmentProbeExpected, AppointmentProbeResu
 
 ### Community 79 - "book.tsx"
 Cohesion: 0.06
-Nodes (44): ChoiceCard(), HourChipGrid(), RejectionCard(), createAppointment, addonTotalCents(), API_REASON_MAP, applicableAddonsFor(), BookingCatalog (+36 more)
+Nodes (45): ChoiceCard(), HourChipGrid(), RejectionCard(), createAppointment, addonTotalCents(), API_REASON_MAP, applicableAddonsFor(), BookingCatalog (+37 more)
 
 ### Community 80 - "connect"
 Cohesion: 0.14
@@ -922,8 +931,8 @@ Cohesion: 0.10
 Nodes (20): API-side session verification (ADR-0004, made concrete), Closing the public appointments reads, Environments and secrets, Implementation Decisions, Login UI + shell gate (the UI-bearing ticket), Milestone 4 — Admin Auth (v1-track) (spec), Out of scope, Problem Statement (+12 more)
 
 ### Community 84 - "sidebar.tsx"
-Cohesion: 0.09
-Nodes (21): NavGroup, navGroups, NavItem, NavTo, Sidebar(), SidebarContent(), SidebarContext, SidebarContextProps (+13 more)
+Cohesion: 0.12
+Nodes (8): SidebarContext, SidebarContextProps, SidebarProvider(), Skeleton(), Tooltip(), TooltipContent(), TooltipTrigger(), useIsMobile()
 
 ### Community 97 - "api/src/routes/service-packages.ts"
 Cohesion: 0.21
@@ -1070,8 +1079,8 @@ Cohesion: 0.07
 Nodes (34): ansi_ljust(), _detect_page_type(), _filter_anti_patterns_for_mode(), format_ascii_box(), format_master_md(), format_page_override_md(), _generate_intelligent_overrides(), hex_to_ansi() (+26 more)
 
 ### Community 144 - "api-client/src/index.ts"
-Cohesion: 0.10
-Nodes (29): CreateEndpoint, CreateInput, CreateApiClientOptions, RpcClient, ADR-0006, ApiClientError, messageFor(), ApiClient (+21 more)
+Cohesion: 0.06
+Nodes (51): getBranches, getApiClient(), getApiUrl(), ADR-0006, ADR-0016, branchQueries, getApiClient(), getApiUrl() (+43 more)
 
 ### Community 145 - "design-system: HTML token validator"
 Cohesion: 0.14
@@ -1343,14 +1352,14 @@ Nodes (17): 1. Create Source Files, 2. Create Config File, 3. Run Build, 4. Test
 
 ### Community 213 - "TestShadcnInstaller"
 Cohesion: 0.12
-Nodes (10): Test ShadcnInstaller class., Test adding all components without config., Test adding all components in dry run mode., Create temporary project structure., Test listing installed components when none exist., Test listing installed components when they exist., Test checking for existing shadcn config., Test getting installed components without config. (+2 more)
+Nodes (10): Test ShadcnInstaller class., Test adding all components without config., Test adding all components in dry run mode., Create temporary project structure., Test listing installed components when none exist., Test listing installed components when they exist., Test initialization with default project root., Test initialization with custom project root. (+2 more)
 
 ### Community 214 - "ui-ux-pro-max: threshold gate tests"
 Cohesion: 0.13
 Nodes (3): TestFixtureValidation, TestMetricMath, TestThresholdGate
 
 ### Community 215 - "vitest/SKILL.md"
-Cohesion: 0.20
+Cohesion: 0.24
 Nodes (3): Advanced, Core, Features
 
 ### Community 216 - "vitest: expect API"
@@ -1398,16 +1407,16 @@ Cohesion: 0.12
 Nodes (16): Async Init, Configure, Direct Import, Importing WASM Modules, Install, Overview, Plugin Options, Related Options (+8 more)
 
 ### Community 227 - ".add_components"
-Cohesion: 0.17
-Nodes (8): main(), Add all available shadcn/ui components. Args: overwrite: If True, overwrite…, List installed components. Returns: Tuple of (success, message with component…, Check if shadcn is initialized in project. Returns: True if components.json…, Get list of already installed components. Returns: List of installed component…, Read shadcn version from project package.json; fall back to a pinned default., Add shadcn/ui components. Args: components: List of component names to add…, Tests for shadcn_add.py
+Cohesion: 0.22
+Nodes (7): main(), Add all available shadcn/ui components. Args: overwrite: If True, overwrite…, List installed components. Returns: Tuple of (success, message with component…, Check if shadcn is initialized in project. Returns: True if components.json…, Get list of already installed components. Returns: List of installed component…, Read shadcn version from project package.json; fall back to a pinned default., Add shadcn/ui components. Args: components: List of component names to add…
 
 ### Community 228 - "BM25"
 Cohesion: 0.09
 Nodes (12): BM25, BM25 ranking algorithm for text search, format_markdown(), generate_design_system(), Format design system as markdown., Main entry point for design system generation. Args: query: Search query (e.g.,…, format_output(), Format results for Claude consumption (token-optimized) (+4 more)
 
 ### Community 229 - "home-cards.tsx"
-Cohesion: 0.13
-Nodes (19): ConfirmationCard(), SummaryRail(), BookNow(), COVERS, packageChips(), packageCover(), PackageCoverCard(), privilegeLabel() (+11 more)
+Cohesion: 0.18
+Nodes (12): BookNow(), COVERS, packageChips(), packageCover(), PackageCoverCard(), privilegeLabel(), serviceBackground(), ServiceImageCard() (+4 more)
 
 ### Community 231 - "vitest: test environments"
 Cohesion: 0.12
@@ -1463,7 +1472,7 @@ Nodes (4): BranchCard(), WalkInBadge(), branchQueries, Route
 
 ### Community 244 - "landing/src/lib/queries.ts"
 Cohesion: 0.09
-Nodes (24): toNotFoundError(), getAddonServices, getAppointment, getBranches, getServicePackageBySlug, getServicePackages, getStudioServices, getApiClient() (+16 more)
+Nodes (26): ConfirmationCard(), toNotFoundError(), getAddonServices, getAppointment, getBranches, getServicePackageBySlug, getServicePackages, getStudioServices (+18 more)
 
 ### Community 245 - "vitest: CLI reference"
 Cohesion: 0.13
@@ -1474,7 +1483,7 @@ Cohesion: 0.13
 Nodes (14): Around Hooks, aroundAll, Basic Hooks, Cleanup Return Pattern, Concurrent Test Hooks, Extended Test Hooks, Hook Execution Order, Hook Timeout (+6 more)
 
 ### Community 247 - "Snapshot Testing"
-Cohesion: 0.13
+Cohesion: 0.12
 Nodes (15): Basic Snapshot, Concurrent Test Snapshots, Custom Serializers, Custom Snapshot Matchers (4.1+), Error Snapshots, File Snapshots, Inline Snapshots, Key Points (+7 more)
 
 ### Community 248 - "Domain: Appointment context"
@@ -1551,7 +1560,7 @@ Nodes (14): Basic Usage, CLI, Common Patterns, Config File, Default, How It Work
 
 ### Community 266 - "ShadcnInstaller"
 Cohesion: 0.14
-Nodes (8): Handle shadcn/ui component installation., ShadcnInstaller, Test adding components that are already installed., Test initialization with default project root., Test initialization with custom project root., Test checking for non-existent shadcn config., Test getting installed components when none exist., Test getting installed components when files exist.
+Nodes (8): Handle shadcn/ui component installation., ShadcnInstaller, Test adding components without shadcn config., Test adding components that are already installed., Test listing installed components without config., Test initialization with dry run mode., Test checking for non-existent shadcn config., Test getting installed components without config.
 
 ### Community 267 - "vitest: concurrency"
 Cohesion: 0.14
@@ -1593,9 +1602,9 @@ Nodes (12): Advanced Configuration, Basic Usage, Behavior When Enabled, Caching,
 Cohesion: 0.15
 Nodes (13): Basic Projects Setup, Browser + Node Projects, Different Environments, Global Setup per Project, Key Points, Monorepo Pattern, Per-Project Pool & Isolation (v4), Project-Specific Dependencies (+5 more)
 
-### Community 277 - "admin package.json scripts"
-Cohesion: 0.15
-Nodes (13): scripts, build, deploy, dev, fix, fix:unsafe, format, generate-routes (+5 more)
+### Community 277 - "scripts"
+Cohesion: 0.14
+Nodes (14): scripts, build, create-staff, deploy, dev, fix, fix:unsafe, format (+6 more)
 
 ### Community 278 - "landing package.json scripts"
 Cohesion: 0.15
@@ -2110,7 +2119,7 @@ Cohesion: 0.29
 Nodes (7): Introduction, Key Differences from Rolldown, Plugin Ecosystem, Prior Arts, Related, What Can It Bundle?, Why tsdown?
 
 ### Community 406 - "Svelte Support"
-Cohesion: 0.25
+Cohesion: 0.29
 Nodes (7): Configuration, Dependencies, Distribution Strategy, Key Points, Quick Start, Related, Svelte Support
 
 ### Community 407 - "vitest: benchmarking"
@@ -2129,8 +2138,8 @@ Nodes (15): API surface (`/api/v1`, thin routes over service modules), Booking f
 Cohesion: 0.33
 Nodes (5): References (Knowledge Base), Routing, Slides, Subcommands, When to Use
 
-### Community 411 - "advanced-plugins.md"
-Cohesion: 0.19
+### Community 411 - "Solid Support"
+Cohesion: 0.29
 Nodes (6): Configuration, Dependencies, Key Points, Quick Start, Related, Solid Support
 
 ### Community 412 - "tsdown CLI: build options"
@@ -2227,7 +2236,7 @@ Nodes (11): Acceptance criteria mapping (for the PR description), File Structure
 
 ### Community 444 - "buttonVariants"
 Cohesion: 0.11
-Nodes (18): MobileNav(), ServiceCard(), SiteFooter(), SiteHeader(), PostHogProvider(), PostHogProviderProps, bookableBranchNames(), BRANCHES (+10 more)
+Nodes (12): MobileNav(), SiteFooter(), SiteHeader(), PostHogProvider(), PostHogProviderProps, NAV_LINKS, RouterContext, Button() (+4 more)
 
 ### Community 445 - "Plan: M2-06 content pages"
 Cohesion: 0.18
@@ -2266,8 +2275,8 @@ Cohesion: 0.17
 Nodes (11): File Structure, Final Review (for the executor's last pass), Global Constraints, M3 Ticket 03 — Landing Chrome + Atmosphere: Ink Bands, SiteFooter, MobileNav, Wash Ground (#97) Implementation Plan, Task 1: The `collapsible` Tier-1 primitive, Task 2: The chrome components — nav lib, ink-led SiteHeader, MobileNav, SiteFooter, Task 3: Chrome mounts at the root route — per-route SiteHeader renders die, Task 4: Home onto the wash ground + white-card strip items + the emphasis strip (+3 more)
 
 ### Community 466 - "compilerOptions"
-Cohesion: 0.09
-Nodes (20): getBranches, getApiClient(), getApiUrl(), ADR-0006, ADR-0016, branchQueries, compilerOptions, allowJs (+12 more)
+Cohesion: 0.13
+Nodes (14): compilerOptions, allowJs, jsx, jsxImportSource, module, noEmit, target, types (+6 more)
 
 ### Community 469 - "compilerOptions"
 Cohesion: 0.18
@@ -2277,13 +2286,17 @@ Nodes (10): compilerOptions, declaration, declarationMap, noEmit, outDir, rootDi
 Cohesion: 0.18
 Nodes (10): Acceptance criteria mapping (for the PR description), File Structure, Global Constraints, M2 Ticket 07 — Booking Wizard `/book` (prototype variant C) — Implementation Plan, Task 1: Applicability on the studio-services read (types + API, TDD), Task 2: Landing data layer — addon-services + appointment server fns, `phDateTime`, Task 3: The pure booking lib (state machine, rejections, PHT math — TDD), Task 4: `/book` route — variant C wizard, rail, rejection card, typed-Link sweep (+2 more)
 
-### Community 471 - "mock-api.ts"
-Cohesion: 0.19
-Nodes (12): RFC-4122, ADDONS, APPOINTMENTS, BRANCH_LINKS, BRANCHES, makeApi(), MockApi, mockApiBrokenBranches (+4 more)
+### Community 471 - "peso"
+Cohesion: 0.17
+Nodes (10): SummaryRail(), CoverPanel(), InclusionsList(), ADR-0009, PackageCard(), ServiceCard(), ServiceTeaserItem(), peso() (+2 more)
 
 ### Community 472 - "Plan: M2-08 booking confirmation"
 Cohesion: 0.22
 Nodes (8): File Structure, Global Constraints, M2 Ticket 08 — Confirmation read-back `/booking/:id` — Implementation Plan, Task 1: Data layer — `getAppointment` server fn, `appointmentQueries.byId`, shared 404 seam (TDD), Task 2: The pure read-back lib — snapshot total + name joins (TDD), Task 3: `/booking/$id` route + typed-navigation convert, Task 4: CDP harness — wizard unknown-id check + e2e read-back assertions, Task 5: Docs — tick the checkbox, log the landing
+
+### Community 473 - "stub-screen.tsx"
+Cohesion: 0.20
+Nodes (6): StubScreen(), StubScreenProps, Route, Route, Badge(), badgeVariants
 
 ### Community 474 - "Plan: M2-09 confirmation email"
 Cohesion: 0.25
@@ -2405,9 +2418,9 @@ Nodes (7): CLUSTER, failUsage(), git(), isMainOnly(), loadMainOnlyPrefixes(), ma
 Cohesion: 0.25
 Nodes (7): types, exports, ./app, name, private, type, version
 
-### Community 522 - "auth.config.ts"
-Cohesion: 0.40
-Nodes (4): auth, ADR-0011, createAuth(), ADR-0011
+### Community 522 - "auth.functions.ts"
+Cohesion: 0.19
+Nodes (9): auth, ADR-0011, createAuth(), ensureSession, getSession, ADR-0011, ADR-0011, Route (+1 more)
 
 ### Community 524 - "linter"
 Cohesion: 0.33
@@ -2425,9 +2438,9 @@ Nodes (5): radius, radius, radius, $type, $value
 Cohesion: 0.60
 Nodes (5): lg, $type, $value, lg, lg
 
-### Community 529 - "tooltip.tsx"
-Cohesion: 0.40
-Nodes (3): Tooltip(), TooltipContent(), TooltipTrigger()
+### Community 529 - "admin-sidebar.tsx"
+Cohesion: 0.15
+Nodes (12): NavGroup, navGroups, NavItem, NavTo, SidebarContent(), SidebarFooter(), SidebarGroup(), SidebarGroupContent() (+4 more)
 
 ### Community 530 - "padding-y"
 Cohesion: 0.67
@@ -2437,6 +2450,10 @@ Nodes (4): padding-y, padding-y, $type, $value
 Cohesion: 0.60
 Nodes (5): sm, sm, sm, $type, $value
 
+### Community 536 - "services.tsx"
+Cohesion: 0.24
+Nodes (6): bookableBranchNames(), BRANCHES, CALAMBA, DIPOLOG, ILIGAN, ServicesPage()
+
 ### Community 540 - "/public/photos — PROTOTYPE stand-ins (#111)"
 Cohesion: 0.50
 Nodes (3): Brand assets + owner photos (NOT stand-ins), /public/photos — PROTOTYPE stand-ins (#111), Source & license
@@ -2445,17 +2462,17 @@ Nodes (3): Brand assets + owner photos (NOT stand-ins), /public/photos — PROTO
 Cohesion: 0.67
 Nodes (4): $type, $value, none, none
 
-### Community 542 - "0"
-Cohesion: 0.67
-Nodes (3): $type, $value, 0
+### Community 542 - "Global Constraints"
+Cohesion: 0.18
+Nodes (10): Global Constraints, M4 Ticket 02 — Admin Auth Server Live (/api/auth routes, per-request instances, create-staff CLI) Implementation Plan, Self-Review (recorded at planning time), Task 1: The `/api/auth/*` catch-all route — BetterAuth's handler, per request, Task 2: The session server functions — `getSession` / `ensureSession`, Task 3: The `create-staff` script + the in-repo provisioning/reset runbook, Task 4: Local dev env values (gitignored — this task has NO commit), Task 5: The live dev verification — probe, refusal, provisioning, sign-in, Postgres rows (+2 more)
 
 ### Community 543 - "16"
 Cohesion: 0.67
 Nodes (3): $type, $value, 16
 
-### Community 544 - "3"
-Cohesion: 0.67
-Nodes (3): $type, $value, 3
+### Community 544 - "FileRoutesByPath"
+Cohesion: 0.22
+Nodes (5): Route, Route, Route, Route, FileRoutesByPath
 
 ### Community 545 - "8"
 Cohesion: 0.67
@@ -2485,6 +2502,30 @@ Nodes (3): primary-foreground, $type, $value
 Cohesion: 0.67
 Nodes (3): secondary-foreground, $type, $value
 
+### Community 553 - "admin/src/routes/__root.tsx"
+Cohesion: 0.32
+Nodes (4): PostHogProvider(), PostHogProviderProps, RouterContext, Toaster()
+
+### Community 554 - "useSidebar"
+Cohesion: 0.33
+Nodes (6): Sidebar(), SidebarMenuButton(), sidebarMenuButtonVariants, SidebarRail(), SidebarTrigger(), useSidebar()
+
+### Community 555 - "admin/src/router.tsx"
+Cohesion: 0.40
+Nodes (3): Register, @tanstack/react-router, routeTree
+
+### Community 556 - "Staff provisioning & password reset (v1)"
+Cohesion: 0.40
+Nodes (4): Creating a staff user, Resetting a staff password, Staff provisioning & password reset (v1), Verifying sign-in (dev)
+
+### Community 558 - "2"
+Cohesion: 0.67
+Nodes (3): $type, $value, 2
+
+### Community 564 - "5"
+Cohesion: 0.67
+Nodes (3): $type, $value, 5
+
 ## Ambiguous Edges - Review These
 - `Shadcn` → `minimumReleaseAgeExclude: lucide-react@1.37.0`  [AMBIGUOUS]
   pnpm-workspace.yaml · relation: conceptually_related_to
@@ -2494,9 +2535,9 @@ Nodes (3): secondary-foreground, $type, $value
   docs/adr/0009-normalized-catalog-lookups.md · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **4224 isolated node(s):** `fs`, `path`, `fs`, `path`, `fs` (+4219 more)
+- **4240 isolated node(s):** `fs`, `path`, `fs`, `path`, `fs` (+4235 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **74 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **75 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -2507,11 +2548,11 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **What is the exact relationship between `Attire Junction (package_inclusion_attires)` and `Catalog Attires & Universal Privileges`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `tsdown - The Elegant Library Bundler` connect `tsdown skill overview` to `tsdown/SKILL.md`?**
-  _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **Why does `search()` connect `search` to `ui-ux-pro-max: text layout tests`, `BM25`, `.generate`, `detect_domain`, `design_system.py`, `scripts/core.py`, `validate_data.py`, `ui-ux-pro-max: stack search & freshness`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **Why does `CLI Reference` connect `tsdown: CLI reference` to `tsdown CLI: package management`, `tsdown CLI: output options`, `tsdown CLI: configuration`, `tsdown CLI: usage patterns`, `tsdown CLI: logging`, `tsdown CLI: dependencies`, `tsdown CLI: development`, `tsdown CLI: env vars`, `tsdown/SKILL.md`, `tsdown CLI: build options`, `tsdown CLI: monorepo`?**
+  _High betweenness centrality (0.002) - this node is a cross-community bridge._
+- **Why does `Shims` connect `tsdown: shims` to `tsdown/SKILL.md`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `TailwindConfigGenerator` (e.g. with `TestGeneratedConfigIsValidJs` and `TestTailwindConfigGenerator`) actually correct?**
   _`TailwindConfigGenerator` has 2 INFERRED edges - model-reasoned connections that need verification._
