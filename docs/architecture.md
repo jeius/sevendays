@@ -71,6 +71,8 @@ Package cover images and portfolio photos are uploaded through `apps/api` (which
 
 | App | Platform | Notes |
 |---|---|---|
-| `apps/landing` | Cloudflare Workers (via `@cloudflare/vite-plugin`, `wrangler deploy`) | Public, cacheable |
-| `apps/admin` | Cloudflare Workers (via `@cloudflare/vite-plugin`, `wrangler deploy`) | Auth-gated, separate deployment from landing |
-| `apps/api` | Cloudflare Workers (via Wrangler) | Bindings/secrets TODO — see `apps/api/wrangler.toml` |
+| `apps/landing` | Cloudflare Workers (via `@cloudflare/vite-plugin`), deployed by branch-keyed CI (`pnpm build`, then `wrangler deploy`) | Public, cacheable |
+| `apps/admin` | Cloudflare Workers (via `@cloudflare/vite-plugin`), deployed by branch-keyed CI (`pnpm build`, then `wrangler deploy`) | Auth-gated (staff auth arrives with M4), separate deployment from landing |
+| `apps/api` | Cloudflare Workers (via Wrangler), deployed by branch-keyed CI (`pnpm build`, then `wrangler deploy`) | Secrets set per environment via `wrangler secret put` — checklist in `docs/tech-stack.md` § Secrets Checklist; the R2 binding stays commented out until M5 (`apps/api/wrangler.toml`) |
+
+Deploys are branch-keyed CI: a push builds (`pnpm build`) and deploys (`wrangler deploy`) the Workers its branch owns, gated on the same push's CI green. The pipeline and its per-branch targets are detailed in `docs/tech-stack.md` § Continuous deploy.
