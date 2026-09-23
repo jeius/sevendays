@@ -24,4 +24,20 @@ describe('parseEnv', () => {
   it('rejects a malformed URL', () => {
     expect(() => parseEnv({ DATABASE_URL: 'not a url' })).toThrow(/postgres|URL/i);
   });
+
+  it('parses without BETTER_AUTH_SECRET (optional — the auth middleware owns the loud failure)', () => {
+    const env = parseEnv({
+      DATABASE_URL: 'postgres://u:p@host:5432/db',
+    });
+    expect(env.BETTER_AUTH_SECRET).toBeUndefined();
+  });
+
+  it('rejects an empty BETTER_AUTH_SECRET when present', () => {
+    expect(() =>
+      parseEnv({
+        DATABASE_URL: 'postgres://u:p@host:5432/db',
+        BETTER_AUTH_SECRET: '',
+      })
+    ).toThrow(/BETTER_AUTH_SECRET/);
+  });
 });

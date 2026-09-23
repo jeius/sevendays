@@ -1,4 +1,4 @@
-import { createApiClient } from '@sevendays/api-client';
+import { type ApiClient, createApiClient } from '@sevendays/api-client';
 
 // Server-only (ADR-0006): the API base URL and the client embedding it must
 // never reach a client bundle. The server functions in api.functions.ts are
@@ -38,4 +38,45 @@ if (!import.meta.env?.DEV) {
 
 export function getApiClient() {
   return createApiClient({ baseUrl: getApiUrl(), fetch: serviceBindingFetch });
+}
+
+// Session-scoped client (M4 ticket 04, ADR-0004 + ADR-0016): server fns
+// read the httpOnly session cookie from the INCOMING request server-side
+// and forward it as Authorization: Bearer over the same transport every
+// other admin→api call rides (the service-binding fetch in production, the
+// API_URL network path in dev). The browser never holds the raw token, and
+// no cookie header crosses apps — only the bearer credential does. The
+// cookie value is forwarded VERBATIM (<token>.<signature>, possibly
+// percent-encoded): the API's bearer plugin decodes and verifies the
+// signature.
+const SESSION_COOKIE_SUFFIX = 'session_token';
+
+function extractSessionToken(cookieHeader: string | null): string {
+  if (cookieHeader) {
+    for (const part of cookieHeader.split(';')) {
+      const eq = part.indexOf('=');
+      if (eq === -1) continue;
+      const name = part.slice(0, eq).trim();
+      // Suffix-match, not equality: dev `better-auth.session_token`,
+      // production `__Secure-better-auth.session_token` (session_data is a
+      // different cookie — excluded by the exact suffix).
+      if (name.endsWith(SESSION_COOKIE_SUFFIX)) {
+        return part.slice(eq + 1).trim();
+      }
+    }
+  }
+  throw new Error(
+    'No session cookie in the incoming request — the session-scoped API client cannot authenticate. The caller must run inside a signed-in request (the _shell gate guarantees it): pass getRequestHeaders().get("cookie"). No fallback by design.'
+  );
+}
+
+export function getSessionScopedApiClient(cookieHeader: string | null): ApiClient {
+  const token = extractSessionToken(cookieHeader);
+  const underlying = serviceBindingFetch ?? fetch;
+  const fetchWithBearer: typeof fetch = async (input, init) => {
+    const headers = new Headers(init?.headers);
+    headers.set('authorization', `Bearer ${token}`);
+    return underlying(input, { ...init, headers });
+  };
+  return createApiClient({ baseUrl: getApiUrl(), fetch: fetchWithBearer });
 }

@@ -1,14 +1,16 @@
 import type { Database } from '@sevendays/db';
 import { createDbClient } from '@sevendays/db';
 import type { Env } from '../env.js';
+import type { SessionData } from './auth.js';
 
 // The API's request context (ADR-0011 + candidate D): the per-request db
 // handle lives in Hono variables, set once by the acquisition middleware on
 // /api/v1 and read by every route handler. Bindings are the Zod-validated
-// Env from src/env.ts.
+// Env from src/env.ts. `session` is set ONLY by requireSession (M4 ticket
+// 04) — optional so ungated routes don't carry a lying type.
 export type ApiEnv = {
   Bindings: Env;
-  Variables: { db: Database };
+  Variables: { db: Database; session?: SessionData };
 };
 
 /**
