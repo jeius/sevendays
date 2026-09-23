@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { z } from 'zod';
+import { PackageEditorScreen } from './screens/package-editor';
+import { PackagesScreen } from './screens/packages';
 
 export const SCREEN_KEYS = [
   'packages',
@@ -88,8 +90,8 @@ export const NAV_GROUPS: { heading: string; items: NavItem[] }[] = [
 
 // Registry: every screen key maps to a component. Tasks 2–4 replace stubs.
 export const SCREENS: Record<ScreenKey, ComponentType<ScreenProps>> = {
-  packages: StubScreen,
-  'package-editor': StubScreen,
+  packages: PackagesScreen,
+  'package-editor': PackageEditorScreen,
   'studio-services': StubScreen,
   'add-ons': StubScreen,
   branches: StubScreen,
