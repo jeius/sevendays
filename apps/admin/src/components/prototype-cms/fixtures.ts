@@ -213,7 +213,7 @@ export const addons: AddonRow[] = [
   {
     id: 'addon-makeup',
     name: 'Makeup',
-    description: 'Professional makeup for the session.',
+    description: 'Professional make-up applied on-site before the shoot.',
     priceCents: 12000,
     isActive: true,
     studioServiceIds: ['ss-portraits-id'],
@@ -221,7 +221,7 @@ export const addons: AddonRow[] = [
   {
     id: 'addon-hairstyle',
     name: 'Hairstyle',
-    description: 'Styled hair for the session.',
+    description: 'Professional hairstyling on-site before the shoot.',
     priceCents: 6000,
     isActive: true,
     studioServiceIds: ['ss-portraits-id'],
