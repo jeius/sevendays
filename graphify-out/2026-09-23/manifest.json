@@ -25,7 +25,7 @@
     "semantic_hash": "2866588561e865ba99fd805d821ad7d8"
   },
   "apps/admin/package.json": {
-    "mtime": 1790078690.370751,
+    "mtime": 1790075975.2559354,
     "ast_hash": "2f9e5497c293d8109368cc84e66ab163",
     "semantic_hash": ""
   },
@@ -35,8 +35,8 @@
     "semantic_hash": "a648f14485559c8d15a9668bf875f35d"
   },
   "apps/admin/src/routeTree.gen.ts": {
-    "mtime": 1790123317.2034245,
-    "ast_hash": "6ecd8016dba567e0a9e01c033846a6a7",
+    "mtime": 1790077370.4258287,
+    "ast_hash": "4729cfd8dee1b745e4754056eb7df7f6",
     "semantic_hash": ""
   },
   "apps/admin/src/router.tsx": {
@@ -840,13 +840,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1790078690.37483,
-    "ast_hash": "57211bd0b0b6784bb95430672ad92791",
+    "mtime": 1790057886.5598059,
+    "ast_hash": "03e93c57f87d3ceabbb09a2c99a841b2",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1790078690.37483,
-    "ast_hash": "71fa2ab5b4e3cb51124dac01887c0e73",
+    "mtime": 1790057886.5641394,
+    "ast_hash": "06cf8c510e2c9f3dba0f1bdabcf15547",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2880,8 +2880,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1790079434.186094,
-    "ast_hash": "58eb42dd57c8c9aa7c07b8d2b52342cc",
+    "mtime": 1790058646.9021928,
+    "ast_hash": "71c5e378c7f097f37e9520464bd859e4",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -2960,8 +2960,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/admin-sidebar.tsx": {
-    "mtime": 1790121874.493578,
-    "ast_hash": "61bdcf3db1d7234cefbba85d01ed61ea",
+    "mtime": 1789489137.646315,
+    "ast_hash": "721224b9128a382f7bda76f577c34ef3",
     "semantic_hash": ""
   },
   "apps/admin/src/components/admin-topbar.tsx": {
@@ -3010,8 +3010,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/routes/_shell.tsx": {
-    "mtime": 1790121373.9877694,
-    "ast_hash": "1a6b2c2bddbb9eb49ad36e0d2a067256",
+    "mtime": 1789489137.650663,
+    "ast_hash": "8778d6dc0c2daec1496660287d97895e",
     "semantic_hash": ""
   },
   "packages/ui/src/components/alert-dialog.tsx": {
@@ -3310,38 +3310,23 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/auth.functions.ts": {
-    "mtime": 1790078690.37483,
+    "mtime": 1790075435.079829,
     "ast_hash": "4dd5a58c8105d7f8a8602d19a9585686",
     "semantic_hash": ""
   },
   "apps/admin/src/routes/api/auth/$.ts": {
-    "mtime": 1790078690.37483,
+    "mtime": 1790074429.9692037,
     "ast_hash": "017b2a17ca80ef92c5a8fecbeef8f182",
     "semantic_hash": ""
   },
   "docs/staff-provisioning.md": {
-    "mtime": 1790078690.37483,
+    "mtime": 1790075990.4955432,
     "ast_hash": "4eb07005121103ea14b7aafe2e61b858",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-22-119-admin-auth-server.md": {
-    "mtime": 1790078690.3789093,
+    "mtime": 1790077414.8215253,
     "ast_hash": "8987c5552f220ea7dddf7eac96a6c462",
-    "semantic_hash": ""
-  },
-  "apps/admin/src/lib/auth-client.ts": {
-    "mtime": 1790120741.8703434,
-    "ast_hash": "19772f2881a394fbc29ac8d4b7beebee",
-    "semantic_hash": ""
-  },
-  "apps/admin/src/routes/login.tsx": {
-    "mtime": 1790120746.2283173,
-    "ast_hash": "66e7b9cfe8f8e4835bdc49d248837577",
-    "semantic_hash": ""
-  },
-  "docs/superpowers/plans/2026-09-22-120-login-shell-gate.md": {
-    "mtime": 1790090262.522042,
-    "ast_hash": "dd8e3af13d71ccc026128ff13365eeb8",
     "semantic_hash": ""
   }
 }
