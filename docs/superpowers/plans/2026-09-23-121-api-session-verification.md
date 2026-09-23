@@ -173,7 +173,7 @@ needs both sides' secrets to match — ADR-0004 at test scale)."
 
 **Not here:** mounting the middleware on any route (Task 3 — the middleware is exported and unused this task, which typecheck allows); `apps/admin` anything (Task 4); touching `packages/db` (the tables exist since #118); gating `POST` or the single-get (the uuid-opacity ruling — spec § Closing the public appointments reads); any clock mocking for the expiry case (the db-update form is pinned — header recon).
 
-- [ ] **Step 1: Create the test-shaped issuer helper**
+- [✅] **Step 1: Create the test-shaped issuer helper**
 
 Create `apps/api/test/helpers/auth.ts` with exactly this content (spike-validated verbatim on 2026-09-23):
 
@@ -238,7 +238,7 @@ export async function signOutSession(databaseUrl: string, token: string) {
 }
 ```
 
-- [ ] **Step 2: Create the proof suite (the red)**
+- [✅] **Step 2: Create the proof suite (the red)**
 
 Create `apps/api/test/require-session.test.ts` with exactly this content (spike-validated verbatim; note what it deliberately does NOT contain — no real-app requests, no booking-path strings — per the audit-token ruling in the header):
 
@@ -262,7 +262,11 @@ const db = createTestDb(url);
 // requireSession + a probe route — because the gate is route-independent
 // (M5 mounts CMS routes behind it). Deliberately free of booking-path
 // strings so the v1 pick carries this file (the audit-token discipline);
-// the gated-list application tests live in the appointments suite.
+// the gated-list application tests live in the dedicated suite.
+// [Amended at execution 2026-09-23: the original word ("appointments suite")
+// tripped this plan's own audit-token fence grep — zero appointments rows,
+// comments included, enforced at Task 2 Step 5 and Task 6 Step 2 — so the
+// comment is reworded; landed verbatim in commit 94c8964.]
 const scratch = new Hono<ApiEnv>()
   .use('*', acquireDb)
   .get('/protected', requireSession, (c) => c.json({ userId: c.get('session')?.user.id ?? null }));
@@ -338,7 +342,7 @@ describe('requireSession (scratch app, real Postgres)', () => {
 });
 ```
 
-- [ ] **Step 3: Run to verify the red**
+- [✅] **Step 3: Run to verify the red**
 
 ```bash
 pnpm --filter @sevendays/api exec vitest run test/require-session.test.ts
@@ -346,7 +350,7 @@ pnpm --filter @sevendays/api exec vitest run test/require-session.test.ts
 
 Expected: FAIL at import — `Cannot find module '../src/services/auth.js'` (or its typecheck-time equivalent surfaced by vitest's transform). That unresolved import IS the red; proceed.
 
-- [ ] **Step 4: Create the service and extend the context type**
+- [✅] **Step 4: Create the service and extend the context type**
 
 Create `apps/api/src/services/auth.ts` with exactly this content (spike-validated verbatim):
 
@@ -438,7 +442,7 @@ export type ApiEnv = {
 
 (The `SessionData` import is type-only — the db.ts ↔ auth.ts cycle never exists at runtime.)
 
-- [ ] **Step 5: Run to verify green, then the gates**
+- [✅] **Step 5: Run to verify green, then the gates**
 
 ```bash
 pnpm --filter @sevendays/api exec vitest run test/require-session.test.ts
@@ -450,7 +454,7 @@ pnpm --filter @sevendays/api exec vitest run
 
 Expected: the suite = **7 passed**; typecheck green (the spike proved every inference: `$Infer.Session`, `c.req.raw.headers`, the optional `Variables.session`, `c.set`); the first grep shows `betterAuth(` ONLY inside `createVerificationAuth`'s factory body in `services/auth.ts` (no module-scope instance — ADR-0011); the second grep returns **ZERO rows** (audit-token discipline — these three files must stay bookings-string-free for the v1 pick); the full suite = **102 passed / 13 files** (95 after Task 1 + 7).
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/api/src/services/auth.ts apps/api/src/services/db.ts apps/api/test/helpers/auth.ts apps/api/test/require-session.test.ts
