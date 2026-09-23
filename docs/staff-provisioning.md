@@ -37,6 +37,19 @@ pnpm --filter @sevendays/admin create-staff --email <email> --name "<name>"
   (`minPasswordLength: 12`).
 - If users already exist, the CLI asks for confirmation before creating
   another.
+- **Role (ADR-0018):** the script hardcodes `--role admin` — the owner's
+  role, and the only one BetterAuth's `admin()` plugin answers its
+  user-management endpoints (`/api/auth/admin/*`) for. Until the dashboard
+  users page ships (M5.5), provision anyone other than the owner with a
+  trailing `--role staff`:
+
+  ```sh
+  pnpm --filter @sevendays/admin create-staff --email <email> --name "<name>" --role staff
+  ```
+
+  The trailing flag overrides the script's hardcoded one — spike-verified
+  2026-09-24 (the created row read `role: staff`). Verify the row after
+  creating: nothing validates the role vocabulary at write time.
 
 ## Resetting a staff password
 

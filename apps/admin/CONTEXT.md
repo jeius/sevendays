@@ -21,7 +21,7 @@ The appointment-management view: the list of Appointments filterable by Branch a
 _Avoid_: home, overview
 
 **Staff User**:
-A studio employee who signs in to the admin site with an email and password provisioned by the owner (`create-staff`, `docs/staff-provisioning.md`) — there is no self-serve sign-up. Carries a role (admin) for future gates.
+A studio employee who signs in to the admin site with an email and password provisioned by the owner (`create-staff`, `docs/staff-provisioning.md`) — there is no self-serve sign-up. Carries a role (ADR-0018): the owner holds `admin` — the only role BetterAuth's user-management endpoints answer to — staff hold `staff`.
 _Avoid_: member, account (for the person), customer
 
 **Session**:
