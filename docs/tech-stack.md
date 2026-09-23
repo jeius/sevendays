@@ -37,7 +37,7 @@ Deploys are branch-keyed GitHub Actions (`.github/workflows/ci.yml`), gated on C
 
 ## Auth
 
-- **BetterAuth** — planned for `apps/admin` staff login. *Not yet integrated.* When wired up, BetterAuth's own tables will be generated into `packages/db/src/schema/` (see the TODO comment in `packages/db/src/schema/index.ts`).
+- **BetterAuth 1.7.5** (`better-auth@^1.7.5`, integrated 2026-09-23 — Milestone 4) — `apps/admin` is the auth server: email+password staff login at `/login` with self-serve sign-up disabled; users are provisioned and reset by the owner CLI (`docs/staff-provisioning.md`); routes mount at `/api/auth/*` with per-request instances over `@sevendays/db` (ADR-0011). `apps/api` runs a verification-only instance (the `bearer` plugin) over the same tables — `requireSession` verifies `Authorization: Bearer` tokens and returns the uniform 401 envelope (ADR-0004); one `BETTER_AUTH_SECRET` is shared across both apps' Workers. The auth tables (user/session/account/verification + rate limit) live in `packages/db/src/schema/auth.ts`, migration 0005.
 
 ## Storage
 

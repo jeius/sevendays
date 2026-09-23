@@ -35,7 +35,7 @@
     "semantic_hash": "a648f14485559c8d15a9668bf875f35d"
   },
   "apps/admin/src/routeTree.gen.ts": {
-    "mtime": 1790125021.3860328,
+    "mtime": 1790135412.5682294,
     "ast_hash": "6ecd8016dba567e0a9e01c033846a6a7",
     "semantic_hash": ""
   },
@@ -75,7 +75,7 @@
     "semantic_hash": ""
   },
   "apps/api/src/env.ts": {
-    "mtime": 1790128154.7620435,
+    "mtime": 1790132264.3293715,
     "ast_hash": "cec3a13859a6ba7b85b321d404a1cf3b",
     "semantic_hash": ""
   },
@@ -95,7 +95,7 @@
     "semantic_hash": ""
   },
   "apps/api/src/routes/appointments.ts": {
-    "mtime": 1790130238.4617136,
+    "mtime": 1790132264.3293715,
     "ast_hash": "c21db7dd382d566cf286a4b27a67cb2f",
     "semantic_hash": ""
   },
@@ -130,7 +130,7 @@
     "semantic_hash": "a20d3d43403a7ac5bbcdfd569758de73"
   },
   "apps/api/src/services/db.ts": {
-    "mtime": 1790129087.7579987,
+    "mtime": 1790132264.3293715,
     "ast_hash": "3fb7d83030e641f118921ee15edd5ebe",
     "semantic_hash": ""
   },
@@ -155,7 +155,7 @@
     "semantic_hash": ""
   },
   "apps/api/test/appointments.test.ts": {
-    "mtime": 1790130238.5057137,
+    "mtime": 1790132264.3293715,
     "ast_hash": "bae4b70c37fe6cd442a0cb68a80527a5",
     "semantic_hash": ""
   },
@@ -710,8 +710,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1790043745.5873444,
-    "ast_hash": "c4c9a50c9c0e64fd004ee357c87802eb",
+    "mtime": 1790177454.9185786,
+    "ast_hash": "66033198e58a5d372ea2830a7c424726",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -720,9 +720,9 @@
     "semantic_hash": "044b5c7e6e392444eb6e3bf59ad68633"
   },
   "apps/admin/CONTEXT.md": {
-    "mtime": 1788076964.5960338,
-    "ast_hash": "1eec3ec0ff5a934c1a0e5583986d46c1",
-    "semantic_hash": "1eec3ec0ff5a934c1a0e5583986d46c1"
+    "mtime": 1790177454.9665785,
+    "ast_hash": "8ba190ba3e920017373c872fe55ddeef",
+    "semantic_hash": ""
   },
   "apps/admin/README.md": {
     "mtime": 1789489137.6419673,
@@ -730,8 +730,8 @@
     "semantic_hash": ""
   },
   "apps/api/CONTEXT.md": {
-    "mtime": 1788866003.3567894,
-    "ast_hash": "91f2e0212174a8f8cc4edff9f8394be4",
+    "mtime": 1790177455.0185785,
+    "ast_hash": "6a3f3a81fc04b4e8c4bbb7b6101d3309",
     "semantic_hash": ""
   },
   "apps/landing/CONTEXT.md": {
@@ -840,13 +840,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1790125021.3900318,
-    "ast_hash": "3dc5663bc18b5e8d2351d9af9dd0e1b6",
+    "mtime": 1790177475.0081742,
+    "ast_hash": "5c77649c01f718d9f4949d586a49a486",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1790125021.3900318,
-    "ast_hash": "8d2701d272701e9f0be60b73f3688f7f",
+    "mtime": 1790177430.285979,
+    "ast_hash": "53f5736592b9f696573c73d403b8bf91",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -915,8 +915,8 @@
     "semantic_hash": "5a60d3661cd014a13268dce87b7ff5a0"
   },
   "docs/tech-stack.md": {
-    "mtime": 1790035804.7623484,
-    "ast_hash": "a104d3e2151c1e39c02889c893b2fc32",
+    "mtime": 1790177474.913578,
+    "ast_hash": "822636bcab3d828d107daa83ee4ed5e1",
     "semantic_hash": ""
   },
   "packages/config/AGENTS.md": {
@@ -1230,7 +1230,7 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/api.server.ts": {
-    "mtime": 1790130802.1656244,
+    "mtime": 1790132264.3293715,
     "ast_hash": "143da823732e1c3475c8ed9db51be482",
     "semantic_hash": ""
   },
@@ -1245,7 +1245,7 @@
     "semantic_hash": ""
   },
   "apps/api/src/env.test.ts": {
-    "mtime": 1790128126.1100767,
+    "mtime": 1790132264.3293715,
     "ast_hash": "3032f86f9eff380ae0c0fc3c7ec940bc",
     "semantic_hash": ""
   },
@@ -2575,7 +2575,7 @@
     "semantic_hash": ""
   },
   "apps/api/test/helpers/env.ts": {
-    "mtime": 1790128159.7500467,
+    "mtime": 1790132264.3293715,
     "ast_hash": "471960a4df8eb25a1f39d1f46063e4a8",
     "semantic_hash": ""
   },
@@ -2880,8 +2880,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1790125651.426408,
-    "ast_hash": "c856a15c95d318ec3b8b7680623e6ccf",
+    "mtime": 1790133072.9927762,
+    "ast_hash": "3e644f4c9722c85520fd55bcc599d59b",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -3345,23 +3345,28 @@
     "semantic_hash": ""
   },
   "apps/api/src/services/auth.ts": {
-    "mtime": 1790129087.7339985,
+    "mtime": 1790132264.3293715,
     "ast_hash": "2289fd27217f212461de45af9cf23856",
     "semantic_hash": ""
   },
   "apps/api/test/helpers/auth.ts": {
-    "mtime": 1790129033.309976,
+    "mtime": 1790132264.3293715,
     "ast_hash": "2693cef0ce3f388a6f4000b72507292f",
     "semantic_hash": ""
   },
   "apps/api/test/require-session.test.ts": {
-    "mtime": 1790129243.2219276,
+    "mtime": 1790132264.3293715,
     "ast_hash": "cc7b44c8ec17bb067c3a73045a2b95e7",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-23-121-api-session-verification.md": {
-    "mtime": 1790131873.3054526,
+    "mtime": 1790132264.3333714,
     "ast_hash": "eef474cd5e0f1f8519dda2508a3dc716",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-09-23-122-m4-live-verify-closeout.md": {
+    "mtime": 1790136494.6431916,
+    "ast_hash": "0cf49b8e61c3960a72ad7870491ff1a9",
     "semantic_hash": ""
   }
 }
