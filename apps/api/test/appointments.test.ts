@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import app from '../src/index.js';
 import { createAppointment } from '../src/services/appointments.js';
 import { EMAIL_FROM } from '../src/services/confirmation-email.js';
+import { signUpSession } from './helpers/auth.js';
 import { createTestDb } from './helpers/db.js';
 import { testEnv } from './helpers/env.js';
 import type { FixtureIds } from './helpers/fixtures.js';
@@ -52,6 +53,14 @@ const MISSING_UUID = 'f0000000-0000-4000-8000-000000000000';
 // All future timestamps are now-relative; past-side tests mock the clock.
 const futureDate = (days = 5) => new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 const FUTURE_ISO = () => futureDate().toISOString();
+
+// The list is session-gated (M4 ticket 04): every list read goes through a
+// real BetterAuth session minted by the test issuer (helpers/auth.ts). The
+// session is minted per call — AFTER beforeEach's truncateAll wiped the
+// auth tables; a cached token would die with the truncate.
+const authedListHeaders = async () => ({
+  authorization: `Bearer ${(await signUpSession(url, 'list-reader@sevendays.test')).token}`,
+});
 
 beforeEach(async () => {
   await truncateAll(db);
@@ -229,7 +238,11 @@ describe('GET /api/v1/appointments', () => {
   it('returns the created appointment, newest first', async () => {
     const first = await createViaApi(payload({ customerName: 'First' }));
     const second = await createViaApi(payload({ customerName: 'Second' }));
-    const res = await app.request('/api/v1/appointments', undefined, testEnv(url));
+    const res = await app.request(
+      '/api/v1/appointments',
+      { headers: await authedListHeaders() },
+      testEnv(url)
+    );
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.map((a: { id: string }) => a.id)).toEqual([second.id, first.id]);
@@ -240,7 +253,7 @@ describe('GET /api/v1/appointments', () => {
     await createViaApi(payload({ branchId: ids.branchB }));
     const res = await app.request(
       `/api/v1/appointments?branchId=${ids.branchA}`,
-      undefined,
+      { headers: await authedListHeaders() },
       testEnv(url)
     );
     const body = await res.json();
@@ -251,7 +264,7 @@ describe('GET /api/v1/appointments', () => {
   it('returns an empty list for an unknown branch', async () => {
     const res = await app.request(
       `/api/v1/appointments?branchId=${MISSING_UUID}`,
-      undefined,
+      { headers: await authedListHeaders() },
       testEnv(url)
     );
     expect(res.status).toBe(200);
@@ -261,7 +274,7 @@ describe('GET /api/v1/appointments', () => {
   it('rejects a malformed branchId with 400', async () => {
     const res = await app.request(
       '/api/v1/appointments?branchId=not-a-uuid',
-      undefined,
+      { headers: await authedListHeaders() },
       testEnv(url)
     );
     expect(res.status).toBe(400);
@@ -280,13 +293,18 @@ describe('GET /api/v1/appointments', () => {
         bookedPriceCents: 150000,
       });
     }
-    const res = await app.request('/api/v1/appointments', undefined, testEnv(url));
+    const res = await app.request(
+      '/api/v1/appointments',
+      { headers: await authedListHeaders() },
+      testEnv(url)
+    );
     expect((await res.json()).length).toBe(200);
   });
 
-  it('serves through the api-client-free public surface (no auth yet — Known Gap)', async () => {
+  it('rejects an unauthenticated caller with the uniform 401 (M4 ticket 04)', async () => {
     const res = await app.request('/api/v1/appointments', undefined, testEnv(url));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: 'Authentication required.' });
   });
 });
 
@@ -337,13 +355,23 @@ describe('GET /api/v1/appointments/:id', () => {
     expect(body.error.length).toBeGreaterThan(0);
   });
 
+  it('stays public without a session (uuid-opacity ruling — M4 ticket 04)', async () => {
+    const created = (await createViaApi(payload())) as { id: string };
+    const res = await app.request(`/api/v1/appointments/${created.id}`, undefined, testEnv(url));
+    expect(res.status).toBe(200);
+  });
+
   it('returns the same shape as the list endpoint (single-get parity)', async () => {
     const created = (await createViaApi(payload())) as { id: string };
     const single = await (
       await app.request(`/api/v1/appointments/${created.id}`, undefined, testEnv(url))
     ).json();
     const listed = await (
-      await app.request('/api/v1/appointments', undefined, testEnv(url))
+      await app.request(
+        '/api/v1/appointments',
+        { headers: await authedListHeaders() },
+        testEnv(url)
+      )
     ).json();
     const fromList = (listed as { id: string }[]).find((a) => a.id === created.id);
     expect(fromList).toBeDefined();

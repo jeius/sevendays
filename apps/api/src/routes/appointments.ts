@@ -6,19 +6,30 @@ import {
   getAppointmentWithAddons,
   listAppointments,
 } from '../services/appointments.js';
+import { requireSession } from '../services/auth.js';
 import { scheduleConfirmationEmail } from '../services/confirmation-email.js';
 import type { ApiEnv } from '../services/db.js';
 import { badRequest, notFound } from '../services/errors.js';
 import { validatedJson, validatedParam, validatedQuery } from '../services/validator.js';
 
 // Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts.
+// The list is session-gated (M4 ticket 04 — the M2 public-PII stopgap
+// closes): requireSession runs BEFORE the query validator so an
+// unauthenticated caller gets the 401 envelope, never a 400 that would
+// leak validation detail. The single-get and POST stay public (the
+// uuid-opacity ruling / guest booking).
 export const appointments = new Hono<ApiEnv>()
-  .get('/', validatedQuery(z.object({ branchId: z.uuid().optional() })), async (c) => {
-    const { branchId } = c.req.valid('query');
-    const db = c.get('db');
-    const rows = await listAppointments(db, { branchId });
-    return c.json(rows);
-  })
+  .get(
+    '/',
+    requireSession,
+    validatedQuery(z.object({ branchId: z.uuid().optional() })),
+    async (c) => {
+      const { branchId } = c.req.valid('query');
+      const db = c.get('db');
+      const rows = await listAppointments(db, { branchId });
+      return c.json(rows);
+    }
+  )
   .get(
     '/:id',
     // z.uuid() is load-bearing (Global Constraints): an unvalidated non-uuid
