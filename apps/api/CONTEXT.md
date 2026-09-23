@@ -48,6 +48,10 @@ _Avoid_: size (unqualified), format
 The finishing applied to printed Inclusions — currently laminated or raw. Not stored per line: framed pictures are laminated, loose prints are raw.
 _Avoid_: lamination, coating
 
+**Session**:
+The auth record the API verifies on gated routes: BetterAuth's session row over the shared tables, presented as an `Authorization: Bearer` token and checked by `requireSession` (ADR-0004) — never a cookie crossing apps, never a hand-rolled token lookup.
+_Avoid_: JWT, cookie, auth context
+
 **Attire**:
 The wardrobe context a framed picture or print is shot in — stored atomically (Toga, Filipiniana, Executive, Uniform); combined contexts like Filipiniana/Executive are Inclusions linked to multiple Attire rows in catalog order.
 _Avoid_: outfit, costume, wardrobe (that is the usage Inclusion)

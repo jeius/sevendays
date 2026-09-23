@@ -11,3 +11,11 @@ _Avoid_: settings, config
 **Deactivate**:
 The catalog action of hiding a Service Package from the landing site. Deliberately not "delete" — the package stays in the data model.
 _Avoid_: delete, remove, archive
+
+**Staff User**:
+A studio employee who signs in to the admin site with an email and password provisioned by the owner (`create-staff`) — there is no self-serve sign-up. Carries a role (admin) for future gates.
+_Avoid_: member, account (for the person), customer
+
+**Session**:
+A signed-in Staff User's server-side state — the row BetterAuth writes at sign-in and the API verifies from the forwarded bearer token on gated routes (ADR-0004). Ends at sign-out or expiry (~7 days).
+_Avoid_: login (as a noun for the state), JWT, cookie (the API never sees cookies)

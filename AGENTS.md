@@ -18,7 +18,7 @@ Each app is a **separate deployment** (Cloudflare Workers for all three — `lan
 
 - The database is provisioned (Supabase) and the catalog is seeded: 3 branches, service packages with inclusions, studio services with per-branch applicability, add-on services. Branch phones are `TODO(seed)` placeholders.
 - The `appointments` tables in `packages/db` (and their schemas in `packages/types`) ship as **inert schema** — documentation of the data model. No runtime path reads or writes them; treat them as read-only reference and never wire code to them without a decision record.
-- BetterAuth is not wired in yet — no admin login exists. Don't build features that assume a logged-in admin user.
+- BetterAuth 1.7.5 is integrated (M4, closed 2026-09-23): staff email+password login at the admin; the API verifies sessions over the shared tables (ADR-0004), and v1 mounts no gated routes until M5's CMS. Staff provisioning and password resets are owner-operated (`pnpm --filter @sevendays/admin create-staff`); there is no self-serve sign-up.
 - The landing site is informational (packages, services, branches, about). The studio takes customers by phone and walk-in; every primary CTA funnels to `/branches`, where each branch card carries its phone and a `tel:` call link.
 - `apps/admin` is scaffolded (auth + CMS come later); `apps/api` exposes read-only catalog endpoints under `/api/v1`.
 
