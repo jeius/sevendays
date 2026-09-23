@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShellRouteImport } from './routes/_shell'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrototypeCmsRouteImport } from './routes/prototype-cms'
 import { Route as ShellIndexRouteImport } from './routes/_shell.index'
 import { Route as ShellAddOnsRouteImport } from './routes/_shell.add-ons'
 import { Route as ShellAppointmentsRouteImport } from './routes/_shell.appointments'
@@ -27,6 +28,11 @@ const ShellRoute = ShellRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrototypeCmsRoute = PrototypeCmsRouteImport.update({
+  id: '/prototype-cms',
+  path: '/prototype-cms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShellIndexRoute = ShellIndexRouteImport.update({
@@ -73,6 +79,7 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof ShellIndexRoute
   '/login': typeof LoginRoute
+  '/prototype-cms': typeof PrototypeCmsRoute
   '/add-ons': typeof ShellAddOnsRoute
   '/appointments': typeof ShellAppointmentsRoute
   '/branches': typeof ShellBranchesRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/prototype-cms': typeof PrototypeCmsRoute
   '/add-ons': typeof ShellAddOnsRoute
   '/appointments': typeof ShellAppointmentsRoute
   '/branches': typeof ShellBranchesRoute
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_shell': typeof ShellRouteWithChildren
   '/login': typeof LoginRoute
+  '/prototype-cms': typeof PrototypeCmsRoute
   '/_shell/add-ons': typeof ShellAddOnsRoute
   '/_shell/appointments': typeof ShellAppointmentsRoute
   '/_shell/branches': typeof ShellBranchesRoute
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/prototype-cms'
     | '/add-ons'
     | '/appointments'
     | '/branches'
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/prototype-cms'
     | '/add-ons'
     | '/appointments'
     | '/branches'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_shell'
     | '/login'
+    | '/prototype-cms'
     | '/_shell/add-ons'
     | '/_shell/appointments'
     | '/_shell/branches'
@@ -145,6 +157,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   ShellRoute: typeof ShellRouteWithChildren
   LoginRoute: typeof LoginRoute
+  PrototypeCmsRoute: typeof PrototypeCmsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prototype-cms': {
+      id: '/prototype-cms'
+      path: '/prototype-cms'
+      fullPath: '/prototype-cms'
+      preLoaderRoute: typeof PrototypeCmsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_shell/': {
@@ -248,8 +268,18 @@ const ShellRouteWithChildren = ShellRoute._addFileChildren(ShellRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   ShellRoute: ShellRouteWithChildren,
   LoginRoute: LoginRoute,
+  PrototypeCmsRoute: PrototypeCmsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
