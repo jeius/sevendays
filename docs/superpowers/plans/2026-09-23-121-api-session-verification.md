@@ -663,7 +663,7 @@ stopgap test is replaced by its inverse 401 assertion. api suite
 
 **Not here:** any caller (nothing in admin reads a gated endpoint today — the dashboard is v2; #122's authenticated probe / M5's CMS consume it); changing `getApiClient()` or `api.functions.ts`; any browser-side code (the raw token never reaches a client bundle — `api.server.ts` is server-only by its header comment and nothing imports it outside server fns); admin vitest (the standing gap — the spec's testing posture keeps this seam thin and leaves its verification to #122's live gate).
 
-- [ ] **Step 1: Append the seam**
+- [✅] **Step 1: Append the seam**
 
 In `apps/admin/src/lib/api.server.ts`, first change the import line from `import { createApiClient } from '@sevendays/api-client';` to:
 
@@ -717,7 +717,7 @@ export function getSessionScopedApiClient(cookieHeader: string | null): ApiClien
 }
 ```
 
-- [ ] **Step 2: Format, typecheck, lint, and the seam's own gates**
+- [✅] **Step 2: Format, typecheck, lint, and the seam's own gates**
 
 ```bash
 pnpm --filter @sevendays/admin fix
@@ -729,7 +729,7 @@ grep -n "getSessionScopedApiClient" apps/admin/src -r --include="*.ts" --include
 
 Expected: biome clean (it may reflow the appended block — content is the pin); typecheck green (the wrapper's `typeof fetch` shape against `CreateApiClientOptions.fetch` is the `toLoopbackFetch`-proven contract); the third grep returns nothing; the fourth shows exactly ONE hit — the definition itself (no caller, per the fence).
 
-- [ ] **Step 3: Commit**
+- [✅] **Step 3: Commit**
 
 ```bash
 git add apps/admin/src/lib/api.server.ts
