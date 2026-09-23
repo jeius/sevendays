@@ -51,7 +51,7 @@
 
 **Not here:** the middleware or factory (Task 2 — the key is dead until then, which typecheck allows); making the key required (GC ruling); touching `.dev.vars`/`.env.example` (the local value exists since #119 Task 4; the example documents it since #118); any Worker secret put (#122).
 
-- [ ] **Step 1: Write the two failing env tests**
+- [✅] **Step 1: Write the two failing env tests**
 
 In `apps/api/src/env.test.ts`, inside the existing `describe('parseEnv', …)` block, insert after the last test (`it('rejects a malformed URL', …)` — its closing is `  });` immediately before the describe's own `});` at end of file):
 
@@ -77,7 +77,7 @@ In `apps/api/src/env.test.ts`, inside the existing `describe('parseEnv', …)` b
   });
 ```
 
-- [ ] **Step 2: Run to verify they fail**
+- [✅] **Step 2: Run to verify they fail**
 
 ```bash
 cd /home/jeius/Projects/sevendays && docker compose up -d db
@@ -86,7 +86,7 @@ pnpm --filter @sevendays/api exec vitest run src/env.test.ts
 
 Expected: **exactly 1 failing** — the empty-string rejection. Pre-change, zod's object parse strips the unknown `BETTER_AUTH_SECRET` key entirely, so `''` parses without throwing and `toThrow` never fires. (The absent-key test PASSES both pre- and post-change by design — it asserts the parsed output `undefined`, the optional-key contract itself; the empty-string case is the behavior the schema change creates.) If BOTH pass pre-change, STOP and report — the schema already changed somewhere out-of-plan.
 
-- [ ] **Step 3: Extend the schema and the header comment**
+- [✅] **Step 3: Extend the schema and the header comment**
 
 In `apps/api/src/env.ts`, replace the comment block + schema (the text from `// instead of surfacing` through the closing `});` of `envSchema`) with:
 
@@ -109,7 +109,7 @@ export const envSchema = z.object({
 });
 ```
 
-- [ ] **Step 4: Extend the test-env helper**
+- [✅] **Step 4: Extend the test-env helper**
 
 Replace the whole content of `apps/api/test/helpers/env.ts` with:
 
@@ -135,16 +135,16 @@ export function testEnv(databaseUrl: string) {
 }
 ```
 
-- [ ] **Step 5: Run to verify green, then the full-suite no-regression check**
+- [✅] **Step 5: Run to verify green, then the full-suite no-regression check**
 
 ```bash
 pnpm --filter @sevendays/api exec vitest run src/env.test.ts
 pnpm --filter @sevendays/api exec vitest run
 ```
 
-Expected: `src/env.test.ts` = 11 passed (9 existing + 2 new); the full suite = **93 passed / 12 files** — unchanged from baseline (the optional key breaks no existing binding; `testEnv`'s new key breaks no parse).
+Expected: `src/env.test.ts` = 11 passed (9 existing + 2 new); the full suite = **95 passed / 12 files** (93 baseline + the 2 new env tests — the optional key breaks no existing binding; `testEnv`'s new key breaks no parse). [Amended at execution 2026-09-23: this line originally pinned 93/12 "unchanged", contradicting the plan's own Self-Review arithmetic (93 → 95 → 102 → 103); controller ruled 95 canonical, Task 1 landed at 95/12.]
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/api/src/env.ts apps/api/src/env.test.ts apps/api/test/helpers/env.ts
