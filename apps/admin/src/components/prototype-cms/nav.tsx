@@ -19,10 +19,12 @@ import type { ComponentType } from 'react';
 import { z } from 'zod';
 import { AddOnsScreen } from './screens/add-ons';
 import { BranchesScreen } from './screens/branches';
+import { GalleryScreen } from './screens/gallery';
 import { LookupsScreen } from './screens/lookups';
 import { PackageEditorScreen } from './screens/package-editor';
 import { PackagesScreen } from './screens/packages';
 import { StudioServicesScreen } from './screens/studio-services';
+import { TestimonialsScreen } from './screens/testimonials';
 
 export const SCREEN_KEYS = [
   'packages',
@@ -100,10 +102,6 @@ export const SCREENS: Record<ScreenKey, ComponentType<ScreenProps>> = {
   'add-ons': AddOnsScreen,
   branches: BranchesScreen,
   lookups: LookupsScreen,
-  gallery: StubScreen,
-  testimonials: StubScreen,
+  gallery: GalleryScreen,
+  testimonials: TestimonialsScreen,
 };
-
-function StubScreen({ variant: _variant }: ScreenProps) {
-  return <p className='text-muted-foreground text-sm'>Composition lands in a later task.</p>;
-}
