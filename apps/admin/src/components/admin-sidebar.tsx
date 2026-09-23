@@ -2,8 +2,9 @@
 // grouped nav (#59 ruling: Overview / Catalog / Studio), collapsing to the
 // variant C icon-rail posture (tooltips + group dividers) via the top bar's
 // trigger. Brand = wordmark + primary only (the tool-neutral mapping);
-// the user card is placeholder data until M4 auth.
+// the user card renders the gate's session identity (#120).
 
+import { Button } from '@sevendays/ui/components/button';
 import { Separator } from '@sevendays/ui/components/separator';
 import {
   Sidebar,
@@ -18,17 +19,19 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@sevendays/ui/components/sidebar';
-import { Link, useMatchRoute } from '@tanstack/react-router';
+import { Link, useMatchRoute, useNavigate } from '@tanstack/react-router';
 import type { LucideIcon } from 'lucide-react';
 import {
   CalendarDays,
   LayoutDashboard,
+  LogOut,
   MapPin,
   Package,
   PlusCircle,
   Settings,
   Wrench,
 } from 'lucide-react';
+import { authClient } from '#/lib/auth-client';
 
 type NavTo =
   | '/'
@@ -48,6 +51,20 @@ interface NavItem {
 interface NavGroup {
   heading: string;
   items: NavItem[];
+}
+
+interface AdminSidebarProps {
+  user: { name: string; email: string };
+}
+
+// Initials for the avatar chip: first letters of the first two name words.
+function initials(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase() ?? '')
+    .join('');
 }
 
 // The ruled taxonomy (#59), icons carried from the prototype unchanged.
@@ -76,7 +93,18 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ user }: AdminSidebarProps) {
+  const navigate = useNavigate();
+
+  // Sign-out (M4 spec § Login UI + shell gate): revoke the session through
+  // BetterAuth's own endpoint (the row dies server-side), then land on
+  // /login — arriving signed-out at the shell would bounce there anyway;
+  // this makes the revocation visible and immediate.
+  const onSignOut = async () => {
+    await authClient.signOut();
+    await navigate({ to: '/login' });
+  };
+
   const matchRoute = useMatchRoute();
   const { state } = useSidebar();
   // Group dividers belong to the icon-rail posture only (#59 variant C);
@@ -128,15 +156,26 @@ export function AdminSidebar() {
         ))}
       </SidebarContent>
       <SidebarFooter>
-        {/* Placeholder identity until M4 auth — the data swaps, the shell stays. */}
-        <div className='flex items-center gap-3 px-2 py-1.5'>
-          <span className='bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-full text-xs font-semibold'>
-            SO
+        {/* Identity from the gate's session fetch; sign-out inline (the
+            owner-ruled Option 2: one click, no menu). In the collapsed icon
+            rail the row becomes a column — avatar above the logout button. */}
+        <div className='flex items-center gap-3 px-2 py-1.5 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 group-data-[collapsible=icon]:px-0'>
+          <span className='bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold'>
+            {initials(user.name)}
           </span>
-          <div className='group-data-[collapsible=icon]:hidden'>
-            <p className='text-sm leading-tight font-medium'>Studio Owner</p>
-            <p className='text-sidebar-foreground/60 text-xs'>Owner</p>
+          <div className='min-w-0 flex-1 group-data-[collapsible=icon]:hidden'>
+            <p className='truncate text-sm leading-tight font-medium'>{user.name}</p>
+            <p className='text-sidebar-foreground/60 truncate text-xs'>{user.email}</p>
           </div>
+          <Button
+            variant='ghost'
+            size='icon'
+            aria-label='Sign out'
+            className='text-sidebar-foreground/60 hover:text-destructive size-8 shrink-0'
+            onClick={() => void onSignOut()}
+          >
+            <LogOut aria-hidden='true' />
+          </Button>
         </div>
       </SidebarFooter>
     </Sidebar>
