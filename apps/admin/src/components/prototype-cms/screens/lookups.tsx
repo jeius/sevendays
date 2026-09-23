@@ -99,7 +99,7 @@ export function LookupsScreen({ search }: ScreenProps) {
                   <TableCell className='font-mono'>{row.code}</TableCell>
                   {/* The 8R row's long seed description wraps visibly — real content. */}
                   <TableCell>
-                    <p className='max-w-xl text-sm'>{row.description}</p>
+                    <p className='max-w-xl text-sm whitespace-normal'>{row.description}</p>
                   </TableCell>
                   <TableCell>
                     <StatusBadge isActive={row.isActive} />
