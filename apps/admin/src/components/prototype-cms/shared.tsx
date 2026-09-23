@@ -12,6 +12,23 @@ import {
   AlertDialogTitle,
 } from '@sevendays/ui/components/alert-dialog';
 import { Badge } from '@sevendays/ui/components/badge';
+import { Button } from '@sevendays/ui/components/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@sevendays/ui/components/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@sevendays/ui/components/sheet';
 import type { ReactNode } from 'react';
 
 /** Peso format pinned to the landing precedent (test-pinned there as ₱1,100.00). */
@@ -88,5 +105,65 @@ export function EmptyState({ line, children }: { line: string; children?: ReactN
       <p className='text-muted-foreground text-sm'>{line}</p>
       {children ? <div className='mt-4'>{children}</div> : null}
     </div>
+  );
+}
+
+/**
+ * The light-entity editor shell: entity-name title, the screen's fields, and
+ * Save changes / Cancel. Identical content in both chromes — `chrome` is the
+ * V1 axis (Dialog vs Sheet) the owner rules on via the add-ons screen.
+ */
+export function LightEntityEditor({
+  title,
+  open,
+  onOpenChange,
+  chrome = 'dialog',
+  children,
+}: {
+  title: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  chrome?: 'dialog' | 'sheet';
+  children: ReactNode;
+}) {
+  if (chrome === 'sheet') {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side='right'>
+          <SheetHeader>
+            <SheetTitle>{title}</SheetTitle>
+            <SheetDescription>Prototype: changes stay on this page.</SheetDescription>
+          </SheetHeader>
+          <div className='flex-1 space-y-5 overflow-y-auto px-6 pb-6'>{children}</div>
+          <SheetFooter>
+            <Button variant='outline' type='button' onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type='button' onClick={() => onOpenChange(false)}>
+              Save changes
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>Prototype: changes stay on this page.</DialogDescription>
+        </DialogHeader>
+        <div className='space-y-5'>{children}</div>
+        <DialogFooter>
+          <Button variant='outline' type='button' onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button type='button' onClick={() => onOpenChange(false)}>
+            Save changes
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

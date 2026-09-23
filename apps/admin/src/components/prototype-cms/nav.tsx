@@ -17,8 +17,12 @@ import {
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { z } from 'zod';
+import { AddOnsScreen } from './screens/add-ons';
+import { BranchesScreen } from './screens/branches';
+import { LookupsScreen } from './screens/lookups';
 import { PackageEditorScreen } from './screens/package-editor';
 import { PackagesScreen } from './screens/packages';
+import { StudioServicesScreen } from './screens/studio-services';
 
 export const SCREEN_KEYS = [
   'packages',
@@ -92,10 +96,10 @@ export const NAV_GROUPS: { heading: string; items: NavItem[] }[] = [
 export const SCREENS: Record<ScreenKey, ComponentType<ScreenProps>> = {
   packages: PackagesScreen,
   'package-editor': PackageEditorScreen,
-  'studio-services': StubScreen,
-  'add-ons': StubScreen,
-  branches: StubScreen,
-  lookups: StubScreen,
+  'studio-services': StudioServicesScreen,
+  'add-ons': AddOnsScreen,
+  branches: BranchesScreen,
+  lookups: LookupsScreen,
   gallery: StubScreen,
   testimonials: StubScreen,
 };
