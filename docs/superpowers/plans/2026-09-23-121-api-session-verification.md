@@ -486,7 +486,7 @@ minted through auth.handler and harvested from set-auth-token."
 
 **Not here:** any change to the single-get or POST routes (the uuid-opacity ruling + guest booking — spec § Closing the public appointments reads); moving the real-app gating assertions into `require-session.test.ts` (they live HERE — this file is main-only at pick time by design); the admin seam (Task 4); landing's read-back (verified unchanged by recon — landing calls only `get`/`create`).
 
-- [ ] **Step 1: Gate the list route**
+- [✅] **Step 1: Gate the list route**
 
 In `apps/api/src/routes/appointments.ts`, replace the imports + chain head (the text from `import type { ApiEnv }` through the end of the `.get('/', …)` line) with:
 
@@ -506,7 +506,7 @@ export const appointments = new Hono<ApiEnv>()
   .get('/', requireSession, validatedQuery(z.object({ branchId: z.uuid().optional() })), async (c) => {
 ```
 
-- [ ] **Step 2: Run the appointments suite to make the blast radius visible (the red)**
+- [✅] **Step 2: Run the appointments suite to make the blast radius visible (the red)**
 
 ```bash
 pnpm --filter @sevendays/api exec vitest run test/appointments.test.ts
@@ -514,7 +514,7 @@ pnpm --filter @sevendays/api exec vitest run test/appointments.test.ts
 
 Expected: **exactly 7 failing**, all in `GET /api/v1/appointments` + the parity test — 'returns the created appointment, newest first', 'filters by branch', 'returns an empty list for an unknown branch', 'rejects a malformed branchId with 400', 'caps the list at 200', 'serves through the api-client-free public surface (no auth yet — Known Gap)', 'returns the same shape as the list endpoint (single-get parity)' — each now receiving `{"error":"Authentication required."}` / 401 instead of a list. Every POST test and every other single-get test stays green (the stays-public halves, proven by the suite itself). If MORE than 7 fail, STOP and reconcile — something outside this plan's prediction moved.
 
-- [ ] **Step 3: Fix the blast radius — import, helper, seven sites**
+- [✅] **Step 3: Fix the blast radius — import, helper, seven sites**
 
 In `apps/api/test/appointments.test.ts`:
 
@@ -594,7 +594,7 @@ with:
     ).json();
 ```
 
-- [ ] **Step 4: Replace the Known-Gap test (its assertion is now false) and add the uuid-opacity proof**
+- [✅] **Step 4: Replace the Known-Gap test (its assertion is now false) and add the uuid-opacity proof**
 
 **4a.** Replace the whole test:
 
@@ -627,7 +627,7 @@ with:
   });
 ```
 
-- [ ] **Step 5: Run to verify green, then the full suite**
+- [✅] **Step 5: Run to verify green, then the full suite**
 
 ```bash
 pnpm --filter @sevendays/api exec vitest run test/appointments.test.ts
@@ -637,7 +637,7 @@ pnpm --filter @sevendays/api typecheck
 
 Expected: `appointments.test.ts` = **41 passed** (40 baseline − 1 replaced + 1 replaced-with + 1 new — net +1); the full suite = **103 passed / 13 files** (the GC-pinned count); typecheck green (the middleware-in-chain inference was spike-proven, and the api build + api-client drift check follows at the Task 5 gate).
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/api/src/routes/appointments.ts apps/api/test/appointments.test.ts
