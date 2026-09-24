@@ -411,7 +411,7 @@ export const addons: AddonRow[] = [
   {
     id: 'addon-makeup',
     name: 'Makeup',
-    description: 'Professional makeup for the session.',
+    description: 'Professional make-up applied on-site before the shoot.',
     priceCents: 12000,
     isActive: true,
     studioServiceIds: ['ss-portraits-id'],
@@ -419,7 +419,7 @@ export const addons: AddonRow[] = [
   {
     id: 'addon-hairstyle',
     name: 'Hairstyle',
-    description: 'Styled hair for the session.',
+    description: 'Professional hairstyling on-site before the shoot.',
     priceCents: 6000,
     isActive: true,
     studioServiceIds: ['ss-portraits-id'],
@@ -899,7 +899,9 @@ Walk the owner through the 14 frames in inventory order (packages → editor (a/
 4. **V3:** branch matrix — checkbox columns (a) or branch cards (b)?
 5. **IA:** Gallery + Testimonials in Catalog, Lookups in Studio — right groups? Lookups one screen or two nav items?
 6. **States:** deactivated badge + 60% dim; no badge on active — confirmed?
-7. **Copy:** the pinned sublines/empty-states/confirm wording — confirmed verbatim?
+7. **Copy:** the pinned sublines/empty-states/confirm wording — confirmed verbatim? Plus **ratify the four unplanned strings** the reviews surfaced ("No framed pictures in this frame yet.", "No studio services yet." / "No add-ons yet." / "No branches yet.", "Deactivated sizes stay on existing packages but disappear from new pickers.").
+8. **Mobile table posture** (user-ordered addition, 2026-09-25 — the ui-ux-pro-max query pass found no `overflow-x-auto` wrapper on any prototype table): at narrow widths — squeeze as-is, `overflow-x-auto` scroll wrapper (a one-class fix; the two mobile frames get re-shot on this pick), or card layout on mobile (build-ticket work)?
+9. **Bulk operations** (user-ordered addition, 2026-09-25 — from the library's bulk-actions pattern): keep per-row actions only (matches the #130 write model — no bulk endpoints), or should the spec plan a checkbox column + bulk action bar (e.g. bulk deactivate) as a build-ticket note? (Sort/filter/pagination can ride this ruling via the shadcn DataTable pattern if wanted.)
 
 - [ ] **Step 2: Record the verdicts on #131 (handover comment)**
 
@@ -942,5 +944,5 @@ Only once the verdicts are in-hand (same session, per the HITL contract):
 - **No placeholders:** the four scaffold files are verbatim; every owner-visible string is pinned verbatim in Global Constraints and quoted once per use site; screen bodies are pinned as element-by-element composition specs (structure, primitives, states, variants) with layout micro-decisions explicitly delegated to the loaded skill set — that delegation is stated, not implied, and is the prototype skill's contracted role.
 - **Gates:** fresh-worktree order, `pnpm check` at a pinned count with reconcile-first wording, per-task build + curl greps, the frame read-back step, push-without-PR. No test files → the count must not move.
 - **Cross-task names:** `ScreenProps { variant, search }` (Task 1) matches every screen's signature (Tasks 2–4); `peso`/`PageHeader`/`StatusBadge`/`DeactivateConfirm`/`EmptyState` produced in Task 2 Step 1 are consumed under the same names in Tasks 3–4; `search.edit`/`search.confirm` defined once (Task 3 Step 1, applies to all screens) and used by the Task 5 frame URLs; fixture ids used by frame URLs (`ss-tarpaulin`, `addon-makeup`, `addon-hairstyle`, `gp-2`, `tm-1`) all exist in `fixtures.ts`.
-- **Counted claims:** 8 screens × verdicts + 3 axes + IA + states + copy = the 7-item Task 6 checklist; 14 frame rows in Task 5 (12 desktop + 2 mobile) — matches the file list and the Task 6 presentation order.
+- **Counted claims:** 8 screens × verdicts + 3 axes + IA + states + copy + mobile-table posture + bulk operations = the 9-item Task 6 checklist (7 pinned at authoring + 2 user-ordered additions, 2026-09-25); 14 frame rows in Task 5 (12 desktop + 2 mobile) — matches the file list and the Task 6 presentation order.
 
