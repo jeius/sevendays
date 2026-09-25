@@ -1,6 +1,8 @@
 import { Hono } from 'hono';
 import { requireSession } from '../services/auth.js';
 import type { ApiEnv } from '../services/db.js';
+import { adminAddonServices } from './admin-addon-services.js';
+import { adminAttires } from './admin-attires.js';
 import { adminBranches } from './admin-branches.js';
 import { adminMedia } from './admin-media.js';
 import { adminPrintSizes } from './admin-print-sizes.js';
@@ -18,4 +20,6 @@ export const admin = new Hono<ApiEnv>()
   .route('/media', adminMedia)
   .route('/branches', adminBranches)
   .route('/print-sizes', adminPrintSizes)
-  .route('/gallery-photos', galleryPhotos);
+  .route('/gallery-photos', galleryPhotos)
+  .route('/attires', adminAttires)
+  .route('/addon-services', adminAddonServices);

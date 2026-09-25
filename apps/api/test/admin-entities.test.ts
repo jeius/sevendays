@@ -1,4 +1,4 @@
-import { branches, printSizes } from '@sevendays/db';
+import { attires, branches, printSizes } from '@sevendays/db';
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
 import { signUpSession } from './helpers/auth.js';
@@ -275,6 +275,198 @@ describe('print sizes admin CRUD', () => {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ code: null }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: 'Authentication required.' });
+  });
+});
+
+describe('attires admin CRUD', () => {
+  it('GET / lists ALL rows including a deactivated one', async () => {
+    await db.insert(attires).values({ name: 'Barong', isActive: false });
+    const { token } = await signUpSession(url, 'admin-attires-list@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/attires',
+      { headers: bearer(token) },
+      testEnv(url)
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { name: string; isActive: boolean }[];
+    expect(body.map((a) => a.name)).toContain('Barong');
+    expect(body.find((a) => a.name === 'Barong')?.isActive).toBe(false);
+  });
+
+  it('POST → 201 canonical read', async () => {
+    const { token } = await signUpSession(url, 'admin-attires-post@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/attires',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({ name: 'Americana' }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { id: string; name: string; isActive: boolean };
+    expect(body.name).toBe('Americana');
+    expect(body.isActive).toBe(true);
+  });
+
+  it('POST duplicate name → 400 with the name field detail', async () => {
+    const { token } = await signUpSession(url, 'admin-attires-dup@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/attires',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({ name: 'Toga' }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { details: { path: string[]; message: string }[] };
+    expect(body.details).toEqual([{ path: ['name'], message: 'already in use' }]);
+  });
+
+  it('PUT flips isActive → 200', async () => {
+    const { token } = await signUpSession(url, 'admin-attires-put@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/attires/${ids.attireToga}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({ name: 'Toga', isActive: false }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { isActive: boolean }).isActive).toBe(false);
+  });
+
+  it('GET /:id unknown → the per-entity 404', async () => {
+    const { token } = await signUpSession(url, 'admin-attires-404@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/attires/00000000-0000-4000-8000-000000000000',
+      { headers: bearer(token) },
+      testEnv(url)
+    );
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: 'Attire not found.' });
+  });
+
+  it('anonymous POST with a validation-bait body → the 401 envelope BEFORE validation', async () => {
+    const res = await app.request(
+      '/api/v1/admin/attires',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name: 42 }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: 'Authentication required.' });
+  });
+});
+
+describe('add-on services admin CRUD', () => {
+  it('GET / lists ALL rows including a deactivated one', async () => {
+    const { token } = await signUpSession(url, 'admin-addons-list@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/addon-services',
+      { headers: bearer(token) },
+      testEnv(url)
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { name: string; isActive: boolean }[];
+    expect(body.map((s) => s.name)).toContain('Retired Add-on');
+    expect(body.find((s) => s.name === 'Retired Add-on')?.isActive).toBe(false);
+  });
+
+  it('POST → 201 canonical read', async () => {
+    const { token } = await signUpSession(url, 'admin-addons-post@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/addon-services',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Props Styling',
+          description: 'On-set props',
+          priceCents: 8000,
+        }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as {
+      id: string;
+      name: string;
+      priceCents: number;
+      isActive: boolean;
+    };
+    expect(body.name).toBe('Props Styling');
+    expect(body.priceCents).toBe(8000);
+    expect(body.isActive).toBe(true);
+  });
+
+  it('POST duplicate name → 400 with the name field detail', async () => {
+    const { token } = await signUpSession(url, 'admin-addons-dup@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/addon-services',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({ name: 'Makeup', description: 'x', priceCents: 1 }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { details: { path: string[]; message: string }[] };
+    expect(body.details).toEqual([{ path: ['name'], message: 'already in use' }]);
+  });
+
+  it('PUT flips isActive → 200', async () => {
+    const { token } = await signUpSession(url, 'admin-addons-put@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/addon-services/${ids.addonMakeup}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Makeup',
+          description: 'On-site makeup service',
+          priceCents: 12000,
+          isActive: false,
+        }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { isActive: boolean }).isActive).toBe(false);
+  });
+
+  it('GET /:id unknown → the per-entity 404', async () => {
+    const { token } = await signUpSession(url, 'admin-addons-404@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/addon-services/00000000-0000-4000-8000-000000000000',
+      { headers: bearer(token) },
+      testEnv(url)
+    );
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: 'Add-on Service not found.' });
+  });
+
+  it('anonymous POST with a validation-bait body → the 401 envelope BEFORE validation', async () => {
+    const res = await app.request(
+      '/api/v1/admin/addon-services',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ priceCents: 'free' }),
       },
       testEnv(url)
     );
