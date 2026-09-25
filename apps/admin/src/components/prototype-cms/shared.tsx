@@ -34,6 +34,16 @@
 // ExpandPanel's cell carries the row's border-b at its end. Collapsed
 // markup is byte-identical to round 5b.
 //
+// Round 7 (K1): the Edit Sheets' entrance moves to the KEYFRAME channel.
+// The controller's runtime probe established Base UI 1.8.0 inserts and
+// cleans `data-starting-style` within a single paint, so every
+// transition-channel slide — the Sheet primitive's own 2.5rem classes AND
+// T14's transform chain — can never fire. Keyframes run on insertion (which
+// is why DeactivateConfirm always animated): LightEntityEditor now carries
+// data-open:animate-in / data-closed:animate-out keyframe classes picked by
+// the already-computed isMobile — right edge on desktop, bottom edge on
+// mobile. DeactivateConfirm is untouched (already keyframe-driven).
+//
 // G1 radius note (spec): every card in this prototype renders one radius
 // step down (rounded-xl → rounded-lg) via className overrides at the usage
 // sites — packages/ui is untouched. If the owner keeps this, the step-down
@@ -383,21 +393,29 @@ export function EmptyState({ line, children }: { line: string; children?: ReactN
  * `chrome` defaults to 'sheet' and no screen passes it anymore.
  *
  * Round 5b (C1 extended): on mobile (<768px, the useIsMobile breakpoint) the
- * sheet docks to the bottom edge like the dialogs — the primitive's
- * data-[side=bottom] slide-up transition handles the animation natively.
- * Desktop keeps the right-side sheet byte-identical (max-md: class only).
- * The primitive's bottom side is h-auto (unbounded), so the usage-site adds
- * max-md:max-h-[85dvh] — that bounds the flex column and lets the body's
- * flex-1 overflow-y-auto actually scroll.
+ * sheet docks to the bottom edge like the dialogs — useIsMobile drives the
+ * side prop. Desktop keeps the right-side sheet. The primitive's bottom side
+ * is h-auto (unbounded), so the usage-site adds max-md:max-h-[85dvh] — that
+ * bounds the flex column and lets the body's flex-1 overflow-y-auto actually
+ * scroll.
  *
- * Round 6 (A1): the owner saw no entrance on mobile. The primitive's
- * data-[side=bottom] starting/ending style is only translate-y-[2.5rem] —
- * too subtle at 200ms — so the usage site composes a full-height slide on
- * the `transform` property (translateY(100%)) keyed on the same
- * data-starting-style/data-ending-style attributes. `transform` (usage) and
- * `translate` (primitive) are separate CSS properties, so the offsets sum
- * during the starting frame instead of fighting the cascade — no `!`
- * needed. duration-300 + ease-out scope to the bottom side below md.
+ * Round 7 (K1): entrance + exit ride the KEYFRAME channel (tw-animate-css).
+ * The controller's runtime probe established Base UI 1.8.0 inserts and cleans
+ * `data-starting-style` within a single paint, so transition-channel slides —
+ * the primitive's own 2.5rem classes AND T14's composed transform chain — can
+ * never fire; keyframes run on insertion, which is why DeactivateConfirm
+ * always animated. The usage site picks the keyframe classes from the
+ * already-computed isMobile: desktop (side right) slides in from/out to the
+ * right edge, mobile (side bottom) from/to the bottom edge — animate-in/out +
+ * fade-in-0 / fade-out-0 + bare slide-in-from-… / slide-out-to-… (bare = 100%
+ * in tw-animate-css 1.4.0, verified against the installed dist), 300ms.
+ * duration-300 feeds the animation's duration (tw-animate reads
+ * var(--tw-duration)) and beats the primitive's duration-200 through cn().
+ * K2 note: Base UI's unmount gate is useAnimationsFinished → getAnimations(),
+ * which nominally sees CSSAnimations, but at runtime the exit still cuts —
+ * the popup unmounts within one frame of close on BOTH the sheet and the
+ * DeactivateConfirm reference (exit-cut predates this change). The entrance
+ * is the deliverable.
  */
 export function LightEntityEditor({
   title,
@@ -418,7 +436,12 @@ export function LightEntityEditor({
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           side={isMobile ? 'bottom' : 'right'}
-          className='max-md:max-h-[85dvh] max-md:data-[side=bottom]:data-[starting-style]:[transform:translateY(100%)] max-md:data-[side=bottom]:data-[ending-style]:[transform:translateY(100%)] max-md:data-[side=bottom]:duration-300 max-md:data-[side=bottom]:ease-out'
+          className={cn(
+            'max-md:max-h-[85dvh]',
+            isMobile
+              ? 'data-open:animate-in data-open:fade-in-0 data-open:slide-in-from-bottom data-closed:animate-out data-closed:fade-out-0 data-closed:slide-out-to-bottom duration-300'
+              : 'data-open:animate-in data-open:fade-in-0 data-open:slide-in-from-right data-closed:animate-out data-closed:fade-out-0 data-closed:slide-out-to-right duration-300'
+          )}
         >
           <SheetHeader>
             <SheetTitle>{title}</SheetTitle>
