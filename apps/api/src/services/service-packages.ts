@@ -25,8 +25,11 @@ type JunctionRow = { inclusionId: string; id: string; name: string };
  * junctions by created_at + id, frames by frameNumber — the position
  * columns exist since M5 #135 but become the read keys only when #138
  * switches the assembly); assembly never re-sorts (groupChildren contract).
+ * Exported for #137's admin reads: the admin assembles the FULL
+ * composition (no activity filter) through this same stitch — callers own
+ * the ordering, so the admin passes (position, id)-ordered rows.
  */
-function assemblePackageRead(
+export function assemblePackageRead(
   packageRows: (typeof servicePackages.$inferSelect)[],
   inclusionRows: (typeof packageInclusions.$inferSelect)[],
   junctionRows: JunctionRow[],
