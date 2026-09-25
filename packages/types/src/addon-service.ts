@@ -21,3 +21,8 @@ export const createAddonServiceSchema = addonServiceSchema.omit({
 });
 
 export type CreateAddonServiceInput = z.infer<typeof createAddonServiceSchema>;
+
+// Full-object PUT (M5 § Mutation shapes): update is the same client field set.
+export const updateAddonServiceSchema = createAddonServiceSchema;
+
+export type UpdateAddonServiceInput = CreateAddonServiceInput;

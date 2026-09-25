@@ -8,6 +8,9 @@ export const printSizeSchema = z.object({
   // in docs/catalog.md) is recorded here for client confirmation at seed
   // review — deliberately not resolved by code.
   description: z.string().min(1),
+  // Deactivation (M5): a deactivated print size hides its referencing
+  // inclusions from public reads (the trim rule, #138).
+  isActive: z.boolean().default(true),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
@@ -21,3 +24,8 @@ export const createPrintSizeSchema = printSizeSchema.omit({
 });
 
 export type CreatePrintSizeInput = z.infer<typeof createPrintSizeSchema>;
+
+// Full-object PUT (M5 § Mutation shapes): update is the same client field set.
+export const updatePrintSizeSchema = createPrintSizeSchema;
+
+export type UpdatePrintSizeInput = CreatePrintSizeInput;

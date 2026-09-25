@@ -43,6 +43,7 @@ describe('buildInclusionRowValues', () => {
         printSizeId: 'ps-11x14',
         frameId: 'frame-1',
         description: null,
+        position: 1,
       },
     ]);
   });
@@ -61,6 +62,7 @@ describe('buildInclusionRowValues', () => {
         printSizeId: 'ps-2r',
         frameId: null,
         description: null,
+        position: 1,
       },
     ]);
   });
@@ -81,6 +83,7 @@ describe('buildInclusionRowValues', () => {
         printSizeId: null,
         frameId: null,
         description: 'Usage of Toga and Hood',
+        position: 1,
       },
     ]);
   });
@@ -104,7 +107,26 @@ describe('buildInclusionRowValues', () => {
     expect(rows.map((r) => r.kind)).toEqual(['print', 'privilege', 'framed_picture']);
   });
 
-  it('sets only the six shape fields — id/createdAt/updatedAt stay DB defaults', () => {
+  it('numbers positions 1..N in entry order (M5: array order is the position)', () => {
+    const rows = buildInclusionRowValues({
+      servicePackageId: 'pkg-1',
+      entries: [
+        { kind: 'print', quantity: 2, printSizeCode: '2R', attireNames: ['Toga'] },
+        {
+          kind: 'framed_picture',
+          quantity: 1,
+          printSizeCode: '11x14',
+          attireNames: ['Toga'],
+          frameId: 'frame-1',
+        },
+        { kind: 'privilege', description: 'High Resolution soft copies', attireNames: [] },
+      ],
+      printSizeId,
+    });
+    expect(rows.map((r) => r.position)).toEqual([1, 2, 3]);
+  });
+
+  it('sets only the seven shape fields — id/createdAt/updatedAt stay DB defaults', () => {
     const rows = buildInclusionRowValues({
       servicePackageId: 'pkg-1',
       entries: [{ kind: 'print', quantity: 1, printSizeCode: '2R', attireNames: [] }],
@@ -116,6 +138,7 @@ describe('buildInclusionRowValues', () => {
       'description',
       'frameId',
       'kind',
+      'position',
       'printSizeId',
       'quantity',
       'servicePackageId',
@@ -166,8 +189,8 @@ describe('buildJunctionPairs', () => {
       attireId,
     });
     expect(pairs).toEqual([
-      { inclusionId: 'inc-1', attireId: 'att-fil' },
-      { inclusionId: 'inc-1', attireId: 'att-exec' },
+      { inclusionId: 'inc-1', attireId: 'att-fil', position: 1 },
+      { inclusionId: 'inc-1', attireId: 'att-exec', position: 2 },
     ]);
   });
 
@@ -188,10 +211,28 @@ describe('buildJunctionPairs', () => {
       attireId: new Map([...attireId, ['Uniform', 'att-uniform']]),
     });
     expect(pairs).toEqual([
-      { inclusionId: 'inc-a', attireId: 'att-toga' },
-      { inclusionId: 'inc-c', attireId: 'att-exec' },
-      { inclusionId: 'inc-c', attireId: 'att-uniform' },
+      { inclusionId: 'inc-a', attireId: 'att-toga', position: 1 },
+      { inclusionId: 'inc-c', attireId: 'att-exec', position: 1 },
+      { inclusionId: 'inc-c', attireId: 'att-uniform', position: 2 },
     ]);
+  });
+
+  it('numbers positions per inclusion, restarting at 1 (attire order within the inclusion)', () => {
+    const pairs = buildJunctionPairs({
+      inclusionIds: ['inc-a', 'inc-c'],
+      entries: [
+        {
+          kind: 'framed_picture',
+          quantity: 1,
+          printSizeCode: '8x10',
+          attireNames: ['Toga'],
+          frameId: 'f',
+        },
+        { kind: 'print', quantity: 4, printSizeCode: '2R', attireNames: ['Executive', 'Uniform'] },
+      ],
+      attireId: new Map([...attireId, ['Uniform', 'att-uniform']]),
+    });
+    expect(pairs.map((p) => p.position)).toEqual([1, 1, 2]);
   });
 
   it('yields zero pairs for an empty attireNames list (privileges with no grant)', () => {

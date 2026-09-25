@@ -31,6 +31,11 @@ export const packageInclusions = pgTable(
     // and privileges stay null.
     frameId: uuid('frame_id').references(() => frames.id),
     description: text('description'),
+    // Display order within the package (M5): array order under the atomic
+    // package save (#137). Landed DEFAULT 1 NOT NULL (populated-table-safe)
+    // and was backfilled from today's id order in #135 before the default
+    // dropped — a forgetful insert now fails loudly instead of tying at 1.
+    position: integer('position').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     // FK lookup indexes (M1.2 review ruling, folded into the first migration):

@@ -22,8 +22,9 @@ type JunctionRow = { inclusionId: string; id: string; name: string };
  * is assembly (it joins fetched values, not rows), so it moved here with
  * the stitch — fetching (which queries, which ordering) stays in the
  * callers. Callers deliver rows in their pinned orders (inclusions by id,
- * junctions by created_at + id, frames by frameNumber); assembly never
- * re-sorts (groupChildren contract).
+ * junctions by created_at + id, frames by frameNumber — the position
+ * columns exist since M5 #135 but become the read keys only when #138
+ * switches the assembly); assembly never re-sorts (groupChildren contract).
  */
 function assemblePackageRead(
   packageRows: (typeof servicePackages.$inferSelect)[],
@@ -93,9 +94,10 @@ export async function listActivePackagesWithInclusions(
     ...new Set(inclusionRows.map((i) => i.printSizeId).filter((id): id is string => id !== null)),
   ];
 
-  // The junction has no position column; insertion order (created_at, then id
-  // as tiebreak) is the render order. Distinct statements per junction row
-  // (fixtures) give distinct created_at, so this ordering is deterministic.
+  // The junction's position column exists since M5 (#135, backfilled from
+  // this order), but the read still keys on (created_at, id) until #138
+  // switches the assembly to (position, id). Distinct statements per junction
+  // row (fixtures) give distinct created_at, so this ordering is deterministic.
   const junctionRows =
     inclusionIds.length > 0
       ? await db
@@ -155,8 +157,10 @@ export async function getActivePackageWithInclusionsBySlug(
     ...new Set(inclusionRows.map((i) => i.printSizeId).filter((id): id is string => id !== null)),
   ];
 
-  // Same junction query + ordering comment as the list (created_at, then id
-  // as tiebreak — the junction has no position column).
+  // The junction's position column exists since M5 (#135, backfilled from
+  // this order), but the read still keys on (created_at, id) until #138
+  // switches the assembly to (position, id). Distinct statements per junction
+  // row (fixtures) give distinct created_at, so this ordering is deterministic.
   const junctionRows =
     inclusionIds.length > 0
       ? await db

@@ -5,6 +5,8 @@ import { account, session, user } from './auth.js';
 import { branchStudioServices } from './branch-studio-services.js';
 import { branches } from './branches.js';
 import { frames } from './frames.js';
+import { galleryCategories } from './gallery-categories.js';
+import { galleryPhotos } from './gallery-photos.js';
 import { packageInclusionAttires } from './package-inclusion-attires.js';
 import { packageInclusions } from './package-inclusions.js';
 import { printSizes } from './print-sizes.js';
@@ -49,6 +51,17 @@ export const packageInclusionAttiresRelations = relations(packageInclusionAttire
   attire: one(attires, {
     fields: [packageInclusionAttires.attireId],
     references: [attires.id],
+  }),
+}));
+
+export const galleryCategoriesRelations = relations(galleryCategories, ({ many }) => ({
+  photos: many(galleryPhotos),
+}));
+
+export const galleryPhotosRelations = relations(galleryPhotos, ({ one }) => ({
+  category: one(galleryCategories, {
+    fields: [galleryPhotos.categoryId],
+    references: [galleryCategories.id],
   }),
 }));
 

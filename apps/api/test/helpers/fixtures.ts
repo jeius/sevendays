@@ -293,13 +293,12 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     .values(simpleRow)
     .returning({ id: packageInclusions.id });
 
-  // One row per statement (not one batch): the junction has no position
-  // column, so render order falls back to insertion order via created_at —
-  // rows written in a single INSERT share now() and would tie on an
-  // (id-ordered) coin flip (Task 4 finding). Distinct statements give each
-  // row a distinct timestamp, preserving catalog attire order
-  // deterministically. The builder owns the pair order; these statements
-  // preserve it.
+  // One row per statement (kept from the pre-position era): the builder now
+  // supplies junction position per inclusion (catalog attire order), and the
+  // #138 read will order by (position, id) — until then the current read
+  // still keys on created_at, and distinct statements keep each row's
+  // created_at distinct so that ordering stays deterministic. The builder
+  // owns the pair order; these statements preserve it.
   const [framedEntry, print2REntry, print2x2Entry] = combinedEntries;
   const combinedPairs = buildJunctionPairs({
     inclusionIds: [inclusionFramedPicture.id, inclusionPrint2R.id, inclusionPrint2x2.id],
