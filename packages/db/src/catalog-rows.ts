@@ -13,7 +13,10 @@
  * quantity/printSizeId/frameId null, description carried. Junction pairs
  * decompose an entry's attireNames in array order — 'Filipiniana/Executive'
  * is two pairs, Filipiniana first (the canonical catalog attire order, never
- * alphabetized). Unknown names fail loudly, never skip.
+ * alphabetized). Positions are 1-based: inclusion position = entry order
+ * within the package (M5 array-order-is-the-position), junction position =
+ * attire order within its inclusion, restarting at 1 per inclusion. Unknown
+ * names fail loudly, never skip.
  */
 import type { frames, packageInclusionAttires, packageInclusions } from './schema/index.js';
 
@@ -61,8 +64,8 @@ export function buildInclusionRowValues(input: {
   printSizeId: PrintSizeIdLookup;
 }): InclusionRowValues[] {
   // biome-ignore lint/suspicious/useIterableCallbackReturn: exhaustive switch over InclusionEntry is deliberate — no default branch (adding a Kind becomes a compile error)
-  return input.entries.map((entry) => {
-    const base = { servicePackageId: input.servicePackageId };
+  return input.entries.map((entry, index) => {
+    const base = { servicePackageId: input.servicePackageId, position: index + 1 };
     switch (entry.kind) {
       case 'framed_picture': {
         if (!entry.frameId) {
@@ -113,10 +116,12 @@ export function buildJunctionPairs(input: {
   for (const [i, entry] of input.entries.entries()) {
     const inclusionId = input.inclusionIds[i];
     if (!inclusionId) throw new Error(`junction pairing: no inclusionId at index ${i}`);
+    let position = 0;
     for (const name of entry.attireNames) {
       const id = input.attireId.get(name);
       if (!id) throw new Error(`Unknown attire name: ${name}`);
-      pairs.push({ inclusionId, attireId: id });
+      position += 1;
+      pairs.push({ inclusionId, attireId: id, position });
     }
   }
   return pairs;
