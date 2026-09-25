@@ -1,12 +1,13 @@
 // PROTOTYPE (throwaway) — wayfinder #131: the testimonials screen. Round 2:
 // the quote, position and status columns are gone — the person is the
 // identity (dot + one-line quote under it, full quote on expand), the order
-// is the rows-array order (no position display anywhere), row actions are
-// icon-only, and rows reorder by whole-row drag (@dnd-kit, same sensor
-// constraints as the gallery: mouse 8px / touch long-press). Round 3: action
-// icons get tooltips, the truncated quote hides while expanded, and a clean
-// row click toggles expansion (dnd-kit's MouseSensor suppresses the click
-// that follows a drag — the two never fire together). Local state only:
+// is the rows-array order (no position display anywhere) and row actions
+// are icon-only. Round 3: action icons get tooltips, the truncated quote
+// hides while expanded, and a clean row click toggles expansion. Round 3
+// owner ruling: rows reorder by a drag HANDLE only — a GripVertical grip at
+// the row start carries the dnd-kit listeners/attributes (same posture as
+// the package-editor grips) and the whole row is no longer draggable, so
+// click-to-expand and drag never share a surface. Local state only:
 // deactivate/reactivate flips isActive, nothing persists. Never merges;
 // delete with the route.
 
@@ -15,8 +16,7 @@ import {
   DndContext,
   type DragEndEvent,
   KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
+  PointerSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
@@ -42,7 +42,7 @@ import {
   TableRow,
 } from '@sevendays/ui/components/table';
 import { Textarea } from '@sevendays/ui/components/textarea';
-import { SquarePen } from 'lucide-react';
+import { GripVertical, SquarePen } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Fragment, useId, useState } from 'react';
 import type { TestimonialRow } from '../fixtures';
@@ -60,12 +60,12 @@ import {
   StatusBadge,
 } from '../shared';
 
-// TM3: whole-row drag on the desktop table row. E3: solid bg + shadow while
-// dragging so the dragged row's text never overlaps the rows beneath it.
-// N3: a clean click on the row also toggles expansion — dnd-kit's MouseSensor
-// (distance 8) separates the two: handleStart only arms a document-level
-// capture click stopPropagation once the drag activates, so post-drag clicks
-// never reach this handler (verified in @dnd-kit/core 6.3.1 source).
+// Round-3 owner ruling: handle-only drag on the desktop table row. The grip
+// button (first cell) carries setActivatorNodeRef + listeners + attributes;
+// the row itself has NO drag listeners/attributes, so its clean click still
+// toggles expansion (N3 — no click-vs-drag arbitration needed anymore). The
+// sortable node stays on the row for the transform. E3: solid bg + shadow
+// while dragging so the dragged row's text never overlaps the rows beneath.
 function SortableTestimonialRow({
   id,
   children,
@@ -75,29 +75,64 @@ function SortableTestimonialRow({
   children: ReactNode;
   onClick?: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id,
   });
   return (
     <TableRow
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`group cursor-grab active:cursor-grabbing ${
-        isDragging ? 'relative z-10 bg-card shadow-sm' : ''
-      }`}
+      className={isDragging ? 'relative z-10 bg-card shadow-sm' : ''}
       onClick={onClick}
-      {...attributes}
-      {...listeners}
     >
+      {/* The grip is the ONLY drag activator. Cell-level stopPropagation
+          keeps a grip click from bubbling to the row's expand toggle. */}
+      <TableCell className='w-10' onClick={(e) => e.stopPropagation()}>
+        <button
+          type='button'
+          ref={setActivatorNodeRef}
+          aria-label='Drag to reorder'
+          className='text-muted-foreground hover:text-foreground touch-none cursor-grab rounded-sm active:cursor-grabbing'
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical aria-hidden='true' className='size-4 shrink-0' />
+        </button>
+      </TableCell>
       {children}
     </TableRow>
   );
 }
 
-// TM3 on the stacked mobile list: same drag on the row wrapper; the two-line
-// header button still toggles the expand (tap vs long-press are distinct).
-function SortableStackRow({ id, children }: { id: string; children: ReactNode }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+// Same handle-only posture on the stacked mobile list: the grip sits at the
+// row start, ahead of the two-line header (its own flex row); the header
+// button still toggles the expand and the wrapper keeps no drag listeners.
+function SortableStackRow({
+  id,
+  header,
+  children,
+}: {
+  id: string;
+  header: ReactNode;
+  children: ReactNode;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id,
   });
   return (
@@ -107,9 +142,20 @@ function SortableStackRow({ id, children }: { id: string; children: ReactNode })
       className={`border-border border-b py-2 last:border-b-0 ${
         isDragging ? 'relative z-10 bg-card shadow-sm' : ''
       }`}
-      {...attributes}
-      {...listeners}
     >
+      <div className='flex items-start gap-2'>
+        <button
+          type='button'
+          ref={setActivatorNodeRef}
+          aria-label='Drag to reorder'
+          className='text-muted-foreground hover:text-foreground touch-none cursor-grab rounded-sm active:cursor-grabbing'
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical aria-hidden='true' className='size-4 shrink-0' />
+        </button>
+        {header}
+      </div>
       {children}
     </div>
   );
@@ -155,11 +201,12 @@ export function TestimonialsScreen({ search }: ScreenProps) {
     );
   }
 
-  // TM3 sensors — same constraints as the gallery (GL3): mouse 8px move,
-  // touch 300ms long-press (8px tolerance) so vertical scroll never conflicts.
+  // Round-3 ruling: the package-editor's handle-only sensor posture —
+  // PointerSensor with a 4px distance constraint (activation lives on the
+  // grip, so no touch long-press is needed; touch-none on the grip keeps
+  // page scroll from fighting a grip drag), plus the keyboard sensor.
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 300, tolerance: 8 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -206,6 +253,8 @@ export function TestimonialsScreen({ search }: ScreenProps) {
             <Table className='@max-[700px]:hidden'>
               <TableHeader>
                 <TableRow>
+                  {/* Drag-handle column (round-3 ruling) — no header label. */}
+                  <TableHead className='w-10' />
                   <TableHead>Person</TableHead>
                   {/* T2: the Actions header renders empty — the icons carry
                       their own labels. */}
@@ -259,8 +308,9 @@ export function TestimonialsScreen({ search }: ScreenProps) {
                               />
                             </TableCell>
                           </SortableTestimonialRow>
-                          {/* T3 desktop reveal: the FULL quote. */}
-                          <ExpandPanel open={expanded} colSpan={2}>
+                          {/* T3 desktop reveal: the FULL quote (spans the
+                              grip + identity + actions columns). */}
+                          <ExpandPanel open={expanded} colSpan={3}>
                             {row.quote}
                           </ExpandPanel>
                         </Fragment>
@@ -271,9 +321,9 @@ export function TestimonialsScreen({ search }: ScreenProps) {
               </TableBody>
             </Table>
 
-            {/* Stacked posture (below 700px container width): the whole
-                two-line header toggles the animated reveal (M1); rows drag
-                by long-press (TM3). */}
+            {/* Stacked posture (below 700px container width): the two-line
+                header toggles the animated reveal (M1); rows drag by the grip
+                (round-3 ruling). */}
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
               <SortableContext
                 items={rows.map((row) => row.id)}
@@ -283,24 +333,31 @@ export function TestimonialsScreen({ search }: ScreenProps) {
                   {rows.map((row) => {
                     const expanded = expandedId === row.id;
                     return (
-                      <SortableStackRow key={row.id} id={row.id}>
-                        <button
-                          type='button'
-                          aria-expanded={expanded}
-                          className='w-full cursor-grab text-left active:cursor-grabbing'
-                          onClick={() => toggleExpanded(row.id)}
-                        >
-                          <div className='flex items-center justify-between gap-3'>
-                            <p className='truncate font-medium'>{row.person}</p>
-                          </div>
-                          {/* N2: line 2 hides while expanded (dot stays). */}
-                          <div className='mt-1 flex min-w-0 items-center gap-2'>
-                            <StatusBadge isActive={row.isActive} />
-                            {expanded ? null : (
-                              <p className='text-muted-foreground truncate text-xs'>{row.quote}</p>
-                            )}
-                          </div>
-                        </button>
+                      <SortableStackRow
+                        key={row.id}
+                        id={row.id}
+                        header={
+                          <button
+                            type='button'
+                            aria-expanded={expanded}
+                            className='w-full cursor-pointer text-left'
+                            onClick={() => toggleExpanded(row.id)}
+                          >
+                            <div className='flex items-center justify-between gap-3'>
+                              <p className='truncate font-medium'>{row.person}</p>
+                            </div>
+                            {/* N2: line 2 hides while expanded (dot stays). */}
+                            <div className='mt-1 flex min-w-0 items-center gap-2'>
+                              <StatusBadge isActive={row.isActive} />
+                              {expanded ? null : (
+                                <p className='text-muted-foreground truncate text-xs'>
+                                  {row.quote}
+                                </p>
+                              )}
+                            </div>
+                          </button>
+                        }
+                      >
                         <Collapse open={expanded}>
                           <div className='mt-2 space-y-2'>
                             <p className='text-muted-foreground text-sm'>{row.quote}</p>
