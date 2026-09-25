@@ -2,7 +2,12 @@
 // (post-verdict: drag-only reorder via @dnd-kit, handle-only grips). Always
 // renders the pkg-basic fixture; reorder mutates the one underlying inclusions
 // array (position = array order is the #130 write shape; frames renumber from
-// array order on save). Nothing persists. Never merges; delete with the route.
+// array order on save). Round 3: the Frames/Prints/Privileges section groups
+// get the card background, the print-size trigger matches the Input radius
+// and renders its item label explicitly, and the attire checkbox chips are
+// back on framed_picture/print rows (T8 over-deleted them; only privileges
+// were scoped to lose them). Nothing persists. Never merges; delete with the
+// route.
 
 import {
   closestCenter,
@@ -45,7 +50,7 @@ import { Link } from '@tanstack/react-router';
 import { ChevronDown, Frame, Gift, GripVertical, Image, Plus, X } from 'lucide-react';
 import { useId, useRef, useState } from 'react';
 import type { InclusionRow, PackageRow } from '../fixtures';
-import { packages, printSizes } from '../fixtures';
+import { attires, packages, printSizes } from '../fixtures';
 import type { ScreenProps } from '../nav';
 import { StatusBadge } from '../shared';
 
@@ -58,9 +63,15 @@ const KIND_ICONS = {
 interface RowActions {
   onRemove: (id: string) => void;
   onUpdate: (id: string, patch: Partial<InclusionRow>) => void;
+  onToggleAttire: (id: string, name: string, checked: boolean) => void;
 }
 
-function InclusionEditorRow({ row, onRemove, onUpdate }: { row: InclusionRow } & RowActions) {
+function InclusionEditorRow({
+  row,
+  onRemove,
+  onUpdate,
+  onToggleAttire,
+}: { row: InclusionRow } & RowActions) {
   const KindIcon = KIND_ICONS[row.kind];
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: row.id,
@@ -99,8 +110,16 @@ function InclusionEditorRow({ row, onRemove, onUpdate }: { row: InclusionRow } &
             value={row.printSize ?? undefined}
             onValueChange={(value) => onUpdate(row.id, { printSize: String(value) })}
           >
-            <SelectTrigger size='sm' aria-label='Print size' className='w-24'>
-              <SelectValue />
+            {/* N4: default size — at size='sm' the h-7 trigger's rounded-2xl
+                got clamped by the browser to a 14px rendered radius, unlike
+                the h-8 Inputs' 16px; the default h-8 renders the same radius
+                as every Input (packages/ui untouched). */}
+            <SelectTrigger aria-label='Print size' className='w-24'>
+              {/* N5: render the item LABEL explicitly — Base UI's SelectValue
+                  falls through to the raw value when no items prop is given. */}
+              <SelectValue>
+                {(value: string | null) => printSizes.find((ps) => ps.code === value)?.code ?? '—'}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {printSizes.map((ps) => (
@@ -128,6 +147,27 @@ function InclusionEditorRow({ row, onRemove, onUpdate }: { row: InclusionRow } &
           <X />
         </Button>
       </div>
+      {/* N7: the four-attire inline chips, restored on framed_picture/print
+          rows exactly as the T7 design had them — T8 over-deleted them (its
+          brief scoped the removal to privilege rows, which stay without). */}
+      {row.kind !== 'privilege' ? (
+        <div className='flex flex-wrap items-center gap-1.5'>
+          {attires.map((attire) => (
+            <label
+              key={attire.id}
+              htmlFor={`${row.id}-${attire.id}`}
+              className='flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs'
+            >
+              <Checkbox
+                id={`${row.id}-${attire.id}`}
+                checked={row.attires.includes(attire.name)}
+                onCheckedChange={(checked) => onToggleAttire(row.id, attire.name, checked === true)}
+              />
+              {attire.name}
+            </label>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -169,6 +209,23 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
 
   function removeInclusion(id: string) {
     setPkg((prev) => ({ ...prev, inclusions: prev.inclusions.filter((row) => row.id !== id) }));
+  }
+
+  // N7: restored with the chips — toggles write into the row's attires array.
+  function toggleAttire(id: string, name: string, checked: boolean) {
+    setPkg((prev) => ({
+      ...prev,
+      inclusions: prev.inclusions.map((row) =>
+        row.id === id
+          ? {
+              ...row,
+              attires: checked
+                ? [...row.attires, name]
+                : row.attires.filter((attire) => attire !== name),
+            }
+          : row
+      ),
+    }));
   }
 
   function addFrame() {
@@ -293,6 +350,7 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
   const rowActions: RowActions = {
     onRemove: removeInclusion,
     onUpdate: updateInclusion,
+    onToggleAttire: toggleAttire,
   };
 
   return (
@@ -492,7 +550,9 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
         <div className='min-w-0 space-y-4'>
           <h2 className='text-lg font-semibold tracking-tight'>Inclusions</h2>
 
-          <section className='space-y-3 rounded-lg border p-4'>
+          {/* N6: the three section groups render bg-card (N6) — the rounded-lg
+              step-down and borders are unchanged. */}
+          <section className='space-y-3 rounded-lg border bg-card p-4'>
             <div className='flex items-center justify-between'>
               <h3 className='text-sm font-medium'>Frames</h3>
               <Button variant='ghost' size='sm' type='button' onClick={addFrame}>
@@ -537,7 +597,7 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
             })}
           </section>
 
-          <section className='space-y-3 rounded-lg border p-4'>
+          <section className='space-y-3 rounded-lg border bg-card p-4'>
             <div className='flex items-center justify-between'>
               <h3 className='text-sm font-medium'>Prints · {prints.length}</h3>
               <Button variant='ghost' size='sm' type='button' onClick={addPrint}>
@@ -561,7 +621,7 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
             </DndContext>
           </section>
 
-          <section className='space-y-3 rounded-lg border p-4'>
+          <section className='space-y-3 rounded-lg border bg-card p-4'>
             <div className='flex items-center justify-between'>
               <h3 className='text-sm font-medium'>Privileges · {privileges.length}</h3>
               <Button variant='ghost' size='sm' type='button' onClick={addPrivilege}>

@@ -502,7 +502,17 @@ export function GalleryScreen({ search }: ScreenProps) {
               }
             >
               <SelectTrigger id={categoryId} aria-label='Category' className='w-full'>
-                <SelectValue />
+                {/* N5: render the item LABEL — Base UI's SelectValue falls
+                    through to the raw value ('gc-graduation') when no items
+                    prop is given, so the label is resolved explicitly;
+                    'Uncategorized' stands in for the null categoryId. */}
+                <SelectValue>
+                  {(value: string | null) =>
+                    value === UNCATEGORIZED || value == null
+                      ? 'Uncategorized'
+                      : (categories.find((c) => c.id === value)?.name ?? 'Uncategorized')
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {sortedCategories.map((category) => (
