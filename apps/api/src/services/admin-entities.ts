@@ -1,22 +1,35 @@
 import type { Database } from '@sevendays/db';
-import { addonServices, attires, branches, printSizes } from '@sevendays/db';
+import {
+  addonServices,
+  attires,
+  branches,
+  branchStudioServices,
+  printSizes,
+  studioServiceAddonServices,
+  studioServices,
+} from '@sevendays/db';
 import type {
   CreateAddonServiceInput,
   CreateAttireInput,
   CreateBranchInput,
   CreatePrintSizeInput,
+  CreateStudioServiceInput,
+  StudioServiceWithBranches,
   UpdateAddonServiceInput,
   UpdateAttireInput,
   UpdateBranchInput,
   UpdatePrintSizeInput,
+  UpdateStudioServiceInput,
 } from '@sevendays/types';
-import { and, asc, eq, ne } from 'drizzle-orm';
+import { and, asc, eq, inArray, ne } from 'drizzle-orm';
 import {
   type AdminCreateResult,
   type AdminWriteResult,
   conflict,
   guardUnique,
+  invalidRefs,
 } from './admin-shared.js';
+import { groupChildren } from './group-children.js';
 
 // Admin CRUD for the simple catalog entities (M5 #137): list/get/create/
 // update per entity — full-object PUTs, deactivation as the isActive flip,
@@ -229,4 +242,219 @@ export async function updateAdminAddonService(
     if (!row) throw new Error('update addon_services: no row returned');
     return row;
   });
+}
+
+// --- studio services + the two applicability matrices ----------------------
+
+type StudioServiceRow = typeof studioServices.$inferSelect;
+
+const STUDIO_SERVICE_UNIQUE: Record<string, string> = { studio_services_name_unique: 'name' };
+
+/**
+ * The admin assembly: the StudioServiceWithBranches shape with ALL links
+ * embedded (bare ids) — assembled WITHOUT the public read's activity
+ * filters: a live link on a deactivated add-on is a staff-visible fact
+ * here (the booking form's matrix keeps its own filter). Batched
+ * two-embed read (no N+1); junction order = the createdAt proxy + id
+ * tiebreak (the public read's convention — membership is the fact).
+ */
+async function assembleAdminStudioServices(
+  db: Database,
+  serviceRows: StudioServiceRow[]
+): Promise<StudioServiceWithBranches[]> {
+  const serviceIds = serviceRows.map((s) => s.id);
+  const linkRows = await db
+    .select({
+      studioServiceId: branchStudioServices.studioServiceId,
+      branchId: branchStudioServices.branchId,
+    })
+    .from(branchStudioServices)
+    .where(inArray(branchStudioServices.studioServiceId, serviceIds))
+    .orderBy(asc(branchStudioServices.createdAt), asc(branchStudioServices.id));
+  const addonRows = await db
+    .select({
+      studioServiceId: studioServiceAddonServices.studioServiceId,
+      addonServiceId: studioServiceAddonServices.addonServiceId,
+    })
+    .from(studioServiceAddonServices)
+    .where(inArray(studioServiceAddonServices.studioServiceId, serviceIds))
+    .orderBy(asc(studioServiceAddonServices.createdAt), asc(studioServiceAddonServices.id));
+  const branchesByService = groupChildren(linkRows, (row) => row.studioServiceId);
+  const addonsByService = groupChildren(addonRows, (row) => row.studioServiceId);
+  return serviceRows.map((s) => ({
+    ...s,
+    bookableBranchIds: branchesByService(s.id).map((l) => l.branchId),
+    applicableAddonServiceIds: addonsByService(s.id).map((l) => l.addonServiceId),
+  }));
+}
+
+export async function listAdminStudioServices(db: Database): Promise<StudioServiceWithBranches[]> {
+  const serviceRows = await db.select().from(studioServices).orderBy(asc(studioServices.name));
+  if (serviceRows.length === 0) return [];
+  return assembleAdminStudioServices(db, serviceRows);
+}
+
+export async function getAdminStudioService(
+  db: Database,
+  id: string
+): Promise<StudioServiceWithBranches | null> {
+  const [row] = await db.select().from(studioServices).where(eq(studioServices.id, id)).limit(1);
+  if (!row) return null;
+  const [assembled] = await assembleAdminStudioServices(db, [row]);
+  return assembled ?? null;
+}
+
+export async function createAdminStudioService(
+  db: Database,
+  input: CreateStudioServiceInput
+): Promise<AdminCreateResult<StudioServiceWithBranches>> {
+  const result = await guardUnique(STUDIO_SERVICE_UNIQUE, async () => {
+    const [row] = await db.insert(studioServices).values(input).returning();
+    if (!row) throw new Error('insert studio_services: no row returned');
+    return row;
+  });
+  if (!result.ok) return result;
+  const [assembled] = await assembleAdminStudioServices(db, [result.row]);
+  if (!assembled) throw new Error('studio service create: assembly lost the row');
+  return { ok: true, row: assembled };
+}
+
+export async function updateAdminStudioService(
+  db: Database,
+  id: string,
+  input: UpdateStudioServiceInput
+): Promise<AdminWriteResult<StudioServiceWithBranches>> {
+  const [current] = await db
+    .select()
+    .from(studioServices)
+    .where(eq(studioServices.id, id))
+    .limit(1);
+  if (!current) return { ok: false, reason: 'not_found' };
+  if (input.name !== current.name) {
+    const [clash] = await db
+      .select({ id: studioServices.id })
+      .from(studioServices)
+      .where(and(eq(studioServices.name, input.name), ne(studioServices.id, id)))
+      .limit(1);
+    if (clash) return conflict('name');
+  }
+  const result = await guardUnique(STUDIO_SERVICE_UNIQUE, async () => {
+    const [row] = await db
+      .update(studioServices)
+      .set({ ...input, updatedAt: new Date() })
+      .where(eq(studioServices.id, id))
+      .returning();
+    if (!row) throw new Error('update studio_services: no row returned');
+    return row;
+  });
+  if (!result.ok) return result;
+  const [assembled] = await assembleAdminStudioServices(db, [result.row]);
+  if (!assembled) throw new Error('studio service update: assembly lost the row');
+  return { ok: true, row: assembled };
+}
+
+/**
+ * The branch matrix (spec § Route topology): full-replace keyed by the
+ * service — diff the payload against the existing rows and rewrite inside
+ * ONE transaction (delete net-missing by row id, insert net-new).
+ * Duplicate payload ids collapse (presence-row semantics). The existence
+ * check is DEACTIVATION-BLIND by ruling: the admin composes from admin
+ * reads, which include deactivated rows; activity filtering is read-side.
+ */
+export async function setStudioServiceBranchMatrix(
+  db: Database,
+  id: string,
+  branchIds: string[]
+): Promise<AdminWriteResult<StudioServiceWithBranches>> {
+  const [service] = await db
+    .select()
+    .from(studioServices)
+    .where(eq(studioServices.id, id))
+    .limit(1);
+  if (!service) return { ok: false, reason: 'not_found' };
+  const known = await db
+    .select({ id: branches.id })
+    .from(branches)
+    .where(inArray(branches.id, branchIds));
+  const knownIds = new Set(known.map((b) => b.id));
+  const unknown = [...new Set(branchIds)].filter((branchId) => !knownIds.has(branchId));
+  if (unknown.length > 0) {
+    return invalidRefs(
+      'Unknown branch in branchIds.',
+      unknown.map((branchId) => ({ path: ['branchIds'], message: `unknown id ${branchId}` }))
+    );
+  }
+  await db.transaction(async (tx) => {
+    const existing = await tx
+      .select({ id: branchStudioServices.id, branchId: branchStudioServices.branchId })
+      .from(branchStudioServices)
+      .where(eq(branchStudioServices.studioServiceId, id));
+    const existingIds = new Set(existing.map((l) => l.branchId));
+    const payloadIds = new Set(branchIds);
+    const toRemove = existing.filter((l) => !payloadIds.has(l.branchId)).map((l) => l.id);
+    if (toRemove.length > 0) {
+      await tx.delete(branchStudioServices).where(inArray(branchStudioServices.id, toRemove));
+    }
+    const toAdd = [...payloadIds].filter((branchId) => !existingIds.has(branchId));
+    if (toAdd.length > 0) {
+      await tx
+        .insert(branchStudioServices)
+        .values(toAdd.map((branchId) => ({ studioServiceId: id, branchId })));
+    }
+  });
+  const read = await getAdminStudioService(db, id);
+  if (!read) throw new Error('matrix save: read-back found no service row');
+  return { ok: true, row: read };
+}
+
+/** The add-on matrix — the branch matrix one junction over (same contract). */
+export async function setStudioServiceAddonMatrix(
+  db: Database,
+  id: string,
+  addonServiceIds: string[]
+): Promise<AdminWriteResult<StudioServiceWithBranches>> {
+  const [service] = await db
+    .select()
+    .from(studioServices)
+    .where(eq(studioServices.id, id))
+    .limit(1);
+  if (!service) return { ok: false, reason: 'not_found' };
+  const known = await db
+    .select({ id: addonServices.id })
+    .from(addonServices)
+    .where(inArray(addonServices.id, addonServiceIds));
+  const knownIds = new Set(known.map((a) => a.id));
+  const unknown = [...new Set(addonServiceIds)].filter((addonId) => !knownIds.has(addonId));
+  if (unknown.length > 0) {
+    return invalidRefs(
+      'Unknown add-on in addonServiceIds.',
+      unknown.map((addonId) => ({ path: ['addonServiceIds'], message: `unknown id ${addonId}` }))
+    );
+  }
+  await db.transaction(async (tx) => {
+    const existing = await tx
+      .select({
+        id: studioServiceAddonServices.id,
+        addonServiceId: studioServiceAddonServices.addonServiceId,
+      })
+      .from(studioServiceAddonServices)
+      .where(eq(studioServiceAddonServices.studioServiceId, id));
+    const existingIds = new Set(existing.map((l) => l.addonServiceId));
+    const payloadIds = new Set(addonServiceIds);
+    const toRemove = existing.filter((l) => !payloadIds.has(l.addonServiceId)).map((l) => l.id);
+    if (toRemove.length > 0) {
+      await tx
+        .delete(studioServiceAddonServices)
+        .where(inArray(studioServiceAddonServices.id, toRemove));
+    }
+    const toAdd = [...payloadIds].filter((addonId) => !existingIds.has(addonId));
+    if (toAdd.length > 0) {
+      await tx
+        .insert(studioServiceAddonServices)
+        .values(toAdd.map((addonId) => ({ studioServiceId: id, addonServiceId: addonId })));
+    }
+  });
+  const read = await getAdminStudioService(db, id);
+  if (!read) throw new Error('matrix save: read-back found no service row');
+  return { ok: true, row: read };
 }
