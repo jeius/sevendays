@@ -6,6 +6,7 @@ import { adminAttires } from './admin-attires.js';
 import { adminBranches } from './admin-branches.js';
 import { adminMedia } from './admin-media.js';
 import { adminPrintSizes } from './admin-print-sizes.js';
+import { adminServicePackages } from './admin-service-packages.js';
 import { adminStudioServices } from './admin-studio-services.js';
 import { galleryPhotos } from './gallery-photos.js';
 
@@ -24,4 +25,5 @@ export const admin = new Hono<ApiEnv>()
   .route('/gallery-photos', galleryPhotos)
   .route('/attires', adminAttires)
   .route('/addon-services', adminAddonServices)
-  .route('/studio-services', adminStudioServices);
+  .route('/studio-services', adminStudioServices)
+  .route('/service-packages', adminServicePackages);
