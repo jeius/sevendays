@@ -2,6 +2,9 @@
 // admin CMS screens. Copy is pinned by the plan's Global Constraints —
 // transcribe, never re-draft. Nothing persists.
 //
+// Round 3: row action icons grow tooltips (label = the aria-label text) and
+// the Reactivate icon turns green to match the status-dot palette.
+//
 // G1 radius note (spec): every card in this prototype renders one radius
 // step down (rounded-xl → rounded-lg) via className overrides at the usage
 // sites — packages/ui is untouched. If the owner keeps this, the step-down
@@ -35,8 +38,14 @@ import {
   SheetTitle,
 } from '@sevendays/ui/components/sheet';
 import { TableCell, TableRow } from '@sevendays/ui/components/table';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@sevendays/ui/components/tooltip';
 import { ChevronDown, Power, PowerOff } from 'lucide-react';
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 /**
  * T3 expand mechanism: a persistent grid whose template-rows transition
@@ -83,9 +92,26 @@ export function ExpandPanel({
 }
 
 /**
+ * N1: an icon-only action shows its label on hover/focus — the tooltip
+ * content IS the button's aria-label text (which stays for AT).
+ */
+function ActionTooltip({ label, button }: { label: string; button: ReactElement }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger render={button} />
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+/**
  * T2 icon-only row actions: Edit (caller-rendered — packages routes to the
  * editor screen, others open the sheet) / Deactivate (PowerOff) / Reactivate
- * (Power), each with aria-label + title since the label text is gone.
+ * (Power), each with aria-label + a tooltip carrying the same text.
+ *
+ * N1 FLAG: the green reactivate tint matches the StatusBadge dot palette —
+ * the token layer has no success semantics, so the Tailwind default stands
+ * in (the same spec-token decision as the dots).
  */
 export function RowIconActions({
   edit,
@@ -93,39 +119,48 @@ export function RowIconActions({
   onDeactivate,
   onReactivate,
 }: {
-  edit: ReactNode;
+  edit: ReactElement;
   isActive: boolean;
   onDeactivate: () => void;
   onReactivate: () => void;
 }) {
   return (
-    <>
-      {edit}
+    <TooltipProvider>
+      <ActionTooltip label='Edit' button={edit} />
       {isActive ? (
-        <Button
-          variant='ghost'
-          size='icon-sm'
-          type='button'
-          aria-label='Deactivate'
-          title='Deactivate'
-          className='text-destructive hover:bg-destructive/10 hover:text-destructive'
-          onClick={onDeactivate}
-        >
-          <PowerOff aria-hidden='true' />
-        </Button>
+        <ActionTooltip
+          label='Deactivate'
+          button={
+            <Button
+              variant='ghost'
+              size='icon-sm'
+              type='button'
+              aria-label='Deactivate'
+              className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+              onClick={onDeactivate}
+            >
+              <PowerOff aria-hidden='true' />
+            </Button>
+          }
+        />
       ) : (
-        <Button
-          variant='ghost'
-          size='icon-sm'
-          type='button'
-          aria-label='Reactivate'
-          title='Reactivate'
-          onClick={onReactivate}
-        >
-          <Power aria-hidden='true' />
-        </Button>
+        <ActionTooltip
+          label='Reactivate'
+          button={
+            <Button
+              variant='ghost'
+              size='icon-sm'
+              type='button'
+              aria-label='Reactivate'
+              className='text-green-600 hover:bg-green-600/10 hover:text-green-600'
+              onClick={onReactivate}
+            >
+              <Power aria-hidden='true' />
+            </Button>
+          }
+        />
       )}
-    </>
+    </TooltipProvider>
   );
 }
 
@@ -142,7 +177,7 @@ export function RowActionsCluster({
   onToggle,
   expanded = false,
 }: {
-  edit: ReactNode;
+  edit: ReactElement;
   isActive: boolean;
   onDeactivate: () => void;
   onReactivate: () => void;

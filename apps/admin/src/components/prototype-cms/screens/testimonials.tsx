@@ -3,9 +3,12 @@
 // identity (dot + one-line quote under it, full quote on expand), the order
 // is the rows-array order (no position display anywhere), row actions are
 // icon-only, and rows reorder by whole-row drag (@dnd-kit, same sensor
-// constraints as the gallery: mouse 8px / touch long-press). Local state
-// only: deactivate/reactivate flips isActive, nothing persists. Never
-// merges; delete with the route.
+// constraints as the gallery: mouse 8px / touch long-press). Round 3: action
+// icons get tooltips, the truncated quote hides while expanded, and a clean
+// row click toggles expansion (dnd-kit's MouseSensor suppresses the click
+// that follows a drag — the two never fire together). Local state only:
+// deactivate/reactivate flips isActive, nothing persists. Never merges;
+// delete with the route.
 
 import {
   closestCenter,
@@ -59,7 +62,19 @@ import {
 
 // TM3: whole-row drag on the desktop table row. E3: solid bg + shadow while
 // dragging so the dragged row's text never overlaps the rows beneath it.
-function SortableTestimonialRow({ id, children }: { id: string; children: ReactNode }) {
+// N3: a clean click on the row also toggles expansion — dnd-kit's MouseSensor
+// (distance 8) separates the two: handleStart only arms a document-level
+// capture click stopPropagation once the drag activates, so post-drag clicks
+// never reach this handler (verified in @dnd-kit/core 6.3.1 source).
+function SortableTestimonialRow({
+  id,
+  children,
+  onClick,
+}: {
+  id: string;
+  children: ReactNode;
+  onClick?: () => void;
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
   });
@@ -70,6 +85,7 @@ function SortableTestimonialRow({ id, children }: { id: string; children: ReactN
       className={`group cursor-grab active:cursor-grabbing ${
         isDragging ? 'relative z-10 bg-card shadow-sm' : ''
       }`}
+      onClick={onClick}
       {...attributes}
       {...listeners}
     >
@@ -132,7 +148,6 @@ export function TestimonialsScreen({ search }: ScreenProps) {
         size='icon-sm'
         type='button'
         aria-label='Edit'
-        title='Edit'
         onClick={() => setEditId(id)}
       >
         <SquarePen aria-hidden='true' />
@@ -211,21 +226,29 @@ export function TestimonialsScreen({ search }: ScreenProps) {
                       const expanded = expandedId === row.id;
                       return (
                         <Fragment key={row.id}>
-                          <SortableTestimonialRow id={row.id}>
-                            <TableCell>
+                          <SortableTestimonialRow
+                            id={row.id}
+                            onClick={() => toggleExpanded(row.id)}
+                          >
+                            <TableCell className='cursor-pointer'>
                               {/* TM1: person is the identity; quote is the
                                   one-line secondary (full quote on expand). */}
                               <div className='space-y-0.5'>
                                 <p className='font-semibold'>{row.person}</p>
+                                {/* N2: the truncated quote hides while
+                                    expanded — the reveal carries the full
+                                    text. */}
                                 <div className='flex min-w-0 items-center gap-2'>
                                   <StatusBadge isActive={row.isActive} />
-                                  <p className='text-muted-foreground truncate text-xs'>
-                                    {row.quote}
-                                  </p>
+                                  {expanded ? null : (
+                                    <p className='text-muted-foreground truncate text-xs'>
+                                      {row.quote}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className='text-right'>
+                            <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
                               <RowActionsCluster
                                 expanded={expanded}
                                 onToggle={() => toggleExpanded(row.id)}
@@ -270,9 +293,12 @@ export function TestimonialsScreen({ search }: ScreenProps) {
                           <div className='flex items-center justify-between gap-3'>
                             <p className='truncate font-medium'>{row.person}</p>
                           </div>
+                          {/* N2: line 2 hides while expanded (dot stays). */}
                           <div className='mt-1 flex min-w-0 items-center gap-2'>
                             <StatusBadge isActive={row.isActive} />
-                            <p className='text-muted-foreground truncate text-xs'>{row.quote}</p>
+                            {expanded ? null : (
+                              <p className='text-muted-foreground truncate text-xs'>{row.quote}</p>
+                            )}
                           </div>
                         </button>
                         <Collapse open={expanded}>

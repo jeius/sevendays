@@ -2,9 +2,11 @@
 // table-first list posture every later catalog screen copies). Round 2: the
 // status column is gone (dot lives under the name), Featured is a badge in
 // the identity cell, row actions are icon-only, and rows expand (controlled
-// disclosure) to show the full description. Local state only:
-// deactivate/reactivate flips isActive, nothing persists. Never merges;
-// delete with the route.
+// disclosure) to show the full description. Round 3: action icons get
+// tooltips, the truncated description hides while the row is expanded (the
+// reveal shows the full text), and clicking the row toggles expansion.
+// Local state only: deactivate/reactivate flips isActive, nothing persists.
+// Never merges; delete with the route.
 
 import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
@@ -58,7 +60,6 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
         size='icon-sm'
         render={<Link to='/prototype-cms' search={{ screen: 'package-editor', variant }} />}
         aria-label='Edit'
-        title='Edit'
       >
         <SquarePen aria-hidden='true' />
       </Button>
@@ -104,8 +105,11 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
                   const expanded = expandedId === row.id;
                   return (
                     <Fragment key={row.id}>
-                      <TableRow className='group'>
-                        <TableCell>
+                      {/* N3: whole-row click toggles expansion — the actions
+                          cell stops propagation so icon clicks never toggle;
+                          the chevron stays the keyboard/AT toggle. */}
+                      <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
+                        <TableCell className='cursor-pointer'>
                           {row.coverImageUrl ? (
                             <img
                               src={row.coverImageUrl}
@@ -118,7 +122,7 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className='cursor-pointer'>
                           <div className='space-y-0.5'>
                             {/* P1: Featured is a primary badge beside the name. */}
                             <div className='flex items-center gap-2'>
@@ -131,18 +135,22 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
                             </div>
                             {/* T1: dot + description under the identity; the
                                 slug is gone from the table entirely (P2). */}
+                            {/* N2: while expanded the reveal carries the full
+                                text — the truncated line hides (dot stays). */}
                             <div className='flex min-w-0 items-center gap-2'>
                               <StatusBadge isActive={row.isActive} />
-                              <p className='text-muted-foreground truncate text-xs'>
-                                {row.description}
-                              </p>
+                              {expanded ? null : (
+                                <p className='text-muted-foreground truncate text-xs'>
+                                  {row.description}
+                                </p>
+                              )}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className='text-right tabular-nums'>
+                        <TableCell className='text-right tabular-nums cursor-pointer'>
                           {peso(row.priceCents)}
                         </TableCell>
-                        <TableCell className='text-right'>
+                        <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
                           <RowActionsCluster
                             expanded={expanded}
                             onToggle={() => toggleExpanded(row.id)}
@@ -180,9 +188,14 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
                         <p className='truncate font-medium'>{row.name}</p>
                         <p className='text-right tabular-nums'>{peso(row.priceCents)}</p>
                       </div>
+                      {/* N2: line 2 hides while expanded (dot stays). */}
                       <div className='mt-1 flex min-w-0 items-center gap-2'>
                         <StatusBadge isActive={row.isActive} />
-                        <p className='text-muted-foreground truncate text-xs'>{row.description}</p>
+                        {expanded ? null : (
+                          <p className='text-muted-foreground truncate text-xs'>
+                            {row.description}
+                          </p>
+                        )}
                       </div>
                     </button>
                     <Collapse open={expanded}>

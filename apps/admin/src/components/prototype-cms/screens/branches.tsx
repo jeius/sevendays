@@ -2,9 +2,11 @@
 // status and address columns are gone (the dot + address live under the
 // name), phone keeps its mono column and walk-ins its badge column, row
 // actions are icon-only, and rows expand to show the full address (phone on
-// mobile). Editor is the ruled Sheet (V1 settled). Deliberately NO
-// hours/capacity fields anywhere — v2 scope; the header subline carries that
-// note. Nothing persists. Never merges; delete with the route.
+// mobile). Round 3: action icons get tooltips, the truncated address hides
+// while expanded, and clicking the row toggles expansion. Editor is the
+// ruled Sheet (V1 settled). Deliberately NO hours/capacity fields anywhere —
+// v2 scope; the header subline carries that note. Nothing persists. Never
+// merges; delete with the route.
 
 import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
@@ -72,7 +74,6 @@ export function BranchesScreen({ search }: ScreenProps) {
         size='icon-sm'
         type='button'
         aria-label='Edit'
-        title='Edit'
         onClick={() => setEditId(id)}
       >
         <SquarePen aria-hidden='true' />
@@ -119,29 +120,37 @@ export function BranchesScreen({ search }: ScreenProps) {
                   const expanded = expandedId === row.id;
                   return (
                     <Fragment key={row.id}>
-                      <TableRow className='group'>
-                        <TableCell>
+                      {/* N3: whole-row click toggles expansion — the actions
+                          cell stops propagation so icon clicks never toggle;
+                          the chevron stays the keyboard/AT toggle. */}
+                      <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
+                        <TableCell className='cursor-pointer'>
                           {/* B1: identity = name / dot + address (the address
                               column died — full text on expand). */}
                           <div className='space-y-0.5'>
                             <p className='font-semibold'>{row.name}</p>
+                            {/* N2: the truncated line hides while expanded. */}
                             <div className='flex min-w-0 items-center gap-2'>
                               <StatusBadge isActive={row.isActive} />
-                              <p className='text-muted-foreground truncate text-xs'>
-                                {row.address}
-                              </p>
+                              {expanded ? null : (
+                                <p className='text-muted-foreground truncate text-xs'>
+                                  {row.address}
+                                </p>
+                              )}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className='font-mono text-sm'>{row.phone}</TableCell>
-                        <TableCell>
+                        <TableCell className='font-mono text-sm cursor-pointer'>
+                          {row.phone}
+                        </TableCell>
+                        <TableCell className='cursor-pointer'>
                           {row.acceptsWalkIns ? (
                             <Badge variant='secondary'>Walk-in friendly</Badge>
                           ) : (
                             <span className='text-muted-foreground'>—</span>
                           )}
                         </TableCell>
-                        <TableCell className='text-right'>
+                        <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
                           <RowActionsCluster
                             expanded={expanded}
                             onToggle={() => toggleExpanded(row.id)}
@@ -182,9 +191,12 @@ export function BranchesScreen({ search }: ScreenProps) {
                           <Badge variant='secondary'>Walk-in friendly</Badge>
                         ) : null}
                       </div>
+                      {/* N2: line 2 hides while expanded (dot stays). */}
                       <div className='mt-1 flex min-w-0 items-center gap-2'>
                         <StatusBadge isActive={row.isActive} />
-                        <p className='text-muted-foreground truncate text-xs'>{row.address}</p>
+                        {expanded ? null : (
+                          <p className='text-muted-foreground truncate text-xs'>{row.address}</p>
+                        )}
                       </div>
                     </button>
                     <Collapse open={expanded}>

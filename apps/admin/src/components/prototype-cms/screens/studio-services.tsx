@@ -2,10 +2,11 @@
 // Round 2: the status column is gone (dot lives under the name), bookable
 // branches render as outline badges in their own column (desktop) and only
 // in the expanded reveal (mobile), row actions are icon-only, and rows
-// expand to show the full description. The branch matrix in the editor
-// renders as selectable name-only toggle cards (V3 settled); toggles write
-// straight into the row's local branchIds. Nothing persists. Never merges;
-// delete with the route.
+// expand to show the full description. Round 3: action icons get tooltips,
+// the truncated description hides while expanded, and clicking the row
+// toggles expansion. The branch matrix in the editor renders as selectable
+// name-only toggle cards (V3 settled); toggles write straight into the
+// row's local branchIds. Nothing persists. Never merges; delete with the route.
 
 import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
@@ -89,7 +90,6 @@ export function StudioServicesScreen({ search }: ScreenProps) {
         size='icon-sm'
         type='button'
         aria-label='Edit'
-        title='Edit'
         onClick={() => setEditId(id)}
       >
         <SquarePen aria-hidden='true' />
@@ -139,23 +139,29 @@ export function StudioServicesScreen({ search }: ScreenProps) {
                   const expanded = expandedId === row.id;
                   return (
                     <Fragment key={row.id}>
-                      <TableRow className='group'>
-                        <TableCell>
+                      {/* N3: whole-row click toggles expansion — the actions
+                          cell stops propagation so icon clicks never toggle;
+                          the chevron stays the keyboard/AT toggle. */}
+                      <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
+                        <TableCell className='cursor-pointer'>
                           {/* T1: identity = name / dot + description. */}
                           <div className='space-y-0.5'>
                             <p className='font-semibold'>{row.name}</p>
+                            {/* N2: the truncated line hides while expanded. */}
                             <div className='flex min-w-0 items-center gap-2'>
                               <StatusBadge isActive={row.isActive} />
-                              <p className='text-muted-foreground truncate text-xs'>
-                                {row.description}
-                              </p>
+                              {expanded ? null : (
+                                <p className='text-muted-foreground truncate text-xs'>
+                                  {row.description}
+                                </p>
+                              )}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className='text-right tabular-nums'>
+                        <TableCell className='text-right tabular-nums cursor-pointer'>
                           {peso(row.priceCents)}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className='cursor-pointer'>
                           {/* S2: branch names as outline badges. */}
                           {bookableAt.length > 0 ? (
                             <div className='flex flex-wrap gap-1'>
@@ -169,7 +175,7 @@ export function StudioServicesScreen({ search }: ScreenProps) {
                             <span className='text-muted-foreground'>—</span>
                           )}
                         </TableCell>
-                        <TableCell className='text-right'>
+                        <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
                           <RowActionsCluster
                             expanded={expanded}
                             onToggle={() => toggleExpanded(row.id)}
@@ -211,9 +217,14 @@ export function StudioServicesScreen({ search }: ScreenProps) {
                         <p className='truncate font-medium'>{row.name}</p>
                         <p className='text-right tabular-nums'>{peso(row.priceCents)}</p>
                       </div>
+                      {/* N2: line 2 hides while expanded (dot stays). */}
                       <div className='mt-1 flex min-w-0 items-center gap-2'>
                         <StatusBadge isActive={row.isActive} />
-                        <p className='text-muted-foreground truncate text-xs'>{row.description}</p>
+                        {expanded ? null : (
+                          <p className='text-muted-foreground truncate text-xs'>
+                            {row.description}
+                          </p>
+                        )}
                       </div>
                     </button>
                     <Collapse open={expanded}>
