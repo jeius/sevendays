@@ -1,9 +1,8 @@
-// PROTOTYPE (throwaway) — wayfinder #131: the add-ons screen. It carries the
-// V1 axis: the editor chrome is a centered Dialog (variant a) vs a right-side
-// Sheet (variant b) — identical content in both, so the owner rules on the
-// chrome alone. The applies-to matrix is fixed presentation (the V3-b card
-// style); checkboxes write straight into the row's local studioServiceIds.
-// Nothing persists. Never merges; delete with the route.
+// PROTOTYPE (throwaway) — wayfinder #131: the add-ons screen. Post-verdict:
+// the editor chrome is the ruled Sheet everywhere (V1 settled); the
+// applies-to matrix renders as selectable name-only toggle cards writing
+// straight into the row's local studioServiceIds. Nothing persists. Never
+// merges; delete with the route.
 
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent } from '@sevendays/ui/components/card';
@@ -32,7 +31,7 @@ import {
   StatusBadge,
 } from '../shared';
 
-export function AddOnsScreen({ variant, search }: ScreenProps) {
+export function AddOnsScreen({ search }: ScreenProps) {
   const [rows, setRows] = useState(addons);
   // Deep-linkable states (frame pass): ?edit=<id> opens that row's editor on
   // mount; ?confirm=<id> opens its deactivate confirm. Close is client-only.
@@ -105,7 +104,7 @@ export function AddOnsScreen({ variant, search }: ScreenProps) {
                     .map((id) => studioServices.find((service) => service.id === id)?.name)
                     .filter((name): name is string => name !== undefined);
                   return (
-                    <TableRow key={row.id} className={row.isActive ? undefined : 'opacity-60'}>
+                    <TableRow key={row.id}>
                       <TableCell>
                         <div className='space-y-0.5'>
                           <p className='font-semibold'>{row.name}</p>
@@ -171,10 +170,8 @@ export function AddOnsScreen({ variant, search }: ScreenProps) {
       <p className='text-muted-foreground text-xs'>Prototype: changes stay on this page.</p>
 
       {editRow ? (
-        // V1 carrier: chrome flips with the variant — a = Dialog, b = Sheet.
         <LightEntityEditor
           title={editRow.name}
-          chrome={variant === 'b' ? 'sheet' : 'dialog'}
           open={editId === editRow.id}
           onOpenChange={(open) => {
             if (!open) {
@@ -228,30 +225,24 @@ export function AddOnsScreen({ variant, search }: ScreenProps) {
             Active
           </label>
 
-          {/* Applies-to matrix — fixed presentation (the V3-b card style). */}
+          {/* Applies-to matrix — ruled: selectable name-only toggle cards. */}
           <section className='space-y-2'>
             <h3 className='text-sm font-medium'>Applies to services</h3>
             <div className='grid gap-2'>
               {studioServices.map((service) => {
-                const checkId = `${editRow.id}-${service.id}-applies`;
+                const selected = editRow.studioServiceIds.includes(service.id);
                 return (
-                  <div key={service.id} className='space-y-2 rounded-lg border p-3'>
-                    <p className='text-sm font-semibold'>{service.name}</p>
-                    <p className='text-muted-foreground text-xs'>{service.description}</p>
-                    <label
-                      htmlFor={checkId}
-                      className='flex items-center gap-2 text-sm font-medium'
-                    >
-                      <Checkbox
-                        id={checkId}
-                        checked={editRow.studioServiceIds.includes(service.id)}
-                        onCheckedChange={(checked) =>
-                          toggleService(editRow.id, service.id, checked === true)
-                        }
-                      />
-                      Applies
-                    </label>
-                  </div>
+                  <button
+                    key={service.id}
+                    type='button'
+                    aria-pressed={selected}
+                    onClick={() => toggleService(editRow.id, service.id, !selected)}
+                    className={`rounded-lg border p-3 text-left text-sm font-medium transition-colors ${
+                      selected ? 'border-primary ring-primary ring-1' : 'hover:bg-accent/50'
+                    }`}
+                  >
+                    {service.name}
+                  </button>
                 );
               })}
             </div>

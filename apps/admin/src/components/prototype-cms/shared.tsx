@@ -11,7 +11,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@sevendays/ui/components/alert-dialog';
-import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
 import {
   Dialog,
@@ -57,12 +56,22 @@ export function PageHeader({
   );
 }
 
-/** Status-badge ruling: active rows carry no badge; deactivated rows carry this one. */
+/**
+ * Ruled status indicator (owner verdict): a color dot + sr-only text, so
+ * color is never the only signal. FLAG: the active/deactivated palette is a
+ * spec-token decision — the token layer has no success/grey semantics, so
+ * Tailwind defaults stand in here.
+ */
 export function StatusBadge({ isActive }: { isActive: boolean }) {
-  if (isActive) {
-    return null;
-  }
-  return <Badge variant='outline'>Deactivated</Badge>;
+  return (
+    <span className='inline-flex items-center gap-1.5'>
+      <span
+        aria-hidden='true'
+        className={`size-2.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-400'}`}
+      />
+      <span className='sr-only'>{isActive ? 'Active' : 'Deactivated'}</span>
+    </span>
+  );
 }
 
 /** Controlled deactivate confirm. onConfirm never deletes — the screen flips isActive. */
@@ -110,14 +119,14 @@ export function EmptyState({ line, children }: { line: string; children?: ReactN
 
 /**
  * The light-entity editor shell: entity-name title, the screen's fields, and
- * Save changes / Cancel. Identical content in both chromes — `chrome` is the
- * V1 axis (Dialog vs Sheet) the owner rules on via the add-ons screen.
+ * Save changes / Cancel. Owner verdict (V1 ruled): Sheet everywhere —
+ * `chrome` defaults to 'sheet' and no screen passes it anymore.
  */
 export function LightEntityEditor({
   title,
   open,
   onOpenChange,
-  chrome = 'dialog',
+  chrome = 'sheet',
   children,
 }: {
   title: string;

@@ -74,8 +74,8 @@ function SortablePhotoCard({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={`animate-in fade-in slide-in-from-bottom-2 gap-0 overflow-hidden py-0 duration-300 ${
-        photo.isActive ? '' : 'opacity-60'
-      } ${isDragging ? 'relative z-10 shadow-md' : ''}`}
+        isDragging ? 'relative z-10 shadow-md' : ''
+      }`}
     >
       <div className='bg-muted relative aspect-[4/3]'>
         {photo.photoUrl ? (
@@ -412,7 +412,6 @@ export function GalleryScreen({ search }: ScreenProps) {
       {editPhoto ? (
         <LightEntityEditor
           title={editPhoto.title}
-          chrome='dialog'
           open={editId === editPhoto.id}
           onOpenChange={(open) => {
             if (!open) {

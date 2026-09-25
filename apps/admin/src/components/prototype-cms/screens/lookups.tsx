@@ -95,7 +95,7 @@ export function LookupsScreen({ search }: ScreenProps) {
             </TableHeader>
             <TableBody>
               {sizes.map((row) => (
-                <TableRow key={row.id} className={row.isActive ? undefined : 'opacity-60'}>
+                <TableRow key={row.id}>
                   <TableCell className='font-mono'>{row.code}</TableCell>
                   {/* The 8R row's long seed description wraps visibly — real content. */}
                   <TableCell>
@@ -163,7 +163,7 @@ export function LookupsScreen({ search }: ScreenProps) {
             </TableHeader>
             <TableBody>
               {attireRows.map((row) => (
-                <TableRow key={row.id} className={row.isActive ? undefined : 'opacity-60'}>
+                <TableRow key={row.id}>
                   <TableCell>
                     <p className='font-semibold'>{row.name}</p>
                   </TableCell>

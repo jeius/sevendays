@@ -1,9 +1,8 @@
-// PROTOTYPE (throwaway) — wayfinder #131: the studio-services screen. The
-// V3 axis lives INSIDE the editor: a = branch matrix as a compact table,
-// b = branch matrix as one small card per branch. Matrix checkboxes write
-// straight into the row's local branchIds (full-replace on save is the
-// model; no per-cell save affordance). Nothing persists. Never merges;
-// delete with the route.
+// PROTOTYPE (throwaway) — wayfinder #131: the studio-services screen.
+// Post-verdict: the branch matrix renders as selectable name-only toggle
+// cards in both variants (V3 settled); toggles write straight into the row's
+// local branchIds (full-replace on save is the model; no per-cell save
+// affordance). Nothing persists. Never merges; delete with the route.
 
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent } from '@sevendays/ui/components/card';
@@ -32,7 +31,7 @@ import {
   StatusBadge,
 } from '../shared';
 
-export function StudioServicesScreen({ variant, search }: ScreenProps) {
+export function StudioServicesScreen({ search }: ScreenProps) {
   const [rows, setRows] = useState(studioServices);
   // Deep-linkable states (frame pass): ?edit=<id> opens that row's editor on
   // mount; ?confirm=<id> opens its deactivate confirm. Close is client-only.
@@ -105,7 +104,7 @@ export function StudioServicesScreen({ variant, search }: ScreenProps) {
                     .map((id) => branches.find((branch) => branch.id === id)?.name)
                     .filter((name): name is string => name !== undefined);
                   return (
-                    <TableRow key={row.id} className={row.isActive ? undefined : 'opacity-60'}>
+                    <TableRow key={row.id}>
                       <TableCell>
                         <div className='space-y-0.5'>
                           <p className='font-semibold'>{row.name}</p>
@@ -228,63 +227,26 @@ export function StudioServicesScreen({ variant, search }: ScreenProps) {
 
           <section className='space-y-2'>
             <h3 className='text-sm font-medium'>Bookable at branches</h3>
-            {variant === 'a' ? (
-              // V3-a: the matrix as a compact table — columns headed by the
-              // branch names, one checkbox row beneath.
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {branches.map((branch) => (
-                      <TableHead key={branch.id} className='text-center'>
-                        {branch.name}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    {branches.map((branch) => (
-                      <TableCell key={branch.id} className='text-center'>
-                        <Checkbox
-                          aria-label={`Bookable at ${branch.name}`}
-                          checked={editRow.branchIds.includes(branch.id)}
-                          onCheckedChange={(checked) =>
-                            toggleBranch(editRow.id, branch.id, checked === true)
-                          }
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableBody>
-              </Table>
-            ) : (
-              // V3-b: one small card per branch — name semibold, address
-              // muted, its checkbox + Bookable label beneath.
-              <div className='grid gap-2 sm:grid-cols-3'>
-                {branches.map((branch) => {
-                  const checkId = `${editRow.id}-${branch.id}-bookable`;
-                  return (
-                    <div key={branch.id} className='space-y-2 rounded-lg border p-3'>
-                      <p className='text-sm font-semibold'>{branch.name}</p>
-                      <p className='text-muted-foreground text-xs'>{branch.address}</p>
-                      <label
-                        htmlFor={checkId}
-                        className='flex items-center gap-2 text-sm font-medium'
-                      >
-                        <Checkbox
-                          id={checkId}
-                          checked={editRow.branchIds.includes(branch.id)}
-                          onCheckedChange={(checked) =>
-                            toggleBranch(editRow.id, branch.id, checked === true)
-                          }
-                        />
-                        Bookable
-                      </label>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            {/* Ruled V3: selectable name-only cards in both variants — the
+                variant table/card branch is deleted. Click toggles branchIds. */}
+            <div className='grid gap-2 sm:grid-cols-3'>
+              {branches.map((branch) => {
+                const selected = editRow.branchIds.includes(branch.id);
+                return (
+                  <button
+                    key={branch.id}
+                    type='button'
+                    aria-pressed={selected}
+                    onClick={() => toggleBranch(editRow.id, branch.id, !selected)}
+                    className={`rounded-lg border p-3 text-left text-sm font-medium transition-colors ${
+                      selected ? 'border-primary ring-primary ring-1' : 'hover:bg-accent/50'
+                    }`}
+                  >
+                    {branch.name}
+                  </button>
+                );
+              })}
+            </div>
           </section>
         </LightEntityEditor>
       ) : null}

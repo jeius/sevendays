@@ -86,7 +86,7 @@ export function BranchesScreen({ search }: ScreenProps) {
               </TableHeader>
               <TableBody>
                 {rows.map((row) => (
-                  <TableRow key={row.id} className={row.isActive ? undefined : 'opacity-60'}>
+                  <TableRow key={row.id}>
                     <TableCell>
                       <p className='font-semibold'>{row.name}</p>
                     </TableCell>

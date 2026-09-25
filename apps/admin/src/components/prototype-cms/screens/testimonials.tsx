@@ -84,7 +84,7 @@ export function TestimonialsScreen({ search }: ScreenProps) {
               </TableHeader>
               <TableBody>
                 {rows.map((row) => (
-                  <TableRow key={row.id} className={row.isActive ? undefined : 'opacity-60'}>
+                  <TableRow key={row.id}>
                     <TableCell>
                       <p className='max-w-72 truncate'>{row.quote}</p>
                     </TableCell>
@@ -140,7 +140,6 @@ export function TestimonialsScreen({ search }: ScreenProps) {
       {editRow ? (
         <LightEntityEditor
           title={editRow.person}
-          chrome='dialog'
           open={editId === editRow.id}
           onOpenChange={(open) => {
             if (!open) {
