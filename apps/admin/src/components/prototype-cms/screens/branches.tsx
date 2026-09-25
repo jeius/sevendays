@@ -1,8 +1,10 @@
-// PROTOTYPE (throwaway) — wayfinder #131: the branches screen. Editor is a
-// centered Dialog on both variants (the composition to react to is identical
-// for create). Deliberately NO hours/capacity fields anywhere — v2 scope;
-// the header subline carries that note. Nothing persists. Never merges;
-// delete with the route.
+// PROTOTYPE (throwaway) — wayfinder #131: the branches screen. Round 2: the
+// status and address columns are gone (the dot + address live under the
+// name), phone keeps its mono column and walk-ins its badge column, row
+// actions are icon-only, and rows expand to show the full address (phone on
+// mobile). Editor is the ruled Sheet (V1 settled). Deliberately NO
+// hours/capacity fields anywhere — v2 scope; the header subline carries that
+// note. Nothing persists. Never merges; delete with the route.
 
 import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
@@ -18,15 +20,20 @@ import {
   TableHeader,
   TableRow,
 } from '@sevendays/ui/components/table';
-import { useId, useState } from 'react';
+import { SquarePen } from 'lucide-react';
+import { Fragment, useId, useState } from 'react';
 import type { BranchRow } from '../fixtures';
 import { branches } from '../fixtures';
 import type { ScreenProps } from '../nav';
 import {
+  Collapse,
   DeactivateConfirm,
   EmptyState,
+  ExpandPanel,
   LightEntityEditor,
   PageHeader,
+  RowActionsCluster,
+  RowIconActions,
   StatusBadge,
 } from '../shared';
 
@@ -36,6 +43,8 @@ export function BranchesScreen({ search }: ScreenProps) {
   // mount; ?confirm=<id> opens its deactivate confirm. Close is client-only.
   const [editId, setEditId] = useState<string | null>(search.edit ?? null);
   const [confirmId, setConfirmId] = useState<string | null>(search.confirm ?? null);
+  // T3: controlled disclosure — one expanded row at a time (id or null).
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const editRow = rows.find((row) => row.id === editId);
   const confirmRow = rows.find((row) => row.id === confirmId);
   const nameId = useId();
@@ -50,6 +59,25 @@ export function BranchesScreen({ search }: ScreenProps) {
 
   function setActive(id: string, isActive: boolean) {
     setRows((prev) => prev.map((row) => (row.id === id ? { ...row, isActive } : row)));
+  }
+
+  function toggleExpanded(id: string) {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }
+
+  function editButton(id: string) {
+    return (
+      <Button
+        variant='ghost'
+        size='icon-sm'
+        type='button'
+        aria-label='Edit'
+        title='Edit'
+        onClick={() => setEditId(id)}
+      >
+        <SquarePen aria-hidden='true' />
+      </Button>
+    );
   }
 
   return (
@@ -73,128 +101,109 @@ export function BranchesScreen({ search }: ScreenProps) {
       ) : (
         <Card className='@container'>
           <CardContent>
-            {/* @container: the table folds into stacked <details> rows below a
-                700px CONTAINER width (Tailwind v4 native container queries). */}
+            {/* @container: the table folds into stacked rows below a 700px
+                CONTAINER width (Tailwind v4 native container queries). */}
             <Table className='@max-[700px]:hidden'>
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead>Address</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Walk-ins</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className='text-right'>Actions</TableHead>
+                  {/* T2: the Actions header renders empty — the icons carry
+                      their own labels. */}
+                  <TableHead className='text-right' />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id} className='group'>
-                    <TableCell>
-                      <p className='font-semibold'>{row.name}</p>
-                    </TableCell>
-                    <TableCell>
-                      <p className='text-muted-foreground text-sm'>{row.address}</p>
-                    </TableCell>
-                    <TableCell className='font-mono text-sm'>{row.phone}</TableCell>
-                    <TableCell>
-                      {row.acceptsWalkIns ? (
-                        <Badge variant='secondary'>Walk-in friendly</Badge>
-                      ) : (
-                        <span className='text-muted-foreground'>—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge isActive={row.isActive} />
-                    </TableCell>
-                    <TableCell className='text-right'>
-                      <div className='flex justify-end gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100'>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => setEditId(row.id)}
-                          type='button'
-                        >
-                          Edit
-                        </Button>
-                        {row.isActive ? (
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            className='text-destructive hover:bg-destructive/10 hover:text-destructive'
-                            onClick={() => setConfirmId(row.id)}
-                            type='button'
-                          >
-                            Deactivate
-                          </Button>
-                        ) : (
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            onClick={() => setActive(row.id, true)}
-                            type='button'
-                          >
-                            Reactivate
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {rows.map((row) => {
+                  const expanded = expandedId === row.id;
+                  return (
+                    <Fragment key={row.id}>
+                      <TableRow className='group'>
+                        <TableCell>
+                          {/* B1: identity = name / dot + address (the address
+                              column died — full text on expand). */}
+                          <div className='space-y-0.5'>
+                            <p className='font-semibold'>{row.name}</p>
+                            <div className='flex min-w-0 items-center gap-2'>
+                              <StatusBadge isActive={row.isActive} />
+                              <p className='text-muted-foreground truncate text-xs'>
+                                {row.address}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className='font-mono text-sm'>{row.phone}</TableCell>
+                        <TableCell>
+                          {row.acceptsWalkIns ? (
+                            <Badge variant='secondary'>Walk-in friendly</Badge>
+                          ) : (
+                            <span className='text-muted-foreground'>—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className='text-right'>
+                          <RowActionsCluster
+                            expanded={expanded}
+                            onToggle={() => toggleExpanded(row.id)}
+                            edit={editButton(row.id)}
+                            isActive={row.isActive}
+                            onDeactivate={() => setConfirmId(row.id)}
+                            onReactivate={() => setActive(row.id, true)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                      {/* T3 desktop reveal: the FULL address. */}
+                      <ExpandPanel open={expanded} colSpan={4}>
+                        {row.address}
+                      </ExpandPanel>
+                    </Fragment>
+                  );
+                })}
               </TableBody>
             </Table>
 
-            {/* Stacked posture (below 700px container width): two-line rows in
-                native <details>; the reveal holds address/phone + actions. */}
+            {/* Stacked posture (below 700px container width): the whole
+                two-line header toggles the animated reveal (M1); line 1's
+                right value is the Walk-in badge, phone moves to the reveal. */}
             <div className='hidden flex-col @max-[700px]:flex'>
-              {rows.map((row) => (
-                <details key={row.id} className='border-border border-b py-2 last:border-b-0'>
-                  <summary className='cursor-pointer list-none [&::-webkit-details-marker]:hidden'>
-                    <div className='flex items-center justify-between gap-3'>
-                      <p className='truncate font-medium'>{row.name}</p>
-                    </div>
-                    <div className='mt-1 flex min-w-0 items-center gap-2'>
-                      <StatusBadge isActive={row.isActive} />
-                      <p className='text-muted-foreground truncate text-sm'>
-                        {row.acceptsWalkIns ? 'Walk-in friendly' : '—'}
-                      </p>
-                    </div>
-                  </summary>
-                  <div className='mt-2 space-y-2'>
-                    <p className='text-muted-foreground text-sm'>{row.address}</p>
-                    <p className='font-mono text-sm'>{row.phone}</p>
-                    <div className='flex gap-1'>
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        onClick={() => setEditId(row.id)}
-                        type='button'
-                      >
-                        Edit
-                      </Button>
-                      {row.isActive ? (
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          className='text-destructive hover:bg-destructive/10 hover:text-destructive'
-                          onClick={() => setConfirmId(row.id)}
-                          type='button'
-                        >
-                          Deactivate
-                        </Button>
-                      ) : (
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => setActive(row.id, true)}
-                          type='button'
-                        >
-                          Reactivate
-                        </Button>
-                      )}
-                    </div>
+              {rows.map((row) => {
+                const expanded = expandedId === row.id;
+                return (
+                  <div key={row.id} className='border-border border-b py-2 last:border-b-0'>
+                    <button
+                      type='button'
+                      aria-expanded={expanded}
+                      className='w-full text-left'
+                      onClick={() => toggleExpanded(row.id)}
+                    >
+                      <div className='flex items-center justify-between gap-3'>
+                        <p className='truncate font-medium'>{row.name}</p>
+                        {row.acceptsWalkIns ? (
+                          <Badge variant='secondary'>Walk-in friendly</Badge>
+                        ) : null}
+                      </div>
+                      <div className='mt-1 flex min-w-0 items-center gap-2'>
+                        <StatusBadge isActive={row.isActive} />
+                        <p className='text-muted-foreground truncate text-xs'>{row.address}</p>
+                      </div>
+                    </button>
+                    <Collapse open={expanded}>
+                      <div className='mt-2 space-y-2'>
+                        <p className='text-muted-foreground text-sm'>{row.address}</p>
+                        <p className='font-mono text-sm'>{row.phone}</p>
+                        <div className='flex gap-1'>
+                          <RowIconActions
+                            edit={editButton(row.id)}
+                            isActive={row.isActive}
+                            onDeactivate={() => setConfirmId(row.id)}
+                            onReactivate={() => setActive(row.id, true)}
+                          />
+                        </div>
+                      </div>
+                    </Collapse>
                   </div>
-                </details>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>

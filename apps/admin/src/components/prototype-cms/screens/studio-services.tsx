@@ -1,9 +1,13 @@
 // PROTOTYPE (throwaway) — wayfinder #131: the studio-services screen.
-// Post-verdict: the branch matrix renders as selectable name-only toggle
-// cards in both variants (V3 settled); toggles write straight into the row's
-// local branchIds (full-replace on save is the model; no per-cell save
-// affordance). Nothing persists. Never merges; delete with the route.
+// Round 2: the status column is gone (dot lives under the name), bookable
+// branches render as outline badges in their own column (desktop) and only
+// in the expanded reveal (mobile), row actions are icon-only, and rows
+// expand to show the full description. The branch matrix in the editor
+// renders as selectable name-only toggle cards (V3 settled); toggles write
+// straight into the row's local branchIds. Nothing persists. Never merges;
+// delete with the route.
 
+import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent } from '@sevendays/ui/components/card';
 import { Checkbox } from '@sevendays/ui/components/checkbox';
@@ -18,16 +22,21 @@ import {
   TableRow,
 } from '@sevendays/ui/components/table';
 import { Textarea } from '@sevendays/ui/components/textarea';
-import { useId, useState } from 'react';
+import { SquarePen } from 'lucide-react';
+import { Fragment, useId, useState } from 'react';
 import type { StudioServiceRow } from '../fixtures';
 import { branches, studioServices } from '../fixtures';
 import type { ScreenProps } from '../nav';
 import {
+  Collapse,
   DeactivateConfirm,
   EmptyState,
+  ExpandPanel,
   LightEntityEditor,
   PageHeader,
   peso,
+  RowActionsCluster,
+  RowIconActions,
   StatusBadge,
 } from '../shared';
 
@@ -37,6 +46,8 @@ export function StudioServicesScreen({ search }: ScreenProps) {
   // mount; ?confirm=<id> opens its deactivate confirm. Close is client-only.
   const [editId, setEditId] = useState<string | null>(search.edit ?? null);
   const [confirmId, setConfirmId] = useState<string | null>(search.confirm ?? null);
+  // T3: controlled disclosure — one expanded row at a time (id or null).
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const editRow = rows.find((row) => row.id === editId);
   const confirmRow = rows.find((row) => row.id === confirmId);
   const nameId = useId();
@@ -67,6 +78,25 @@ export function StudioServicesScreen({ search }: ScreenProps) {
     );
   }
 
+  function toggleExpanded(id: string) {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }
+
+  function editButton(id: string) {
+    return (
+      <Button
+        variant='ghost'
+        size='icon-sm'
+        type='button'
+        aria-label='Edit'
+        title='Edit'
+        onClick={() => setEditId(id)}
+      >
+        <SquarePen aria-hidden='true' />
+      </Button>
+    );
+  }
+
   return (
     <section data-prototype-screen='studio-services' className='space-y-4'>
       <PageHeader
@@ -88,16 +118,17 @@ export function StudioServicesScreen({ search }: ScreenProps) {
       ) : (
         <Card className='@container'>
           <CardContent>
-            {/* @container: the table folds into stacked <details> rows below a
-                700px CONTAINER width (Tailwind v4 native container queries). */}
+            {/* @container: the table folds into stacked rows below a 700px
+                CONTAINER width (Tailwind v4 native container queries). */}
             <Table className='@max-[700px]:hidden'>
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead className='text-right'>Price</TableHead>
-                  <TableHead>Bookable at</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className='text-right'>Actions</TableHead>
+                  <TableHead>Branches</TableHead>
+                  {/* T2: the Actions header renders empty — the icons carry
+                      their own labels. */}
+                  <TableHead className='text-right' />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -105,122 +136,109 @@ export function StudioServicesScreen({ search }: ScreenProps) {
                   const bookableAt = row.branchIds
                     .map((id) => branches.find((branch) => branch.id === id)?.name)
                     .filter((name): name is string => name !== undefined);
+                  const expanded = expandedId === row.id;
                   return (
-                    <TableRow key={row.id} className='group'>
-                      <TableCell>
-                        <div className='space-y-0.5'>
-                          <p className='font-semibold'>{row.name}</p>
-                          <p className='text-muted-foreground max-w-56 truncate text-xs'>
-                            {row.description}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell className='text-right tabular-nums'>
-                        {peso(row.priceCents)}
-                      </TableCell>
-                      <TableCell>
-                        {bookableAt.length > 0 ? (
-                          <p className='text-muted-foreground text-sm'>{bookableAt.join(', ')}</p>
-                        ) : (
-                          <span className='text-muted-foreground'>—</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge isActive={row.isActive} />
-                      </TableCell>
-                      <TableCell className='text-right'>
-                        <div className='flex justify-end gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100'>
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            onClick={() => setEditId(row.id)}
-                            type='button'
-                          >
-                            Edit
-                          </Button>
-                          {row.isActive ? (
-                            <Button
-                              variant='ghost'
-                              size='sm'
-                              className='text-destructive hover:bg-destructive/10 hover:text-destructive'
-                              onClick={() => setConfirmId(row.id)}
-                              type='button'
-                            >
-                              Deactivate
-                            </Button>
+                    <Fragment key={row.id}>
+                      <TableRow className='group'>
+                        <TableCell>
+                          {/* T1: identity = name / dot + description. */}
+                          <div className='space-y-0.5'>
+                            <p className='font-semibold'>{row.name}</p>
+                            <div className='flex min-w-0 items-center gap-2'>
+                              <StatusBadge isActive={row.isActive} />
+                              <p className='text-muted-foreground truncate text-xs'>
+                                {row.description}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className='text-right tabular-nums'>
+                          {peso(row.priceCents)}
+                        </TableCell>
+                        <TableCell>
+                          {/* S2: branch names as outline badges. */}
+                          {bookableAt.length > 0 ? (
+                            <div className='flex flex-wrap gap-1'>
+                              {bookableAt.map((name) => (
+                                <Badge key={name} variant='outline'>
+                                  {name}
+                                </Badge>
+                              ))}
+                            </div>
                           ) : (
-                            <Button
-                              variant='ghost'
-                              size='sm'
-                              onClick={() => setActive(row.id, true)}
-                              type='button'
-                            >
-                              Reactivate
-                            </Button>
+                            <span className='text-muted-foreground'>—</span>
                           )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                        </TableCell>
+                        <TableCell className='text-right'>
+                          <RowActionsCluster
+                            expanded={expanded}
+                            onToggle={() => toggleExpanded(row.id)}
+                            edit={editButton(row.id)}
+                            isActive={row.isActive}
+                            onDeactivate={() => setConfirmId(row.id)}
+                            onReactivate={() => setActive(row.id, true)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                      {/* T3 desktop reveal: the FULL description. */}
+                      <ExpandPanel open={expanded} colSpan={4}>
+                        {row.description}
+                      </ExpandPanel>
+                    </Fragment>
                   );
                 })}
               </TableBody>
             </Table>
 
-            {/* Stacked posture (below 700px container width): two-line rows in
-                native <details>; the reveal holds overflow fields + actions. */}
+            {/* Stacked posture (below 700px container width): the whole
+                two-line header toggles the animated reveal (M1); branch
+                badges live ONLY in the reveal (S2). */}
             <div className='hidden flex-col @max-[700px]:flex'>
               {rows.map((row) => {
                 const bookableAt = row.branchIds
                   .map((id) => branches.find((branch) => branch.id === id)?.name)
                   .filter((name): name is string => name !== undefined);
+                const expanded = expandedId === row.id;
                 return (
-                  <details key={row.id} className='border-border border-b py-2 last:border-b-0'>
-                    <summary className='cursor-pointer list-none [&::-webkit-details-marker]:hidden'>
+                  <div key={row.id} className='border-border border-b py-2 last:border-b-0'>
+                    <button
+                      type='button'
+                      aria-expanded={expanded}
+                      className='w-full text-left'
+                      onClick={() => toggleExpanded(row.id)}
+                    >
                       <div className='flex items-center justify-between gap-3'>
                         <p className='truncate font-medium'>{row.name}</p>
                         <p className='text-right tabular-nums'>{peso(row.priceCents)}</p>
                       </div>
                       <div className='mt-1 flex min-w-0 items-center gap-2'>
                         <StatusBadge isActive={row.isActive} />
-                        <p className='text-muted-foreground truncate text-sm'>
-                          {bookableAt.length > 0 ? bookableAt.join(', ') : '—'}
-                        </p>
+                        <p className='text-muted-foreground truncate text-xs'>{row.description}</p>
                       </div>
-                    </summary>
-                    <div className='mt-2 space-y-2'>
-                      <p className='text-muted-foreground text-sm'>{row.description}</p>
-                      <div className='flex gap-1'>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => setEditId(row.id)}
-                          type='button'
-                        >
-                          Edit
-                        </Button>
-                        {row.isActive ? (
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            className='text-destructive hover:bg-destructive/10 hover:text-destructive'
-                            onClick={() => setConfirmId(row.id)}
-                            type='button'
-                          >
-                            Deactivate
-                          </Button>
-                        ) : (
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            onClick={() => setActive(row.id, true)}
-                            type='button'
-                          >
-                            Reactivate
-                          </Button>
-                        )}
+                    </button>
+                    <Collapse open={expanded}>
+                      <div className='mt-2 space-y-2'>
+                        <p className='text-muted-foreground text-sm'>{row.description}</p>
+                        {bookableAt.length > 0 ? (
+                          <div className='flex flex-wrap gap-1'>
+                            {bookableAt.map((name) => (
+                              <Badge key={name} variant='outline'>
+                                {name}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : null}
+                        <div className='flex gap-1'>
+                          <RowIconActions
+                            edit={editButton(row.id)}
+                            isActive={row.isActive}
+                            onDeactivate={() => setConfirmId(row.id)}
+                            onReactivate={() => setActive(row.id, true)}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </details>
+                    </Collapse>
+                  </div>
                 );
               })}
             </div>

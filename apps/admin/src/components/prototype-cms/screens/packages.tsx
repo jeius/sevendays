@@ -1,6 +1,9 @@
 // PROTOTYPE (throwaway) — wayfinder #131: the packages table screen (the
-// table-first list posture every later catalog screen copies). Local state
-// only: deactivate/reactivate flips isActive, nothing persists. Never merges;
+// table-first list posture every later catalog screen copies). Round 2: the
+// status column is gone (dot lives under the name), Featured is a badge in
+// the identity cell, row actions are icon-only, and rows expand (controlled
+// disclosure) to show the full description. Local state only:
+// deactivate/reactivate flips isActive, nothing persists. Never merges;
 // delete with the route.
 
 import { Badge } from '@sevendays/ui/components/badge';
@@ -15,20 +18,51 @@ import {
   TableRow,
 } from '@sevendays/ui/components/table';
 import { Link } from '@tanstack/react-router';
-import { Image } from 'lucide-react';
-import { useState } from 'react';
+import { Image, SquarePen } from 'lucide-react';
+import { Fragment, useState } from 'react';
 import { packages } from '../fixtures';
 import type { ScreenProps } from '../nav';
-import { DeactivateConfirm, EmptyState, PageHeader, peso, StatusBadge } from '../shared';
+import {
+  Collapse,
+  DeactivateConfirm,
+  EmptyState,
+  ExpandPanel,
+  PageHeader,
+  peso,
+  RowActionsCluster,
+  RowIconActions,
+  StatusBadge,
+} from '../shared';
 
 export function PackagesScreen({ variant, search }: ScreenProps) {
   const [rows, setRows] = useState(packages);
   // Deep-linkable confirm (frame pass): ?confirm=<id> opens that row's dialog.
   const [confirmId, setConfirmId] = useState<string | null>(search.confirm ?? null);
+  // T3: controlled disclosure — one expanded row at a time (id or null).
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const confirmRow = rows.find((row) => row.id === confirmId);
 
   function setActive(id: string, isActive: boolean) {
     setRows((prev) => prev.map((row) => (row.id === id ? { ...row, isActive } : row)));
+  }
+
+  function toggleExpanded(id: string) {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }
+
+  // T2: Edit stays a real router Link (deep-link to the editor screen).
+  function editButton() {
+    return (
+      <Button
+        variant='ghost'
+        size='icon-sm'
+        render={<Link to='/prototype-cms' search={{ screen: 'package-editor', variant }} />}
+        aria-label='Edit'
+        title='Edit'
+      >
+        <SquarePen aria-hidden='true' />
+      </Button>
+    );
   }
 
   return (
@@ -52,137 +86,125 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
       ) : (
         <Card className='@container'>
           <CardContent>
-            {/* @container: the table folds into stacked <details> rows below a
-                700px CONTAINER width (Tailwind v4 native container queries). */}
+            {/* @container: the table folds into stacked rows below a 700px
+                CONTAINER width (Tailwind v4 native container queries). */}
             <Table className='@max-[700px]:hidden'>
               <TableHeader>
                 <TableRow>
                   <TableHead className='w-14'>Cover</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead className='text-right'>Price</TableHead>
-                  <TableHead>Featured</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className='text-right'>Actions</TableHead>
+                  {/* T2: the Actions header renders empty — the icons carry
+                      their own labels. */}
+                  <TableHead className='text-right' />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id} className='group'>
-                    <TableCell>
-                      {row.coverImageUrl ? (
-                        <img
-                          src={row.coverImageUrl}
-                          alt=''
-                          className='h-[30px] w-10 rounded-md object-cover'
-                        />
-                      ) : (
-                        <div className='bg-muted text-muted-foreground grid h-[30px] w-10 place-items-center rounded-md'>
-                          <Image className='size-4' aria-hidden='true' />
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className='space-y-0.5'>
-                        <p className='font-semibold'>{row.name}</p>
-                        <p className='text-muted-foreground font-mono text-xs'>{row.slug}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell className='text-right tabular-nums'>
-                      {peso(row.priceCents)}
-                    </TableCell>
-                    <TableCell>
-                      {row.isFeatured ? (
-                        <Badge variant='secondary'>Featured</Badge>
-                      ) : (
-                        <span className='text-muted-foreground'>—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge isActive={row.isActive} />
-                    </TableCell>
-                    <TableCell className='text-right'>
-                      <div className='flex justify-end gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100'>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          render={
-                            <Link
-                              to='/prototype-cms'
-                              search={{ screen: 'package-editor', variant }}
+                {rows.map((row) => {
+                  const expanded = expandedId === row.id;
+                  return (
+                    <Fragment key={row.id}>
+                      <TableRow className='group'>
+                        <TableCell>
+                          {row.coverImageUrl ? (
+                            <img
+                              src={row.coverImageUrl}
+                              alt=''
+                              className='h-[30px] w-10 rounded-md object-cover'
                             />
-                          }
-                        >
-                          Edit
-                        </Button>
-                        {row.isActive ? (
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            className='text-destructive hover:bg-destructive/10 hover:text-destructive'
-                            onClick={() => setConfirmId(row.id)}
-                          >
-                            Deactivate
-                          </Button>
-                        ) : (
-                          <Button variant='ghost' size='sm' onClick={() => setActive(row.id, true)}>
-                            Reactivate
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                          ) : (
+                            <div className='bg-muted text-muted-foreground grid h-[30px] w-10 place-items-center rounded-md'>
+                              <Image className='size-4' aria-hidden='true' />
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className='space-y-0.5'>
+                            {/* P1: Featured is a primary badge beside the name. */}
+                            <div className='flex items-center gap-2'>
+                              <p className='font-semibold'>{row.name}</p>
+                              {row.isFeatured ? (
+                                <Badge variant='default' className='text-xs'>
+                                  Featured
+                                </Badge>
+                              ) : null}
+                            </div>
+                            {/* T1: dot + description under the identity; the
+                                slug is gone from the table entirely (P2). */}
+                            <div className='flex min-w-0 items-center gap-2'>
+                              <StatusBadge isActive={row.isActive} />
+                              <p className='text-muted-foreground truncate text-xs'>
+                                {row.description}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className='text-right tabular-nums'>
+                          {peso(row.priceCents)}
+                        </TableCell>
+                        <TableCell className='text-right'>
+                          <RowActionsCluster
+                            expanded={expanded}
+                            onToggle={() => toggleExpanded(row.id)}
+                            edit={editButton()}
+                            isActive={row.isActive}
+                            onDeactivate={() => setConfirmId(row.id)}
+                            onReactivate={() => setActive(row.id, true)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                      {/* T3 desktop reveal: the FULL description. */}
+                      <ExpandPanel open={expanded} colSpan={4}>
+                        {row.description}
+                      </ExpandPanel>
+                    </Fragment>
+                  );
+                })}
               </TableBody>
             </Table>
 
-            {/* Stacked posture (below 700px container width): two-line rows in
-                native <details>; the reveal holds overflow fields + actions. */}
+            {/* Stacked posture (below 700px container width): the whole
+                two-line header toggles the animated reveal (M1). */}
             <div className='hidden flex-col @max-[700px]:flex'>
-              {rows.map((row) => (
-                <details key={row.id} className='border-border border-b py-2 last:border-b-0'>
-                  <summary className='cursor-pointer list-none [&::-webkit-details-marker]:hidden'>
-                    <div className='flex items-center justify-between gap-3'>
-                      <p className='truncate font-medium'>{row.name}</p>
-                      <p className='text-right tabular-nums'>{peso(row.priceCents)}</p>
-                    </div>
-                    <div className='mt-1 flex min-w-0 items-center gap-2'>
-                      <StatusBadge isActive={row.isActive} />
-                      <p className='text-muted-foreground truncate font-mono text-xs'>{row.slug}</p>
-                    </div>
-                  </summary>
-                  <div className='mt-2 space-y-2'>
-                    {row.isFeatured ? <Badge variant='secondary'>Featured</Badge> : null}
-                    <div className='flex gap-1'>
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        render={
-                          <Link
-                            to='/prototype-cms'
-                            search={{ screen: 'package-editor', variant }}
+              {rows.map((row) => {
+                const expanded = expandedId === row.id;
+                return (
+                  <div key={row.id} className='border-border border-b py-2 last:border-b-0'>
+                    <button
+                      type='button'
+                      aria-expanded={expanded}
+                      className='w-full text-left'
+                      onClick={() => toggleExpanded(row.id)}
+                    >
+                      <div className='flex items-center justify-between gap-3'>
+                        <p className='truncate font-medium'>{row.name}</p>
+                        <p className='text-right tabular-nums'>{peso(row.priceCents)}</p>
+                      </div>
+                      <div className='mt-1 flex min-w-0 items-center gap-2'>
+                        <StatusBadge isActive={row.isActive} />
+                        <p className='text-muted-foreground truncate text-xs'>{row.description}</p>
+                      </div>
+                    </button>
+                    <Collapse open={expanded}>
+                      <div className='mt-2 space-y-2'>
+                        {row.isFeatured ? (
+                          <Badge variant='default' className='text-xs'>
+                            Featured
+                          </Badge>
+                        ) : null}
+                        <div className='flex gap-1'>
+                          <RowIconActions
+                            edit={editButton()}
+                            isActive={row.isActive}
+                            onDeactivate={() => setConfirmId(row.id)}
+                            onReactivate={() => setActive(row.id, true)}
                           />
-                        }
-                      >
-                        Edit
-                      </Button>
-                      {row.isActive ? (
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          className='text-destructive hover:bg-destructive/10 hover:text-destructive'
-                          onClick={() => setConfirmId(row.id)}
-                        >
-                          Deactivate
-                        </Button>
-                      ) : (
-                        <Button variant='ghost' size='sm' onClick={() => setActive(row.id, true)}>
-                          Reactivate
-                        </Button>
-                      )}
-                    </div>
+                        </div>
+                      </div>
+                    </Collapse>
                   </div>
-                </details>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>

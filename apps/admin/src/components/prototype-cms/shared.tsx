@@ -28,7 +28,148 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@sevendays/ui/components/sheet';
+import { TableCell, TableRow } from '@sevendays/ui/components/table';
+import { ChevronDown, Power, PowerOff } from 'lucide-react';
 import type { ReactNode } from 'react';
+
+/**
+ * T3 expand mechanism: a persistent grid whose template-rows transition
+ * 0fr ↔ 1fr animates open AND closed (Base UI's Collapsible panel has no
+ * animation styles in the shared primitive, so the CSS grid trick wins).
+ * The element stays mounted in both states, which is what makes the close
+ * transition play.
+ */
+export function Collapse({ open, children }: { open: boolean; children: ReactNode }) {
+  return (
+    <div
+      className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+        open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+      }`}
+    >
+      <div className='min-h-0 overflow-hidden'>{children}</div>
+    </div>
+  );
+}
+
+/**
+ * T3 desktop reveal: a full-width panel TableRow rendered under its row
+ * (always mounted, so Collapse animates both ways). Collapsed it is 0px tall
+ * and borderless; the activated row keeps its own border-b as the separator.
+ */
+export function ExpandPanel({
+  open,
+  colSpan,
+  children,
+}: {
+  open: boolean;
+  colSpan: number;
+  children: ReactNode;
+}) {
+  return (
+    <TableRow className='border-b-0 hover:bg-transparent'>
+      <TableCell colSpan={colSpan} className='p-0 text-left align-top whitespace-normal'>
+        <Collapse open={open}>
+          <div className='text-muted-foreground px-2 pb-3 text-sm'>{children}</div>
+        </Collapse>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+/**
+ * T2 icon-only row actions: Edit (caller-rendered — packages routes to the
+ * editor screen, others open the sheet) / Deactivate (PowerOff) / Reactivate
+ * (Power), each with aria-label + title since the label text is gone.
+ */
+export function RowIconActions({
+  edit,
+  isActive,
+  onDeactivate,
+  onReactivate,
+}: {
+  edit: ReactNode;
+  isActive: boolean;
+  onDeactivate: () => void;
+  onReactivate: () => void;
+}) {
+  return (
+    <>
+      {edit}
+      {isActive ? (
+        <Button
+          variant='ghost'
+          size='icon-sm'
+          type='button'
+          aria-label='Deactivate'
+          title='Deactivate'
+          className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+          onClick={onDeactivate}
+        >
+          <PowerOff aria-hidden='true' />
+        </Button>
+      ) : (
+        <Button
+          variant='ghost'
+          size='icon-sm'
+          type='button'
+          aria-label='Reactivate'
+          title='Reactivate'
+          onClick={onReactivate}
+        >
+          <Power aria-hidden='true' />
+        </Button>
+      )}
+    </>
+  );
+}
+
+/**
+ * T2 actions cluster: the expand chevron (always visible, rotates when open)
+ * sits beside the hover/focus-within-revealed icon actions from the T7 audit.
+ * No chevron when the row has nothing to reveal (attires).
+ */
+export function RowActionsCluster({
+  edit,
+  isActive,
+  onDeactivate,
+  onReactivate,
+  onToggle,
+  expanded = false,
+}: {
+  edit: ReactNode;
+  isActive: boolean;
+  onDeactivate: () => void;
+  onReactivate: () => void;
+  onToggle?: () => void;
+  expanded?: boolean;
+}) {
+  return (
+    <div className='flex items-center justify-end gap-1'>
+      {onToggle ? (
+        <Button
+          variant='ghost'
+          size='icon-sm'
+          type='button'
+          aria-expanded={expanded}
+          aria-label={expanded ? 'Collapse row' : 'Expand row'}
+          title={expanded ? 'Collapse' : 'Expand'}
+          className={`transition-transform ${expanded ? 'rotate-180' : ''}`}
+          onClick={onToggle}
+        >
+          <ChevronDown aria-hidden='true' />
+        </Button>
+      ) : null}
+      <div className='flex items-center gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100'>
+        <RowIconActions
+          edit={edit}
+          isActive={isActive}
+          onDeactivate={onDeactivate}
+          onReactivate={onReactivate}
+        />
+      </div>
+    </div>
+  );
+}
 
 /** Peso format pinned to the landing precedent (test-pinned there as ₱1,100.00). */
 export function peso(cents: number): string {

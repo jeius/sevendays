@@ -1,8 +1,9 @@
-// PROTOTYPE (throwaway) — wayfinder #131: the testimonials screen (the shared
-// table posture; the position column is the /about slot order, ruling 8 —
-// no drag, position is edited in the dialog). Local state only:
-// deactivate/reactivate flips isActive, nothing persists. Never merges;
-// delete with the route.
+// PROTOTYPE (throwaway) — wayfinder #131: the testimonials screen. Round 2:
+// the quote, position and status columns are gone — the person is the
+// identity (dot + one-line quote under it, full quote on expand) and the
+// order is the rows-array order (no position display anywhere). Row actions
+// are icon-only. Local state only: deactivate/reactivate flips isActive,
+// nothing persists. Never merges; delete with the route.
 
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent } from '@sevendays/ui/components/card';
@@ -18,15 +19,20 @@ import {
   TableRow,
 } from '@sevendays/ui/components/table';
 import { Textarea } from '@sevendays/ui/components/textarea';
-import { useId, useState } from 'react';
+import { SquarePen } from 'lucide-react';
+import { Fragment, useId, useState } from 'react';
 import type { TestimonialRow } from '../fixtures';
 import { testimonials } from '../fixtures';
 import type { ScreenProps } from '../nav';
 import {
+  Collapse,
   DeactivateConfirm,
   EmptyState,
+  ExpandPanel,
   LightEntityEditor,
   PageHeader,
+  RowActionsCluster,
+  RowIconActions,
   StatusBadge,
 } from '../shared';
 
@@ -36,11 +42,12 @@ export function TestimonialsScreen({ search }: ScreenProps) {
   // mount; ?confirm=<id> opens its deactivate confirm. Close is client-only.
   const [editId, setEditId] = useState<string | null>(search.edit ?? null);
   const [confirmId, setConfirmId] = useState<string | null>(search.confirm ?? null);
+  // T3: controlled disclosure — one expanded row at a time (id or null).
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const editRow = rows.find((row) => row.id === editId);
   const confirmRow = rows.find((row) => row.id === confirmId);
   const quoteId = useId();
   const personId = useId();
-  const positionId = useId();
   const activeId = useId();
 
   function updateRow(id: string, patch: Partial<TestimonialRow>) {
@@ -49,6 +56,25 @@ export function TestimonialsScreen({ search }: ScreenProps) {
 
   function setActive(id: string, isActive: boolean) {
     setRows((prev) => prev.map((row) => (row.id === id ? { ...row, isActive } : row)));
+  }
+
+  function toggleExpanded(id: string) {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }
+
+  function editButton(id: string) {
+    return (
+      <Button
+        variant='ghost'
+        size='icon-sm'
+        type='button'
+        aria-label='Edit'
+        title='Edit'
+        onClick={() => setEditId(id)}
+      >
+        <SquarePen aria-hidden='true' />
+      </Button>
+    );
   }
 
   return (
@@ -72,115 +98,92 @@ export function TestimonialsScreen({ search }: ScreenProps) {
       ) : (
         <Card className='@container'>
           <CardContent>
-            {/* @container: the table folds into stacked <details> rows below a
-                700px CONTAINER width (Tailwind v4 native container queries). */}
+            {/* @container: the table folds into stacked rows below a 700px
+                CONTAINER width (Tailwind v4 native container queries). */}
             <Table className='@max-[700px]:hidden'>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Quote</TableHead>
                   <TableHead>Person</TableHead>
-                  <TableHead className='text-right'>Position</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className='text-right'>Actions</TableHead>
+                  {/* T2: the Actions header renders empty — the icons carry
+                      their own labels. */}
+                  <TableHead className='text-right' />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id} className='group'>
-                    <TableCell>
-                      <p className='max-w-72 truncate'>{row.quote}</p>
-                    </TableCell>
-                    <TableCell>{row.person}</TableCell>
-                    <TableCell className='text-right'>
-                      <span className='font-mono text-xs tabular-nums'>#{row.position}</span>
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge isActive={row.isActive} />
-                    </TableCell>
-                    <TableCell className='text-right'>
-                      <div className='flex justify-end gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100'>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          type='button'
-                          onClick={() => setEditId(row.id)}
-                        >
-                          Edit
-                        </Button>
-                        {row.isActive ? (
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            type='button'
-                            className='text-destructive hover:bg-destructive/10 hover:text-destructive'
-                            onClick={() => setConfirmId(row.id)}
-                          >
-                            Deactivate
-                          </Button>
-                        ) : (
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            type='button'
-                            onClick={() => setActive(row.id, true)}
-                          >
-                            Reactivate
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {rows.map((row) => {
+                  const expanded = expandedId === row.id;
+                  return (
+                    <Fragment key={row.id}>
+                      <TableRow className='group'>
+                        <TableCell>
+                          {/* TM1: person is the identity; quote is the
+                              one-line secondary (full quote on expand). */}
+                          <div className='space-y-0.5'>
+                            <p className='font-semibold'>{row.person}</p>
+                            <div className='flex min-w-0 items-center gap-2'>
+                              <StatusBadge isActive={row.isActive} />
+                              <p className='text-muted-foreground truncate text-xs'>{row.quote}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className='text-right'>
+                          <RowActionsCluster
+                            expanded={expanded}
+                            onToggle={() => toggleExpanded(row.id)}
+                            edit={editButton(row.id)}
+                            isActive={row.isActive}
+                            onDeactivate={() => setConfirmId(row.id)}
+                            onReactivate={() => setActive(row.id, true)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                      {/* T3 desktop reveal: the FULL quote. */}
+                      <ExpandPanel open={expanded} colSpan={2}>
+                        {row.quote}
+                      </ExpandPanel>
+                    </Fragment>
+                  );
+                })}
               </TableBody>
             </Table>
 
-            {/* Stacked posture (below 700px container width): two-line rows in
-                native <details>; the reveal holds the row actions. */}
+            {/* Stacked posture (below 700px container width): the whole
+                two-line header toggles the animated reveal (M1). */}
             <div className='hidden flex-col @max-[700px]:flex'>
-              {rows.map((row) => (
-                <details key={row.id} className='border-border border-b py-2 last:border-b-0'>
-                  <summary className='cursor-pointer list-none [&::-webkit-details-marker]:hidden'>
-                    <div className='flex items-center justify-between gap-3'>
-                      <p className='truncate font-medium'>{row.quote}</p>
-                      <span className='font-mono text-xs tabular-nums'>#{row.position}</span>
-                    </div>
-                    <div className='mt-1 flex min-w-0 items-center gap-2'>
-                      <StatusBadge isActive={row.isActive} />
-                      <p className='text-muted-foreground truncate text-sm'>{row.person}</p>
-                    </div>
-                  </summary>
-                  <div className='mt-2 flex gap-1'>
-                    <Button
-                      variant='ghost'
-                      size='sm'
+              {rows.map((row) => {
+                const expanded = expandedId === row.id;
+                return (
+                  <div key={row.id} className='border-border border-b py-2 last:border-b-0'>
+                    <button
                       type='button'
-                      onClick={() => setEditId(row.id)}
+                      aria-expanded={expanded}
+                      className='w-full text-left'
+                      onClick={() => toggleExpanded(row.id)}
                     >
-                      Edit
-                    </Button>
-                    {row.isActive ? (
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        type='button'
-                        className='text-destructive hover:bg-destructive/10 hover:text-destructive'
-                        onClick={() => setConfirmId(row.id)}
-                      >
-                        Deactivate
-                      </Button>
-                    ) : (
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        type='button'
-                        onClick={() => setActive(row.id, true)}
-                      >
-                        Reactivate
-                      </Button>
-                    )}
+                      <div className='flex items-center justify-between gap-3'>
+                        <p className='truncate font-medium'>{row.person}</p>
+                      </div>
+                      <div className='mt-1 flex min-w-0 items-center gap-2'>
+                        <StatusBadge isActive={row.isActive} />
+                        <p className='text-muted-foreground truncate text-xs'>{row.quote}</p>
+                      </div>
+                    </button>
+                    <Collapse open={expanded}>
+                      <div className='mt-2 space-y-2'>
+                        <p className='text-muted-foreground text-sm'>{row.quote}</p>
+                        <div className='flex gap-1'>
+                          <RowIconActions
+                            edit={editButton(row.id)}
+                            isActive={row.isActive}
+                            onDeactivate={() => setConfirmId(row.id)}
+                            onReactivate={() => setActive(row.id, true)}
+                          />
+                        </div>
+                      </div>
+                    </Collapse>
                   </div>
-                </details>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -213,15 +216,6 @@ export function TestimonialsScreen({ search }: ScreenProps) {
               id={personId}
               value={editRow.person}
               onChange={(e) => updateRow(editRow.id, { person: e.target.value })}
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={positionId}>Position</FieldLabel>
-            <Input
-              id={positionId}
-              type='number'
-              value={editRow.position}
-              onChange={(e) => updateRow(editRow.id, { position: Number(e.target.value) || 0 })}
             />
           </Field>
           <label htmlFor={activeId} className='flex items-center gap-2 text-sm font-medium'>
