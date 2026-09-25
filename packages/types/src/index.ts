@@ -7,6 +7,7 @@ export * from './branch.js';
 export * from './frames.js';
 export * from './gallery.js';
 export * from './inclusion.js';
+export * from './media.js';
 export * from './package.js';
 export * from './print-size.js';
 export * from './studio-service.js';

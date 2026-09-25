@@ -84,6 +84,10 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       API_URL: ${{ vars.API_URL }}
       BETTER_AUTH_URL: ${{ vars.BETTER_AUTH_URL }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      MEDIA_PUBLIC_BASE_URL: ${{ vars.MEDIA_PUBLIC_BASE_URL }}
+      R2_S3_ACCESS_KEY_ID: ${{ secrets.R2_S3_ACCESS_KEY_ID }}
+      R2_S3_SECRET_ACCESS_KEY: ${{ secrets.R2_S3_SECRET_ACCESS_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -111,7 +115,7 @@ jobs:
 
       - name: Deploy api (sevendays-api)
         working-directory: apps/api
-        run: pnpm exec wrangler deploy --name sevendays-api
+        run: pnpm exec wrangler deploy --name sevendays-api --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "MEDIA_PUBLIC_BASE_URL:$MEDIA_PUBLIC_BASE_URL"
 
       - name: Sync api DATABASE_URL from the environment secret
         working-directory: apps/api
@@ -121,6 +125,16 @@ jobs:
             exit 1
           fi
           printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL --name sevendays-api
+
+      - name: Sync api R2 S3-token secrets (skip until the owner mints them)
+        working-directory: apps/api
+        run: |
+          if [ -z "$R2_S3_ACCESS_KEY_ID" ] || [ -z "$R2_S3_SECRET_ACCESS_KEY" ]; then
+            echo '::notice::R2 S3-token secrets missing from the teaser GitHub environment — presign stays loudly unavailable (docs/media-bucket-runbook.md § Owner handoff)'
+            exit 0
+          fi
+          printf '%s' "$R2_S3_ACCESS_KEY_ID" | pnpm exec wrangler secret put R2_S3_ACCESS_KEY_ID --name sevendays-api
+          printf '%s' "$R2_S3_SECRET_ACCESS_KEY" | pnpm exec wrangler secret put R2_S3_SECRET_ACCESS_KEY --name sevendays-api
 
       - name: Deploy landing (sevendays-landing)
         working-directory: apps/landing
@@ -153,6 +167,10 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       API_URL: ${{ vars.API_URL }}
       BETTER_AUTH_URL: ${{ vars.BETTER_AUTH_URL }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      MEDIA_PUBLIC_BASE_URL: ${{ vars.MEDIA_PUBLIC_BASE_URL }}
+      R2_S3_ACCESS_KEY_ID: ${{ secrets.R2_S3_ACCESS_KEY_ID }}
+      R2_S3_SECRET_ACCESS_KEY: ${{ secrets.R2_S3_SECRET_ACCESS_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -179,7 +197,7 @@ jobs:
 
       - name: Deploy api (sevendays-v1-api)
         working-directory: apps/api
-        run: pnpm exec wrangler deploy --name sevendays-v1-api
+        run: pnpm exec wrangler deploy --name sevendays-v1-api --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "MEDIA_PUBLIC_BASE_URL:$MEDIA_PUBLIC_BASE_URL"
 
       - name: Sync api DATABASE_URL from the environment secret
         working-directory: apps/api
@@ -189,6 +207,16 @@ jobs:
             exit 1
           fi
           printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL --name sevendays-v1-api
+
+      - name: Sync api R2 S3-token secrets (skip until the owner mints them)
+        working-directory: apps/api
+        run: |
+          if [ -z "$R2_S3_ACCESS_KEY_ID" ] || [ -z "$R2_S3_SECRET_ACCESS_KEY" ]; then
+            echo '::notice::R2 S3-token secrets missing from the v1 GitHub environment — presign stays loudly unavailable (docs/media-bucket-runbook.md § Owner handoff)'
+            exit 0
+          fi
+          printf '%s' "$R2_S3_ACCESS_KEY_ID" | pnpm exec wrangler secret put R2_S3_ACCESS_KEY_ID --name sevendays-v1-api
+          printf '%s' "$R2_S3_SECRET_ACCESS_KEY" | pnpm exec wrangler secret put R2_S3_SECRET_ACCESS_KEY --name sevendays-v1-api
 
       - name: Deploy landing (sevendays-v1-landing)
         working-directory: apps/landing

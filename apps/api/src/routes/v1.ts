@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { parseEnv } from '../env.js';
 import { type ApiEnv, createApiDb } from '../services/db.js';
 import { addonServices } from './addon-services.js';
+import { admin } from './admin.js';
 import { appointments } from './appointments.js';
 import { branches } from './branches.js';
 import { servicePackages } from './service-packages.js';
@@ -26,4 +27,5 @@ export const v1 = new Hono<ApiEnv>()
   .route('/appointments', appointments)
   .route('/service-packages', servicePackages)
   .route('/studio-services', studioServices)
-  .route('/addon-services', addonServices);
+  .route('/addon-services', addonServices)
+  .route('/admin', admin);
