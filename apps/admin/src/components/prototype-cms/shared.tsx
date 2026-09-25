@@ -14,6 +14,10 @@
 // the sm breakpoint (full-width, rounded top, slide-up) and the centered
 // dialog above it — responsive classes on the content only.
 //
+// Round 5b: LightEntityEditor's right-side Sheet becomes a BOTTOM sheet below
+// 768px (useIsMobile drives the side prop) — C1 extended to the catalog
+// editors; desktop right-side behavior is untouched.
+//
 // G1 radius note (spec): every card in this prototype renders one radius
 // step down (rounded-xl → rounded-lg) via className overrides at the usage
 // sites — packages/ui is untouched. If the owner keeps this, the step-down
@@ -53,6 +57,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@sevendays/ui/components/tooltip';
+import { useIsMobile } from '@sevendays/ui/hooks/use-mobile';
 import { ChevronDown, Power, PowerOff } from 'lucide-react';
 import type { ReactElement, ReactNode } from 'react';
 
@@ -323,6 +328,14 @@ export function EmptyState({ line, children }: { line: string; children?: ReactN
  * The light-entity editor shell: entity-name title, the screen's fields, and
  * Save changes / Cancel. Owner verdict (V1 ruled): Sheet everywhere —
  * `chrome` defaults to 'sheet' and no screen passes it anymore.
+ *
+ * Round 5b (C1 extended): on mobile (<768px, the useIsMobile breakpoint) the
+ * sheet docks to the bottom edge like the dialogs — the primitive's
+ * data-[side=bottom] slide-up transition handles the animation natively.
+ * Desktop keeps the right-side sheet byte-identical (max-md: class only).
+ * The primitive's bottom side is h-auto (unbounded), so the usage-site adds
+ * max-md:max-h-[85dvh] — that bounds the flex column and lets the body's
+ * flex-1 overflow-y-auto actually scroll.
  */
 export function LightEntityEditor({
   title,
@@ -337,10 +350,11 @@ export function LightEntityEditor({
   chrome?: 'dialog' | 'sheet';
   children: ReactNode;
 }) {
+  const isMobile = useIsMobile();
   if (chrome === 'sheet') {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side='right'>
+        <SheetContent side={isMobile ? 'bottom' : 'right'} className='max-md:max-h-[85dvh]'>
           <SheetHeader>
             <SheetTitle>{title}</SheetTitle>
             <SheetDescription>Prototype: changes stay on this page.</SheetDescription>
