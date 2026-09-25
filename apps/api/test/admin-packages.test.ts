@@ -7,6 +7,7 @@ import { createTestDb } from './helpers/db.js';
 import { testEnv } from './helpers/env.js';
 import type { FixtureIds } from './helpers/fixtures.js';
 import { loadFixtures } from './helpers/fixtures.js';
+import { stubCommitBucket } from './helpers/r2-stub.js';
 import { truncateAll } from './helpers/truncate.js';
 
 const url = process.env.TEST_DATABASE_URL as string;
@@ -415,5 +416,127 @@ describe('the atomic package save — update', () => {
     // The cascaded rewrite left zero junction rows for the one remaining
     // (privilege) inclusion — the fixture's framed/print pairs are gone.
     expect(junctions).toHaveLength(0);
+  });
+});
+
+describe('the package cover lifecycle (commit-verified through ticket 02)', () => {
+  const STAGING = 'tmp/00000000-0000-4000-8000-000000000000.jpg';
+  const BASE = 'https://pub-test.r2.dev';
+
+  const withBucket = () => {
+    const stub = stubCommitBucket({ [STAGING]: { size: 1024, contentType: 'image/jpeg' } });
+    return { stub, env: { ...testEnv(url), MEDIA_BUCKET: stub.bucket } };
+  };
+
+  const putCover = async (email: string, cover: unknown, env: Record<string, unknown>) =>
+    app.request(
+      `/api/v1/admin/service-packages/${ids.packageSimple}`,
+      {
+        method: 'PUT',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${(await signUpSession(url, email)).token}`,
+        },
+        body: JSON.stringify(
+          cover === 'ABSENT'
+            ? {
+                name: 'Simple Package',
+                description: 'Prints only',
+                priceCents: 90000,
+                slug: 'simple-package',
+                isActive: true,
+                isFeatured: false,
+                durationMinutes: null,
+                frames: [],
+                inclusions: [],
+              }
+            : {
+                name: 'Simple Package',
+                description: 'Prints only',
+                priceCents: 90000,
+                slug: 'simple-package',
+                isActive: true,
+                isFeatured: false,
+                durationMinutes: null,
+                frames: [],
+                inclusions: [],
+                coverImageKey: cover,
+              }
+        ),
+      },
+      env
+    );
+
+  it('PUT with a staging key binds it — HEAD-verified, promoted to covers/, staging deleted, URL resolved', async () => {
+    const { stub, env } = withBucket();
+    const res = await putCover('admin-cover-bind@sevendays.test', STAGING, env);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { coverImageUrl: string | null };
+    expect(body.coverImageUrl).toMatch(/^https:\/\/pub-test\.r2\.dev\/covers\/[0-9a-f-]{36}\.jpg$/);
+    expect(stub.putCalls).toHaveLength(1);
+    expect(stub.putCalls[0]?.key).toBe((body.coverImageUrl ?? '').replace(`${BASE}/`, ''));
+    expect(stub.deleteCalls).toEqual([STAGING]);
+  });
+
+  it('PUT null clears the cover — and the replaced object is deleted only after the save', async () => {
+    const { stub, env } = withBucket();
+    const bound = await putCover('admin-cover-clear-a@sevendays.test', STAGING, env);
+    expect(bound.status).toBe(200);
+    const finalKey = (
+      ((await bound.json()) as { coverImageUrl: string }).coverImageUrl ?? ''
+    ).replace(`${BASE}/`, '');
+    const cleared = await putCover('admin-cover-clear-b@sevendays.test', null, env);
+    expect(cleared.status).toBe(200);
+    expect(((await cleared.json()) as { coverImageUrl: string | null }).coverImageUrl).toBeNull();
+    expect(stub.deleteCalls).toEqual([STAGING, finalKey]);
+  });
+
+  it('PUT without the field leaves the cover unchanged (absent = unchanged)', async () => {
+    const { stub, env } = withBucket();
+    const res = await putCover('admin-cover-absent@sevendays.test', 'ABSENT', env);
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { coverImageUrl: string | null }).coverImageUrl).toBeNull();
+    expect(stub.putCalls).toEqual([]);
+  });
+
+  it('PUT with a foreign key → the commit 400 with the coverImageKey detail — and NO delete call', async () => {
+    const { stub, env } = withBucket();
+    const res = await putCover(
+      'admin-cover-foreign@sevendays.test',
+      'covers/00000000-0000-4000-8000-000000000000.jpg',
+      env
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { details: { path: string[]; message: string }[] };
+    expect(body.details[0]?.path).toEqual(['coverImageKey']);
+    expect(stub.deleteCalls).toEqual([]);
+  });
+
+  it('PUT with a staging key that has no object → the commit not-found 400', async () => {
+    const empty = stubCommitBucket();
+    const res = await putCover(
+      'admin-cover-missing@sevendays.test',
+      'tmp/11111111-0000-4000-8000-000000000001.jpg',
+      { ...testEnv(url), MEDIA_BUCKET: empty.bucket }
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('POST create with a coverImageKey → 201 with the resolved absolute URL', async () => {
+    const { stub, env } = withBucket();
+    const { token } = await signUpSession(url, 'admin-cover-create@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/service-packages',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+        body: JSON.stringify(save({ coverImageKey: STAGING })),
+      },
+      env
+    );
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { coverImageUrl: string | null };
+    expect(body.coverImageUrl).toMatch(/^https:\/\/pub-test\.r2\.dev\/covers\//);
+    expect(stub.deleteCalls).toEqual([STAGING]);
   });
 });
