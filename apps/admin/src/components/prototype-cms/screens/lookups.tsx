@@ -24,6 +24,12 @@ import {
   TableRow,
 } from '@sevendays/ui/components/table';
 import { Textarea } from '@sevendays/ui/components/textarea';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@sevendays/ui/components/tooltip';
 import { useId, useState } from 'react';
 import type { AttireRow, PrintSizeRow } from '../fixtures';
 import { attires, printSizes } from '../fixtures';
@@ -74,7 +80,9 @@ export function LookupsScreen({ search }: ScreenProps) {
         subline='Shared catalog vocabularies used by package inclusions.'
       />
 
-      <Card>
+      {/* @container: the table folds into stacked <details> rows below a
+          700px CONTAINER width (Tailwind v4 native container queries). */}
+      <Card className='@container'>
         <CardHeader>
           <CardTitle>Print sizes</CardTitle>
           <CardAction>
@@ -84,66 +92,126 @@ export function LookupsScreen({ search }: ScreenProps) {
           </CardAction>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className='w-24'>Code</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className='text-right'>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sizes.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell className='font-mono'>{row.code}</TableCell>
-                  {/* The 8R row's long seed description wraps visibly — real content. */}
-                  <TableCell>
-                    <p className='max-w-xl text-sm whitespace-normal'>{row.description}</p>
-                  </TableCell>
-                  <TableCell>
+          {/* One Provider wraps the table: Base UI's provider is optional but
+              gives the row tooltips a shared open/close delay. */}
+          <TooltipProvider>
+            <Table className='@max-[700px]:hidden'>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className='w-24'>Code</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className='text-right'>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sizes.map((row) => (
+                  <TableRow key={row.id} className='group'>
+                    <TableCell className='font-mono'>{row.code}</TableCell>
+                    {/* Ruled 5R: one-line truncate + tooltip on hover/focus. */}
+                    <TableCell>
+                      <Tooltip>
+                        <TooltipTrigger render={<p className='max-w-64 truncate text-sm' />}>
+                          {row.description}
+                        </TooltipTrigger>
+                        <TooltipContent>{row.description}</TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge isActive={row.isActive} />
+                    </TableCell>
+                    <TableCell className='text-right'>
+                      <div className='flex justify-end gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100'>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          onClick={() => setEditId(row.id)}
+                          type='button'
+                        >
+                          Edit
+                        </Button>
+                        {row.isActive ? (
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+                            onClick={() => setConfirmId(row.id)}
+                            type='button'
+                          >
+                            Deactivate
+                          </Button>
+                        ) : (
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={() => setSizeActive(row.id, true)}
+                            type='button'
+                          >
+                            Reactivate
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TooltipProvider>
+
+          {/* Stacked posture (below 700px container width): two-line rows in
+              native <details>; the reveal holds the full description + actions. */}
+          <div className='hidden flex-col @max-[700px]:flex'>
+            {sizes.map((row) => (
+              <details key={row.id} className='border-border border-b py-2 last:border-b-0'>
+                <summary className='cursor-pointer list-none [&::-webkit-details-marker]:hidden'>
+                  <div className='flex items-center justify-between gap-3'>
+                    <p className='truncate font-medium'>{row.code}</p>
+                  </div>
+                  <div className='mt-1 flex min-w-0 items-center gap-2'>
                     <StatusBadge isActive={row.isActive} />
-                  </TableCell>
-                  <TableCell className='text-right'>
-                    <div className='flex justify-end gap-1'>
+                    <p className='text-muted-foreground truncate text-sm'>{row.description}</p>
+                  </div>
+                </summary>
+                <div className='mt-2 space-y-2'>
+                  <p className='text-muted-foreground text-sm'>{row.description}</p>
+                  <div className='flex gap-1'>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => setEditId(row.id)}
+                      type='button'
+                    >
+                      Edit
+                    </Button>
+                    {row.isActive ? (
                       <Button
                         variant='ghost'
                         size='sm'
-                        onClick={() => setEditId(row.id)}
+                        className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+                        onClick={() => setConfirmId(row.id)}
                         type='button'
                       >
-                        Edit
+                        Deactivate
                       </Button>
-                      {row.isActive ? (
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          className='text-destructive hover:bg-destructive/10 hover:text-destructive'
-                          onClick={() => setConfirmId(row.id)}
-                          type='button'
-                        >
-                          Deactivate
-                        </Button>
-                      ) : (
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => setSizeActive(row.id, true)}
-                          type='button'
-                        >
-                          Reactivate
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    ) : (
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        onClick={() => setSizeActive(row.id, true)}
+                        type='button'
+                      >
+                        Reactivate
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </details>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className='@container'>
         <CardHeader>
           <CardTitle>Attires</CardTitle>
           <CardAction>
@@ -153,7 +221,7 @@ export function LookupsScreen({ search }: ScreenProps) {
           </CardAction>
         </CardHeader>
         <CardContent>
-          <Table>
+          <Table className='@max-[700px]:hidden'>
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
@@ -163,7 +231,7 @@ export function LookupsScreen({ search }: ScreenProps) {
             </TableHeader>
             <TableBody>
               {attireRows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow key={row.id} className='group'>
                   <TableCell>
                     <p className='font-semibold'>{row.name}</p>
                   </TableCell>
@@ -171,7 +239,7 @@ export function LookupsScreen({ search }: ScreenProps) {
                     <StatusBadge isActive={row.isActive} />
                   </TableCell>
                   <TableCell className='text-right'>
-                    <div className='flex justify-end gap-1'>
+                    <div className='flex justify-end gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100'>
                       <Button
                         variant='ghost'
                         size='sm'
@@ -206,6 +274,47 @@ export function LookupsScreen({ search }: ScreenProps) {
               ))}
             </TableBody>
           </Table>
+
+          {/* Stacked posture — attires carry no secondary field; line 2 is the dot alone. */}
+          <div className='hidden flex-col @max-[700px]:flex'>
+            {attireRows.map((row) => (
+              <details key={row.id} className='border-border border-b py-2 last:border-b-0'>
+                <summary className='cursor-pointer list-none [&::-webkit-details-marker]:hidden'>
+                  <div className='flex items-center justify-between gap-3'>
+                    <p className='truncate font-medium'>{row.name}</p>
+                  </div>
+                  <div className='mt-1 flex min-w-0 items-center gap-2'>
+                    <StatusBadge isActive={row.isActive} />
+                  </div>
+                </summary>
+                <div className='mt-2 flex gap-1'>
+                  <Button variant='ghost' size='sm' onClick={() => setEditId(row.id)} type='button'>
+                    Edit
+                  </Button>
+                  {row.isActive ? (
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+                      onClick={() => setConfirmId(row.id)}
+                      type='button'
+                    >
+                      Deactivate
+                    </Button>
+                  ) : (
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => setAttireActive(row.id, true)}
+                      type='button'
+                    >
+                      Reactivate
+                    </Button>
+                  )}
+                </div>
+              </details>
+            ))}
+          </div>
         </CardContent>
       </Card>
 

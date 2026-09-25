@@ -50,9 +50,11 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
           </Button>
         </EmptyState>
       ) : (
-        <Card>
+        <Card className='@container'>
           <CardContent>
-            <Table>
+            {/* @container: the table folds into stacked <details> rows below a
+                700px CONTAINER width (Tailwind v4 native container queries). */}
+            <Table className='@max-[700px]:hidden'>
               <TableHeader>
                 <TableRow>
                   <TableHead className='w-14'>Cover</TableHead>
@@ -65,7 +67,7 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
               </TableHeader>
               <TableBody>
                 {rows.map((row) => (
-                  <TableRow key={row.id}>
+                  <TableRow key={row.id} className='group'>
                     <TableCell>
                       {row.coverImageUrl ? (
                         <img
@@ -99,7 +101,7 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
                       <StatusBadge isActive={row.isActive} />
                     </TableCell>
                     <TableCell className='text-right'>
-                      <div className='flex justify-end gap-1'>
+                      <div className='flex justify-end gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100'>
                         <Button
                           variant='ghost'
                           size='sm'
@@ -132,6 +134,56 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
                 ))}
               </TableBody>
             </Table>
+
+            {/* Stacked posture (below 700px container width): two-line rows in
+                native <details>; the reveal holds overflow fields + actions. */}
+            <div className='hidden flex-col @max-[700px]:flex'>
+              {rows.map((row) => (
+                <details key={row.id} className='border-border border-b py-2 last:border-b-0'>
+                  <summary className='cursor-pointer list-none [&::-webkit-details-marker]:hidden'>
+                    <div className='flex items-center justify-between gap-3'>
+                      <p className='truncate font-medium'>{row.name}</p>
+                      <p className='text-right tabular-nums'>{peso(row.priceCents)}</p>
+                    </div>
+                    <div className='mt-1 flex min-w-0 items-center gap-2'>
+                      <StatusBadge isActive={row.isActive} />
+                      <p className='text-muted-foreground truncate font-mono text-xs'>{row.slug}</p>
+                    </div>
+                  </summary>
+                  <div className='mt-2 space-y-2'>
+                    {row.isFeatured ? <Badge variant='secondary'>Featured</Badge> : null}
+                    <div className='flex gap-1'>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        render={
+                          <Link
+                            to='/prototype-cms'
+                            search={{ screen: 'package-editor', variant }}
+                          />
+                        }
+                      >
+                        Edit
+                      </Button>
+                      {row.isActive ? (
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+                          onClick={() => setConfirmId(row.id)}
+                        >
+                          Deactivate
+                        </Button>
+                      ) : (
+                        <Button variant='ghost' size='sm' onClick={() => setActive(row.id, true)}>
+                          Reactivate
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </details>
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}

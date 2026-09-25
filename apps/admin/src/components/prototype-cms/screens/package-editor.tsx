@@ -390,7 +390,7 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
                   <Input
                     id={priceId}
                     type='number'
-                    className='pl-7'
+                    className='pl-7 tabular-nums'
                     value={pkg.priceCents / 100}
                     onChange={(e) =>
                       updateField('priceCents', Math.round(Number(e.target.value) * 100) || 0)
