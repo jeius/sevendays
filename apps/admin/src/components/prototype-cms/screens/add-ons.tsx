@@ -4,7 +4,8 @@
 // reveal (mobile), row actions are icon-only, and rows expand to show the
 // full description. Round 3: action icons get tooltips, the truncated
 // description hides while expanded, and clicking the row toggles expansion.
-// The editor chrome is the ruled Sheet everywhere (V1 settled); the
+// Round 4: the status dot moves beside the name and the chevron follows the
+// icons. The editor chrome is the ruled Sheet everywhere (V1 settled); the
 // applies-to matrix renders as selectable name-only toggle cards writing
 // straight into the row's local studioServiceIds. Nothing persists. Never
 // merges; delete with the route.
@@ -145,18 +146,24 @@ export function AddOnsScreen({ search }: ScreenProps) {
                           the chevron stays the keyboard/AT toggle. */}
                       <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
                         <TableCell className='cursor-pointer'>
-                          {/* T1: identity = name / dot + description. */}
+                          {/* T1: identity = name / dot + description. Round 4:
+                              the dot sits BESIDE the name (the
+                              lookups-attires reference pattern) so it never
+                              strands on its own line when the description
+                              hides. */}
                           <div className='space-y-0.5'>
-                            <p className='font-semibold'>{row.name}</p>
-                            {/* N2: the truncated line hides while expanded. */}
-                            <div className='flex min-w-0 items-center gap-2'>
+                            <div className='flex items-center gap-2'>
                               <StatusBadge isActive={row.isActive} />
-                              {expanded ? null : (
+                              <p className='font-semibold'>{row.name}</p>
+                            </div>
+                            {/* N2: the truncated line hides while expanded. */}
+                            {expanded ? null : (
+                              <div className='flex min-w-0 items-center'>
                                 <p className='text-muted-foreground truncate text-xs'>
                                   {row.description}
                                 </p>
-                              )}
-                            </div>
+                              </div>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className='text-right tabular-nums cursor-pointer'>
@@ -215,18 +222,18 @@ export function AddOnsScreen({ search }: ScreenProps) {
                       onClick={() => toggleExpanded(row.id)}
                     >
                       <div className='flex items-center justify-between gap-3'>
-                        <p className='truncate font-medium'>{row.name}</p>
+                        <div className='flex min-w-0 items-center gap-2'>
+                          <StatusBadge isActive={row.isActive} />
+                          <p className='truncate font-medium'>{row.name}</p>
+                        </div>
                         <p className='text-right tabular-nums'>{peso(row.priceCents)}</p>
                       </div>
-                      {/* N2: line 2 hides while expanded (dot stays). */}
-                      <div className='mt-1 flex min-w-0 items-center gap-2'>
-                        <StatusBadge isActive={row.isActive} />
-                        {expanded ? null : (
-                          <p className='text-muted-foreground truncate text-xs'>
-                            {row.description}
-                          </p>
-                        )}
-                      </div>
+                      {/* N2: the description line hides while expanded. */}
+                      {expanded ? null : (
+                        <p className='text-muted-foreground mt-1 truncate text-xs'>
+                          {row.description}
+                        </p>
+                      )}
                     </button>
                     <Collapse open={expanded}>
                       <div className='mt-2 space-y-2'>

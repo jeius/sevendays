@@ -3,7 +3,9 @@
 // name), phone keeps its mono column and walk-ins its badge column, row
 // actions are icon-only, and rows expand to show the full address (phone on
 // mobile). Round 3: action icons get tooltips, the truncated address hides
-// while expanded, and clicking the row toggles expansion. Editor is the
+// while expanded, and clicking the row toggles expansion. Round 4: the
+// status dot moves beside the name and the chevron follows the icons.
+// Editor is the
 // ruled Sheet (V1 settled). Deliberately NO hours/capacity fields anywhere —
 // v2 scope; the header subline carries that note. Nothing persists. Never
 // merges; delete with the route.
@@ -126,18 +128,24 @@ export function BranchesScreen({ search }: ScreenProps) {
                       <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
                         <TableCell className='cursor-pointer'>
                           {/* B1: identity = name / dot + address (the address
-                              column died — full text on expand). */}
+                              column died — full text on expand). Round 4:
+                              the dot sits BESIDE the name (the
+                              lookups-attires reference pattern) so it never
+                              strands on its own line when the address
+                              hides. */}
                           <div className='space-y-0.5'>
-                            <p className='font-semibold'>{row.name}</p>
-                            {/* N2: the truncated line hides while expanded. */}
-                            <div className='flex min-w-0 items-center gap-2'>
+                            <div className='flex items-center gap-2'>
                               <StatusBadge isActive={row.isActive} />
-                              {expanded ? null : (
+                              <p className='font-semibold'>{row.name}</p>
+                            </div>
+                            {/* N2: the truncated line hides while expanded. */}
+                            {expanded ? null : (
+                              <div className='flex min-w-0 items-center'>
                                 <p className='text-muted-foreground truncate text-xs'>
                                   {row.address}
                                 </p>
-                              )}
-                            </div>
+                              </div>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className='font-mono text-sm cursor-pointer'>
@@ -186,18 +194,18 @@ export function BranchesScreen({ search }: ScreenProps) {
                       onClick={() => toggleExpanded(row.id)}
                     >
                       <div className='flex items-center justify-between gap-3'>
-                        <p className='truncate font-medium'>{row.name}</p>
+                        <div className='flex min-w-0 items-center gap-2'>
+                          <StatusBadge isActive={row.isActive} />
+                          <p className='truncate font-medium'>{row.name}</p>
+                        </div>
                         {row.acceptsWalkIns ? (
                           <Badge variant='secondary'>Walk-in friendly</Badge>
                         ) : null}
                       </div>
-                      {/* N2: line 2 hides while expanded (dot stays). */}
-                      <div className='mt-1 flex min-w-0 items-center gap-2'>
-                        <StatusBadge isActive={row.isActive} />
-                        {expanded ? null : (
-                          <p className='text-muted-foreground truncate text-xs'>{row.address}</p>
-                        )}
-                      </div>
+                      {/* N2: the address line hides while expanded. */}
+                      {expanded ? null : (
+                        <p className='text-muted-foreground mt-1 truncate text-xs'>{row.address}</p>
+                      )}
                     </button>
                     <Collapse open={expanded}>
                       <div className='mt-2 space-y-2'>

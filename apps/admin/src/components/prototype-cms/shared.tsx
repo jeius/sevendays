@@ -5,6 +5,10 @@
 // Round 3: row action icons grow tooltips (label = the aria-label text) and
 // the Reactivate icon turns green to match the status-dot palette.
 //
+// Round 4: in the actions cluster the expand chevron renders AFTER the icon
+// actions — [Edit] [Deactivate/Reactivate] [Chevron] (owner ruling) — still
+// always visible, rotation and aria-expanded intact.
+//
 // G1 radius note (spec): every card in this prototype renders one radius
 // step down (rounded-xl → rounded-lg) via className overrides at the usage
 // sites — packages/ui is untouched. If the owner keeps this, the step-down
@@ -165,9 +169,10 @@ export function RowIconActions({
 }
 
 /**
- * T2 actions cluster: the expand chevron (always visible, rotates when open)
- * sits beside the hover/focus-within-revealed icon actions from the T7 audit.
- * No chevron when the row has nothing to reveal (attires).
+ * T2 actions cluster: the hover/focus-within-revealed icon actions from the
+ * T7 audit, then the expand chevron (always visible, rotates when open) —
+ * round-4 ruling: the chevron comes AFTER the icons. No chevron when the row
+ * has nothing to reveal (attires).
  */
 export function RowActionsCluster({
   edit,
@@ -186,6 +191,14 @@ export function RowActionsCluster({
 }) {
   return (
     <div className='flex items-center justify-end gap-1'>
+      <div className='flex items-center gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100'>
+        <RowIconActions
+          edit={edit}
+          isActive={isActive}
+          onDeactivate={onDeactivate}
+          onReactivate={onReactivate}
+        />
+      </div>
       {onToggle ? (
         <Button
           variant='ghost'
@@ -200,14 +213,6 @@ export function RowActionsCluster({
           <ChevronDown aria-hidden='true' />
         </Button>
       ) : null}
-      <div className='flex items-center gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100'>
-        <RowIconActions
-          edit={edit}
-          isActive={isActive}
-          onDeactivate={onDeactivate}
-          onReactivate={onReactivate}
-        />
-      </div>
     </div>
   );
 }

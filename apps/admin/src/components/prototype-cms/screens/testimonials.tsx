@@ -7,7 +7,11 @@
 // owner ruling: rows reorder by a drag HANDLE only — a GripVertical grip at
 // the row start carries the dnd-kit listeners/attributes (same posture as
 // the package-editor grips) and the whole row is no longer draggable, so
-// click-to-expand and drag never share a surface. Local state only:
+// click-to-expand and drag never share a surface. Round 4: the sortable row
+// gains the `group` class the other five screens mark their rows with (the
+// cluster's opacity-0 reveal had no group ancestor, so the icons never
+// showed), the status dot moves beside the person, and the chevron follows
+// the icons. Local state only:
 // deactivate/reactivate flips isActive, nothing persists. Never merges;
 // delete with the route.
 
@@ -90,7 +94,7 @@ function SortableTestimonialRow({
     <TableRow
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={isDragging ? 'relative z-10 bg-card shadow-sm' : ''}
+      className={isDragging ? 'group relative z-10 bg-card shadow-sm' : 'group'}
       onClick={onClick}
     >
       {/* The grip is the ONLY drag activator. Cell-level stopPropagation
@@ -281,20 +285,26 @@ export function TestimonialsScreen({ search }: ScreenProps) {
                           >
                             <TableCell className='cursor-pointer'>
                               {/* TM1: person is the identity; quote is the
-                                  one-line secondary (full quote on expand). */}
+                                  one-line secondary (full quote on expand).
+                                  Round 4: the dot sits BESIDE the person —
+                                  the lookups-attires reference pattern — so
+                                  it never strands on its own line when the
+                                  quote hides. */}
                               <div className='space-y-0.5'>
-                                <p className='font-semibold'>{row.person}</p>
+                                <div className='flex items-center gap-2'>
+                                  <StatusBadge isActive={row.isActive} />
+                                  <p className='font-semibold'>{row.person}</p>
+                                </div>
                                 {/* N2: the truncated quote hides while
                                     expanded — the reveal carries the full
                                     text. */}
-                                <div className='flex min-w-0 items-center gap-2'>
-                                  <StatusBadge isActive={row.isActive} />
-                                  {expanded ? null : (
+                                {expanded ? null : (
+                                  <div className='flex min-w-0 items-center'>
                                     <p className='text-muted-foreground truncate text-xs'>
                                       {row.quote}
                                     </p>
-                                  )}
-                                </div>
+                                  </div>
+                                )}
                               </div>
                             </TableCell>
                             <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
@@ -344,17 +354,17 @@ export function TestimonialsScreen({ search }: ScreenProps) {
                             onClick={() => toggleExpanded(row.id)}
                           >
                             <div className='flex items-center justify-between gap-3'>
-                              <p className='truncate font-medium'>{row.person}</p>
+                              <div className='flex min-w-0 items-center gap-2'>
+                                <StatusBadge isActive={row.isActive} />
+                                <p className='truncate font-medium'>{row.person}</p>
+                              </div>
                             </div>
-                            {/* N2: line 2 hides while expanded (dot stays). */}
-                            <div className='mt-1 flex min-w-0 items-center gap-2'>
-                              <StatusBadge isActive={row.isActive} />
-                              {expanded ? null : (
-                                <p className='text-muted-foreground truncate text-xs'>
-                                  {row.quote}
-                                </p>
-                              )}
-                            </div>
+                            {/* N2: the quote line hides while expanded. */}
+                            {expanded ? null : (
+                              <p className='text-muted-foreground mt-1 truncate text-xs'>
+                                {row.quote}
+                              </p>
+                            )}
                           </button>
                         }
                       >

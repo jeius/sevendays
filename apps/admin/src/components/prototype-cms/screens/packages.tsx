@@ -5,6 +5,8 @@
 // disclosure) to show the full description. Round 3: action icons get
 // tooltips, the truncated description hides while the row is expanded (the
 // reveal shows the full text), and clicking the row toggles expansion.
+// Round 4: the status dot moves beside the name (ahead of it — the
+// lookups-attires reference pattern) and the chevron follows the icons.
 // Local state only: deactivate/reactivate flips isActive, nothing persists.
 // Never merges; delete with the route.
 
@@ -124,8 +126,13 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
                         </TableCell>
                         <TableCell className='cursor-pointer'>
                           <div className='space-y-0.5'>
-                            {/* P1: Featured is a primary badge beside the name. */}
+                            {/* P1: Featured is a primary badge beside the
+                                name. Round 4: the dot LEADS the line — the
+                                lookups-attires reference pattern (dot first,
+                                then name) — so it never strands on its own
+                                line when the description hides. */}
                             <div className='flex items-center gap-2'>
+                              <StatusBadge isActive={row.isActive} />
                               <p className='font-semibold'>{row.name}</p>
                               {row.isFeatured ? (
                                 <Badge variant='default' className='text-xs'>
@@ -133,18 +140,17 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
                                 </Badge>
                               ) : null}
                             </div>
-                            {/* T1: dot + description under the identity; the
+                            {/* T1: description under the identity; the
                                 slug is gone from the table entirely (P2). */}
                             {/* N2: while expanded the reveal carries the full
-                                text — the truncated line hides (dot stays). */}
-                            <div className='flex min-w-0 items-center gap-2'>
-                              <StatusBadge isActive={row.isActive} />
-                              {expanded ? null : (
+                                text — the truncated line hides. */}
+                            {expanded ? null : (
+                              <div className='flex min-w-0 items-center'>
                                 <p className='text-muted-foreground truncate text-xs'>
                                   {row.description}
                                 </p>
-                              )}
-                            </div>
+                              </div>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className='text-right tabular-nums cursor-pointer'>
@@ -185,18 +191,18 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
                       onClick={() => toggleExpanded(row.id)}
                     >
                       <div className='flex items-center justify-between gap-3'>
-                        <p className='truncate font-medium'>{row.name}</p>
+                        <div className='flex min-w-0 items-center gap-2'>
+                          <StatusBadge isActive={row.isActive} />
+                          <p className='truncate font-medium'>{row.name}</p>
+                        </div>
                         <p className='text-right tabular-nums'>{peso(row.priceCents)}</p>
                       </div>
-                      {/* N2: line 2 hides while expanded (dot stays). */}
-                      <div className='mt-1 flex min-w-0 items-center gap-2'>
-                        <StatusBadge isActive={row.isActive} />
-                        {expanded ? null : (
-                          <p className='text-muted-foreground truncate text-xs'>
-                            {row.description}
-                          </p>
-                        )}
-                      </div>
+                      {/* N2: the description line hides while expanded. */}
+                      {expanded ? null : (
+                        <p className='text-muted-foreground mt-1 truncate text-xs'>
+                          {row.description}
+                        </p>
+                      )}
                     </button>
                     <Collapse open={expanded}>
                       <div className='mt-2 space-y-2'>

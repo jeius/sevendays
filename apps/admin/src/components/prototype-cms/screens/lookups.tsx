@@ -5,7 +5,9 @@
 // description and status columns are gone, full text on expand); attires
 // lead with the status dot. Round 3: action icons get tooltips, the
 // truncated description hides while expanded, and clicking the print-size
-// row toggles expansion. Each section is a Card with a card title + New
+// row toggles expansion. Round 4: on print sizes the status dot moves beside
+// the code and the chevron follows the icons (attires already lead with the
+// dot). Each section is a Card with a card title + New
 // button + Table. Nothing persists. Never merges; delete with the route.
 
 import { Button } from '@sevendays/ui/components/button';
@@ -141,18 +143,23 @@ export function LookupsScreen({ search }: ScreenProps) {
                     <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
                       <TableCell className='cursor-pointer'>
                         {/* L1: identity = code (mono, semibold) / dot +
-                            description. No tooltip — the expand shows it all. */}
+                            description. No tooltip — the expand shows it all.
+                            Round 4: the dot sits BESIDE the code (the attires
+                            reference pattern) so it never strands on its own
+                            line when the description hides. */}
                         <div className='space-y-0.5'>
-                          <p className='font-mono font-semibold'>{row.code}</p>
-                          {/* N2: the truncated line hides while expanded. */}
-                          <div className='flex min-w-0 items-center gap-2'>
+                          <div className='flex items-center gap-2'>
                             <StatusBadge isActive={row.isActive} />
-                            {expanded ? null : (
+                            <p className='font-mono font-semibold'>{row.code}</p>
+                          </div>
+                          {/* N2: the truncated line hides while expanded. */}
+                          {expanded ? null : (
+                            <div className='flex min-w-0 items-center'>
                               <p className='text-muted-foreground truncate text-xs'>
                                 {row.description}
                               </p>
-                            )}
-                          </div>
+                            </div>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
@@ -189,15 +196,17 @@ export function LookupsScreen({ search }: ScreenProps) {
                     onClick={() => toggleExpanded(row.id)}
                   >
                     <div className='flex items-center justify-between gap-3'>
-                      <p className='truncate font-mono font-medium'>{row.code}</p>
+                      <div className='flex min-w-0 items-center gap-2'>
+                        <StatusBadge isActive={row.isActive} />
+                        <p className='truncate font-mono font-medium'>{row.code}</p>
+                      </div>
                     </div>
-                    {/* N2: line 2 hides while expanded (dot stays). */}
-                    <div className='mt-1 flex min-w-0 items-center gap-2'>
-                      <StatusBadge isActive={row.isActive} />
-                      {expanded ? null : (
-                        <p className='text-muted-foreground truncate text-xs'>{row.description}</p>
-                      )}
-                    </div>
+                    {/* N2: the description line hides while expanded. */}
+                    {expanded ? null : (
+                      <p className='text-muted-foreground mt-1 truncate text-xs'>
+                        {row.description}
+                      </p>
+                    )}
                   </button>
                   <Collapse open={expanded}>
                     <div className='mt-2 space-y-2'>
