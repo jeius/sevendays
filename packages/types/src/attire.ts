@@ -6,6 +6,9 @@ export const attireSchema = z.object({
   // Filipiniana, Executive, Uniform). Combined contexts are junction-composed
   // per inclusion, not stored names.
   name: z.string().min(1),
+  // Deactivation (M5): a deactivated attire trims from its inclusion's
+  // attire list on public reads (#138); the inclusion still renders.
+  isActive: z.boolean().default(true),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
@@ -19,3 +22,8 @@ export const createAttireSchema = attireSchema.omit({
 });
 
 export type CreateAttireInput = z.infer<typeof createAttireSchema>;
+
+// Full-object PUT (M5 § Mutation shapes): update is the same client field set.
+export const updateAttireSchema = createAttireSchema;
+
+export type UpdateAttireInput = CreateAttireInput;

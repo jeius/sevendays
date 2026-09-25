@@ -37,3 +37,23 @@ export const studioServiceWithBranchesSchema = studioServiceSchema.extend({
 });
 
 export type StudioServiceWithBranches = z.infer<typeof studioServiceWithBranchesSchema>;
+
+// Full-object PUT (M5 § Mutation shapes): update is the same client field set.
+export const updateStudioServiceSchema = createStudioServiceSchema;
+
+export type UpdateStudioServiceInput = CreateStudioServiceInput;
+
+// Applicability matrix payloads (M5 § Route topology): full-replace PUTs
+// keyed by the studio service — the server diffs and rewrites the junction
+// rows in one transaction (#137).
+export const studioServiceBranchMatrixSchema = z.object({
+  branchIds: z.array(z.uuid()),
+});
+
+export type StudioServiceBranchMatrixInput = z.infer<typeof studioServiceBranchMatrixSchema>;
+
+export const studioServiceAddonMatrixSchema = z.object({
+  addonServiceIds: z.array(z.uuid()),
+});
+
+export type StudioServiceAddonMatrixInput = z.infer<typeof studioServiceAddonMatrixSchema>;
