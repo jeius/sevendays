@@ -1,4 +1,4 @@
-import type { ServicePackageWithInclusions } from '@sevendays/types';
+import type { ServicePackageRead } from '@sevendays/types';
 import { buttonVariants } from '@sevendays/ui/components/button';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
@@ -18,7 +18,7 @@ export function PackageCard({
   pkg,
   cta,
 }: {
-  pkg: ServicePackageWithInclusions;
+  pkg: ServicePackageRead;
   cta?: 'card' | 'detail';
 }) {
   return (

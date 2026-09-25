@@ -2,7 +2,7 @@ import { ApiClientError } from '@sevendays/api-client';
 import type {
   AppointmentWithAddons,
   Branch,
-  ServicePackageWithInclusions,
+  ServicePackageRead,
   StudioServiceWithBranches,
 } from '@sevendays/types';
 import type { QueryClient } from '@tanstack/react-query';
@@ -75,7 +75,7 @@ function branch(id: string, name: string): Branch {
   };
 }
 
-function pkg(id: string, name: string): ServicePackageWithInclusions {
+function pkg(id: string, name: string): ServicePackageRead {
   return {
     id,
     name,
@@ -83,7 +83,7 @@ function pkg(id: string, name: string): ServicePackageWithInclusions {
     priceCents: 90000,
     durationMinutes: null,
     isActive: true,
-    coverImageKey: null,
+    coverImageUrl: null,
     slug: `slug-${id.slice(-4)}`,
     isFeatured: false,
     createdAt: new Date('2026-01-01T00:00:00Z'),

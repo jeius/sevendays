@@ -2,7 +2,7 @@ import type {
   AddonService,
   AppointmentWithAddons,
   Branch,
-  ServicePackageWithInclusions,
+  ServicePackageRead,
 } from '@sevendays/types';
 import type { InferRequestType } from 'hono/client';
 import { expectTypeOf, it } from 'vitest';
@@ -17,9 +17,7 @@ const client = createApiClient({ baseUrl: 'http://localhost:4949/' });
 // drift-kill visible at the wrapper level.
 it('wrapper return types come from the shared schemas', () => {
   expectTypeOf(client.branches.list).returns.toEqualTypeOf<Promise<Branch[]>>();
-  expectTypeOf(client.servicePackages.list).returns.toEqualTypeOf<
-    Promise<ServicePackageWithInclusions[]>
-  >();
+  expectTypeOf(client.servicePackages.list).returns.toEqualTypeOf<Promise<ServicePackageRead[]>>();
   expectTypeOf(client.addonServices.list).returns.toEqualTypeOf<Promise<AddonService[]>>();
   expectTypeOf(client.appointments.list).returns.toEqualTypeOf<Promise<AppointmentWithAddons[]>>();
   expectTypeOf(client.appointments.create).returns.toEqualTypeOf<Promise<AppointmentWithAddons>>();

@@ -12,7 +12,7 @@ import type { CreateAppointmentArgs } from '@sevendays/api-client';
 import type {
   AddonService,
   Branch,
-  ServicePackageWithInclusions,
+  ServicePackageRead,
   StudioServiceWithBranches,
 } from '@sevendays/types';
 import { useMemo, useState } from 'react';
@@ -21,7 +21,7 @@ import { z } from 'zod';
 /** One wizard read snapshot — the four reads the route loader prefetches. */
 export interface BookingCatalog {
   branches: Branch[];
-  packages: ServicePackageWithInclusions[];
+  packages: ServicePackageRead[];
   services: StudioServiceWithBranches[];
   addons: AddonService[];
 }

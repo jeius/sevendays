@@ -1,7 +1,7 @@
 import type {
   AddonService,
   Branch,
-  ServicePackageWithInclusions,
+  ServicePackageRead,
   StudioServiceWithBranches,
 } from '@sevendays/types';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -77,7 +77,7 @@ function addon(id: string, priceCents: number): AddonService {
   };
 }
 
-function pkg(id: string, priceCents: number): ServicePackageWithInclusions {
+function pkg(id: string, priceCents: number): ServicePackageRead {
   return {
     id,
     name: `Package ${id.slice(-4)}`,
@@ -85,7 +85,7 @@ function pkg(id: string, priceCents: number): ServicePackageWithInclusions {
     priceCents,
     durationMinutes: null,
     isActive: true,
-    coverImageKey: null,
+    coverImageUrl: null,
     slug: `slug-${id.slice(-4)}`,
     isFeatured: false,
     createdAt: new Date('2026-01-01T00:00:00Z'),

@@ -1,5 +1,5 @@
 import { ApiClientError } from '@sevendays/api-client';
-import type { ServicePackageWithInclusions } from '@sevendays/types';
+import type { ServicePackageRead } from '@sevendays/types';
 import type { QueryClient } from '@tanstack/react-query';
 import { isNotFound } from '@tanstack/react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -25,11 +25,11 @@ vi.mock('./api.functions', () => ({
 
 const mockedGet = vi.mocked(getServicePackageBySlug);
 
-function basicPackage(): ServicePackageWithInclusions {
+function basicPackage(): ServicePackageRead {
   return {
     slug: 'basic-package',
     priceCents: 90000,
-  } as ServicePackageWithInclusions;
+  } as ServicePackageRead;
 }
 
 describe('servicePackageQueries.bySlug', () => {

@@ -48,7 +48,7 @@ const PACKAGES = [
     priceCents: 250000,
     durationMinutes: null,
     isActive: true,
-    coverImageKey: null,
+    coverImageUrl: null,
     slug: 'basic-package',
     isFeatured: true,
     createdAt: NOW,

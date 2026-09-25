@@ -9,7 +9,7 @@
 import type {
   AppointmentWithAddons,
   Branch,
-  ServicePackageWithInclusions,
+  ServicePackageRead,
   StudioServiceWithBranches,
 } from '@sevendays/types';
 
@@ -24,7 +24,7 @@ export function branchNameFor(record: AppointmentWithAddons, branches: Branch[])
 }
 
 export interface ReadCatalog {
-  packages: ServicePackageWithInclusions[];
+  packages: ServicePackageRead[];
   services: StudioServiceWithBranches[];
 }
 
