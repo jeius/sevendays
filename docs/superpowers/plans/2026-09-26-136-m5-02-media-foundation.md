@@ -879,7 +879,7 @@ function stubBucket(initial: Record<string, { size: number; contentType: string 
     },
     async put(key: string, value: unknown, options: unknown) {
       putCalls.push({ key, value, options });
-      objects.set(key, { size: 1, contentType: 'image/jpeg' });
+      objects.set(key, { size: 1, contentType: 'image/jpeg', deleted: false });
       return { key };
     },
     async delete(keys: string | string[]) {
