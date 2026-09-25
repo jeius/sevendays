@@ -6,17 +6,35 @@ import { z } from 'zod';
 // Supabase connection (ADR-0007). The email pair (issue #47) has no fallback
 // by design — the API_URL posture: a deploy without either var fails every
 // /api/v1 request (acquireDb parses the full schema) rather than silently
-// dropping confirmation emails. BETTER_AUTH_SECRET (M4 ticket 04) is the one
-// OPTIONAL key: requiring it here would fail every /api/v1 request on a
-// Worker without the secret (the teaser until #122's puts) — instead the
-// auth middleware owns the loud missing-secret failure, so only gated routes
-// care. The exported Env derives from the schema; the ambient generated
-// global in worker-configuration.d.ts is no longer load-bearing anywhere.
+// dropping confirmation emails.
+//
+// Two OPTIONAL keys, each with a loud owner (fail-everything would be wrong):
+// - BETTER_AUTH_SECRET (M4 ticket 04): the auth middleware owns the missing-
+//   secret failure, so only gated routes care.
+// - The R2 S3-token pair (M5 #136): the presign service owns the missing-
+//   credential failure (MissingR2CredentialsError), so a deploy made before
+//   the owner's token mint serves everything except presign — never a silent
+//   fallback there either.
+//
+// MEDIA_BUCKET/IMAGES are REQUIRED bindings (they deploy with wrangler.toml
+// once the sevendays-media bucket exists — docs/media-bucket-runbook.md), and
+// CLOUDFLARE_ACCOUNT_ID/MEDIA_PUBLIC_BASE_URL are REQUIRED per-environment
+// values (CI passes them at deploy; the DATABASE_URL posture applies). The
+// z.custom object check makes a binding's absence a parse failure instead of
+// a mid-route TypeError. The ambient generated global in
+// worker-configuration.d.ts stays no longer load-bearing anywhere (the
+// R2Bucket/ImagesBinding types come from @cloudflare/workers-types).
 export const envSchema = z.object({
   DATABASE_URL: z.url(),
   RESEND_API_KEY: z.string().min(1),
   LANDING_ORIGIN: z.url(),
   BETTER_AUTH_SECRET: z.string().min(1).optional(),
+  MEDIA_BUCKET: z.custom<R2Bucket>((v) => v !== null && typeof v === 'object'),
+  IMAGES: z.custom<ImagesBinding>((v) => v !== null && typeof v === 'object'),
+  CLOUDFLARE_ACCOUNT_ID: z.string().min(1),
+  MEDIA_PUBLIC_BASE_URL: z.url(),
+  R2_S3_ACCESS_KEY_ID: z.string().min(1).optional(),
+  R2_S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
