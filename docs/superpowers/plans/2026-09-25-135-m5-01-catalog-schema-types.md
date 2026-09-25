@@ -52,7 +52,7 @@
 
 **Not here:** the position backfill or the default drop (Task 3 — 0006 alone leaves live rows at position 1, which is legal and invisible until reads switch to position ordering in #138); the builders (Task 2 — `position` is optional in `$inferInsert` while the default exists, so the seed and fixtures keep compiling and running unchanged); any `packages/types` change (Tasks 4–5); any query change in `service-packages.ts` beyond the two comment sentences.
 
-- [ ] **Step 1: Write the failing truncate-pin update**
+- [✅] **Step 1: Write the failing truncate-pin update**
 
 In `apps/api/test/helpers/truncate.test.ts`, replace the second test wholesale (the pin — the list is the 21-table state after 0006; `gallery_categories`/`gallery_photos` sort after `frames`, `testimonials` after `studio_services`):
 
@@ -84,12 +84,12 @@ In `apps/api/test/helpers/truncate.test.ts`, replace the second test wholesale (
   });
 ```
 
-- [ ] **Step 2: Run the pin to verify it fails**
+- [✅] **Step 2: Run the pin to verify it fails**
 
 Run: `pnpm --filter @sevendays/api test -- truncate`
 Expected: FAIL — `toEqual` mismatch (received the 18-table list, expected 21).
 
-- [ ] **Step 3: Write the three new schema files**
+- [✅] **Step 3: Write the three new schema files**
 
 `packages/db/src/schema/gallery-categories.ts`:
 
@@ -170,7 +170,7 @@ export const testimonials = pgTable('testimonials', {
 });
 ```
 
-- [ ] **Step 4: Add the columns to the five existing tables**
+- [✅] **Step 4: Add the columns to the five existing tables**
 
 In `packages/db/src/schema/branches.ts`, insert after the `acceptsWalkIns` line (keeping the trailing `createdAt` line and comment block untouched):
 
@@ -218,7 +218,7 @@ In `package-inclusion-attires.ts`, insert after the `attireId` line:
     position: integer('position').notNull().default(1),
 ```
 
-- [ ] **Step 5: Wire the barrel and relations**
+- [✅] **Step 5: Wire the barrel and relations**
 
 In `packages/db/src/schema/index.ts`, add to the alphabetical star-export list (between `./frames.js` and `./package-inclusion-attires.js`, and after `./studio-services.js` respectively):
 
@@ -246,14 +246,14 @@ export const galleryPhotosRelations = relations(galleryPhotos, ({ one }) => ({
 }));
 ```
 
-- [ ] **Step 6: Typecheck + build the package, then run the pin to verify it passes**
+- [✅] **Step 6: Typecheck + build the package, then run the pin to verify it passes**
 
 Run: `pnpm --filter @sevendays/db typecheck && pnpm --filter @sevendays/db build && pnpm build:packages`
 Expected: all green (position is optional in `$inferInsert` while the default exists — seed and fixtures compile unchanged).
 Run: `pnpm --filter @sevendays/api test -- truncate`
 Expected: PASS (2 tests; the derived list now walks 21 tables).
 
-- [ ] **Step 7: Generate migration 0006 and read it against the pinned shape**
+- [✅] **Step 7: Generate migration 0006 and read it against the pinned shape**
 
 Run: `pnpm --filter @sevendays/db db:generate`
 Expected: one new `migrations/0006_*.sql` (record the name) whose statements are exactly this shape (order may differ; constraint names as pinned):
@@ -300,7 +300,7 @@ ALTER TABLE "package_inclusion_attires" ADD COLUMN "position" integer DEFAULT 1 
 
 If drizzle emits a materially different shape (a table rewrite, `SET NOT NULL`, a hand-listed unnamed constraint), STOP and report.
 
-- [ ] **Step 8: Apply to the live database (gated)**
+- [✅] **Step 8: Apply to the live database (gated)**
 
 Run: `node packages/db/scripts/check-env.mjs` → expect `GATE: PASS`.
 Run: `pnpm --filter @sevendays/db db:migrate`
@@ -308,7 +308,7 @@ Expected: exit 0; the journal applies 0006. Then verify the live shape read-only
 Run: `cd packages/db && node --env-file=.env scripts/db-state.mjs; cd ../..`
 Expected: the public table list includes `gallery_categories`, `gallery_photos`, `testimonials` (21 tables; counts may print zero rows for the new tables — they are CMS-born-empty).
 
-- [ ] **Step 9: The two stale comment sentences in the read service (comment-only)**
+- [✅] **Step 9: The two stale comment sentences in the read service (comment-only)**
 
 In `apps/api/src/services/service-packages.ts`, replace this sentence inside the `assemblePackageRead` docstring:
 
@@ -344,7 +344,7 @@ with:
   // row (fixtures) give distinct created_at, so this ordering is deterministic.
 ```
 
-- [ ] **Step 10: Run the touched suites and commit**
+- [✅] **Step 10: Run the touched suites and commit**
 
 Run: `pnpm --filter @sevendays/api test` (compose db up) — expected 13 files / 103 tests PASS (nothing in the api's behavior moved; the pin test now walks 21 tables). Run `pnpm --filter @sevendays/api fix` and `pnpm --filter @sevendays/db fix`, then commit:
 
@@ -368,7 +368,7 @@ git commit -m "feat(db): gallery/testimonials tables, lookup is_active, inclusio
 
 **Not here:** the seed script itself (no edit — its inserts flow through the builders); the backfill (Task 3 — builders cover future inserts only, existing live rows keep their DEFAULT 1 until the script runs); `buildFrameRowValues` (frames keep `frameNumber`, no position column).
 
-- [ ] **Step 1: Write the failing builder tests**
+- [✅] **Step 1: Write the failing builder tests**
 
 In `packages/db/src/catalog-rows.test.ts`:
 
@@ -478,12 +478,12 @@ with:
     ]);
 ```
 
-- [ ] **Step 2: Run the builder tests to verify they fail**
+- [✅] **Step 2: Run the builder tests to verify they fail**
 
 Run: `pnpm --filter @sevendays/db test -- catalog-rows`
 Expected: FAIL — the two new `position` assertions fail (`undefined` where a number is expected), the rewritten keys test fails (`position` missing from keys), and the two edited deep-equals fail (received objects without `position`).
 
-- [ ] **Step 3: Implement — positions in the builders**
+- [✅] **Step 3: Implement — positions in the builders**
 
 In `packages/db/src/catalog-rows.ts`:
 
@@ -556,12 +556,12 @@ with:
   return pairs;
 ```
 
-- [ ] **Step 4: Run the builder tests to verify they pass**
+- [✅] **Step 4: Run the builder tests to verify they pass**
 
 Run: `pnpm --filter @sevendays/db test`
 Expected: PASS — the db suite reads **22 passed | 8 skipped** (catalog-rows grew from 20 `it(` occurrences to 22; the two skipped `describe.runIf` files are unchanged).
 
-- [ ] **Step 5: Rewrite the now-stale fixture comment (comment-only)**
+- [✅] **Step 5: Rewrite the now-stale fixture comment (comment-only)**
 
 In `apps/api/test/helpers/fixtures.ts`, replace:
 
@@ -586,7 +586,7 @@ with:
   // owns the pair order; these statements preserve it.
 ```
 
-- [ ] **Step 6: Run the api suite and commit**
+- [✅] **Step 6: Run the api suite and commit**
 
 Run: `pnpm --filter @sevendays/api test` — expected 13 files / 103 tests PASS (fixtures now supply positions into the DEFAULT-1 column; values are legal whatever they are until #138 re-keys the read).
 Run `pnpm --filter @sevendays/db fix`, then commit:
@@ -612,7 +612,7 @@ git commit -m "feat(db): catalog-rows builders supply inclusion + junction posit
 
 **Not here:** the compose/CI databases (they get 0006+0007 through the normal migrate path — 0006's `DEFAULT 1` fills any persisted leftover rows, and 0007's `DROP DEFAULT` is data-agnostic, so no environment needs the script); any read change (positions are invisible to reads until #138); the gallery/testimonials tables (born empty — no backfill).
 
-- [ ] **Step 1: Write the backfill + verify script**
+- [✅] **Step 1: Write the backfill + verify script**
 
 `packages/db/scripts/backfill-positions.mjs` (plain node over postgres.js — the `db-state.mjs` script precedent; no drizzle typing concerns for a one-off):
 
@@ -745,7 +745,7 @@ if (failures.length > 0) {
 console.log('GATE: PASS — backfill verified (lookups active; positions monotonic 1..N)');
 ```
 
-- [ ] **Step 2: Run the backfill against live, twice (idempotence proof)**
+- [✅] **Step 2: Run the backfill against live, twice (idempotence proof)**
 
 Run: `node packages/db/scripts/check-env.mjs` → expect `GATE: PASS`.
 Run: `cd packages/db && node --env-file=.env scripts/backfill-positions.mjs; cd ../..`
@@ -753,7 +753,7 @@ Expected: every line `[ok] …`, ending `GATE: PASS` — including `all branches
 Run the script a second time — expected: identical `[ok]` lines and `GATE: PASS` (row_number re-derives the same values; this proves idempotence).
 Any `[FAIL]` line → STOP and report; do not proceed to the flip.
 
-- [ ] **Step 3: Drop the backfill default in the schema**
+- [✅] **Step 3: Drop the backfill default in the schema**
 
 In `packages/db/src/schema/package-inclusions.ts`, replace:
 
@@ -794,7 +794,7 @@ with:
     position: integer('position').notNull(),
 ```
 
-- [ ] **Step 4: Generate migration 0007 and read it against the pinned shape**
+- [✅] **Step 4: Generate migration 0007 and read it against the pinned shape**
 
 Run: `pnpm --filter @sevendays/db db:generate`
 Expected: one new `migrations/0007_*.sql` (record the name) containing exactly:
@@ -806,12 +806,12 @@ ALTER TABLE "package_inclusion_attires" ALTER COLUMN "position" DROP DEFAULT;
 
 Anything materially different (a `SET NOT NULL`, a `TYPE` change) → STOP and report.
 
-- [ ] **Step 5: Apply to live + update the truncate pin's title**
+- [✅] **Step 5: Apply to live + update the truncate pin's title**
 
 Run: `pnpm --filter @sevendays/db db:migrate` → exit 0.
 In `apps/api/test/helpers/truncate.test.ts`, replace the title string `'still truncates exactly the twenty-one known public tables (migrations 0000-0006)'` with `'still truncates exactly the twenty-one known public tables (migrations 0000-0007)'` (the list is unchanged — 0007 adds no table).
 
-- [ ] **Step 6: Rebuild + prove the insert contract, run the suites, commit**
+- [✅] **Step 6: Rebuild + prove the insert contract, run the suites, commit**
 
 Run: `pnpm --filter @sevendays/db typecheck && pnpm --filter @sevendays/db build`
 Expected: green — with no default, `$inferInsert` now REQUIRES `position`; this compiles only because Task 2's builders supply it (the proof the seed and fixtures are position-complete).
@@ -839,7 +839,7 @@ git commit -m "feat(db): backfill inclusion positions, drop the backfill default
 
 **Not here:** anything package-shaped (`servicePackageReadSchema`, the save payload, the deletion of the dead create schemas — Task 5); `branch.ts` gets no sibling test file (there is none today — branch coverage lands in Task 6's contract suite); admin-vs-public *list* semantics (both read the same shapes — the admin list simply includes deactivated rows; that's #137's query, not a schema); any UI.
 
-- [ ] **Step 1: Write the failing tests for the two new files**
+- [✅] **Step 1: Write the failing tests for the two new files**
 
 `packages/types/src/gallery.test.ts`:
 
@@ -1065,12 +1065,12 @@ describe('publicTestimonialSchema', () => {
 });
 ```
 
-- [ ] **Step 2: Run them to verify they fail**
+- [✅] **Step 2: Run them to verify they fail**
 
 Run: `pnpm --filter @sevendays/types test`
 Expected: FAIL — `gallery.test.ts` and `testimonial.test.ts` fail to resolve their imports (modules don't exist).
 
-- [ ] **Step 3: Write the two new schema files**
+- [✅] **Step 3: Write the two new schema files**
 
 `packages/types/src/gallery.ts`:
 
@@ -1241,7 +1241,7 @@ export const publicTestimonialSchema = z.object({
 export type PublicTestimonial = z.infer<typeof publicTestimonialSchema>;
 ```
 
-- [ ] **Step 4: Add `isActive` to the three lookup row schemas + the update aliases**
+- [✅] **Step 4: Add `isActive` to the three lookup row schemas + the update aliases**
 
 In `packages/types/src/branch.ts`, add to `branchSchema` after the `acceptsWalkIns` line:
 
@@ -1328,7 +1328,7 @@ export const studioServiceAddonMatrixSchema = z.object({
 export type StudioServiceAddonMatrixInput = z.infer<typeof studioServiceAddonMatrixSchema>;
 ```
 
-- [ ] **Step 5: Export the new modules + write the four sibling-test edits**
+- [✅] **Step 5: Export the new modules + write the four sibling-test edits**
 
 In `packages/types/src/index.ts`, add to the alphabetical list (after `./frames.js`, and after `./studio-service.js` respectively):
 
@@ -1427,7 +1427,7 @@ describe('studio-service matrix payloads (M5)', () => {
 
 (If `UUID` is not already a const in `studio-service.test.ts`, declare `const UUID = '00000000-0000-4000-8000-000000000000';` beside the existing fixtures — it is; reuse it.)
 
-- [ ] **Step 6: Run the types suite to verify it passes, then rebuild + commit**
+- [✅] **Step 6: Run the types suite to verify it passes, then rebuild + commit**
 
 Run: `pnpm --filter @sevendays/types test`
 Expected: PASS — **12 files / 98 tests** (70 baseline + 12 gallery + 6 testimonial + 3 attire + 3 print-size + 1 addon + 3 studio-service).
@@ -1453,7 +1453,7 @@ git commit -m "feat(types): gallery + testimonial vocabulary, lookup is_active, 
 
 **Not here:** any consumer change (verified by sweep: nothing outside `packages/types` tests imports the deleted names — `apps/` matched only the read schemas and `coverImageKey` string literals in fixtures, which stay valid); slug *generation* (`slugifyName` stays db-side, #137 calls it); `servicePackageSchema`/`servicePackageWithInclusionsSchema` (untouched — #138); per-kind quantity/description normalization beyond the attire + frame rules (the editor sends well-formed rows; #137's service normalizes — do not over-constrain the payload).
 
-- [ ] **Step 1: Write the failing package tests**
+- [✅] **Step 1: Write the failing package tests**
 
 In `packages/types/src/package.test.ts`:
 
@@ -1730,17 +1730,17 @@ describe('packageSaveInclusionSchema (the inclusion row inside the save)', () =>
 });
 ```
 
-- [ ] **Step 2: Trim the dead create-schema tests from inclusion.test.ts and frames.test.ts**
+- [✅] **Step 2: Trim the dead create-schema tests from inclusion.test.ts and frames.test.ts**
 
 In `inclusion.test.ts`: change the import to `{ packageInclusionSchema }` (drop `createPackageInclusionSchema`) and DELETE these five tests — `'rejects an unknown kind'`, `'rejects a non-integer quantity'` (both inside `describe('packageInclusionSchema')`; their semantics moved to the `packageSaveInclusionSchema` block above), and the entire `describe('createPackageInclusionSchema attire rule', …)` block (3 tests — the ≥1-attire rule moved with the path assertion; the frame-token rules live at the package level). The file keeps `describe('packageInclusionSchema')` (3 tests) + `describe('resolvedInclusionSchema')` (2 tests) = **5 tests**.
 In `frames.test.ts`: change the import to `{ frameSchema }` and DELETE the entire `describe('createFrameSchema', …)` block (2 tests) — the save payload's frame is `packageSaveFrameSchema`. The file keeps **2 tests**.
 
-- [ ] **Step 3: Run the types suite to verify the new tests fail**
+- [✅] **Step 3: Run the types suite to verify the new tests fail**
 
 Run: `pnpm --filter @sevendays/types test`
 Expected: FAIL — the new package describe blocks fail (`servicePackageReadSchema`, `packageSaveInclusionSchema`, `updateServicePackageSchema` unresolved; the reshaped-create expectations mismatch), while the trimmed inclusion/frames files pass.
 
-- [ ] **Step 4: Implement — reshape package.ts, delete the dead exports**
+- [✅] **Step 4: Implement — reshape package.ts, delete the dead exports**
 
 In `packages/types/src/package.ts`:
 
@@ -1881,7 +1881,7 @@ export type ServicePackageRead = z.infer<typeof servicePackageReadSchema>;
 
 (d) In `packages/types/src/frames.ts`, DELETE the `createFrameSchema` definition and `CreateFrameInput` type. The row schema stays.
 
-- [ ] **Step 5: Run the types suite to verify it passes, then rebuild + blast-radius check + commit**
+- [✅] **Step 5: Run the types suite to verify it passes, then rebuild + blast-radius check + commit**
 
 Run: `pnpm --filter @sevendays/types test`
 Expected: PASS — **12 files / 105 tests** (Task 4's 98 + 14 new package tests − 5 trimmed inclusion tests − 2 trimmed frame tests = 105).
@@ -1906,7 +1906,7 @@ git commit -m "feat(types): atomic package-save payload + canonical read shape (
 
 **Not here:** any DB row or route call (the write model's behavioral proofs — uniqueness 400s, the atomic save's transaction, trim rules — are #137/#138's integration suites; this file is pure Zod over pinned fixtures but rides the api suite per the ticket's AC, so the write model's vocabulary is guarded where the write model lives); mutations of the tested schemas (fixtures only).
 
-- [ ] **Step 1: Write the contract suite**
+- [✅] **Step 1: Write the contract suite**
 
 `apps/api/test/cms-schema-contracts.test.ts`:
 
@@ -2299,7 +2299,7 @@ describe('the two update schemas that differ from create', () => {
 });
 ```
 
-- [ ] **Step 2: Run the suite to verify it passes, then commit**
+- [✅] **Step 2: Run the suite to verify it passes, then commit**
 
 Run: `pnpm --filter @sevendays/api test`
 Expected: PASS — **14 files / 121 tests** (103 + 18 here: 9 round-trips + 2 wire-rename + 2 matrix + 3 order + 2 update-shapes). If any contract test fails, the schema drifted from this plan — fix the schema, not the test.
@@ -2323,16 +2323,16 @@ git commit -m "test(api): schema-contract suite — every entity round-trips its
 
 **Not here:** M5 checkboxes 1/3+ (siblings' — stay unticked); the milestone-close docs rotation (#143 — tech-stack/AGENTS status flips beyond the migration-count line); the seed-contract runbook note (#143); any deploy expectation (no deployed surface changed — the API's routes and responses are byte-identical; CI's merge legs are the only deploys).
 
-- [ ] **Step 1: The full gate**
+- [✅] **Step 1: The full gate**
 
 Run: `docker compose up -d db` (idempotent), then `pnpm check`.
 Expected: **35/35 turbo tasks green** — types **12 files / 105 tests**, db **22 passed | 8 skipped**, api **14 files / 121 tests**, landing suite unchanged, admin no-op (known). Reconcile any count mismatch before proceeding.
 
-- [ ] **Step 2: Regenerate the graph**
+- [✅] **Step 2: Regenerate the graph**
 
 Run: `graphify update .` — include `graphify-out/` in the docs commit below.
 
-- [ ] **Step 3: Rotate the docs (three surgical edits + the session record)**
+- [✅] **Step 3: Rotate the docs (three surgical edits + the session record)**
 
 (a) `docs/plan.md` — tick M5 checkbox 2. Replace:
 
@@ -2370,7 +2370,7 @@ with:
 3. In Immediate Next Steps, replace `**#135** (catalog schema + shared types) is takeable now.` with `**#136** (media foundation) is takeable next — **#135** (catalog schema + shared types) landed 2026-09-XX.`
 4. Update the trailing `_Last updated: …` line to carry this ticket's landing (date + one clause).
 
-- [ ] **Step 4: Commit the docs + open the PR + squash-merge**
+- [✅] **Step 4: Commit the docs + open the PR + squash-merge**
 
 ```bash
 git add docs/plan.md docs/progress.md AGENTS.md graphify-out
@@ -2379,11 +2379,11 @@ git commit -m "docs: M5 ticket 01 close-out — plan tick, progress rotation, mi
 
 Then `gh pr create --title "M5 ticket 01 — catalog schema + shared types" --body-file <evidence>/pr-body.md` — the PR body states: the AC checklist (all four, each with its evidence pointer — migration journal lines, the backfill `GATE: PASS` output, the export list, the suite counts); the no-deployed-surface-change note (routes and responses byte-identical; CI merge legs are the proof); the evidence dir path. Then squash-merge (`gh pr merge --squash --delete-branch`), watch both CI legs green (`Deploy teaser (main)` + `Deploy v1 (private)`).
 
-- [ ] **Step 5: The v1 pick + ledger row (post-merge, per `docs/agents/v1-picks.md`)**
+- [✅] **Step 5: The v1 pick + ledger row (post-merge, per `docs/agents/v1-picks.md`)**
 
 On a fresh local `v1` from `origin/v1`: classify the squash commit (expect **SPLIT** — v1-paths: the `packages/db` schema files + migrations + `catalog-rows.*` + `backfill-positions.mjs`, the `packages/types` files, `apps/api/test/helpers/truncate.test.ts` + `fixtures.ts` + `cms-schema-contracts.test.ts`, `service-packages.ts` comment hunks; main-only: docs, `plan.md`, the plan file, `graphify-out/`). Content pass: expect CLEAN (schema/types work carries none of the 18 audit tokens — verify with `node scripts/audit-v1-absence.mjs` expecting PASS 0/18). Apply the v1-paths (migrations carried **WITHOUT re-migrate** — the editions share the live DB, already migrated from main; the #118 precedent); no lockfile change (no deps moved). Locks: `pnpm install --frozen-lockfile` → `pnpm build:packages` → `pnpm --filter @sevendays/api build` → `pnpm check` → `pnpm build` green on v1; audit PASS; the CI run green (`Deploy v1 (private)` success, `Deploy teaser (main)` skipped). Append the ledger row (verdict `split`, the v1 pick SHA, notes: clean-pick content per the spec's v1 posture; migrations not re-migrated; the backfill script carried for fresh-environment parity but inert — v1's seed supplies positions through the builders). Push v1.
 
-- [ ] **Step 6: Close the ticket**
+- [✅] **Step 6: Close the ticket**
 
 `gh issue close 135 --comment …` — the comment ticks all four AC boxes with evidence pointers (migration names + journal, backfill `GATE: PASS` (run twice), the export inventory, `pnpm check` 35/35 with the three suite counts) and names the PR + pick SHAs. Then `git checkout main && git pull`, and this plan's own checkboxes are already ticked per-task by the executor.
 
@@ -2396,3 +2396,14 @@ On a fresh local `v1` from `origin/v1`: classify the squash commit (expect **SPL
 - **Type consistency:** `packageSaveFrameSchema`/`packageSaveInclusionSchema`/`servicePackageReadSchema` names match between Task 5's implementation, its tests, Task 6's contract suite, and the Interfaces blocks; `z.url()` field names (`coverImageUrl`, `photoUrl`) match the spec's wire-rename vocabulary; builder output fields (`position`) match the drizzle columns added in Task 1.
 - **No placeholders:** every code block is complete; the only executor-filled values are the generated migration suffixes and dates, each explicitly marked at its use site.
 
+
+---
+
+## Execution amendments (recorded at close-out, 2026-09-25)
+
+The SDD execution (six implementer tasks + one fix round, MAX reviews per task and a final whole-branch review — all PASS) landed four rulings this file's text predates:
+
+1. **D1 — Task 4's gate missed the landing fixtures.** `branchSchema`'s `isActive` addition made the field output-required (`z.infer`), breaking three landing test fixtures typed against the output shape. Task 4's blast-radius gate ran the suites but not the whole-repo typecheck, so the break surfaced in Task 5's gate (verified pre-existing at Task 4's HEAD via stash). Fixed in fix round 1 (`fix(landing): branch fixtures gain isActive…`) — three one-line insertions — and the whole-repo typecheck is now a standing gate for every task touching `packages/types` schemas.
+2. **D2 — Task 6 gained a 19th test** (controller amendment from the Task 5 review): `updateServicePackageSchema` with duplicate frame tokens must fail, pinning refine-on-update. The api count is therefore **122**, not the 121 this plan's Global Constraints state (types 105 stands).
+3. **T5 deviation (review-verified sound):** the update schema is built zod-4 refine-last (unrefined private base + one shared `refinePackageSave` applied to both create and update) rather than this file's `.extend()`-after-`.superRefine()` chain — the worker hit type/module-load resistance the controller's plain-node probe did not reproduce; the landed shape is semantically identical and test-pinned.
+4. **Live-DB sequence:** the controller (not the workers) ran every live-Supabase step — check-env gate, `db:migrate` for 0006/0007, and the backfill (run twice, GATE: PASS both) — because workers never touch `.env`. The worker-side order (drop default + generate 0007 locally before the live backfill) preserved the plan's only live constraint: backfill verified before 0007 applied.
