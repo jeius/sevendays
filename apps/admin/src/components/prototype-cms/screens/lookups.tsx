@@ -7,7 +7,10 @@
 // truncated description hides while expanded, and clicking the print-size
 // row toggles expansion. Round 4: on print sizes the status dot moves beside
 // the code and the chevron follows the icons (attires already lead with the
-// dot). Each section is a Card with a card title + New
+// dot). Round 5: the description indents by the dot's width so it aligns
+// with the code text, the identity value truncates with a full-text hover
+// tooltip, and the code column's fixed width drops (A3's only explicit
+// width constraint). Each section is a Card with a card title + New
 // button + Table. Nothing persists. Never merges; delete with the route.
 
 import { Button } from '@sevendays/ui/components/button';
@@ -30,12 +33,14 @@ import {
   TableRow,
 } from '@sevendays/ui/components/table';
 import { Textarea } from '@sevendays/ui/components/textarea';
+import { TooltipProvider } from '@sevendays/ui/components/tooltip';
 import { SquarePen } from 'lucide-react';
 import { Fragment, useId, useState } from 'react';
 import type { AttireRow, PrintSizeRow } from '../fixtures';
 import { attires, printSizes } from '../fixtures';
 import type { ScreenProps } from '../nav';
 import {
+  ActionTooltip,
   Collapse,
   DeactivateConfirm,
   ExpandPanel,
@@ -123,64 +128,83 @@ export function LookupsScreen({ search }: ScreenProps) {
           </CardAction>
         </CardHeader>
         <CardContent>
-          <Table className='@max-[700px]:hidden'>
-            <TableHeader>
-              <TableRow>
-                <TableHead className='w-24'>Code</TableHead>
-                {/* L1: the description and status columns died — the
+          {/* The TooltipProvider is the per-table one the identity tooltips
+              use (A3). */}
+          <TooltipProvider>
+            <Table className='@max-[700px]:hidden'>
+              <TableHeader>
+                <TableRow>
+                  {/* A3: the code column's fixed width drops w-24 → w-16 — the
+                    only explicit width on an identity column in the prototype
+                    (longest fixture code "11x14" still fits at w-16). */}
+                  <TableHead className='w-16'>Code</TableHead>
+                  {/* L1: the description and status columns died — the
                     description is the dot line, full text on expand. */}
-                <TableHead className='text-right' />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sizes.map((row) => {
-                const expanded = expandedId === row.id;
-                return (
-                  <Fragment key={row.id}>
-                    {/* N3: whole-row click toggles expansion — the actions
+                  <TableHead className='text-right' />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sizes.map((row) => {
+                  const expanded = expandedId === row.id;
+                  return (
+                    <Fragment key={row.id}>
+                      {/* N3: whole-row click toggles expansion — the actions
                         cell stops propagation so icon clicks never toggle;
                         the chevron stays the keyboard/AT toggle. */}
-                    <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
-                      <TableCell className='cursor-pointer'>
-                        {/* L1: identity = code (mono, semibold) / dot +
+                      <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
+                        <TableCell className='cursor-pointer'>
+                          {/* L1: identity = code (mono, semibold) / dot +
                             description. No tooltip — the expand shows it all.
                             Round 4: the dot sits BESIDE the code (the attires
                             reference pattern) so it never strands on its own
-                            line when the description hides. */}
-                        <div className='space-y-0.5'>
-                          <div className='flex items-center gap-2'>
-                            <StatusBadge isActive={row.isActive} />
-                            <p className='font-mono font-semibold'>{row.code}</p>
-                          </div>
-                          {/* N2: the truncated line hides while expanded. */}
-                          {expanded ? null : (
-                            <div className='flex min-w-0 items-center'>
-                              <p className='text-muted-foreground truncate text-xs'>
-                                {row.description}
-                              </p>
+                            line when the description hides. A3: the code
+                            truncates when the column is squeezed and the
+                            tooltip carries the full text. */}
+                          <div className='space-y-0.5'>
+                            <div className='flex items-center gap-2'>
+                              <StatusBadge isActive={row.isActive} />
+                              <ActionTooltip
+                                label={row.code}
+                                button={
+                                  <p className='min-w-0 truncate font-mono font-semibold'>
+                                    {row.code}
+                                  </p>
+                                }
+                              />
                             </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
-                        <RowActionsCluster
-                          expanded={expanded}
-                          onToggle={() => toggleExpanded(row.id)}
-                          edit={editButton(row.id)}
-                          isActive={row.isActive}
-                          onDeactivate={() => setConfirmId(row.id)}
-                          onReactivate={() => setSizeActive(row.id, true)}
-                        />
-                      </TableCell>
-                    </TableRow>
-                    <ExpandPanel open={expanded} colSpan={2}>
-                      {row.description}
-                    </ExpandPanel>
-                  </Fragment>
-                );
-              })}
-            </TableBody>
-          </Table>
+                            {/* N2: the truncated line hides while expanded.
+                              A1: the line indents by the dot (size-2.5) +
+                              its gap-2 — 4.5 spacing steps — so the text
+                              aligns with the code above it. */}
+                            {expanded ? null : (
+                              <div className='flex min-w-0 items-center pl-4.5'>
+                                <p className='text-muted-foreground truncate text-xs'>
+                                  {row.description}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
+                          <RowActionsCluster
+                            expanded={expanded}
+                            onToggle={() => toggleExpanded(row.id)}
+                            edit={editButton(row.id)}
+                            isActive={row.isActive}
+                            onDeactivate={() => setConfirmId(row.id)}
+                            onReactivate={() => setSizeActive(row.id, true)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                      <ExpandPanel open={expanded} colSpan={2}>
+                        {row.description}
+                      </ExpandPanel>
+                    </Fragment>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TooltipProvider>
 
           {/* Stacked posture (below 700px container width): the whole
               two-line header toggles the animated reveal (M1). */}
@@ -201,9 +225,10 @@ export function LookupsScreen({ search }: ScreenProps) {
                         <p className='truncate font-mono font-medium'>{row.code}</p>
                       </div>
                     </div>
-                    {/* N2: the description line hides while expanded. */}
+                    {/* N2: the description line hides while expanded. A1:
+                        dot-width indent, same as the desktop line 2. */}
                     {expanded ? null : (
-                      <p className='text-muted-foreground mt-1 truncate text-xs'>
+                      <p className='text-muted-foreground mt-1 truncate pl-4.5 text-xs'>
                         {row.description}
                       </p>
                     )}
@@ -238,36 +263,42 @@ export function LookupsScreen({ search }: ScreenProps) {
           </CardAction>
         </CardHeader>
         <CardContent>
-          <Table className='@max-[700px]:hidden'>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead className='text-right' />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {attireRows.map((row) => (
-                <TableRow key={row.id} className='group'>
-                  <TableCell>
-                    {/* L2: status dot FIRST, then the name (no description
-                        line, so no expand affordance). */}
-                    <div className='flex items-center gap-2'>
-                      <StatusBadge isActive={row.isActive} />
-                      <p className='font-semibold'>{row.name}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell className='text-right'>
-                    <RowActionsCluster
-                      edit={editButton(row.id)}
-                      isActive={row.isActive}
-                      onDeactivate={() => setConfirmId(row.id)}
-                      onReactivate={() => setAttireActive(row.id, true)}
-                    />
-                  </TableCell>
+          <TooltipProvider>
+            <Table className='@max-[700px]:hidden'>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead className='text-right' />
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {attireRows.map((row) => (
+                  <TableRow key={row.id} className='group'>
+                    <TableCell>
+                      {/* L2: status dot FIRST, then the name (no description
+                        line, so no expand affordance). A3: the name truncates
+                        (one line, tooltip carries the full text). */}
+                      <div className='flex items-center gap-2'>
+                        <StatusBadge isActive={row.isActive} />
+                        <ActionTooltip
+                          label={row.name}
+                          button={<p className='min-w-0 truncate font-semibold'>{row.name}</p>}
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell className='text-right'>
+                      <RowActionsCluster
+                        edit={editButton(row.id)}
+                        isActive={row.isActive}
+                        onDeactivate={() => setConfirmId(row.id)}
+                        onReactivate={() => setAttireActive(row.id, true)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TooltipProvider>
 
           {/* Stacked posture — attires carry no secondary field, so the dot
               leads and the icon actions sit inline (nothing to reveal). */}

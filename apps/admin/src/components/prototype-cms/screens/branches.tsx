@@ -5,7 +5,9 @@
 // mobile). Round 3: action icons get tooltips, the truncated address hides
 // while expanded, and clicking the row toggles expansion. Round 4: the
 // status dot moves beside the name and the chevron follows the icons.
-// Editor is the
+// Round 5: the address indents by the dot's width so it aligns with the
+// name text, and the name truncates with a full-text hover tooltip
+// (identity column's min width drops). Editor is the
 // ruled Sheet (V1 settled). Deliberately NO hours/capacity fields anywhere —
 // v2 scope; the header subline carries that note. Nothing persists. Never
 // merges; delete with the route.
@@ -24,12 +26,14 @@ import {
   TableHeader,
   TableRow,
 } from '@sevendays/ui/components/table';
+import { TooltipProvider } from '@sevendays/ui/components/tooltip';
 import { SquarePen } from 'lucide-react';
 import { Fragment, useId, useState } from 'react';
 import type { BranchRow } from '../fixtures';
 import { branches } from '../fixtures';
 import type { ScreenProps } from '../nav';
 import {
+  ActionTooltip,
   Collapse,
   DeactivateConfirm,
   EmptyState,
@@ -105,79 +109,92 @@ export function BranchesScreen({ search }: ScreenProps) {
         <Card className='@container rounded-lg'>
           <CardContent>
             {/* @container: the table folds into stacked rows below a 700px
-                CONTAINER width (Tailwind v4 native container queries). */}
-            <Table className='@max-[700px]:hidden'>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Walk-ins</TableHead>
-                  {/* T2: the Actions header renders empty — the icons carry
+                CONTAINER width (Tailwind v4 native container queries). The
+                TooltipProvider is the per-table one the name tooltips use
+                (A3). */}
+            <TooltipProvider>
+              <Table className='@max-[700px]:hidden'>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Walk-ins</TableHead>
+                    {/* T2: the Actions header renders empty — the icons carry
                       their own labels. */}
-                  <TableHead className='text-right' />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((row) => {
-                  const expanded = expandedId === row.id;
-                  return (
-                    <Fragment key={row.id}>
-                      {/* N3: whole-row click toggles expansion — the actions
+                    <TableHead className='text-right' />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rows.map((row) => {
+                    const expanded = expandedId === row.id;
+                    return (
+                      <Fragment key={row.id}>
+                        {/* N3: whole-row click toggles expansion — the actions
                           cell stops propagation so icon clicks never toggle;
                           the chevron stays the keyboard/AT toggle. */}
-                      <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
-                        <TableCell className='cursor-pointer'>
-                          {/* B1: identity = name / dot + address (the address
+                        <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
+                          <TableCell className='cursor-pointer'>
+                            {/* B1: identity = name / dot + address (the address
                               column died — full text on expand). Round 4:
                               the dot sits BESIDE the name (the
                               lookups-attires reference pattern) so it never
                               strands on its own line when the address
-                              hides. */}
-                          <div className='space-y-0.5'>
-                            <div className='flex items-center gap-2'>
-                              <StatusBadge isActive={row.isActive} />
-                              <p className='font-semibold'>{row.name}</p>
-                            </div>
-                            {/* N2: the truncated line hides while expanded. */}
-                            {expanded ? null : (
-                              <div className='flex min-w-0 items-center'>
-                                <p className='text-muted-foreground truncate text-xs'>
-                                  {row.address}
-                                </p>
+                              hides. A3: the name truncates when the column is
+                              squeezed and the tooltip carries the full text. */}
+                            <div className='space-y-0.5'>
+                              <div className='flex items-center gap-2'>
+                                <StatusBadge isActive={row.isActive} />
+                                <ActionTooltip
+                                  label={row.name}
+                                  button={
+                                    <p className='min-w-0 truncate font-semibold'>{row.name}</p>
+                                  }
+                                />
                               </div>
+                              {/* N2: the truncated line hides while expanded.
+                                A1: the line indents by the dot (size-2.5) +
+                                its gap-2 — 4.5 spacing steps — so the text
+                                aligns with the name above it. */}
+                              {expanded ? null : (
+                                <div className='flex min-w-0 items-center pl-4.5'>
+                                  <p className='text-muted-foreground truncate text-xs'>
+                                    {row.address}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className='font-mono text-sm cursor-pointer'>
+                            {row.phone}
+                          </TableCell>
+                          <TableCell className='cursor-pointer'>
+                            {row.acceptsWalkIns ? (
+                              <Badge variant='secondary'>Walk-in friendly</Badge>
+                            ) : (
+                              <span className='text-muted-foreground'>—</span>
                             )}
-                          </div>
-                        </TableCell>
-                        <TableCell className='font-mono text-sm cursor-pointer'>
-                          {row.phone}
-                        </TableCell>
-                        <TableCell className='cursor-pointer'>
-                          {row.acceptsWalkIns ? (
-                            <Badge variant='secondary'>Walk-in friendly</Badge>
-                          ) : (
-                            <span className='text-muted-foreground'>—</span>
-                          )}
-                        </TableCell>
-                        <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
-                          <RowActionsCluster
-                            expanded={expanded}
-                            onToggle={() => toggleExpanded(row.id)}
-                            edit={editButton(row.id)}
-                            isActive={row.isActive}
-                            onDeactivate={() => setConfirmId(row.id)}
-                            onReactivate={() => setActive(row.id, true)}
-                          />
-                        </TableCell>
-                      </TableRow>
-                      {/* T3 desktop reveal: the FULL address. */}
-                      <ExpandPanel open={expanded} colSpan={4}>
-                        {row.address}
-                      </ExpandPanel>
-                    </Fragment>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                          </TableCell>
+                          <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
+                            <RowActionsCluster
+                              expanded={expanded}
+                              onToggle={() => toggleExpanded(row.id)}
+                              edit={editButton(row.id)}
+                              isActive={row.isActive}
+                              onDeactivate={() => setConfirmId(row.id)}
+                              onReactivate={() => setActive(row.id, true)}
+                            />
+                          </TableCell>
+                        </TableRow>
+                        {/* T3 desktop reveal: the FULL address. */}
+                        <ExpandPanel open={expanded} colSpan={4}>
+                          {row.address}
+                        </ExpandPanel>
+                      </Fragment>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TooltipProvider>
 
             {/* Stacked posture (below 700px container width): the whole
                 two-line header toggles the animated reveal (M1); line 1's
@@ -202,9 +219,12 @@ export function BranchesScreen({ search }: ScreenProps) {
                           <Badge variant='secondary'>Walk-in friendly</Badge>
                         ) : null}
                       </div>
-                      {/* N2: the address line hides while expanded. */}
+                      {/* N2: the address line hides while expanded. A1:
+                          dot-width indent, same as the desktop line 2. */}
                       {expanded ? null : (
-                        <p className='text-muted-foreground mt-1 truncate text-xs'>{row.address}</p>
+                        <p className='text-muted-foreground mt-1 truncate pl-4.5 text-xs'>
+                          {row.address}
+                        </p>
                       )}
                     </button>
                     <Collapse open={expanded}>

@@ -11,7 +11,9 @@
 // gains the `group` class the other five screens mark their rows with (the
 // cluster's opacity-0 reveal had no group ancestor, so the icons never
 // showed), the status dot moves beside the person, and the chevron follows
-// the icons. Local state only:
+// the icons. Round 5: the quote indents by the dot's width so it aligns
+// with the person text, and the person truncates with a full-text hover
+// tooltip (identity column's min width drops). Local state only:
 // deactivate/reactivate flips isActive, nothing persists. Never merges;
 // delete with the route.
 
@@ -46,6 +48,7 @@ import {
   TableRow,
 } from '@sevendays/ui/components/table';
 import { Textarea } from '@sevendays/ui/components/textarea';
+import { TooltipProvider } from '@sevendays/ui/components/tooltip';
 import { GripVertical, SquarePen } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Fragment, useId, useState } from 'react';
@@ -53,6 +56,7 @@ import type { TestimonialRow } from '../fixtures';
 import { testimonials } from '../fixtures';
 import type { ScreenProps } from '../nav';
 import {
+  ActionTooltip,
   Collapse,
   DeactivateConfirm,
   EmptyState,
@@ -253,83 +257,102 @@ export function TestimonialsScreen({ search }: ScreenProps) {
         <Card className='@container rounded-lg'>
           <CardContent>
             {/* @container: the table folds into stacked rows below a 700px
-                CONTAINER width (Tailwind v4 native container queries). */}
-            <Table className='@max-[700px]:hidden'>
-              <TableHeader>
-                <TableRow>
-                  {/* Drag-handle column (round-3 ruling) — no header label. */}
-                  <TableHead className='w-10' />
-                  <TableHead>Person</TableHead>
-                  {/* T2: the Actions header renders empty — the icons carry
+                CONTAINER width (Tailwind v4 native container queries). The
+                TooltipProvider is the per-table one the name tooltips use
+                (A3). */}
+            <TooltipProvider>
+              <Table className='@max-[700px]:hidden'>
+                <TableHeader>
+                  <TableRow>
+                    {/* Drag-handle column (round-3 ruling) — no header label. */}
+                    <TableHead className='w-10' />
+                    <TableHead>Person</TableHead>
+                    {/* T2: the Actions header renders empty — the icons carry
                       their own labels. */}
-                  <TableHead className='text-right' />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={onDragEnd}
-                >
-                  <SortableContext
-                    items={rows.map((row) => row.id)}
-                    strategy={verticalListSortingStrategy}
+                    <TableHead className='text-right' />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={onDragEnd}
                   >
-                    {rows.map((row) => {
-                      const expanded = expandedId === row.id;
-                      return (
-                        <Fragment key={row.id}>
-                          <SortableTestimonialRow
-                            id={row.id}
-                            onClick={() => toggleExpanded(row.id)}
-                          >
-                            <TableCell className='cursor-pointer'>
-                              {/* TM1: person is the identity; quote is the
+                    <SortableContext
+                      items={rows.map((row) => row.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {rows.map((row) => {
+                        const expanded = expandedId === row.id;
+                        return (
+                          <Fragment key={row.id}>
+                            <SortableTestimonialRow
+                              id={row.id}
+                              onClick={() => toggleExpanded(row.id)}
+                            >
+                              <TableCell className='cursor-pointer'>
+                                {/* TM1: person is the identity; quote is the
                                   one-line secondary (full quote on expand).
                                   Round 4: the dot sits BESIDE the person —
                                   the lookups-attires reference pattern — so
                                   it never strands on its own line when the
-                                  quote hides. */}
-                              <div className='space-y-0.5'>
-                                <div className='flex items-center gap-2'>
-                                  <StatusBadge isActive={row.isActive} />
-                                  <p className='font-semibold'>{row.person}</p>
-                                </div>
-                                {/* N2: the truncated quote hides while
-                                    expanded — the reveal carries the full
-                                    text. */}
-                                {expanded ? null : (
-                                  <div className='flex min-w-0 items-center'>
-                                    <p className='text-muted-foreground truncate text-xs'>
-                                      {row.quote}
-                                    </p>
+                                  quote hides. A3: the person truncates when
+                                  the column is squeezed and the tooltip
+                                  carries the full text. */}
+                                <div className='space-y-0.5'>
+                                  <div className='flex items-center gap-2'>
+                                    <StatusBadge isActive={row.isActive} />
+                                    <ActionTooltip
+                                      label={row.person}
+                                      button={
+                                        <p className='min-w-0 truncate font-semibold'>
+                                          {row.person}
+                                        </p>
+                                      }
+                                    />
                                   </div>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
-                              <RowActionsCluster
-                                expanded={expanded}
-                                onToggle={() => toggleExpanded(row.id)}
-                                edit={editButton(row.id)}
-                                isActive={row.isActive}
-                                onDeactivate={() => setConfirmId(row.id)}
-                                onReactivate={() => setActive(row.id, true)}
-                              />
-                            </TableCell>
-                          </SortableTestimonialRow>
-                          {/* T3 desktop reveal: the FULL quote (spans the
+                                  {/* N2: the truncated quote hides while
+                                    expanded — the reveal carries the full
+                                    text. A1: the line indents by the dot
+                                    (size-2.5) + its gap-2 — 4.5 spacing
+                                    steps — so the text aligns with the
+                                    person above it. */}
+                                  {expanded ? null : (
+                                    <div className='flex min-w-0 items-center pl-4.5'>
+                                      <p className='text-muted-foreground truncate text-xs'>
+                                        {row.quote}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell
+                                className='text-right'
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <RowActionsCluster
+                                  expanded={expanded}
+                                  onToggle={() => toggleExpanded(row.id)}
+                                  edit={editButton(row.id)}
+                                  isActive={row.isActive}
+                                  onDeactivate={() => setConfirmId(row.id)}
+                                  onReactivate={() => setActive(row.id, true)}
+                                />
+                              </TableCell>
+                            </SortableTestimonialRow>
+                            {/* T3 desktop reveal: the FULL quote (spans the
                               grip + identity + actions columns). */}
-                          <ExpandPanel open={expanded} colSpan={3}>
-                            {row.quote}
-                          </ExpandPanel>
-                        </Fragment>
-                      );
-                    })}
-                  </SortableContext>
-                </DndContext>
-              </TableBody>
-            </Table>
+                            <ExpandPanel open={expanded} colSpan={3}>
+                              {row.quote}
+                            </ExpandPanel>
+                          </Fragment>
+                        );
+                      })}
+                    </SortableContext>
+                  </DndContext>
+                </TableBody>
+              </Table>
+            </TooltipProvider>
 
             {/* Stacked posture (below 700px container width): the two-line
                 header toggles the animated reveal (M1); rows drag by the grip
@@ -359,9 +382,10 @@ export function TestimonialsScreen({ search }: ScreenProps) {
                                 <p className='truncate font-medium'>{row.person}</p>
                               </div>
                             </div>
-                            {/* N2: the quote line hides while expanded. */}
+                            {/* N2: the quote line hides while expanded. A1:
+                                dot-width indent, same as the desktop line 2. */}
                             {expanded ? null : (
-                              <p className='text-muted-foreground mt-1 truncate text-xs'>
+                              <p className='text-muted-foreground mt-1 truncate pl-4.5 text-xs'>
                                 {row.quote}
                               </p>
                             )}

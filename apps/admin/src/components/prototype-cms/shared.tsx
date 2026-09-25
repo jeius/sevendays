@@ -9,6 +9,11 @@
 // actions — [Edit] [Deactivate/Reactivate] [Chevron] (owner ruling) — still
 // always visible, rotation and aria-expanded intact.
 //
+// Round 5: ActionTooltip is exported (the identity cells reuse it to show the
+// full row NAME on hover), and DeactivateConfirm renders a bottom sheet below
+// the sm breakpoint (full-width, rounded top, slide-up) and the centered
+// dialog above it — responsive classes on the content only.
+//
 // G1 radius note (spec): every card in this prototype renders one radius
 // step down (rounded-xl → rounded-lg) via className overrides at the usage
 // sites — packages/ui is untouched. If the owner keeps this, the step-down
@@ -97,9 +102,11 @@ export function ExpandPanel({
 
 /**
  * N1: an icon-only action shows its label on hover/focus — the tooltip
- * content IS the button's aria-label text (which stays for AT).
+ * content IS the button's aria-label text (which stays for AT). Round 5
+ * (A3): exported — the identity cells reuse it so a truncated row NAME
+ * reveals its full text on hover (trigger is the name element itself).
  */
-function ActionTooltip({ label, button }: { label: string; button: ReactElement }) {
+export function ActionTooltip({ label, button }: { label: string; button: ReactElement }) {
   return (
     <Tooltip>
       <TooltipTrigger render={button} />
@@ -261,7 +268,15 @@ export function StatusBadge({ isActive }: { isActive: boolean }) {
   );
 }
 
-/** Controlled deactivate confirm. onConfirm never deletes — the screen flips isActive. */
+/**
+ * Controlled deactivate confirm. onConfirm never deletes — the screen flips
+ * isActive. Round 5 (C1): below the sm breakpoint the dialog docks to the
+ * bottom edge as a sheet — full width, rounded top, slide-up entrance
+ * (max-sm classes win the cascade over the centered positioning of the
+ * primitive) — and above sm the classes restore the primitive's centered
+ * dialog verbatim. The right-side editor Sheets are ruled OUT of scope
+ * (dialogs only).
+ */
 export function DeactivateConfirm({
   name,
   open,
@@ -275,7 +290,7 @@ export function DeactivateConfirm({
 }) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className='top-auto bottom-0 left-0 translate-x-0 translate-y-0 rounded-b-none data-[size=default]:max-w-none max-sm:data-open:slide-in-from-bottom-4 max-sm:data-closed:slide-out-to-bottom-4 sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-b-[min(var(--radius-4xl),24px)]'>
         <AlertDialogHeader>
           <AlertDialogTitle>Deactivate {name}?</AlertDialogTitle>
           <AlertDialogDescription>

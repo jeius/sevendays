@@ -5,7 +5,10 @@
 // full description. Round 3: action icons get tooltips, the truncated
 // description hides while expanded, and clicking the row toggles expansion.
 // Round 4: the status dot moves beside the name and the chevron follows the
-// icons. The editor chrome is the ruled Sheet everywhere (V1 settled); the
+// icons. Round 5: the description indents by the dot's width so it aligns
+// with the name text, and the name truncates with a full-text hover tooltip
+// (identity column's min width drops). The editor chrome is the ruled Sheet
+// everywhere (V1 settled); the
 // applies-to matrix renders as selectable name-only toggle cards writing
 // straight into the row's local studioServiceIds. Nothing persists. Never
 // merges; delete with the route.
@@ -25,12 +28,14 @@ import {
   TableRow,
 } from '@sevendays/ui/components/table';
 import { Textarea } from '@sevendays/ui/components/textarea';
+import { TooltipProvider } from '@sevendays/ui/components/tooltip';
 import { SquarePen } from 'lucide-react';
 import { Fragment, useId, useState } from 'react';
 import type { AddonRow } from '../fixtures';
 import { addons, studioServices } from '../fixtures';
 import type { ScreenProps } from '../nav';
 import {
+  ActionTooltip,
   Collapse,
   DeactivateConfirm,
   EmptyState,
@@ -121,88 +126,101 @@ export function AddOnsScreen({ search }: ScreenProps) {
         <Card className='@container rounded-lg'>
           <CardContent>
             {/* @container: the table folds into stacked rows below a 700px
-                CONTAINER width (Tailwind v4 native container queries). */}
-            <Table className='@max-[700px]:hidden'>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead className='text-right'>Price</TableHead>
-                  <TableHead>Services</TableHead>
-                  {/* T2: the Actions header renders empty — the icons carry
+                CONTAINER width (Tailwind v4 native container queries). The
+                TooltipProvider is the per-table one the name tooltips use
+                (A3). */}
+            <TooltipProvider>
+              <Table className='@max-[700px]:hidden'>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead className='text-right'>Price</TableHead>
+                    <TableHead>Services</TableHead>
+                    {/* T2: the Actions header renders empty — the icons carry
                       their own labels. */}
-                  <TableHead className='text-right' />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((row) => {
-                  const appliesTo = row.studioServiceIds
-                    .map((id) => studioServices.find((service) => service.id === id)?.name)
-                    .filter((name): name is string => name !== undefined);
-                  const expanded = expandedId === row.id;
-                  return (
-                    <Fragment key={row.id}>
-                      {/* N3: whole-row click toggles expansion — the actions
+                    <TableHead className='text-right' />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rows.map((row) => {
+                    const appliesTo = row.studioServiceIds
+                      .map((id) => studioServices.find((service) => service.id === id)?.name)
+                      .filter((name): name is string => name !== undefined);
+                    const expanded = expandedId === row.id;
+                    return (
+                      <Fragment key={row.id}>
+                        {/* N3: whole-row click toggles expansion — the actions
                           cell stops propagation so icon clicks never toggle;
                           the chevron stays the keyboard/AT toggle. */}
-                      <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
-                        <TableCell className='cursor-pointer'>
-                          {/* T1: identity = name / dot + description. Round 4:
+                        <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
+                          <TableCell className='cursor-pointer'>
+                            {/* T1: identity = name / dot + description. Round 4:
                               the dot sits BESIDE the name (the
                               lookups-attires reference pattern) so it never
                               strands on its own line when the description
-                              hides. */}
-                          <div className='space-y-0.5'>
-                            <div className='flex items-center gap-2'>
-                              <StatusBadge isActive={row.isActive} />
-                              <p className='font-semibold'>{row.name}</p>
-                            </div>
-                            {/* N2: the truncated line hides while expanded. */}
-                            {expanded ? null : (
-                              <div className='flex min-w-0 items-center'>
-                                <p className='text-muted-foreground truncate text-xs'>
-                                  {row.description}
-                                </p>
+                              hides. A3: the name truncates when the column is
+                              squeezed and the tooltip carries the full text. */}
+                            <div className='space-y-0.5'>
+                              <div className='flex items-center gap-2'>
+                                <StatusBadge isActive={row.isActive} />
+                                <ActionTooltip
+                                  label={row.name}
+                                  button={
+                                    <p className='min-w-0 truncate font-semibold'>{row.name}</p>
+                                  }
+                                />
                               </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className='text-right tabular-nums cursor-pointer'>
-                          {peso(row.priceCents)}
-                        </TableCell>
-                        <TableCell className='cursor-pointer'>
-                          {/* A2: service names as outline badges. */}
-                          {appliesTo.length > 0 ? (
-                            <div className='flex flex-wrap gap-1'>
-                              {appliesTo.map((name) => (
-                                <Badge key={name} variant='outline'>
-                                  {name}
-                                </Badge>
-                              ))}
+                              {/* N2: the truncated line hides while expanded.
+                                A1: the line indents by the dot (size-2.5) +
+                                its gap-2 — 4.5 spacing steps — so the text
+                                aligns with the name above it. */}
+                              {expanded ? null : (
+                                <div className='flex min-w-0 items-center pl-4.5'>
+                                  <p className='text-muted-foreground truncate text-xs'>
+                                    {row.description}
+                                  </p>
+                                </div>
+                              )}
                             </div>
-                          ) : (
-                            <span className='text-muted-foreground'>—</span>
-                          )}
-                        </TableCell>
-                        <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
-                          <RowActionsCluster
-                            expanded={expanded}
-                            onToggle={() => toggleExpanded(row.id)}
-                            edit={editButton(row.id)}
-                            isActive={row.isActive}
-                            onDeactivate={() => setConfirmId(row.id)}
-                            onReactivate={() => setActive(row.id, true)}
-                          />
-                        </TableCell>
-                      </TableRow>
-                      {/* T3 desktop reveal: the FULL description. */}
-                      <ExpandPanel open={expanded} colSpan={4}>
-                        {row.description}
-                      </ExpandPanel>
-                    </Fragment>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                          </TableCell>
+                          <TableCell className='text-right tabular-nums cursor-pointer'>
+                            {peso(row.priceCents)}
+                          </TableCell>
+                          <TableCell className='cursor-pointer'>
+                            {/* A2: service names as outline badges. */}
+                            {appliesTo.length > 0 ? (
+                              <div className='flex flex-wrap gap-1'>
+                                {appliesTo.map((name) => (
+                                  <Badge key={name} variant='outline'>
+                                    {name}
+                                  </Badge>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className='text-muted-foreground'>—</span>
+                            )}
+                          </TableCell>
+                          <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
+                            <RowActionsCluster
+                              expanded={expanded}
+                              onToggle={() => toggleExpanded(row.id)}
+                              edit={editButton(row.id)}
+                              isActive={row.isActive}
+                              onDeactivate={() => setConfirmId(row.id)}
+                              onReactivate={() => setActive(row.id, true)}
+                            />
+                          </TableCell>
+                        </TableRow>
+                        {/* T3 desktop reveal: the FULL description. */}
+                        <ExpandPanel open={expanded} colSpan={4}>
+                          {row.description}
+                        </ExpandPanel>
+                      </Fragment>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TooltipProvider>
 
             {/* Stacked posture (below 700px container width): the whole
                 two-line header toggles the animated reveal (M1); service
@@ -228,9 +246,10 @@ export function AddOnsScreen({ search }: ScreenProps) {
                         </div>
                         <p className='text-right tabular-nums'>{peso(row.priceCents)}</p>
                       </div>
-                      {/* N2: the description line hides while expanded. */}
+                      {/* N2: the description line hides while expanded. A1:
+                          dot-width indent, same as the desktop line 2. */}
                       {expanded ? null : (
-                        <p className='text-muted-foreground mt-1 truncate text-xs'>
+                        <p className='text-muted-foreground mt-1 truncate pl-4.5 text-xs'>
                           {row.description}
                         </p>
                       )}
