@@ -1,16 +1,19 @@
 // PROTOTYPE (throwaway) — wayfinder #131: the gallery manager. Category rail
 // filters the photo grid; batch upload is the norm (ruling 9) and is
 // simulated — appended rows point at URL.createObjectURL(file) thumbs, the
-// R2/presign seam is #129's. Reorder is drag-only (@dnd-kit, rectSortingStrategy;
-// the position chip doubles as the drag handle). Nothing persists. Never
-// merges; delete with the route.
+// R2/presign seam is #129's. Round 2: the WHOLE card is the drag handle
+// (MouseSensor distance + TouchSensor long-press, so vertical scroll never
+// conflicts), card actions are icon-only overlays at the top-right
+// (hover/tap), and the status dot is gone — deactivated cards just dim.
+// Nothing persists. Never merges; delete with the route.
 
 import {
   closestCenter,
   DndContext,
   type DragEndEvent,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
@@ -36,32 +39,32 @@ import {
   SelectValue,
 } from '@sevendays/ui/components/select';
 import { Textarea } from '@sevendays/ui/components/textarea';
-import { Check, Image, ImagePlus, Images, Plus, X } from 'lucide-react';
+import { Check, Image, ImagePlus, Images, Plus, Power, PowerOff, SquarePen, X } from 'lucide-react';
 import { useId, useRef, useState } from 'react';
 import type { GalleryCategoryRow, GalleryPhotoRow } from '../fixtures';
 import { galleryCategories, galleryPhotos } from '../fixtures';
 import type { ScreenProps } from '../nav';
-import {
-  DeactivateConfirm,
-  EmptyState,
-  LightEntityEditor,
-  PageHeader,
-  StatusBadge,
-} from '../shared';
+import { DeactivateConfirm, EmptyState, LightEntityEditor, PageHeader } from '../shared';
 
 const UNCATEGORIZED = 'uncategorized';
 
-// One grid tile of the sortable photo grid. The position chip doubles as the
-// drag handle (listeners + attributes on the chip alone, touch-action none).
+// One grid tile of the sortable photo grid. GL3: the WHOLE card is the drag
+// handle — listeners + attributes live on the Card, activated only past the
+// sensor constraints (mouse 8px, touch long-press), so clicks and scroll
+// still work. No touch-none here: it would kill mobile scrolling.
 function SortablePhotoCard({
   photo,
   categoryName,
+  selected,
+  onToggleSelect,
   onEdit,
   onDeactivate,
   onReactivate,
 }: {
   photo: GalleryPhotoRow;
   categoryName: string;
+  selected: boolean;
+  onToggleSelect: (id: string) => void;
   onEdit: (id: string) => void;
   onDeactivate: (id: string) => void;
   onReactivate: (id: string) => void;
@@ -73,9 +76,14 @@ function SortablePhotoCard({
     <Card
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`animate-in fade-in slide-in-from-bottom-2 gap-0 overflow-hidden py-0 duration-300 ${
-        isDragging ? 'relative z-10 shadow-md' : ''
-      }`}
+      // E3: solid card bg + shadow while dragging (text never overlaps);
+      // GL2: deactivated = the dimmed card only, no dot.
+      className={`group/card animate-in fade-in slide-in-from-bottom-2 relative cursor-grab gap-0 overflow-hidden py-0 duration-300 active:cursor-grabbing ${
+        isDragging ? 'z-10 bg-card shadow-sm' : ''
+      } ${photo.isActive ? '' : 'opacity-60'}`}
+      {...attributes}
+      {...listeners}
+      onClick={() => onToggleSelect(photo.id)}
     >
       <div className='bg-muted relative aspect-[4/3]'>
         {photo.photoUrl ? (
@@ -89,20 +97,62 @@ function SortablePhotoCard({
             <Image className='size-8' aria-hidden='true' />
           </div>
         )}
-        <button
-          type='button'
-          aria-label='Drag to reorder'
-          className='bg-background/90 absolute top-2 left-2 touch-none cursor-grab rounded-md px-1.5 py-0.5 font-mono text-xs tabular-nums active:cursor-grabbing'
-          {...attributes}
-          {...listeners}
-        >
+        {/* GL3: the position chip is display-only now. */}
+        <span className='bg-background/90 absolute top-2 left-2 rounded-md px-1.5 py-0.5 font-mono text-xs tabular-nums'>
           #{photo.position}
-        </button>
-        {!photo.isActive ? (
-          <div className='absolute top-2 right-2'>
-            <StatusBadge isActive={false} />
-          </div>
-        ) : null}
+        </span>
+        {/* GL1: icon actions overlaid top-right — hover on desktop, tap
+            (selected-card state) on touch. Each button stops propagation so
+            a click on it never toggles the card's selected state. */}
+        <div
+          className={`absolute top-2 right-2 z-10 flex gap-1 rounded-md bg-background/90 p-0.5 shadow-sm transition-opacity ${
+            selected ? 'opacity-100' : 'opacity-0 group-hover/card:opacity-100'
+          }`}
+        >
+          <Button
+            variant='ghost'
+            size='icon-sm'
+            type='button'
+            aria-label='Edit'
+            title='Edit'
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(photo.id);
+            }}
+          >
+            <SquarePen aria-hidden='true' />
+          </Button>
+          {photo.isActive ? (
+            <Button
+              variant='ghost'
+              size='icon-sm'
+              type='button'
+              aria-label='Deactivate'
+              title='Deactivate'
+              className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeactivate(photo.id);
+              }}
+            >
+              <PowerOff aria-hidden='true' />
+            </Button>
+          ) : (
+            <Button
+              variant='ghost'
+              size='icon-sm'
+              type='button'
+              aria-label='Reactivate'
+              title='Reactivate'
+              onClick={(e) => {
+                e.stopPropagation();
+                onReactivate(photo.id);
+              }}
+            >
+              <Power aria-hidden='true' />
+            </Button>
+          )}
+        </div>
       </div>
       <CardContent className='space-y-2 p-3'>
         <p className='text-sm font-medium'>{photo.title}</p>
@@ -111,26 +161,6 @@ function SortablePhotoCard({
         ) : (
           <span className='text-muted-foreground text-xs'>Uncategorized</span>
         )}
-        <div className='flex items-center gap-1'>
-          <Button variant='ghost' size='sm' type='button' onClick={() => onEdit(photo.id)}>
-            Edit
-          </Button>
-          {photo.isActive ? (
-            <Button
-              variant='ghost'
-              size='sm'
-              type='button'
-              className='text-destructive hover:bg-destructive/10 hover:text-destructive'
-              onClick={() => onDeactivate(photo.id)}
-            >
-              Deactivate
-            </Button>
-          ) : (
-            <Button variant='ghost' size='sm' type='button' onClick={() => onReactivate(photo.id)}>
-              Reactivate
-            </Button>
-          )}
-        </div>
       </CardContent>
     </Card>
   );
@@ -141,6 +171,9 @@ export function GalleryScreen({ search }: ScreenProps) {
   const [photos, setPhotos] = useState(galleryPhotos);
   // 'all' = the All photos rail entry; otherwise a category id.
   const [filter, setFilter] = useState<string>('all');
+  // GL1: a tap on a card toggles the actions-visible state (the mobile
+  // half of the hover/tap reveal; hover covers desktop via group-hover).
+  const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   // Deep-linkable states (frame pass): ?edit=<id> opens that photo's editor on
   // mount; ?confirm=<id> opens its deactivate confirm. Close is client-only.
   const [editId, setEditId] = useState<string | null>(search.edit ?? null);
@@ -229,8 +262,12 @@ export function GalleryScreen({ search }: ScreenProps) {
     );
   }
 
+  // GL3 sensors: the whole card is the handle — mouse needs an 8px move,
+  // touch needs a 300ms long-press (8px tolerance) so vertical scroll never
+  // starts a drag. Keyboard stays for a11y.
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 300, tolerance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -394,6 +431,10 @@ export function GalleryScreen({ search }: ScreenProps) {
                         key={photo.id}
                         photo={photo}
                         categoryName={categoryName}
+                        selected={selectedPhotoId === photo.id}
+                        onToggleSelect={(id) =>
+                          setSelectedPhotoId((prev) => (prev === id ? null : id))
+                        }
                         onEdit={setEditId}
                         onDeactivate={setConfirmId}
                         onReactivate={(id) => setActive(id, true)}

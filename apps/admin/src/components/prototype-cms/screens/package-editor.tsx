@@ -39,12 +39,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@sevendays/ui/components/select';
+import { Separator } from '@sevendays/ui/components/separator';
 import { Textarea } from '@sevendays/ui/components/textarea';
 import { Link } from '@tanstack/react-router';
 import { ChevronDown, Frame, Gift, GripVertical, Image, Plus, X } from 'lucide-react';
 import { useId, useRef, useState } from 'react';
 import type { InclusionRow, PackageRow } from '../fixtures';
-import { attires, packages, printSizes } from '../fixtures';
+import { packages, printSizes } from '../fixtures';
 import type { ScreenProps } from '../nav';
 import { StatusBadge } from '../shared';
 
@@ -57,15 +58,9 @@ const KIND_ICONS = {
 interface RowActions {
   onRemove: (id: string) => void;
   onUpdate: (id: string, patch: Partial<InclusionRow>) => void;
-  onToggleAttire: (id: string, name: string, checked: boolean) => void;
 }
 
-function InclusionEditorRow({
-  row,
-  onRemove,
-  onUpdate,
-  onToggleAttire,
-}: { row: InclusionRow } & RowActions) {
+function InclusionEditorRow({ row, onRemove, onUpdate }: { row: InclusionRow } & RowActions) {
   const KindIcon = KIND_ICONS[row.kind];
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: row.id,
@@ -74,7 +69,9 @@ function InclusionEditorRow({
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`space-y-2 rounded-lg border p-3 ${isDragging ? 'relative z-10 shadow-md' : ''}`}
+      // E3: solid card bg + shadow while dragging so the dragged row's text
+      // never overlaps the rows beneath it.
+      className={`space-y-2 rounded-lg border p-3 ${isDragging ? 'relative z-10 bg-card shadow-sm' : ''}`}
     >
       <div className='flex flex-wrap items-center gap-2'>
         {/* Handle-only drag: listeners + attributes live on the grip alone. */}
@@ -131,22 +128,6 @@ function InclusionEditorRow({
           <X />
         </Button>
       </div>
-      <div className='flex flex-wrap items-center gap-1.5'>
-        {attires.map((attire) => (
-          <label
-            key={attire.id}
-            htmlFor={`${row.id}-${attire.id}`}
-            className='flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs'
-          >
-            <Checkbox
-              id={`${row.id}-${attire.id}`}
-              checked={row.attires.includes(attire.name)}
-              onCheckedChange={(checked) => onToggleAttire(row.id, attire.name, checked === true)}
-            />
-            {attire.name}
-          </label>
-        ))}
-      </div>
     </div>
   );
 }
@@ -188,22 +169,6 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
 
   function removeInclusion(id: string) {
     setPkg((prev) => ({ ...prev, inclusions: prev.inclusions.filter((row) => row.id !== id) }));
-  }
-
-  function toggleAttire(id: string, name: string, checked: boolean) {
-    setPkg((prev) => ({
-      ...prev,
-      inclusions: prev.inclusions.map((row) =>
-        row.id === id
-          ? {
-              ...row,
-              attires: checked
-                ? [...row.attires, name]
-                : row.attires.filter((attire) => attire !== name),
-            }
-          : row
-      ),
-    }));
   }
 
   function addFrame() {
@@ -328,7 +293,6 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
   const rowActions: RowActions = {
     onRemove: removeInclusion,
     onUpdate: updateInclusion,
-    onToggleAttire: toggleAttire,
   };
 
   return (
@@ -357,7 +321,11 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
         </div>
       </header>
 
-      <div className='grid items-start gap-6 xl:grid-cols-3'>
+      {/* E1: the wrapping Card around the inclusions editor is gone — the
+          field cards stand on the left, a Separator divides them from the
+          inclusions area, and Frames/Prints/Privileges are three visually
+          grouped section cards (radius per the G1 step-down). */}
+      <div className='grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,2fr)]'>
         <div className='space-y-6'>
           <Card>
             <CardHeader>
@@ -516,106 +484,107 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
           </Card>
         </div>
 
-        <Card className='xl:col-span-2'>
-          <CardHeader>
-            <CardTitle>Inclusions</CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-6'>
-            <section className='space-y-2'>
-              <div className='flex items-center justify-between'>
-                <h3 className='text-sm font-medium'>Frames</h3>
-                <Button variant='ghost' size='sm' type='button' onClick={addFrame}>
-                  <Plus data-icon='inline-start' />
-                  Add frame
-                </Button>
-              </div>
-              {pkg.frames.map((frame, frameIndex) => {
-                const group = pkg.inclusions.filter(
-                  (candidate) =>
-                    candidate.kind === 'framed_picture' && candidate.frameId === frame.id
-                );
-                return (
-                  <div key={frame.id} className='bg-muted/20 space-y-2 rounded-xl border p-3'>
-                    <div className='flex items-center gap-2'>
-                      <Badge variant='outline' className='font-mono text-xs'>
-                        Frame {frameIndex + 1}
-                      </Badge>
-                      {group.length === 0 ? (
-                        <p className='text-muted-foreground text-xs'>
-                          No framed pictures in this frame yet.
-                        </p>
-                      ) : null}
-                    </div>
-                    <DndContext
-                      sensors={sensors}
-                      collisionDetection={closestCenter}
-                      onDragEnd={makeDragEnd(
-                        (c) => c.kind === 'framed_picture' && c.frameId === frame.id
-                      )}
-                    >
-                      <SortableContext
-                        items={group.map((row) => row.id)}
-                        strategy={verticalListSortingStrategy}
-                      >
-                        {group.map((row) => (
-                          <InclusionEditorRow key={row.id} row={row} {...rowActions} />
-                        ))}
-                      </SortableContext>
-                    </DndContext>
+        {/* E1: separators between the left card column and the inclusions
+            area — horizontal when stacked, vertical on the xl grid. */}
+        <Separator className='xl:hidden' />
+        <Separator orientation='vertical' className='hidden xl:block' />
+
+        <div className='min-w-0 space-y-4'>
+          <h2 className='text-lg font-semibold tracking-tight'>Inclusions</h2>
+
+          <section className='space-y-3 rounded-lg border p-4'>
+            <div className='flex items-center justify-between'>
+              <h3 className='text-sm font-medium'>Frames</h3>
+              <Button variant='ghost' size='sm' type='button' onClick={addFrame}>
+                <Plus data-icon='inline-start' />
+                Add frame
+              </Button>
+            </div>
+            {pkg.frames.map((frame, frameIndex) => {
+              const group = pkg.inclusions.filter(
+                (candidate) => candidate.kind === 'framed_picture' && candidate.frameId === frame.id
+              );
+              return (
+                <div key={frame.id} className='bg-muted/20 space-y-2 rounded-xl border p-3'>
+                  <div className='flex items-center gap-2'>
+                    <Badge variant='outline' className='font-mono text-xs'>
+                      Frame {frameIndex + 1}
+                    </Badge>
+                    {group.length === 0 ? (
+                      <p className='text-muted-foreground text-xs'>
+                        No framed pictures in this frame yet.
+                      </p>
+                    ) : null}
                   </div>
-                );
-              })}
-            </section>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={makeDragEnd(
+                      (c) => c.kind === 'framed_picture' && c.frameId === frame.id
+                    )}
+                  >
+                    <SortableContext
+                      items={group.map((row) => row.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {group.map((row) => (
+                        <InclusionEditorRow key={row.id} row={row} {...rowActions} />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
+                </div>
+              );
+            })}
+          </section>
 
-            <section className='space-y-2'>
-              <div className='flex items-center justify-between'>
-                <h3 className='text-sm font-medium'>Prints · {prints.length}</h3>
-                <Button variant='ghost' size='sm' type='button' onClick={addPrint}>
-                  <Plus data-icon='inline-start' />
-                  Add print
-                </Button>
-              </div>
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={makeDragEnd((c) => c.kind === 'print')}
+          <section className='space-y-3 rounded-lg border p-4'>
+            <div className='flex items-center justify-between'>
+              <h3 className='text-sm font-medium'>Prints · {prints.length}</h3>
+              <Button variant='ghost' size='sm' type='button' onClick={addPrint}>
+                <Plus data-icon='inline-start' />
+                Add print
+              </Button>
+            </div>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={makeDragEnd((c) => c.kind === 'print')}
+            >
+              <SortableContext
+                items={prints.map((row) => row.id)}
+                strategy={verticalListSortingStrategy}
               >
-                <SortableContext
-                  items={prints.map((row) => row.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {prints.map((row) => (
-                    <InclusionEditorRow key={row.id} row={row} {...rowActions} />
-                  ))}
-                </SortableContext>
-              </DndContext>
-            </section>
+                {prints.map((row) => (
+                  <InclusionEditorRow key={row.id} row={row} {...rowActions} />
+                ))}
+              </SortableContext>
+            </DndContext>
+          </section>
 
-            <section className='space-y-2'>
-              <div className='flex items-center justify-between'>
-                <h3 className='text-sm font-medium'>Privileges · {privileges.length}</h3>
-                <Button variant='ghost' size='sm' type='button' onClick={addPrivilege}>
-                  <Plus data-icon='inline-start' />
-                  Add privilege
-                </Button>
-              </div>
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={makeDragEnd((c) => c.kind === 'privilege')}
+          <section className='space-y-3 rounded-lg border p-4'>
+            <div className='flex items-center justify-between'>
+              <h3 className='text-sm font-medium'>Privileges · {privileges.length}</h3>
+              <Button variant='ghost' size='sm' type='button' onClick={addPrivilege}>
+                <Plus data-icon='inline-start' />
+                Add privilege
+              </Button>
+            </div>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={makeDragEnd((c) => c.kind === 'privilege')}
+            >
+              <SortableContext
+                items={privileges.map((row) => row.id)}
+                strategy={verticalListSortingStrategy}
               >
-                <SortableContext
-                  items={privileges.map((row) => row.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {privileges.map((row) => (
-                    <InclusionEditorRow key={row.id} row={row} {...rowActions} />
-                  ))}
-                </SortableContext>
-              </DndContext>
-            </section>
-          </CardContent>
-        </Card>
+                {privileges.map((row) => (
+                  <InclusionEditorRow key={row.id} row={row} {...rowActions} />
+                ))}
+              </SortableContext>
+            </DndContext>
+          </section>
+        </div>
       </div>
     </section>
   );
