@@ -84,7 +84,7 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
           </Button>
         </EmptyState>
       ) : (
-        <Card className='@container'>
+        <Card className='@container rounded-lg'>
           <CardContent>
             {/* @container: the table folds into stacked rows below a 700px
                 CONTAINER width (Tailwind v4 native container queries). */}

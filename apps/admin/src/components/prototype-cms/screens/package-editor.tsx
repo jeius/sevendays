@@ -327,7 +327,7 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
           grouped section cards (radius per the G1 step-down). */}
       <div className='grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,2fr)]'>
         <div className='space-y-6'>
-          <Card>
+          <Card className='rounded-lg'>
             <CardHeader>
               <CardTitle>Core</CardTitle>
             </CardHeader>
@@ -404,7 +404,7 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className='rounded-lg'>
             <CardHeader>
               <CardTitle>Cover</CardTitle>
             </CardHeader>
@@ -459,7 +459,7 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className='rounded-lg'>
             <CardContent>
               <Collapsible>
                 <CollapsibleTrigger render={<Button variant='ghost' size='sm' type='button' />}>
@@ -505,7 +505,7 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
                 (candidate) => candidate.kind === 'framed_picture' && candidate.frameId === frame.id
               );
               return (
-                <div key={frame.id} className='bg-muted/20 space-y-2 rounded-xl border p-3'>
+                <div key={frame.id} className='bg-muted/20 space-y-2 rounded-lg border p-3'>
                   <div className='flex items-center gap-2'>
                     <Badge variant='outline' className='font-mono text-xs'>
                       Frame {frameIndex + 1}

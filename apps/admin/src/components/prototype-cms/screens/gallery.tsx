@@ -78,7 +78,7 @@ function SortablePhotoCard({
       style={{ transform: CSS.Transform.toString(transform), transition }}
       // E3: solid card bg + shadow while dragging (text never overlaps);
       // GL2: deactivated = the dimmed card only, no dot.
-      className={`group/card animate-in fade-in slide-in-from-bottom-2 relative cursor-grab gap-0 overflow-hidden py-0 duration-300 active:cursor-grabbing ${
+      className={`group/card animate-in fade-in slide-in-from-bottom-2 relative cursor-grab gap-0 overflow-hidden rounded-lg py-0 duration-300 active:cursor-grabbing ${
         isDragging ? 'z-10 bg-card shadow-sm' : ''
       } ${photo.isActive ? '' : 'opacity-60'}`}
       {...attributes}
@@ -345,7 +345,7 @@ export function GalleryScreen({ search }: ScreenProps) {
 
       <div className='flex flex-col gap-4 lg:flex-row lg:items-start'>
         {/* Category rail — horizontal scroll strip on narrow widths. */}
-        <Card className='shrink-0 lg:w-[220px]'>
+        <Card className='shrink-0 rounded-lg lg:w-[220px]'>
           <CardContent className='flex gap-1 overflow-x-auto p-2 lg:flex-col lg:overflow-x-visible'>
             {railEntry('All photos', photos.length, 'all', true)}
             {sortedCategories.map((category) =>

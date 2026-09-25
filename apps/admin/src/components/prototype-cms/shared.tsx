@@ -1,6 +1,12 @@
 // PROTOTYPE (throwaway) — wayfinder #131: shared composition pieces for the
 // admin CMS screens. Copy is pinned by the plan's Global Constraints —
 // transcribe, never re-draft. Nothing persists.
+//
+// G1 radius note (spec): every card in this prototype renders one radius
+// step down (rounded-xl → rounded-lg) via className overrides at the usage
+// sites — packages/ui is untouched. If the owner keeps this, the step-down
+// is a design-system TOKEN decision (the Card primitive's own radius), not
+// a prototype-local patch to carry forward.
 import {
   AlertDialog,
   AlertDialogAction,
@@ -251,7 +257,7 @@ export function DeactivateConfirm({
 /** The StubScreen posture: centered muted line in a dashed-border card, optional action. */
 export function EmptyState({ line, children }: { line: string; children?: ReactNode }) {
   return (
-    <div className='border-border flex flex-col items-center justify-center rounded-xl border border-dashed p-10 text-center'>
+    <div className='border-border flex flex-col items-center justify-center rounded-lg border border-dashed p-10 text-center'>
       <p className='text-muted-foreground text-sm'>{line}</p>
       {children ? <div className='mt-4'>{children}</div> : null}
     </div>

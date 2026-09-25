@@ -110,7 +110,7 @@ export function LookupsScreen({ search }: ScreenProps) {
 
       {/* @container: the table folds into stacked rows below a 700px CONTAINER
           width (Tailwind v4 native container queries). */}
-      <Card className='@container'>
+      <Card className='@container rounded-lg'>
         <CardHeader>
           <CardTitle>Print sizes</CardTitle>
           <CardAction>
@@ -209,7 +209,7 @@ export function LookupsScreen({ search }: ScreenProps) {
         </CardContent>
       </Card>
 
-      <Card className='@container'>
+      <Card className='@container rounded-lg'>
         <CardHeader>
           <CardTitle>Attires</CardTitle>
           <CardAction>
