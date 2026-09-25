@@ -17,9 +17,10 @@ export const packageInclusionAttires = pgTable(
       .notNull()
       .references(() => attires.id),
     // Attire order within the inclusion (M5): catalog attire order under the
-    // atomic package save (#137); backfilled from today's (created_at, id)
-    // order (ticket #135 Task 3) before the default drops.
-    position: integer('position').notNull().default(1),
+    // atomic package save (#137). Landed DEFAULT 1 NOT NULL, was backfilled
+    // from today's (created_at, id) order in #135 before the default
+    // dropped — a forgetful insert now fails loudly instead of tying at 1.
+    position: integer('position').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
