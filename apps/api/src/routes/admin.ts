@@ -4,10 +4,12 @@ import type { ApiEnv } from '../services/db.js';
 import { adminAddonServices } from './admin-addon-services.js';
 import { adminAttires } from './admin-attires.js';
 import { adminBranches } from './admin-branches.js';
+import { adminGalleryCategories } from './admin-gallery-categories.js';
 import { adminMedia } from './admin-media.js';
 import { adminPrintSizes } from './admin-print-sizes.js';
 import { adminServicePackages } from './admin-service-packages.js';
 import { adminStudioServices } from './admin-studio-services.js';
+import { adminTestimonials } from './admin-testimonials.js';
 import { galleryPhotos } from './gallery-photos.js';
 
 // The gated admin sub-app (M5 § Route topology): ONE requireSession at this
@@ -26,4 +28,6 @@ export const admin = new Hono<ApiEnv>()
   .route('/attires', adminAttires)
   .route('/addon-services', adminAddonServices)
   .route('/studio-services', adminStudioServices)
-  .route('/service-packages', adminServicePackages);
+  .route('/service-packages', adminServicePackages)
+  .route('/gallery-categories', adminGalleryCategories)
+  .route('/testimonials', adminTestimonials);

@@ -341,3 +341,105 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     serviceBranchLinks: serviceBranchLinks.map((l) => l.branchId),
   };
 }
+
+export type GalleryFixtureIds = {
+  categoryA: string; // active, position 1
+  categoryB: string; // active, position 2
+  categoryRetired: string; // inactive, position 3
+  photoA: string; // active, categoryA, position 1
+  photoB: string; // active, categoryB, position 2
+  photoRetired: string; // inactive, uncategorized, position 3
+  testimonialA: string; // active, position 1
+  testimonialB: string; // active, position 2
+  testimonialRetired: string; // inactive, position 3
+};
+
+/**
+ * The CMS-born-empty tables get their own fixture builder (the main
+ * loadFixtures predates M5's gallery): 3 categories (one deactivated),
+ * 3 photos (one deactivated, one uncategorized — the staff-only state),
+ * 3 testimonials (one deactivated). Positions contiguous 1..3.
+ */
+export async function loadGalleryFixtures(db: TestDb): Promise<GalleryFixtureIds> {
+  const { galleryCategories, galleryPhotos, testimonials } = await import('@sevendays/db');
+
+  const [categoryA] = await db
+    .insert(galleryCategories)
+    .values({ name: 'Weddings', position: 1 })
+    .returning({ id: galleryCategories.id });
+  const [categoryB] = await db
+    .insert(galleryCategories)
+    .values({ name: 'Graduation', position: 2 })
+    .returning({ id: galleryCategories.id });
+  const [categoryRetired] = await db
+    .insert(galleryCategories)
+    .values({ name: 'Retired Tab', position: 3, isActive: false })
+    .returning({ id: galleryCategories.id });
+  if (!categoryA || !categoryB || !categoryRetired) {
+    throw new Error('gallery fixtures: category insert returned no row');
+  }
+
+  const [photoA] = await db
+    .insert(galleryPhotos)
+    .values({
+      r2Key: 'gallery/aaaaaaaa-0000-4000-8000-000000000001.jpg',
+      categoryId: categoryA.id,
+      position: 1,
+    })
+    .returning({ id: galleryPhotos.id });
+  const [photoB] = await db
+    .insert(galleryPhotos)
+    .values({
+      r2Key: 'gallery/aaaaaaaa-0000-4000-8000-000000000002.jpg',
+      categoryId: categoryB.id,
+      position: 2,
+    })
+    .returning({ id: galleryPhotos.id });
+  const [photoRetired] = await db
+    .insert(galleryPhotos)
+    .values({
+      r2Key: 'gallery/aaaaaaaa-0000-4000-8000-000000000003.jpg',
+      position: 3,
+      isActive: false,
+    })
+    .returning({ id: galleryPhotos.id });
+  if (!photoA || !photoB || !photoRetired) {
+    throw new Error('gallery fixtures: photo insert returned no row');
+  }
+
+  const [testimonialA] = await db
+    .insert(testimonials)
+    .values({
+      quote: 'The photos came out better than we hoped.',
+      person: 'Maria, batch 2026',
+      position: 1,
+    })
+    .returning({ id: testimonials.id });
+  const [testimonialB] = await db
+    .insert(testimonials)
+    .values({
+      quote: 'Fast, friendly, and the prints are gorgeous.',
+      person: 'Jon & Riza',
+      position: 2,
+    })
+    .returning({ id: testimonials.id });
+  const [testimonialRetired] = await db
+    .insert(testimonials)
+    .values({ quote: 'Retired quote.', person: 'Former Client', position: 3, isActive: false })
+    .returning({ id: testimonials.id });
+  if (!testimonialA || !testimonialB || !testimonialRetired) {
+    throw new Error('gallery fixtures: testimonial insert returned no row');
+  }
+
+  return {
+    categoryA: categoryA.id,
+    categoryB: categoryB.id,
+    categoryRetired: categoryRetired.id,
+    photoA: photoA.id,
+    photoB: photoB.id,
+    photoRetired: photoRetired.id,
+    testimonialA: testimonialA.id,
+    testimonialB: testimonialB.id,
+    testimonialRetired: testimonialRetired.id,
+  };
+}
