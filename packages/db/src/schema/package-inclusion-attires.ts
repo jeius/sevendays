@@ -1,4 +1,4 @@
-import { index, pgTable, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import { index, integer, pgTable, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 import { attires } from './attires.js';
 import { packageInclusions } from './package-inclusions.js';
 
@@ -16,6 +16,10 @@ export const packageInclusionAttires = pgTable(
     attireId: uuid('attire_id')
       .notNull()
       .references(() => attires.id),
+    // Attire order within the inclusion (M5): catalog attire order under the
+    // atomic package save (#137); backfilled from today's (created_at, id)
+    // order (ticket #135 Task 3) before the default drops.
+    position: integer('position').notNull().default(1),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [

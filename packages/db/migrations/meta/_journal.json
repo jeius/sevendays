@@ -43,6 +43,13 @@
       "when": 1790053387204,
       "tag": "0005_aspiring_firelord",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790350055937,
+      "tag": "0006_dry_kid_colt",
+      "breakpoints": true
     }
   ]
 }
