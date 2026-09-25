@@ -1,6 +1,9 @@
+import type { Database } from '@sevendays/db';
+import { galleryPhotos } from '@sevendays/db';
 import type { MediaPurpose } from '@sevendays/types';
 import { mediaStagingKeySchema } from '@sevendays/types';
 import { AwsClient } from 'aws4fetch';
+import { eq } from 'drizzle-orm';
 import type { Env } from '../env.js';
 
 // The media seam (M5 #136, ADR-0019): presign mints a short-lived, type-
@@ -157,4 +160,37 @@ export async function commitUpload(
   });
   await bucket.delete(stagingKey.data);
   return { ok: true, finalKey };
+}
+
+/**
+ * The gated by-id thumbnail (GET /api/v1/admin/gallery-photos/:id/thumb):
+ * resolve the row → stream the object → transform via the Images binding
+ * (no public read path involved). Over the binding's documented 20 MB input
+ * limit, fall back to the ORIGINAL bytes with the stored content type (the
+ * ADR-0019 cap trade, made explicit — full-size display in the admin grid).
+ * Returns null for a missing row OR a missing object — the route answers
+ * the per-entity 404 either way.
+ */
+export async function servePhotoThumbnail(
+  db: Database,
+  env: Pick<Env, 'MEDIA_BUCKET' | 'IMAGES'>,
+  id: string
+): Promise<Response | null> {
+  const [row] = await db
+    .select({ r2Key: galleryPhotos.r2Key })
+    .from(galleryPhotos)
+    .where(eq(galleryPhotos.id, id))
+    .limit(1);
+  if (!row) return null;
+  const obj = await env.MEDIA_BUCKET.get(row.r2Key);
+  if (!obj) return null;
+  if (obj.size > MAX_THUMBNAIL_INPUT_BYTES) {
+    return new Response(obj.body, {
+      headers: { 'content-type': obj.httpMetadata?.contentType ?? 'application/octet-stream' },
+    });
+  }
+  const result = await env.IMAGES.input(obj.body)
+    .transform({ width: THUMBNAIL_WIDTH_PX })
+    .output({ format: 'image/webp' });
+  return result.response();
 }
