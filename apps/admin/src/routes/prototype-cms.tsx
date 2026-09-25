@@ -8,6 +8,7 @@
 // M5 build tickets land.
 import { SidebarInset, SidebarProvider } from '@sevendays/ui/components/sidebar';
 import { createFileRoute } from '@tanstack/react-router';
+import { MotionConfig } from 'motion/react';
 import { AdminTopbar } from '#/components/admin-topbar';
 import { SCREENS, searchSchema } from '#/components/prototype-cms/nav';
 import { ProtoSidebar } from '#/components/prototype-cms/proto-sidebar';
@@ -22,14 +23,19 @@ function PrototypeCms() {
   const search = Route.useSearch();
   const Screen = SCREENS[search.screen];
   return (
-    <SidebarProvider>
-      <ProtoSidebar active={search.screen} variant={search.variant} />
-      <SidebarInset>
-        <AdminTopbar />
-        <div className='flex-1 space-y-6 p-6' data-prototype-cms={search.screen}>
-          <Screen variant={search.variant} search={search} />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    // Round 8: respect prefers-reduced-motion for every motion animation on
+    // the route (portals render inside this React tree, so the config
+    // reaches the sheet/confirm popups too).
+    <MotionConfig reducedMotion='user'>
+      <SidebarProvider>
+        <ProtoSidebar active={search.screen} variant={search.variant} />
+        <SidebarInset>
+          <AdminTopbar />
+          <div className='flex-1 space-y-6 p-6' data-prototype-cms={search.screen}>
+            <Screen variant={search.variant} search={search} />
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </MotionConfig>
   );
 }

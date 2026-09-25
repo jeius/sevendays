@@ -44,6 +44,14 @@
 // the already-computed isMobile — right edge on desktop, bottom edge on
 // mobile. DeactivateConfirm is untouched (already keyframe-driven).
 //
+// Round 8: entrances AND exits move to Motion for React ('motion/react',
+// never framer-motion) via the Base UI integration recipe — motion.div
+// through the render prop, AnimatePresence around the conditional portal,
+// keepMounted on the confirm's Portal — with a local close-latch because
+// the screens mount both popups conditionally (see the components). T15's
+// keyframe chain and T12/T14's slide chains are deleted; both mobile
+// bottom sheets get rounded-t-xl (owner ruling).
+//
 // G1 radius note (spec): every card in this prototype renders one radius
 // step down (rounded-xl → rounded-lg) via className overrides at the usage
 // sites — packages/ui is untouched. If the owner keeps this, the step-down
@@ -57,6 +65,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogPortal,
   AlertDialogTitle,
 } from '@sevendays/ui/components/alert-dialog';
 import { Button } from '@sevendays/ui/components/button';
@@ -86,7 +95,9 @@ import {
 import { useIsMobile } from '@sevendays/ui/hooks/use-mobile';
 import { cn } from 'cn';
 import { ChevronDown, Power, PowerOff } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import type { ComponentProps, ReactElement, ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
  * T3 expand mechanism: a persistent grid whose template-rows transition
@@ -329,21 +340,39 @@ export function StatusBadge({ isActive }: { isActive: boolean }) {
 /**
  * Controlled deactivate confirm. onConfirm never deletes — the screen flips
  * isActive. Round 5 (C1): below the sm breakpoint the dialog docks to the
- * bottom edge as a sheet — full width, rounded top, slide-up entrance
- * (max-sm classes win the cascade over the centered positioning of the
- * primitive) — and above sm the classes restore the primitive's centered
- * dialog verbatim. The right-side editor Sheets are ruled OUT of scope
- * (dialogs only).
+ * bottom edge as a sheet — full width, rounded top (max-sm:rounded-t-xl, the
+ * owner's round-8 ruling) — and above sm the classes restore the primitive's
+ * centered dialog verbatim. The right-side editor Sheets are ruled OUT of
+ * scope (dialogs only).
  *
- * Round 6 (A1): the owner saw no entrance below sm. The primitive's own
- * animation is the tw-animate channel only (data-open/data-closed +
- * animate-in/out, 100ms, 1rem slide — no data-starting-style/data-ending-style
- * classes exist on it), so the usage site adds a second, visible channel
- * keyed on the Base UI popup's runtime data-starting-style/data-ending-style
- * attributes: 2rem slide-up + fade below sm at 300ms ease-out
- * (transition-[translate,opacity] — `translate` because Tailwind v4's
- * translate-y-* sets the translate property, which is what the usage site's
- * translate-y-0 resting state uses).
+ * Round 8: entrance AND exit ride Motion for React (the unified `motion`
+ * package, imported from 'motion/react' — never framer-motion), via the
+ * Base UI integration recipe: the popup is composed with a motion.div
+ * through the `render` prop (NOT function/spread props), the Portal carries
+ * `keepMounted`, and the conditional portal is wrapped in <AnimatePresence>.
+ * Both channels animate opacity + transform (WAAPI), so Base UI's
+ * getAnimations() unmount gate holds the popup until the exit finishes —
+ * fixing the exit-cut T15 established on every surface. Desktop: scale
+ * 0.95 + fade (the skill's scale example); mobile bottom-sheet: full
+ * translateY(100%) slide. T14's starting/ending-style chain and T12's
+ * tw-animate slide classes are deleted — motion owns the animation; the
+ * primitive's own tw-animate zoom classes still exist on the element and
+ * compose (same 1→0.95 target, shorter duration). useIsMobile (768px) picks
+ * the variant, matching the editor; the confirm's CSS dock is max-sm, so in
+ * the 640–768px band a centered dialog slides vertically instead of scaling.
+ *
+ * Close-latch (spike round): the screens render this component conditionally
+ * (`confirmRow ? <DeactivateConfirm …> : null`), so propagating the close to
+ * the parent immediately would unmount the WHOLE component — AnimatePresence
+ * included — in the same commit that should start the exit (the CDP probe
+ * showed zero exit animations and DOM removal within one frame). So the
+ * component holds a local `visible` latch: the close request only flips the
+ * latch (the exit plays while the parent's open prop stays true), and the
+ * parent is informed via onExitComplete — the canonical Motion pattern for
+ * parent-conditional rendering. The isolation suite (t1–t3, probe scripts in
+ * the SDD workspace) proved the pinned Base UI recipe holds end to end once
+ * the parent unmount is deferred: exit animations run on the popup and the
+ * popup leaves the DOM at ~330–345ms (the 300ms exit plus a frame).
  */
 export function DeactivateConfirm({
   name,
@@ -356,23 +385,64 @@ export function DeactivateConfirm({
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
 }) {
+  const isMobile = useIsMobile();
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    setVisible(open);
+  }, [open]);
+  const variants = isMobile
+    ? {
+        initial: { opacity: 0, transform: 'translateY(100%)' },
+        animate: { opacity: 1, transform: 'translateY(0)' },
+        exit: { opacity: 0, transform: 'translateY(100%)' },
+      }
+    : {
+        initial: { opacity: 0, scale: 0.95 },
+        animate: { opacity: 1, scale: 1 },
+        exit: { opacity: 0, scale: 0.95 },
+      };
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className='top-auto bottom-0 left-0 translate-x-0 translate-y-0 rounded-b-none data-[size=default]:max-w-none max-sm:data-open:slide-in-from-bottom-4 max-sm:data-closed:slide-out-to-bottom-4 max-sm:data-[starting-style]:translate-y-8 max-sm:data-[starting-style]:opacity-0 max-sm:data-[ending-style]:translate-y-8 max-sm:data-[ending-style]:opacity-0 max-sm:transition-[translate,opacity] max-sm:duration-300 max-sm:ease-out sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-b-[min(var(--radius-4xl),24px)]'>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Deactivate {name}?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Deactivated items are hidden from the landing site immediately. History is untouched,
-            and you can reactivate any time.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction variant='destructive' onClick={onConfirm}>
-            Deactivate
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
+    <AlertDialog
+      open={visible && open}
+      onOpenChange={(next) => {
+        if (next) {
+          onOpenChange(true);
+        } else {
+          setVisible(false);
+        }
+      }}
+    >
+      <AnimatePresence onExitComplete={() => onOpenChange(false)}>
+        {visible && (
+          <AlertDialogPortal keepMounted>
+            <AlertDialogContent
+              render={
+                <motion.div
+                  initial={variants.initial}
+                  animate={variants.animate}
+                  exit={variants.exit}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                />
+              }
+              className='top-auto bottom-0 left-0 translate-x-0 translate-y-0 rounded-b-none data-[size=default]:max-w-none max-sm:rounded-t-xl sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-b-[min(var(--radius-4xl),24px)]'
+            >
+              <AlertDialogHeader>
+                <AlertDialogTitle>Deactivate {name}?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Deactivated items are hidden from the landing site immediately. History is
+                  untouched, and you can reactivate any time.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction variant='destructive' onClick={onConfirm}>
+                  Deactivate
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogPortal>
+        )}
+      </AnimatePresence>
     </AlertDialog>
   );
 }
@@ -416,6 +486,23 @@ export function EmptyState({ line, children }: { line: string; children?: ReactN
  * the popup unmounts within one frame of close on BOTH the sheet and the
  * DeactivateConfirm reference (exit-cut predates this change). The entrance
  * is the deliverable.
+ *
+ * Round 8: the WHOLE animation moves to Motion for React (the unified
+ * `motion` package, imported from 'motion/react' — never framer-motion),
+ * via the Base UI integration recipe: SheetContent is composed with a
+ * motion.div through the `render` prop (NOT function/spread props) and the
+ * conditional content is wrapped in <AnimatePresence>. T15's keyframe
+ * classes are DELETED — motion owns the animation. Side-aware transform
+ * STRINGS (WAAPI channel): desktop (side right) translateX(100%) ↔ 0;
+ * mobile (side bottom) translateY(100%) ↔ 0; 300ms ease-out; opacity
+ * animates alongside so Base UI's getAnimations() unmount gate holds the
+ * popup until the exit finishes. The confirm's close-latch applies here
+ * too (see DeactivateConfirm): the screens render the editor conditionally,
+ * so Cancel/Save only flip the local `visible` latch and the parent is
+ * informed on onExitComplete. motion's own will-change handling was checked
+ * at runtime (computed style sampled during the entrance) — motion 13 did
+ * not set will-change on the popup; transform strings + opacity are already
+ * compositor-friendly, and the brief allows relying on motion's handling.
  */
 export function LightEntityEditor({
   title,
@@ -431,32 +518,63 @@ export function LightEntityEditor({
   children: ReactNode;
 }) {
   const isMobile = useIsMobile();
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    setVisible(open);
+  }, [open]);
   if (chrome === 'sheet') {
+    const variants = isMobile
+      ? {
+          initial: { opacity: 0, transform: 'translateY(100%)' },
+          animate: { opacity: 1, transform: 'translateY(0)' },
+          exit: { opacity: 0, transform: 'translateY(100%)' },
+        }
+      : {
+          initial: { opacity: 0, transform: 'translateX(100%)' },
+          animate: { opacity: 1, transform: 'translateX(0)' },
+          exit: { opacity: 0, transform: 'translateX(100%)' },
+        };
     return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent
-          side={isMobile ? 'bottom' : 'right'}
-          className={cn(
-            'max-md:max-h-[85dvh]',
-            isMobile
-              ? 'data-open:animate-in data-open:fade-in-0 data-open:slide-in-from-bottom data-closed:animate-out data-closed:fade-out-0 data-closed:slide-out-to-bottom duration-300'
-              : 'data-open:animate-in data-open:fade-in-0 data-open:slide-in-from-right data-closed:animate-out data-closed:fade-out-0 data-closed:slide-out-to-right duration-300'
+      <Sheet
+        open={visible && open}
+        onOpenChange={(next) => {
+          if (next) {
+            onOpenChange(true);
+          } else {
+            setVisible(false);
+          }
+        }}
+      >
+        <AnimatePresence onExitComplete={() => onOpenChange(false)}>
+          {visible && (
+            <SheetContent
+              side={isMobile ? 'bottom' : 'right'}
+              render={
+                <motion.div
+                  initial={variants.initial}
+                  animate={variants.animate}
+                  exit={variants.exit}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                />
+              }
+              className={cn('max-md:max-h-[85dvh]', isMobile && 'rounded-t-xl')}
+            >
+              <SheetHeader>
+                <SheetTitle>{title}</SheetTitle>
+                <SheetDescription>Prototype: changes stay on this page.</SheetDescription>
+              </SheetHeader>
+              <div className='flex-1 space-y-5 overflow-y-auto px-6 pb-6'>{children}</div>
+              <SheetFooter>
+                <Button variant='outline' type='button' onClick={() => setVisible(false)}>
+                  Cancel
+                </Button>
+                <Button type='button' onClick={() => setVisible(false)}>
+                  Save changes
+                </Button>
+              </SheetFooter>
+            </SheetContent>
           )}
-        >
-          <SheetHeader>
-            <SheetTitle>{title}</SheetTitle>
-            <SheetDescription>Prototype: changes stay on this page.</SheetDescription>
-          </SheetHeader>
-          <div className='flex-1 space-y-5 overflow-y-auto px-6 pb-6'>{children}</div>
-          <SheetFooter>
-            <Button variant='outline' type='button' onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type='button' onClick={() => onOpenChange(false)}>
-              Save changes
-            </Button>
-          </SheetFooter>
-        </SheetContent>
+        </AnimatePresence>
       </Sheet>
     );
   }
