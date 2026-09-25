@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { boolean, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 // Atomic attires (ADR-0009 revision): one row per single attire value
 // (Toga, Filipiniana, Executive, Uniform). Combined contexts like
@@ -7,6 +7,10 @@ import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 export const attires = pgTable('attires', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull().unique(),
+  // Deactivation (M5): a deactivated attire trims from its inclusion's
+  // attire list on public reads (the inclusion still renders, #138); admin
+  // reads always assemble the full composition.
+  isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

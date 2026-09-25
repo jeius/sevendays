@@ -1,4 +1,4 @@
-import { index, pgTable, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import { index, integer, pgTable, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 import { attires } from './attires.js';
 import { packageInclusions } from './package-inclusions.js';
 
@@ -16,6 +16,11 @@ export const packageInclusionAttires = pgTable(
     attireId: uuid('attire_id')
       .notNull()
       .references(() => attires.id),
+    // Attire order within the inclusion (M5): catalog attire order under the
+    // atomic package save (#137). Landed DEFAULT 1 NOT NULL, was backfilled
+    // from today's (created_at, id) order in #135 before the default
+    // dropped — a forgetful insert now fails loudly instead of tying at 1.
+    position: integer('position').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [

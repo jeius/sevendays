@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   createStudioServiceSchema,
+  studioServiceAddonMatrixSchema,
+  studioServiceBranchMatrixSchema,
   studioServiceSchema,
   studioServiceWithBranchesSchema,
+  updateStudioServiceSchema,
 } from './studio-service.js';
 
 const UUID = '00000000-0000-4000-8000-000000000000';
@@ -114,5 +117,27 @@ describe('studioServiceWithBranchesSchema', () => {
       bookableBranchIds: [],
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe('studio-service matrix payloads (M5)', () => {
+  it('studioServiceBranchMatrixSchema parses { branchIds }; rejects a non-uuid entry', () => {
+    expect(studioServiceBranchMatrixSchema.safeParse({ branchIds: [UUID] }).success).toBe(true);
+    expect(studioServiceBranchMatrixSchema.safeParse({ branchIds: ['not-a-uuid'] }).success).toBe(
+      false
+    );
+  });
+
+  it('studioServiceAddonMatrixSchema parses { addonServiceIds }; rejects a non-uuid entry', () => {
+    expect(studioServiceAddonMatrixSchema.safeParse({ addonServiceIds: [UUID] }).success).toBe(
+      true
+    );
+    expect(
+      studioServiceAddonMatrixSchema.safeParse({ addonServiceIds: ['not-a-uuid'] }).success
+    ).toBe(false);
+  });
+
+  it('update is the create schema (full-object PUT)', () => {
+    expect(updateStudioServiceSchema).toBe(createStudioServiceSchema);
   });
 });

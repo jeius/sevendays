@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { addonServiceSchema, createAddonServiceSchema } from './addon-service.js';
+import {
+  addonServiceSchema,
+  createAddonServiceSchema,
+  updateAddonServiceSchema,
+} from './addon-service.js';
 
 const UUID = '00000000-0000-4000-8000-000000000000';
 
@@ -33,5 +37,9 @@ describe('addonServiceSchema', () => {
       priceCents: 60.5,
     });
     expect(result.success).toBe(false);
+  });
+
+  it('update is the create schema (full-object PUT)', () => {
+    expect(updateAddonServiceSchema).toBe(createAddonServiceSchema);
   });
 });

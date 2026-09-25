@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createPackageInclusionSchema, packageInclusionSchema } from './inclusion.js';
+import { packageInclusionSchema } from './inclusion.js';
 import { resolvedInclusionSchema } from './package.js';
 
 const UUID = '00000000-0000-4000-8000-000000000000';
@@ -49,27 +49,6 @@ describe('packageInclusionSchema', () => {
     });
     expect(result.success).toBe(true);
   });
-
-  it('rejects an unknown kind', () => {
-    const result = createPackageInclusionSchema.safeParse({
-      kind: 'souvenir',
-      quantity: 2,
-      printSizeId: null,
-      description: null,
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects a non-integer quantity', () => {
-    const result = createPackageInclusionSchema.safeParse({
-      kind: 'print',
-      quantity: 2.5,
-      printSizeId: UUID,
-      attireIds: [UUID],
-      description: null,
-    });
-    expect(result.success).toBe(false);
-  });
 });
 
 describe('resolvedInclusionSchema', () => {
@@ -99,41 +78,5 @@ describe('resolvedInclusionSchema', () => {
       attires: [{ id: UUID, name: 'Toga' }],
     });
     expect(result.success).toBe(false);
-  });
-});
-
-describe('createPackageInclusionSchema attire rule', () => {
-  it('rejects a framed picture create payload without attireIds', () => {
-    const result = createPackageInclusionSchema.safeParse({
-      kind: 'framed_picture',
-      quantity: 1,
-      printSizeId: UUID,
-      description: null,
-    });
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0]?.path).toEqual(['attireIds']);
-    }
-  });
-
-  it('accepts a framed picture create payload with attireIds and no frameId', () => {
-    const result = createPackageInclusionSchema.safeParse({
-      kind: 'framed_picture',
-      quantity: 1,
-      printSizeId: UUID,
-      attireIds: [UUID],
-      description: null,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it('accepts a privilege create payload without attireIds', () => {
-    const result = createPackageInclusionSchema.safeParse({
-      kind: 'privilege',
-      quantity: null,
-      printSizeId: null,
-      description: 'High Resolution soft copies',
-    });
-    expect(result.success).toBe(true);
   });
 });

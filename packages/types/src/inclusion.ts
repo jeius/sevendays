@@ -28,23 +28,3 @@ export const packageInclusionSchema = z.object({
 });
 
 export type PackageInclusion = z.infer<typeof packageInclusionSchema>;
-
-export const createPackageInclusionSchema = packageInclusionSchema
-  .omit({ id: true, createdAt: true, updatedAt: true })
-  .extend({
-    frameId: z.uuid().nullable().optional(),
-    attireIds: z.array(z.uuid()).optional(),
-  })
-  .superRefine((value, ctx) => {
-    if (value.kind === 'privilege') return;
-    const attireIds = value.attireIds;
-    if (!attireIds || attireIds.length < 1) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['attireIds'],
-        message: `${value.kind} inclusions require at least one attire`,
-      });
-    }
-  });
-
-export type CreatePackageInclusionInput = z.infer<typeof createPackageInclusionSchema>;

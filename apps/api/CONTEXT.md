@@ -71,3 +71,25 @@ _Avoid_: deleted, archived, cancelled (for packages)
 **Deactivated (Studio Service)**:
 The same catalog action for a Studio Service. Independent of Branch applicability — a service can be active yet offered at only some Branches.
 _Avoid_: deleted, archived, cancelled (for catalog offerings)
+
+**Deactivated (Lookup)**:
+The same catalog action applied to Print sizes and Attires, with a lookup-specific rule on public reads: a deactivated Attire trims from its Inclusion's attire list (the Inclusion still renders, even with none left), while a deactivated Print size hides its referencing Inclusions entirely. Staff reads always see the full composition.
+_Avoid_: deleted, archived, disabled
+
+**Lookup**:
+A shared reference entity that Inclusions resolve values against — Print size and Attire. Frame is not a lookup: it is numbered within, and owned by, its Service Package.
+_Avoid_: dictionary, reference table
+
+## Gallery & testimonials
+
+**Gallery Photo**:
+A single photograph in the studio's gallery, shown in the landing site's about grid; each belongs to at most one Gallery Category, and an uncategorized photo is visible to staff only.
+_Avoid_: picture (unqualified — collides with framed-picture Inclusions), image, media
+
+**Gallery Category**:
+A staff-managed grouping of Gallery Photos — one tab of the about grid, shown in a fixed order. A photo belongs to at most one category.
+_Avoid_: album, collection, tag
+
+**Testimonial**:
+A structured customer quote — the quote text, the person attributed, and a display position — rendered in the landing site's about slot.
+_Avoid_: review, story (that is owner copy), blurb
