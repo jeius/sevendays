@@ -1,10 +1,26 @@
 // PROTOTYPE (throwaway) — wayfinder #131: the dedicated package-editor screen
-// (V2 reorder variants: a = arrow buttons, b = arrows + non-functional drag
-// grip rendered for reaction). Always renders the pkg-basic fixture; reorder
-// mutates the one underlying inclusions array (position = array order is the
-// #130 write shape; frames renumber from array order on save). Nothing
-// persists. Never merges; delete with the route.
+// (post-verdict: drag-only reorder via @dnd-kit, handle-only grips). Always
+// renders the pkg-basic fixture; reorder mutates the one underlying inclusions
+// array (position = array order is the #130 write shape; frames renumber from
+// array order on save). Nothing persists. Never merges; delete with the route.
 
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@sevendays/ui/components/card';
@@ -25,17 +41,7 @@ import {
 } from '@sevendays/ui/components/select';
 import { Textarea } from '@sevendays/ui/components/textarea';
 import { Link } from '@tanstack/react-router';
-import {
-  ArrowDown,
-  ArrowUp,
-  ChevronDown,
-  Frame,
-  Gift,
-  GripVertical,
-  Image,
-  Plus,
-  X,
-} from 'lucide-react';
+import { ChevronDown, Frame, Gift, GripVertical, Image, Plus, X } from 'lucide-react';
 import { useId, useRef, useState } from 'react';
 import type { InclusionRow, PackageRow } from '../fixtures';
 import { attires, packages, printSizes } from '../fixtures';
@@ -49,7 +55,6 @@ const KIND_ICONS = {
 } as const;
 
 interface RowActions {
-  onMove: (id: string, dir: 'up' | 'down') => void;
   onRemove: (id: string) => void;
   onUpdate: (id: string, patch: Partial<InclusionRow>) => void;
   onToggleAttire: (id: string, name: string, checked: boolean) => void;
@@ -57,48 +62,31 @@ interface RowActions {
 
 function InclusionEditorRow({
   row,
-  variant,
-  sectionFirst,
-  sectionLast,
-  onMove,
   onRemove,
   onUpdate,
   onToggleAttire,
-}: {
-  row: InclusionRow;
-  variant: 'a' | 'b';
-  sectionFirst: boolean;
-  sectionLast: boolean;
-} & RowActions) {
+}: { row: InclusionRow } & RowActions) {
   const KindIcon = KIND_ICONS[row.kind];
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: row.id,
+  });
   return (
-    <div className='space-y-2 rounded-lg border p-3'>
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={`space-y-2 rounded-lg border p-3 ${isDragging ? 'relative z-10 shadow-md' : ''}`}
+    >
       <div className='flex flex-wrap items-center gap-2'>
-        {variant === 'b' ? (
-          <GripVertical aria-hidden='true' className='text-muted-foreground size-4 shrink-0' />
-        ) : null}
-        <div className='flex items-center gap-0.5'>
-          <Button
-            variant='ghost'
-            size='icon-sm'
-            type='button'
-            aria-label='Move up'
-            disabled={sectionFirst}
-            onClick={() => onMove(row.id, 'up')}
-          >
-            <ArrowUp />
-          </Button>
-          <Button
-            variant='ghost'
-            size='icon-sm'
-            type='button'
-            aria-label='Move down'
-            disabled={sectionLast}
-            onClick={() => onMove(row.id, 'down')}
-          >
-            <ArrowDown />
-          </Button>
-        </div>
+        {/* Handle-only drag: listeners + attributes live on the grip alone. */}
+        <button
+          type='button'
+          aria-label='Drag to reorder'
+          className='text-muted-foreground hover:text-foreground touch-none cursor-grab rounded-sm active:cursor-grabbing'
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical aria-hidden='true' className='size-4 shrink-0' />
+        </button>
         <KindIcon aria-hidden='true' className='text-muted-foreground size-4 shrink-0' />
         {row.kind !== 'privilege' ? (
           <Input
@@ -288,45 +276,45 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
     });
   }
 
-  // Sections are views over the one inclusions array: a move swaps the row
-  // with its section neighbor. The swap partner comes from the filtered
-  // section list and is applied by row identity — never by raw array index —
-  // so a move can never cross another section's rows.
-  function moveInclusion(id: string, dir: 'up' | 'down') {
+  // Sections are views over the one inclusions array: a drag reorders the
+  // section's rows among themselves. The reorder is derived from the filtered
+  // section list and applied by row identity — never by raw array index —
+  // so a drag can never cross another section's rows (same discipline as the
+  // reviewed moveInclusion identity swap).
+  function reorderInclusions(
+    matches: (c: InclusionRow) => boolean,
+    activeId: string,
+    overId: string
+  ) {
     setPkg((prev) => {
-      const row = prev.inclusions.find((candidate) => candidate.id === id);
-      if (!row) {
-        return prev;
-      }
-      let matches: (candidate: InclusionRow) => boolean;
-      if (row.kind === 'framed_picture' && row.frameId) {
-        matches = (c) => c.kind === 'framed_picture' && c.frameId === row.frameId;
-      } else if (row.kind === 'print' || row.kind === 'privilege') {
-        matches = (c) => c.kind === row.kind;
-      } else {
-        return prev; // framed row without a frame: no section to move within
-      }
       const section = prev.inclusions.filter(matches);
-      const pos = section.findIndex((candidate) => candidate.id === id);
-      const target = dir === 'up' ? pos - 1 : pos + 1;
-      if (pos < 0 || target < 0 || target >= section.length) {
-        return prev; // at the section's end: disabled in the UI anyway
-      }
-      const neighbor = section[target];
-      if (!neighbor) {
+      const from = section.findIndex((candidate) => candidate.id === activeId);
+      const to = section.findIndex((candidate) => candidate.id === overId);
+      if (from < 0 || to < 0) {
         return prev;
       }
-      const inclusions = prev.inclusions.map((candidate) => {
-        if (candidate.id === row.id) {
-          return neighbor;
-        }
-        if (candidate.id === neighbor.id) {
-          return row;
-        }
-        return candidate;
-      });
+      const reordered = arrayMove(section, from, to);
+      const queue = [...reordered];
+      const inclusions = prev.inclusions.map((candidate) =>
+        matches(candidate) ? (queue.shift() ?? candidate) : candidate
+      );
       return { ...prev, inclusions };
     });
+  }
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  function makeDragEnd(matches: (c: InclusionRow) => boolean) {
+    return (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) {
+        return;
+      }
+      reorderInclusions(matches, String(active.id), String(over.id));
+    };
   }
 
   // The save model: frameNumbers re-derive from array order (#130 write shape).
@@ -338,7 +326,6 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
   }
 
   const rowActions: RowActions = {
-    onMove: moveInclusion,
     onRemove: removeInclusion,
     onUpdate: updateInclusion,
     onToggleAttire: toggleAttire,
@@ -559,19 +546,22 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
                         </p>
                       ) : null}
                     </div>
-                    {group.map((row) => {
-                      const index = group.findIndex((candidate) => candidate.id === row.id);
-                      return (
-                        <InclusionEditorRow
-                          key={row.id}
-                          row={row}
-                          variant={variant}
-                          sectionFirst={index === 0}
-                          sectionLast={index === group.length - 1}
-                          {...rowActions}
-                        />
-                      );
-                    })}
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={makeDragEnd(
+                        (c) => c.kind === 'framed_picture' && c.frameId === frame.id
+                      )}
+                    >
+                      <SortableContext
+                        items={group.map((row) => row.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {group.map((row) => (
+                          <InclusionEditorRow key={row.id} row={row} {...rowActions} />
+                        ))}
+                      </SortableContext>
+                    </DndContext>
                   </div>
                 );
               })}
@@ -585,19 +575,20 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
                   Add print
                 </Button>
               </div>
-              {prints.map((row) => {
-                const index = prints.findIndex((candidate) => candidate.id === row.id);
-                return (
-                  <InclusionEditorRow
-                    key={row.id}
-                    row={row}
-                    variant={variant}
-                    sectionFirst={index === 0}
-                    sectionLast={index === prints.length - 1}
-                    {...rowActions}
-                  />
-                );
-              })}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={makeDragEnd((c) => c.kind === 'print')}
+              >
+                <SortableContext
+                  items={prints.map((row) => row.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {prints.map((row) => (
+                    <InclusionEditorRow key={row.id} row={row} {...rowActions} />
+                  ))}
+                </SortableContext>
+              </DndContext>
             </section>
 
             <section className='space-y-2'>
@@ -608,19 +599,20 @@ export function PackageEditorScreen({ variant }: ScreenProps) {
                   Add privilege
                 </Button>
               </div>
-              {privileges.map((row) => {
-                const index = privileges.findIndex((candidate) => candidate.id === row.id);
-                return (
-                  <InclusionEditorRow
-                    key={row.id}
-                    row={row}
-                    variant={variant}
-                    sectionFirst={index === 0}
-                    sectionLast={index === privileges.length - 1}
-                    {...rowActions}
-                  />
-                );
-              })}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={makeDragEnd((c) => c.kind === 'privilege')}
+              >
+                <SortableContext
+                  items={privileges.map((row) => row.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {privileges.map((row) => (
+                    <InclusionEditorRow key={row.id} row={row} {...rowActions} />
+                  ))}
+                </SortableContext>
+              </DndContext>
             </section>
           </CardContent>
         </Card>

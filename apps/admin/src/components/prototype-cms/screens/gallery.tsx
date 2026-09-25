@@ -1,10 +1,27 @@
 // PROTOTYPE (throwaway) — wayfinder #131: the gallery manager. Category rail
 // filters the photo grid; batch upload is the norm (ruling 9) and is
 // simulated — appended rows point at URL.createObjectURL(file) thumbs, the
-// R2/presign seam is #129's. Reorder is the V2-a arrow affordance (no drag
-// axis; folds into V2's verdict). Nothing persists. Never merges; delete with
-// the route.
+// R2/presign seam is #129's. Reorder is drag-only (@dnd-kit, rectSortingStrategy;
+// the position chip doubles as the drag handle). Nothing persists. Never
+// merges; delete with the route.
 
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent } from '@sevendays/ui/components/card';
@@ -19,7 +36,7 @@ import {
   SelectValue,
 } from '@sevendays/ui/components/select';
 import { Textarea } from '@sevendays/ui/components/textarea';
-import { ArrowDown, ArrowUp, Check, Image, ImagePlus, Images, Plus, X } from 'lucide-react';
+import { Check, Image, ImagePlus, Images, Plus, X } from 'lucide-react';
 import { useId, useRef, useState } from 'react';
 import type { GalleryCategoryRow, GalleryPhotoRow } from '../fixtures';
 import { galleryCategories, galleryPhotos } from '../fixtures';
@@ -33,6 +50,91 @@ import {
 } from '../shared';
 
 const UNCATEGORIZED = 'uncategorized';
+
+// One grid tile of the sortable photo grid. The position chip doubles as the
+// drag handle (listeners + attributes on the chip alone, touch-action none).
+function SortablePhotoCard({
+  photo,
+  categoryName,
+  onEdit,
+  onDeactivate,
+  onReactivate,
+}: {
+  photo: GalleryPhotoRow;
+  categoryName: string;
+  onEdit: (id: string) => void;
+  onDeactivate: (id: string) => void;
+  onReactivate: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: photo.id,
+  });
+  return (
+    <Card
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={`animate-in fade-in slide-in-from-bottom-2 gap-0 overflow-hidden py-0 duration-300 ${
+        photo.isActive ? '' : 'opacity-60'
+      } ${isDragging ? 'relative z-10 shadow-md' : ''}`}
+    >
+      <div className='bg-muted relative aspect-[4/3]'>
+        {photo.photoUrl ? (
+          <img
+            src={photo.photoUrl}
+            alt={photo.title}
+            className='absolute inset-0 h-full w-full object-cover'
+          />
+        ) : (
+          <div className='text-muted-foreground absolute inset-0 grid place-items-center'>
+            <Image className='size-8' aria-hidden='true' />
+          </div>
+        )}
+        <button
+          type='button'
+          aria-label='Drag to reorder'
+          className='bg-background/90 absolute top-2 left-2 touch-none cursor-grab rounded-md px-1.5 py-0.5 font-mono text-xs tabular-nums active:cursor-grabbing'
+          {...attributes}
+          {...listeners}
+        >
+          #{photo.position}
+        </button>
+        {!photo.isActive ? (
+          <div className='absolute top-2 right-2'>
+            <StatusBadge isActive={false} />
+          </div>
+        ) : null}
+      </div>
+      <CardContent className='space-y-2 p-3'>
+        <p className='text-sm font-medium'>{photo.title}</p>
+        {photo.categoryId ? (
+          <Badge variant='outline'>{categoryName}</Badge>
+        ) : (
+          <span className='text-muted-foreground text-xs'>Uncategorized</span>
+        )}
+        <div className='flex items-center gap-1'>
+          <Button variant='ghost' size='sm' type='button' onClick={() => onEdit(photo.id)}>
+            Edit
+          </Button>
+          {photo.isActive ? (
+            <Button
+              variant='ghost'
+              size='sm'
+              type='button'
+              className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+              onClick={() => onDeactivate(photo.id)}
+            >
+              Deactivate
+            </Button>
+          ) : (
+            <Button variant='ghost' size='sm' type='button' onClick={() => onReactivate(photo.id)}>
+              Reactivate
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export function GalleryScreen({ search }: ScreenProps) {
   const [categories, setCategories] = useState(galleryCategories);
@@ -100,25 +202,44 @@ export function GalleryScreen({ search }: ScreenProps) {
     event.target.value = ''; // allow re-picking the same file
   }
 
-  // Single-axis reorder (V2-a): swap positions with the visible neighbor.
-  function move(id: string, dir: 'up' | 'down') {
-    const index = visiblePhotos.findIndex((p) => p.id === id);
-    const current = visiblePhotos[index];
-    const neighbor = visiblePhotos[dir === 'up' ? index - 1 : index + 1];
-    if (!current || !neighbor) {
+  // Drag-only reorder (post-verdict): a drag reorders the VISIBLE grid and the
+  // new order is written back as positions. The visible rows keep the same set
+  // of position numbers (reassigned in the new order), so a filtered drag can
+  // never collide with positions held by other categories.
+  function reorderPhotos(activeId: string, overId: string) {
+    const from = visiblePhotos.findIndex((p) => p.id === activeId);
+    const to = visiblePhotos.findIndex((p) => p.id === overId);
+    if (from < 0 || to < 0) {
       return;
     }
+    const reordered = arrayMove(visiblePhotos, from, to);
+    const slots = visiblePhotos.map((p) => p.position).sort((a, b) => a - b);
+    const positionById = new Map<string, number>();
+    reordered.forEach((p, i) => {
+      const slot = slots[i];
+      if (slot !== undefined) {
+        positionById.set(p.id, slot);
+      }
+    });
     setPhotos((prev) =>
       prev.map((p) => {
-        if (p.id === current.id) {
-          return { ...p, position: neighbor.position };
-        }
-        if (p.id === neighbor.id) {
-          return { ...p, position: current.position };
-        }
-        return p;
+        const position = positionById.get(p.id);
+        return position === undefined ? p : { ...p, position };
       })
     );
+  }
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  function onDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) {
+      return;
+    }
+    reorderPhotos(String(active.id), String(over.id));
   }
 
   function createCategory() {
@@ -259,102 +380,29 @@ export function GalleryScreen({ search }: ScreenProps) {
               line={filter === 'all' ? 'No photos yet.' : 'No photos in this category yet.'}
             />
           ) : (
-            <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-              {visiblePhotos.map((photo, index) => {
-                const categoryName =
-                  categories.find((c) => c.id === photo.categoryId)?.name ?? 'Uncategorized';
-                return (
-                  <Card
-                    key={photo.id}
-                    className={`animate-in fade-in slide-in-from-bottom-2 gap-0 overflow-hidden py-0 duration-300 ${
-                      photo.isActive ? '' : 'opacity-60'
-                    }`}
-                  >
-                    <div className='bg-muted relative aspect-[4/3]'>
-                      {photo.photoUrl ? (
-                        <img
-                          src={photo.photoUrl}
-                          alt={photo.title}
-                          className='absolute inset-0 h-full w-full object-cover'
-                        />
-                      ) : (
-                        <div className='text-muted-foreground absolute inset-0 grid place-items-center'>
-                          <Image className='size-8' aria-hidden='true' />
-                        </div>
-                      )}
-                      <span className='bg-background/90 absolute top-2 left-2 rounded-md px-1.5 py-0.5 font-mono text-xs tabular-nums'>
-                        #{photo.position}
-                      </span>
-                      {!photo.isActive ? (
-                        <div className='absolute top-2 right-2'>
-                          <StatusBadge isActive={false} />
-                        </div>
-                      ) : null}
-                    </div>
-                    <CardContent className='space-y-2 p-3'>
-                      <p className='text-sm font-medium'>{photo.title}</p>
-                      {photo.categoryId ? (
-                        <Badge variant='outline'>{categoryName}</Badge>
-                      ) : (
-                        <span className='text-muted-foreground text-xs'>Uncategorized</span>
-                      )}
-                      <div className='flex items-center gap-0.5'>
-                        <div className='flex items-center gap-0.5'>
-                          <Button
-                            variant='ghost'
-                            size='icon-sm'
-                            type='button'
-                            aria-label='Move up'
-                            disabled={index === 0}
-                            onClick={() => move(photo.id, 'up')}
-                          >
-                            <ArrowUp />
-                          </Button>
-                          <Button
-                            variant='ghost'
-                            size='icon-sm'
-                            type='button'
-                            aria-label='Move down'
-                            disabled={index === visiblePhotos.length - 1}
-                            onClick={() => move(photo.id, 'down')}
-                          >
-                            <ArrowDown />
-                          </Button>
-                        </div>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          type='button'
-                          onClick={() => setEditId(photo.id)}
-                        >
-                          Edit
-                        </Button>
-                        {photo.isActive ? (
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            type='button'
-                            className='text-destructive hover:bg-destructive/10 hover:text-destructive'
-                            onClick={() => setConfirmId(photo.id)}
-                          >
-                            Deactivate
-                          </Button>
-                        ) : (
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            type='button'
-                            onClick={() => setActive(photo.id, true)}
-                          >
-                            Reactivate
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+              <SortableContext
+                items={visiblePhotos.map((p) => p.id)}
+                strategy={rectSortingStrategy}
+              >
+                <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+                  {visiblePhotos.map((photo) => {
+                    const categoryName =
+                      categories.find((c) => c.id === photo.categoryId)?.name ?? 'Uncategorized';
+                    return (
+                      <SortablePhotoCard
+                        key={photo.id}
+                        photo={photo}
+                        categoryName={categoryName}
+                        onEdit={setEditId}
+                        onDeactivate={setConfirmId}
+                        onReactivate={(id) => setActive(id, true)}
+                      />
+                    );
+                  })}
+                </div>
+              </SortableContext>
+            </DndContext>
           )}
 
           <p className='text-muted-foreground text-xs'>Prototype: changes stay on this page.</p>
