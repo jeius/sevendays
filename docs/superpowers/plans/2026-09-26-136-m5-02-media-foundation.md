@@ -91,22 +91,26 @@ pnpm --filter @sevendays/api exec wrangler r2 bucket create sevendays-media
 
 - [ ] **Step C2: Set the bucket CORS (exact admin origins — teaser, v1, localhost)**
 
-Write the JSON below to `.superpowers/sdd/2026-09-26-136-m5-02/cors.json` (gitignored scratch), then set + verify. Rule fields map 1:1 to browser CORS: `AllowedHeaders` must include `content-type` (it is signed), `ExposeHeaders` lets the browser read `ETag`. Origins are exact `scheme://host[:port]` — no paths, no trailing slash; the subdomain `pahamajulius.workers.dev` is pinned from `docs/agents/v1-picks.md` line 100's deployed-URL evidence, admin dev runs on port 3000 (`apps/admin/package.json`).
+Write the JSON below to `.superpowers/sdd/2026-09-26-136-m5-02-media-foundation/evidence/cors.json` (gitignored scratch), then set + verify. **Format correction (controller, 2026-09-26 — the research sketch's AWS-style `AllowedOrigins` keys are rejected by wrangler 4.127.1, which demands lowercase keys nested in `allowed`):** the working file is the `{"rules": [{ "allowed": …, "exposeHeaders": …, "maxAgeSeconds": … }]}` shape set and verified live. Rule fields map 1:1 to browser CORS: `headers` must include `content-type` (it is signed), `exposeHeaders` lets the browser read `ETag`. Origins are exact `scheme://host[:port]` — no paths, no trailing slash; the subdomain `pahamajulius.workers.dev` is pinned from `docs/agents/v1-picks.md` line 100's deployed-URL evidence, admin dev runs on port 3000 (`apps/admin/package.json`).
 
 ```json
-[
-  {
-    "AllowedOrigins": [
-      "http://localhost:3000",
-      "https://sevendays-admin.pahamajulius.workers.dev",
-      "https://sevendays-v1-admin.pahamajulius.workers.dev"
-    ],
-    "AllowedMethods": ["PUT"],
-    "AllowedHeaders": ["content-type"],
-    "ExposeHeaders": ["ETag"],
-    "MaxAgeSeconds": 3600
-  }
-]
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": [
+          "http://localhost:3000",
+          "https://sevendays-admin.pahamajulius.workers.dev",
+          "https://sevendays-v1-admin.pahamajulius.workers.dev"
+        ],
+        "methods": ["PUT"],
+        "headers": ["content-type"]
+      },
+      "exposeHeaders": ["ETag"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+}
 ```
 
 ```bash
