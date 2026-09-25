@@ -5,6 +5,7 @@ import {
   MEDIA_BUCKET_NAME,
   MissingR2CredentialsError,
   presignUpload,
+  resolveMediaUrl,
 } from './media.js';
 
 const CREDS = {
@@ -244,5 +245,25 @@ describe('commitUpload', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.reason).toBe('not_found');
+  });
+});
+
+describe('resolveMediaUrl', () => {
+  const env = { MEDIA_PUBLIC_BASE_URL: 'https://pub-test.r2.dev' };
+
+  it('resolves a key to the absolute public URL', () => {
+    expect(resolveMediaUrl(env, 'covers/00000000-0000-4000-8000-000000000000.jpg')).toBe(
+      'https://pub-test.r2.dev/covers/00000000-0000-4000-8000-000000000000.jpg'
+    );
+  });
+
+  it('passes a null key through as null (no cover is a null URL, never a string)', () => {
+    expect(resolveMediaUrl(env, null)).toBeNull();
+  });
+
+  it('is a plain join — no trailing-slash normalization beyond what the var carries', () => {
+    expect(
+      resolveMediaUrl({ MEDIA_PUBLIC_BASE_URL: 'https://pub-test.r2.dev/' }, 'gallery/a.jpg')
+    ).toBe('https://pub-test.r2.dev//gallery/a.jpg');
   });
 });

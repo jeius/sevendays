@@ -194,3 +194,17 @@ export async function servePhotoThumbnail(
     .output({ format: 'image/webp' });
   return result.response();
 }
+
+/**
+ * Read-time URL resolution (ADR-0019): the absolute public URL for an object
+ * key, null passthrough for a null key. The ONLY place a key becomes a URL —
+ * admin reads resolve here (#137); #138 reuses it for the public reads. Raw
+ * keys never leave the API at any layer. (Added by #137 as the one fenced
+ * extension to this seam; presign/commit/thumb are untouched.)
+ */
+export function resolveMediaUrl(
+  env: Pick<Env, 'MEDIA_PUBLIC_BASE_URL'>,
+  key: string | null
+): string | null {
+  return key ? `${env.MEDIA_PUBLIC_BASE_URL}/${key}` : null;
+}
