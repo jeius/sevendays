@@ -10,14 +10,15 @@ import {
 export const servicePackages = new Hono<ApiEnv>()
   .get('/', async (c) => {
     const db = c.get('db');
-    return c.json(await listActivePackagesWithInclusions(db));
+    return c.json(await listActivePackagesWithInclusions(db, c.env));
   })
   // No param schema (Global Constraints): slug is an opaque text key — an
   // unknown slug is a plain service-level 404, and validating would add a
   // second error path for no benefit. The :id/:slug asymmetry is deliberate.
+  // Unknown AND deactivated slugs take the same uniform 404 (#138).
   .get('/:slug', async (c) => {
     const db = c.get('db');
-    const pkg = await getActivePackageWithInclusionsBySlug(db, c.req.param('slug'));
+    const pkg = await getActivePackageWithInclusionsBySlug(db, c.env, c.req.param('slug'));
     if (!pkg) {
       return notFound(c, 'Package not found.');
     }
