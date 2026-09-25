@@ -52,6 +52,17 @@
 // keyframe chain and T12/T14's slide chains are deleted; both mobile
 // bottom sheets get rounded-t-xl (owner ruling).
 //
+// Round 9: the DeactivateConfirm's exit FLASH is fixed — it was the
+// overlay/Backdrop, not the popup. The primitive's tw-animate overlay exit
+// (`data-closed:animate-out fade-out-0 duration-100`) runs with fill-mode
+// none, so at 100ms the backdrop snapped back to full opacity for the rest
+// of the popup's 300ms exit (probe: overlay back at opacity 1, zero
+// animations, ~200ms before joint unmount). The overlay now rides the same
+// motion render-prop recipe as the popup (opacity 0→1→0, 300ms ease-out);
+// its WAAPI animation outranks the primitive's CSSAnimation for the whole
+// window and holds 0 until unmount. The editor never flashed (its overlay's
+// dead transition channel leaves a static data-ending-style:opacity-0 hold).
+//
 // G1 radius note (spec): every card in this prototype renders one radius
 // step down (rounded-xl → rounded-lg) via className overrides at the usage
 // sites — packages/ui is untouched. If the owner keeps this, the step-down
@@ -65,6 +76,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogOverlay,
   AlertDialogPortal,
   AlertDialogTitle,
 } from '@sevendays/ui/components/alert-dialog';
@@ -373,6 +385,24 @@ export function StatusBadge({ isActive }: { isActive: boolean }) {
  * the SDD workspace) proved the pinned Base UI recipe holds end to end once
  * the parent unmount is deferred: exit animations run on the popup and the
  * popup leaves the DOM at ~330–345ms (the 300ms exit plus a frame).
+ *
+ * Round 9 (exit-flash fix): the OVERLAY joins motion. The owner-visible flash
+ * was the confirm's Backdrop, not the popup: the primitive's only overlay
+ * exit is the tw-animate `data-closed:animate-out fade-out-0 duration-100`
+ * CSSAnimation, and tw-animate's --animate-out shorthand carries
+ * `var(--tw-animation-fill-mode,none)` — fill NONE — so when the 100ms fade
+ * ends, the animation stops applying and the backdrop snaps back to base
+ * opacity 1 (bg-black/30 + blur) for the remaining ~200ms of the popup's
+ * 300ms motion exit, then everything unmounts together. The CDP probe caught
+ * the overlay at opacity 1 with zero animations from ~100ms to removal on
+ * BOTH sides (desktop + mobile). The editor never flashed because its
+ * overlay's dead-transition channel leaves `data-ending-style:opacity-0`
+ * matching — a static hold at 0. Fix (same recipe as the popup): the overlay
+ * is composed with a motion.div through the `render` prop — opacity
+ * 0→1→0 over the same 300ms ease-out — whose WAAPI animation outranks the
+ * primitive's CSSAnimation in the effect stack for the whole window (the
+ * popup already proves that composition: it carries both and fades
+ * monotonically) and holds the final 0 until AnimatePresence unmounts.
  */
 export function DeactivateConfirm({
   name,
@@ -415,6 +445,16 @@ export function DeactivateConfirm({
       <AnimatePresence onExitComplete={() => onOpenChange(false)}>
         {visible && (
           <AlertDialogPortal keepMounted>
+            <AlertDialogOverlay
+              render={
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                />
+              }
+            />
             <AlertDialogContent
               render={
                 <motion.div
