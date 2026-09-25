@@ -7,6 +7,3 @@ export const frameSchema = z.object({
 });
 
 export type PackageFrame = z.infer<typeof frameSchema>;
-
-export const createFrameSchema = frameSchema.omit({ id: true });
-export type CreateFrameInput = z.infer<typeof createFrameSchema>;

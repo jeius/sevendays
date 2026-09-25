@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createFrameSchema, frameSchema } from './frames.js';
+import { frameSchema } from './frames.js';
 
 const UUID = '00000000-0000-4000-8000-000000000000';
 
@@ -22,17 +22,5 @@ describe('frameSchema', () => {
       });
       expect(result.success).toBe(false);
     }
-  });
-});
-
-describe('createFrameSchema', () => {
-  it('parses a minimal create payload', () => {
-    const result = createFrameSchema.safeParse({ servicePackageId: UUID, frameNumber: 2 });
-    expect(result.success).toBe(true);
-  });
-
-  it('rejects a missing frameNumber', () => {
-    const result = createFrameSchema.safeParse({ servicePackageId: UUID });
-    expect(result.success).toBe(false);
   });
 });
