@@ -1,12 +1,16 @@
 import type { Database } from '@sevendays/db';
-import { galleryCategories, testimonials } from '@sevendays/db';
+import { galleryCategories, galleryPhotos, testimonials } from '@sevendays/db';
 import type {
   CreateGalleryCategoryInput,
+  CreateGalleryPhotoInput,
   CreateTestimonialInput,
+  GalleryPhoto,
   UpdateGalleryCategoryInput,
+  UpdateGalleryPhotoInput,
   UpdateTestimonialInput,
 } from '@sevendays/types';
 import { and, asc, eq, max, ne } from 'drizzle-orm';
+import type { Env } from '../env.js';
 import {
   type AdminCreateResult,
   type AdminWriteFailure,
@@ -14,6 +18,7 @@ import {
   conflict,
   guardUnique,
 } from './admin-shared.js';
+import { commitUpload, resolveMediaUrl } from './media.js';
 
 // The positioned collections (M5 #137): position is SERVER-assigned and
 // never client-supplied — create assigns max+1, the order PUT full-replaces
@@ -212,4 +217,172 @@ export async function setTestimonialOrder(
     }
   });
   return { ok: true, row: await listAdminTestimonials(db) };
+}
+
+// --- gallery photos ---------------------------------------------------------
+
+type PhotoRow = typeof galleryPhotos.$inferSelect;
+export type PhotoEnv = Pick<Env, 'MEDIA_BUCKET' | 'MEDIA_PUBLIC_BASE_URL'>;
+
+function toPhotoRead(env: PhotoEnv, row: PhotoRow): GalleryPhoto {
+  // The wire rename (ADR-0019): strip the raw key, resolve the absolute URL.
+  const { r2Key, ...rest } = row;
+  const photoUrl = resolveMediaUrl(env, r2Key);
+  if (!photoUrl) throw new Error(`gallery photo ${row.id} has no r2Key`);
+  return { ...rest, photoUrl };
+}
+
+export async function listAdminGalleryPhotos(db: Database, env: PhotoEnv): Promise<GalleryPhoto[]> {
+  const rows = await db
+    .select()
+    .from(galleryPhotos)
+    .orderBy(asc(galleryPhotos.position), asc(galleryPhotos.id));
+  return rows.map((row) => toPhotoRead(env, row));
+}
+
+export async function getAdminGalleryPhoto(
+  db: Database,
+  env: PhotoEnv,
+  id: string
+): Promise<GalleryPhoto | null> {
+  const [row] = await db.select().from(galleryPhotos).where(eq(galleryPhotos.id, id)).limit(1);
+  return row ? toPhotoRead(env, row) : null;
+}
+
+async function nextPhotoPosition(db: Database): Promise<number> {
+  const [row] = await db.select({ value: max(galleryPhotos.position) }).from(galleryPhotos);
+  return (row?.value ?? 0) + 1;
+}
+
+/**
+ * The commit step shared by create and replace: HEAD-verify the staging key
+ * through ticket 02's commitUpload (verify → caps → promote to the immutable
+ * gallery/<uuid>.jpg → delete staging), failures re-pathed onto the r2Key
+ * payload field. Runs BEFORE any DB write.
+ */
+async function commitStagingKey(
+  env: PhotoEnv,
+  stagingKey: string
+): Promise<{ ok: true; finalKey: string } | AdminWriteFailure> {
+  const commit = await commitUpload(env.MEDIA_BUCKET, { stagingKey, purpose: 'gallery-photo' });
+  if (!commit.ok) {
+    return {
+      ok: false,
+      reason: 'conflict',
+      message: commit.message,
+      details: (commit.details ?? [{ path: ['key'], message: commit.message }]).map(
+        (detail): Detail => ({ path: ['r2Key'], message: detail.message })
+      ),
+    };
+  }
+  return { ok: true, finalKey: commit.finalKey };
+}
+
+async function assertCategoryExists(
+  db: Database,
+  categoryId: string
+): Promise<AdminWriteFailure | null> {
+  const [known] = await db
+    .select({ id: galleryCategories.id })
+    .from(galleryCategories)
+    .where(eq(galleryCategories.id, categoryId))
+    .limit(1);
+  if (!known) {
+    return {
+      ok: false,
+      reason: 'invalid',
+      message: 'Unknown category.',
+      details: [{ path: ['categoryId'], message: `unknown id ${categoryId}` }],
+    };
+  }
+  return null;
+}
+
+export async function createAdminGalleryPhoto(
+  db: Database,
+  env: PhotoEnv,
+  input: CreateGalleryPhotoInput
+): Promise<AdminCreateResult<GalleryPhoto>> {
+  // Category existence FIRST — an invalid payload must not touch the bucket
+  // (a commit would promote the object and orphan it on the 400).
+  if (input.categoryId !== undefined && input.categoryId !== null) {
+    const failure = await assertCategoryExists(db, input.categoryId);
+    if (failure) return failure;
+  }
+  const commit = await commitStagingKey(env, input.r2Key);
+  if (!commit.ok) return commit;
+  const position = await nextPhotoPosition(db);
+  const [row] = await db
+    .insert(galleryPhotos)
+    .values({
+      r2Key: commit.finalKey,
+      title: input.title ?? null,
+      caption: input.caption ?? null,
+      categoryId: input.categoryId ?? null,
+      position,
+    })
+    .returning();
+  if (!row) throw new Error('insert gallery_photos: no row returned');
+  return { ok: true, row: toPhotoRead(env, row) };
+}
+
+export async function updateAdminGalleryPhoto(
+  db: Database,
+  env: PhotoEnv,
+  id: string,
+  input: UpdateGalleryPhotoInput
+): Promise<AdminWriteResult<GalleryPhoto>> {
+  const [current] = await db.select().from(galleryPhotos).where(eq(galleryPhotos.id, id)).limit(1);
+  if (!current) return { ok: false, reason: 'not_found' };
+  if (input.categoryId !== null) {
+    const failure = await assertCategoryExists(db, input.categoryId);
+    if (failure) return failure;
+  }
+  let finalKey: string | null = current.r2Key;
+  if (input.r2Key !== undefined) {
+    const commit = await commitStagingKey(env, input.r2Key);
+    if (!commit.ok) return commit;
+    finalKey = commit.finalKey;
+  }
+  const [row] = await db
+    .update(galleryPhotos)
+    .set({
+      r2Key: finalKey,
+      title: input.title,
+      caption: input.caption,
+      categoryId: input.categoryId,
+      isActive: input.isActive,
+      updatedAt: new Date(),
+    })
+    .where(eq(galleryPhotos.id, id))
+    .returning();
+  if (!row) throw new Error('update gallery_photos: no row returned');
+  // Keys are immutable — replace is new key + row update + old-key delete,
+  // the old object deleted only AFTER the update committed.
+  if (finalKey !== current.r2Key) {
+    await env.MEDIA_BUCKET.delete(current.r2Key);
+  }
+  return { ok: true, row: toPhotoRead(env, row) };
+}
+
+export async function setGalleryPhotoOrder(
+  db: Database,
+  env: PhotoEnv,
+  photoIds: string[]
+  // Same declared union as the other two order services (never not_found —
+  // it reads first, checks, then writes): the thin route's `!result.ok`
+  // narrows to badRequest without a 404 branch.
+): Promise<{ ok: true; row: GalleryPhoto[] } | AdminWriteFailure> {
+  const rows = await db.select().from(galleryPhotos);
+  const check = checkCompleteOrder(rows, photoIds, 'photoIds');
+  if (!check.ok) return check;
+  await db.transaction(async (tx) => {
+    for (const [index, photoId] of photoIds.entries()) {
+      await tx
+        .update(galleryPhotos)
+        .set({ position: index + 1, updatedAt: new Date() })
+        .where(eq(galleryPhotos.id, photoId));
+    }
+  });
+  return { ok: true, row: await listAdminGalleryPhotos(db, env) };
 }
