@@ -44,6 +44,7 @@ import {
   Collapse,
   DeactivateConfirm,
   ExpandPanel,
+  ExpandRow,
   LightEntityEditor,
   PageHeader,
   RowActionsCluster,
@@ -151,7 +152,11 @@ export function LookupsScreen({ search }: ScreenProps) {
                       {/* N3: whole-row click toggles expansion — the actions
                         cell stops propagation so icon clicks never toggle;
                         the chevron stays the keyboard/AT toggle. */}
-                      <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
+                      <ExpandRow
+                        expanded={expanded}
+                        className='group'
+                        onClick={() => toggleExpanded(row.id)}
+                      >
                         <TableCell className='cursor-pointer'>
                           {/* L1: identity = code (mono, semibold) / dot +
                             description. No tooltip — the expand shows it all.
@@ -195,7 +200,7 @@ export function LookupsScreen({ search }: ScreenProps) {
                             onReactivate={() => setSizeActive(row.id, true)}
                           />
                         </TableCell>
-                      </TableRow>
+                      </ExpandRow>
                       <ExpandPanel open={expanded} colSpan={2}>
                         {row.description}
                       </ExpandPanel>

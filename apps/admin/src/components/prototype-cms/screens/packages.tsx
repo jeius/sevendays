@@ -38,6 +38,7 @@ import {
   DeactivateConfirm,
   EmptyState,
   ExpandPanel,
+  ExpandRow,
   PageHeader,
   peso,
   RowActionsCluster,
@@ -127,7 +128,11 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
                         {/* N3: whole-row click toggles expansion — the actions
                           cell stops propagation so icon clicks never toggle;
                           the chevron stays the keyboard/AT toggle. */}
-                        <TableRow className='group' onClick={() => toggleExpanded(row.id)}>
+                        <ExpandRow
+                          expanded={expanded}
+                          className='group'
+                          onClick={() => toggleExpanded(row.id)}
+                        >
                           <TableCell className='cursor-pointer'>
                             {row.coverImageUrl ? (
                               <img
@@ -193,7 +198,7 @@ export function PackagesScreen({ variant, search }: ScreenProps) {
                               onReactivate={() => setActive(row.id, true)}
                             />
                           </TableCell>
-                        </TableRow>
+                        </ExpandRow>
                         {/* T3 desktop reveal: the FULL description. */}
                         <ExpandPanel open={expanded} colSpan={4}>
                           {row.description}

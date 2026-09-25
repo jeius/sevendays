@@ -18,6 +18,22 @@
 // 768px (useIsMobile drives the side prop) — C1 extended to the catalog
 // editors; desktop right-side behavior is untouched.
 //
+// Round 6 (A1): both mobile bottom sheets get a visible slide-up. The
+// AlertDialogContent primitive animates only through the tw-animate channel
+// (data-open/data-closed + animate-in/out — it carries NO starting/ending
+// style classes), so DeactivateConfirm adds a transition-channel slide keyed
+// on the Base UI popup's own data-starting-style/data-ending-style
+// attributes below sm. The Sheet primitive DOES use the transition channel
+// (data-[side=bottom] starting/ending style translate-y-[2.5rem]) —
+// LightEntityEditor composes a full-height translateY(100%) on the `transform`
+// property (the primitive slides via the `translate` property, so the two
+// compose instead of fighting the cascade) below md.
+//
+// Round 6 (A2): the expanded row's border encloses identity + panel.
+// ExpandRow (identity row) drops its bottom border while expanded;
+// ExpandPanel's cell carries the row's border-b at its end. Collapsed
+// markup is byte-identical to round 5b.
+//
 // G1 radius note (spec): every card in this prototype renders one radius
 // step down (rounded-xl → rounded-lg) via className overrides at the usage
 // sites — packages/ui is untouched. If the owner keeps this, the step-down
@@ -58,8 +74,9 @@ import {
   TooltipTrigger,
 } from '@sevendays/ui/components/tooltip';
 import { useIsMobile } from '@sevendays/ui/hooks/use-mobile';
+import { cn } from 'cn';
 import { ChevronDown, Power, PowerOff } from 'lucide-react';
-import type { ReactElement, ReactNode } from 'react';
+import type { ComponentProps, ReactElement, ReactNode } from 'react';
 
 /**
  * T3 expand mechanism: a persistent grid whose template-rows transition
@@ -83,7 +100,14 @@ export function Collapse({ open, children }: { open: boolean; children: ReactNod
 /**
  * T3 desktop reveal: a full-width panel TableRow rendered under its row
  * (always mounted, so Collapse animates both ways). Collapsed it is 0px tall
- * and borderless; the activated row keeps its own border-b as the separator.
+ * and borderless.
+ *
+ * A2 (round 6): when open, the identity row above drops ITS bottom border
+ * (see ExpandRow) and this panel's cell carries the row's border-b at its
+ * end — the line encloses identity + panel as one visual row instead of
+ * cutting between them. The border lives on the cell, not the row, so the
+ * TableBody primitive's `[&_tr:last-child]:border-0` can't swallow it when
+ * the last entity's panel is the tbody's final row.
  */
 export function ExpandPanel({
   open,
@@ -96,13 +120,32 @@ export function ExpandPanel({
 }) {
   return (
     <TableRow className='border-b-0 hover:bg-transparent'>
-      <TableCell colSpan={colSpan} className='p-0 text-left align-top whitespace-normal'>
+      <TableCell
+        colSpan={colSpan}
+        className={`p-0 text-left align-top whitespace-normal${open ? ' border-b' : ''}`}
+      >
         <Collapse open={open}>
           <div className='text-muted-foreground px-2 pb-3 text-sm'>{children}</div>
         </Collapse>
       </TableCell>
     </TableRow>
   );
+}
+
+/**
+ * A2 (round 6): the identity row of an expandable pair. Collapsed it renders
+ * byte-identically to a plain TableRow (the caller's classes pass through
+ * untouched); expanded, its bottom border drops so the separator moves to
+ * the ExpandPanel's end. The conditional border-b-0 beats the TableRow
+ * primitive's border-b through tailwind-merge in the primitive's cn().
+ * Ref/style/onClick flow through (testimonials' sortable row rides on this).
+ */
+export function ExpandRow({
+  expanded,
+  className,
+  ...props
+}: ComponentProps<typeof TableRow> & { expanded: boolean }) {
+  return <TableRow className={cn(expanded && 'border-b-0', className)} {...props} />;
 }
 
 /**
@@ -281,6 +324,16 @@ export function StatusBadge({ isActive }: { isActive: boolean }) {
  * primitive) — and above sm the classes restore the primitive's centered
  * dialog verbatim. The right-side editor Sheets are ruled OUT of scope
  * (dialogs only).
+ *
+ * Round 6 (A1): the owner saw no entrance below sm. The primitive's own
+ * animation is the tw-animate channel only (data-open/data-closed +
+ * animate-in/out, 100ms, 1rem slide — no data-starting-style/data-ending-style
+ * classes exist on it), so the usage site adds a second, visible channel
+ * keyed on the Base UI popup's runtime data-starting-style/data-ending-style
+ * attributes: 2rem slide-up + fade below sm at 300ms ease-out
+ * (transition-[translate,opacity] — `translate` because Tailwind v4's
+ * translate-y-* sets the translate property, which is what the usage site's
+ * translate-y-0 resting state uses).
  */
 export function DeactivateConfirm({
   name,
@@ -295,7 +348,7 @@ export function DeactivateConfirm({
 }) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className='top-auto bottom-0 left-0 translate-x-0 translate-y-0 rounded-b-none data-[size=default]:max-w-none max-sm:data-open:slide-in-from-bottom-4 max-sm:data-closed:slide-out-to-bottom-4 sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-b-[min(var(--radius-4xl),24px)]'>
+      <AlertDialogContent className='top-auto bottom-0 left-0 translate-x-0 translate-y-0 rounded-b-none data-[size=default]:max-w-none max-sm:data-open:slide-in-from-bottom-4 max-sm:data-closed:slide-out-to-bottom-4 max-sm:data-[starting-style]:translate-y-8 max-sm:data-[starting-style]:opacity-0 max-sm:data-[ending-style]:translate-y-8 max-sm:data-[ending-style]:opacity-0 max-sm:transition-[translate,opacity] max-sm:duration-300 max-sm:ease-out sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-b-[min(var(--radius-4xl),24px)]'>
         <AlertDialogHeader>
           <AlertDialogTitle>Deactivate {name}?</AlertDialogTitle>
           <AlertDialogDescription>
@@ -336,6 +389,15 @@ export function EmptyState({ line, children }: { line: string; children?: ReactN
  * The primitive's bottom side is h-auto (unbounded), so the usage-site adds
  * max-md:max-h-[85dvh] — that bounds the flex column and lets the body's
  * flex-1 overflow-y-auto actually scroll.
+ *
+ * Round 6 (A1): the owner saw no entrance on mobile. The primitive's
+ * data-[side=bottom] starting/ending style is only translate-y-[2.5rem] —
+ * too subtle at 200ms — so the usage site composes a full-height slide on
+ * the `transform` property (translateY(100%)) keyed on the same
+ * data-starting-style/data-ending-style attributes. `transform` (usage) and
+ * `translate` (primitive) are separate CSS properties, so the offsets sum
+ * during the starting frame instead of fighting the cascade — no `!`
+ * needed. duration-300 + ease-out scope to the bottom side below md.
  */
 export function LightEntityEditor({
   title,
@@ -354,7 +416,10 @@ export function LightEntityEditor({
   if (chrome === 'sheet') {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side={isMobile ? 'bottom' : 'right'} className='max-md:max-h-[85dvh]'>
+        <SheetContent
+          side={isMobile ? 'bottom' : 'right'}
+          className='max-md:max-h-[85dvh] max-md:data-[side=bottom]:data-[starting-style]:[transform:translateY(100%)] max-md:data-[side=bottom]:data-[ending-style]:[transform:translateY(100%)] max-md:data-[side=bottom]:duration-300 max-md:data-[side=bottom]:ease-out'
+        >
           <SheetHeader>
             <SheetTitle>{title}</SheetTitle>
             <SheetDescription>Prototype: changes stay on this page.</SheetDescription>

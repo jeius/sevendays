@@ -61,6 +61,7 @@ import {
   DeactivateConfirm,
   EmptyState,
   ExpandPanel,
+  ExpandRow,
   LightEntityEditor,
   PageHeader,
   RowActionsCluster,
@@ -76,10 +77,14 @@ import {
 // while dragging so the dragged row's text never overlaps the rows beneath.
 function SortableTestimonialRow({
   id,
+  expanded,
   children,
   onClick,
 }: {
   id: string;
+  // A2: while expanded the identity row's bottom border drops (the
+  // separator moves to the ExpandPanel's end) — ExpandRow owns that.
+  expanded: boolean;
   children: ReactNode;
   onClick?: () => void;
 }) {
@@ -95,8 +100,9 @@ function SortableTestimonialRow({
     id,
   });
   return (
-    <TableRow
+    <ExpandRow
       ref={setNodeRef}
+      expanded={expanded}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={isDragging ? 'group relative z-10 bg-card shadow-sm' : 'group'}
       onClick={onClick}
@@ -116,7 +122,7 @@ function SortableTestimonialRow({
         </button>
       </TableCell>
       {children}
-    </TableRow>
+    </ExpandRow>
   );
 }
 
@@ -288,6 +294,7 @@ export function TestimonialsScreen({ search }: ScreenProps) {
                           <Fragment key={row.id}>
                             <SortableTestimonialRow
                               id={row.id}
+                              expanded={expanded}
                               onClick={() => toggleExpanded(row.id)}
                             >
                               <TableCell className='cursor-pointer'>
