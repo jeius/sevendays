@@ -40,4 +40,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
   );
 };
 
+// biome-ignore lint/performance/noBarrelFile: the shadcn sonner seam re-exports `toast` for app consumers (PD6 ruling, #139)
+export { toast } from 'sonner';
 export { Toaster };
