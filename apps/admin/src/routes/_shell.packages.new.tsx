@@ -1,8 +1,9 @@
-// The create-package route (M5 #139, /packages/new): lands in Task 5 as a
-// minimal stub (PD6 route-order ruling) so the table's typed Links validate
-// against the registered tree — the editor composition replaces it in Task 6.
+// The create-package route (M5 #139, /packages/new): the full editor in
+// create mode over live lookups. No package query and NO Advanced card — the
+// server generates the slug at create (AQ-6). The gate lives on `_shell`
+// (no per-route beforeLoad).
 import { createFileRoute } from '@tanstack/react-router';
-import { PageHeader } from '#/components/cms/shared';
+import { PackageEditor } from '#/components/packages/package-editor';
 
 export const Route = createFileRoute('/_shell/packages/new')({
   head: () => ({ meta: [{ title: 'New package | Sevendays Admin' }] }),
@@ -10,6 +11,5 @@ export const Route = createFileRoute('/_shell/packages/new')({
 });
 
 function NewPackagePage() {
-  // Task 6 replaces this stub body
-  return <PageHeader title='New package' />;
+  return <PackageEditor mode='create' />;
 }
