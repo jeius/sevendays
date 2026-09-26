@@ -1,4 +1,4 @@
-import type { ServicePackageWithInclusions, StudioServiceWithBranches } from '@sevendays/types';
+import type { ServicePackageRead, StudioServiceWithBranches } from '@sevendays/types';
 import { buttonVariants } from '@sevendays/ui/components/button';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
@@ -25,7 +25,7 @@ export function HomeImageLed({
   packages,
   services,
 }: {
-  packages: ServicePackageWithInclusions[];
+  packages: ServicePackageRead[];
   services: StudioServiceWithBranches[];
 }) {
   const { heading, packages: strip } = selectFeaturedPackages(packages);

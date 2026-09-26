@@ -1,9 +1,9 @@
-import type { ServicePackageWithInclusions } from '@sevendays/types';
+import type { ServicePackageRead } from '@sevendays/types';
 import { describe, expect, it } from 'vitest';
 import { FALLBACK_HEADING, FEATURED_HEADING, selectFeaturedPackages } from './featured';
 
 let n = 0;
-function pkg(overrides: Partial<ServicePackageWithInclusions> = {}): ServicePackageWithInclusions {
+function pkg(overrides: Partial<ServicePackageRead> = {}): ServicePackageRead {
   n += 1;
   return {
     id: `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`,
@@ -12,7 +12,7 @@ function pkg(overrides: Partial<ServicePackageWithInclusions> = {}): ServicePack
     priceCents: 100000,
     durationMinutes: null,
     isActive: true,
-    coverImageKey: null,
+    coverImageUrl: null,
     slug: `package-${n}`,
     isFeatured: false,
     createdAt: new Date('2026-01-01T00:00:00Z'),

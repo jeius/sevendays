@@ -1,4 +1,4 @@
-import type { ServicePackageWithInclusions } from '@sevendays/types';
+import type { ServicePackageRead } from '@sevendays/types';
 import { peso } from '../lib/format';
 import { CoverPanel } from './cover-panel';
 import { InclusionsList } from './inclusions-list';
@@ -7,7 +7,7 @@ import { InclusionsList } from './inclusions-list';
 // detail navigation needed from listings) — reused on the home strip and the
 // detail page. CTA-less on v1 by ruling (the catalog is a showcase, not a
 // funnel).
-export function PackageCard({ pkg }: { pkg: ServicePackageWithInclusions }) {
+export function PackageCard({ pkg }: { pkg: ServicePackageRead }) {
   return (
     <article className='flex flex-col gap-3 rounded-xl border border-brand-gray-cool bg-card p-6 shadow-sm'>
       <CoverPanel name={pkg.name} />

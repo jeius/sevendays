@@ -1,6 +1,6 @@
 import type {
   ResolvedPackageInclusion,
-  ServicePackageWithInclusions,
+  ServicePackageRead,
   StudioServiceWithBranches,
 } from '@sevendays/types';
 import {
@@ -135,7 +135,7 @@ export function ServiceImageCard({ service }: { service: StudioServiceWithBranch
 // overlaid on the same two-layer ink tint — while the text-heavy body
 // (description, chips, +K popover, CTA) stays on white. Deliberately NOT
 // full-image-with-all-text. Sans titles per D.
-export function PackageCoverCard({ pkg }: { pkg: ServicePackageWithInclusions }) {
+export function PackageCoverCard({ pkg }: { pkg: ServicePackageRead }) {
   return (
     // Hover (owner ask, D): one idea, layered — the card lifts while the
     // cover slowly zooms ("the photograph opens up"). Transforms only (no
@@ -169,7 +169,7 @@ export function PackageCoverCard({ pkg }: { pkg: ServicePackageWithInclusions })
   );
 }
 
-export function packageChips(pkg: ServicePackageWithInclusions): string[] {
+export function packageChips(pkg: ServicePackageRead): string[] {
   const framed = pkg.inclusions.filter((i) => i.kind === 'framed_picture');
   const prints = pkg.inclusions.filter((i) => i.kind === 'print');
   const privileges = pkg.inclusions.filter((i) => i.kind === 'privilege');

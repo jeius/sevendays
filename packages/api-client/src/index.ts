@@ -2,13 +2,17 @@ import { hc } from 'hono/client';
 import type { AppType, CreateApiClientOptions, RpcClient } from './client.js';
 import { addonServicesRoutes } from './routes/addon-services.js';
 import { branchesRoutes } from './routes/branches.js';
+import { galleryRoutes } from './routes/gallery.js';
 import { servicePackagesRoutes } from './routes/service-packages.js';
 import { studioServicesRoutes } from './routes/studio-services.js';
+import { testimonialsRoutes } from './routes/testimonials.js';
 
 /** The full client surface: raw RPC + one route-tree group per resource. */
 export interface ApiClient {
   raw: RpcClient;
   branches: ReturnType<typeof branchesRoutes>;
+  gallery: ReturnType<typeof galleryRoutes>;
+  testimonials: ReturnType<typeof testimonialsRoutes>;
   servicePackages: ReturnType<typeof servicePackagesRoutes>;
   addonServices: ReturnType<typeof addonServicesRoutes>;
   studioServices: ReturnType<typeof studioServicesRoutes>;
@@ -38,6 +42,8 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
   return {
     raw,
     branches: branchesRoutes(raw),
+    gallery: galleryRoutes(raw),
+    testimonials: testimonialsRoutes(raw),
     servicePackages: servicePackagesRoutes(raw),
     addonServices: addonServicesRoutes(raw),
     studioServices: studioServicesRoutes(raw),
