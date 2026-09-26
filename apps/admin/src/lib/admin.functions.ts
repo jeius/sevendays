@@ -7,11 +7,25 @@
 // per-field errors via lib/package-editor-state.ts.
 import { startSpan } from '@sentry/tanstackstart-react';
 import { ApiClientError } from '@sevendays/api-client';
-import type { MediaPresignResponse, ServicePackageRead } from '@sevendays/types';
+import type {
+  AddonService,
+  Branch,
+  MediaPresignResponse,
+  ServicePackageRead,
+  StudioServiceWithBranches,
+} from '@sevendays/types';
 import {
+  createAddonServiceSchema,
+  createBranchSchema,
   createServicePackageSchema,
+  createStudioServiceSchema,
   mediaPresignRequestSchema,
+  studioServiceAddonMatrixSchema,
+  studioServiceBranchMatrixSchema,
+  updateAddonServiceSchema,
+  updateBranchSchema,
   updateServicePackageSchema,
+  updateStudioServiceSchema,
 } from '@sevendays/types';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequestHeaders } from '@tanstack/react-start/server';
@@ -65,6 +79,12 @@ export const fetchAdminPrintSizes = createServerFn({ method: 'GET' }).handler(as
 export const fetchAdminAttires = createServerFn({ method: 'GET' }).handler(async () => {
   return startSpan({ name: 'GET /api/v1/admin/attires' }, async () => {
     return getSessionScopedApiClient(getRequestHeaders().get('cookie')).admin.attires.list();
+  });
+});
+
+export const fetchAdminAddons = createServerFn({ method: 'GET' }).handler(async () => {
+  return startSpan({ name: 'GET /api/v1/admin/addon-services' }, async () => {
+    return getSessionScopedApiClient(getRequestHeaders().get('cookie')).admin.addons.list();
   });
 });
 
@@ -138,6 +158,240 @@ export const saveAdminPackageUpdate = createServerFn({
         return {
           ok: true,
           data: await client.admin.servicePackages.update({ param: { id }, json: payload }),
+        };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+export const saveAdminBranchCreate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(createBranchSchema)
+  .handler(async ({ data }): Promise<AdminMutationResult<Branch>> => {
+    return startSpan({ name: 'POST /api/v1/admin/branches' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      try {
+        return { ok: true, data: await client.admin.branches.create(data) };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+export const saveAdminBranchUpdate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid(), payload: updateBranchSchema }))
+  .handler(async ({ data }): Promise<AdminMutationResult<Branch>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/branches/:id' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      const { id, payload } = data;
+      try {
+        return {
+          ok: true,
+          data: await client.admin.branches.update({ param: { id }, json: payload }),
+        };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+export const saveAdminStudioServiceCreate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(createStudioServiceSchema)
+  .handler(async ({ data }): Promise<AdminMutationResult<StudioServiceWithBranches>> => {
+    return startSpan({ name: 'POST /api/v1/admin/studio-services' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      try {
+        return { ok: true, data: await client.admin.studioServices.create(data) };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+export const saveAdminStudioServiceUpdate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid(), payload: updateStudioServiceSchema }))
+  .handler(async ({ data }): Promise<AdminMutationResult<StudioServiceWithBranches>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/studio-services/:id' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      const { id, payload } = data;
+      try {
+        return {
+          ok: true,
+          data: await client.admin.studioServices.update({ param: { id }, json: payload }),
+        };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+export const saveAdminAddonCreate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(createAddonServiceSchema)
+  .handler(async ({ data }): Promise<AdminMutationResult<AddonService>> => {
+    return startSpan({ name: 'POST /api/v1/admin/addon-services' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      try {
+        return { ok: true, data: await client.admin.addons.create(data) };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+export const saveAdminAddonUpdate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid(), payload: updateAddonServiceSchema }))
+  .handler(async ({ data }): Promise<AdminMutationResult<AddonService>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/addon-services/:id' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      const { id, payload } = data;
+      try {
+        return {
+          ok: true,
+          data: await client.admin.addons.update({ param: { id }, json: payload }),
+        };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+export const saveAdminStudioServiceBranchMatrix = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(studioServiceBranchMatrixSchema.extend({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminMutationResult<StudioServiceWithBranches>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/studio-services/:id/branches' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      const { id, branchIds } = data;
+      try {
+        return {
+          ok: true,
+          data: await client.admin.studioServices.setBranchMatrix({
+            param: { id },
+            json: { branchIds },
+          }),
+        };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+export const saveAdminStudioServiceAddonMatrix = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(studioServiceAddonMatrixSchema.extend({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminMutationResult<StudioServiceWithBranches>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/studio-services/:id/addons' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      const { id, addonServiceIds } = data;
+      try {
+        return {
+          ok: true,
+          data: await client.admin.studioServices.setAddonMatrix({
+            param: { id },
+            json: { addonServiceIds },
+          }),
         };
       } catch (error) {
         if (error instanceof ApiClientError) {

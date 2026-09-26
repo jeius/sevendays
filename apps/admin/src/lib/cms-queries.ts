@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 import {
+  fetchAdminAddons,
   fetchAdminAttires,
   fetchAdminBranches,
   fetchAdminPackage,
@@ -36,6 +37,14 @@ export const adminStudioServiceQueries = {
     queryOptions({
       queryKey: ['admin', 'studio-services'],
       queryFn: fetchAdminStudioServices,
+    }),
+};
+
+export const adminAddonQueries = {
+  all: () =>
+    queryOptions({
+      queryKey: ['admin', 'addon-services'],
+      queryFn: fetchAdminAddons,
     }),
 };
 
