@@ -1,11 +1,11 @@
-import type { ResolvedPackageInclusion, ServicePackageWithInclusions } from '@sevendays/types';
+import type { ResolvedPackageInclusion, ServicePackageRead } from '@sevendays/types';
 
 /**
  * Inclusions per the detail spec: frames (each framed picture hangs off its
  * frame — ADR-0009), then prints (count × size), then privileges
  * (quantityless). Plain lists, no design pass.
  */
-export function InclusionsList({ pkg }: { pkg: ServicePackageWithInclusions }) {
+export function InclusionsList({ pkg }: { pkg: ServicePackageRead }) {
   const framed = pkg.inclusions.filter((i) => i.kind === 'framed_picture');
   const prints = pkg.inclusions.filter((i) => i.kind === 'print');
   const privileges = pkg.inclusions.filter((i) => i.kind === 'privilege');

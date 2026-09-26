@@ -27,6 +27,15 @@ export type FixtureIds = {
   serviceRetired: string;
   serviceStudio: string;
   serviceBranchLinks: string[];
+  // #138: the combined package's inclusion + junction row ids — its
+  // ordering tests swap positions deterministically (id order would
+  // contradict the swapped positions, created_at order would contradict
+  // the swapped junction positions).
+  inclusionFramed11x14: string;
+  inclusionPrint2R: string;
+  inclusionPrint2x2: string;
+  junctionFramedFilipiniana: string;
+  junctionFramedExecutive: string;
 };
 
 export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
@@ -305,8 +314,31 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     entries: [framedEntry, print2REntry, print2x2Entry],
     attireId: attireIdMap,
   });
+  // Still one row per statement (distinct created_at — cheap, and any
+  // created_at-sensitive reader stays deterministic); #138 captures the
+  // framed inclusion's junction ids via .returning for its position-swap
+  // tests.
+  const insertedCombinedPairs: { id: string; inclusionId: string; attireId: string }[] = [];
   for (const pair of combinedPairs) {
-    await db.insert(packageInclusionAttires).values(pair);
+    const [row] = await db.insert(packageInclusionAttires).values(pair).returning({
+      id: packageInclusionAttires.id,
+      inclusionId: packageInclusionAttires.inclusionId,
+      attireId: packageInclusionAttires.attireId,
+    });
+    if (!row) throw new Error('fixtures: junction insert returned no row');
+    insertedCombinedPairs.push(row);
+  }
+  const filipinianaId = attireIdMap.get('Filipiniana');
+  const executiveId = attireIdMap.get('Executive');
+  if (!filipinianaId || !executiveId) throw new Error('fixtures: attire lookup missing');
+  const junctionFramedFilipiniana = insertedCombinedPairs.find(
+    (p) => p.inclusionId === inclusionFramedPicture.id && p.attireId === filipinianaId
+  );
+  const junctionFramedExecutive = insertedCombinedPairs.find(
+    (p) => p.inclusionId === inclusionFramedPicture.id && p.attireId === executiveId
+  );
+  if (!junctionFramedFilipiniana || !junctionFramedExecutive) {
+    throw new Error('fixtures: framed inclusion junction rows missing');
   }
   const simplePairs = buildJunctionPairs({
     inclusionIds: [simplePrintRow.id],
@@ -339,6 +371,11 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     serviceRetired: serviceRetired.id,
     serviceStudio: serviceStudio.id,
     serviceBranchLinks: serviceBranchLinks.map((l) => l.branchId),
+    inclusionFramed11x14: inclusionFramedPicture.id,
+    inclusionPrint2R: inclusionPrint2R.id,
+    inclusionPrint2x2: inclusionPrint2x2.id,
+    junctionFramedFilipiniana: junctionFramedFilipiniana.id,
+    junctionFramedExecutive: junctionFramedExecutive.id,
   };
 }
 

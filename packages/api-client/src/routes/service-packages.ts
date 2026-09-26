@@ -1,5 +1,5 @@
-import type { ServicePackageWithInclusions } from '@sevendays/types';
-import { servicePackageWithInclusionsSchema } from '@sevendays/types';
+import type { ServicePackageRead } from '@sevendays/types';
+import { servicePackageReadSchema } from '@sevendays/types';
 import type { InferRequestType } from 'hono/client';
 import type { RpcClient } from '../client.js';
 import { unwrap } from '../unwrap.js';
@@ -16,15 +16,15 @@ export type GetPackageBySlugArgs = InferRequestType<BySlugEndpoint>;
 /** Service Package wrappers: list + by-slug under /api/v1/service-packages. */
 export function servicePackagesRoutes(raw: RpcClient) {
   return {
-    /** GET /api/v1/service-packages — active packages with resolved lookups. */
-    async list(): Promise<ServicePackageWithInclusions[]> {
+    /** GET /api/v1/service-packages — active packages, trim-ruled, coverImageUrl-resolved (#138). */
+    async list(): Promise<ServicePackageRead[]> {
       const res = await raw.api.v1['service-packages'].$get();
-      return unwrap(res, servicePackageWithInclusionsSchema.array());
+      return unwrap(res, servicePackageReadSchema.array());
     },
     /** GET /api/v1/service-packages/:slug — one active package; 404 when unknown/inactive. */
-    async bySlug(args: GetPackageBySlugArgs): Promise<ServicePackageWithInclusions> {
+    async bySlug(args: GetPackageBySlugArgs): Promise<ServicePackageRead> {
       const res = await raw.api.v1['service-packages'][':slug'].$get(args);
-      return unwrap(res, servicePackageWithInclusionsSchema);
+      return unwrap(res, servicePackageReadSchema);
     },
   };
 }
