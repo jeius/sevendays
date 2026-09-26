@@ -1,25 +1,17 @@
-// The packages screen (M5 #139): the gated shell's catalog entry point —
-// PageHeader over the consolidated packages table (the #131 table ruling).
-// The prototype's honesty caption does NOT port.
-import { Button } from '@sevendays/ui/components/button';
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { PageHeader } from '#/components/cms/shared';
-import { PackagesTable } from '#/components/packages/packages-table';
+// The packages layout (M5 #139, /packages): a pure Outlet. The table page is
+// the index child (_shell.packages.index.tsx); the editor routes
+// (_shell.packages.new.tsx, _shell.packages.$packageId.edit.tsx) are its
+// sibling children. Found live during Task 7's evidence run: with the table
+// rendered directly in THIS file and no Outlet, the child routes MATCHED
+// (router state: success) but could never mount — /packages/new and the edit
+// route fuzzy-fell back to the table view.
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_shell/packages')({
   head: () => ({ meta: [{ title: 'Packages | Sevendays Admin' }] }),
-  component: PackagesPage,
+  component: PackagesLayout,
 });
 
-function PackagesPage() {
-  return (
-    <section className='space-y-4'>
-      <PageHeader
-        title='Packages'
-        subline="Everything on the landing site's /packages page, editable in place."
-        actions={<Button render={<Link to='/packages/new' />}>New package</Button>}
-      />
-      <PackagesTable />
-    </section>
-  );
+function PackagesLayout() {
+  return <Outlet />;
 }

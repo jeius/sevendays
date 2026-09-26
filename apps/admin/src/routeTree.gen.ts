@@ -18,6 +18,7 @@ import { Route as ShellBranchesRouteImport } from './routes/_shell.branches'
 import { Route as ShellPackagesRouteImport } from './routes/_shell.packages'
 import { Route as ShellSettingsRouteImport } from './routes/_shell.settings'
 import { Route as ShellStudioServicesRouteImport } from './routes/_shell.studio-services'
+import { Route as ShellPackagesIndexRouteImport } from './routes/_shell.packages.index'
 import { Route as ShellPackagesNewRouteImport } from './routes/_shell.packages.new'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ShellPackagesPackageIdEditRouteImport } from './routes/_shell.packages.$packageId.edit'
@@ -66,6 +67,11 @@ const ShellStudioServicesRoute = ShellStudioServicesRouteImport.update({
   path: '/studio-services',
   getParentRoute: () => ShellRoute,
 } as any)
+const ShellPackagesIndexRoute = ShellPackagesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ShellPackagesRoute,
+} as any)
 const ShellPackagesNewRoute = ShellPackagesNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/studio-services': typeof ShellStudioServicesRoute
   '/packages/new': typeof ShellPackagesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/packages/': typeof ShellPackagesIndexRoute
   '/packages/$packageId/edit': typeof ShellPackagesPackageIdEditRoute
 }
 export interface FileRoutesByTo {
@@ -101,12 +108,12 @@ export interface FileRoutesByTo {
   '/add-ons': typeof ShellAddOnsRoute
   '/appointments': typeof ShellAppointmentsRoute
   '/branches': typeof ShellBranchesRoute
-  '/packages': typeof ShellPackagesRouteWithChildren
   '/settings': typeof ShellSettingsRoute
   '/studio-services': typeof ShellStudioServicesRoute
   '/': typeof ShellIndexRoute
   '/packages/new': typeof ShellPackagesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/packages': typeof ShellPackagesIndexRoute
   '/packages/$packageId/edit': typeof ShellPackagesPackageIdEditRoute
 }
 export interface FileRoutesById {
@@ -122,6 +129,7 @@ export interface FileRoutesById {
   '/_shell/': typeof ShellIndexRoute
   '/_shell/packages/new': typeof ShellPackagesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_shell/packages/': typeof ShellPackagesIndexRoute
   '/_shell/packages/$packageId/edit': typeof ShellPackagesPackageIdEditRoute
 }
 export interface FileRouteTypes {
@@ -137,6 +145,7 @@ export interface FileRouteTypes {
     | '/studio-services'
     | '/packages/new'
     | '/api/auth/$'
+    | '/packages/'
     | '/packages/$packageId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -144,12 +153,12 @@ export interface FileRouteTypes {
     | '/add-ons'
     | '/appointments'
     | '/branches'
-    | '/packages'
     | '/settings'
     | '/studio-services'
     | '/'
     | '/packages/new'
     | '/api/auth/$'
+    | '/packages'
     | '/packages/$packageId/edit'
   id:
     | '__root__'
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/_shell/'
     | '/_shell/packages/new'
     | '/api/auth/$'
+    | '/_shell/packages/'
     | '/_shell/packages/$packageId/edit'
   fileRoutesById: FileRoutesById
 }
@@ -238,6 +248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShellStudioServicesRouteImport
       parentRoute: typeof ShellRoute
     }
+    '/_shell/packages/': {
+      id: '/_shell/packages/'
+      path: '/'
+      fullPath: '/packages/'
+      preLoaderRoute: typeof ShellPackagesIndexRouteImport
+      parentRoute: typeof ShellPackagesRoute
+    }
     '/_shell/packages/new': {
       id: '/_shell/packages/new'
       path: '/new'
@@ -264,11 +281,13 @@ declare module '@tanstack/react-router' {
 
 interface ShellPackagesRouteChildren {
   ShellPackagesNewRoute: typeof ShellPackagesNewRoute
+  ShellPackagesIndexRoute: typeof ShellPackagesIndexRoute
   ShellPackagesPackageIdEditRoute: typeof ShellPackagesPackageIdEditRoute
 }
 
 const ShellPackagesRouteChildren: ShellPackagesRouteChildren = {
   ShellPackagesNewRoute: ShellPackagesNewRoute,
+  ShellPackagesIndexRoute: ShellPackagesIndexRoute,
   ShellPackagesPackageIdEditRoute: ShellPackagesPackageIdEditRoute,
 }
 
