@@ -57,7 +57,11 @@ export type { AppType, CreateApiClientOptions, RpcClient } from './client.js';
 export { ApiClientError } from './error.js';
 export { toLoopbackFetch } from './loopback.js';
 export type {
+  CreateAddonArgs,
   CreateServicePackageArgs,
   PresignArgs,
+  SetAddonMatrixArgs,
+  SetBranchMatrixArgs,
+  UpdateAddonArgs,
   UpdateServicePackageArgs,
 } from './routes/admin.js';

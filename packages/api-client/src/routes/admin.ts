@@ -5,6 +5,7 @@
  * #141 gallery/testimonials/lookups).
  */
 import type {
+  AddonService,
   Attire,
   Branch,
   MediaPresignResponse,
@@ -13,6 +14,7 @@ import type {
   StudioServiceWithBranches,
 } from '@sevendays/types';
 import {
+  addonServiceSchema,
   attireSchema,
   branchSchema,
   mediaPresignResponseSchema,
@@ -61,11 +63,27 @@ type GetAdminStudioServiceEndpoint = AdminRpc['studio-services'][':id']['$get'];
 type CreateAdminStudioServiceEndpoint = AdminRpc['studio-services']['$post'];
 type UpdateAdminStudioServiceEndpoint = AdminRpc['studio-services'][':id']['$put'];
 type SetBranchMatrixEndpoint = AdminRpc['studio-services'][':id']['branches']['$put'];
+type SetAddonMatrixEndpoint = AdminRpc['studio-services'][':id']['addons']['$put'];
 
 type GetAdminStudioServiceArgs = InferRequestType<GetAdminStudioServiceEndpoint>;
 type CreateAdminStudioServiceArgs = InferRequestType<CreateAdminStudioServiceEndpoint>['json'];
 type UpdateAdminStudioServiceArgs = InferRequestType<UpdateAdminStudioServiceEndpoint>;
-type SetBranchMatrixArgs = InferRequestType<SetBranchMatrixEndpoint>;
+
+/** The studio-service branch-matrix PUT args: path id + the full-replace `{ branchIds }` body. */
+export type SetBranchMatrixArgs = InferRequestType<SetBranchMatrixEndpoint>;
+/** The studio-service addon-matrix PUT args: path id + the full-replace `{ addonServiceIds }` body. */
+export type SetAddonMatrixArgs = InferRequestType<SetAddonMatrixEndpoint>;
+
+// addon-services (CRUD rides along for #140).
+type GetAdminAddonEndpoint = AdminRpc['addon-services'][':id']['$get'];
+type CreateAdminAddonEndpoint = AdminRpc['addon-services']['$post'];
+type UpdateAdminAddonEndpoint = AdminRpc['addon-services'][':id']['$put'];
+
+type GetAdminAddonArgs = InferRequestType<GetAdminAddonEndpoint>;
+/** The addon create body, as the RPC surface declares it. */
+export type CreateAddonArgs = InferRequestType<CreateAdminAddonEndpoint>['json'];
+/** The addon PUT args: path id + the full-object update payload. */
+export type UpdateAddonArgs = InferRequestType<UpdateAdminAddonEndpoint>;
 
 // media (ticket 02's presign route).
 type PresignEndpoint = AdminRpc['media']['presign']['$post'];
@@ -153,6 +171,37 @@ export function adminStudioServices(raw: RpcClient) {
       const res = await raw.api.v1.admin['studio-services'][':id']['branches'].$put(args);
       return unwrap(res, studioServiceWithBranchesSchema);
     },
+    /** PUT /api/v1/admin/studio-services/:id/addons — full-replace applicable-addons matrix; the refreshed read. */
+    async setAddonMatrix(args: SetAddonMatrixArgs): Promise<StudioServiceWithBranches> {
+      const res = await raw.api.v1.admin['studio-services'][':id']['addons'].$put(args);
+      return unwrap(res, studioServiceWithBranchesSchema);
+    },
+  };
+}
+
+/** Add-on Service wrappers over /api/v1/admin/addon-services (CRUD rides along for #140). */
+export function adminAddonServices(raw: RpcClient) {
+  return {
+    /** GET /api/v1/admin/addon-services — ALL add-on services incl. deactivated. */
+    async list(): Promise<AddonService[]> {
+      const res = await raw.api.v1.admin['addon-services'].$get();
+      return unwrap(res, addonServiceSchema.array());
+    },
+    /** GET /api/v1/admin/addon-services/:id — one add-on service; 404 when unknown. */
+    async byId(args: GetAdminAddonArgs): Promise<AddonService> {
+      const res = await raw.api.v1.admin['addon-services'][':id'].$get(args);
+      return unwrap(res, addonServiceSchema);
+    },
+    /** POST /api/v1/admin/addon-services — 201 with the created add-on service. */
+    async create(json: CreateAddonArgs): Promise<AddonService> {
+      const res = await raw.api.v1.admin['addon-services'].$post({ json });
+      return unwrap(res, addonServiceSchema);
+    },
+    /** PUT /api/v1/admin/addon-services/:id — full-object update; the refreshed add-on service. */
+    async update(args: UpdateAddonArgs): Promise<AddonService> {
+      const res = await raw.api.v1.admin['addon-services'][':id'].$put(args);
+      return unwrap(res, addonServiceSchema);
+    },
   };
 }
 
@@ -195,6 +244,7 @@ export function adminRoutes(raw: RpcClient) {
     servicePackages: adminServicePackages(raw),
     branches: adminBranches(raw),
     studioServices: adminStudioServices(raw),
+    addons: adminAddonServices(raw),
     printSizes: adminPrintSizes(raw),
     attires: adminAttires(raw),
     media: adminMedia(raw),
