@@ -1,6 +1,7 @@
 import { hc } from 'hono/client';
 import type { AppType, CreateApiClientOptions, RpcClient } from './client.js';
 import { addonServicesRoutes } from './routes/addon-services.js';
+import { adminRoutes } from './routes/admin.js';
 import { branchesRoutes } from './routes/branches.js';
 import { galleryRoutes } from './routes/gallery.js';
 import { servicePackagesRoutes } from './routes/service-packages.js';
@@ -16,6 +17,7 @@ export interface ApiClient {
   servicePackages: ReturnType<typeof servicePackagesRoutes>;
   addonServices: ReturnType<typeof addonServicesRoutes>;
   studioServices: ReturnType<typeof studioServicesRoutes>;
+  admin: ReturnType<typeof adminRoutes>;
 }
 
 /**
@@ -47,9 +49,15 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
     servicePackages: servicePackagesRoutes(raw),
     addonServices: addonServicesRoutes(raw),
     studioServices: studioServicesRoutes(raw),
+    admin: adminRoutes(raw),
   };
 }
 
 export type { AppType, CreateApiClientOptions, RpcClient } from './client.js';
 export { ApiClientError } from './error.js';
 export { toLoopbackFetch } from './loopback.js';
+export type {
+  CreateServicePackageArgs,
+  PresignArgs,
+  UpdateServicePackageArgs,
+} from './routes/admin.js';
