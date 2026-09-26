@@ -9,6 +9,7 @@ import type { ServicePackageRead } from '@sevendays/types';
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
+import { signUpSession } from './helpers/auth.js';
 import { createTestDb } from './helpers/db.js';
 import { testEnv } from './helpers/env.js';
 import type { FixtureIds } from './helpers/fixtures.js';
@@ -238,5 +239,74 @@ describe('public trim rules, position ordering, and resolved URLs (#138)', () =>
     expect(body.coverImageUrl).toBe(
       'https://pub-test.r2.dev/covers/01234567-0000-4000-8000-000000000002.jpg'
     );
+  });
+
+  it('a package deactivated through the admin PUT serves the uniform 404 by slug and vanishes from the list', async () => {
+    const { token } = await signUpSession(url, 'slug-404@sevendays.test');
+    const bearerHeader = { authorization: `Bearer ${token}` };
+    const created = await app.request(
+      '/api/v1/admin/service-packages',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...bearerHeader },
+        body: JSON.stringify({
+          name: 'Slug 404 Probe',
+          description: 'Created to be deactivated.',
+          priceCents: 120000,
+          durationMinutes: null,
+          isActive: true,
+          isFeatured: false,
+          frames: [],
+          inclusions: [],
+        }),
+      },
+      testEnv(url)
+    );
+    expect(created.status).toBe(201);
+    const pkg = (await created.json()) as { id: string; slug: string };
+    expect(pkg.slug).toBe('slug-404-probe');
+
+    // Live by slug before the flip…
+    const before = await app.request(
+      `/api/v1/service-packages/${pkg.slug}`,
+      undefined,
+      testEnv(url)
+    );
+    expect(before.status).toBe(200);
+
+    // …deactivated through the CMS path…
+    const deactivated = await app.request(
+      `/api/v1/admin/service-packages/${pkg.id}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearerHeader },
+        body: JSON.stringify({
+          name: 'Slug 404 Probe',
+          description: 'Created to be deactivated.',
+          priceCents: 120000,
+          durationMinutes: null,
+          isActive: false,
+          isFeatured: false,
+          frames: [],
+          inclusions: [],
+          slug: pkg.slug,
+        }),
+      },
+      testEnv(url)
+    );
+    expect(deactivated.status).toBe(200);
+
+    // …serves the EXISTING uniform not-found by slug, byte-identical wording.
+    const after = await app.request(
+      `/api/v1/service-packages/${pkg.slug}`,
+      undefined,
+      testEnv(url)
+    );
+    expect(after.status).toBe(404);
+    expect(((await after.json()) as { error: string }).error).toBe('Package not found.');
+
+    const list = await app.request('/api/v1/service-packages', undefined, testEnv(url));
+    const body = (await list.json()) as { slug: string }[];
+    expect(body.some((p) => p.slug === pkg.slug)).toBe(false);
   });
 });
