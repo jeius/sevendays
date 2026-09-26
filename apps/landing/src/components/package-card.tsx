@@ -14,13 +14,7 @@ import { InclusionsList } from './inclusions-list';
 // exactly-one primary affordance ("Book this package"). The v1 scrub swaps
 // the detail CTA for "Call us" → /branches at pick time — never a runtime
 // branch (the #97 convention).
-export function PackageCard({
-  pkg,
-  cta,
-}: {
-  pkg: ServicePackageRead;
-  cta?: 'card' | 'detail';
-}) {
+export function PackageCard({ pkg, cta }: { pkg: ServicePackageRead; cta?: 'card' | 'detail' }) {
   return (
     <article className='flex flex-col gap-3 rounded-xl border border-brand-gray-cool bg-card p-6 shadow-sm'>
       <CoverPanel name={pkg.name} />
