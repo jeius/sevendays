@@ -18,7 +18,10 @@ import { Route as ShellBranchesRouteImport } from './routes/_shell.branches'
 import { Route as ShellPackagesRouteImport } from './routes/_shell.packages'
 import { Route as ShellSettingsRouteImport } from './routes/_shell.settings'
 import { Route as ShellStudioServicesRouteImport } from './routes/_shell.studio-services'
+import { Route as ShellPackagesIndexRouteImport } from './routes/_shell.packages.index'
+import { Route as ShellPackagesNewRouteImport } from './routes/_shell.packages.new'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ShellPackagesPackageIdEditRouteImport } from './routes/_shell.packages.$packageId.edit'
 
 const ShellRoute = ShellRouteImport.update({
   id: '/_shell',
@@ -64,11 +67,27 @@ const ShellStudioServicesRoute = ShellStudioServicesRouteImport.update({
   path: '/studio-services',
   getParentRoute: () => ShellRoute,
 } as any)
+const ShellPackagesIndexRoute = ShellPackagesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ShellPackagesRoute,
+} as any)
+const ShellPackagesNewRoute = ShellPackagesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => ShellPackagesRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShellPackagesPackageIdEditRoute =
+  ShellPackagesPackageIdEditRouteImport.update({
+    id: '/$packageId/edit',
+    path: '/$packageId/edit',
+    getParentRoute: () => ShellPackagesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof ShellIndexRoute
@@ -76,21 +95,26 @@ export interface FileRoutesByFullPath {
   '/add-ons': typeof ShellAddOnsRoute
   '/appointments': typeof ShellAppointmentsRoute
   '/branches': typeof ShellBranchesRoute
-  '/packages': typeof ShellPackagesRoute
+  '/packages': typeof ShellPackagesRouteWithChildren
   '/settings': typeof ShellSettingsRoute
   '/studio-services': typeof ShellStudioServicesRoute
+  '/packages/new': typeof ShellPackagesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/packages/': typeof ShellPackagesIndexRoute
+  '/packages/$packageId/edit': typeof ShellPackagesPackageIdEditRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/add-ons': typeof ShellAddOnsRoute
   '/appointments': typeof ShellAppointmentsRoute
   '/branches': typeof ShellBranchesRoute
-  '/packages': typeof ShellPackagesRoute
   '/settings': typeof ShellSettingsRoute
   '/studio-services': typeof ShellStudioServicesRoute
   '/': typeof ShellIndexRoute
+  '/packages/new': typeof ShellPackagesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/packages': typeof ShellPackagesIndexRoute
+  '/packages/$packageId/edit': typeof ShellPackagesPackageIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -99,11 +123,14 @@ export interface FileRoutesById {
   '/_shell/add-ons': typeof ShellAddOnsRoute
   '/_shell/appointments': typeof ShellAppointmentsRoute
   '/_shell/branches': typeof ShellBranchesRoute
-  '/_shell/packages': typeof ShellPackagesRoute
+  '/_shell/packages': typeof ShellPackagesRouteWithChildren
   '/_shell/settings': typeof ShellSettingsRoute
   '/_shell/studio-services': typeof ShellStudioServicesRoute
   '/_shell/': typeof ShellIndexRoute
+  '/_shell/packages/new': typeof ShellPackagesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_shell/packages/': typeof ShellPackagesIndexRoute
+  '/_shell/packages/$packageId/edit': typeof ShellPackagesPackageIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -116,18 +143,23 @@ export interface FileRouteTypes {
     | '/packages'
     | '/settings'
     | '/studio-services'
+    | '/packages/new'
     | '/api/auth/$'
+    | '/packages/'
+    | '/packages/$packageId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/add-ons'
     | '/appointments'
     | '/branches'
-    | '/packages'
     | '/settings'
     | '/studio-services'
     | '/'
+    | '/packages/new'
     | '/api/auth/$'
+    | '/packages'
+    | '/packages/$packageId/edit'
   id:
     | '__root__'
     | '/_shell'
@@ -139,7 +171,10 @@ export interface FileRouteTypes {
     | '/_shell/settings'
     | '/_shell/studio-services'
     | '/_shell/'
+    | '/_shell/packages/new'
     | '/api/auth/$'
+    | '/_shell/packages/'
+    | '/_shell/packages/$packageId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -213,6 +248,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShellStudioServicesRouteImport
       parentRoute: typeof ShellRoute
     }
+    '/_shell/packages/': {
+      id: '/_shell/packages/'
+      path: '/'
+      fullPath: '/packages/'
+      preLoaderRoute: typeof ShellPackagesIndexRouteImport
+      parentRoute: typeof ShellPackagesRoute
+    }
+    '/_shell/packages/new': {
+      id: '/_shell/packages/new'
+      path: '/new'
+      fullPath: '/packages/new'
+      preLoaderRoute: typeof ShellPackagesNewRouteImport
+      parentRoute: typeof ShellPackagesRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -220,14 +269,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_shell/packages/$packageId/edit': {
+      id: '/_shell/packages/$packageId/edit'
+      path: '/$packageId/edit'
+      fullPath: '/packages/$packageId/edit'
+      preLoaderRoute: typeof ShellPackagesPackageIdEditRouteImport
+      parentRoute: typeof ShellPackagesRoute
+    }
   }
 }
+
+interface ShellPackagesRouteChildren {
+  ShellPackagesNewRoute: typeof ShellPackagesNewRoute
+  ShellPackagesIndexRoute: typeof ShellPackagesIndexRoute
+  ShellPackagesPackageIdEditRoute: typeof ShellPackagesPackageIdEditRoute
+}
+
+const ShellPackagesRouteChildren: ShellPackagesRouteChildren = {
+  ShellPackagesNewRoute: ShellPackagesNewRoute,
+  ShellPackagesIndexRoute: ShellPackagesIndexRoute,
+  ShellPackagesPackageIdEditRoute: ShellPackagesPackageIdEditRoute,
+}
+
+const ShellPackagesRouteWithChildren = ShellPackagesRoute._addFileChildren(
+  ShellPackagesRouteChildren,
+)
 
 interface ShellRouteChildren {
   ShellAddOnsRoute: typeof ShellAddOnsRoute
   ShellAppointmentsRoute: typeof ShellAppointmentsRoute
   ShellBranchesRoute: typeof ShellBranchesRoute
-  ShellPackagesRoute: typeof ShellPackagesRoute
+  ShellPackagesRoute: typeof ShellPackagesRouteWithChildren
   ShellSettingsRoute: typeof ShellSettingsRoute
   ShellStudioServicesRoute: typeof ShellStudioServicesRoute
   ShellIndexRoute: typeof ShellIndexRoute
@@ -237,7 +309,7 @@ const ShellRouteChildren: ShellRouteChildren = {
   ShellAddOnsRoute: ShellAddOnsRoute,
   ShellAppointmentsRoute: ShellAppointmentsRoute,
   ShellBranchesRoute: ShellBranchesRoute,
-  ShellPackagesRoute: ShellPackagesRoute,
+  ShellPackagesRoute: ShellPackagesRouteWithChildren,
   ShellSettingsRoute: ShellSettingsRoute,
   ShellStudioServicesRoute: ShellStudioServicesRoute,
   ShellIndexRoute: ShellIndexRoute,
@@ -253,3 +325,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
