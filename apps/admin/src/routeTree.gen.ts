@@ -15,13 +15,17 @@ import { Route as ShellIndexRouteImport } from './routes/_shell.index'
 import { Route as ShellAddOnsRouteImport } from './routes/_shell.add-ons'
 import { Route as ShellAppointmentsRouteImport } from './routes/_shell.appointments'
 import { Route as ShellBranchesRouteImport } from './routes/_shell.branches'
+import { Route as ShellGalleryRouteImport } from './routes/_shell.gallery'
+import { Route as ShellLookupsRouteImport } from './routes/_shell.lookups'
 import { Route as ShellPackagesRouteImport } from './routes/_shell.packages'
 import { Route as ShellSettingsRouteImport } from './routes/_shell.settings'
 import { Route as ShellStudioServicesRouteImport } from './routes/_shell.studio-services'
+import { Route as ShellTestimonialsRouteImport } from './routes/_shell.testimonials'
 import { Route as ShellPackagesIndexRouteImport } from './routes/_shell.packages.index'
 import { Route as ShellPackagesNewRouteImport } from './routes/_shell.packages.new'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ShellPackagesPackageIdEditRouteImport } from './routes/_shell.packages.$packageId.edit'
+import { Route as ApiAdminGalleryPhotosIdThumbRouteImport } from './routes/api/admin/gallery-photos/$id.thumb'
 
 const ShellRoute = ShellRouteImport.update({
   id: '/_shell',
@@ -52,6 +56,16 @@ const ShellBranchesRoute = ShellBranchesRouteImport.update({
   path: '/branches',
   getParentRoute: () => ShellRoute,
 } as any)
+const ShellGalleryRoute = ShellGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => ShellRoute,
+} as any)
+const ShellLookupsRoute = ShellLookupsRouteImport.update({
+  id: '/lookups',
+  path: '/lookups',
+  getParentRoute: () => ShellRoute,
+} as any)
 const ShellPackagesRoute = ShellPackagesRouteImport.update({
   id: '/packages',
   path: '/packages',
@@ -65,6 +79,11 @@ const ShellSettingsRoute = ShellSettingsRouteImport.update({
 const ShellStudioServicesRoute = ShellStudioServicesRouteImport.update({
   id: '/studio-services',
   path: '/studio-services',
+  getParentRoute: () => ShellRoute,
+} as any)
+const ShellTestimonialsRoute = ShellTestimonialsRouteImport.update({
+  id: '/testimonials',
+  path: '/testimonials',
   getParentRoute: () => ShellRoute,
 } as any)
 const ShellPackagesIndexRoute = ShellPackagesIndexRouteImport.update({
@@ -88,6 +107,12 @@ const ShellPackagesPackageIdEditRoute =
     path: '/$packageId/edit',
     getParentRoute: () => ShellPackagesRoute,
   } as any)
+const ApiAdminGalleryPhotosIdThumbRoute =
+  ApiAdminGalleryPhotosIdThumbRouteImport.update({
+    id: '/api/admin/gallery-photos/$id/thumb',
+    path: '/api/admin/gallery-photos/$id/thumb',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof ShellIndexRoute
@@ -95,26 +120,34 @@ export interface FileRoutesByFullPath {
   '/add-ons': typeof ShellAddOnsRoute
   '/appointments': typeof ShellAppointmentsRoute
   '/branches': typeof ShellBranchesRoute
+  '/gallery': typeof ShellGalleryRoute
+  '/lookups': typeof ShellLookupsRoute
   '/packages': typeof ShellPackagesRouteWithChildren
   '/settings': typeof ShellSettingsRoute
   '/studio-services': typeof ShellStudioServicesRoute
+  '/testimonials': typeof ShellTestimonialsRoute
   '/packages/new': typeof ShellPackagesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/packages/': typeof ShellPackagesIndexRoute
   '/packages/$packageId/edit': typeof ShellPackagesPackageIdEditRoute
+  '/api/admin/gallery-photos/$id/thumb': typeof ApiAdminGalleryPhotosIdThumbRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/add-ons': typeof ShellAddOnsRoute
   '/appointments': typeof ShellAppointmentsRoute
   '/branches': typeof ShellBranchesRoute
+  '/gallery': typeof ShellGalleryRoute
+  '/lookups': typeof ShellLookupsRoute
   '/settings': typeof ShellSettingsRoute
   '/studio-services': typeof ShellStudioServicesRoute
+  '/testimonials': typeof ShellTestimonialsRoute
   '/': typeof ShellIndexRoute
   '/packages/new': typeof ShellPackagesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/packages': typeof ShellPackagesIndexRoute
   '/packages/$packageId/edit': typeof ShellPackagesPackageIdEditRoute
+  '/api/admin/gallery-photos/$id/thumb': typeof ApiAdminGalleryPhotosIdThumbRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -123,14 +156,18 @@ export interface FileRoutesById {
   '/_shell/add-ons': typeof ShellAddOnsRoute
   '/_shell/appointments': typeof ShellAppointmentsRoute
   '/_shell/branches': typeof ShellBranchesRoute
+  '/_shell/gallery': typeof ShellGalleryRoute
+  '/_shell/lookups': typeof ShellLookupsRoute
   '/_shell/packages': typeof ShellPackagesRouteWithChildren
   '/_shell/settings': typeof ShellSettingsRoute
   '/_shell/studio-services': typeof ShellStudioServicesRoute
+  '/_shell/testimonials': typeof ShellTestimonialsRoute
   '/_shell/': typeof ShellIndexRoute
   '/_shell/packages/new': typeof ShellPackagesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_shell/packages/': typeof ShellPackagesIndexRoute
   '/_shell/packages/$packageId/edit': typeof ShellPackagesPackageIdEditRoute
+  '/api/admin/gallery-photos/$id/thumb': typeof ApiAdminGalleryPhotosIdThumbRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,26 +177,34 @@ export interface FileRouteTypes {
     | '/add-ons'
     | '/appointments'
     | '/branches'
+    | '/gallery'
+    | '/lookups'
     | '/packages'
     | '/settings'
     | '/studio-services'
+    | '/testimonials'
     | '/packages/new'
     | '/api/auth/$'
     | '/packages/'
     | '/packages/$packageId/edit'
+    | '/api/admin/gallery-photos/$id/thumb'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/add-ons'
     | '/appointments'
     | '/branches'
+    | '/gallery'
+    | '/lookups'
     | '/settings'
     | '/studio-services'
+    | '/testimonials'
     | '/'
     | '/packages/new'
     | '/api/auth/$'
     | '/packages'
     | '/packages/$packageId/edit'
+    | '/api/admin/gallery-photos/$id/thumb'
   id:
     | '__root__'
     | '/_shell'
@@ -167,20 +212,25 @@ export interface FileRouteTypes {
     | '/_shell/add-ons'
     | '/_shell/appointments'
     | '/_shell/branches'
+    | '/_shell/gallery'
+    | '/_shell/lookups'
     | '/_shell/packages'
     | '/_shell/settings'
     | '/_shell/studio-services'
+    | '/_shell/testimonials'
     | '/_shell/'
     | '/_shell/packages/new'
     | '/api/auth/$'
     | '/_shell/packages/'
     | '/_shell/packages/$packageId/edit'
+    | '/api/admin/gallery-photos/$id/thumb'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   ShellRoute: typeof ShellRouteWithChildren
   LoginRoute: typeof LoginRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiAdminGalleryPhotosIdThumbRoute: typeof ApiAdminGalleryPhotosIdThumbRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -227,6 +277,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShellBranchesRouteImport
       parentRoute: typeof ShellRoute
     }
+    '/_shell/gallery': {
+      id: '/_shell/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof ShellGalleryRouteImport
+      parentRoute: typeof ShellRoute
+    }
+    '/_shell/lookups': {
+      id: '/_shell/lookups'
+      path: '/lookups'
+      fullPath: '/lookups'
+      preLoaderRoute: typeof ShellLookupsRouteImport
+      parentRoute: typeof ShellRoute
+    }
     '/_shell/packages': {
       id: '/_shell/packages'
       path: '/packages'
@@ -246,6 +310,13 @@ declare module '@tanstack/react-router' {
       path: '/studio-services'
       fullPath: '/studio-services'
       preLoaderRoute: typeof ShellStudioServicesRouteImport
+      parentRoute: typeof ShellRoute
+    }
+    '/_shell/testimonials': {
+      id: '/_shell/testimonials'
+      path: '/testimonials'
+      fullPath: '/testimonials'
+      preLoaderRoute: typeof ShellTestimonialsRouteImport
       parentRoute: typeof ShellRoute
     }
     '/_shell/packages/': {
@@ -276,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShellPackagesPackageIdEditRouteImport
       parentRoute: typeof ShellPackagesRoute
     }
+    '/api/admin/gallery-photos/$id/thumb': {
+      id: '/api/admin/gallery-photos/$id/thumb'
+      path: '/api/admin/gallery-photos/$id/thumb'
+      fullPath: '/api/admin/gallery-photos/$id/thumb'
+      preLoaderRoute: typeof ApiAdminGalleryPhotosIdThumbRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -299,9 +377,12 @@ interface ShellRouteChildren {
   ShellAddOnsRoute: typeof ShellAddOnsRoute
   ShellAppointmentsRoute: typeof ShellAppointmentsRoute
   ShellBranchesRoute: typeof ShellBranchesRoute
+  ShellGalleryRoute: typeof ShellGalleryRoute
+  ShellLookupsRoute: typeof ShellLookupsRoute
   ShellPackagesRoute: typeof ShellPackagesRouteWithChildren
   ShellSettingsRoute: typeof ShellSettingsRoute
   ShellStudioServicesRoute: typeof ShellStudioServicesRoute
+  ShellTestimonialsRoute: typeof ShellTestimonialsRoute
   ShellIndexRoute: typeof ShellIndexRoute
 }
 
@@ -309,9 +390,12 @@ const ShellRouteChildren: ShellRouteChildren = {
   ShellAddOnsRoute: ShellAddOnsRoute,
   ShellAppointmentsRoute: ShellAppointmentsRoute,
   ShellBranchesRoute: ShellBranchesRoute,
+  ShellGalleryRoute: ShellGalleryRoute,
+  ShellLookupsRoute: ShellLookupsRoute,
   ShellPackagesRoute: ShellPackagesRouteWithChildren,
   ShellSettingsRoute: ShellSettingsRoute,
   ShellStudioServicesRoute: ShellStudioServicesRoute,
+  ShellTestimonialsRoute: ShellTestimonialsRoute,
   ShellIndexRoute: ShellIndexRoute,
 }
 
@@ -321,6 +405,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShellRoute: ShellRouteWithChildren,
   LoginRoute: LoginRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiAdminGalleryPhotosIdThumbRoute: ApiAdminGalleryPhotosIdThumbRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
