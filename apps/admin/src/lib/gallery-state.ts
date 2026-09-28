@@ -128,6 +128,13 @@ export function reorderVisiblePhotos(
   }
   // The visible ids in their global sequence.
   const subsequence = globalIds.filter((id) => visibleSet.has(id));
+  // Ghost-id parity with reorderIds (#143): a visibleId absent from the
+  // global list (a stale filtered view) bails — the input returned
+  // unchanged, never a silently corrupted write-back.
+  const globalSet = new Set(globalIds);
+  if (visibleIds.some((id) => !globalSet.has(id))) {
+    return globalIds;
+  }
   const from = subsequence.indexOf(activeId);
   const to = subsequence.indexOf(overId);
   const moved = arrayMove(subsequence, from, to);
