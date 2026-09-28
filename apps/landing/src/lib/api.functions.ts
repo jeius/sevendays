@@ -45,6 +45,18 @@ export const getAddonServices = createServerFn().handler(async () => {
   });
 });
 
+export const getGallery = createServerFn().handler(async () => {
+  return startSpan({ name: 'GET /api/v1/gallery' }, async () => {
+    return getApiClient().gallery.list();
+  });
+});
+
+export const getTestimonials = createServerFn().handler(async () => {
+  return startSpan({ name: 'GET /api/v1/testimonials' }, async () => {
+    return getApiClient().testimonials.list();
+  });
+});
+
 /**
  * Guest booking POST. Callers pass the start-fn payload ({ data: input });
  * the api-client RPC shape ({ json }) is wrapped here. Rejections reject

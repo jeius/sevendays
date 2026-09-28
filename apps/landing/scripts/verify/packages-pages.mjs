@@ -66,6 +66,40 @@ async function main() {
     strip.every((p) => stripLinks.includes(`/book?package=${p.id}`))
   );
 
+  // Ruled edit (M5 ticket #142): the empty-state + cover rules, re-derived
+  // from the live API. Green on today's populated null-cover catalog;
+  // armed for the zero-packages state (live-exercised by #143's gate).
+  const featuredStrip = await evaluate(
+    `document.querySelector("section[data-strip='featured']") !== null`
+  );
+  check(
+    'home: featured strip collapses ⇔ zero active packages',
+    featuredStrip === packages.length > 0
+  );
+  const stripObserved = await evaluate(`(() => {
+    const articles = [...document.querySelectorAll("section[data-strip='featured'] article")];
+    const names = ${JSON.stringify(strip.map((p) => p.name))};
+    return names.map((n) => {
+      const a = articles.find((el) => el.querySelector('h3')?.textContent === n);
+      if (!a) return null;
+      return {
+        hasImg: [...a.querySelectorAll('img')].some((i) => i.getAttribute('alt') === n),
+        hasPlaceholder: a.textContent.includes('Cover photo coming soon'),
+      };
+    });
+  })()`);
+  check(
+    'home: strip cards carry the cover rule (img ⇔ cover)',
+    strip.every((p, i) => {
+      const o = stripObserved[i];
+      return (
+        o !== null &&
+        o.hasImg === (p.coverImageUrl != null) &&
+        o.hasPlaceholder === (p.coverImageUrl == null)
+      );
+    })
+  );
+
   // /packages: every active package, full details
   await go(`${LANDING}/packages`);
   const listText = await text();
@@ -81,15 +115,59 @@ async function main() {
     listText.includes(peso(cheapest)) && listText.includes('Inclusions')
   );
 
+  // Ruled edit (M5 ticket #142): list-card cover rule (lazy img ⇔ cover,
+  // placeholder ⇔ none) + the empty-state ⇔ rule.
+  const listObserved = await evaluate(`(() => {
+    const articles = [...document.querySelectorAll('article')];
+    const names = ${JSON.stringify(packages.map((p) => p.name))};
+    return names.map((n) => {
+      const a = articles.find((el) => el.querySelector('h3')?.textContent === n);
+      if (!a) return null;
+      const img = [...a.querySelectorAll('img')].find((i) => i.getAttribute('alt') === n);
+      if (!img) return 'placeholder';
+      return {
+        loading: img.getAttribute('loading'),
+        objectCover: img.className.includes('object-cover'),
+      };
+    });
+  })()`);
+  check(
+    '/packages: list cards carry the cover rule (lazy img ⇔ cover)',
+    packages.every((p, i) => {
+      const o = listObserved[i];
+      if (p.coverImageUrl != null) {
+        return o !== null && o !== 'placeholder' && o.loading === 'lazy' && o.objectCover === true;
+      }
+      return o === 'placeholder';
+    })
+  );
+  check(
+    '/packages: empty-state line ⇔ zero active packages',
+    listText.includes('No packages to show right now — check back soon.') ===
+      (packages.length === 0)
+  );
+
   // /packages/:slug: by-slug detail + deep link
   await go(`${LANDING}/packages/basic-package`);
   const detail = await text();
+  // Ruled edit (M5 ticket #142): the cover rule is the ⇔ assertion —
+  // placeholder present ⇔ no coverImageUrl; an img (alt = name, lazy,
+  // object-cover) ⇔ coverImageUrl present. The old clause assumed null
+  // covers forever; this form survives real content.
+  const detailCover = await evaluate(
+    `[...document.querySelectorAll('article img')].some(i => i.getAttribute('alt') === ${JSON.stringify(basic.name)})`
+  );
   check(
-    '/packages/:slug renders by slug (name, price, cover placeholder, inclusions)',
+    '/packages/:slug renders by slug (name, price, inclusions)',
     detail.includes(basic.name) &&
       detail.includes(peso(basic.priceCents)) &&
-      detail.includes('Cover photo coming soon') &&
       detail.includes('Inclusions')
+  );
+  check(
+    'detail: cover rule (placeholder ⇔ no cover)',
+    basic.coverImageUrl
+      ? detailCover === true && !detail.includes('Cover photo coming soon')
+      : detailCover === false && detail.includes('Cover photo coming soon')
   );
   const detailLink = await evaluate(
     `[...document.querySelectorAll('a[href^="/book?package="]')].map(a => a.getAttribute('href'))[0] ?? null`
