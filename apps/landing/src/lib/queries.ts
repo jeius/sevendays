@@ -2,9 +2,11 @@ import { queryOptions } from '@tanstack/react-query';
 import {
   getAddonServices,
   getBranches,
+  getGallery,
   getServicePackageBySlug,
   getServicePackages,
   getStudioServices,
+  getTestimonials,
 } from './api.functions';
 
 // Query key factory — one group per resource read.
@@ -49,5 +51,29 @@ export const addonServiceQueries = {
     queryOptions({
       queryKey: ['addon-services'],
       queryFn: () => getAddonServices(),
+    }),
+};
+
+export const galleryQueries = {
+  /**
+   * The assembled public gallery read (#138). Default staleTime — every
+   * fresh page load re-reads through the loader's ensureQueryData (the M5
+   * "immediately" rule: freshness is a fresh-page-load property; no cache
+   * layer). Tab filtering is client state over this single payload.
+   */
+  all: () =>
+    queryOptions({
+      queryKey: ['gallery'],
+      queryFn: () => getGallery(),
+    }),
+};
+
+export const testimonialQueries = {
+  /** Active testimonials, position-ordered (#138). Same default-staleTime
+   * posture as galleryQueries. */
+  all: () =>
+    queryOptions({
+      queryKey: ['testimonials'],
+      queryFn: () => getTestimonials(),
     }),
 };

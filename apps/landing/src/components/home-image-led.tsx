@@ -105,18 +105,23 @@ export function HomeImageLed({
         </div>
       </section>
 
-      {/* 3 — Featured packages: cover-driven cards (owner ruling). */}
-      <section className='mx-auto max-w-5xl px-6 py-16' data-strip='featured'>
-        <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
-          {KICKERS.packages}
-        </p>
-        <h2 className='text-brand-ink mt-2 font-serif text-3xl font-semibold'>{heading}</h2>
-        <div className='mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
-          {strip.map((p) => (
-            <PackageCoverCard key={p.id} pkg={p} />
-          ))}
-        </div>
-      </section>
+      {/* 3 — Featured packages: cover-driven cards (owner ruling). The M5
+          empty-state rule: zero ACTIVE packages collapse the strip ENTIRELY
+          (no heading, no box) — the predicate is the full list length, not
+          the selection (a flagless catalog still falls back to first-4). */}
+      {packages.length > 0 && (
+        <section className='mx-auto max-w-5xl px-6 py-16' data-strip='featured'>
+          <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
+            {KICKERS.packages}
+          </p>
+          <h2 className='text-brand-ink mt-2 font-serif text-3xl font-semibold'>{heading}</h2>
+          <div className='mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
+            {strip.map((p) => (
+              <PackageCoverCard key={p.id} pkg={p} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 4 — Services: full-image-background cards. */}
       <section className='border-line-soft bg-wash-a border-y' data-strip='services'>

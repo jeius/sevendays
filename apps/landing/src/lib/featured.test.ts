@@ -77,4 +77,10 @@ describe('selectFeaturedPackages', () => {
     ]);
     expect(result.packages.map((p) => p.name)).toEqual(['Alpha', 'Zeta']);
   });
+
+  it('empty catalog: an empty strip under the fallback heading (the strip collapses in JSX)', () => {
+    const result = selectFeaturedPackages([]);
+    expect(result.heading).toBe(FALLBACK_HEADING);
+    expect(result.packages).toEqual([]);
+  });
 });

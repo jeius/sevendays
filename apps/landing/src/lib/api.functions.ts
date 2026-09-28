@@ -42,3 +42,15 @@ export const getAddonServices = createServerFn().handler(async () => {
     return getApiClient().addonServices.list();
   });
 });
+
+export const getGallery = createServerFn().handler(async () => {
+  return startSpan({ name: 'GET /api/v1/gallery' }, async () => {
+    return getApiClient().gallery.list();
+  });
+});
+
+export const getTestimonials = createServerFn().handler(async () => {
+  return startSpan({ name: 'GET /api/v1/testimonials' }, async () => {
+    return getApiClient().testimonials.list();
+  });
+});
