@@ -93,14 +93,15 @@ export function quantityFromInput(input: string): number | null {
 }
 
 /**
- * `#143 seam: duration mapping`. Empty / `NaN` / `<= 0` → null — the
- * catalog specifies no durations, so a meaningless duration is simply
- * absent (unlike quantity, which must surface as a validation error).
+ * `#143 seam: duration mapping`. Empty / `NaN` / `<= 0` / non-integer →
+ * null — the schema demands a positive int and the catalog specifies no
+ * durations, so a meaningless duration is simply absent (unlike quantity,
+ * which must surface as a validation error).
  */
 export function durationFromInput(input: string): number | null {
   if (input === '') return null;
   const parsed = Number(input);
-  if (Number.isNaN(parsed) || parsed <= 0) return null;
+  if (Number.isNaN(parsed) || parsed <= 0 || !Number.isInteger(parsed)) return null;
   return parsed;
 }
 
@@ -290,6 +291,8 @@ export function validateEditorState(state: PackageEditorState): EditorFieldError
   }
   if (!Number.isFinite(state.priceCents) || state.priceCents < 0) {
     errors.price = 'Enter a price of zero or more.';
+  } else if (!Number.isInteger(state.priceCents)) {
+    errors.price = 'Enter whole centavos.';
   }
   for (const row of state.inclusions) {
     const rowErrors: InclusionFieldErrors = {};
@@ -298,8 +301,15 @@ export function validateEditorState(state: PackageEditorState): EditorFieldError
         rowErrors.attires = 'Pick at least one attire.';
       }
     }
-    if (row.kind === 'framed_picture' && (row.frameToken == null || row.frameToken === '')) {
-      rowErrors.frameToken = 'framed pictures need a frame';
+    if (row.kind === 'framed_picture') {
+      if (!row.frameToken) {
+        rowErrors.frameToken = 'framed pictures need a frame';
+      } else if (!state.frames.some((frame) => frame.token === row.frameToken)) {
+        // Schema parity (#137's refinePackageSave): a token that no longer
+        // references frames[] would 400 server-side — flag it inline with
+        // the same message (the remedy is identical: pick a listed frame).
+        rowErrors.frameToken = 'framed pictures need a frame';
+      }
     }
     if (row.kind === 'privilege' && row.description.trim().length < 1) {
       rowErrors.description = 'Privileges need a description.';

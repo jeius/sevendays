@@ -233,6 +233,11 @@ describe('input mappers', () => {
     expect(durationFromInput('45')).toBe(45);
   });
 
+  it('durationFromInput maps a non-integer to null — the schema demands a positive int, the catalog has no durations (TDD #143 sweep)', () => {
+    expect(durationFromInput('45.5')).toBeNull();
+    expect(durationFromInput('45.0')).toBe(45);
+  });
+
   it('tokenFor echoes an existing token; null mints a fresh uuid', () => {
     expect(tokenFor('frame-1')).toBe('frame-1');
     const minted = tokenFor(null);
@@ -316,6 +321,38 @@ describe('validateEditorState', () => {
       frameToken: 'framed pictures need a frame',
     });
     expect(errors.inclusions.k3).toMatchObject({ description: 'Privileges need a description.' });
+  });
+
+  it('a non-integer priceCents flags the price slot (the schema is int-nonnegative; TDD #143 sweep)', () => {
+    const errors = validateEditorState({
+      ...newEditorState(),
+      name: 'n',
+      description: 'd',
+      priceCents: 19950.5,
+    });
+    expect(errors.price).toBe('Enter whole centavos.');
+  });
+
+  it('a framed_picture whose frameToken is not among frames[] flags the row (schema parity with refinePackageSave; TDD #143 sweep)', () => {
+    const state = {
+      ...newEditorState(),
+      name: 'n',
+      description: 'd',
+      frames: [{ token: 'f1' }],
+      inclusions: [
+        {
+          key: 'k1',
+          kind: 'framed_picture' as const,
+          quantityInput: '1',
+          printSizeId: uuid(13),
+          frameToken: 'f-gone',
+          attireIds: [uuid(1)],
+          description: '',
+        },
+      ],
+    };
+    const errors = validateEditorState(state);
+    expect(errors.inclusions.k1).toMatchObject({ frameToken: 'framed pictures need a frame' });
   });
 });
 
