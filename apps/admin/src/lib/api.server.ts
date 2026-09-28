@@ -52,6 +52,10 @@ export function getApiClient() {
 // signature.
 const SESSION_COOKIE_SUFFIX = 'session_token';
 
+// Typed so the thumb proxy can answer a missing session with 401 while
+// every OTHER unexpected failure stops masking as auth (#143 sweep).
+export class SessionMissingError extends Error {}
+
 function extractSessionToken(cookieHeader: string | null): string {
   if (cookieHeader) {
     for (const part of cookieHeader.split(';')) {
@@ -66,7 +70,7 @@ function extractSessionToken(cookieHeader: string | null): string {
       }
     }
   }
-  throw new Error(
+  throw new SessionMissingError(
     'No session cookie in the incoming request — the session-scoped API client cannot authenticate. The caller must run inside a signed-in request (the _shell gate guarantees it): pass getRequestHeaders().get("cookie"). No fallback by design.'
   );
 }

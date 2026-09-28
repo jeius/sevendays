@@ -266,12 +266,9 @@ export function BranchesScreen() {
     if (errors.name || errors.address || errors.phone) {
       setFieldErrors(errors);
       toast.error('Fix the highlighted fields.');
-      // Veto-throw: the shared Save button closes the Sheet unconditionally
-      // when onSave returns normally (onSave(); setVisible(false)); the only
-      // synchronous keep-open channel in the landed LightEntityEditor is a
-      // throw, and shared.tsx sits outside this ticket's scope fence. React
-      // reports it as an uncaught event-handler error — deliberate, never
-      // user-visible; the inline errors + toast are the UX.
+      // Veto-throw: the shared Save button closes the Sheet only when onSave
+      // returns normally — a throw is the keep-open veto and is swallowed there
+      // (#143). The inline errors + toast are the UX.
       throw new Error('branch-editor-validation-hold');
     }
     setFieldErrors({});

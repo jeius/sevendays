@@ -9,13 +9,13 @@ import { truncateAll } from './helpers/truncate.js';
 
 const url = process.env.TEST_DATABASE_URL as string;
 const db = createTestDb(url);
-let ids: FixtureIds;
+let _ids: FixtureIds;
 
 const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
 
 beforeEach(async () => {
   await truncateAll(db);
-  ids = await loadFixtures(db);
+  _ids = await loadFixtures(db);
 });
 
 // AC-1 (completeness half): EVERY admin router answers the uniform 401
