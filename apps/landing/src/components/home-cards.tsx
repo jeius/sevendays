@@ -13,6 +13,7 @@ import {
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
 import { peso } from '../lib/format';
+import { CoverPanel } from './cover-panel';
 
 // The ruled card system (#111 Track 2, variant D build target): uniformity
 // mechanics — 1-line titles, clamp-2 descriptions, fixed media heights,
@@ -63,20 +64,6 @@ function ChipCluster({ chips }: { chips: string[] }) {
       )}
     </div>
   );
-}
-
-// Stand-in cover mapping (M5: R2 cover photos replace this wholesale).
-// Seeded names are generic ("Basic Package", "Package A"…), so covers cycle
-// deterministically per package instead of matching on keywords.
-const COVERS = [
-  '/photos/cover-portrait.jpg',
-  '/photos/cover-event.jpg',
-  '/photos/cover-commercial.jpg',
-] as const;
-
-export function packageCover(id: string): string {
-  const hash = [...id].reduce((n, c) => n + c.charCodeAt(0), 0);
-  return COVERS[hash % COVERS.length] ?? COVERS[0];
 }
 
 // The full-image service-card backgrounds (stand-ins; M5 swaps for the
@@ -159,11 +146,10 @@ export function PackageCoverCard({ pkg }: { pkg: ServicePackageRead }) {
     // layout shift), and both still under prefers-reduced-motion.
     <article className='group bg-card border-brand-gray-cool flex flex-col overflow-hidden rounded-xl border shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0'>
       <div className='border-line-soft relative h-56 shrink-0 overflow-hidden border-b'>
-        <img
-          src={packageCover(pkg.id)}
-          alt={`Cover for ${pkg.name} — stand-in until R2 assets arrive`}
-          className='absolute inset-0 size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100'
-          loading='lazy'
+        <CoverPanel
+          name={pkg.name}
+          coverImageUrl={pkg.coverImageUrl}
+          className='absolute inset-0 size-full rounded-none transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100'
         />
         <div className='bg-brand-ink/35 absolute inset-0' aria-hidden='true' />
         <div
