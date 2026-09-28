@@ -19,12 +19,22 @@ const peso = (cents) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
 
 async function main() {
-  const [servicesRes, branchesRes] = await Promise.all([
+  const [servicesRes, branchesRes, galleryRes, testimonialsRes] = await Promise.all([
     fetch(`${API}/api/v1/studio-services`),
     fetch(`${API}/api/v1/branches`),
+    fetch(`${API}/api/v1/gallery`),
+    fetch(`${API}/api/v1/testimonials`),
   ]);
   const services = await servicesRes.json();
   const branches = await branchesRes.json();
+  const gallery = await galleryRes.json();
+  const testimonials = await testimonialsRes.json();
+  if (!gallery || !Array.isArray(gallery.categories) || !Array.isArray(gallery.photos)) {
+    throw new Error('seed drift: gallery read is not the assembled {categories, photos} payload');
+  }
+  if (!Array.isArray(testimonials)) {
+    throw new Error('seed drift: testimonials read is not an array');
+  }
   if (!Array.isArray(services) || services.length === 0) {
     throw new Error('seed drift: no studio services from the live API');
   }
@@ -35,7 +45,7 @@ async function main() {
     branches.filter((b) => s.bookableBranchIds.includes(b.id)).map((b) => b.name);
 
   const page = await connect();
-  const { go, text, evaluate, close } = page;
+  const { go, text, evaluate, wait, close } = page;
 
   // Home: strips + blurb
   await go(`${LANDING}/`);
@@ -156,21 +166,96 @@ async function main() {
     branches.every((b) => branchLinks.includes(`/book?branch=${b.id}`))
   );
 
-  // /about: placeholders + empty portfolio grid
+  // /about — Ruled edit (M5 ticket #142): the two placeholder checks rewrite
+  // into payload-derived ⇔ rules (the story line is byte-kept — not this
+  // ticket's copy). The live gallery/testimonials tables are CMS-born-empty,
+  // so the empty branches are LIVE-exercised today; the populated branches
+  // arm for the owner's first uploads. Tab filtering asserts client-side
+  // state over the single fetch.
   await go(`${LANDING}/about`);
   const about = await text();
-  const portfolioCount = await evaluate(
-    `document.querySelector('[data-portfolio-grid]')?.querySelectorAll('article, img').length ?? null`
+  check(
+    '/about: story placeholder renders (byte-kept)',
+    about.includes('Our studio story is coming soon.')
   );
   check(
-    '/about: story + testimonial placeholders render',
-    about.includes('Our studio story is coming soon.') &&
-      about.includes('What clients say is coming soon.')
+    '/about: portfolio empty-state ⇔ zero photos',
+    about.includes('Portfolio coming soon.') === (gallery.photos.length === 0)
+  );
+  const expectedTabs = [
+    'All',
+    ...gallery.categories
+      .filter((c) => gallery.photos.some((p) => p.categoryId === c.id))
+      .map((c) => c.name),
+  ];
+  const tabState = await evaluate(`(() => {
+    const row = document.querySelector('[data-gallery-tabs]');
+    if (!row) return null;
+    return [...row.querySelectorAll('button')].map((b) => ({
+      label: b.textContent.trim(),
+      pressed: b.getAttribute('aria-pressed'),
+    }));
+  })()`);
+  check(
+    '/about: tab row ⇔ photos exist; All first + default',
+    gallery.photos.length === 0
+      ? tabState === null
+      : tabState !== null &&
+          tabState.length === expectedTabs.length &&
+          tabState.every((t, i) => t.label === expectedTabs[i]) &&
+          tabState[0].label === 'All' &&
+          tabState[0].pressed === 'true',
+    `tabs: ${JSON.stringify(tabState)}`
+  );
+  const gridSrcs = await evaluate(
+    `[...document.querySelectorAll('[data-portfolio-grid] img')].map(i => i.getAttribute('src'))`
   );
   check(
-    '/about: empty portfolio grid is the M5 drop-in slot',
-    portfolioCount === 0,
-    `grid articles/imgs: ${portfolioCount}`
+    '/about: grid renders exactly the payload photos, payload order',
+    gallery.photos.length === 0
+      ? gridSrcs === null || gridSrcs.length === 0
+      : gridSrcs !== null &&
+          gridSrcs.length === gallery.photos.length &&
+          gridSrcs.every((src, i) => src === gallery.photos[i].photoUrl)
+  );
+  if (gallery.photos.length > 0 && expectedTabs.length > 1) {
+    const firstCategoryPhotos = gallery.photos.filter(
+      (p) => p.categoryId === gallery.categories.find((c) => expectedTabs[1] === c.name).id
+    );
+    await evaluate(`document.querySelectorAll('[data-gallery-tabs] button')[1].click()`);
+    await wait(400);
+    const filtered = await evaluate(
+      `[...document.querySelectorAll('[data-portfolio-grid] img')].map(i => i.getAttribute('src'))`
+    );
+    const restored = await (async () => {
+      await evaluate(`document.querySelectorAll('[data-gallery-tabs] button')[0].click()`);
+      await wait(400);
+      return evaluate(
+        `[...document.querySelectorAll('[data-portfolio-grid] img')].map(i => i.getAttribute('src'))`
+      );
+    })();
+    check(
+      '/about: tab filtering is client-side over the single fetch',
+      Array.isArray(filtered) &&
+        filtered.length === firstCategoryPhotos.length &&
+        filtered.every((src, i) => src === firstCategoryPhotos[i].photoUrl) &&
+        Array.isArray(restored) &&
+        restored.length === gallery.photos.length &&
+        restored.every((src, i) => src === gallery.photos[i].photoUrl)
+    );
+  } else {
+    check(
+      '/about: tab filtering is client-side over the single fetch',
+      true,
+      'armed — single-category or empty payload cannot demo filtering'
+    );
+  }
+  check(
+    '/about: testimonials render the payload (coming-soon ⇔ zero)',
+    testimonials.length === 0
+      ? about.includes('What clients say is coming soon.')
+      : testimonials.every((t) => about.includes(t.person)) &&
+          !about.includes('What clients say is coming soon.')
   );
 
   close();
