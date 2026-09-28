@@ -61,11 +61,25 @@ export { ApiClientError } from './error.js';
 export { toLoopbackFetch } from './loopback.js';
 export type {
   CreateAddonArgs,
+  CreateAttireArgs,
+  CreateGalleryCategoryArgs,
+  CreateGalleryPhotoArgs,
+  CreatePrintSizeArgs,
   CreateServicePackageArgs,
+  CreateTestimonialArgs,
+  GalleryCategoryOrderArgs,
+  GalleryPhotoOrderArgs,
+  GetGalleryPhotoThumbArgs,
   PresignArgs,
   SetAddonMatrixArgs,
   SetBranchMatrixArgs,
+  TestimonialOrderArgs,
   UpdateAddonArgs,
+  UpdateAttireArgs,
+  UpdateGalleryCategoryArgs,
+  UpdateGalleryPhotoArgs,
+  UpdatePrintSizeArgs,
   UpdateServicePackageArgs,
+  UpdateTestimonialArgs,
 } from './routes/admin.js';
 export type { CreateAppointmentArgs } from './routes/appointments.js';
