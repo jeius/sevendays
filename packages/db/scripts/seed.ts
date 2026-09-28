@@ -1,3 +1,7 @@
+// CONTRACT (M5 close-out, #143): bootstrap/dev-only. This seeder stands up
+// fresh environments and resets dev — it NEVER runs against production
+// content: the admin CMS owns the catalog, and a re-run after real edits
+// would overwrite them by design (packages/db/README.md).
 // Re-runnable catalog seeder: one transaction, natural-key upserts, per-package
 // inclusion rebuild. Reruns never duplicate rows; branch/lookup/package ids stay
 // stable — inclusion rows are deleted and rebuilt per package (with their
