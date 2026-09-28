@@ -64,6 +64,7 @@ Deploys are branch-keyed GitHub Actions (`.github/workflows/ci.yml`), gated on C
 
 - **Vitest 4** — every workspace that owns tests has its own `vitest.config.ts` extending `@sevendays/config/vitest` (a built entry — run `pnpm build:packages` after a fresh clone). See `docs/adr/0003-vitest-4-per-workspace-configs.md` for why per-workspace configs are mandatory.
 - Root `vitest.config.ts` composes `packages/` and `apps/` projects for root-level runs and coverage merging; it does not discover a workspace's tests on its own.
+- `apps/admin` runs the same shape since the M5 close-out (#143): plain-node lib-seam tests over the pure editor-state/upload seams — no component/DOM tests.
 
 ## Secrets Checklist (none committed to the repo)
 
