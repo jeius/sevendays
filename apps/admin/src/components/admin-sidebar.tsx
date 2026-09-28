@@ -23,12 +23,15 @@ import { Link, useMatchRoute, useNavigate } from '@tanstack/react-router';
 import type { LucideIcon } from 'lucide-react';
 import {
   CalendarDays,
+  Images,
   LayoutDashboard,
   LogOut,
   MapPin,
   Package,
   PlusCircle,
+  Quote,
   Settings,
+  Tags,
   Wrench,
 } from 'lucide-react';
 import { authClient } from '#/lib/auth-client';
@@ -39,7 +42,10 @@ type NavTo =
   | '/packages'
   | '/add-ons'
   | '/studio-services'
+  | '/gallery'
+  | '/testimonials'
   | '/branches'
+  | '/lookups'
   | '/settings';
 
 interface NavItem {
@@ -82,12 +88,15 @@ const navGroups: NavGroup[] = [
       { to: '/packages', label: 'Packages', icon: Package },
       { to: '/add-ons', label: 'Add-ons', icon: PlusCircle },
       { to: '/studio-services', label: 'Studio services', icon: Wrench },
+      { to: '/gallery', label: 'Gallery', icon: Images },
+      { to: '/testimonials', label: 'Testimonials', icon: Quote },
     ],
   },
   {
     heading: 'Studio',
     items: [
       { to: '/branches', label: 'Branches', icon: MapPin },
+      { to: '/lookups', label: 'Lookups', icon: Tags },
       { to: '/settings', label: 'Settings', icon: Settings },
     ],
   },

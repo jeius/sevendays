@@ -3,10 +3,13 @@ import {
   fetchAdminAddons,
   fetchAdminAttires,
   fetchAdminBranches,
+  fetchAdminGalleryCategories,
+  fetchAdminGalleryPhotos,
   fetchAdminPackage,
   fetchAdminPackages,
   fetchAdminPrintSizes,
   fetchAdminStudioServices,
+  fetchAdminTestimonials,
 } from './admin.functions';
 
 // Query key factories for the admin CMS (M5 #139) — the branchQueries
@@ -58,5 +61,26 @@ export const adminLookupQueries = {
     queryOptions({
       queryKey: ['admin', 'attires'],
       queryFn: fetchAdminAttires,
+    }),
+};
+
+export const adminGalleryQueries = {
+  categories: () =>
+    queryOptions({
+      queryKey: ['admin', 'gallery-categories'],
+      queryFn: fetchAdminGalleryCategories,
+    }),
+  photos: () =>
+    queryOptions({
+      queryKey: ['admin', 'gallery-photos'],
+      queryFn: fetchAdminGalleryPhotos,
+    }),
+};
+
+export const adminTestimonialQueries = {
+  all: () =>
+    queryOptions({
+      queryKey: ['admin', 'testimonials'],
+      queryFn: fetchAdminTestimonials,
     }),
 };

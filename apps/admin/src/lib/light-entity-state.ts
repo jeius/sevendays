@@ -8,15 +8,23 @@
 // flipped. The add-on applies-to matrix is service-keyed in the write
 // model (#137): toggling one add-on's applicability fans out into one
 // full-replace PUT per AFFECTED service — the diff below is that seam.
+// M5 #141 grows this seam with the testimonial, print-size, and attire
+// blocks — same template.
 import type {
   AddonService,
+  Attire,
   Branch,
+  PrintSize,
   StudioServiceAddonMatrixInput,
   StudioServiceBranchMatrixInput,
   StudioServiceWithBranches,
+  Testimonial,
   UpdateAddonServiceInput,
+  UpdateAttireInput,
   UpdateBranchInput,
+  UpdatePrintSizeInput,
   UpdateStudioServiceInput,
+  UpdateTestimonialInput,
 } from '@sevendays/types';
 
 /**
@@ -67,6 +75,9 @@ export type LightFieldErrors = {
   name?: string;
   address?: string;
   phone?: string;
+  quote?: string;
+  person?: string;
+  code?: string;
   description?: string;
   price?: string;
 };
@@ -360,6 +371,235 @@ export function validateAddonState(state: AddonEditorState): LightFieldErrors {
   }
   if (!Number.isInteger(state.priceCents) || state.priceCents < 0) {
     errors.price = 'Enter a valid price.';
+  }
+  return errors;
+}
+
+/**
+ * The testimonial editor's whole state. `#143 seam: the testimonial state
+ * shape`.
+ */
+export interface TestimonialEditorState {
+  quote: string;
+  person: string;
+  isActive: boolean;
+}
+
+/**
+ * `#143 seam: read → testimonial state`. The read row minus server-managed
+ * fields (id/position/createdAt/updatedAt).
+ */
+export function testimonialStateFromRead(row: Testimonial): TestimonialEditorState {
+  return {
+    quote: row.quote,
+    person: row.person,
+    isActive: row.isActive,
+  };
+}
+
+/**
+ * `#143 seam: create-mode testimonial state`. Empty strings, active by
+ * default.
+ */
+export function newTestimonialState(): TestimonialEditorState {
+  return {
+    quote: '',
+    person: '',
+    isActive: true,
+  };
+}
+
+/**
+ * `#143 seam: testimonial state → full-object PUT payload`. All three
+ * fields explicit — the schema's `.default(true)` is never trusted
+ * client-side (#137's full-object PUT: no undefined-vs-null merge
+ * semantics).
+ */
+export function buildTestimonialPayload(state: TestimonialEditorState): UpdateTestimonialInput {
+  return {
+    quote: state.quote,
+    person: state.person,
+    isActive: state.isActive,
+  };
+}
+
+/**
+ * `#143 seam: read → testimonial flip payload`. The read reshaped back
+ * into the full-object update payload with ONLY `isActive` flipped — the
+ * flip never drops a field, because the PUT is full-object and a missing
+ * field would overwrite real data with the schema default (#137's
+ * deactivation contract).
+ */
+export function buildTestimonialFlipPayload(
+  row: Testimonial,
+  isActive: boolean
+): UpdateTestimonialInput {
+  return {
+    quote: row.quote,
+    person: row.person,
+    isActive,
+  };
+}
+
+/**
+ * `#143 seam: testimonial validation` — mirrors the save schema's
+ * client-relevant rules for inline marking (AQ-5): quote/person min-1
+ * (trimmed). An all-empty result = valid.
+ */
+export function validateTestimonialState(state: TestimonialEditorState): LightFieldErrors {
+  const errors: LightFieldErrors = {};
+  if (state.quote.trim().length < 1) {
+    errors.quote = 'Quote is required.';
+  }
+  if (state.person.trim().length < 1) {
+    errors.person = 'Person is required.';
+  }
+  return errors;
+}
+
+/**
+ * The print-size editor's whole state. `#143 seam: the print-size state
+ * shape`.
+ */
+export interface PrintSizeEditorState {
+  code: string;
+  description: string;
+  isActive: boolean;
+}
+
+/**
+ * `#143 seam: read → print-size state`. The read row minus server-managed
+ * fields (id/createdAt/updatedAt).
+ */
+export function printSizeStateFromRead(row: PrintSize): PrintSizeEditorState {
+  return {
+    code: row.code,
+    description: row.description,
+    isActive: row.isActive,
+  };
+}
+
+/**
+ * `#143 seam: create-mode print-size state`. Empty strings, active by
+ * default.
+ */
+export function newPrintSizeState(): PrintSizeEditorState {
+  return {
+    code: '',
+    description: '',
+    isActive: true,
+  };
+}
+
+/**
+ * `#143 seam: print-size state → full-object PUT payload`. All three
+ * fields explicit — the schema's `.default(true)` is never trusted
+ * client-side (#137's full-object PUT: no undefined-vs-null merge
+ * semantics).
+ */
+export function buildPrintSizePayload(state: PrintSizeEditorState): UpdatePrintSizeInput {
+  return {
+    code: state.code,
+    description: state.description,
+    isActive: state.isActive,
+  };
+}
+
+/**
+ * `#143 seam: read → print-size flip payload`. The read reshaped back
+ * into the full-object update payload with ONLY `isActive` flipped — the
+ * flip never drops a field, because the PUT is full-object and a missing
+ * field would overwrite real data with the schema default (#137's
+ * deactivation contract).
+ */
+export function buildPrintSizeFlipPayload(row: PrintSize, isActive: boolean): UpdatePrintSizeInput {
+  return {
+    code: row.code,
+    description: row.description,
+    isActive,
+  };
+}
+
+/**
+ * `#143 seam: print-size validation` — mirrors the save schema's
+ * client-relevant rules for inline marking (AQ-5): code/description
+ * min-1 (trimmed). An all-empty result = valid.
+ */
+export function validatePrintSizeState(state: PrintSizeEditorState): LightFieldErrors {
+  const errors: LightFieldErrors = {};
+  if (state.code.trim().length < 1) {
+    errors.code = 'Code is required.';
+  }
+  if (state.description.trim().length < 1) {
+    errors.description = 'Description is required.';
+  }
+  return errors;
+}
+
+/**
+ * The attire editor's whole state. `#143 seam: the attire state shape`.
+ */
+export interface AttireEditorState {
+  name: string;
+  isActive: boolean;
+}
+
+/**
+ * `#143 seam: read → attire state`. The read row minus server-managed
+ * fields (id/createdAt/updatedAt).
+ */
+export function attireStateFromRead(row: Attire): AttireEditorState {
+  return {
+    name: row.name,
+    isActive: row.isActive,
+  };
+}
+
+/**
+ * `#143 seam: create-mode attire state`. Empty name, active by default.
+ */
+export function newAttireState(): AttireEditorState {
+  return {
+    name: '',
+    isActive: true,
+  };
+}
+
+/**
+ * `#143 seam: attire state → full-object PUT payload`. Both fields
+ * explicit — the schema's `.default(true)` is never trusted client-side
+ * (#137's full-object PUT: no undefined-vs-null merge semantics).
+ */
+export function buildAttirePayload(state: AttireEditorState): UpdateAttireInput {
+  return {
+    name: state.name,
+    isActive: state.isActive,
+  };
+}
+
+/**
+ * `#143 seam: read → attire flip payload`. The read reshaped back into
+ * the full-object update payload with ONLY `isActive` flipped — the flip
+ * never drops a field, because the PUT is full-object and a missing field
+ * would overwrite real data with the schema default (#137's deactivation
+ * contract).
+ */
+export function buildAttireFlipPayload(row: Attire, isActive: boolean): UpdateAttireInput {
+  return {
+    name: row.name,
+    isActive,
+  };
+}
+
+/**
+ * `#143 seam: attire validation` — mirrors the save schema's
+ * client-relevant rules for inline marking (AQ-5): name min-1 (trimmed).
+ * An all-empty result = valid.
+ */
+export function validateAttireState(state: AttireEditorState): LightFieldErrors {
+  const errors: LightFieldErrors = {};
+  if (state.name.trim().length < 1) {
+    errors.name = 'Name is required.';
   }
   return errors;
 }
