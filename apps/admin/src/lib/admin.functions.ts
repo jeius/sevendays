@@ -9,23 +9,41 @@ import { startSpan } from '@sentry/tanstackstart-react';
 import { ApiClientError } from '@sevendays/api-client';
 import type {
   AddonService,
+  Attire,
   Branch,
+  GalleryCategory,
+  GalleryPhoto,
   MediaPresignResponse,
+  PrintSize,
   ServicePackageRead,
   StudioServiceWithBranches,
+  Testimonial,
 } from '@sevendays/types';
 import {
   createAddonServiceSchema,
+  createAttireSchema,
   createBranchSchema,
+  createGalleryCategorySchema,
+  createGalleryPhotoSchema,
+  createPrintSizeSchema,
   createServicePackageSchema,
   createStudioServiceSchema,
+  createTestimonialSchema,
+  galleryCategoryOrderSchema,
+  galleryPhotoOrderSchema,
   mediaPresignRequestSchema,
   studioServiceAddonMatrixSchema,
   studioServiceBranchMatrixSchema,
+  testimonialOrderSchema,
   updateAddonServiceSchema,
+  updateAttireSchema,
   updateBranchSchema,
+  updateGalleryCategorySchema,
+  updateGalleryPhotoSchema,
+  updatePrintSizeSchema,
   updateServicePackageSchema,
   updateStudioServiceSchema,
+  updateTestimonialSchema,
 } from '@sevendays/types';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequestHeaders } from '@tanstack/react-start/server';
@@ -85,6 +103,29 @@ export const fetchAdminAttires = createServerFn({ method: 'GET' }).handler(async
 export const fetchAdminAddons = createServerFn({ method: 'GET' }).handler(async () => {
   return startSpan({ name: 'GET /api/v1/admin/addon-services' }, async () => {
     return getSessionScopedApiClient(getRequestHeaders().get('cookie')).admin.addons.list();
+  });
+});
+
+// GET /api/v1/admin/gallery-categories
+export const fetchAdminGalleryCategories = createServerFn({ method: 'GET' }).handler(async () => {
+  return startSpan({ name: 'GET /api/v1/admin/gallery-categories' }, async () => {
+    return getSessionScopedApiClient(
+      getRequestHeaders().get('cookie')
+    ).admin.galleryCategories.list();
+  });
+});
+
+// GET /api/v1/admin/gallery-photos
+export const fetchAdminGalleryPhotos = createServerFn({ method: 'GET' }).handler(async () => {
+  return startSpan({ name: 'GET /api/v1/admin/gallery-photos' }, async () => {
+    return getSessionScopedApiClient(getRequestHeaders().get('cookie')).admin.galleryPhotos.list();
+  });
+});
+
+// GET /api/v1/admin/testimonials
+export const fetchAdminTestimonials = createServerFn({ method: 'GET' }).handler(async () => {
+  return startSpan({ name: 'GET /api/v1/admin/testimonials' }, async () => {
+    return getSessionScopedApiClient(getRequestHeaders().get('cookie')).admin.testimonials.list();
   });
 });
 
@@ -392,6 +433,377 @@ export const saveAdminStudioServiceAddonMatrix = createServerFn({
             param: { id },
             json: { addonServiceIds },
           }),
+        };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// POST /api/v1/admin/gallery-categories
+export const saveAdminGalleryCategoryCreate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(createGalleryCategorySchema)
+  .handler(async ({ data }): Promise<AdminMutationResult<GalleryCategory>> => {
+    return startSpan({ name: 'POST /api/v1/admin/gallery-categories' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      try {
+        return { ok: true, data: await client.admin.galleryCategories.create(data) };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// PUT /api/v1/admin/gallery-categories/:id
+export const saveAdminGalleryCategoryUpdate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid(), payload: updateGalleryCategorySchema }))
+  .handler(async ({ data }): Promise<AdminMutationResult<GalleryCategory>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/gallery-categories/:id' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      const { id, payload } = data;
+      try {
+        return {
+          ok: true,
+          data: await client.admin.galleryCategories.update({ param: { id }, json: payload }),
+        };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// PUT /api/v1/admin/gallery-categories/order
+export const saveAdminGalleryCategoryOrder = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(galleryCategoryOrderSchema)
+  .handler(async ({ data }): Promise<AdminMutationResult<GalleryCategory[]>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/gallery-categories/order' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      try {
+        return { ok: true, data: await client.admin.galleryCategories.setOrder(data) };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// POST /api/v1/admin/gallery-photos
+export const saveAdminGalleryPhotoCreate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(createGalleryPhotoSchema)
+  .handler(async ({ data }): Promise<AdminMutationResult<GalleryPhoto>> => {
+    return startSpan({ name: 'POST /api/v1/admin/gallery-photos' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      try {
+        return { ok: true, data: await client.admin.galleryPhotos.create(data) };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// PUT /api/v1/admin/gallery-photos/:id
+export const saveAdminGalleryPhotoUpdate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid(), payload: updateGalleryPhotoSchema }))
+  .handler(async ({ data }): Promise<AdminMutationResult<GalleryPhoto>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/gallery-photos/:id' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      const { id, payload } = data;
+      try {
+        return {
+          ok: true,
+          data: await client.admin.galleryPhotos.update({ param: { id }, json: payload }),
+        };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// PUT /api/v1/admin/gallery-photos/order
+export const saveAdminGalleryPhotoOrder = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(galleryPhotoOrderSchema)
+  .handler(async ({ data }): Promise<AdminMutationResult<GalleryPhoto[]>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/gallery-photos/order' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      try {
+        return { ok: true, data: await client.admin.galleryPhotos.setOrder(data) };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// POST /api/v1/admin/testimonials
+export const saveAdminTestimonialCreate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(createTestimonialSchema)
+  .handler(async ({ data }): Promise<AdminMutationResult<Testimonial>> => {
+    return startSpan({ name: 'POST /api/v1/admin/testimonials' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      try {
+        return { ok: true, data: await client.admin.testimonials.create(data) };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// PUT /api/v1/admin/testimonials/:id
+export const saveAdminTestimonialUpdate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid(), payload: updateTestimonialSchema }))
+  .handler(async ({ data }): Promise<AdminMutationResult<Testimonial>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/testimonials/:id' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      const { id, payload } = data;
+      try {
+        return {
+          ok: true,
+          data: await client.admin.testimonials.update({ param: { id }, json: payload }),
+        };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// PUT /api/v1/admin/testimonials/order
+export const saveAdminTestimonialOrder = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(testimonialOrderSchema)
+  .handler(async ({ data }): Promise<AdminMutationResult<Testimonial[]>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/testimonials/order' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      try {
+        return { ok: true, data: await client.admin.testimonials.setOrder(data) };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// POST /api/v1/admin/print-sizes
+export const saveAdminPrintSizeCreate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(createPrintSizeSchema)
+  .handler(async ({ data }): Promise<AdminMutationResult<PrintSize>> => {
+    return startSpan({ name: 'POST /api/v1/admin/print-sizes' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      try {
+        return { ok: true, data: await client.admin.printSizes.create(data) };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// PUT /api/v1/admin/print-sizes/:id
+export const saveAdminPrintSizeUpdate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid(), payload: updatePrintSizeSchema }))
+  .handler(async ({ data }): Promise<AdminMutationResult<PrintSize>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/print-sizes/:id' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      const { id, payload } = data;
+      try {
+        return {
+          ok: true,
+          data: await client.admin.printSizes.update({ param: { id }, json: payload }),
+        };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// POST /api/v1/admin/attires
+export const saveAdminAttireCreate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(createAttireSchema)
+  .handler(async ({ data }): Promise<AdminMutationResult<Attire>> => {
+    return startSpan({ name: 'POST /api/v1/admin/attires' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      try {
+        return { ok: true, data: await client.admin.attires.create(data) };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// PUT /api/v1/admin/attires/:id
+export const saveAdminAttireUpdate = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid(), payload: updateAttireSchema }))
+  .handler(async ({ data }): Promise<AdminMutationResult<Attire>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/attires/:id' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      const { id, payload } = data;
+      try {
+        return {
+          ok: true,
+          data: await client.admin.attires.update({ param: { id }, json: payload }),
         };
       } catch (error) {
         if (error instanceof ApiClientError) {

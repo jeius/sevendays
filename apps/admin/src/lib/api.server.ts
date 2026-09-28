@@ -2,7 +2,8 @@ import { type ApiClient, createApiClient } from '@sevendays/api-client';
 
 // Server-only (ADR-0006): the API base URL and the client embedding it must
 // never reach a client bundle. The server functions in api.functions.ts are
-// the only permitted importers of this module.
+// the only permitted importers of this module, alongside the gallery thumb
+// proxy route (`routes/api/admin/gallery-photos/$id.thumb.ts`).
 export function getApiUrl(): string {
   const url = process.env.API_URL;
   if (typeof url !== 'string' || url.trim() === '') {

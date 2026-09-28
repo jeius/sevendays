@@ -8,23 +8,29 @@ import type {
   AddonService,
   Attire,
   Branch,
+  GalleryCategory,
+  GalleryPhoto,
   MediaPresignResponse,
   PrintSize,
   ServicePackageRead,
   StudioServiceWithBranches,
+  Testimonial,
 } from '@sevendays/types';
 import {
   addonServiceSchema,
   attireSchema,
   branchSchema,
+  galleryCategorySchema,
+  galleryPhotoSchema,
   mediaPresignResponseSchema,
   printSizeSchema,
   servicePackageReadSchema,
   studioServiceWithBranchesSchema,
+  testimonialSchema,
 } from '@sevendays/types';
 import type { InferRequestType } from 'hono/client';
 import type { RpcClient } from '../client.js';
-import { unwrap } from '../unwrap.js';
+import { unwrap, unwrapError } from '../unwrap.js';
 
 // Type-flow law (pinned): every path rides the admin subtree of the built
 // AppType — a route rename in the API breaks THIS file's compile (the
@@ -84,6 +90,74 @@ type GetAdminAddonArgs = InferRequestType<GetAdminAddonEndpoint>;
 export type CreateAddonArgs = InferRequestType<CreateAdminAddonEndpoint>['json'];
 /** The addon PUT args: path id + the full-object update payload. */
 export type UpdateAddonArgs = InferRequestType<UpdateAdminAddonEndpoint>;
+
+// gallery-categories (#141: CRUD + the display-order PUT).
+type GetAdminGalleryCategoryEndpoint = AdminRpc['gallery-categories'][':id']['$get'];
+type CreateAdminGalleryCategoryEndpoint = AdminRpc['gallery-categories']['$post'];
+type UpdateAdminGalleryCategoryEndpoint = AdminRpc['gallery-categories'][':id']['$put'];
+type SetGalleryCategoryOrderEndpoint = AdminRpc['gallery-categories']['order']['$put'];
+
+type GetAdminGalleryCategoryArgs = InferRequestType<GetAdminGalleryCategoryEndpoint>;
+/** The gallery-category create body, as the RPC surface declares it. */
+export type CreateGalleryCategoryArgs =
+  InferRequestType<CreateAdminGalleryCategoryEndpoint>['json'];
+/** The gallery-category PUT args: path id + the full-object update payload. */
+export type UpdateGalleryCategoryArgs = InferRequestType<UpdateAdminGalleryCategoryEndpoint>;
+/** The gallery-category order PUT body: the full-replace `{ categoryIds }` list. */
+export type GalleryCategoryOrderArgs = InferRequestType<SetGalleryCategoryOrderEndpoint>['json'];
+
+// gallery-photos (#141: CRUD + order + the binary by-id thumb seam).
+type GetAdminGalleryPhotoEndpoint = AdminRpc['gallery-photos'][':id']['$get'];
+type CreateAdminGalleryPhotoEndpoint = AdminRpc['gallery-photos']['$post'];
+type UpdateAdminGalleryPhotoEndpoint = AdminRpc['gallery-photos'][':id']['$put'];
+type SetGalleryPhotoOrderEndpoint = AdminRpc['gallery-photos']['order']['$put'];
+type GetGalleryPhotoThumbEndpoint = AdminRpc['gallery-photos'][':id']['thumb']['$get'];
+
+type GetAdminGalleryPhotoArgs = InferRequestType<GetAdminGalleryPhotoEndpoint>;
+/** The gallery-photo create body, as the RPC surface declares it. */
+export type CreateGalleryPhotoArgs = InferRequestType<CreateAdminGalleryPhotoEndpoint>['json'];
+/** The gallery-photo PUT args: path id + the full-object update payload. */
+export type UpdateGalleryPhotoArgs = InferRequestType<UpdateAdminGalleryPhotoEndpoint>;
+/** The gallery-photo order PUT body: the full-replace `{ photoIds }` list. */
+export type GalleryPhotoOrderArgs = InferRequestType<SetGalleryPhotoOrderEndpoint>['json'];
+/** The by-id thumb GET args: `{ param: { id } }`. */
+export type GetGalleryPhotoThumbArgs = InferRequestType<GetGalleryPhotoThumbEndpoint>;
+
+// testimonials (#141: CRUD + the display-order PUT).
+type GetAdminTestimonialEndpoint = AdminRpc['testimonials'][':id']['$get'];
+type CreateAdminTestimonialEndpoint = AdminRpc['testimonials']['$post'];
+type UpdateAdminTestimonialEndpoint = AdminRpc['testimonials'][':id']['$put'];
+type SetTestimonialOrderEndpoint = AdminRpc['testimonials']['order']['$put'];
+
+type GetAdminTestimonialArgs = InferRequestType<GetAdminTestimonialEndpoint>;
+/** The testimonial create body, as the RPC surface declares it. */
+export type CreateTestimonialArgs = InferRequestType<CreateAdminTestimonialEndpoint>['json'];
+/** The testimonial PUT args: path id + the full-object update payload. */
+export type UpdateTestimonialArgs = InferRequestType<UpdateAdminTestimonialEndpoint>;
+/** The testimonial order PUT body: the full-replace `{ testimonialIds }` list. */
+export type TestimonialOrderArgs = InferRequestType<SetTestimonialOrderEndpoint>['json'];
+
+// print-sizes (#141 CRUD growth from #139's GET-only lookup rider).
+type GetAdminPrintSizeEndpoint = AdminRpc['print-sizes'][':id']['$get'];
+type CreateAdminPrintSizeEndpoint = AdminRpc['print-sizes']['$post'];
+type UpdateAdminPrintSizeEndpoint = AdminRpc['print-sizes'][':id']['$put'];
+
+type GetAdminPrintSizeArgs = InferRequestType<GetAdminPrintSizeEndpoint>;
+/** The print-size create body, as the RPC surface declares it. */
+export type CreatePrintSizeArgs = InferRequestType<CreateAdminPrintSizeEndpoint>['json'];
+/** The print-size PUT args: path id + the full-object update payload. */
+export type UpdatePrintSizeArgs = InferRequestType<UpdateAdminPrintSizeEndpoint>;
+
+// attires (#141 CRUD growth from #139's GET-only lookup rider).
+type GetAdminAttireEndpoint = AdminRpc['attires'][':id']['$get'];
+type CreateAdminAttireEndpoint = AdminRpc['attires']['$post'];
+type UpdateAdminAttireEndpoint = AdminRpc['attires'][':id']['$put'];
+
+type GetAdminAttireArgs = InferRequestType<GetAdminAttireEndpoint>;
+/** The attire create body, as the RPC surface declares it. */
+export type CreateAttireArgs = InferRequestType<CreateAdminAttireEndpoint>['json'];
+/** The attire PUT args: path id + the full-object update payload. */
+export type UpdateAttireArgs = InferRequestType<UpdateAdminAttireEndpoint>;
 
 // media (ticket 02's presign route).
 type PresignEndpoint = AdminRpc['media']['presign']['$post'];
@@ -205,7 +279,7 @@ export function adminAddonServices(raw: RpcClient) {
   };
 }
 
-/** Print Size wrappers over /api/v1/admin/print-sizes — GET-only (AQ-2: the package editor's lookup vocabulary incl. deactivated rows; CRUD is #141's). */
+/** Print Size wrappers over /api/v1/admin/print-sizes (#139's lookup list grew the full CRUD in #141 — the package editor's vocabulary incl. deactivated rows). */
 export function adminPrintSizes(raw: RpcClient) {
   return {
     /** GET /api/v1/admin/print-sizes — ALL print sizes incl. deactivated. */
@@ -213,16 +287,147 @@ export function adminPrintSizes(raw: RpcClient) {
       const res = await raw.api.v1.admin['print-sizes'].$get();
       return unwrap(res, printSizeSchema.array());
     },
+    /** GET /api/v1/admin/print-sizes/:id — one print size; 404 when unknown. */
+    async byId(args: GetAdminPrintSizeArgs): Promise<PrintSize> {
+      const res = await raw.api.v1.admin['print-sizes'][':id'].$get(args);
+      return unwrap(res, printSizeSchema);
+    },
+    /** POST /api/v1/admin/print-sizes — 201 with the created print size. */
+    async create(json: CreatePrintSizeArgs): Promise<PrintSize> {
+      const res = await raw.api.v1.admin['print-sizes'].$post({ json });
+      return unwrap(res, printSizeSchema);
+    },
+    /** PUT /api/v1/admin/print-sizes/:id — full-object update; the refreshed print size. */
+    async update(args: UpdatePrintSizeArgs): Promise<PrintSize> {
+      const res = await raw.api.v1.admin['print-sizes'][':id'].$put(args);
+      return unwrap(res, printSizeSchema);
+    },
   };
 }
 
-/** Attire wrappers over /api/v1/admin/attires — GET-only (AQ-2, same ruling as print sizes; CRUD is #141's). */
+/** Attire wrappers over /api/v1/admin/attires (#139's lookup list grew the full CRUD in #141 — same growth as print sizes). */
 export function adminAttires(raw: RpcClient) {
   return {
     /** GET /api/v1/admin/attires — ALL attires incl. deactivated. */
     async list(): Promise<Attire[]> {
       const res = await raw.api.v1.admin.attires.$get();
       return unwrap(res, attireSchema.array());
+    },
+    /** GET /api/v1/admin/attires/:id — one attire; 404 when unknown. */
+    async byId(args: GetAdminAttireArgs): Promise<Attire> {
+      const res = await raw.api.v1.admin.attires[':id'].$get(args);
+      return unwrap(res, attireSchema);
+    },
+    /** POST /api/v1/admin/attires — 201 with the created attire. */
+    async create(json: CreateAttireArgs): Promise<Attire> {
+      const res = await raw.api.v1.admin.attires.$post({ json });
+      return unwrap(res, attireSchema);
+    },
+    /** PUT /api/v1/admin/attires/:id — full-object update; the refreshed attire. */
+    async update(args: UpdateAttireArgs): Promise<Attire> {
+      const res = await raw.api.v1.admin.attires[':id'].$put(args);
+      return unwrap(res, attireSchema);
+    },
+  };
+}
+
+/** Gallery Category wrappers over /api/v1/admin/gallery-categories (CRUD + the display-order PUT, #141). */
+export function adminGalleryCategories(raw: RpcClient) {
+  return {
+    /** GET /api/v1/admin/gallery-categories — ALL categories incl. deactivated. */
+    async list(): Promise<GalleryCategory[]> {
+      const res = await raw.api.v1.admin['gallery-categories'].$get();
+      return unwrap(res, galleryCategorySchema.array());
+    },
+    /** GET /api/v1/admin/gallery-categories/:id — one category; 404 when unknown. */
+    async byId(args: GetAdminGalleryCategoryArgs): Promise<GalleryCategory> {
+      const res = await raw.api.v1.admin['gallery-categories'][':id'].$get(args);
+      return unwrap(res, galleryCategorySchema);
+    },
+    /** POST /api/v1/admin/gallery-categories — 201 with the created category (slug server-generated). */
+    async create(json: CreateGalleryCategoryArgs): Promise<GalleryCategory> {
+      const res = await raw.api.v1.admin['gallery-categories'].$post({ json });
+      return unwrap(res, galleryCategorySchema);
+    },
+    /** PUT /api/v1/admin/gallery-categories/:id — full-object update; the refreshed category. */
+    async update(args: UpdateGalleryCategoryArgs): Promise<GalleryCategory> {
+      const res = await raw.api.v1.admin['gallery-categories'][':id'].$put(args);
+      return unwrap(res, galleryCategorySchema);
+    },
+    /** PUT /api/v1/admin/gallery-categories/order — full-replace display order; the reordered list. */
+    async setOrder(json: GalleryCategoryOrderArgs): Promise<GalleryCategory[]> {
+      const res = await raw.api.v1.admin['gallery-categories']['order'].$put({ json });
+      return unwrap(res, galleryCategorySchema.array());
+    },
+  };
+}
+
+/** Gallery Photo wrappers over /api/v1/admin/gallery-photos (CRUD + order + the binary by-id thumb seam, #141). */
+export function adminGalleryPhotos(raw: RpcClient) {
+  return {
+    /** GET /api/v1/admin/gallery-photos — ALL photos incl. deactivated, photoUrl resolved. */
+    async list(): Promise<GalleryPhoto[]> {
+      const res = await raw.api.v1.admin['gallery-photos'].$get();
+      return unwrap(res, galleryPhotoSchema.array());
+    },
+    /** GET /api/v1/admin/gallery-photos/:id — one photo; 404 when unknown. */
+    async byId(args: GetAdminGalleryPhotoArgs): Promise<GalleryPhoto> {
+      const res = await raw.api.v1.admin['gallery-photos'][':id'].$get(args);
+      return unwrap(res, galleryPhotoSchema);
+    },
+    /** POST /api/v1/admin/gallery-photos — 201 with the created photo (the staging key is commit-verified and promoted at persist). */
+    async create(json: CreateGalleryPhotoArgs): Promise<GalleryPhoto> {
+      const res = await raw.api.v1.admin['gallery-photos'].$post({ json });
+      return unwrap(res, galleryPhotoSchema);
+    },
+    /** PUT /api/v1/admin/gallery-photos/:id — full-object update; the refreshed photo. */
+    async update(args: UpdateGalleryPhotoArgs): Promise<GalleryPhoto> {
+      const res = await raw.api.v1.admin['gallery-photos'][':id'].$put(args);
+      return unwrap(res, galleryPhotoSchema);
+    },
+    /** PUT /api/v1/admin/gallery-photos/order — full-replace display order; the reordered list. */
+    async setOrder(json: GalleryPhotoOrderArgs): Promise<GalleryPhoto[]> {
+      const res = await raw.api.v1.admin['gallery-photos']['order'].$put({ json });
+      return unwrap(res, galleryPhotoSchema.array());
+    },
+    /** GET /api/v1/admin/gallery-photos/:id/thumb — BINARY seam: a 2xx returns the raw Response untouched (never unwrapped); non-2xx throws the envelope error via unwrapError. */
+    async thumbResponse(args: GetGalleryPhotoThumbArgs): Promise<Response> {
+      const res = await raw.api.v1.admin['gallery-photos'][':id']['thumb'].$get(args);
+      if (!res.ok) {
+        await unwrapError(res);
+      }
+      return res;
+    },
+  };
+}
+
+/** Testimonial wrappers over /api/v1/admin/testimonials (CRUD + the display-order PUT, #141). */
+export function adminTestimonials(raw: RpcClient) {
+  return {
+    /** GET /api/v1/admin/testimonials — ALL testimonials incl. deactivated. */
+    async list(): Promise<Testimonial[]> {
+      const res = await raw.api.v1.admin.testimonials.$get();
+      return unwrap(res, testimonialSchema.array());
+    },
+    /** GET /api/v1/admin/testimonials/:id — one testimonial; 404 when unknown. */
+    async byId(args: GetAdminTestimonialArgs): Promise<Testimonial> {
+      const res = await raw.api.v1.admin.testimonials[':id'].$get(args);
+      return unwrap(res, testimonialSchema);
+    },
+    /** POST /api/v1/admin/testimonials — 201 with the created testimonial. */
+    async create(json: CreateTestimonialArgs): Promise<Testimonial> {
+      const res = await raw.api.v1.admin.testimonials.$post({ json });
+      return unwrap(res, testimonialSchema);
+    },
+    /** PUT /api/v1/admin/testimonials/:id — full-object update; the refreshed testimonial. */
+    async update(args: UpdateTestimonialArgs): Promise<Testimonial> {
+      const res = await raw.api.v1.admin.testimonials[':id'].$put(args);
+      return unwrap(res, testimonialSchema);
+    },
+    /** PUT /api/v1/admin/testimonials/order — full-replace display order; the reordered list. */
+    async setOrder(json: TestimonialOrderArgs): Promise<Testimonial[]> {
+      const res = await raw.api.v1.admin.testimonials['order'].$put({ json });
+      return unwrap(res, testimonialSchema.array());
     },
   };
 }
@@ -248,5 +453,8 @@ export function adminRoutes(raw: RpcClient) {
     printSizes: adminPrintSizes(raw),
     attires: adminAttires(raw),
     media: adminMedia(raw),
+    galleryCategories: adminGalleryCategories(raw),
+    galleryPhotos: adminGalleryPhotos(raw),
+    testimonials: adminTestimonials(raw),
   };
 }
