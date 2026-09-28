@@ -1,9 +1,11 @@
-// The testimonials route (M5 #141): the gated shell's testimonials entry
-// point. The screen (Task 8) will own its state (person-main rows + the
-// grip-handle reorder) and take over this render — the route only mounts
-// the pinned PageHeader + a temporary placeholder until then.
+// The testimonials route (M5 #141, Task 8): the gated shell's testimonials
+// entry point. The screen owns its state (person-main rows + the
+// grip-handle reorder + the editor wiring) and composes its own PageHeader
+// (the `New testimonial` action toggles the screen's create state, so the
+// header lives where the state lives) — the route only mounts it under the
+// pinned head title.
 import { createFileRoute } from '@tanstack/react-router';
-import { PageHeader } from '#/components/cms/shared';
+import { TestimonialsScreen } from '#/components/testimonials/testimonials-screen';
 
 export const Route = createFileRoute('/_shell/testimonials')({
   head: () => ({ meta: [{ title: 'Testimonials | Sevendays Admin' }] }),
@@ -11,10 +13,5 @@ export const Route = createFileRoute('/_shell/testimonials')({
 });
 
 function TestimonialsPage() {
-  return (
-    <>
-      <PageHeader title='Testimonials' subline='Client quotes shown on the /about page, ordered.' />
-      <p className='text-muted-foreground text-sm'>Screen lands in Task 8.</p>
-    </>
-  );
+  return <TestimonialsScreen />;
 }
