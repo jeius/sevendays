@@ -1,9 +1,10 @@
 // Indeterminate ruling (#155, ADR-0017): a partial selection renders the
 // check in the UNFILLED box with a primary border — distinct from the
-// filled full-check at a glance. Base UI 1.8.0 rides `data-indeterminate`
-// alongside `data-unchecked` (the value stays false), and the Indicator
-// renders for checked OR indeterminate — so the glyph needs no swap, only
-// the deliberate border. `aria-checked="mixed"` is Base UI's own and stays.
+// filled full-check at a glance. Base UI 1.8.0's partial state emits ONLY
+// `data-indeterminate` (the `checked` attribute mapping returns empty), so
+// the box keeps its unfilled background, and the Indicator renders for
+// checked OR indeterminate — the glyph needs no swap, only the deliberate
+// border. `aria-checked="mixed"` is Base UI's own and stays.
 import { Checkbox as CheckboxPrimitive } from '@base-ui/react/checkbox';
 import { cn } from 'cn';
 import { CheckIcon } from 'lucide-react';
