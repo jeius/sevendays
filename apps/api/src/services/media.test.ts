@@ -20,7 +20,7 @@ const CREDS = {
 // options the service chose, delete records deletions. Assertions run
 // against the recorded calls, so promote/delete semantics are pinned
 // exactly (toHaveBeenCalledWith-equivalent, without a mock's looseness).
-function stubBucket(initial: Record<string, { size: number; contentType: string }> = {}) {
+function stubBucket(initial: Record<string, { size: number; contentType?: string }> = {}) {
   const objects = new Map(
     Object.entries(initial).map(([key, meta]) => [key, { ...meta, deleted: false }])
   );
@@ -217,6 +217,25 @@ describe('commitUpload', () => {
     expect(result.reason).toBe('cap_violation');
     expect(result.details).toEqual([
       { path: ['contentType'], message: expect.stringContaining('image/png') },
+    ]);
+    expect(stub.deleteCalls).toEqual([STAGING_KEY]);
+    expect(stub.putCalls).toEqual([]);
+  });
+
+  it('an object stored with NO contentType fails the caps check as (none) and is deleted', async () => {
+    // The ?? "" fallback branch (#136 T4 minor): R2 hands head() an
+    // httpMetadata object whose contentType is undefined when the PUT
+    // carried none — the violation message must name (none), not crash.
+    const stub = stubBucket({ [STAGING_KEY]: { size: 1024 } });
+    const result = await commitUpload(stub.bucket, {
+      stagingKey: STAGING_KEY,
+      purpose: 'gallery-photo',
+    });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.reason).toBe('cap_violation');
+    expect(result.details).toEqual([
+      { path: ['contentType'], message: 'stored content type (none) is not allowed' },
     ]);
     expect(stub.deleteCalls).toEqual([STAGING_KEY]);
     expect(stub.putCalls).toEqual([]);
