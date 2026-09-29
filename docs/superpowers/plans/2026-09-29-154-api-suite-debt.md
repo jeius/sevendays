@@ -326,7 +326,9 @@ Still in `describe('add-on services admin CRUD')`, extend the existing `'PUT fli
 
 - [ ] **Step 3: The two deactivation-blind matrix tests (admin-studio-services.test.ts)**
 
-The file's first line is `import { branchStudioServices, studioServiceAddonServices } from '@sevendays/db';` — change it to add `branches` (the ghost-branch insert below needs it): ```ts
+The file's first line is `import { branchStudioServices, studioServiceAddonServices } from '@sevendays/db';` — change it to:
+
+```ts
 import { branchStudioServices, branches, studioServiceAddonServices } from '@sevendays/db';
 ```
 
