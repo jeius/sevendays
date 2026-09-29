@@ -35,6 +35,8 @@ import {
   ExpandPanel,
   ExpandRow,
   peso,
+  QUERY_ERROR_LINE,
+  QueryErrorState,
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
@@ -53,7 +55,7 @@ interface FlipInput {
 const PENDING_ROW_KEYS = ['row-1', 'row-2', 'row-3', 'row-4'];
 
 export function PackagesTable() {
-  const { data: packages, isPending } = useQuery(adminPackageQueries.all());
+  const { data: packages, isPending, isError, refetch } = useQuery(adminPackageQueries.all());
   const queryClient = useQueryClient();
   // T3: controlled disclosure — one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -117,6 +119,17 @@ export function PackagesTable() {
       >
         <SquarePen aria-hidden='true' />
       </Button>
+    );
+  }
+
+  if (isError) {
+    return (
+      <QueryErrorState
+        line={QUERY_ERROR_LINE}
+        onRetry={() => {
+          void refetch();
+        }}
+      />
     );
   }
 

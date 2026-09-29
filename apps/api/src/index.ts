@@ -3,7 +3,8 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import type { Env } from './env.js';
 import { v1 } from './routes/v1.js';
-import { internalError } from './services/errors.js';
+import { internalError, serviceUnavailable } from './services/errors.js';
+import { MissingR2CredentialsError } from './services/media.js';
 
 const app = new Hono<{ Bindings: Env }>()
   .use('*', logger())
@@ -22,6 +23,14 @@ const app = new Hono<{ Bindings: Env }>()
   // outage is visible as 500s while uptime monitoring still sees the Worker up.
   .onError((error, c) => {
     console.error(`[api] ${c.req.method} ${c.req.path} failed:`, error);
+    // Leak-safe detail channel (#155): the one deploy-time misconfiguration
+    // operators must tell apart from generic infra failure answers a curated
+    // 503 line; every other throw keeps the uniform 500. The loud detail
+    // (secret names, runbook path) stays in the log above — never the
+    // response.
+    if (error instanceof MissingR2CredentialsError) {
+      return serviceUnavailable(c, 'Media uploads are not configured.');
+    }
     return internalError(c);
   })
 

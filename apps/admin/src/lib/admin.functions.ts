@@ -52,8 +52,10 @@ import { getSessionScopedApiClient } from './api.server';
 
 // Mutations-as-results (the #139 plan ruling): a write server fn resolves to
 // this union instead of throwing, so the API's 400 field details cross the
-// serialization boundary intact. Reads stay throwing — query error state
-// carries the message.
+// serialization boundary intact. The package READ is result-valued too
+// (#155 fix round: the RPC boundary erases the thrown ApiClientError class,
+// so its status rides the result) — other reads stay throwing; query error
+// state carries the message.
 export type AdminMutationResult<T> =
   | { ok: true; data: T }
   | { ok: false; status: number; message: string; details?: unknown };
@@ -70,9 +72,20 @@ export const fetchAdminPackage = createServerFn({ method: 'GET' })
   .validator(z.object({ id: z.uuid() }))
   .handler(async ({ data }) => {
     return startSpan({ name: 'GET /api/v1/admin/service-packages/:id' }, async () => {
-      return getSessionScopedApiClient(
-        getRequestHeaders().get('cookie')
-      ).admin.servicePackages.byId({ param: { id: data.id } });
+      try {
+        const read = await getSessionScopedApiClient(
+          getRequestHeaders().get('cookie')
+        ).admin.servicePackages.byId({ param: { id: data.id } });
+        return { ok: true as const, data: read };
+      } catch (error) {
+        // The RPC boundary erases the ApiClientError class — a client-side
+        // instanceof can never match (#155 live-frame finding). Surface the
+        // status through the RESULT instead.
+        if (error instanceof ApiClientError) {
+          return { ok: false as const, status: error.status, message: error.message };
+        }
+        throw error;
+      }
     });
   });
 

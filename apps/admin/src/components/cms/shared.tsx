@@ -93,6 +93,42 @@ export function EmptyState({ line, children }: { line: string; children?: ReactN
   );
 }
 
+/** Owner-ratified 2026-09-29 (#155): the admin list-screens' failed-read line. */
+export const QUERY_ERROR_LINE = 'Couldn’t load this page.';
+
+/** Owner-ratified 2026-09-29 (#155): the package editor's not-found line. */
+export const PACKAGE_NOT_FOUND_LINE = 'This package doesn’t exist or was removed.';
+
+/**
+ * The query-error posture (#155 ruling): a failed read renders this — never
+ * the skeleton-forever the `|| !data` pending arm would otherwise hold. The
+ * line and the Retry affordance are owner-ratified copy; onRetry re-runs the
+ * caller's failed query(ies). The not-found variant (the editor's 404) passes
+ * NO onRetry and a child action instead — retrying a 404 is a lie.
+ */
+export function QueryErrorState({
+  line,
+  onRetry,
+  children,
+}: {
+  line: string;
+  onRetry?: () => void;
+  children?: ReactNode;
+}) {
+  return (
+    <EmptyState line={line}>
+      <div className='flex items-center justify-center gap-2'>
+        {onRetry ? (
+          <Button variant='outline' type='button' onClick={onRetry}>
+            Retry
+          </Button>
+        ) : null}
+        {children}
+      </div>
+    </EmptyState>
+  );
+}
+
 /**
  * The animated expand mechanism: a persistent grid whose template-rows
  * transition 0fr ↔ 1fr animates open AND closed (Base UI's Collapsible panel

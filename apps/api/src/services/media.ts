@@ -30,9 +30,11 @@ const FINAL_PREFIXES: Record<MediaPurpose, string> = {
 const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 
 /** Deploy-time misconfiguration (the BETTER_AUTH_SECRET posture): the route
- * does not catch this — the root onError logs it and answers the uniform
- * 500, so a Worker without the owner-minted token fails presign loudly
- * instead of silently handing out unsigned URLs. */
+ * does not catch this — the root onError logs the loud detail and answers
+ * the curated 503 'Media uploads are not configured.' (#155's leak-safe
+ * channel: operators distinguish missing tokens from generic infra failure;
+ * env names never leave the Worker), so a Worker without the owner-minted
+ * token fails presign loudly instead of silently handing out unsigned URLs. */
 export class MissingR2CredentialsError extends Error {
   constructor() {
     super(

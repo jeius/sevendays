@@ -160,7 +160,7 @@ describe('POST /api/v1/admin/media/presign', () => {
     expect(upload.searchParams.get('X-Amz-SignedHeaders')).toBe('content-type;host');
   });
 
-  it('fails presign with the uniform 500 + log when the S3-token pair is absent (loud, never silent)', async () => {
+  it('fails presign with the curated 503 + the loud log when the S3-token pair is absent (leak-safe detail, #155)', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { token } = await signUpSession(url, 'presign-nocreds@sevendays.test');
     const res = await app.request(
@@ -172,8 +172,8 @@ describe('POST /api/v1/admin/media/presign', () => {
       },
       { ...testEnv(url), ...MEDIA_VARS }
     );
-    expect(res.status).toBe(500);
-    expect(await res.json()).toEqual({ error: 'Internal server error.' });
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: 'Media uploads are not configured.' });
     expect(spy.mock.calls.some((call) => String(call[0]).startsWith('[api]'))).toBe(true);
   });
 });
