@@ -1,4 +1,4 @@
-import { branchStudioServices, studioServiceAddonServices } from '@sevendays/db';
+import { branches, branchStudioServices, studioServiceAddonServices } from '@sevendays/db';
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
@@ -133,6 +133,15 @@ describe('studio services admin CRUD', () => {
     );
     expect(res.status).toBe(200);
     expect(((await res.json()) as { isActive: boolean }).isActive).toBe(false);
+    // The round-trip (#137 T9): the assembled admin GET still shows the
+    // deactivated service — links embedded, isActive false.
+    const after = await authed(
+      'GET',
+      `/api/v1/admin/studio-services/${ids.serviceStudio}`,
+      'admin-services-put-after@sevendays.test'
+    );
+    expect(after.status).toBe(200);
+    expect(((await after.json()) as { isActive: boolean }).isActive).toBe(false);
   });
 
   it('PUT unknown id → 404', async () => {
@@ -201,6 +210,31 @@ describe('the branch matrix (PUT /:id/branches — full-replace, one transaction
     expect(res.status).toBe(200);
     expect(((await res.json()) as { bookableBranchIds: string[] }).bookableBranchIds).toEqual([]);
   });
+
+  it('a DEACTIVATED branch id still links — the existence check is deactivation-blind by ruling', async () => {
+    // #137 T4 minor: the admin composes from admin reads (deactivated rows
+    // included); activity filtering is read-side, never write-side.
+    const [ghost] = await db
+      .insert(branches)
+      .values({
+        name: 'Ghost Branch',
+        address: 'Nowhere St',
+        phone: '+63 900 000 009',
+        isActive: false,
+      })
+      .returning({ id: branches.id });
+    if (!ghost) throw new Error('ghost branch insert returned no row');
+    const res = await authed(
+      'PUT',
+      `/api/v1/admin/studio-services/${ids.servicePortrait}/branches`,
+      'admin-matrix-branch-ghost@sevendays.test',
+      { branchIds: [ghost.id] }
+    );
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { bookableBranchIds: string[] }).bookableBranchIds).toEqual([
+      ghost.id,
+    ]);
+  });
 });
 
 describe('the add-on matrix (PUT /:id/addons — full-replace, one transaction)', () => {
@@ -237,6 +271,19 @@ describe('the add-on matrix (PUT /:id/addons — full-replace, one transaction)'
       .from(studioServiceAddonServices)
       .where(eq(studioServiceAddonServices.studioServiceId, ids.servicePortrait));
     expect(after).toHaveLength(before.length);
+  });
+
+  it('a DEACTIVATED add-on id still links (deactivation-blind, same ruling)', async () => {
+    const res = await authed(
+      'PUT',
+      `/api/v1/admin/studio-services/${ids.servicePortrait}/addons`,
+      'admin-matrix-addon-retired@sevendays.test',
+      { addonServiceIds: [ids.addonRetired] }
+    );
+    expect(res.status).toBe(200);
+    expect(
+      ((await res.json()) as { applicableAddonServiceIds: string[] }).applicableAddonServiceIds
+    ).toEqual([ids.addonRetired]);
   });
 
   it('anonymous POST with a validation-bait body → the 401 envelope BEFORE validation', async () => {
