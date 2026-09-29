@@ -415,6 +415,11 @@ export function DeactivateConfirm({
  * WAAPI so Base UI's getAnimations() unmount gate holds the popup until the
  * exit finishes. The visible-latch + onExitComplete discipline is identical
  * to DeactivateConfirm's (the screens render the editor conditionally).
+ *
+ * Veto contract: onSave may THROW to keep the editor open (validation
+ * holds, AQ-5). The Save button closes only when onSave returns normally;
+ * a throw is swallowed — the screen's inline errors + toast are the UX,
+ * and React never sees the error.
  */
 export function LightEntityEditor({
   title,
@@ -486,8 +491,14 @@ export function LightEntityEditor({
               <Button
                 type='button'
                 onClick={() => {
-                  onSave();
-                  setVisible(false);
+                  try {
+                    onSave();
+                    setVisible(false);
+                  } catch {
+                    // Vetoed: the screen keeps the editor open and signals
+                    // inline (AQ-5). The synchronous throw is the documented
+                    // keep-open channel — swallowed here, never console noise.
+                  }
                 }}
               >
                 {saveLabel ?? 'Save changes'}

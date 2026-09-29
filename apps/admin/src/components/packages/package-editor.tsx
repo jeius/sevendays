@@ -244,16 +244,18 @@ function InclusionEditorRow({
           lines under the controls they name. */}
       {errors ? (
         <div className='space-y-0.5'>
-          {[
-            errors.quantity,
-            errors.printSizeId,
-            errors.attires,
-            errors.description,
-            errors.frameToken,
-          ]
-            .filter((message): message is string => message !== undefined)
-            .map((message) => (
-              <p key={message} className='text-destructive text-xs'>
+          {(
+            [
+              ['quantity', errors.quantity],
+              ['printSizeId', errors.printSizeId],
+              ['attires', errors.attires],
+              ['description', errors.description],
+              ['frameToken', errors.frameToken],
+            ] as [string, string | undefined][]
+          )
+            .filter((pair): pair is [string, string] => pair[1] !== undefined)
+            .map(([slot, message]) => (
+              <p key={slot} className='text-destructive text-xs'>
                 {message}
               </p>
             ))}
