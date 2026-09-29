@@ -59,7 +59,7 @@ describe('mediaStagingKeySchema', () => {
     expect(mediaStagingKeySchema.safeParse(STAGING_KEY).success).toBe(true);
   });
 
-  it('rejects final keys, traversal, and uppercase uuids (foreign-key commit gate)', () => {
+  it('rejects final keys, traversal, uppercase uuids, and non-jpeg extensions (foreign-key commit gate)', () => {
     expect(
       mediaStagingKeySchema.safeParse('covers/00000000-0000-4000-8000-000000000000.jpg').success
     ).toBe(false);
@@ -69,6 +69,11 @@ describe('mediaStagingKeySchema', () => {
     expect(mediaStagingKeySchema.safeParse('tmp/../../covers/victim.jpg').success).toBe(false);
     expect(
       mediaStagingKeySchema.safeParse('tmp/00000000-0000-4000-8000-000000000000.JPG').success
+    ).toBe(false);
+    // #154 (the #136 T3 one-liner): a lowercase NON-JPEG extension is its own
+    // reject case — the regex pins the extension, not just letter case.
+    expect(
+      mediaStagingKeySchema.safeParse('tmp/00000000-0000-4000-8000-000000000000.txt').success
     ).toBe(false);
     expect(mediaStagingKeySchema.safeParse('tmp/short.jpg').success).toBe(false);
   });

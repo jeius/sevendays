@@ -54,13 +54,17 @@ function stubImages(marker = 'WEBP-MARKER-BYTES') {
 
 // Stub R2 bucket for the thumb legs: get returns metadata + a one-chunk body
 // (the service reads .size and streams .body — exactly what R2ObjectBody gives).
-function stubMediaBucket(options: { size: number; body?: string }) {
+// contentType: undefined keeps the historical 'image/jpeg' default for the
+// existing tests; a distinct string proves flow-through; null models an
+// object stored with NO contentType (the service's ?? octet-stream branch).
+function stubMediaBucket(options: { size: number; body?: string; contentType?: string | null }) {
+  const contentType = options.contentType === undefined ? 'image/jpeg' : options.contentType;
   return {
     async get(key: string) {
       return {
         key,
         size: options.size,
-        httpMetadata: { contentType: 'image/jpeg' },
+        httpMetadata: { contentType: contentType ?? undefined },
         body: new ReadableStream<Uint8Array>({
           start(controller) {
             controller.enqueue(new TextEncoder().encode(options.body ?? 'ORIGINAL-JPEG-BYTES'));
@@ -253,5 +257,62 @@ describe('GET /api/v1/admin/gallery-photos/:id/thumb', () => {
     expect(res.headers.get('content-type')).toBe('image/jpeg');
     expect(await res.text()).toBe('HUGE-ORIGINAL');
     expect(images.calls).toEqual([]);
+  });
+
+  it('the over-20 MB fallback serves the STORED content type — a marker value proves flow-through, not a constant', async () => {
+    // #136 T5 minor: the stub's hardcoded image/jpeg made the existing
+    // fallback assert indistinguishable from a hardcoded constant; a stored
+    // marker type must arrive in the response headers verbatim.
+    const { token } = await signUpSession(url, 'thumb-stored-type@sevendays.test');
+    const row = await insertPhoto('gallery/00000000-0000-4000-8000-000000000001.jpg');
+    const bucket = stubMediaBucket({
+      size: 20 * 1024 * 1024 + 1,
+      body: 'MARKER-ORIGINAL',
+      contentType: 'image/x-stored-marker',
+    });
+    const images = stubImages();
+    const res = await app.request(
+      `/api/v1/admin/gallery-photos/${row.id}/thumb`,
+      { headers: bearer(token) },
+      withCreds({ MEDIA_BUCKET: bucket, IMAGES: images.binding })
+    );
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('image/x-stored-marker');
+    expect(await res.text()).toBe('MARKER-ORIGINAL');
+    expect(images.calls).toEqual([]);
+  });
+
+  it('the over-20 MB fallback answers application/octet-stream when the object carries NO content type', async () => {
+    const { token } = await signUpSession(url, 'thumb-octet@sevendays.test');
+    const row = await insertPhoto('gallery/00000000-0000-4000-8000-000000000002.jpg');
+    const bucket = stubMediaBucket({
+      size: 20 * 1024 * 1024 + 1,
+      body: 'NO-TYPE-ORIGINAL',
+      contentType: null,
+    });
+    const images = stubImages();
+    const res = await app.request(
+      `/api/v1/admin/gallery-photos/${row.id}/thumb`,
+      { headers: bearer(token) },
+      withCreds({ MEDIA_BUCKET: bucket, IMAGES: images.binding })
+    );
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('application/octet-stream');
+    expect(await res.text()).toBe('NO-TYPE-ORIGINAL');
+    expect(images.calls).toEqual([]);
+  });
+
+  it('answers 401 — never the param 400 — for an anonymous caller with a NON-UUID id (gate-before-param proof)', async () => {
+    // #136 T5 minor: the existing anonymous-401 test sends a valid uuid, so
+    // the param validator's position was proven only structurally. A
+    // non-uuid id would fail validatedParam IF it ran — a 401 here proves
+    // the session gate short-circuits first (the presign mirror's ordering).
+    const res = await app.request(
+      '/api/v1/admin/gallery-photos/not-a-uuid/thumb',
+      undefined,
+      testEnv(url)
+    );
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: 'Authentication required.' });
   });
 });
