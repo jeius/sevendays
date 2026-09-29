@@ -24,7 +24,7 @@
   - `apps/api/test/admin-packages.test.ts` — absent-unchanged is pinned only at the NULL pre-state (`:494`, packageSimple has no cover); **absent at a NON-NULL pre-state is untested**. The missing-staging test (`:515`) asserts only `status === 400` — not the typed not-found message/details, and not `deleteCalls: []`.
   - `apps/api/src/services/admin-gallery.ts:44-66` — `checkCompleteOrder` has three arms; the order-PUT tests cover missing-row (categories) and unknown-id (testimonials/photos); **the `duplicate id` arm (`:50`) has no test**.
   - `apps/api/test/public-reads.test.ts` — AR3 (active photo under a deactivated category stays public) is documented in `services/gallery.ts`'s JSDoc and the #138 plan but **has no fixture case**; AR7's gallery half is pinned (`:84`) — **the testimonials half (empty → `[]` 200) is not**.
-  - `packages/api-client/test/mock-api.ts` — the mock app mounts branches/service-packages/studio-services/addon-services/appointments only: **no `/gallery`, no `/testimonials`**, so the two wrappers added in #138 (`src/routes/gallery.ts`, `src/routes/testimonials.ts`) have no loopback tests. `test/loopback.test.ts` (16 tests) covers every other wrapper group.
+  - `packages/api-client/test/mock-api.ts` — the mock app mounts branches/service-packages/studio-services/addon-services/appointments only: **no `/gallery`, no `/testimonials`**, so the two wrappers added in #138 (`src/routes/gallery.ts`, `src/routes/testimonials.ts`) have no loopback tests. `test/loopback.test.ts` (14 tests at the BASE this plan was authored from; 18 after Task 5) covers every other wrapper group.
   - `apps/api/test/service-packages.test.ts` (the `'inclusions order by (position, id), not by id'` test) — the comment `// Insertion id order reads framed → 2R → 2x2; the swapped positions / must win.` overclaims id-axis determinism (minted uuids are unordered).
   - `apps/api/test/media-live.test.ts` — leg-1's cleanup (`await bucket.delete(result.finalKey)` at the test's tail, `:124`) is not throw-safe: an expect failure between promote and delete litters `gallery/` (no lifecycle rule cleans it). The `liveBucket()` HEAD adapter (`:49-51`) maps EVERY non-ok to `null` with no reason surfaced.
 - **Contract facts the new tests pin (all read from source, this commit)**:
@@ -32,7 +32,7 @@
   - `servePhotoThumbnail` >20MiB → `new Response(obj.body, { headers: { 'content-type': obj.httpMetadata?.contentType ?? 'application/octet-stream' } })` — the stored type flows; absent → octet-stream.
   - The admin root `requireSession` answers 401 before route-level `validatedParam` (the M4 ordering; presign's invalid-body 401 test is the standing proof).
   - `setStudioServiceBranchMatrix`/`setStudioServiceAddonMatrix` existence checks are deactivation-blind (`inArray` on ids only) → a deactivated id links with 200.
-  - `resolveCover` (admin-packages.ts:151-170) re-paths commit failures onto `coverImageKey` and passes `commitUpload`'s message through: missing staging → 400 with `error: 'Upload not found — the PUT may have failed, expired, or been already committed.'`, details `[{ path: ['coverImageKey'], message: 'no object at the staging key' }]`; absent at non-null pre-state → the stored cover survives (`putCalls` stays at the bind's 1, `deleteCalls` stays at `[STAGING]`).
+  - `resolveCover` (admin-packages.ts:145-170) re-paths commit failures onto `coverImageKey` and passes `commitUpload`'s message through: missing staging → 400 with `error: 'Upload not found — the PUT may have failed, expired, or been already committed.'`, details `[{ path: ['coverImageKey'], message: 'no object at the staging key' }]`; absent at non-null pre-state → the stored cover survives (`putCalls` stays at the bind's 1, `deleteCalls` stays at `[STAGING]`).
   - `checkCompleteOrder` on `[A, A, B, C]` → exactly one detail `{ path: [<field>], message: 'duplicate id <A>' }`, reason `invalid` → 400, nothing written.
   - The public gallery read filters photos on `isActive + categoryId IS NOT NULL` only — a deactivated CATEGORY never removes a photo (AR3); `GET /api/v1/testimonials` on an empty table answers `[]` 200 (AR7).
   - The api-client `unwrap` gate: a 404 envelope throws `ApiClientError` with `status: 404` and `details` = the whole body object (`{ error: 'Not found.' }` from the mock's uniform notFound).
@@ -417,7 +417,7 @@ git commit -m "test(api): admin entity suites — PUT clash branches, deactivati
 - Modify: `apps/api/test/admin-packages.test.ts` (one new test + one test reworked in place)
 
 **Interfaces:**
-- Consumes: the file's existing `withBucket()` / `putCover(email, cover, env)` helpers (`:426-468`); `resolveCover`'s contract (`admin-packages.ts:146-170`): absent → `finalKey: undefined` → the stored cover survives; missing staging → the typed conflict 400 with the not-found message re-pathed onto `coverImageKey`.
+- Consumes: the file's existing `withBucket()` / `putCover(email, cover, env)` helpers (`:426-468`); `resolveCover`'s contract (`admin-packages.ts:145-170`): absent → `finalKey: undefined` → the stored cover survives; missing staging → the typed conflict 400 with the not-found message re-pathed onto `coverImageKey`.
 - Produces: nothing consumed later.
 
 - [ ] **Step 1: Absent-unchanged at a NON-NULL pre-state**
