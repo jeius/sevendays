@@ -155,7 +155,9 @@ export function studioServiceStateFromRead(
     description: row.description,
     priceCents: row.priceCents,
     isActive: row.isActive,
-    branchIds: row.bookableBranchIds,
+    // The state owns its own copy — a push on editor state must never
+    // mutate the React Query cache row (#143 sweep: replace, never push).
+    branchIds: [...row.bookableBranchIds],
   };
 }
 

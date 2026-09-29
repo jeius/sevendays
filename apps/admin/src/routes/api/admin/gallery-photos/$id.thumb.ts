@@ -4,12 +4,13 @@
 // request's cookie through the session-scoped client and streams the
 // binary response through untouched (content-type carried; NO cache
 // headers added — #136's agent ruling carries to the proxy). The API's
-// requireSession stays the only auth gate: no cookie → the client seam
-// throws → 401 here; an upstream error envelope → its status + body.
+// requireSession stays the only auth gate: an upstream error envelope →
+// its status + body; no cookie → SessionMissingError → 401 here; any
+// other non-upstream throw → 502.
 import { ApiClientError } from '@sevendays/api-client';
 import { createFileRoute } from '@tanstack/react-router';
 
-import { getSessionScopedApiClient } from '#/lib/api.server';
+import { getSessionScopedApiClient, SessionMissingError } from '#/lib/api.server';
 
 export const Route = createFileRoute('/api/admin/gallery-photos/$id/thumb')({
   server: {
@@ -34,8 +35,16 @@ export const Route = createFileRoute('/api/admin/gallery-photos/$id/thumb')({
               headers: { 'content-type': 'application/json' },
             });
           }
-          return new Response(JSON.stringify({ error: 'Authentication required.' }), {
-            status: 401,
+          if (error instanceof SessionMissingError) {
+            return new Response(JSON.stringify({ error: 'Authentication required.' }), {
+              status: 401,
+              headers: { 'content-type': 'application/json' },
+            });
+          }
+          // Infra failure (binding hiccup, unexpected throw) — no longer
+          // masked as a 401 (#143 sweep): name it a bad gateway.
+          return new Response(JSON.stringify({ error: 'Internal server error.' }), {
+            status: 502,
             headers: { 'content-type': 'application/json' },
           });
         }

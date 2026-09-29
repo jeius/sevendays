@@ -298,6 +298,10 @@ export function StudioServicesScreen() {
       toast.success('Saved.');
     },
     onError: (error, input) => {
+      // Bounded duplicate-POST window: a fast double-submit (or the
+      // thrown-create retry re-arming create mode) can fire the create
+      // twice — the second lands on the unique-name constraint and
+      // surfaces as its 400 conflict message, never a duplicate row.
       // Not an API failure (serialization, session loss) — loud toast, same
       // keep-open posture.
       toast.error(error.message);
@@ -398,12 +402,9 @@ export function StudioServicesScreen() {
     if (errors.name || errors.description || errors.price) {
       setFieldErrors(errors);
       toast.error('Fix the highlighted fields.');
-      // Veto-throw: the shared Save button closes the Sheet unconditionally
-      // when onSave returns normally (onSave(); setVisible(false)); the only
-      // synchronous keep-open channel in the landed LightEntityEditor is a
-      // throw, and shared.tsx sits outside this ticket's scope fence. React
-      // reports it as an uncaught event-handler error — deliberate, never
-      // user-visible; the inline errors + toast are the UX.
+      // Veto-throw: the shared Save button closes the Sheet only when onSave
+      // returns normally — a throw is the keep-open veto and is swallowed there
+      // (#143). The inline errors + toast are the UX.
       throw new Error('studio-service-editor-validation-hold');
     }
     setFieldErrors({});

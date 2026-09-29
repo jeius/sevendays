@@ -35,6 +35,10 @@
 
 Deploys are branch-keyed GitHub Actions (`.github/workflows/ci.yml`), gated on CI green (`needs: check`). Pushes to the tracked branches deploy the three Workers — `sevendays-v1-api`, `sevendays-v1-landing`, `sevendays-v1-admin`. Per-target secrets live as GitHub **environment** secrets — `CLOUDFLARE_API_TOKEN` + `DATABASE_URL` (the api's `DATABASE_URL` syncs from the environment secret on every deploy) — and `API_URL` is an environment **variable** per target: a frontend Worker var that every deploy wipes, so it rides each deploy as `--var`. The `--name` flags pin all Worker targets in the workflow itself. Manual redeploy: `gh run rerun <run-id> --failed` on the latest run. Frontend→API routing in deployed environments goes through the `API` **service binding** (ADR-0016): Cloudflare rejects Worker→Worker subrequests over `*.workers.dev` (error 1042), so the binding — not the public URL — is the production transport; the binding's service name follows the API worker's name.
 
+### Seed contract (bootstrap/dev-only)
+
+`db:seed` upserts the catalog by natural key. It is a bootstrap and dev-reset tool — fresh environments and deliberate dev resets only — and never runs against production content: the admin CMS owns the catalog, and a seed re-run after real edits would overwrite them by design (that is what "reset" means). `docs/catalog.md` remains the seed's input of record; the CMS is the catalog's.
+
 ## Auth
 
 - **BetterAuth 1.7.5** (`better-auth@^1.7.5`, integrated 2026-09-23 — Milestone 4) — `apps/admin` is the auth server: email+password staff login at `/login` with self-serve sign-up disabled; users are provisioned and reset by the owner CLI (`pnpm --filter @sevendays/admin create-staff`); routes mount at `/api/auth/*` with per-request instances over `@sevendays/db` (ADR-0011). `apps/api` runs a verification-only instance (the `bearer` plugin) over the same tables — `requireSession` verifies `Authorization: Bearer` tokens and returns the uniform 401 envelope (ADR-0004); one `BETTER_AUTH_SECRET` is shared across both apps' Workers. The auth tables (user/session/account/verification + rate limit) live in `packages/db/src/schema/auth.ts`, migration 0005.
@@ -56,6 +60,7 @@ Deploys are branch-keyed GitHub Actions (`.github/workflows/ci.yml`), gated on C
 
 - **Vitest 4** — every workspace that owns tests has its own `vitest.config.ts` extending `@sevendays/config/vitest` (a built entry — run `pnpm build:packages` after a fresh clone). See `docs/adr/0003-vitest-4-per-workspace-configs.md` for why per-workspace configs are mandatory.
 - Root `vitest.config.ts` composes `packages/` and `apps/` projects for root-level runs and coverage merging; it does not discover a workspace's tests on its own.
+- `apps/admin` runs the same shape since the M5 close-out (#143): plain-node lib-seam tests over the pure editor-state/upload seams — no component/DOM tests.
 
 ## Secrets Checklist (none committed to the repo)
 

@@ -349,12 +349,9 @@ export function LookupsScreen() {
       if (errors.code || errors.description) {
         setSizeErrors(errors);
         toast.error('Fix the highlighted fields.');
-        // Veto-throw: the shared Save button closes the Sheet unconditionally
-        // when onSave returns normally (onSave(); setVisible(false)); the only
-        // synchronous keep-open channel in the landed LightEntityEditor is a
-        // throw, and shared.tsx sits outside this ticket's scope fence. React
-        // reports it as an uncaught event-handler error — deliberate, never
-        // user-visible; the inline errors + toast are the UX.
+        // Veto-throw: the shared Save button closes the Sheet only when onSave
+        // returns normally — a throw is the keep-open veto and is swallowed there
+        // (#143). The inline errors + toast are the UX.
         throw new Error('lookups-editor-validation-hold');
       }
       setSizeErrors({});
@@ -645,7 +642,7 @@ function PrintSizesSection({
               <TableRow>
                 {/* A3: the code column carries no fixed width — the only
                     explicit width constraint the prototype dropped. */}
-                <TableHead>Code</TableHead>
+                <TableHead className='w-16'>Code</TableHead>
                 {/* T2: the Actions header renders empty — the icons carry
                     their own labels. */}
                 <TableHead className='text-right' />
