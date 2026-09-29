@@ -48,7 +48,13 @@ function liveBucket(): R2Bucket {
   const base = `https://${ACCOUNT_ID}.r2.cloudflarestorage.com/${MEDIA_BUCKET_NAME}`;
   const head = async (key: string) => {
     const res = await client.fetch(`${base}/${key}`, { method: 'HEAD' });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      // Reason-observable null (#154, the #136 T6 nit): callers still see
+      // null, the operator sees WHICH status ate it — a 404 (missing
+      // object) and a 403 (credentials) demand different runbook pages.
+      console.warn(`[media-live] HEAD ${key} → non-ok ${res.status} ${res.statusText}`);
+      return null;
+    }
     return {
       key,
       size: Number(res.headers.get('content-length') ?? '0'),
@@ -116,12 +122,18 @@ liveDescribe('live media round-trip (REAL bucket — controller/owner only)', ()
     const result = await commitUpload(bucket, { stagingKey: key, purpose: 'gallery-photo' });
     if (!result.ok) throw new Error(`expected ok, got ${result.reason}: ${result.message}`);
     expect(result.finalKey).toMatch(/^gallery\/[0-9a-f-]{36}\.jpg$/);
-    const finalObj = await bucket.head(result.finalKey);
-    expect(finalObj).not.toBeNull();
-    expect(finalObj?.httpMetadata?.cacheControl).toContain('immutable');
-    expect(await bucket.head(key)).toBeNull();
-    // cleanup: the harness owns its object — never leave test rows in the shared bucket
-    await bucket.delete(result.finalKey);
+    // cleanup: the harness owns its object — never leave test rows in the
+    // shared bucket. finally-wrapped (#154, the #136 T6 nit): an expect
+    // failure between promote and delete used to skip the delete and litter
+    // gallery/ — no lifecycle rule cleans it.
+    try {
+      const finalObj = await bucket.head(result.finalKey);
+      expect(finalObj).not.toBeNull();
+      expect(finalObj?.httpMetadata?.cacheControl).toContain('immutable');
+      expect(await bucket.head(key)).toBeNull();
+    } finally {
+      await bucket.delete(result.finalKey);
+    }
     expect(await bucket.head(result.finalKey)).toBeNull();
   });
 

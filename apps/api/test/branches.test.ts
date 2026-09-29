@@ -13,7 +13,7 @@ let ids: FixtureIds;
 
 const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
 
-const sendMock = vi.fn();
+const { sendMock } = vi.hoisted(() => ({ sendMock: vi.fn() }));
 vi.mock('resend', () => ({
   // `new Resend(...)` at the call site — vitest 4 rejects `new` on a vi.fn
   // whose implementation is an arrow; the named `function` impl returning
@@ -41,6 +41,8 @@ function fakeExecCtx() {
 beforeEach(async () => {
   await truncateAll(db);
   ids = await loadFixtures(db);
+  sendMock.mockReset();
+  sendMock.mockResolvedValue({ data: { id: 'email-id' }, error: null });
 });
 
 describe('GET /api/v1/branches', () => {
