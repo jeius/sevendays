@@ -50,6 +50,8 @@ import {
   LightEntityEditor,
   PageHeader,
   peso,
+  QUERY_ERROR_LINE,
+  QueryErrorState,
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
@@ -129,6 +131,11 @@ export function StudioServicesScreen() {
   const services = servicesQuery.data;
   const branches = branchesQuery.data;
   const isPending = servicesQuery.isPending || branchesQuery.isPending;
+  const isError = servicesQuery.isError || branchesQuery.isError;
+  const refetchReads = () => {
+    void servicesQuery.refetch();
+    void branchesQuery.refetch();
+  };
   const queryClient = useQueryClient();
   // T3: controlled disclosure — one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -444,7 +451,9 @@ export function StudioServicesScreen() {
         }
       />
 
-      {isPending || !services ? (
+      {isError ? (
+        <QueryErrorState line={QUERY_ERROR_LINE} onRetry={refetchReads} />
+      ) : isPending || !services ? (
         // Pending posture: skeleton rows echoing the two-line row anatomy
         // (checkbox, name + description, price) at the table's rhythm.
         <Card className='@container rounded-lg'>

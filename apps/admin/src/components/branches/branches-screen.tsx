@@ -40,6 +40,8 @@ import {
   ExpandRow,
   LightEntityEditor,
   PageHeader,
+  QUERY_ERROR_LINE,
+  QueryErrorState,
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
@@ -79,7 +81,7 @@ interface FlipInput {
 const PENDING_ROW_KEYS = ['row-1', 'row-2', 'row-3', 'row-4'];
 
 export function BranchesScreen() {
-  const { data: branches, isPending } = useQuery(adminBranchQueries.all());
+  const { data: branches, isPending, isError, refetch } = useQuery(adminBranchQueries.all());
   const queryClient = useQueryClient();
   // T3: controlled disclosure — one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -309,7 +311,17 @@ export function BranchesScreen() {
         }
       />
 
-      {isPending || !branches ? (
+      {isError ? (
+        // Error posture (#155): a failed read answers the ruled line +
+        // Retry — never the skeleton-forever (the pending arm's `|| !data`
+        // would otherwise hold the skeleton on a failed query).
+        <QueryErrorState
+          line={QUERY_ERROR_LINE}
+          onRetry={() => {
+            void refetch();
+          }}
+        />
+      ) : isPending || !branches ? (
         // Pending posture: skeleton rows echoing the two-line row anatomy
         // (checkbox, name + address, phone) at the table's rhythm.
         <Card className='@container rounded-lg'>

@@ -61,6 +61,8 @@ import {
   ExpandRow,
   LightEntityEditor,
   PageHeader,
+  QUERY_ERROR_LINE,
+  QueryErrorState,
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
@@ -200,7 +202,12 @@ function SortableStackRow({
 }
 
 export function TestimonialsScreen() {
-  const { data: testimonials, isPending } = useQuery(adminTestimonialQueries.all());
+  const {
+    data: testimonials,
+    isPending,
+    isError,
+    refetch,
+  } = useQuery(adminTestimonialQueries.all());
   const queryClient = useQueryClient();
   // T3: controlled disclosure — one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -440,7 +447,14 @@ export function TestimonialsScreen() {
         }
       />
 
-      {isPending || !testimonials ? (
+      {isError ? (
+        <QueryErrorState
+          line={QUERY_ERROR_LINE}
+          onRetry={() => {
+            void refetch();
+          }}
+        />
+      ) : isPending || !testimonials ? (
         // Pending posture: skeleton rows echoing the row anatomy (grip,
         // person + quote, actions) at the table's rhythm.
         <Card className='@container rounded-lg'>

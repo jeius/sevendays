@@ -57,6 +57,8 @@ import {
   LightEntityEditor,
   PageHeader,
   peso,
+  QUERY_ERROR_LINE,
+  QueryErrorState,
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
@@ -137,6 +139,11 @@ export function AddonsScreen() {
   const addons = addonsQuery.data;
   const services = servicesQuery.data;
   const isPending = addonsQuery.isPending || servicesQuery.isPending;
+  const isError = addonsQuery.isError || servicesQuery.isError;
+  const refetchReads = () => {
+    void addonsQuery.refetch();
+    void servicesQuery.refetch();
+  };
   const queryClient = useQueryClient();
   // T3: controlled disclosure — one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -469,7 +476,9 @@ export function AddonsScreen() {
         }
       />
 
-      {isPending || !addons ? (
+      {isError ? (
+        <QueryErrorState line={QUERY_ERROR_LINE} onRetry={refetchReads} />
+      ) : isPending || !addons ? (
         // Pending posture: skeleton rows echoing the two-line row anatomy
         // (checkbox, name + description, price) at the table's rhythm.
         <Card className='@container rounded-lg'>
