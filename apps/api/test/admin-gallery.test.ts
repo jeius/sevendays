@@ -1,4 +1,4 @@
-import { galleryCategories, galleryPhotos } from '@sevendays/db';
+import { galleryCategories, galleryPhotos, testimonials } from '@sevendays/db';
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
@@ -222,6 +222,39 @@ describe('testimonials admin CRUD', () => {
     expect(res.status).toBe(400);
     const body = (await res.json()) as { details: { path: string[]; message: string }[] };
     expect(body.details[0]?.path).toEqual(['testimonialIds']);
+  });
+
+  it('PUT /order with a DUPLICATE id → 400 naming the duplicate, positions untouched', async () => {
+    // #137 T7 minor: the third arm of checkCompleteOrder. A payload listing
+    // every row exactly once EXCEPT one row twice answers exactly one
+    // duplicate detail — and the write never runs.
+    const res = await authed(
+      'PUT',
+      '/api/v1/admin/testimonials/order',
+      'admin-testi-orderdup@sevendays.test',
+      {
+        testimonialIds: [
+          ids.testimonialA,
+          ids.testimonialA,
+          ids.testimonialB,
+          ids.testimonialRetired,
+        ],
+      }
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as {
+      error: string;
+      details: { path: string[]; message: string }[];
+    };
+    expect(body.error).toBe('The order payload must list every row exactly once.');
+    expect(body.details).toEqual([
+      { path: ['testimonialIds'], message: `duplicate id ${ids.testimonialA}` },
+    ]);
+    const rows = await db
+      .select({ position: testimonials.position })
+      .from(testimonials)
+      .where(eq(testimonials.id, ids.testimonialB));
+    expect(rows[0]?.position).toBe(2); // the fixture position — untouched
   });
 
   it('anonymous POST with a validation-bait body → the 401 envelope BEFORE validation', async () => {

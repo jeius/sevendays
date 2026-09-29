@@ -6,7 +6,12 @@ import { createApiClient } from '../src/index.js';
 import { toLoopbackFetch } from '../src/loopback.js';
 import { unwrap } from '../src/unwrap.js';
 import type { MockApi } from './mock-api.js';
-import { mockApi, mockApiBrokenBranches } from './mock-api.js';
+import {
+  mockApi,
+  mockApiBrokenBranches,
+  mockApiBrokenGallery,
+  mockApiBrokenTestimonials,
+} from './mock-api.js';
 
 const BASE = 'http://localhost:4949/';
 
@@ -159,4 +164,40 @@ it('studioServices.list returns active services with bookable branch ids', async
     '22222222-2222-4222-8222-222222222222',
   ]);
   expect(rows[0]?.createdAt).toBeInstanceOf(Date);
+});
+
+it('gallery.list parses the assembled read into typed data', async () => {
+  const client = clientFor(mockApi);
+  const read = await client.gallery.list();
+  expect(read.categories).toHaveLength(2);
+  expect(read.categories[0]?.name).toBe('Weddings');
+  expect(read.photos).toHaveLength(1);
+  expect(read.photos[0]?.photoUrl).toBe(
+    'https://pub-test.r2.dev/gallery/aaaaaaaa-0000-4000-8000-000000000001.jpg'
+  );
+  expect(read.photos[0]?.categoryId).toBe(read.categories[0]?.id);
+});
+
+it('gallery.list surfaces the uniform 404 envelope as ApiClientError', async () => {
+  const client = clientFor(mockApiBrokenGallery);
+  const err = await client.gallery.list().catch((e) => e);
+  expect(err).toBeInstanceOf(ApiClientError);
+  expect((err as ApiClientError).status).toBe(404);
+  expect((err as ApiClientError).details).toEqual({ error: 'Not found.' });
+});
+
+it('testimonials.list parses the public projection into typed data', async () => {
+  const client = clientFor(mockApi);
+  const rows = await client.testimonials.list();
+  expect(rows).toHaveLength(1);
+  expect(rows[0]?.quote).toBe('The photos came out better than we hoped.');
+  expect(rows[0]?.person).toBe('Maria, batch 2026');
+});
+
+it('testimonials.list surfaces the uniform 404 envelope as ApiClientError', async () => {
+  const client = clientFor(mockApiBrokenTestimonials);
+  const err = await client.testimonials.list().catch((e) => e);
+  expect(err).toBeInstanceOf(ApiClientError);
+  expect((err as ApiClientError).status).toBe(404);
+  expect((err as ApiClientError).details).toEqual({ error: 'Not found.' });
 });

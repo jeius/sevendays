@@ -81,6 +81,24 @@ describe('GET /api/v1/gallery (the assembled public read, #138)', () => {
     expect(body.photos.map((p) => p.id)).toEqual([gallery.photoB, gallery.photoA]);
   });
 
+  it('an ACTIVE photo under a DEACTIVATED category stays public (AR3 — category deactivation is not a photo filter)', async () => {
+    // #138 T4 minor: AR3 was asserted only structurally (the query filters
+    // on photo activity + categorized-ness, nothing else). This is the real
+    // fixture case: retire the TAB, the photo under it stays in the payload.
+    await db
+      .update(galleryCategories)
+      .set({ isActive: false })
+      .where(eq(galleryCategories.id, gallery.categoryA));
+    const res = await app.request('/api/v1/gallery', undefined, testEnv(url));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      categories: { id: string }[];
+      photos: { id: string }[];
+    };
+    expect(body.categories.map((c) => c.id)).toEqual([gallery.categoryB]);
+    expect(body.photos.map((p) => p.id)).toEqual([gallery.photoA, gallery.photoB]);
+  });
+
   it('the CMS-born-empty tables answer empty arrays with 200', async () => {
     await truncateAll(db);
     const res = await app.request('/api/v1/gallery', undefined, testEnv(url));
@@ -124,5 +142,14 @@ describe('GET /api/v1/testimonials (the public read, #138)', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as { id: string }[];
     expect(body.map((t) => t.id)).toEqual([gallery.testimonialB, gallery.testimonialA]);
+  });
+
+  it('the CMS-born-empty table answers [] with 200 (AR7 testimonial half)', async () => {
+    // #138 T4 minor: the gallery half is pinned above; the assembled
+    // testimonials read answers the same empty-200 contract.
+    await truncateAll(db);
+    const res = await app.request('/api/v1/testimonials', undefined, testEnv(url));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual([]);
   });
 });

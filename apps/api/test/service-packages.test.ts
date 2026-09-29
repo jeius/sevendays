@@ -172,8 +172,9 @@ describe('public trim rules, position ordering, and resolved URLs (#138)', () =>
     expect(res.status).toBe(200);
     const body = (await res.json()) as ServicePackageRead[];
     const combined = body.find((p) => p.id === ids.packageCombined);
-    // Insertion id order reads framed → 2R → 2x2; the swapped positions
-    // must win.
+    // Insert-time positions read framed → 2R → 2x2 (positions are distinct,
+    // so the id tiebreak never runs — minted uuids carry no order); the
+    // swapped positions must win.
     expect(combined?.inclusions.map((i) => i.printSize?.code ?? i.kind)).toEqual([
       '2R',
       '2x2',

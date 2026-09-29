@@ -499,6 +499,23 @@ describe('the package cover lifecycle (commit-verified through ticket 02)', () =
     expect(stub.putCalls).toEqual([]);
   });
 
+  it('PUT without the field leaves a BOUND cover unchanged (absent = unchanged at a non-null pre-state)', async () => {
+    // #137 T6 minor: absent-unchanged was pinned only at the null pre-state.
+    // Bind a real cover first, then PUT the package with the field absent:
+    // the stored final key survives — no re-promote, no delete of the bound
+    // object (presence-encoding makes "changed" structural).
+    const { stub, env } = withBucket();
+    const bound = await putCover('admin-cover-absent2-a@sevendays.test', STAGING, env);
+    expect(bound.status).toBe(200);
+    const boundUrl = ((await bound.json()) as { coverImageUrl: string }).coverImageUrl;
+    expect(boundUrl).toMatch(/^https:\/\/pub-test\.r2\.dev\/covers\//);
+    const res = await putCover('admin-cover-absent2-b@sevendays.test', 'ABSENT', env);
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { coverImageUrl: string | null }).coverImageUrl).toBe(boundUrl);
+    expect(stub.putCalls).toHaveLength(1); // only the initial bind — no second promote
+    expect(stub.deleteCalls).toEqual([STAGING]); // staging cleanup only — the bound object survives
+  });
+
   it('PUT with a foreign key → the commit 400 with the coverImageKey detail — and NO delete call', async () => {
     const { stub, env } = withBucket();
     const res = await putCover(
@@ -512,7 +529,12 @@ describe('the package cover lifecycle (commit-verified through ticket 02)', () =
     expect(stub.deleteCalls).toEqual([]);
   });
 
-  it('PUT with a staging key that has no object → the commit not-found 400', async () => {
+  it('PUT with a staging key that has no object → the 400 not-found shape (typed conflict, nothing deleted)', async () => {
+    // #137 T6 minor: the old test asserted only status===400 — the typed
+    // not_found vocabulary (commitUpload's message, the coverImageKey
+    // re-path) and the no-delete proof were unpinned. This is the ACTUAL
+    // documented status: not_found maps through the conflict arm → 400,
+    // never a 404.
     const empty = stubCommitBucket();
     const res = await putCover(
       'admin-cover-missing@sevendays.test',
@@ -520,6 +542,17 @@ describe('the package cover lifecycle (commit-verified through ticket 02)', () =
       { ...testEnv(url), MEDIA_BUCKET: empty.bucket }
     );
     expect(res.status).toBe(400);
+    const body = (await res.json()) as {
+      error: string;
+      details: { path: string[]; message: string }[];
+    };
+    expect(body.error).toBe(
+      'Upload not found — the PUT may have failed, expired, or been already committed.'
+    );
+    expect(body.details).toEqual([
+      { path: ['coverImageKey'], message: 'no object at the staging key' },
+    ]);
+    expect(empty.deleteCalls).toEqual([]);
   });
 
   it('POST create with a coverImageKey → 201 with the resolved absolute URL', async () => {

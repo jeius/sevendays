@@ -346,6 +346,26 @@ describe('attires admin CRUD', () => {
     expect(((await res.json()) as { isActive: boolean }).isActive).toBe(false);
   });
 
+  it('PUT name taken by another row → 400 with the name field detail', async () => {
+    const { token } = await signUpSession(url, 'admin-attires-putdup@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/attires/${ids.attireToga}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({ name: 'Filipiniana', isActive: true }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as {
+      error: string;
+      details: { path: string[]; message: string }[];
+    };
+    expect(body.error).toBe('That value is already in use.');
+    expect(body.details).toEqual([{ path: ['name'], message: 'already in use' }]);
+  });
+
   it('GET /:id unknown → the per-entity 404', async () => {
     const { token } = await signUpSession(url, 'admin-attires-404@sevendays.test');
     const res = await app.request(
@@ -447,6 +467,40 @@ describe('add-on services admin CRUD', () => {
     );
     expect(res.status).toBe(200);
     expect(((await res.json()) as { isActive: boolean }).isActive).toBe(false);
+    // The round-trip (#137 T9): the admin GET still shows the deactivated
+    // row — the public read trims, the admin read never does.
+    const after = await app.request(
+      `/api/v1/admin/addon-services/${ids.addonMakeup}`,
+      { headers: bearer(token) },
+      testEnv(url)
+    );
+    expect(after.status).toBe(200);
+    expect(((await after.json()) as { isActive: boolean }).isActive).toBe(false);
+  });
+
+  it('PUT name taken by another row → 400 with the name field detail', async () => {
+    const { token } = await signUpSession(url, 'admin-addons-putdup@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/addon-services/${ids.addonMakeup}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Hairstyle',
+          description: 'On-site makeup service',
+          priceCents: 12000,
+          isActive: true,
+        }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as {
+      error: string;
+      details: { path: string[]; message: string }[];
+    };
+    expect(body.error).toBe('That value is already in use.');
+    expect(body.details).toEqual([{ path: ['name'], message: 'already in use' }]);
   });
 
   it('GET /:id unknown → the per-entity 404', async () => {
