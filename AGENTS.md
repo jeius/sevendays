@@ -32,7 +32,7 @@ Run from the repo root unless noted. All commands are powered by Turborepo and f
 
 ### Current status of `pnpm test`
 
-- `apps/api` has real vitest tests.
+- `apps/api` has real vitest tests. The M5-pinned suite debt is paid (#154): the media, admin-entity, cover, order-guard, and public-read branch gaps are pinned, the api-client loopback suite covers the gallery/testimonials wrappers (+4 tests; 18 in the loopback file), and the live media harness is try/finally-safe with reason-observable HEAD failures. Floors: api 23 files passed + 1 skipped (24) / 290 passed + 3 skipped; api-client 5 files / 33 tests.
 - `apps/landing` runs a real vitest suite (lib-seam tests, since M2 ticket 05).
 - `apps/admin` runs a real vitest suite (since M5 ticket 09, #143): landing-style plain-node lib-seam tests over the pure seams (`src/lib/*.test.ts`) — no component/DOM tests, vitest as the only test dependency. The api and landing suites remain the behavioral backbones.
 
