@@ -10,6 +10,16 @@ export function internalError(c: Context) {
 }
 
 /**
+ * The leak-safe operator-detail channel (#155): a KNOWN deploy-time
+ * misconfiguration answers a curated 503 line — stable, no env names, no
+ * runbook paths — while the root onError's log keeps the loud detail.
+ * Unknown throws keep the uniform 500.
+ */
+export function serviceUnavailable(c: Context, message: string) {
+  return c.json({ error: message }, 503);
+}
+
+/**
  * The uniform 404 envelope: always c.json({ error }, 404), never a bare
  * c.notFound() (which would emit Hono's plain-text default). Default is the
  * root app's unmounted-path wording; mounted-path 404s pass the entity

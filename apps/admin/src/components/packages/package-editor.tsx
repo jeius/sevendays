@@ -68,7 +68,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { ChevronDown, Frame, Gift, GripVertical, Image, Plus, X } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
-import { StatusBadge } from '#/components/cms/shared';
+import {
+  PACKAGE_NOT_FOUND_LINE,
+  QUERY_ERROR_LINE,
+  QueryErrorState,
+  StatusBadge,
+} from '#/components/cms/shared';
 import {
   presignAdminCoverUpload,
   saveAdminPackageCreate,
@@ -302,8 +307,8 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
   // Hydrate once from the edit read — never on refetch (a post-save
   // invalidation must not clobber the editor's state).
   useEffect(() => {
-    if (mode === 'edit' && packageQuery.data && state === null) {
-      setState(editorStateFromRead(packageQuery.data));
+    if (mode === 'edit' && packageQuery.data?.ok && state === null) {
+      setState(editorStateFromRead(packageQuery.data.data));
     }
   }, [mode, packageQuery.data, state]);
 
@@ -610,6 +615,44 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
     } else {
       editSave.mutate(buildUpdatePayload(state, attiresQuery.data));
     }
+  }
+
+  // --- Error postures (#155): a 404 on the edit read is the ruled
+  // not-found line + Back (retrying a 404 is a lie); any OTHER failed read
+  // (a non-404 result, or a transport-level failure on the package read or
+  // either lookup) is the standard line + Retry over all failed queries.
+  // The read is RESULT-VALUED: the RPC boundary erases the ApiClientError
+  // class, so the 404 arrives as { ok: false, status } data, not a thrown
+  // instance (live-frame finding). ---
+  const read = packageQuery.data;
+  const notFound = mode === 'edit' && read !== undefined && !read.ok && read.status === 404;
+  const readFailed =
+    printSizesQuery.isError ||
+    attiresQuery.isError ||
+    packageQuery.isError ||
+    (mode === 'edit' && read !== undefined && !read.ok && read.status !== 404);
+
+  if (notFound) {
+    return (
+      <QueryErrorState line={PACKAGE_NOT_FOUND_LINE}>
+        <Button variant='outline' type='button' onClick={() => void navigate({ to: '/packages' })}>
+          Back to packages
+        </Button>
+      </QueryErrorState>
+    );
+  }
+
+  if (readFailed) {
+    return (
+      <QueryErrorState
+        line={QUERY_ERROR_LINE}
+        onRetry={() => {
+          if (mode === 'edit') void packageQuery.refetch();
+          void printSizesQuery.refetch();
+          void attiresQuery.refetch();
+        }}
+      />
+    );
   }
 
   // --- Pending posture: skeleton until the (create: two / edit: three)

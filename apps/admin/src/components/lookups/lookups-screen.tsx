@@ -47,6 +47,8 @@ import {
   ExpandPanel,
   ExpandRow,
   LightEntityEditor,
+  QUERY_ERROR_LINE,
+  QueryErrorState,
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
@@ -112,8 +114,18 @@ interface AttireFlipInput {
 const PENDING_ROW_KEYS = ['row-1', 'row-2', 'row-3', 'row-4'];
 
 export function LookupsScreen() {
-  const { data: printSizes, isPending: sizesPending } = useQuery(adminLookupQueries.printSizes());
-  const { data: attires, isPending: attiresPending } = useQuery(adminLookupQueries.attires());
+  const {
+    data: printSizes,
+    isPending: sizesPending,
+    isError: sizesError,
+    refetch: refetchSizes,
+  } = useQuery(adminLookupQueries.printSizes());
+  const {
+    data: attires,
+    isPending: attiresPending,
+    isError: attiresError,
+    refetch: refetchAttires,
+  } = useQuery(adminLookupQueries.attires());
   const queryClient = useQueryClient();
   // T3: controlled disclosure — one expanded row at a time across BOTH
   // sections (id or null; uuid ids never collide). Only print sizes expand.
@@ -384,6 +396,10 @@ export function LookupsScreen() {
       <PrintSizesSection
         printSizes={printSizes}
         isPending={sizesPending}
+        isError={sizesError}
+        onRetry={() => {
+          void refetchSizes();
+        }}
         expandedId={expandedId}
         onToggle={toggleExpanded}
         onCreate={openSizeCreate}
@@ -394,6 +410,10 @@ export function LookupsScreen() {
       <AttiresSection
         attires={attires}
         isPending={attiresPending}
+        isError={attiresError}
+        onRetry={() => {
+          void refetchAttires();
+        }}
         onCreate={openAttireCreate}
         onEdit={openAttireEdit}
         onDeactivate={(row) => setConfirmId(row.id)}
@@ -540,6 +560,8 @@ interface SizeSectionHandlers {
 function PrintSizesSection({
   printSizes,
   isPending,
+  isError,
+  onRetry,
   expandedId,
   onToggle,
   onCreate,
@@ -549,6 +571,8 @@ function PrintSizesSection({
 }: {
   printSizes?: PrintSize[];
   isPending: boolean;
+  isError: boolean;
+  onRetry: () => void;
   expandedId: string | null;
 } & SizeSectionHandlers) {
   // The table's one action shape: the sheet-opening Edit icon (the parent
@@ -564,6 +588,26 @@ function PrintSizesSection({
       >
         <SquarePen aria-hidden='true' />
       </Button>
+    );
+  }
+
+  if (isError) {
+    // Error posture (#155) in the section's own card shell — the header
+    // (and its create action) stay reachable while the read is failed.
+    return (
+      <Card className='rounded-lg'>
+        <CardHeader>
+          <CardTitle>Print sizes</CardTitle>
+          <CardAction>
+            <Button onClick={onCreate} size='sm' type='button' variant='outline'>
+              New print size
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <QueryErrorState line={QUERY_ERROR_LINE} onRetry={onRetry} />
+        </CardContent>
+      </Card>
     );
   }
 
@@ -776,6 +820,8 @@ function PrintSizesSection({
 function AttiresSection({
   attires,
   isPending,
+  isError,
+  onRetry,
   onCreate,
   onEdit,
   onDeactivate,
@@ -783,6 +829,8 @@ function AttiresSection({
 }: {
   attires?: Attire[];
   isPending: boolean;
+  isError: boolean;
+  onRetry: () => void;
   onCreate: () => void;
   onEdit: (row: Attire) => void;
   onDeactivate: (row: Attire) => void;
@@ -799,6 +847,26 @@ function AttiresSection({
       >
         <SquarePen aria-hidden='true' />
       </Button>
+    );
+  }
+
+  if (isError) {
+    // Error posture (#155) in the section's own card shell — the header
+    // (and its create action) stay reachable while the read is failed.
+    return (
+      <Card className='rounded-lg'>
+        <CardHeader>
+          <CardTitle>Attires</CardTitle>
+          <CardAction>
+            <Button onClick={onCreate} size='sm' type='button' variant='outline'>
+              New attire
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <QueryErrorState line={QUERY_ERROR_LINE} onRetry={onRetry} />
+        </CardContent>
+      </Card>
     );
   }
 

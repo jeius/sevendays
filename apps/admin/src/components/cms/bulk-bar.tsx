@@ -11,9 +11,10 @@ import { useState } from 'react';
 /**
  * The select-all header checkbox. `indeterminate` rides Base-UI's root prop
  * (present at @base-ui/react 1.8.0 — probed per the #140 plan): a partial
- * selection reads as a dash, not a lie. The next state is computed from the
- * counts, never from the event, so the toggle is authoritative against stale
- * checkbox state.
+ * selection reads as the ruled indeterminate glyph — the check in an
+ * unfilled, primary-bordered box (#155) — never a full filled check. The
+ * next state is computed from the counts, never from the event, so the
+ * toggle is authoritative against stale checkbox state.
  */
 export function BulkSelectHeader({
   total,

@@ -59,7 +59,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { cn } from 'cn';
 import { Check, ImagePlus, Images, Plus, Power, PowerOff, SquarePen, X } from 'lucide-react';
 import { type ChangeEvent, useId, useRef, useState } from 'react';
-import { DeactivateConfirm, EmptyState, LightEntityEditor } from '#/components/cms/shared';
+import {
+  DeactivateConfirm,
+  EmptyState,
+  LightEntityEditor,
+  QUERY_ERROR_LINE,
+  QueryErrorState,
+} from '#/components/cms/shared';
 import {
   presignAdminCoverUpload,
   saveAdminGalleryCategoryCreate,
@@ -624,10 +630,18 @@ function CategoryRail({
  * file's hidden input by id).
  */
 export function GalleryScreen() {
-  const { data: categories, isPending: categoriesPending } = useQuery(
-    adminGalleryQueries.categories()
-  );
-  const { data: photos, isPending: photosPending } = useQuery(adminGalleryQueries.photos());
+  const {
+    data: categories,
+    isPending: categoriesPending,
+    isError: categoriesError,
+    refetch: refetchCategories,
+  } = useQuery(adminGalleryQueries.categories());
+  const {
+    data: photos,
+    isPending: photosPending,
+    isError: photosError,
+    refetch: refetchPhotos,
+  } = useQuery(adminGalleryQueries.photos());
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   // 'all' = the All photos rail entry; otherwise a category id.
@@ -1071,6 +1085,21 @@ export function GalleryScreen() {
     setEditing({ row });
     setEditorOpen(true);
     setEditorNonce((n) => n + 1);
+  }
+
+  if (categoriesError || photosError) {
+    // Error posture (#155): either read failed — Retry re-runs both.
+    return (
+      <section className='space-y-4'>
+        <QueryErrorState
+          line={QUERY_ERROR_LINE}
+          onRetry={() => {
+            void refetchCategories();
+            void refetchPhotos();
+          }}
+        />
+      </section>
+    );
   }
 
   // --- Pending posture (before any narrowing) ---

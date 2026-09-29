@@ -50,6 +50,8 @@ import {
   LightEntityEditor,
   PageHeader,
   peso,
+  QUERY_ERROR_LINE,
+  QueryErrorState,
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
@@ -60,6 +62,7 @@ import {
   saveAdminStudioServiceCreate,
   saveAdminStudioServiceUpdate,
 } from '#/lib/admin.functions';
+import { bulkConfirmName } from '#/lib/bulk-counts';
 import { adminBranchQueries, adminStudioServiceQueries } from '#/lib/cms-queries';
 import type { LightFieldErrors, StudioServiceEditorState } from '#/lib/light-entity-state';
 import {
@@ -129,6 +132,11 @@ export function StudioServicesScreen() {
   const services = servicesQuery.data;
   const branches = branchesQuery.data;
   const isPending = servicesQuery.isPending || branchesQuery.isPending;
+  const isError = servicesQuery.isError || branchesQuery.isError;
+  const refetchReads = () => {
+    void servicesQuery.refetch();
+    void branchesQuery.refetch();
+  };
   const queryClient = useQueryClient();
   // T3: controlled disclosure — one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -444,7 +452,9 @@ export function StudioServicesScreen() {
         }
       />
 
-      {isPending || !services ? (
+      {isError ? (
+        <QueryErrorState line={QUERY_ERROR_LINE} onRetry={refetchReads} />
+      ) : isPending || !services ? (
         // Pending posture: skeleton rows echoing the two-line row anatomy
         // (checkbox, name + description, price) at the table's rhythm.
         <Card className='@container rounded-lg'>
@@ -753,10 +763,16 @@ export function StudioServicesScreen() {
         />
       ) : null}
 
-      {/* AQ-3: the bulk confirm reuses the pinned dialog — the name argument
-          carries the count, so the title reads `Deactivate 3 items?`. */}
+      {/* AQ-3 + #155: the bulk confirm reuses the pinned dialog — the name
+          argument is the eligible-aware count (owner-ratified): the title
+          reads `Deactivate 3 items?` when every selected row will flip, and
+          `Deactivate 2 of 3 selected items?` when some are already inactive
+          (the toast has always counted eligible-only flips). */}
       <DeactivateConfirm
-        name={`${selected.size} items`}
+        name={bulkConfirmName(
+          selected.size,
+          (services ?? []).filter((row) => selected.has(row.id) && row.isActive).length
+        )}
         open={bulkConfirmOpen}
         onOpenChange={(open) => {
           if (!open) {
