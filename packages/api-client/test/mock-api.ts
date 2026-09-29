@@ -138,6 +138,31 @@ const APPOINTMENTS = [
   },
 ];
 
+// #138's public reads (#154 loopback coverage): the assembled gallery and
+// the testimonials projection, shaped to the public schemas.
+const GALLERY = {
+  categories: [
+    { id: 'a0000000-0000-4000-8000-000000000000', name: 'Weddings' },
+    { id: 'a0000000-0000-4000-8000-000000000001', name: 'Graduation' },
+  ],
+  photos: [
+    {
+      id: 'a0000000-0000-4000-8000-000000000002',
+      photoUrl: 'https://pub-test.r2.dev/gallery/aaaaaaaa-0000-4000-8000-000000000001.jpg',
+      title: null,
+      categoryId: 'a0000000-0000-4000-8000-000000000000',
+    },
+  ],
+};
+
+const TESTIMONIALS = [
+  {
+    id: 'a0000000-0000-4000-8000-000000000003',
+    quote: 'The photos came out better than we hoped.',
+    person: 'Maria, batch 2026',
+  },
+];
+
 // The API's uniform-error hook, mirrored. Duplicated (not runtime-imported
 // from apps/api) because the API is consumed types-only by rule.
 const validatedJson = <S extends ZodSchema>(schema: S) =>
@@ -158,7 +183,15 @@ const validatedJson = <S extends ZodSchema>(schema: S) =>
 
 // Chained registration, mirroring apps/api's registration style (the mock
 // must answer exactly the surface AppType describes).
-const makeApi = ({ brokenBranches = false }: { brokenBranches?: boolean } = {}) => {
+const makeApi = ({
+  brokenBranches = false,
+  brokenGallery = false,
+  brokenTestimonials = false,
+}: {
+  brokenBranches?: boolean;
+  brokenGallery?: boolean;
+  brokenTestimonials?: boolean;
+} = {}) => {
   type MockEnv = { Bindings: Record<string, never> };
 
   const branches = new Hono<MockEnv>().get('/', (c) =>
@@ -181,6 +214,14 @@ const makeApi = ({ brokenBranches = false }: { brokenBranches?: boolean } = {}) 
     });
 
   const addonServices = new Hono<MockEnv>().get('/', (c) => c.json(ADDONS));
+
+  const gallery = new Hono<MockEnv>().get('/', (c) =>
+    brokenGallery ? c.json({ error: 'Not found.' }, 404) : c.json(GALLERY)
+  );
+
+  const testimonials = new Hono<MockEnv>().get('/', (c) =>
+    brokenTestimonials ? c.json({ error: 'Not found.' }, 404) : c.json(TESTIMONIALS)
+  );
 
   const studioServices = new Hono<MockEnv>().get('/', (c) =>
     c.json(
@@ -280,6 +321,8 @@ const makeApi = ({ brokenBranches = false }: { brokenBranches?: boolean } = {}) 
     .route('/service-packages', servicePackages)
     .route('/studio-services', studioServices)
     .route('/addon-services', addonServices)
+    .route('/gallery', gallery)
+    .route('/testimonials', testimonials)
     .route('/appointments', appointments);
 
   return new Hono<MockEnv>()
@@ -297,3 +340,5 @@ const makeApi = ({ brokenBranches = false }: { brokenBranches?: boolean } = {}) 
 export type MockApi = ReturnType<typeof makeApi>;
 export const mockApi = makeApi();
 export const mockApiBrokenBranches = makeApi({ brokenBranches: true });
+export const mockApiBrokenGallery = makeApi({ brokenGallery: true });
+export const mockApiBrokenTestimonials = makeApi({ brokenTestimonials: true });
