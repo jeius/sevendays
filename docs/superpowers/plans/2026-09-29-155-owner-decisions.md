@@ -891,7 +891,7 @@ gh issue edit 152 --body-file /tmp/152-body.md
 `docs/progress.md` — append at the END of `## What Exists` (immediately before `## Known Gaps / Not Yet Done`), verbatim:
 
 ```markdown
-- **The #155 owner-decision follow-ups landed (2026-09-29):** admin screens answer a failed query with the owner-ratified `Couldn’t load this page.` + Retry (the package editor’s 404: `This package doesn’t exist or was removed.` + Back to packages) — no more skeleton-forever; the bulk deactivate confirm counts eligible rows (`Deactivate 2 of 3 selected items?`); the API answers missing R2 credentials with the leak-safe curated 503 `Media uploads are not configured.` (loud detail stays server-log-only); the shared checkbox renders the ruled indeterminate glyph (check in the unfilled, primary-bordered box). Rulings + rendered frames recorded on issue #155.
+- **The #155 owner-decision follow-ups landed (2026-09-29):** admin screens answer a failed query with the owner-ratified `Couldn’t load this page.` + Retry (the package editor’s 404: `This package doesn’t exist or was removed.` + Back to packages) — no more skeleton-forever; the bulk deactivate confirm counts eligible rows (`Deactivate 2 of 3 selected items?`); the API answers missing R2 credentials with the leak-safe curated 503 `Media uploads are not configured.` (loud detail stays server-log-only); the shared checkbox renders the ruled indeterminate glyph (check in the unfilled, primary-bordered box). Rulings recorded on issue #155; the rendered frames live in the gitignored SDD evidence workspace (the #139 evidence precedent), named in the #155 rulings comment.
 ```
 
 - [ ] **Step 5: Gates + commit**
