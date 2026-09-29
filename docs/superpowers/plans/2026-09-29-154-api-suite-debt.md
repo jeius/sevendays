@@ -384,11 +384,14 @@ In `describe('studio services admin CRUD')`, extend the existing `'PUT flips isA
 
 ```ts
     // The round-trip (#137 T9): the assembled admin GET still shows the
-    // deactivated service — links embedded, isActive false.
+    // deactivated service — links embedded, isActive false. authed() mints
+    // a FRESH signUpSession per call — the email MUST be unique within the
+    // file (re-signing-up the test's own email 422s USER_ALREADY_EXISTS;
+    // execution defect, landed as admin-services-put-after@…).
     const after = await authed(
       'GET',
       `/api/v1/admin/studio-services/${ids.serviceStudio}`,
-      'admin-services-put@sevendays.test'
+      'admin-services-put-after@sevendays.test'
     );
     expect(after.status).toBe(200);
     expect(((await after.json()) as { isActive: boolean }).isActive).toBe(false);
