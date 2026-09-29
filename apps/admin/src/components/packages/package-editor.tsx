@@ -34,7 +34,6 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ApiClientError } from '@sevendays/api-client';
 import type {
   Attire,
   CreateServicePackageInput,
@@ -308,8 +307,8 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
   // Hydrate once from the edit read — never on refetch (a post-save
   // invalidation must not clobber the editor's state).
   useEffect(() => {
-    if (mode === 'edit' && packageQuery.data && state === null) {
-      setState(editorStateFromRead(packageQuery.data));
+    if (mode === 'edit' && packageQuery.data?.ok && state === null) {
+      setState(editorStateFromRead(packageQuery.data.data));
     }
   }, [mode, packageQuery.data, state]);
 
@@ -620,15 +619,18 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
 
   // --- Error postures (#155): a 404 on the edit read is the ruled
   // not-found line + Back (retrying a 404 is a lie); any OTHER failed read
-  // (the package read failing non-404, or either lookup) is the standard
-  // line + Retry over all failed queries. ---
-  const notFound =
-    mode === 'edit' &&
-    packageQuery.isError &&
-    packageQuery.error instanceof ApiClientError &&
-    packageQuery.error.status === 404;
+  // (a non-404 result, or a transport-level failure on the package read or
+  // either lookup) is the standard line + Retry over all failed queries.
+  // The read is RESULT-VALUED: the RPC boundary erases the ApiClientError
+  // class, so the 404 arrives as { ok: false, status } data, not a thrown
+  // instance (live-frame finding). ---
+  const read = packageQuery.data;
+  const notFound = mode === 'edit' && read !== undefined && !read.ok && read.status === 404;
   const readFailed =
-    printSizesQuery.isError || attiresQuery.isError || (mode === 'edit' && packageQuery.isError);
+    printSizesQuery.isError ||
+    attiresQuery.isError ||
+    packageQuery.isError ||
+    (mode === 'edit' && read !== undefined && !read.ok && read.status !== 404);
 
   if (notFound) {
     return (

@@ -70,9 +70,20 @@ export const fetchAdminPackage = createServerFn({ method: 'GET' })
   .validator(z.object({ id: z.uuid() }))
   .handler(async ({ data }) => {
     return startSpan({ name: 'GET /api/v1/admin/service-packages/:id' }, async () => {
-      return getSessionScopedApiClient(
-        getRequestHeaders().get('cookie')
-      ).admin.servicePackages.byId({ param: { id: data.id } });
+      try {
+        const read = await getSessionScopedApiClient(
+          getRequestHeaders().get('cookie')
+        ).admin.servicePackages.byId({ param: { id: data.id } });
+        return { ok: true as const, data: read };
+      } catch (error) {
+        // The RPC boundary erases the ApiClientError class — a client-side
+        // instanceof can never match (#155 live-frame finding). Surface the
+        // status through the RESULT instead.
+        if (error instanceof ApiClientError) {
+          return { ok: false as const, status: error.status, message: error.message };
+        }
+        throw error;
+      }
     });
   });
 
