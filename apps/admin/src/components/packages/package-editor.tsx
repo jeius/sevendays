@@ -34,6 +34,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { ApiClientError } from '@sevendays/api-client';
 import type {
   Attire,
   CreateServicePackageInput,
@@ -68,7 +69,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { ChevronDown, Frame, Gift, GripVertical, Image, Plus, X } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
-import { StatusBadge } from '#/components/cms/shared';
+import {
+  PACKAGE_NOT_FOUND_LINE,
+  QUERY_ERROR_LINE,
+  QueryErrorState,
+  StatusBadge,
+} from '#/components/cms/shared';
 import {
   presignAdminCoverUpload,
   saveAdminPackageCreate,
@@ -610,6 +616,41 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
     } else {
       editSave.mutate(buildUpdatePayload(state, attiresQuery.data));
     }
+  }
+
+  // --- Error postures (#155): a 404 on the edit read is the ruled
+  // not-found line + Back (retrying a 404 is a lie); any OTHER failed read
+  // (the package read failing non-404, or either lookup) is the standard
+  // line + Retry over all failed queries. ---
+  const notFound =
+    mode === 'edit' &&
+    packageQuery.isError &&
+    packageQuery.error instanceof ApiClientError &&
+    packageQuery.error.status === 404;
+  const readFailed =
+    printSizesQuery.isError || attiresQuery.isError || (mode === 'edit' && packageQuery.isError);
+
+  if (notFound) {
+    return (
+      <QueryErrorState line={PACKAGE_NOT_FOUND_LINE}>
+        <Button variant='outline' type='button' onClick={() => void navigate({ to: '/packages' })}>
+          Back to packages
+        </Button>
+      </QueryErrorState>
+    );
+  }
+
+  if (readFailed) {
+    return (
+      <QueryErrorState
+        line={QUERY_ERROR_LINE}
+        onRetry={() => {
+          if (mode === 'edit') void packageQuery.refetch();
+          void printSizesQuery.refetch();
+          void attiresQuery.refetch();
+        }}
+      />
+    );
   }
 
   // --- Pending posture: skeleton until the (create: two / edit: three)
