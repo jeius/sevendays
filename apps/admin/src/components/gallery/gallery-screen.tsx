@@ -1149,14 +1149,17 @@ export function GalleryScreen() {
   return (
     <section className='space-y-4'>
       {/* The hidden input + its ref live in the SCREEN — the route's
-          `Upload photos` label opens it by id (no route logic). The accept
-          ruling is the prototype's: the pre-check is the JPG gate. */}
+          `Upload photos` label opens it by id (no route logic). The
+          picker is JPG-only (#170, ruling #165 Q7 a): accept matches
+          the pre-check's gate — the package editor's cover input is
+          the reference. The pre-check stays the courtesy gate; the
+          server re-verifies (#136). */}
       <input
         ref={fileInputRef}
         id='gallery-upload-input'
         type='file'
         multiple
-        accept='image/*'
+        accept='image/jpeg'
         className='hidden'
         tabIndex={-1}
         aria-hidden='true'
