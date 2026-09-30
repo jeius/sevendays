@@ -22,7 +22,9 @@ import {
 import { Link, useMatchRoute, useNavigate } from '@tanstack/react-router';
 import type { LucideIcon } from 'lucide-react';
 import {
+  CalendarDays,
   Images,
+  LayoutDashboard,
   LogOut,
   MapPin,
   Package,
@@ -35,6 +37,8 @@ import {
 import { authClient } from '#/lib/auth-client';
 
 type NavTo =
+  | '/'
+  | '/appointments'
   | '/packages'
   | '/add-ons'
   | '/studio-services'
@@ -70,9 +74,14 @@ function initials(name: string): string {
 }
 
 // The ruled taxonomy (#59), icons carried from the prototype unchanged.
-// This console ships only the CMS surfaces — the dashboard and
-// appointments destinations are out of scope in this build (#168).
 const navGroups: NavGroup[] = [
+  {
+    heading: 'Overview',
+    items: [
+      { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/appointments', label: 'Appointments', icon: CalendarDays },
+    ],
+  },
   {
     heading: 'Catalog',
     items: [
@@ -143,7 +152,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                     <SidebarMenuButton
                       render={<Link to={item.to} />}
                       tooltip={item.label}
-                      isActive={Boolean(matchRoute({ to: item.to, fuzzy: true }))}
+                      isActive={Boolean(matchRoute({ to: item.to, fuzzy: item.to !== '/' }))}
                     >
                       <item.icon aria-hidden='true' />
                       <span>{item.label}</span>

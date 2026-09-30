@@ -13,6 +13,7 @@ import { Route as ShellRouteImport } from './routes/_shell'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ShellIndexRouteImport } from './routes/_shell.index'
 import { Route as ShellAddOnsRouteImport } from './routes/_shell.add-ons'
+import { Route as ShellAppointmentsRouteImport } from './routes/_shell.appointments'
 import { Route as ShellBranchesRouteImport } from './routes/_shell.branches'
 import { Route as ShellGalleryRouteImport } from './routes/_shell.gallery'
 import { Route as ShellLookupsRouteImport } from './routes/_shell.lookups'
@@ -43,6 +44,11 @@ const ShellIndexRoute = ShellIndexRouteImport.update({
 const ShellAddOnsRoute = ShellAddOnsRouteImport.update({
   id: '/add-ons',
   path: '/add-ons',
+  getParentRoute: () => ShellRoute,
+} as any)
+const ShellAppointmentsRoute = ShellAppointmentsRouteImport.update({
+  id: '/appointments',
+  path: '/appointments',
   getParentRoute: () => ShellRoute,
 } as any)
 const ShellBranchesRoute = ShellBranchesRouteImport.update({
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/': typeof ShellIndexRoute
   '/login': typeof LoginRoute
   '/add-ons': typeof ShellAddOnsRoute
+  '/appointments': typeof ShellAppointmentsRoute
   '/branches': typeof ShellBranchesRoute
   '/gallery': typeof ShellGalleryRoute
   '/lookups': typeof ShellLookupsRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/add-ons': typeof ShellAddOnsRoute
+  '/appointments': typeof ShellAppointmentsRoute
   '/branches': typeof ShellBranchesRoute
   '/gallery': typeof ShellGalleryRoute
   '/lookups': typeof ShellLookupsRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/_shell': typeof ShellRouteWithChildren
   '/login': typeof LoginRoute
   '/_shell/add-ons': typeof ShellAddOnsRoute
+  '/_shell/appointments': typeof ShellAppointmentsRoute
   '/_shell/branches': typeof ShellBranchesRoute
   '/_shell/gallery': typeof ShellGalleryRoute
   '/_shell/lookups': typeof ShellLookupsRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/add-ons'
+    | '/appointments'
     | '/branches'
     | '/gallery'
     | '/lookups'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/add-ons'
+    | '/appointments'
     | '/branches'
     | '/gallery'
     | '/lookups'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/_shell'
     | '/login'
     | '/_shell/add-ons'
+    | '/_shell/appointments'
     | '/_shell/branches'
     | '/_shell/gallery'
     | '/_shell/lookups'
@@ -249,6 +261,13 @@ declare module '@tanstack/react-router' {
       path: '/add-ons'
       fullPath: '/add-ons'
       preLoaderRoute: typeof ShellAddOnsRouteImport
+      parentRoute: typeof ShellRoute
+    }
+    '/_shell/appointments': {
+      id: '/_shell/appointments'
+      path: '/appointments'
+      fullPath: '/appointments'
+      preLoaderRoute: typeof ShellAppointmentsRouteImport
       parentRoute: typeof ShellRoute
     }
     '/_shell/branches': {
@@ -356,6 +375,7 @@ const ShellPackagesRouteWithChildren = ShellPackagesRoute._addFileChildren(
 
 interface ShellRouteChildren {
   ShellAddOnsRoute: typeof ShellAddOnsRoute
+  ShellAppointmentsRoute: typeof ShellAppointmentsRoute
   ShellBranchesRoute: typeof ShellBranchesRoute
   ShellGalleryRoute: typeof ShellGalleryRoute
   ShellLookupsRoute: typeof ShellLookupsRoute
@@ -368,6 +388,7 @@ interface ShellRouteChildren {
 
 const ShellRouteChildren: ShellRouteChildren = {
   ShellAddOnsRoute: ShellAddOnsRoute,
+  ShellAppointmentsRoute: ShellAppointmentsRoute,
   ShellBranchesRoute: ShellBranchesRoute,
   ShellGalleryRoute: ShellGalleryRoute,
   ShellLookupsRoute: ShellLookupsRoute,
@@ -389,3 +410,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

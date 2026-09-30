@@ -1,11 +1,20 @@
-// The shell's root lands on the packages worklist — no dashboard surface
-// ships in this build, and a routeless `/` is not an option (post-login
-// needs a landing screen). The removed appointments path answers with the
-// router's not-found (#168).
-import { createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
+import { StubScreen } from '#/components/stub-screen';
 
 export const Route = createFileRoute('/_shell/')({
-  beforeLoad: () => {
-    throw redirect({ to: '/packages' });
-  },
+  head: () => ({ meta: [{ title: 'Dashboard | Sevendays Admin' }] }),
+  component: DashboardPage,
 });
+
+function DashboardPage() {
+  // The honest empty state (#93): the appointments dashboard — its cards,
+  // filters, and table — is v2 payload, created wholesale then. Nothing
+  // dashboard-shaped ships in v1, so this screen ships empty on purpose.
+  return (
+    <StubScreen
+      title='Dashboard'
+      blurb='This screen ships empty for now — the appointments dashboard arrives with v2.'
+      milestone='v2'
+    />
+  );
+}
