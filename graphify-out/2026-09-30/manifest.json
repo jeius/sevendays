@@ -720,8 +720,8 @@
     "semantic_hash": "044b5c7e6e392444eb6e3bf59ad68633"
   },
   "apps/admin/CONTEXT.md": {
-    "mtime": 1790759039.6220303,
-    "ast_hash": "7d74e2428a27c0107803de390d984b62",
+    "mtime": 1790744995.3707154,
+    "ast_hash": "32d67a4ed24a251ddfceee913970f618",
     "semantic_hash": ""
   },
   "apps/admin/README.md": {
@@ -730,8 +730,8 @@
     "semantic_hash": ""
   },
   "apps/api/CONTEXT.md": {
-    "mtime": 1790759039.5883632,
-    "ast_hash": "0e052d6a86b903f8f38cfacbf5b693bd",
+    "mtime": 1790751956.9184587,
+    "ast_hash": "1846c49a2a129fb7b4901cefc3b16b67",
     "semantic_hash": ""
   },
   "apps/landing/CONTEXT.md": {
@@ -845,8 +845,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1790764859.7478328,
-    "ast_hash": "cbb3c27526f7581fe47ce525e90325fd",
+    "mtime": 1790730271.5376978,
+    "ast_hash": "e79d5cf138a1214ae17d2891b878d646",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2880,8 +2880,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1790765250.5911255,
-    "ast_hash": "1a9ecbf9905ccbcb07be4d926f127815",
+    "mtime": 1790730295.4785964,
+    "ast_hash": "213c6ed7a91c416cd43ab9a198e6080d",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -3540,8 +3540,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/gallery/gallery-screen.tsx": {
-    "mtime": 1790764859.7478328,
-    "ast_hash": "85bc931b0308c28bc1a8628f923d1834",
+    "mtime": 1790691139.524564,
+    "ast_hash": "e246512d8633d7936fe7bc1e5f8562ee",
     "semantic_hash": ""
   },
   "apps/admin/src/components/lookups/lookups-screen.tsx": {
@@ -3605,8 +3605,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/routes/_shell.gallery.tsx": {
-    "mtime": 1790764859.7478328,
-    "ast_hash": "10b8ee27940bf8289e5134719adc873e",
+    "mtime": 1790619602.2273946,
+    "ast_hash": "6d910525376cc4645e83cd1fc122cedd",
     "semantic_hash": ""
   },
   "apps/admin/src/routes/_shell.lookups.tsx": {
@@ -3877,11 +3877,6 @@
   "docs/superpowers/plans/2026-09-29-155-owner-decisions.md": {
     "mtime": 1790691139.5287805,
     "ast_hash": "28a68f28626591cf49e7a5a262ecb781",
-    "semantic_hash": ""
-  },
-  "docs/superpowers/plans/2026-09-30-170-gallery-upload-picker.md": {
-    "mtime": 1790764859.7478328,
-    "ast_hash": "4dcbac4ca0212edfb06dc57e58e1385a",
     "semantic_hash": ""
   }
 }
