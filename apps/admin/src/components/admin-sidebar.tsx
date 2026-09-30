@@ -74,6 +74,8 @@ function initials(name: string): string {
 }
 
 // The ruled taxonomy (#59), icons carried from the prototype unchanged.
+// Overview is wholly future scope — both destinations are later-milestone
+// stubs; Catalog and Studio carry the live CMS surfaces.
 const navGroups: NavGroup[] = [
   {
     heading: 'Overview',

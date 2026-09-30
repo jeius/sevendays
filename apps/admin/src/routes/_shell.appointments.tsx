@@ -10,7 +10,7 @@ function AppointmentsPage() {
   return (
     <StubScreen
       title='Appointments'
-      blurb='The bookings worklist — list, branch/status filters, status updates. The real surface is the appointments dashboard, now v2 payload.'
+      blurb='The bookings worklist — list, branch/status filters, status updates. The full worklist arrives with v2.'
       milestone='v2'
     />
   );
