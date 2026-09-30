@@ -28,20 +28,30 @@ function GalleryPage() {
           // render target is not a native <button> (suppresses the dev-mode
           // console error and applies the full useButton keyboard state),
           // and tabIndex={0} gives the label its tab stop.
-          <Button
-            nativeButton={false}
-            render={
-              <label
-                htmlFor='gallery-upload-input'
-                className='cursor-pointer'
-                // biome-ignore lint/a11y/noNoninteractiveTabindex: this label is a Base UI <Button> render target (nativeButton={false}) — an interactive control at runtime, so it needs its own tab stop
-                tabIndex={0}
-              >
-                <ImagePlus aria-hidden='true' />
-                Upload photos
-              </label>
-            }
-          />
+          <>
+            <Button
+              nativeButton={false}
+              render={
+                <label
+                  htmlFor='gallery-upload-input'
+                  className='cursor-pointer'
+                  // biome-ignore lint/a11y/noNoninteractiveTabindex: this label is a Base UI <Button> render target (nativeButton={false}) — an interactive control at runtime, so it needs its own tab stop
+                  tabIndex={0}
+                >
+                  <ImagePlus aria-hidden='true' />
+                  Upload photos
+                </label>
+              }
+            />
+            {/* #170 (ruling #165 Q7 f): the picker's constraint said up
+                front — plain text-muted-foreground, so both themes carry
+                it with no extra styling. The PageHeader's actions row
+                (flex items-center gap-2) seats it beside the affordance;
+                it renders in every screen state, the empty states
+                included (the route always mounts the header above the
+                screen). */}
+            <p className='text-muted-foreground text-xs'>JPG files up to 50 MiB.</p>
+          </>
         }
       />
       <GalleryScreen />
