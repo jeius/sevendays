@@ -8,7 +8,9 @@ import { Badge } from '@sevendays/ui/components/badge';
 interface StubScreenProps {
   title: string;
   blurb: string;
-  milestone: 'M4' | 'M5' | 'v2';
+  /** Present only when a ruled future scope owns the screen (the v2 stubs);
+      omitted when no milestone owns the shape yet — Settings (#167). */
+  milestone?: 'v2';
 }
 
 export function StubScreen({ title, blurb, milestone }: StubScreenProps) {
@@ -19,9 +21,11 @@ export function StubScreen({ title, blurb, milestone }: StubScreenProps) {
     >
       <h1 className='text-foreground text-lg font-semibold'>{title}</h1>
       <p className='text-muted-foreground mt-2 max-w-md text-sm'>{blurb}</p>
-      <Badge variant='outline' className='mt-4 font-mono text-xs'>
-        arrives with {milestone}
-      </Badge>
+      {milestone && (
+        <Badge variant='outline' className='mt-4 font-mono text-xs'>
+          arrives with {milestone}
+        </Badge>
+      )}
     </section>
   );
 }
