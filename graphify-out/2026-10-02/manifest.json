@@ -720,8 +720,8 @@
     "semantic_hash": "044b5c7e6e392444eb6e3bf59ad68633"
   },
   "apps/admin/CONTEXT.md": {
-    "mtime": 1790930401.1421306,
-    "ast_hash": "80fbfe82826bc36ce72c7e3246189981",
+    "mtime": 1790759039.6220303,
+    "ast_hash": "7d74e2428a27c0107803de390d984b62",
     "semantic_hash": ""
   },
   "apps/admin/README.md": {
@@ -840,13 +840,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1790953862.4619923,
-    "ast_hash": "f4886dc86a5b7b1adc9455108fd48f10",
+    "mtime": 1790640929.607651,
+    "ast_hash": "161405bae6f8c27bf7042cf7a703f289",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1790953938.8843358,
-    "ast_hash": "cbdf46693b052047350cea8c66585104",
+    "mtime": 1790764859.7478328,
+    "ast_hash": "cbb3c27526f7581fe47ce525e90325fd",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2920,8 +2920,8 @@
     "semantic_hash": ""
   },
   "docs/specs/2026-09-14-ui-ux-design-system-spec.md": {
-    "mtime": 1790953902.9473302,
-    "ast_hash": "de06d30a7f97dc0c9e7af3dca06fbe0b",
+    "mtime": 1789386343.2058074,
+    "ast_hash": "8158df3994d0dfcf3f840328c0fe2274",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-14-95-ui-shared-primitive-library.md": {
@@ -3445,8 +3445,8 @@
     "semantic_hash": ""
   },
   "docs/specs/2026-09-24-m5-admin-cms-spec.md": {
-    "mtime": 1790953888.0694432,
-    "ast_hash": "5998eeb6ac50c051d66248a377d13d36",
+    "mtime": 1790337644.6710632,
+    "ast_hash": "fee1d43cbbfd43fefc4b499b94645e8a",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-24-131-m5-prototype-admin-cms-compositions.md": {
@@ -3882,51 +3882,6 @@
   "docs/superpowers/plans/2026-09-30-170-gallery-upload-picker.md": {
     "mtime": 1790764859.7478328,
     "ast_hash": "4dcbac4ca0212edfb06dc57e58e1385a",
-    "semantic_hash": ""
-  },
-  "apps/admin/.impeccable/live/config.json": {
-    "mtime": 1790770155.8608627,
-    "ast_hash": "c07b2106f28468fd4b9c1b5773bf624d",
-    "semantic_hash": ""
-  },
-  "apps/landing/.impeccable/live/config.json": {
-    "mtime": 1790770155.8567991,
-    "ast_hash": "c07b2106f28468fd4b9c1b5773bf624d",
-    "semantic_hash": ""
-  },
-  "PRODUCT.md": {
-    "mtime": 1790952376.63448,
-    "ast_hash": "8339d1360a8c8281b91bf98a87284561",
-    "semantic_hash": ""
-  },
-  "apps/admin/PRODUCT.md": {
-    "mtime": 1790770150.6882684,
-    "ast_hash": "388d8876bbf8b495e46fef95790ad2d3",
-    "semantic_hash": ""
-  },
-  "apps/landing/PRODUCT.md": {
-    "mtime": 1790770139.4508967,
-    "ast_hash": "fcdb52db2fe2a1e5a50c4ef96db8dbb8",
-    "semantic_hash": ""
-  },
-  "docs/adr/0020-unpriced-catalog-items-nullable-snapshots.md": {
-    "mtime": 1790953558.082453,
-    "ast_hash": "bfda12ee843382c675d049e636c2bccf",
-    "semantic_hash": ""
-  },
-  "docs/adr/0021-reset-email-topology-service-binding.md": {
-    "mtime": 1790953579.0661957,
-    "ast_hash": "fed551b94b4e2b3f8341901b3f3bb859",
-    "semantic_hash": ""
-  },
-  "docs/specs/2026-10-02-m7-experience-cms-maturation-spec.md": {
-    "mtime": 1790953760.7015827,
-    "ast_hash": "f9b46f3b97e016ef4bd60f7dc0bbe480",
-    "semantic_hash": ""
-  },
-  "docs/superpowers/plans/2026-09-30-164-landing-redesign-prototype.md": {
-    "mtime": 1790778899.8762581,
-    "ast_hash": "f7127046d18fa7927fe0d69a901e7bb6",
     "semantic_hash": ""
   }
 }
