@@ -889,7 +889,7 @@ Expected: exits 0, prints `--dry-run: exiting now.` with the bindings table (pro
 Run: `pnpm --filter @sevendays/api fix && pnpm --filter @sevendays/api typecheck && pnpm --filter @sevendays/api build` (the AppType export is unchanged — api-client keeps typechecking), then commit:
 
 ```bash
-git add apps/api/src/observability/request-context.ts apps/api/src/index.ts apps/api/src/services/db.ts apps/api/wrangler.toml apps/api/test/application-log.test.ts apps/api/test/error-seam.test.ts
+git add apps/api/src/observability/request-context.ts apps/api/src/index.ts apps/api/wrangler.toml apps/api/test/application-log.test.ts apps/api/test/error-seam.test.ts
 git commit -m "feat(api): requestId middleware + access/error events; CORS middleware dropped; Workers Logs enabled (#183)"
 ```
 
