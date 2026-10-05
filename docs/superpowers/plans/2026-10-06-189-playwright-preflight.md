@@ -519,7 +519,7 @@ to:
 
 ```markdown
 - Test: `pnpm test`
-- Typecheck: `pnpm typecheck`
+- Everything (lint + format + typecheck + test): `pnpm check`
 ```
 
 to:
@@ -527,7 +527,7 @@ to:
 ```markdown
 - Test: `pnpm test`
 - E2E, browser smoke (chromium-only, walks a deployed environment via `E2E_BASE_URL`; never part of `pnpm check` — ADR-0022): first run `pnpm exec playwright install chromium`, then `E2E_BASE_URL=<deployment> pnpm test:e2e`
-- Typecheck: `pnpm typecheck`
+- Everything (lint + format + typecheck + test): `pnpm check`
 ```
 
 Second, at the end of the "Current status of `pnpm test`" section, change:
