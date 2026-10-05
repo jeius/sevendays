@@ -26,7 +26,15 @@ _Avoid_: free, inquire-only
 
 **Dashboard**:
 The appointment-management view: the list of Appointments filterable by Branch and Status, where staff change Status.
-_Avoid_: home, overview
+_Avoid_: home, overview, analytics
+
+**Analytics Dashboard**:
+The admin's landing view at `/` (nav: Analytics, Overview group): the studio's aggregate operating pulse — audience traffic, system health, storage and media budget, content freshness — plus a Sentry link-out. Aggregate-only by rule (person-level data is owner-scoped); booking analytics never appear here (v2).
+_Avoid_: dashboard, home, overview
+
+**Audit Log**:
+The owner-only screen presenting the CMS's durable who/what/when record (the Audit Log table, owned by the API's context) as a filterable, newest-first table. Person-level by nature — it names who acted — so it never joins the all-staff Analytics Dashboard.
+_Avoid_: activity feed, change history, changelog
 
 **Staff User**:
 A studio employee who signs in to the admin site with an email and password — there is no self-serve sign-up; the owner provisions users (Users Page; the CLI runbook is the bootstrap/break-glass path). Carries a role (ADR-0018): the owner holds `admin` — the only role BetterAuth's user-management endpoints answer to — staff hold `staff`.

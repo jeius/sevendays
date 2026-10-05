@@ -123,3 +123,13 @@ _Avoid_: review, story (that is owner copy), blurb
 **Testimonial Submission**:
 An inbound customer quote from the public form — the quote text and the person attributed — awaiting staff review; it never renders anywhere. Accepting one creates a Testimonial, with the text editable at acceptance; rejecting one retains it as a record, never a rendering.
 _Avoid_: pending testimonial, feedback, entry
+
+## Observability
+
+**Application Log**:
+The API's structured, ephemeral event stream — access lines, admin-mutation, media, and email events, errors — written for human debugging only: it serves no dashboard and is never a durable record.
+_Avoid_: audit log (that is the Audit Log), telemetry, log trail
+
+**Audit Log**:
+The durable who/what/when record of a CMS write, held as a database table written in the same transaction as the mutation it records — never derived from the Application Log.
+_Avoid_: activity log, change history, mutation log
