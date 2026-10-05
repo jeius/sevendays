@@ -5,6 +5,7 @@ import {
 } from '@sevendays/types';
 import { Hono } from 'hono';
 import { z } from 'zod';
+import { logAdminMutation } from '../observability/events.js';
 import {
   createAdminGalleryCategory,
   getAdminGalleryCategory,
@@ -29,6 +30,7 @@ export const adminGalleryCategories = new Hono<ApiEnv>()
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
     }
+    logAdminMutation(c, { entity: 'gallery-category', entityId: result.row.id });
     return c.json(result.row, 201);
   })
   .put('/order', validatedJson(galleryCategoryOrderSchema), async (c) => {
@@ -37,6 +39,7 @@ export const adminGalleryCategories = new Hono<ApiEnv>()
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
     }
+    logAdminMutation(c, { entity: 'gallery-category', entityId: null });
     return c.json(result.row);
   })
   .get('/:id', validatedParam(z.object({ id: z.uuid() })), async (c) => {
@@ -60,6 +63,7 @@ export const adminGalleryCategories = new Hono<ApiEnv>()
         }
         return badRequest(c, result.message, result.details);
       }
+      logAdminMutation(c, { entity: 'gallery-category', entityId: result.row.id });
       return c.json(result.row);
     }
   );

@@ -743,8 +743,11 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
     expect(sendMock).toHaveBeenCalledTimes(1);
   });
 
-  it('a typed Resend failure never fails the booking (logged, 201 stands)', async () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('a typed Resend failure never fails the booking — the failed email event with the classified code, 201 stands', async () => {
+    const lines: string[] = [];
+    vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      lines.push(String(args[0]));
+    });
     // The SDK's REAL failure shape: it resolves { data: null, error } — it
     // does not throw (resend@6 Response contract).
     sendMock.mockResolvedValue({
@@ -754,21 +757,116 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
     const ctx = fakeExecCtx();
     const res = await postBooking(ctx);
     expect(res.status).toBe(201);
+    const created = await res.json();
     await Promise.all(ctx.promises);
-    expect(spy.mock.calls.some((call) => String(call[0]).includes('confirmation email'))).toBe(
-      true
-    );
+    const failed = lines
+      .map((line) => JSON.parse(line) as Record<string, unknown>)
+      .filter((line) => line.evt === 'email' && line.phase === 'failed');
+    expect(failed).toHaveLength(1);
+    expect(failed[0]).toMatchObject({
+      appointmentId: created.id,
+      code: 'resend:internal_server_error',
+    });
+    expect(failed[0]?.requestId).toBe(res.headers.get('x-request-id'));
   });
 
-  it('a thrown send failure never fails the booking either (logged, 201 stands)', async () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('a thrown send failure never fails the booking either — code send_failed, 201 stands', async () => {
+    const lines: string[] = [];
+    vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      lines.push(String(args[0]));
+    });
     sendMock.mockRejectedValue(new Error('network down'));
     const ctx = fakeExecCtx();
     const res = await postBooking(ctx);
     expect(res.status).toBe(201);
     await Promise.all(ctx.promises);
-    expect(spy.mock.calls.some((call) => String(call[0]).includes('confirmation email'))).toBe(
-      true
+    const failed = lines
+      .map((line) => JSON.parse(line) as Record<string, unknown>)
+      .filter((line) => line.evt === 'email' && line.phase === 'failed');
+    expect(failed).toHaveLength(1);
+    expect(failed[0]).toMatchObject({ code: 'send_failed' });
+  });
+
+  it("email attempt + sent events ride the booking request (appointmentId + the request's requestId)", async () => {
+    const lines: string[] = [];
+    vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      lines.push(String(args[0]));
+    });
+    const ctx = fakeExecCtx();
+    const res = await postBooking(ctx);
+    expect(res.status).toBe(201);
+    const created = await res.json();
+    await Promise.all(ctx.promises);
+    const parsed = lines.map((line) => JSON.parse(line) as Record<string, unknown>);
+    const emailLines = parsed.filter((line) => line.evt === 'email');
+    expect(emailLines).toHaveLength(2); // attempt, then sent — nothing else
+    expect(emailLines[0]).toMatchObject({ phase: 'attempt', appointmentId: created.id });
+    expect(emailLines[1]).toMatchObject({ phase: 'sent', appointmentId: created.id });
+    const requestId = res.headers.get('x-request-id');
+    expect(emailLines.every((line) => line.requestId === requestId)).toBe(true);
+    const access = parsed.find((line) => line.evt === 'access');
+    expect(access?.requestId).toBe(requestId);
+    expect(access?.route).toBe('/api/v1/appointments');
+  });
+
+  it('PII sweep: a booking carrying customer email/phone + UA + x-forwarded-for leaves NONE of them in any line, and every line fits the five schemas', async () => {
+    const lines: string[] = [];
+    vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      lines.push(String(args[0]));
+    });
+    const email = 'pii-sweep-customer@sevendays.test';
+    const phone = '+63 917 555 0199';
+    const ctx = fakeExecCtx();
+    const res = await app.request(
+      '/api/v1/appointments',
+      {
+        method: 'POST',
+        body: JSON.stringify(payload({ customerEmail: email, customerPhone: phone })),
+        headers: {
+          'content-type': 'application/json',
+          'user-agent': 'pii-sweep-agent/1.0',
+          'x-forwarded-for': '203.0.113.7',
+        },
+      },
+      testEnv(url),
+      ctx
     );
+    expect(res.status).toBe(201);
+    await Promise.all(ctx.promises);
+    expect(lines.length).toBeGreaterThan(0);
+    // (a) none of the carried values appear anywhere in the raw stream
+    const raw = lines.join('\n');
+    for (const forbidden of [email, phone, 'pii-sweep-agent', '203.0.113.7']) {
+      expect(raw.includes(forbidden)).toBe(false);
+    }
+    // (b) every line's key set is within the five enumerated schemas
+    const allowed = new Set([
+      'time',
+      'level',
+      'msg',
+      'requestId',
+      'evt',
+      'method',
+      'route',
+      'status',
+      'durationMs',
+      'actorId',
+      'entity',
+      'entityId',
+      'op',
+      'reason',
+      'phase',
+      'appointmentId',
+      'code',
+      'name',
+      'message',
+      'stack',
+    ]);
+    for (const line of lines) {
+      const parsed = JSON.parse(line) as Record<string, unknown>;
+      for (const key of Object.keys(parsed)) {
+        expect(allowed.has(key)).toBe(true);
+      }
+    }
   });
 });

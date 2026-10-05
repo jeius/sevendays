@@ -55,6 +55,6 @@ export const appointments = new Hono<ApiEnv>()
     }
     // Fire-and-forget (issue #47): the booking is committed; the email is
     // scheduled past the response — its failure never fails the booking.
-    scheduleConfirmationEmail(c.executionCtx, c.env, db, result.record);
+    scheduleConfirmationEmail(c.executionCtx, c.env, db, result.record, c.get('logger'));
     return c.json(result.record, 201);
   });

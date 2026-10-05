@@ -9,7 +9,7 @@ One of the studio's three physical photography locations.
 _Avoid_: store, location, studio (unqualified)
 
 **Service Package**:
-A bookable offering with a name, description, price, duration, and cover image. Its fixed contents are its Inclusions; paid extras are attached at booking as Add-on Services.
+A bookable offering with a name, description, an optional price, duration, and cover image. Its fixed contents are its Inclusions; extras are attached at booking as Add-on Services.
 _Avoid_: plan, product, offering, package (unqualified — collides with npm packages)
 
 **Inclusion**:
@@ -17,7 +17,7 @@ A fixed item or privilege bundled with a Service Package at no extra charge — 
 _Avoid_: freebie, bundle, "what's included" (in prose)
 
 **Add-on Service**:
-An optional paid extra — hairstyle, makeup — attached to an Appointment at booking time. An addition to whatever the Appointment books, never bookable instead of it; on Studio Service bookings, only the add-ons configured to apply to that service are offered.
+An optional extra — hairstyle, makeup — priced unless Unpriced, attached to an Appointment at booking time. An addition to whatever the Appointment books, never bookable instead of it; on Studio Service bookings, only the add-ons configured to apply to that service are offered.
 _Avoid_: service (unqualified), extra, option
 
 **Studio Service**:
@@ -98,6 +98,14 @@ _Avoid_: deleted, archived, disabled
 A shared reference entity that Inclusions resolve values against — Print size and Attire. Frame is not a lookup: it is numbered within, and owned by, its Service Package.
 _Avoid_: dictionary, reference table
 
+**Delete**:
+Permanent removal of a CMS entity — refused while anything references it: an Appointment on the offering (any Status, ever), an add-on attached to a past Appointment, an Inclusion resolving a Lookup, a Gallery Photo in the category. A row that passes is destroyed with what it owns — Frames, Inclusions, matrix entries, its cover image or photo; a blocked row leaves Deactivation as its only path, for good.
+_Avoid_: hard delete, remove, purge, cascade (in prose)
+
+**Unpriced**:
+A catalog item — Service Package, Studio Service, or Add-on Service — whose price is deliberately unset. The item stays fully functional: bookable and attachable exactly as a priced one, with no price rendered anywhere it would appear — no placeholder stands in, and a booking with any Unpriced part shows no total. Reversible at any time by setting a price.
+_Avoid_: free (that is zero-priced), inquire-only, price-on-request
+
 ## Gallery & testimonials
 
 **Gallery Photo**:
@@ -111,3 +119,17 @@ _Avoid_: album, collection, tag
 **Testimonial**:
 A structured customer quote — the quote text, the person attributed, and a display position — rendered in the landing site's about slot.
 _Avoid_: review, story (that is owner copy), blurb
+
+**Testimonial Submission**:
+An inbound customer quote from the public form — the quote text and the person attributed — awaiting staff review; it never renders anywhere. Accepting one creates a Testimonial, with the text editable at acceptance; rejecting one retains it as a record, never a rendering.
+_Avoid_: pending testimonial, feedback, entry
+
+## Observability
+
+**Application Log**:
+The API's structured, ephemeral event stream — access lines, admin-mutation, media, and email events, errors — written for human debugging only: it serves no dashboard and is never a durable record.
+_Avoid_: audit log (that is the Audit Log), telemetry, log trail
+
+**Audit Log**:
+The durable who/what/when record of a CMS write, held as a database table written in the same transaction as the mutation it records — never derived from the Application Log.
+_Avoid_: activity log, change history, mutation log

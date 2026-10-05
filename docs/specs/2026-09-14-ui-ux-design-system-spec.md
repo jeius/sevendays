@@ -143,7 +143,7 @@ Contact step: **no bespoke wrapper** — plain `input`/`label`/`textarea` primit
 
 ### Quality bar (map charting rulings)
 
-- **Dark mode is out** — light theme only for both editions; the token layer's `.dark` block is carried, parked, not judged.
+- **Dark mode is out** — light theme only for both editions; the token layer's `.dark` block is carried, parked, not judged. _(Corrected 2026-10-02: both halves went stale — no `.dark` block was ever carried (`packages/ui/src/tokens.css` deliberately designed none at the M3 build), and dark mode was unparked into Milestone 7 for all three surfaces, default light, designed from zero on the ruled ramp — maturation map #158, tickets #162 + #164; see the M7 spec § Dark mode.)_
 - **Motion = shadcn defaults**; no custom motion system.
 - **No Storybook, no visual-regression tooling.**
 - **A11y = Base UI/shadcn defaults + keyboard and responsive passes** on what's built; no formal audit. WCAG AA on own surfaces governs the token derivation (the measured pair table rides the #92 prototype record).

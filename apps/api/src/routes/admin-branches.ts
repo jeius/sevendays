@@ -1,6 +1,7 @@
 import { createBranchSchema, updateBranchSchema } from '@sevendays/types';
 import { Hono } from 'hono';
 import { z } from 'zod';
+import { logAdminMutation } from '../observability/events.js';
 import {
   createAdminBranch,
   getAdminBranch,
@@ -15,7 +16,9 @@ import { validatedJson, validatedParam } from '../services/validator.js';
 // behind routes/admin.ts's ONE requireSession: the uniform 401 envelope
 // precedes every validator here (per-family proof: test/admin-entities.test.ts).
 // validatedParam runs before validatedJson — path before body; both answer
-// the uniform { error, details } 400.
+// the uniform { error, details } 400. One admin_mutation event per committed
+// write (M6 #183) — emitted only after result.ok, so 400/401 paths stay
+// silent.
 export const adminBranches = new Hono<ApiEnv>()
   .get('/', async (c) => {
     return c.json(await listAdminBranches(c.get('db')));
@@ -33,6 +36,7 @@ export const adminBranches = new Hono<ApiEnv>()
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
     }
+    logAdminMutation(c, { entity: 'branch', entityId: result.row.id });
     return c.json(result.row, 201);
   })
   .put(
@@ -48,6 +52,7 @@ export const adminBranches = new Hono<ApiEnv>()
         }
         return badRequest(c, result.message, result.details);
       }
+      logAdminMutation(c, { entity: 'branch', entityId: result.row.id });
       return c.json(result.row);
     }
   );
