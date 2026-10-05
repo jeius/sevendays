@@ -840,13 +840,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1790953862.4619923,
-    "ast_hash": "f4886dc86a5b7b1adc9455108fd48f10",
+    "mtime": 1791165401.1968424,
+    "ast_hash": "fa911af660fbdfcef5b09675b46daab9",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1790953938.8843358,
-    "ast_hash": "cbdf46693b052047350cea8c66585104",
+    "mtime": 1791184217.4410903,
+    "ast_hash": "6da94b94af78c3138cda01ea61c84acd",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -3927,6 +3927,21 @@
   "docs/superpowers/plans/2026-09-30-164-landing-redesign-prototype.md": {
     "mtime": 1790778899.8762581,
     "ast_hash": "f7127046d18fa7927fe0d69a901e7bb6",
+    "semantic_hash": ""
+  },
+  "docs/adr/0022-standalone-playwright-browser-test-foundation.md": {
+    "mtime": 1791165366.0821745,
+    "ast_hash": "e4d71e47199dbc5280c254ff56973e3f",
+    "semantic_hash": ""
+  },
+  "docs/adr/0023-observability-data-path-admin-server-functions.md": {
+    "mtime": 1791165379.2868376,
+    "ast_hash": "ec5012a0a8fd90fe8b21f33698947c86",
+    "semantic_hash": ""
+  },
+  "docs/specs/2026-10-05-m6-production-hardening-observability-spec.md": {
+    "mtime": 1791165336.6932216,
+    "ast_hash": "abe8a6006464255e2feefc3805227168",
     "semantic_hash": ""
   }
 }
