@@ -160,7 +160,7 @@ describe('POST /api/v1/admin/media/presign', () => {
     expect(upload.searchParams.get('X-Amz-SignedHeaders')).toBe('content-type;host');
   });
 
-  it('fails presign with the curated 503 + the structured error event when the S3-token pair is absent (leak-safe detail, #155)', async () => {
+  it('fails presign with the curated 503 + the presign media_failure and error events when the S3-token pair is absent (leak-safe detail, #155)', async () => {
     const lines: string[] = [];
     vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
       lines.push(String(args[0]));
@@ -177,16 +177,36 @@ describe('POST /api/v1/admin/media/presign', () => {
     );
     expect(res.status).toBe(503);
     expect(await res.json()).toEqual({ error: 'Media uploads are not configured.' });
-    // The loud detail rides the structured error event now (M6 #183): the
-    // thrown MissingR2CredentialsError with name/route/requestId — the
-    // response keeps the curated 503, the env names never leave the Worker.
-    const errorLines = lines
-      .map((line) => JSON.parse(line) as Record<string, unknown>)
-      .filter((line) => line.evt === 'error');
-    expect(errorLines).toHaveLength(1);
-    expect(errorLines[0]?.name).toBe('MissingR2CredentialsError');
-    expect(errorLines[0]?.route).toBe('/api/v1/admin/media/presign');
-    expect(errorLines[0]?.requestId).toBe(res.headers.get('x-request-id'));
+    const parsed = lines.map((line) => JSON.parse(line) as Record<string, unknown>);
+    const media = parsed.filter((line) => line.evt === 'media_failure');
+    expect(media).toHaveLength(1);
+    expect(media[0]).toMatchObject({ op: 'presign', reason: 'missing_credentials' });
+    expect(media[0]?.requestId).toBe(res.headers.get('x-request-id'));
+    // The thrown MissingR2CredentialsError rides the error class (one line).
+    const errors = parsed.filter((line) => line.evt === 'error');
+    expect(errors).toHaveLength(1);
+    expect(errors[0]?.name).toBe('MissingR2CredentialsError');
+  });
+
+  it('a successful presign stays QUIET — no media event at all (the highest-frequency admin call)', async () => {
+    const lines: string[] = [];
+    vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      lines.push(String(args[0]));
+    });
+    const { token } = await signUpSession(url, 'presign-quiet@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/media/presign',
+      {
+        method: 'POST',
+        body: JSON.stringify({ purpose: 'package-cover', contentType: 'image/jpeg' }),
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+      },
+      withCreds()
+    );
+    expect(res.status).toBe(200);
+    const parsed = lines.map((line) => JSON.parse(line) as Record<string, unknown>);
+    expect(parsed.filter((line) => line.evt === 'media_failure')).toEqual([]);
+    expect(parsed.filter((line) => line.evt === 'access')).toHaveLength(1);
   });
 });
 
@@ -240,6 +260,9 @@ describe('GET /api/v1/admin/gallery-photos/:id/thumb', () => {
       withCreds({ MEDIA_BUCKET: bucket, IMAGES: images.binding })
     );
     expect(res.status).toBe(200);
+    // The raw-Response path (no c.json prepared-header merge) still gets the
+    // echoed requestId from the middleware's post-next() header set.
+    expect(res.headers.get('x-request-id')).toMatch(/^[0-9a-f-]{36}$/);
     expect(res.headers.get('content-type')).toBe('image/webp');
     expect(await res.text()).toBe('WEBP-MARKER-BYTES');
     // The stub must have seen the exact chain the service builds.
@@ -326,5 +349,25 @@ describe('GET /api/v1/admin/gallery-photos/:id/thumb', () => {
     );
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: 'Authentication required.' });
+  });
+
+  it('an unknown photo id → the 404 PLUS the thumbnail media_failure line', async () => {
+    const lines: string[] = [];
+    vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      lines.push(String(args[0]));
+    });
+    const { token } = await signUpSession(url, 'thumb-evt@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/gallery-photos/00000000-0000-4000-8000-000000000000/thumb',
+      { headers: bearer(token) },
+      withCreds()
+    );
+    expect(res.status).toBe(404);
+    const media = lines
+      .map((line) => JSON.parse(line) as Record<string, unknown>)
+      .filter((line) => line.evt === 'media_failure');
+    expect(media).toHaveLength(1);
+    expect(media[0]).toMatchObject({ op: 'thumbnail', reason: 'not_found' });
+    expect(media[0]?.requestId).toBe(res.headers.get('x-request-id'));
   });
 });

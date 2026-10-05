@@ -5,7 +5,7 @@ import {
 } from '@sevendays/types';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { logAdminMutation } from '../observability/events.js';
+import { logAdminMutation, logMediaFailure } from '../observability/events.js';
 import {
   createAdminGalleryPhoto,
   getAdminGalleryPhoto,
@@ -30,7 +30,12 @@ export const galleryPhotos = new Hono<ApiEnv>()
     return c.json(await listAdminGalleryPhotos(c.get('db'), c.env));
   })
   .post('/', validatedJson(createGalleryPhotoSchema), async (c) => {
-    const result = await createAdminGalleryPhoto(c.get('db'), c.env, c.req.valid('json'));
+    const result = await createAdminGalleryPhoto(
+      c.get('db'),
+      c.env,
+      c.req.valid('json'),
+      c.get('logger')
+    );
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
     }
@@ -51,6 +56,7 @@ export const galleryPhotos = new Hono<ApiEnv>()
     const db = c.get('db');
     const response = await servePhotoThumbnail(db, c.env, id);
     if (!response) {
+      logMediaFailure(c.get('logger'), { op: 'thumbnail', reason: 'not_found' });
       return notFound(c, 'Photo not found.');
     }
     return response;
@@ -69,7 +75,13 @@ export const galleryPhotos = new Hono<ApiEnv>()
     validatedJson(updateGalleryPhotoSchema),
     async (c) => {
       const { id } = c.req.valid('param');
-      const result = await updateAdminGalleryPhoto(c.get('db'), c.env, id, c.req.valid('json'));
+      const result = await updateAdminGalleryPhoto(
+        c.get('db'),
+        c.env,
+        id,
+        c.req.valid('json'),
+        c.get('logger')
+      );
       if (!result.ok) {
         if (result.reason === 'not_found') {
           return notFound(c, 'Photo not found.');

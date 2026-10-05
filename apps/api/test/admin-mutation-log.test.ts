@@ -5,6 +5,7 @@ import { createTestDb } from './helpers/db.js';
 import { testEnv } from './helpers/env.js';
 import type { FixtureIds } from './helpers/fixtures.js';
 import { loadFixtures } from './helpers/fixtures.js';
+import { stubCommitBucket } from './helpers/r2-stub.js';
 import { truncateAll } from './helpers/truncate.js';
 
 const url = process.env.TEST_DATABASE_URL as string;
@@ -252,5 +253,49 @@ describe('admin_mutation events (M6 #183 — one per committed CMS write)', () =
       .map((line) => line.entity)
       .sort();
     expect(entities).toEqual(['addon-service', 'attire', 'print-size', 'testimonial']);
+  });
+});
+
+describe('the gallery-photo commit seam (media_failure × commit + the photo mutation line)', () => {
+  const STAGING = 'tmp/00000000-0000-4000-8000-000000000009.jpg';
+
+  it('POST with a foreign key → 400, a media_failure {op: commit, reason: foreign_key}, and NO mutation line', async () => {
+    const lines = captureLines();
+    const res = await authed(
+      'POST',
+      '/api/v1/admin/gallery-photos',
+      'mut-photo-fk@sevendays.test',
+      { r2Key: 'gallery/00000000-0000-4000-8000-000000000000.jpg' }
+    );
+    expect(res.status).toBe(400);
+    const parsed = lines.map((line) => JSON.parse(line) as Record<string, unknown>);
+    const media = parsed.filter((line) => line.evt === 'media_failure');
+    expect(media).toHaveLength(1);
+    expect(media[0]).toMatchObject({ op: 'commit', reason: 'foreign_key' });
+    expect(parsed.filter((line) => line.evt === 'admin_mutation')).toEqual([]);
+  });
+
+  it('POST with a staged object (stubbed bucket) → 201 and the gallery-photo mutation line', async () => {
+    const lines = captureLines();
+    const stub = stubCommitBucket({ [STAGING]: { size: 1024, contentType: 'image/jpeg' } });
+    const { token } = await signUpSession(url, 'mut-photo-ok@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/gallery-photos',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({ r2Key: STAGING, title: 'Evt portrait', caption: null }),
+      },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(201);
+    const events = mutations(lines);
+    expect(events).toHaveLength(1);
+    expect(events[0]?.entity).toBe('gallery-photo');
+    expect(
+      lines
+        .map((line) => JSON.parse(line) as Record<string, unknown>)
+        .filter((line) => line.evt === 'media_failure')
+    ).toEqual([]);
   });
 });

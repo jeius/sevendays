@@ -29,7 +29,12 @@ export const adminServicePackages = new Hono<ApiEnv>()
     return c.json(read);
   })
   .post('/', validatedJson(createServicePackageSchema), async (c) => {
-    const result = await createAdminPackage(c.get('db'), c.env, c.req.valid('json'));
+    const result = await createAdminPackage(
+      c.get('db'),
+      c.env,
+      c.req.valid('json'),
+      c.get('logger')
+    );
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
     }
@@ -42,7 +47,13 @@ export const adminServicePackages = new Hono<ApiEnv>()
     validatedJson(updateServicePackageSchema),
     async (c) => {
       const { id } = c.req.valid('param');
-      const result = await updateAdminPackage(c.get('db'), c.env, id, c.req.valid('json'));
+      const result = await updateAdminPackage(
+        c.get('db'),
+        c.env,
+        id,
+        c.req.valid('json'),
+        c.get('logger')
+      );
       if (!result.ok) {
         if (result.reason === 'not_found') {
           return notFound(c, 'Package not found.');

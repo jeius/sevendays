@@ -17,6 +17,8 @@ import type {
 } from '@sevendays/types';
 import { and, asc, eq, inArray, ne, or } from 'drizzle-orm';
 import type { Env } from '../env.js';
+import { logMediaFailure } from '../observability/events.js';
+import type { RequestLogger } from '../observability/logger.js';
 import {
   type AdminCreateResult,
   AdminSaveError,
@@ -144,7 +146,8 @@ type CoverResolution = { ok: true; finalKey: string | null | undefined } | Admin
  */
 async function resolveCover(
   env: SaveEnv,
-  key: string | null | undefined
+  key: string | null | undefined,
+  log?: RequestLogger
 ): Promise<CoverResolution> {
   if (key === undefined) return { ok: true, finalKey: undefined };
   if (key === null) return { ok: true, finalKey: null };
@@ -153,6 +156,11 @@ async function resolveCover(
     purpose: 'package-cover',
   });
   if (!commit.ok) {
+    // M6 #183: the cover-commit seam's typed failure (see admin-gallery's
+    // commitStagingKey — the route-level 'conflict' cannot name it).
+    if (log) {
+      logMediaFailure(log, { op: 'commit', reason: commit.reason });
+    }
     return {
       ok: false,
       reason: 'conflict',
@@ -407,9 +415,10 @@ async function runPackageSave(
 export async function createAdminPackage(
   db: Database,
   env: SaveEnv,
-  input: CreateServicePackageInput
+  input: CreateServicePackageInput,
+  log?: RequestLogger
 ): Promise<AdminCreateResult<ServicePackageRead>> {
-  const cover = await resolveCover(env, input.coverImageKey);
+  const cover = await resolveCover(env, input.coverImageKey, log);
   if (!cover.ok) return cover;
   const slug = slugifyName(input.name);
   const result = await runPackageSave(db, env, {
@@ -431,7 +440,8 @@ export async function updateAdminPackage(
   db: Database,
   env: SaveEnv,
   id: string,
-  input: UpdateServicePackageInput
+  input: UpdateServicePackageInput,
+  log?: RequestLogger
 ): Promise<AdminWriteResult<ServicePackageRead>> {
   if (!SLUG_FORMAT.test(input.slug)) {
     return {
@@ -443,7 +453,7 @@ export async function updateAdminPackage(
       ],
     };
   }
-  const cover = await resolveCover(env, input.coverImageKey);
+  const cover = await resolveCover(env, input.coverImageKey, log);
   if (!cover.ok) return cover;
   return runPackageSave(db, env, {
     input,
