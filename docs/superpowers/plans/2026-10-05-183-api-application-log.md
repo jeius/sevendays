@@ -251,7 +251,7 @@ describe('event classes — enumerated field schemas (spec #175)', () => {
   it('one request child stamps the same requestId on every event it emits', () => {
     const lines = captureLines();
     const log = createRequestLogger('req-unit-7');
-    logAccess(log, { method: 'POST', route: '/api/v1/appointments', status: 201, durationMs: 12 });
+    logAccess(log, { method: 'POST', route: '/api/v1/branches', status: 201, durationMs: 12 });
     logEmail(log, { phase: 'sent', appointmentId: 'apt-9' });
     const parsed = parse(lines);
     expect(parsed).toHaveLength(2);
@@ -672,11 +672,13 @@ describe('the access line + requestId contract (M6 #183)', () => {
   it('a session-gated read → the access line carries actorId (the verified session), keyed to the token owner', async () => {
     const lines = captureLines();
     const { token, userId } = await signUpSession(url, 'access-actor@sevendays.test');
-    const res = await app.request('/api/v1/appointments', { headers: bearer(token) }, testEnv(url));
+    const res = await app.request('/api/v1/admin/service-packages', { headers: bearer(token) }, testEnv(url));
     expect(res.status).toBe(200);
     const [line] = byEvt(lines, 'access');
     if (!line) throw new Error('expected one access line');
     expect(line.actorId).toBe(userId);
+    // The route is session-gated and present on BOTH editions (v1 shed the
+    // appointments seam) — final-review fix f8b7897, keeps the file pick-clean.
   });
 
   it('no ACAO header anywhere — the wildcard CORS middleware is gone (the closed surface, #176)', async () => {
@@ -2126,10 +2128,10 @@ After CI green on the PR (the repo's check workflow), squash-merge via the GitHu
 - [ ] **Step 5: The v1 pick (per `docs/agents/v1-picks.md`)**
 
 Classification (pre-ruled by the spec's ledger, confirmed by this diff):
-- **PICK clean** — all `apps/api` paths EXCEPT the three booking-coupled files below (the observability module + events.test.ts, request-context + index + db.ts, all nine routers' mutation edits, the media seams incl. admin-gallery/admin-packages threading, wrangler.toml's `[observability]` block riding the transformed surface, package.json + lockfile, and the v1-present test files: application-log, admin-mutation-log, error-seam, media-routes).
+- **PICK clean** — all `apps/api` paths EXCEPT the three booking-coupled files below (the observability module + events.test.ts, request-context + index + db.ts, all nine routers' mutation edits, the media seams incl. admin-gallery/admin-packages threading, wrangler.toml's `[observability]` block riding the transformed surface, package.json + lockfile, and the v1-present test files: application-log (its actorId test rides `/api/v1/admin/service-packages` — session-gated on BOTH editions; final-review fix f8b7897), admin-mutation-log, error-seam, media-routes).
 - **Main-only, dropped** — `apps/api/src/routes/appointments.ts` + `apps/api/src/services/confirmation-email.ts` + `apps/api/test/appointments.test.ts` (the email-event half — v1 shed the appointments/resend seam, the #147 ruling recurring), the plan file, `docs/plan.md` + `docs/progress.md`, and `AGENTS.md` (content-dropped — v1's client-safe rewrite carries neither edited sentence, the #145/#146 ruling).
 
-Follow the runbook's pick procedure (branch off v1, apply the clean paths, drop the main-only list, run the locks: frozen install + `pnpm build:packages && pnpm --filter @sevendays/api build` + `pnpm check` 35/35 + `pnpm build` + the audit), push v1, confirm the CI run's `check` + `Deploy v1 (private)` legs succeed with `Deploy teaser (main)` skipped. Note in the pick evidence: v1's api floor becomes 26 files + 1 skipped / 312 passed + 3 skipped (317 minus the five appointments.test.ts email/PII tests that don't exist there — reconcile against v1's actual file set before recording).
+Follow the runbook's pick procedure (branch off v1, apply the clean paths, drop the main-only list, run the locks: frozen install + `pnpm build:packages && pnpm --filter @sevendays/api build` + `pnpm check` 35/35 + `pnpm build` + the audit), push v1, confirm the CI run's `check` + `Deploy v1 (private)` legs succeed with `Deploy teaser (main)` skipped. Note in the pick evidence: v1's api floor becomes 25 files + 1 skipped / 274 passed + 3 skipped (317 minus appointments.test.ts's 43 tests — the whole file is main-only, not just the five email/PII tests; final-review corrected 2026-10-05 — reconcile against v1's actual file set before recording).
 
 - [ ] **Step 6: Ledger + issue close**
 
