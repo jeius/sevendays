@@ -10,6 +10,8 @@ import type { AppointmentWithAddons } from '@sevendays/types';
 import { eq } from 'drizzle-orm';
 import { Resend } from 'resend';
 import type { Env } from '../env.js';
+import { logEmail } from '../observability/events.js';
+import type { RequestLogger } from '../observability/logger.js';
 
 /** Sandbox sender (M2): ONE constant, no env override — M6's domain swap
  * replaces it (the `bookings@` local part is reserved). */
@@ -110,6 +112,24 @@ export interface ConfirmationEmailScheduler {
 }
 
 /**
+ * resend@6's typed failure, reified: the SDK resolves { data, error } and
+ * never throws, so the error branch THROWS this instead — the waitUntil
+ * catch can classify the email event's code (`resend:<rejectionName>`)
+ * without ever logging resend's free-text message (which may echo the
+ * recipient address — the PII floor). #184's Sentry capture reads the
+ * original error off the send seam.
+ */
+export class ResendRejectionError extends Error {
+  readonly rejectionName: string;
+
+  constructor(rejectionName: string) {
+    super(`resend rejected the send (${rejectionName})`);
+    this.name = 'ResendRejectionError';
+    this.rejectionName = rejectionName;
+  }
+}
+
+/**
  * Schedule the send past the response (spec mechanics): ONE waitUntil after
  * the commit, the rejection caught and logged INSIDE the scheduled callback
  * — email failure = booking stands, and a failed send can never surface as
@@ -119,11 +139,21 @@ export function scheduleConfirmationEmail(
   executionCtx: ConfirmationEmailScheduler,
   env: Env,
   db: Database,
-  record: AppointmentWithAddons
+  record: AppointmentWithAddons,
+  log: RequestLogger
 ): void {
   executionCtx.waitUntil(
-    sendConfirmationEmail(env, db, record).catch((error: unknown) => {
-      console.error(`[api] confirmation email for appointment ${record.id} failed:`, error);
+    sendConfirmationEmail(env, db, record, log).catch((error: unknown) => {
+      // Email failure = booking stands; the failed event carries a
+      // CLASSIFIED code, never the error's free text (resend messages may
+      // echo the recipient — the PII floor; the loud detail is #184's
+      // Sentry capture at this same seam).
+      logEmail(log, {
+        phase: 'failed',
+        appointmentId: record.id,
+        code:
+          error instanceof ResendRejectionError ? `resend:${error.rejectionName}` : 'send_failed',
+      });
     })
   );
 }
@@ -164,7 +194,8 @@ async function resolveOfferingName(db: Database, record: AppointmentWithAddons):
 export async function sendConfirmationEmail(
   env: Env,
   db: Database,
-  record: AppointmentWithAddons
+  record: AppointmentWithAddons,
+  log: RequestLogger
 ): Promise<void> {
   const [branch] = await db
     .select({ name: branches.name, phone: branches.phone })
@@ -187,10 +218,13 @@ export async function sendConfirmationEmail(
     landingOrigin: env.LANDING_ORIGIN,
   });
 
+  logEmail(log, { phase: 'attempt', appointmentId: record.id });
+
   const result = await new Resend(env.RESEND_API_KEY).emails.send(email, {
     idempotencyKey: `booking-confirm/${record.id}`,
   });
   if (result.error) {
-    throw new Error(`resend rejected the send (${result.error.name}): ${result.error.message}`);
+    throw new ResendRejectionError(result.error.name);
   }
+  logEmail(log, { phase: 'sent', appointmentId: record.id });
 }
