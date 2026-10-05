@@ -29,9 +29,9 @@
 - **Branch & baseline:** `feat/183-api-application-log` off main `f0d8dd3` (plain checkout — single linear ticket, no worktree needed). This plan file is the branch's first commit. Commit messages follow the repo's `type(scope): … (#183)` squash style; every commit below is pinned verbatim. Evidence (test output, dry-run bundle manifest) lands in gitignored `.superpowers/sdd/2026-10-05-183-api-application-log/`.
 - **Gates (repo AGENTS.md, verbatim duties):** after any manifest change run `pnpm install`. Before any work that typechecks `packages/api-client` or the apps, run `pnpm build:packages && pnpm --filter @sevendays/api build` (the client resolves `AppType` from the built `dist/`). Every task commits only with `pnpm check` green for the packages it touched (api tests need the compose db up: `docker compose up -d db` first). Biome canonical form via `pnpm --filter @sevendays/api fix` (biome check --write) before committing — accept its rewrites. Never commit secrets. Tick checklist boxes with `- [✅]`, never `[x]` (this plan file and `docs/plan.md` alike). Run `graphify update .` at close (code was modified; `graphify-out/graph.json` exists).
 - **Version pins (probed 2026-10-05):** add exactly `loglayer@9.4.0`, `@loglayer/transport-pino@3.3.0`, `pino@10.4.0` to `apps/api` dependencies (`pnpm --filter @sevendays/api add loglayer@9.4.0 @loglayer/transport-pino@3.3.0 pino@10.4.0`) — verify with `pnpm --filter @sevendays/api list loglayer @loglayer/transport-pino pino --depth 0`; anything else resolves → STOP and report. `hono` resolves `4.13.5`, `wrangler` `4.127.1`, `zod` `4.5.1`. The ONLY pre-existing peer warning is `@hono/zod-validator` wanting zod 3 (long-standing, not this ticket's).
-- **The sink (spike-pinned, binding):** `import { pino } from 'pino/browser'` (explicit subpath — load-bearing); `pino({ level: 'trace', browser: { write: (o) => console.log(JSON.stringify(o)) } })`; `new LogLayer({ transport: new PinoTransport({ logger: p }) })` built ONCE per isolate; per-request children via `appLogger.withMetadata({ requestId })`. Emitted line = `{ time, level, ...childMetadata, ...eventMetadata, msg }` — one JSON string per `console.log` (Workers Logs ingests it; tests spy `console.log`). `pino/browser` has no shipped types — the declaration shim at `apps/api/src/types/pino-browser.d.ts` (Task 1, verbatim) is the one allowed module-declaration file.
+- **The sink (spike-pinned, binding):** `import { pino } from 'pino/browser'` (explicit subpath — load-bearing); `pino({ level: 'trace', browser: { write: (o) => console.log(JSON.stringify(o)) } })`; `new LogLayer({ transport: new PinoTransport({ logger: p }) })` built ONCE per isolate; per-request children via `appLogger.child().withContext({ requestId })` — **`child()` first is load-bearing: `withContext` MUTATES the instance it is called on (appendContext + `return this`), so calling it on the singleton would leak every prior request's id into the next line; `child()` clones the context manager into a fresh instance** (loglayer 9.4.0 `dist/index.js:381-400,478-484`, verified during the Task-1 salvage). Emitted line = `{ time, level, ...childMetadata, ...eventMetadata, msg }` — one JSON string per `console.log` (Workers Logs ingests it; tests spy `console.log`; context keys spread at top level because `contextFieldName` defaults to undefined). `pino/browser` has no shipped types — the declaration shim at `apps/api/src/types/pino-browser.d.ts` (Task 1, verbatim) is the one allowed module-declaration file, and its options type is `import('pino').LoggerOptions` (strict mode needs the contextual type for the `browser.write` callback parameter).
 - **Event vocabulary (agent ruling, owner-reviewable; binding):** `evt` values exactly `access` | `admin_mutation` | `media_failure` | `email` | `error`. Enumerated field schemas per class (beyond `time`/`level`/`msg`/`requestId`): access = `method`, `route`, `status`, `durationMs`, `actorId` only when the session verified; admin_mutation = `method`, `route`, `entity`, `entityId` (`string | null`), `actorId`; media_failure = `op` (`presign` | `commit` | `thumbnail`), `reason` (`missing_credentials` | the CommitUploadResult reason | `not_found` respectively); email = `phase` (`attempt` | `sent` | `failed`), `appointmentId`, `code` on failed only (`resend:<error.name>` | `send_failed`); error = `method`, `route`, `name`, `message`, `stack` (omitted when absent). Levels: access/admin_mutation/email-attempt/email-sent = info (30); media_failure = warn (40); email-failed/error = error (50). Entity names: the nine kebab route segments (`branch`, `print-size`, `gallery-photo`, `attire`, `addon-service`, `studio-service`, `service-package`, `gallery-category`, `testimonial`). No event ever carries a raw body, email address, IP, User-Agent, or referrer — the email-failure classification exists precisely to keep resend's free-text messages out.
-- **Access line (spec-verbatim duties, binding):** one line per request except exactly `c.req.path === '/health'` (the header still rides /health responses — every response carries `X-Request-Id`; only the line is suppressed). `route` = `c.req.routePath || c.req.path` (pattern for matched routes, raw path for 404s). `durationMs` = `Date.now()` delta over the whole chain. `actorId` = `c.get('session')?.userId` read AFTER `next()` (requireSession has run by then).
+- **Access line (spec-verbatim duties, binding):** one line per request except exactly `c.req.path === '/health'` (the header still rides /health responses — every response carries `X-Request-Id`; only the line is suppressed). `route` = `c.req.routePath || c.req.path` (pattern for matched routes, raw path for 404s). `durationMs` = `Date.now()` delta over the whole chain. `actorId` = `c.get('session')?.user.id` read AFTER `next()` (requireSession has run by then; BetterAuth's `SessionData` is `{ session, user }` and the id lives at `user.id` — salvaged during Task 1, the plan's original `?.userId` was wrong against the real shape).
 - **CORS closure (spec-verbatim, binding):** the `hono/cors` import AND the `.use('*', cors(...))` line are deleted — not narrowed, no config left behind. No ACAO header may appear on any api response (asserted). The R2 bucket's presign allowlist (media runbook) is untouched — it is not api code.
 - **PII floor (binding):** the PII sweep test (Task 5) runs a real booking POST carrying a distinctive customer email/phone plus `user-agent` and `x-forwarded-for` headers and asserts (a) every captured line parses as JSON, (b) every line's key set is within the five enumerated schemas, (c) no line's raw string contains the email, the phone, the UA, or the IP.
 - **Copy pins are semantic, formatting is biome's:** every fenced file/comment/code block below lands verbatim in content; `pnpm --filter @sevendays/api fix` then normalizes quoting/ordering/import order to house style — accept its rewrite, commit the result.
@@ -52,7 +52,7 @@ apps/api/
       events.test.ts                       # create (Task 1) — unit suite over the console capture seam
     index.ts                               # modify (Task 2) — requestLogging, logError in onError, cors+logger dropped
     services/
-      db.ts                                # modify (Task 2) — ApiEnv Variables gains logger
+      db.ts                                # modify (Task 1) — ApiEnv Variables gains logger (moved from Task 2 by salvage ruling)
       confirmation-email.ts                # modify (Task 5) — log param, email events, ResendRejectionError
       admin-gallery.ts                     # modify (Task 4) — commitStagingKey logs commit failures
       admin-packages.ts                    # modify (Task 4) — resolveCover logs commit failures
@@ -76,11 +76,11 @@ apps/api/
 **Files:**
 - Create (test-first): `apps/api/src/observability/events.test.ts`
 - Create: `apps/api/src/observability/logger.ts`, `apps/api/src/observability/events.ts`, `apps/api/src/types/pino-browser.d.ts`
-- Modify: `apps/api/package.json` + `pnpm-lock.yaml` (the three `pnpm add`s only)
+- Modify: `apps/api/package.json` + `pnpm-lock.yaml` (the three `pnpm add`s only), `apps/api/src/services/db.ts:11-14` (the ApiEnv type — moved here from Task 2 by salvage ruling: events.ts's `c.get('logger')` typechecks only once `logger` is in ApiEnv's Variables)
 
 **Interfaces:**
 - Consumes: nothing from earlier tasks (the module is self-contained; `import type { Env } from '../env.js'` for the RootEnv shape only).
-- Produces (exact exports — Tasks 2–5 and #184 consume): from `logger.ts` — `type RequestLogger = LogLayer`, `buildAppLogger(): LogLayer`, `createRequestLogger(requestId: string): RequestLogger`, `type RootEnv = { Bindings: Env; Variables: { logger: RequestLogger; session?: { userId: string } } }` (the `session` key is a structural slice — the real `SessionData` lands via `requireSession` on ApiEnv contexts at runtime; typing the slice keeps the middleware free of a services import cycle); from `events.ts` — `logAccess(log: RequestLogger, fields: { method: string; route: string; status: number; durationMs: number; actorId?: string }): void`, `logAdminMutation(c: Context<ApiEnv>, fields: { entity: AdminMutationEntity; entityId: string | null }): void` with `type AdminMutationEntity = 'branch' | 'print-size' | 'gallery-photo' | 'attire' | 'addon-service' | 'studio-service' | 'service-package' | 'gallery-category' | 'testimonial'`, `logMediaFailure(log: RequestLogger, fields: { op: 'presign' | 'commit' | 'thumbnail'; reason: string }): void`, `logEmail(log: RequestLogger, fields: { phase: 'attempt' | 'sent' | 'failed'; appointmentId: string; code?: string }): void`, `logError(c: Context<RootEnv>, error: Error): void`.
+- Produces (exact exports — Tasks 2–5 and #184 consume): from `logger.ts` — `type RequestLogger = LogLayer`, `buildAppLogger(): LogLayer`, `createRequestLogger(requestId: string): RequestLogger`, `type RootEnv = { Bindings: Env; Variables: { logger: RequestLogger; session?: { user: { id: string } } } }` (the `session` key is a structural slice — the real `SessionData` lands via `requireSession` on ApiEnv contexts at runtime; typing the slice keeps the middleware free of a services import cycle); from `events.ts` — `logAccess(log: RequestLogger, fields: { method: string; route: string; status: number; durationMs: number; actorId?: string }): void`, `logAdminMutation(c: Context<ApiEnv>, fields: { entity: AdminMutationEntity; entityId: string | null }): void` with `type AdminMutationEntity = 'branch' | 'print-size' | 'gallery-photo' | 'attire' | 'addon-service' | 'studio-service' | 'service-package' | 'gallery-category' | 'testimonial'`, `logMediaFailure(log: RequestLogger, fields: { op: 'presign' | 'commit' | 'thumbnail'; reason: string }): void`, `logEmail(log: RequestLogger, fields: { phase: 'attempt' | 'sent' | 'failed'; appointmentId: string; code?: string }): void`, `logError(c: Context<RootEnv>, error: Error): void`; PLUS the ApiEnv growth — `ApiEnv['Variables']` gains `logger: RequestLogger` (required) in `services/db.ts` (moved from Task 2: events.ts's `c.get('logger')` compiles against it; actorId reads `c.get('session')?.user.id` — BetterAuth's SessionData carries the id at `user.id`, verified in the Task-1 salvage).
 
 **Not here:** the middleware or any route wiring (Task 2); any consumer of the emitters beyond the unit suite; `packages/types` (api-internal vocabulary).
 
@@ -122,6 +122,7 @@ describe('event classes — enumerated field schemas (spec #175)', () => {
     });
     expect(lines).toHaveLength(1);
     const [line] = parse(lines);
+    if (!line) throw new Error('expected one parsed line');
     expect(Object.keys(line).sort()).toEqual([
       'durationMs',
       'evt',
@@ -151,6 +152,7 @@ describe('event classes — enumerated field schemas (spec #175)', () => {
       actorId: 'user-1',
     });
     const [line] = parse(lines);
+    if (!line) throw new Error('expected one parsed line');
     expect(Object.keys(line)).toContain('actorId');
     expect(line.actorId).toBe('user-1');
   });
@@ -163,6 +165,7 @@ describe('event classes — enumerated field schemas (spec #175)', () => {
     });
     expect(lines).toHaveLength(1);
     const [line] = parse(lines);
+    if (!line) throw new Error('expected one parsed line');
     expect(Object.keys(line).sort()).toEqual([
       'evt',
       'level',
@@ -185,6 +188,7 @@ describe('event classes — enumerated field schemas (spec #175)', () => {
       appointmentId: 'apt-1',
     });
     const [line] = parse(lines);
+    if (!line) throw new Error('expected one parsed line');
     expect(Object.keys(line).sort()).toEqual([
       'appointmentId',
       'evt',
@@ -207,6 +211,7 @@ describe('event classes — enumerated field schemas (spec #175)', () => {
       appointmentId: 'apt-1',
     });
     const [line] = parse(lines);
+    if (!line) throw new Error('expected one parsed line');
     expect(Object.keys(line).sort()).toEqual([
       'appointmentId',
       'evt',
@@ -227,6 +232,7 @@ describe('event classes — enumerated field schemas (spec #175)', () => {
       code: 'resend:internal_server_error',
     });
     const [line] = parse(lines);
+    if (!line) throw new Error('expected one parsed line');
     expect(Object.keys(line).sort()).toEqual([
       'appointmentId',
       'code',
@@ -271,10 +277,13 @@ Create `apps/api/src/types/pino-browser.d.ts`:
 // `pino/browser` has no types under moduleResolution: nodenext. This shim
 // declares the browser factory against the root pino types — the instance is
 // runtime-compatible with everything @loglayer/transport-pino calls on it
-// (the level methods only; spiking 2026-10-05, see the #183 plan).
+// (the level methods only; spiking 2026-10-05, see the #183 plan). The
+// options type is pino's real LoggerOptions (not Record<string, unknown>):
+// strict mode needs the contextual type for the browser.write callback's
+// object parameter.
 declare module 'pino/browser' {
   import type { Logger } from 'pino';
-  export function pino(options?: Record<string, unknown>): Logger;
+  export function pino(options?: import('pino').LoggerOptions): Logger;
 }
 ```
 
@@ -309,23 +318,62 @@ export function buildAppLogger(): LogLayer {
 }
 
 // One base instance per isolate; per-request children bind the requestId.
+// child() first is LOAD-BEARING: withContext mutates the instance it is
+// called on (contextManager.appendContext + return this), so calling it on
+// the singleton would leak every prior request's id into the next line.
+// child() clones the context manager into a fresh instance; the child's own
+// withContext then stamps this request's id onto that child only.
 const appLogger = buildAppLogger();
 
 export function createRequestLogger(requestId: string): RequestLogger {
-  return appLogger.withMetadata({ requestId });
+  return appLogger.child().withContext({ requestId });
 }
 
 // The root app's environment: the request logger (set by requestLogging) and
-// a structural slice of the session for the access line's actorId — the real
-// SessionData lands via requireSession on ApiEnv contexts at runtime; typing
-// only the slice keeps this module free of a services/auth import cycle.
+// a structural slice of the BetterAuth session for the access line's actorId
+// — the real SessionData is { session, user } and the id lives at user.id;
+// typing only the slice keeps this module free of a services/auth import
+// cycle while staying structurally satisfied by the real session.
 export type RootEnv = {
   Bindings: Env;
-  Variables: { logger: RequestLogger; session?: { userId: string } };
+  Variables: { logger: RequestLogger; session?: { user: { id: string } } };
 };
 ```
 
-- [ ] **Step 5: Write events.ts**
+- [ ] **Step 5: Grow the ApiEnv variables, then write events.ts**
+
+First, in `apps/api/src/services/db.ts`, change the type (lines 11–14) from:
+
+```ts
+export type ApiEnv = {
+  Bindings: Env;
+  Variables: { db: Database; session?: SessionData };
+};
+```
+
+to:
+
+```ts
+export type ApiEnv = {
+  Bindings: Env;
+  Variables: { db: Database; session?: SessionData; logger: RequestLogger };
+};
+```
+
+and add the import beside the existing `./auth.js` one:
+
+```ts
+import type { RequestLogger } from '../observability/logger.js';
+```
+
+Update the type's header comment's last sentence to instead end:
+
+```text
+// `logger` is set by requestLogging at the ROOT (M6 #183) — required, because
+// the middleware precedes every route including /health.
+```
+
+(This edit moved here from Task 2 Step 5 by salvage ruling: events.ts below compiles `c.get('logger')` against ApiEnv, so the type must land in the same task.)
 
 Create `apps/api/src/observability/events.ts`:
 
@@ -400,7 +448,7 @@ export function logAdminMutation(
       route: c.req.routePath,
       entity: fields.entity,
       entityId: fields.entityId,
-      actorId: c.get('session')?.userId,
+      actorId: c.get('session')?.user.id,
     })
     .info('admin mutation');
 }
@@ -469,7 +517,7 @@ Expected: green (the shim types the subpath; the Context imports resolve).
 Run: `pnpm --filter @sevendays/api fix` then `pnpm --filter @sevendays/api test` (full suite — nothing else imports the module yet, so the count is **24 files passed + 1 skipped / 297 tests passed + 3 skipped**), then commit:
 
 ```bash
-git add apps/api/package.json pnpm-lock.yaml apps/api/src/types/pino-browser.d.ts apps/api/src/observability/
+git add apps/api/package.json pnpm-lock.yaml apps/api/src/types/pino-browser.d.ts apps/api/src/observability/ apps/api/src/services/db.ts
 git commit -m "feat(api): the observability module — loglayer/pino sink + the five event emitters (#183)"
 ```
 
@@ -479,11 +527,11 @@ git commit -m "feat(api): the observability module — loglayer/pino sink + the 
 
 **Files:**
 - Create: `apps/api/src/observability/request-context.ts`, `apps/api/test/application-log.test.ts`
-- Modify: `apps/api/src/index.ts` (whole file), `apps/api/src/services/db.ts:11-14` (the ApiEnv type), `apps/api/wrangler.toml` (the observability block), `apps/api/test/error-seam.test.ts` (two spy tests)
+- Modify: `apps/api/src/index.ts` (whole file), `apps/api/wrangler.toml` (the observability block), `apps/api/test/error-seam.test.ts` (two spy tests)
 
 **Interfaces:**
-- Consumes: Task 1's `createRequestLogger`/`logAccess`/`logError`/`RequestLogger`/`RootEnv`.
-- Produces (Tasks 3–5 + #184 consume): `requestLogging` (`MiddlewareHandler<RootEnv>` — mints the `requestId`, stores the child logger as `c.var.logger`, echoes `X-Request-Id` on every response incl. raw `Response` returns, emits the access line for every path except `/health` with the final status incl. onError-produced 500/503s); `ApiEnv['Variables']` gains `logger: RequestLogger` so every v1 handler's `c.get('logger')` typechecks; the root app drops `hono/cors` + `hono/logger` entirely; `wrangler.toml` enables Workers Logs.
+- Consumes: Task 1's `createRequestLogger`/`logAccess`/`logError`/`RequestLogger`/`RootEnv`, PLUS Task 1's ApiEnv growth (`logger: RequestLogger` already in `services/db.ts`'s Variables — do NOT re-edit that file).
+- Produces (Tasks 3–5 + #184 consume): `requestLogging` (`MiddlewareHandler<RootEnv>` — mints the `requestId`, stores the child logger as `c.var.logger`, echoes `X-Request-Id` on every response incl. raw `Response` returns, emits the access line for every path except `/health` with the final status incl. onError-produced 500/503s); the root app drops `hono/cors` + `hono/logger` entirely; `wrangler.toml` enables Workers Logs.
 
 **Not here:** mutation/media/email emitters at any route (Tasks 3–5); Sentry (#184); the `[observability]` block on any other app's wrangler.toml (the frontends ride #184).
 
@@ -731,44 +779,15 @@ export const requestLogging: MiddlewareHandler<RootEnv> = async (c, next) => {
       route: c.req.routePath || c.req.path,
       status: c.res.status,
       durationMs: Date.now() - start,
-      actorId: c.get('session')?.userId,
+      actorId: c.get('session')?.user.id,
     });
   }
 };
 ```
 
-- [ ] **Step 5: Grow the ApiEnv variables**
+- [ ] **Step 5: Verify the ApiEnv growth landed in Task 1 (no edit)**
 
-In `apps/api/src/services/db.ts`, change the type (lines 11–14) from:
-
-```ts
-export type ApiEnv = {
-  Bindings: Env;
-  Variables: { db: Database; session?: SessionData };
-};
-```
-
-to:
-
-```ts
-export type ApiEnv = {
-  Bindings: Env;
-  Variables: { db: Database; session?: SessionData; logger: RequestLogger };
-};
-```
-
-and add the import beside the existing `./auth.js` one:
-
-```ts
-import type { RequestLogger } from '../observability/logger.js';
-```
-
-Update the type's header comment's last sentence (the one reading "`session` is set ONLY by requireSession (M4 ticket 04) — optional so ungated routes don't carry a lying type.") to instead end:
-
-```text
-// `logger` is set by requestLogging at the ROOT (M6 #183) — required, because
-// the middleware precedes every route including /health.
-```
+`apps/api/src/services/db.ts` already carries `logger: RequestLogger` in ApiEnv's Variables (Task 1 Step 5 — moved here by the salvage ruling). Verify with `grep -n "logger: RequestLogger" apps/api/src/services/db.ts` — if absent, STOP and report NEEDS_CONTEXT. Do NOT edit the file.
 
 - [ ] **Step 6: Rewrite index.ts (whole file, verbatim)**
 
