@@ -1,6 +1,7 @@
 import { createAddonServiceSchema, updateAddonServiceSchema } from '@sevendays/types';
 import { Hono } from 'hono';
 import { z } from 'zod';
+import { logAdminMutation } from '../observability/events.js';
 import {
   createAdminAddonService,
   getAdminAddonService,
@@ -33,6 +34,7 @@ export const adminAddonServices = new Hono<ApiEnv>()
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
     }
+    logAdminMutation(c, { entity: 'addon-service', entityId: result.row.id });
     return c.json(result.row, 201);
   })
   .put(
@@ -48,6 +50,7 @@ export const adminAddonServices = new Hono<ApiEnv>()
         }
         return badRequest(c, result.message, result.details);
       }
+      logAdminMutation(c, { entity: 'addon-service', entityId: result.row.id });
       return c.json(result.row);
     }
   );
