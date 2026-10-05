@@ -22,12 +22,15 @@
   },
   "dependencies": {
     "@hono/zod-validator": "^0.4.0",
+    "@loglayer/transport-pino": "3.3.0",
     "@sevendays/db": "workspace:*",
     "@sevendays/types": "workspace:*",
     "aws4fetch": "1.0.20",
     "better-auth": "^1.7.5",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.6.0",
+    "loglayer": "9.4.0",
+    "pino": "10.4.0",
     "zod": "^4.5.1"
   },
   "devDependencies": {

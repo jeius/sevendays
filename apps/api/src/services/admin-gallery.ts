@@ -11,6 +11,8 @@ import type {
 } from '@sevendays/types';
 import { and, asc, eq, max, ne } from 'drizzle-orm';
 import type { Env } from '../env.js';
+import { logMediaFailure } from '../observability/events.js';
+import type { RequestLogger } from '../observability/logger.js';
 import {
   type AdminCreateResult,
   type AdminWriteFailure,
@@ -262,10 +264,18 @@ async function nextPhotoPosition(db: Database): Promise<number> {
  */
 async function commitStagingKey(
   env: PhotoEnv,
-  stagingKey: string
+  stagingKey: string,
+  log?: RequestLogger
 ): Promise<{ ok: true; finalKey: string } | AdminWriteFailure> {
   const commit = await commitUpload(env.MEDIA_BUCKET, { stagingKey, purpose: 'gallery-photo' });
   if (!commit.ok) {
+    // M6 #183: the commit seam's typed failure — one media_failure event
+    // (reason is commitUpload's vocabulary: foreign_key | not_found |
+    // cap_violation). Emitted HERE, not at the route: 'conflict' at the
+    // route level conflates this with uniqueness collisions.
+    if (log) {
+      logMediaFailure(log, { op: 'commit', reason: commit.reason });
+    }
     return {
       ok: false,
       reason: 'conflict',
@@ -301,7 +311,8 @@ async function assertCategoryExists(
 export async function createAdminGalleryPhoto(
   db: Database,
   env: PhotoEnv,
-  input: CreateGalleryPhotoInput
+  input: CreateGalleryPhotoInput,
+  log?: RequestLogger
 ): Promise<AdminCreateResult<GalleryPhoto>> {
   // Category existence FIRST — an invalid payload must not touch the bucket
   // (a commit would promote the object and orphan it on the 400).
@@ -309,7 +320,7 @@ export async function createAdminGalleryPhoto(
     const failure = await assertCategoryExists(db, input.categoryId);
     if (failure) return failure;
   }
-  const commit = await commitStagingKey(env, input.r2Key);
+  const commit = await commitStagingKey(env, input.r2Key, log);
   if (!commit.ok) return commit;
   const position = await nextPhotoPosition(db);
   const [row] = await db
@@ -330,7 +341,8 @@ export async function updateAdminGalleryPhoto(
   db: Database,
   env: PhotoEnv,
   id: string,
-  input: UpdateGalleryPhotoInput
+  input: UpdateGalleryPhotoInput,
+  log?: RequestLogger
 ): Promise<AdminWriteResult<GalleryPhoto>> {
   const [current] = await db.select().from(galleryPhotos).where(eq(galleryPhotos.id, id)).limit(1);
   if (!current) return { ok: false, reason: 'not_found' };
@@ -340,7 +352,7 @@ export async function updateAdminGalleryPhoto(
   }
   let finalKey: string | null = current.r2Key;
   if (input.r2Key !== undefined) {
-    const commit = await commitStagingKey(env, input.r2Key);
+    const commit = await commitStagingKey(env, input.r2Key, log);
     if (!commit.ok) return commit;
     finalKey = commit.finalKey;
   }

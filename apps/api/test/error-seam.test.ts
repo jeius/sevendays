@@ -38,29 +38,50 @@ describe('GET /health', () => {
 // 500. Two distinct paths are proven over real Postgres via the in-app
 // request style: a missing DATABASE_URL (middleware throws on acquisition) and
 // a db error (handler's module call throws on a refused connection).
-describe('uniform 500 envelope + logging', () => {
+describe('uniform 500 envelope + structured error events', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('returns uniform 500 JSON when a handler/db error is thrown, and logs it', async () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    // Refused port: postgres.js fails fast (~4-10ms, probe-verified); the
-    // middleware creates the client fine, the handler's query throws.
+  it('returns uniform 500 JSON when a handler/db error is thrown, and emits the error event', async () => {
+    const lines: string[] = [];
+    vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      lines.push(String(args[0]));
+    });
+    // FULL env (the complete testEnv — a bare env dies as ZodError in the
+    // acquisition middleware before any query) + a refused port: postgres.js fails fast (~4-10ms), the
+    // handler's query throws, drizzle-orm 0.45.2 wraps it as DrizzleQueryError.
     const res = await app.request('/api/v1/branches', undefined, {
+      ...testEnv(url),
       DATABASE_URL: 'postgres://postgres:postgres@127.0.0.1:1/sevendays_test',
     });
     expect(res.status).toBe(500);
     expect(await res.json()).toEqual({ error: 'Internal server error.' });
-    expect(spy.mock.calls.some((call) => String(call[0]).startsWith('[api]'))).toBe(true);
+    const errorLines = lines
+      .map((line) => JSON.parse(line) as Record<string, unknown>)
+      .filter((line) => line.evt === 'error');
+    expect(errorLines).toHaveLength(1);
+    // DrizzleQueryError's message names the failing query (the raw cause
+    // rides .cause); its constructor never sets .name, so the line's name
+    // reads 'Error' — assert the wrapper-identifying message instead.
+    expect(String(errorLines[0]?.message)).toMatch(/Failed query/);
+    expect(errorLines[0]?.route).toBe('/api/v1/branches'); // matched route → the pattern
   });
 
-  it('returns uniform 500 JSON when DATABASE_URL is missing (acquisition throws), and logs it', async () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('returns uniform 500 JSON when DATABASE_URL is missing (acquisition throws), and emits the error event', async () => {
+    const lines: string[] = [];
+    vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      lines.push(String(args[0]));
+    });
     const res = await app.request('/api/v1/branches', undefined, { DATABASE_URL: '' });
     expect(res.status).toBe(500);
     expect(await res.json()).toEqual({ error: 'Internal server error.' });
-    expect(spy.mock.calls.some((call) => String(call[0]).includes('/api/v1/branches'))).toBe(true);
+    const errorLines = lines
+      .map((line) => JSON.parse(line) as Record<string, unknown>)
+      .filter((line) => line.evt === 'error');
+    expect(errorLines).toHaveLength(1);
+    expect(errorLines[0]?.name).toBe('ZodError'); // parseEnv rejects the partial env
+    expect(errorLines[0]?.route).toBe('/api/v1/branches');
   });
 });
 

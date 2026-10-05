@@ -1,33 +1,40 @@
 import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
-import type { Env } from './env.js';
+import { logError } from './observability/events.js';
+import type { RootEnv } from './observability/logger.js';
+import { requestLogging } from './observability/request-context.js';
 import { v1 } from './routes/v1.js';
 import { internalError, serviceUnavailable } from './services/errors.js';
 import { MissingR2CredentialsError } from './services/media.js';
 
-const app = new Hono<{ Bindings: Env }>()
-  .use('*', logger())
-  .use('*', cors({ origin: '*' })) // TODO(M6): restrict once domains exist.
+const app = new Hono<RootEnv>()
+  .use('*', requestLogging)
+  // The CORS surface is CLOSED (M6 #183, ruling #176): the wildcard
+  // middleware is dropped, not narrowed — no browser ever calls this api
+  // (every frontend call is server-side over the API service binding,
+  // ADR-0016; the browser never holds the bearer token), so browsers stay
+  // default-denied, the true posture. If a browser-facing surface ever
+  // appears (v2 embedding), CORS arrives WITH that surface. The one real
+  // browser-CORS surface stays the R2 bucket's presign allowlist
+  // (docs/media-bucket-runbook.md).
 
   // All body/query validation goes through the validated* helpers so failures
   // carry the uniform { error, details } shape — never raw zValidator.
   // See services/validator.ts.
 
   // Uniform error envelope (candidate D / ADR-0006): every thrown error — from
-  // the versioned routes, the acquisition middleware (Task 2), or any future
-  // handler — lands here, is logged once (workerd-safe console.error, no new
-  // dependency) with the route that threw it, and returns the single 500 JSON
-  // shape. Replaces the per-route try/catch + silent swallow that let deploy
-  // blocker #2 ship invisible (M1.5). Health stays mounted outside v1, so a db
-  // outage is visible as 500s while uptime monitoring still sees the Worker up.
+  // the versioned routes, the acquisition middleware, or any future handler —
+  // lands here, emits ONE structured error event through the request's child
+  // logger (name/message/stack + requestId — the wrangler-tail answer), and
+  // returns the single 500 JSON shape. Health stays mounted outside v1, so a
+  // db outage is visible as 500s while uptime monitoring still sees the Worker
+  // up. #184's Sentry capture rides this same seam.
   .onError((error, c) => {
-    console.error(`[api] ${c.req.method} ${c.req.path} failed:`, error);
+    logError(c, error);
     // Leak-safe detail channel (#155): the one deploy-time misconfiguration
     // operators must tell apart from generic infra failure answers a curated
     // 503 line; every other throw keeps the uniform 500. The loud detail
-    // (secret names, runbook path) stays in the log above — never the
-    // response.
+    // (secret names, runbook path) stays in the error event above — never
+    // the response.
     if (error instanceof MissingR2CredentialsError) {
       return serviceUnavailable(c, 'Media uploads are not configured.');
     }
