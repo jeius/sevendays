@@ -13,8 +13,7 @@ const captureLines = () => {
   return lines;
 };
 
-const parse = (lines: string[]) =>
-  lines.map((line) => JSON.parse(line) as Record<string, unknown>);
+const parse = (lines: string[]) => lines.map((line) => JSON.parse(line) as Record<string, unknown>);
 
 afterEach(() => {
   vi.restoreAllMocks();

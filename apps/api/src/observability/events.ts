@@ -82,9 +82,9 @@ export function logMediaFailure(
   log: RequestLogger,
   fields: { op: MediaFailureOp; reason: string }
 ): void {
-  log.withMetadata({ evt: 'media_failure', op: fields.op, reason: fields.reason }).warn(
-    'media failure'
-  );
+  log
+    .withMetadata({ evt: 'media_failure', op: fields.op, reason: fields.reason })
+    .warn('media failure');
 }
 
 /** The confirmation email's attempt + Resend outcome (no customer PII). */
