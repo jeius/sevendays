@@ -1018,7 +1018,6 @@ const packageSave = (overrides: Record<string, unknown> = {}) => ({
       description: null,
     },
   ],
-  coverImageKey: null,
   ...overrides,
 });
 
