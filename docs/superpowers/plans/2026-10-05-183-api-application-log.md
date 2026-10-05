@@ -31,7 +31,7 @@
 - **Version pins (probed 2026-10-05):** add exactly `loglayer@9.4.0`, `@loglayer/transport-pino@3.3.0`, `pino@10.4.0` to `apps/api` dependencies (`pnpm --filter @sevendays/api add loglayer@9.4.0 @loglayer/transport-pino@3.3.0 pino@10.4.0`) — verify with `pnpm --filter @sevendays/api list loglayer @loglayer/transport-pino pino --depth 0`; anything else resolves → STOP and report. `hono` resolves `4.13.5`, `wrangler` `4.127.1`, `zod` `4.5.1`. The ONLY pre-existing peer warning is `@hono/zod-validator` wanting zod 3 (long-standing, not this ticket's).
 - **The sink (spike-pinned, binding):** `import { pino } from 'pino/browser'` (explicit subpath — load-bearing); `pino({ level: 'trace', browser: { write: (o) => console.log(JSON.stringify(o)) } })`; `new LogLayer({ transport: new PinoTransport({ logger: p }) })` built ONCE per isolate; per-request children via `appLogger.child().withContext({ requestId })` — **`child()` first is load-bearing: `withContext` MUTATES the instance it is called on (appendContext + `return this`), so calling it on the singleton would leak every prior request's id into the next line; `child()` clones the context manager into a fresh instance** (loglayer 9.4.0 `dist/index.js:381-400,478-484`, verified during the Task-1 salvage). Emitted line = `{ time, level, ...childMetadata, ...eventMetadata, msg }` — one JSON string per `console.log` (Workers Logs ingests it; tests spy `console.log`; context keys spread at top level because `contextFieldName` defaults to undefined). `pino/browser` has no shipped types — the declaration shim at `apps/api/src/types/pino-browser.d.ts` (Task 1, verbatim) is the one allowed module-declaration file, and its options type is `import('pino').LoggerOptions` (strict mode needs the contextual type for the `browser.write` callback parameter).
 - **Event vocabulary (agent ruling, owner-reviewable; binding):** `evt` values exactly `access` | `admin_mutation` | `media_failure` | `email` | `error`. Enumerated field schemas per class (beyond `time`/`level`/`msg`/`requestId`): access = `method`, `route`, `status`, `durationMs`, `actorId` only when the session verified; admin_mutation = `method`, `route`, `entity`, `entityId` (`string | null`), `actorId`; media_failure = `op` (`presign` | `commit` | `thumbnail`), `reason` (`missing_credentials` | the CommitUploadResult reason | `not_found` respectively); email = `phase` (`attempt` | `sent` | `failed`), `appointmentId`, `code` on failed only (`resend:<error.name>` | `send_failed`); error = `method`, `route`, `name`, `message`, `stack` (omitted when absent). Levels: access/admin_mutation/email-attempt/email-sent = info (30); media_failure = warn (40); email-failed/error = error (50). Entity names: the nine kebab route segments (`branch`, `print-size`, `gallery-photo`, `attire`, `addon-service`, `studio-service`, `service-package`, `gallery-category`, `testimonial`). No event ever carries a raw body, email address, IP, User-Agent, or referrer — the email-failure classification exists precisely to keep resend's free-text messages out.
-- **Access line (spec-verbatim duties, binding):** one line per request except exactly `c.req.path === '/health'` (the header still rides /health responses — every response carries `X-Request-Id`; only the line is suppressed). `route` = `c.req.routePath || c.req.path` (pattern for matched routes, raw path for 404s). `durationMs` = `Date.now()` delta over the whole chain. `actorId` = `c.get('session')?.user.id` read AFTER `next()` (requireSession has run by then; BetterAuth's `SessionData` is `{ session, user }` and the id lives at `user.id` — salvaged during Task 1, the plan's original `?.userId` was wrong against the real shape).
+- **Access line (spec-verbatim duties, binding):** one line per request except exactly `c.req.path === '/health'` (the header still rides /health responses — every response carries `X-Request-Id`; only the line is suppressed). `route` = `c.req.routePath.includes('*') ? c.req.path : c.req.routePath` — a matched route reports its pattern; routePath resolves to the registering middleware's wildcard (`/*` or `/api/v1/*`) for 404s and middleware-thrown errors (Hono 4.13.5 `dist/request.js:282` + compose's routeIndex — the original `''`-when-unmatched claim was an inference the Task 2 run disproved), and the raw path stands in there. `durationMs` = `Date.now()` delta over the whole chain. `actorId` = `c.get('session')?.user.id` read AFTER `next()` (requireSession has run by then; BetterAuth's `SessionData` is `{ session, user }` and the id lives at `user.id` — salvaged during Task 1, the plan's original `?.userId` was wrong against the real shape).
 - **CORS closure (spec-verbatim, binding):** the `hono/cors` import AND the `.use('*', cors(...))` line are deleted — not narrowed, no config left behind. No ACAO header may appear on any api response (asserted). The R2 bucket's presign allowlist (media runbook) is untouched — it is not api code.
 - **PII floor (binding):** the PII sweep test (Task 5) runs a real booking POST carrying a distinctive customer email/phone plus `user-agent` and `x-forwarded-for` headers and asserts (a) every captured line parses as JSON, (b) every line's key set is within the five enumerated schemas, (c) no line's raw string contains the email, the phone, the UA, or the IP.
 - **Copy pins are semantic, formatting is biome's:** every fenced file/comment/code block below lands verbatim in content; `pnpm --filter @sevendays/api fix` then normalizes quoting/ordering/import order to house style — accept its rewrite, commit the result.
@@ -497,7 +497,7 @@ export function logError(c: Context<RootEnv>, error: Error): void {
     .withMetadata({
       evt: 'error',
       method: c.req.method,
-      route: c.req.routePath || c.req.path,
+      route: c.req.routePath.includes('*') ? c.req.path : c.req.routePath,
       name: error.name,
       message: error.message,
       ...(error.stack ? { stack: error.stack } : {}),
@@ -527,7 +527,7 @@ git commit -m "feat(api): the observability module — loglayer/pino sink + the 
 
 **Files:**
 - Create: `apps/api/src/observability/request-context.ts`, `apps/api/test/application-log.test.ts`
-- Modify: `apps/api/src/index.ts` (whole file), `apps/api/wrangler.toml` (the observability block), `apps/api/test/error-seam.test.ts` (two spy tests)
+- Modify: `apps/api/src/index.ts` (whole file), `apps/api/wrangler.toml` (the observability block), `apps/api/test/error-seam.test.ts` (two spy tests), `apps/api/test/media-routes.test.ts` (the ONE out-of-scope test absorbed — the pinned index.ts removes the `console.error` channel its assertion spies), `apps/api/src/observability/events.ts` (logError's route joins the wildcard fallback — same one-line change as the middleware)
 
 **Interfaces:**
 - Consumes: Task 1's `createRequestLogger`/`logAccess`/`logError`/`RequestLogger`/`RootEnv`, PLUS Task 1's ApiEnv growth (`logger: RequestLogger` already in `services/db.ts`'s Variables — do NOT re-edit that file).
@@ -633,7 +633,7 @@ describe('the access line + requestId contract (M6 #183)', () => {
     const [line] = byEvt(lines, 'access');
     if (!line) throw new Error('expected one access line');
     expect(line.status).toBe(404);
-    expect(line.route).toBe('/nope'); // routePath is '' when unmatched → raw path
+    expect(line.route).toBe('/nope'); // routePath is the wildcard /* when unmatched → the raw path stands in
   });
 
   it('a thrown handler error → an access line at 500 PLUS one error line, both keyed to the response header; the error class carries name/message/stack', async () => {
@@ -664,8 +664,8 @@ describe('the access line + requestId contract (M6 #183)', () => {
       'stack',
       'time',
     ]);
-    expect(error.name).toBe('Error'); // the refused-connection class: plain Error, code ECONNREFUSED (probed 2026-10-05 — postgres.js wraps server errors as PostgresError, connection failures stay plain)
-    expect(String(error.message)).toMatch(/ECONNREFUSED/);
+    expect(error.name).toBe('Error'); // drizzle 0.45.2 wraps the driver failure as DrizzleQueryError but its constructor never sets .name — the line's name reads 'Error'
+    expect(String(error.message)).toMatch(/Failed query/); // the wrapper-identifying message; the raw cause rides .cause
     expect(typeof error.stack).toBe('string');
   });
 
@@ -689,7 +689,7 @@ describe('the access line + requestId contract (M6 #183)', () => {
 });
 ```
 
-- [ ] **Step 2: Rewrite the two error-seam spy tests (count unchanged: 2)**
+- [ ] **Step 2: Rewrite the two error-seam spy tests (count unchanged: 2) + absorb the one out-of-scope breakage**
 
 In `apps/api/test/error-seam.test.ts`, replace the body of the describe `'uniform 500 envelope + logging'` (lines 41–65) with:
 
@@ -704,9 +704,12 @@ describe('uniform 500 envelope + structured error events', () => {
     vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
       lines.push(String(args[0]));
     });
-    // Refused port: postgres.js fails fast (~4-10ms, probe-verified); the
-    // middleware creates the client fine, the handler's query throws.
+    // FULL env (the schema requires RESEND_API_KEY/LANDING_ORIGIN too — a
+    // bare env dies as ZodError in the acquisition middleware before any
+    // query) + a refused port: postgres.js fails fast (~4-10ms), the
+    // handler's query throws, drizzle-orm 0.45.2 wraps it as DrizzleQueryError.
     const res = await app.request('/api/v1/branches', undefined, {
+      ...testEnv(url),
       DATABASE_URL: 'postgres://postgres:postgres@127.0.0.1:1/sevendays_test',
     });
     expect(res.status).toBe(500);
@@ -715,8 +718,11 @@ describe('uniform 500 envelope + structured error events', () => {
       .map((line) => JSON.parse(line) as Record<string, unknown>)
       .filter((line) => line.evt === 'error');
     expect(errorLines).toHaveLength(1);
-    expect(String(errorLines[0]?.message)).toMatch(/ECONNREFUSED/); // refused-connection class (probed)
-    expect(errorLines[0]?.route).toBe('/api/v1/branches');
+    // DrizzleQueryError's message names the failing query (the raw cause
+    // rides .cause); its constructor never sets .name, so the line's name
+    // reads 'Error' — assert the wrapper-identifying message instead.
+    expect(String(errorLines[0]?.message)).toMatch(/Failed query/);
+    expect(errorLines[0]?.route).toBe('/api/v1/branches'); // matched route → the pattern
   });
 
   it('returns uniform 500 JSON when DATABASE_URL is missing (acquisition throws), and emits the error event', async () => {
@@ -732,9 +738,42 @@ describe('uniform 500 envelope + structured error events', () => {
       .filter((line) => line.evt === 'error');
     expect(errorLines).toHaveLength(1);
     expect(errorLines[0]?.name).toBe('ZodError'); // parseEnv rejects the partial env
-    expect(errorLines[0]?.route).toBe('/api/v1/branches');
+    expect(errorLines[0]?.route).toBe('/api/v1/branches'); // wildcard routePath falls back to the raw path
   });
 });
+```
+
+Then in `apps/api/test/media-routes.test.ts` (the ONE out-of-scope test this task must absorb — the pinned index.ts removes the `console.error('[api] …')` channel its assertion spies), replace the presign-503 test (`'fails presign with the curated 503 + the loud log when the S3-token pair is absent (leak-safe detail, #155)'`) with:
+
+```ts
+  it('fails presign with the curated 503 + the structured error event when the S3-token pair is absent (leak-safe detail, #155)', async () => {
+    const lines: string[] = [];
+    vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      lines.push(String(args[0]));
+    });
+    const { token } = await signUpSession(url, 'presign-nocreds@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/media/presign',
+      {
+        method: 'POST',
+        body: JSON.stringify({ purpose: 'gallery-photo', contentType: 'image/jpeg' }),
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+      },
+      { ...testEnv(url), ...MEDIA_VARS }
+    );
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: 'Media uploads are not configured.' });
+    // The loud detail rides the structured error event now (M6 #183): the
+    // thrown MissingR2CredentialsError with name/route/requestId — the
+    // response keeps the curated 503, the env names never leave the Worker.
+    const errorLines = lines
+      .map((line) => JSON.parse(line) as Record<string, unknown>)
+      .filter((line) => line.evt === 'error');
+    expect(errorLines).toHaveLength(1);
+    expect(errorLines[0]?.name).toBe('MissingR2CredentialsError');
+    expect(errorLines[0]?.route).toBe('/api/v1/admin/media/presign');
+    expect(errorLines[0]?.requestId).toBe(res.headers.get('x-request-id'));
+  });
 ```
 
 - [ ] **Step 3: Run to verify the new/rewritten tests fail**
@@ -776,7 +815,7 @@ export const requestLogging: MiddlewareHandler<RootEnv> = async (c, next) => {
   if (c.req.path !== '/health') {
     logAccess(c.get('logger'), {
       method: c.req.method,
-      route: c.req.routePath || c.req.path,
+      route: c.req.routePath.includes('*') ? c.req.path : c.req.routePath,
       status: c.res.status,
       durationMs: Date.now() - start,
       actorId: c.get('session')?.user.id,
@@ -795,7 +834,6 @@ Replace the entire contents of `apps/api/src/index.ts` with:
 
 ```ts
 import { Hono } from 'hono';
-import type { Env } from './env.js';
 import { logError } from './observability/events.js';
 import { requestLogging } from './observability/request-context.js';
 import type { RootEnv } from './observability/logger.js';
@@ -889,7 +927,7 @@ Expected: exits 0, prints `--dry-run: exiting now.` with the bindings table (pro
 Run: `pnpm --filter @sevendays/api fix && pnpm --filter @sevendays/api typecheck && pnpm --filter @sevendays/api build` (the AppType export is unchanged — api-client keeps typechecking), then commit:
 
 ```bash
-git add apps/api/src/observability/request-context.ts apps/api/src/index.ts apps/api/wrangler.toml apps/api/test/application-log.test.ts apps/api/test/error-seam.test.ts
+git add apps/api/src/observability/request-context.ts apps/api/src/index.ts apps/api/wrangler.toml apps/api/test/application-log.test.ts apps/api/test/error-seam.test.ts apps/api/test/media-routes.test.ts apps/api/src/observability/events.ts
 git commit -m "feat(api): requestId middleware + access/error events; CORS middleware dropped; Workers Logs enabled (#183)"
 ```
 
@@ -1301,7 +1339,7 @@ git commit -m "feat(api): admin-mutation events across the nine routers (#183)"
 
 - [ ] **Step 1: Write the failing tests**
 
-In `apps/api/test/media-routes.test.ts`, replace the body of the test at line 163 (`'fails presign with the curated 503 + the loud log when the S3-token pair is absent (leak-safe detail, #155)'`) with:
+In `apps/api/test/media-routes.test.ts`, replace the body of the presign-503 test (`'fails presign with the curated 503 + the structured error event when the S3-token pair is absent (leak-safe detail, #155)'` — landed in Task 2's salvage; grep by title, the line number has shifted) with:
 
 ```ts
   it('fails presign with the curated 503 + the presign media_failure and error events when the S3-token pair is absent (leak-safe detail, #155)', async () => {
