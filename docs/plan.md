@@ -138,19 +138,25 @@ Red-penciled 2026-09-25 to match its spec (`docs/specs/2026-09-24-m5-admin-cms-s
 
 **Exit criteria:** a signed-in staff member can manage the studio's entire catalog — create/edit/deactivate packages (with covers), branches, studio services + matrices, add-ons, lookups, gallery, testimonials — and a fresh page load of the landing site reflects every change with no deploy; the admin app has a real test suite.
 
-## Milestone 6 — Production Hardening (v1 production slice)
+## Milestone 6 — Production Hardening & Observability (v1 production slice)
 
 **Split made real 2026-09-11 (delivery-versions spec, GitHub issue #76):** domains, CORS, logging, and Sentry are the v1 production slice, joined by ship-time provisioning of the dedicated handover accounts (spec § Handover Mechanics); the booking-specific items — booking-endpoint rate limiting, Resend sending domain + email check, booking-funnel PostHog events — moved to v2. _(2026-10-02: the Resend sending domain + its email check moved forward again — into Milestone 7 for the reset email, ADR-0021; see the v2 hardening annotations below.)_
 
-- [ ] Real logging via Loglayer + Pino in `apps/api`
-- [ ] Sentry wired into `apps/api` (Workers SDK)
-- [ ] CORS locked down on `apps/api` (currently wide open — see `AGENTS.md` TODO)
-- [ ] Ship-time provisioning: dedicated Cloudflare account + dedicated Supabase org/project created at ship-readiness; the three apps, their bindings, and the R2 media bucket provisioned there (teaser/dev infra never co-locates with them)
-- [ ] Secrets rotate at ship, not handover: fresh `DATABASE_URL` (new project) + newly generated `BETTER_AUTH_SECRET` + `SENTRY_DSN` as Worker secrets in the dedicated account
-- [ ] Real domains + Cloudflare custom domain setup for all three apps (Workers routes) in the dedicated account, verified in DNS
-- [ ] Verify: `pnpm check`/`pnpm build` green in CI on the release commit; the v1 deployment (landing + admin + api) works on the production domain from the dedicated accounts
+Written 2026-10-05 per its spec (`docs/specs/2026-10-05-m6-production-hardening-observability-spec.md`, GitHub issue #182) — the output of the M6 Production Hardening & Observability wayfinder map (#173, closed 2026-10-05 with tickets #174–#181): the owner's 2026-10-03 scope addition (the analytics dashboard + the system-observability feature set) joins the hardening payload. Two ADRs written with the spec: **ADR-0022** (standalone Playwright as the browser-E2E + visual-regression foundation — M6's pre-flight) and **ADR-0023** (the observability data path — admin server fns own the analytics queries, the API stays domain-pure). Cost posture: v1 is the free handover — the client pays Supabase Pro from handover day; every other surface fits free tiers.
 
-**Exit criteria:** the v1 app is safe to point real customers and the client's team at, running on ship-time-dedicated accounts.
+- [ ] Real logging via Loglayer + Pino in `apps/api` → **Workers Logs, 3-day retention** — five PII-free event classes (access minus `/health`, admin-mutation, media failures, email, errors), `requestId` minted per request and echoed as `X-Request-Id`
+- [ ] Sentry wired into `apps/api` (Workers SDK) **and the frontends' dormant scaffold initialized** — one project, `release` = git SHA, environments dev/teaser/v1; api errors + traces 100%, frontends errors-only
+- [ ] CORS surface **closed** — the wildcard middleware dropped (no browser ever calls the api; the R2 presign allowlist stays the one real browser-CORS surface)
+- [ ] The mutation **Audit Log** — schema-based, written in the mutation's transaction (the nine entity routers + media commit, request-grain, lean fields), with the owner-scoped Audit Log screen in the admin
+- [ ] The **Analytics Dashboard** at `/` — Traffic (PostHog, landing-scoped) / System Health (CF GraphQL + DB probes, incl. per-frontend error rates) / Storage & Media (R2 + free-tier budget markers) / Content (counts + last-updated) + the Sentry link-out; admin server fns own the queries (ADR-0023); both editions (v1 index/sidebar = recorded SPLIT); #93's data-viz deferral reversed (app-local charts, `--chart-*` in the admin `@theme`)
+- [ ] The **Playwright pre-flight** — standalone `@playwright/test` at a top-level `e2e/` (ADR-0022), chromium-only, CI on-demand + nightly with cached browsers, never PR-gating, main-only never picked
+- [ ] The **production smoke** — the verify gate's second leg made executable: seven presence-level assertions (health, home, CMS-fed surface, live media asset, booking page serves, admin sign-in page, real `smoke-staff` sign-in), read-only plus the one sign-in act; nightly walks teaser, owner-run dispatch walks v1
+- [ ] Ship-time provisioning: dedicated Cloudflare account + dedicated Supabase org/project; the three apps, their bindings, and the R2 media bucket provisioned there; ordered by `docs/ship-provisioning-runbook.md` (owner-operated; the production smoke is its last step)
+- [ ] Secrets rotate at ship, not handover — the reconciled at-ship list: fresh `DATABASE_URL` (new project), `DATABASE_MIGRATE_URL` (owner-held), a newly generated `BETTER_AUTH_SECRET`, the R2 S3 token pair, `SENTRY_DSN`, the `smoke-staff` credentials; carried/pointed anew: `VITE_SENTRY_DSN`, `SENTRY_RELEASE`, `MEDIA_PUBLIC_BASE_URL` (→ `media.<domain>`), `API_URL`, `BETTER_AUTH_URL`, the dashboard's CF/PostHog tokens (dedicated v1 PostHog project born at ship)
+- [ ] Real domains: apex (+ `www` redirect) / `admin.` / `api.` / `media.` as Workers custom domains in the dedicated account, verified in DNS; curated media copied across; `MEDIA_PUBLIC_BASE_URL` flips at ship (#129)
+- [ ] Verify: `pnpm check`/`pnpm build` green in CI on the release commit **+ the production smoke green on the production domain** (two separate greens)
+
+**Exit criteria:** the v1 app is safe to point real customers and the client's team at, running on ship-time-dedicated accounts — observably healthy, fully audited on writes, and verified by an executable smoke on the production domain.
 
 ## Milestone 7 — Experience & CMS Maturation (v1-track)
 
