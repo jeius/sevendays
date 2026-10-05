@@ -117,7 +117,10 @@ export function logError(c: Context<RootEnv>, error: Error): void {
     .withMetadata({
       evt: 'error',
       method: c.req.method,
-      route: c.req.routePath || c.req.path,
+      // Same wildcard rule as the access line: routePath is the registering
+      // middleware's wildcard (/* or /api/v1/*) for 404s and middleware-
+      // thrown errors — the raw path names the actual request there.
+      route: c.req.routePath.includes('*') ? c.req.path : c.req.routePath,
       name: error.name,
       message: error.message,
       ...(error.stack ? { stack: error.stack } : {}),

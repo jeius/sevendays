@@ -160,8 +160,11 @@ describe('POST /api/v1/admin/media/presign', () => {
     expect(upload.searchParams.get('X-Amz-SignedHeaders')).toBe('content-type;host');
   });
 
-  it('fails presign with the curated 503 + the loud log when the S3-token pair is absent (leak-safe detail, #155)', async () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('fails presign with the curated 503 + the structured error event when the S3-token pair is absent (leak-safe detail, #155)', async () => {
+    const lines: string[] = [];
+    vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      lines.push(String(args[0]));
+    });
     const { token } = await signUpSession(url, 'presign-nocreds@sevendays.test');
     const res = await app.request(
       '/api/v1/admin/media/presign',
@@ -174,7 +177,16 @@ describe('POST /api/v1/admin/media/presign', () => {
     );
     expect(res.status).toBe(503);
     expect(await res.json()).toEqual({ error: 'Media uploads are not configured.' });
-    expect(spy.mock.calls.some((call) => String(call[0]).startsWith('[api]'))).toBe(true);
+    // The loud detail rides the structured error event now (M6 #183): the
+    // thrown MissingR2CredentialsError with name/route/requestId — the
+    // response keeps the curated 503, the env names never leave the Worker.
+    const errorLines = lines
+      .map((line) => JSON.parse(line) as Record<string, unknown>)
+      .filter((line) => line.evt === 'error');
+    expect(errorLines).toHaveLength(1);
+    expect(errorLines[0]?.name).toBe('MissingR2CredentialsError');
+    expect(errorLines[0]?.route).toBe('/api/v1/admin/media/presign');
+    expect(errorLines[0]?.requestId).toBe(res.headers.get('x-request-id'));
   });
 });
 

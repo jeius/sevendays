@@ -17,6 +17,13 @@ bucket_name = "sevendays-media"
 [images]
 binding = "IMAGES"
 
+# Workers Logs (M6 #183, spec § logging): the Application Log's sink —
+# `wrangler tail` is the live viewer; 3-day retention accepted as v1's bar
+# (Logpush stays off, paid-only). No head_sampling_rate: v1 traffic is far
+# under any cap, every line rides.
+[observability]
+enabled = true
+
 # Secrets (set via `wrangler secret put <NAME>`, never committed):
 #   DATABASE_URL
 #   BETTER_AUTH_SECRET
