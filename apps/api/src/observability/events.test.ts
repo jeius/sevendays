@@ -159,7 +159,7 @@ describe('event classes — enumerated field schemas (spec #175)', () => {
   it('one request child stamps the same requestId on every event it emits', () => {
     const lines = captureLines();
     const log = createRequestLogger('req-unit-7');
-    logAccess(log, { method: 'POST', route: '/api/v1/appointments', status: 201, durationMs: 12 });
+    logAccess(log, { method: 'POST', route: '/api/v1/branches', status: 201, durationMs: 12 });
     logEmail(log, { phase: 'sent', appointmentId: 'apt-9' });
     const parsed = parse(lines);
     expect(parsed).toHaveLength(2);

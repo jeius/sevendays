@@ -131,7 +131,11 @@ describe('the access line + requestId contract (M6 #183)', () => {
   it('a session-gated read → the access line carries actorId (the verified session), keyed to the token owner', async () => {
     const lines = captureLines();
     const { token, userId } = await signUpSession(url, 'access-actor@sevendays.test');
-    const res = await app.request('/api/v1/appointments', { headers: bearer(token) }, testEnv(url));
+    const res = await app.request(
+      '/api/v1/admin/service-packages',
+      { headers: bearer(token) },
+      testEnv(url)
+    );
     expect(res.status).toBe(200);
     const [line] = byEvt(lines, 'access');
     if (!line) throw new Error('expected one access line');
