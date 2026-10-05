@@ -26,6 +26,12 @@ scripts
 skills-lock.json
 .agents
 graphify-out
+# The Playwright pre-flight (M6 #189, ADR-0022) — main-only owner tooling;
+# the workflow path is load-bearing: .github/workflows/ is not seeded out, and
+# a scheduled workflow picked to v1 would fire nightly against missing files.
+e2e
+playwright.config.ts
+.github/workflows/e2e.yml
 # Docs scrubbed to the client-safe set (spec § The v1 Absence Boundary):
 docs/plan.md
 docs/progress.md
