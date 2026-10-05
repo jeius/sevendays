@@ -2023,7 +2023,7 @@ Expected: PASS — the four email-event tests green (two rewrites + two new), th
 - [ ] **Step 5: Gates + commit**
 
 Run: `pnpm --filter @sevendays/api test`
-Expected: **26 files passed + 1 skipped (27) / 317 tests passed + 3 skipped** (315 + 2; the two rewrites keep their count). The repo's last `console.error` in src is gone — verify: `grep -rn "console\." apps/api/src --include='*.ts' | grep -v test` returns nothing.
+Expected: **26 files passed + 1 skipped (27) / 317 tests passed + 3 skipped** (315 + 2; the two rewrites keep their count). The repo's last `console.error` CALL in src is gone — verify: `grep -rn "console\.error" apps/api/src --include='*.ts'` returns no call sites (a JSDoc mention in events.ts describing the replacement is fine; the pino sink's `console.log` in logger.ts is the intentional seam, which is why the original `console\.` pattern was wrong — Task 5 deviation, ruled 2026-10-05).
 Run: `pnpm --filter @sevendays/api fix && pnpm --filter @sevendays/api typecheck`, then commit:
 
 ```bash
