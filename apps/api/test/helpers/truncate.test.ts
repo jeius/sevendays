@@ -14,13 +14,14 @@ describe('publicTableNames', () => {
     expect(publicTableNames()).toEqual(fromBarrel);
   });
 
-  it('still truncates exactly the twenty-one known public tables (migrations 0000-0007)', () => {
+  it('still truncates exactly the twenty-two known public tables (migrations 0000-0008)', () => {
     expect(publicTableNames()).toEqual([
       'account',
       'addon_services',
       'appointment_addon_services',
       'appointments',
       'attires',
+      'audit_log',
       'branch_studio_services',
       'branches',
       'frames',
