@@ -22,9 +22,9 @@ import {
 import { Link, useMatchRoute, useNavigate } from '@tanstack/react-router';
 import type { LucideIcon } from 'lucide-react';
 import {
+  Activity,
   CalendarDays,
   Images,
-  LayoutDashboard,
   LogOut,
   MapPin,
   Package,
@@ -74,13 +74,14 @@ function initials(name: string): string {
 }
 
 // The ruled taxonomy (#59), icons carried from the prototype unchanged.
-// Overview is wholly future scope — both destinations are later-milestone
-// stubs; Catalog and Studio carry the live CMS surfaces.
+// Overview carries the Analytics dashboard (#186 — the #93 stub's
+// replacement); Appointments stays the v2 teaser stub; Catalog and Studio
+// carry the live CMS surfaces.
 const navGroups: NavGroup[] = [
   {
     heading: 'Overview',
     items: [
-      { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/', label: 'Analytics', icon: Activity },
       { to: '/appointments', label: 'Appointments', icon: CalendarDays },
     ],
   },
