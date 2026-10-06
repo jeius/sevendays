@@ -1940,7 +1940,7 @@ Expected: check 35/35 turbo tasks; build green. The api floor line: **27 files p
 to
 
 ```markdown
-- [ ] The mutation **Audit Log** — schema-based, written in the mutation's transaction (the nine entity routers + media commit, request-grain, lean fields), with the owner-scoped Audit Log screen in the admin _(write side landed 2026-10-06 via #185 — the `audit_log` table (migration 0008) + transactional rows across the nine routers and the media commit, request-grain, requestId-correlated to the Application Log, +15 api tests +4 types tests; the box stays unticked until the owner screen lands at #188)_
+- [ ] The mutation **Audit Log** — schema-based, written in the mutation's transaction (the nine entity routers + media commit, request-grain, lean fields), with the owner-scoped Audit Log screen in the admin _(write side landed 2026-10-06 via #185 — the `audit_log` table (migration 0008) + transactional rows across the nine routers and the media commit, request-grain, requestId-correlated to the Application Log, +15 api tests +6 types tests; the box stays unticked until the owner screen lands at #188)_
 ```
 
 (b) `docs/progress.md` — three edits. First, the dated entry at the very top (after the `# Progress` heading's blank line):
