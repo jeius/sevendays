@@ -9,10 +9,7 @@
 // SENTRY_DSN leaves Sentry disabled (the no-op-without-DSN posture both
 // frontends share). The explicit <Env> generic is load-bearing: the default
 // generic is cloudflare:workers' env TYPE (a type-only import — the SDK's
-// runtime build never imports the scheme). The default honoIntegration is
-// inert here — nothing invokes it without @sentry/hono's middleware, so the
-// capture seam is the only capture path (verified against
-// @sentry/cloudflare 10.72.0's integrations/hono.js).
+// runtime build never imports the scheme).
 import { captureException, withSentry } from '@sentry/cloudflare';
 import type { Env } from './env.js';
 import app from './index.js';
@@ -28,5 +25,12 @@ export default withSentry<Env>((env) => {
     tracesSampleRate: 1,
     sendDefaultPii: false,
     initialScope: { tags: { app: 'api' } },
+    // The SDK's withSentry auto-instruments Hono's error handler at this
+    // version (instrumentHonoErrorHandler lives in withSentry.js), which
+    // would capture onError errors itself and make the seam's capture a
+    // silent no-op (core's same-object guard drops the duplicate). The
+    // filter removes that integration so the explicit capture seam IS the
+    // only capture path — same mechanism the stubbed-client tests assert.
+    integrations: (defaults) => defaults.filter((integration) => integration.name !== 'Hono'),
   };
 }, app);
