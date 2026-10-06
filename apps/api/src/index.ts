@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { captureError } from './observability/capture.js';
 import { logError } from './observability/events.js';
 import type { RootEnv } from './observability/logger.js';
 import { requestLogging } from './observability/request-context.js';
@@ -30,6 +31,12 @@ const app = new Hono<RootEnv>()
   // up. #184's Sentry capture rides this same seam.
   .onError((error, c) => {
     logError(c, error);
+    // Sentry capture (M6 #184): one call covers every 5xx AND the curated
+    // 503 — MissingR2CredentialsError reaches onError before the branch
+    // below answers 503 — while 4xx reaches onError never. Whether a client
+    // is registered at all is the worker entry's call (no-op without
+    // SENTRY_DSN).
+    captureError(error);
     // Leak-safe detail channel (#155): the one deploy-time misconfiguration
     // operators must tell apart from generic infra failure answers a curated
     // 503 line; every other throw keeps the uniform 500. The loud detail
