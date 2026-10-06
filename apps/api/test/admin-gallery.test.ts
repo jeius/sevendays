@@ -1,4 +1,4 @@
-import { galleryCategories, galleryPhotos, testimonials } from '@sevendays/db';
+import { auditLog, galleryCategories, galleryPhotos, testimonials } from '@sevendays/db';
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
@@ -458,5 +458,168 @@ describe('gallery photos admin CRUD', () => {
     );
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: 'Authentication required.' });
+  });
+});
+
+describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => {
+  const rows = async () => db.select().from(auditLog);
+
+  it('category POST → one create row with the name; a duplicate-name 400 records nothing', async () => {
+    const res = await authed(
+      'POST',
+      '/api/v1/admin/gallery-categories',
+      'audit-cat-a@sevendays.test',
+      {
+        name: 'Audit Tab',
+      }
+    );
+    expect(res.status).toBe(201);
+    const { id } = (await res.json()) as { id: string };
+    const dup = await authed(
+      'POST',
+      '/api/v1/admin/gallery-categories',
+      'audit-cat-b@sevendays.test',
+      {
+        name: 'Weddings', // fixture name — the uniqueness collision
+      }
+    );
+    expect(dup.status).toBe(400);
+    const all = await rows();
+    expect(all).toHaveLength(1);
+    expect(all[0]).toMatchObject({
+      entity: 'gallery-category',
+      entityId: id,
+      action: 'create',
+      summary: 'Audit Tab',
+      actorEmail: 'audit-cat-a@sevendays.test',
+    });
+  });
+
+  it('the three order PUTs → one reorder row each (entityId null, summary null — the family, not a row); an incomplete payload records nothing', async () => {
+    const cats = await authed(
+      'PUT',
+      '/api/v1/admin/gallery-categories/order',
+      'audit-order-c@sevendays.test',
+      { categoryIds: [ids.categoryB, ids.categoryRetired, ids.categoryA] }
+    );
+    const tes = await authed(
+      'PUT',
+      '/api/v1/admin/testimonials/order',
+      'audit-order-t@sevendays.test',
+      { testimonialIds: [ids.testimonialB, ids.testimonialRetired, ids.testimonialA] }
+    );
+    const pho = await authed(
+      'PUT',
+      '/api/v1/admin/gallery-photos/order',
+      'audit-order-p@sevendays.test',
+      { photoIds: [ids.photoB, ids.photoRetired, ids.photoA] }
+    );
+    expect([cats.status, tes.status, pho.status]).toEqual([200, 200, 200]);
+    const bad = await authed(
+      'PUT',
+      '/api/v1/admin/gallery-categories/order',
+      'audit-order-bad@sevendays.test',
+      { categoryIds: [ids.categoryA] } // missing rows → 400 before any write
+    );
+    expect(bad.status).toBe(400);
+    const all = await rows();
+    expect(all.filter((row) => row.action === 'reorder')).toHaveLength(3);
+    expect(all.every((row) => row.entityId === null && row.summary === null)).toBe(true);
+    expect(new Set(all.map((row) => row.entity))).toEqual(
+      new Set(['gallery-category', 'testimonial', 'gallery-photo'])
+    );
+  });
+
+  it('testimonial PUT flipping isActive → deactivate with summary = person', async () => {
+    const res = await authed(
+      'PUT',
+      `/api/v1/admin/testimonials/${ids.testimonialA}`,
+      'audit-te@sevendays.test',
+      {
+        quote: 'The photos came out better than we hoped.',
+        person: 'Maria, batch 2026',
+        isActive: false,
+      }
+    );
+    expect(res.status).toBe(200);
+    const all = await rows();
+    expect(all).toHaveLength(1);
+    expect(all[0]).toMatchObject({
+      entity: 'testimonial',
+      entityId: ids.testimonialA,
+      action: 'deactivate',
+      summary: 'Maria, batch 2026',
+    });
+  });
+
+  it('photo POST with a staged object (the media commit) → one create row; summary = title, or the final key when untitled', async () => {
+    const STAGING_TITLED = 'tmp/00000000-0000-4000-8000-0000000000b1.jpg';
+    const STAGING_UNTITLED = 'tmp/00000000-0000-4000-8000-0000000000b2.jpg';
+    const stub = stubCommitBucket({
+      [STAGING_TITLED]: { size: 1024, contentType: 'image/jpeg' },
+      [STAGING_UNTITLED]: { size: 1024, contentType: 'image/jpeg' },
+    });
+    const { token } = await signUpSession(url, 'audit-photo@sevendays.test');
+    const post = (body: unknown) =>
+      app.request(
+        '/api/v1/admin/gallery-photos',
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', ...bearer(token) },
+          body: JSON.stringify(body),
+        },
+        { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+      );
+    const titled = await post({ r2Key: STAGING_TITLED, title: 'Titled portrait', caption: null });
+    const untitled = await post({ r2Key: STAGING_UNTITLED });
+    expect(titled.status).toBe(201);
+    expect(untitled.status).toBe(201);
+    const untitledId = ((await untitled.json()) as { id: string }).id;
+    const [untitledRow] = await db
+      .select()
+      .from(galleryPhotos)
+      .where(eq(galleryPhotos.id, untitledId));
+    const all = await rows();
+    expect(all).toHaveLength(2);
+    expect(all.find((row) => row.summary === 'Titled portrait')).toMatchObject({
+      entity: 'gallery-photo',
+      action: 'create',
+    });
+    const untitledAudit = all.find((row) => row.entityId === untitledId);
+    expect(untitledAudit?.summary).toBe(untitledRow?.r2Key);
+  });
+
+  it('photo PUT with a fresh staging key (replace) → one update row, summary = the new final key (title null)', async () => {
+    const STAGING_REPLACE = 'tmp/00000000-0000-4000-8000-0000000000b3.jpg';
+    const stub = stubCommitBucket({ [STAGING_REPLACE]: { size: 2048, contentType: 'image/jpeg' } });
+    const { token } = await signUpSession(url, 'audit-photo-put@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/gallery-photos/${ids.photoA}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          r2Key: STAGING_REPLACE,
+          title: null,
+          caption: null,
+          categoryId: null,
+          isActive: true,
+        }),
+      },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(200);
+    const [photoRow] = await db
+      .select()
+      .from(galleryPhotos)
+      .where(eq(galleryPhotos.id, ids.photoA));
+    const all = await rows();
+    expect(all).toHaveLength(1);
+    expect(all[0]).toMatchObject({
+      entity: 'gallery-photo',
+      entityId: ids.photoA,
+      action: 'update',
+    });
+    expect(all[0]?.summary).toBe(photoRow?.r2Key);
   });
 });
