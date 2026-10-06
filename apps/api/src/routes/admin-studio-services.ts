@@ -15,6 +15,7 @@ import {
   setStudioServiceBranchMatrix,
   updateAdminStudioService,
 } from '../services/admin-entities.js';
+import { auditActor } from '../services/audit.js';
 import type { ApiEnv } from '../services/db.js';
 import { badRequest, notFound } from '../services/errors.js';
 import { validatedJson, validatedParam } from '../services/validator.js';
@@ -35,7 +36,7 @@ export const adminStudioServices = new Hono<ApiEnv>()
     return c.json(row);
   })
   .post('/', validatedJson(createStudioServiceSchema), async (c) => {
-    const result = await createAdminStudioService(c.get('db'), c.req.valid('json'));
+    const result = await createAdminStudioService(c.get('db'), auditActor(c), c.req.valid('json'));
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
     }
@@ -48,7 +49,12 @@ export const adminStudioServices = new Hono<ApiEnv>()
     validatedJson(updateStudioServiceSchema),
     async (c) => {
       const { id } = c.req.valid('param');
-      const result = await updateAdminStudioService(c.get('db'), id, c.req.valid('json'));
+      const result = await updateAdminStudioService(
+        c.get('db'),
+        auditActor(c),
+        id,
+        c.req.valid('json')
+      );
       if (!result.ok) {
         if (result.reason === 'not_found') {
           return notFound(c, 'Studio Service not found.');
@@ -66,7 +72,7 @@ export const adminStudioServices = new Hono<ApiEnv>()
     async (c) => {
       const { id } = c.req.valid('param');
       const { branchIds } = c.req.valid('json');
-      const result = await setStudioServiceBranchMatrix(c.get('db'), id, branchIds);
+      const result = await setStudioServiceBranchMatrix(c.get('db'), auditActor(c), id, branchIds);
       if (!result.ok) {
         if (result.reason === 'not_found') {
           return notFound(c, 'Studio Service not found.');
@@ -84,7 +90,12 @@ export const adminStudioServices = new Hono<ApiEnv>()
     async (c) => {
       const { id } = c.req.valid('param');
       const { addonServiceIds } = c.req.valid('json');
-      const result = await setStudioServiceAddonMatrix(c.get('db'), id, addonServiceIds);
+      const result = await setStudioServiceAddonMatrix(
+        c.get('db'),
+        auditActor(c),
+        id,
+        addonServiceIds
+      );
       if (!result.ok) {
         if (result.reason === 'not_found') {
           return notFound(c, 'Studio Service not found.');

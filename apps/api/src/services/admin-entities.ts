@@ -393,13 +393,22 @@ export async function getAdminStudioService(
 
 export async function createAdminStudioService(
   db: Database,
+  audit: AuditActor,
   input: CreateStudioServiceInput
 ): Promise<AdminCreateResult<StudioServiceWithBranches>> {
-  const result = await guardUnique(STUDIO_SERVICE_UNIQUE, async () => {
-    const [row] = await db.insert(studioServices).values(input).returning();
-    if (!row) throw new Error('insert studio_services: no row returned');
-    return row;
-  });
+  const result = await guardUnique(STUDIO_SERVICE_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx.insert(studioServices).values(input).returning();
+      if (!row) throw new Error('insert studio_services: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'studio-service',
+        entityId: row.id,
+        action: 'create',
+        summary: row.name,
+      });
+      return row;
+    })
+  );
   if (!result.ok) return result;
   const [assembled] = await assembleAdminStudioServices(db, [result.row]);
   if (!assembled) throw new Error('studio service create: assembly lost the row');
@@ -408,6 +417,7 @@ export async function createAdminStudioService(
 
 export async function updateAdminStudioService(
   db: Database,
+  audit: AuditActor,
   id: string,
   input: UpdateStudioServiceInput
 ): Promise<AdminWriteResult<StudioServiceWithBranches>> {
@@ -425,15 +435,25 @@ export async function updateAdminStudioService(
       .limit(1);
     if (clash) return conflict('name');
   }
-  const result = await guardUnique(STUDIO_SERVICE_UNIQUE, async () => {
-    const [row] = await db
-      .update(studioServices)
-      .set({ ...input, updatedAt: new Date() })
-      .where(eq(studioServices.id, id))
-      .returning();
-    if (!row) throw new Error('update studio_services: no row returned');
-    return row;
-  });
+  const action: AuditAction =
+    current.isActive && input.isActive === false ? 'deactivate' : 'update';
+  const result = await guardUnique(STUDIO_SERVICE_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx
+        .update(studioServices)
+        .set({ ...input, updatedAt: new Date() })
+        .where(eq(studioServices.id, id))
+        .returning();
+      if (!row) throw new Error('update studio_services: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'studio-service',
+        entityId: id,
+        action,
+        summary: row.name,
+      });
+      return row;
+    })
+  );
   if (!result.ok) return result;
   const [assembled] = await assembleAdminStudioServices(db, [result.row]);
   if (!assembled) throw new Error('studio service update: assembly lost the row');
@@ -450,6 +470,7 @@ export async function updateAdminStudioService(
  */
 export async function setStudioServiceBranchMatrix(
   db: Database,
+  audit: AuditActor,
   id: string,
   branchIds: string[]
 ): Promise<AdminWriteResult<StudioServiceWithBranches>> {
@@ -488,6 +509,14 @@ export async function setStudioServiceBranchMatrix(
         .insert(branchStudioServices)
         .values(toAdd.map((branchId) => ({ studioServiceId: id, branchId })));
     }
+    // M6 #185: ONE row per matrix REQUEST (request-grain) — the junction
+    // churn is the write; the row records the save, not the row count.
+    await writeAuditRow(tx, audit, {
+      entity: 'studio-service',
+      entityId: id,
+      action: 'update',
+      summary: service.name,
+    });
   });
   const read = await getAdminStudioService(db, id);
   if (!read) throw new Error('matrix save: read-back found no service row');
@@ -497,6 +526,7 @@ export async function setStudioServiceBranchMatrix(
 /** The add-on matrix — the branch matrix one junction over (same contract). */
 export async function setStudioServiceAddonMatrix(
   db: Database,
+  audit: AuditActor,
   id: string,
   addonServiceIds: string[]
 ): Promise<AdminWriteResult<StudioServiceWithBranches>> {
@@ -540,6 +570,14 @@ export async function setStudioServiceAddonMatrix(
         .insert(studioServiceAddonServices)
         .values(toAdd.map((addonId) => ({ studioServiceId: id, addonServiceId: addonId })));
     }
+    // M6 #185: ONE row per matrix REQUEST (request-grain) — the junction
+    // churn is the write; the row records the save, not the row count.
+    await writeAuditRow(tx, audit, {
+      entity: 'studio-service',
+      entityId: id,
+      action: 'update',
+      summary: service.name,
+    });
   });
   const read = await getAdminStudioService(db, id);
   if (!read) throw new Error('matrix save: read-back found no service row');
