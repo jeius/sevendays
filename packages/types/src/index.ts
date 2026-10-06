@@ -3,6 +3,7 @@ export * from './api-error.js';
 export * from './appointment.js';
 export * from './appointment-read.js';
 export * from './attire.js';
+export * from './audit.js';
 export * from './branch.js';
 export * from './frames.js';
 export * from './gallery.js';

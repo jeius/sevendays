@@ -13,6 +13,7 @@ import {
   setGalleryPhotoOrder,
   updateAdminGalleryPhoto,
 } from '../services/admin-gallery.js';
+import { auditActor } from '../services/audit.js';
 import type { ApiEnv } from '../services/db.js';
 import { badRequest, notFound } from '../services/errors.js';
 import { servePhotoThumbnail } from '../services/media.js';
@@ -33,6 +34,7 @@ export const galleryPhotos = new Hono<ApiEnv>()
     const result = await createAdminGalleryPhoto(
       c.get('db'),
       c.env,
+      auditActor(c),
       c.req.valid('json'),
       c.get('logger')
     );
@@ -44,7 +46,7 @@ export const galleryPhotos = new Hono<ApiEnv>()
   })
   .put('/order', validatedJson(galleryPhotoOrderSchema), async (c) => {
     const { photoIds } = c.req.valid('json');
-    const result = await setGalleryPhotoOrder(c.get('db'), c.env, photoIds);
+    const result = await setGalleryPhotoOrder(c.get('db'), c.env, auditActor(c), photoIds);
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
     }
@@ -78,6 +80,7 @@ export const galleryPhotos = new Hono<ApiEnv>()
       const result = await updateAdminGalleryPhoto(
         c.get('db'),
         c.env,
+        auditActor(c),
         id,
         c.req.valid('json'),
         c.get('logger')

@@ -8,6 +8,7 @@ import {
   listAdminPackages,
   updateAdminPackage,
 } from '../services/admin-packages.js';
+import { auditActor } from '../services/audit.js';
 import type { ApiEnv } from '../services/db.js';
 import { badRequest, notFound } from '../services/errors.js';
 import { validatedJson, validatedParam } from '../services/validator.js';
@@ -32,6 +33,7 @@ export const adminServicePackages = new Hono<ApiEnv>()
     const result = await createAdminPackage(
       c.get('db'),
       c.env,
+      auditActor(c),
       c.req.valid('json'),
       c.get('logger')
     );
@@ -50,6 +52,7 @@ export const adminServicePackages = new Hono<ApiEnv>()
       const result = await updateAdminPackage(
         c.get('db'),
         c.env,
+        auditActor(c),
         id,
         c.req.valid('json'),
         c.get('logger')

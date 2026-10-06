@@ -57,6 +57,13 @@
       "when": 1790351697660,
       "tag": "0007_illegal_epoch",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791266890321,
+      "tag": "0008_powerful_tyger_tiger",
+      "breakpoints": true
     }
   ]
 }

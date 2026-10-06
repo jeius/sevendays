@@ -1,4 +1,9 @@
-import { branches, branchStudioServices, studioServiceAddonServices } from '@sevendays/db';
+import {
+  auditLog,
+  branches,
+  branchStudioServices,
+  studioServiceAddonServices,
+} from '@sevendays/db';
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
@@ -298,5 +303,108 @@ describe('the add-on matrix (PUT /:id/addons — full-replace, one transaction)'
     );
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: 'Authentication required.' });
+  });
+});
+
+describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => {
+  const rows = async () => db.select().from(auditLog);
+
+  it('POST → one create row with the service name; the actor is the caller', async () => {
+    const res = await authed('POST', '/api/v1/admin/studio-services', 'audit-svc@sevendays.test', {
+      name: 'Audit Service',
+      description: 'For the audit row',
+      priceCents: 1000,
+    });
+    expect(res.status).toBe(201);
+    const { id } = (await res.json()) as { id: string };
+    const all = await rows();
+    expect(all).toHaveLength(1);
+    expect(all[0]).toMatchObject({
+      entity: 'studio-service',
+      entityId: id,
+      action: 'create',
+      summary: 'Audit Service',
+      actorEmail: 'audit-svc@sevendays.test',
+    });
+  });
+
+  it('PUT flipping isActive → deactivate; a later same-state PUT (no flip) → update', async () => {
+    const created = await authed(
+      'POST',
+      '/api/v1/admin/studio-services',
+      'audit-svc-flip-a@sevendays.test',
+      {
+        name: 'Flip Service',
+        description: 'd',
+        priceCents: 2000,
+      }
+    );
+    const { id } = (await created.json()) as { id: string };
+    const body = { name: 'Flip Service', description: 'd', priceCents: 2000 };
+    const off = await authed(
+      'PUT',
+      `/api/v1/admin/studio-services/${id}`,
+      'audit-svc-flip-b@sevendays.test',
+      {
+        ...body,
+        isActive: false,
+      }
+    );
+    expect(off.status).toBe(200);
+    const stillOff = await authed(
+      'PUT',
+      `/api/v1/admin/studio-services/${id}`,
+      'audit-svc-flip-c@sevendays.test',
+      {
+        ...body,
+        description: 'edited while off',
+        isActive: false,
+      }
+    );
+    expect(stillOff.status).toBe(200);
+    const forSvc = (await rows()).filter((row) => row.entityId === id);
+    expect(forSvc.filter((row) => row.action === 'create')).toHaveLength(1);
+    expect(forSvc.filter((row) => row.action === 'deactivate')).toHaveLength(1);
+    expect(forSvc.filter((row) => row.action === 'update')).toHaveLength(1);
+  });
+
+  it('the branch-matrix PUT → ONE update row (request-grain): entityId = the service, summary = its name; an unknown-branch 400 records nothing', async () => {
+    const created = await authed(
+      'POST',
+      '/api/v1/admin/studio-services',
+      'audit-matrix-a@sevendays.test',
+      {
+        name: 'Audit Matrix Service',
+        description: 'd',
+        priceCents: 3000,
+      }
+    );
+    const { id } = (await created.json()) as { id: string };
+    const ok = await authed(
+      'PUT',
+      `/api/v1/admin/studio-services/${id}/branches`,
+      'audit-matrix-b@sevendays.test',
+      {
+        branchIds: [ids.branchA],
+      }
+    );
+    expect(ok.status).toBe(200);
+    const bad = await authed(
+      'PUT',
+      `/api/v1/admin/studio-services/${id}/branches`,
+      'audit-matrix-c@sevendays.test',
+      {
+        branchIds: ['00000000-0000-4000-8000-0000000000ff'],
+      }
+    );
+    expect(bad.status).toBe(400);
+    const matrixRows = (await rows()).filter(
+      (row) => row.entityId === id && row.action === 'update'
+    );
+    expect(matrixRows).toHaveLength(1);
+    expect(matrixRows[0]).toMatchObject({
+      entity: 'studio-service',
+      summary: 'Audit Matrix Service',
+    });
   });
 });

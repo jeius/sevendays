@@ -10,10 +10,11 @@ import type { SessionData } from './auth.js';
 // Env from src/env.ts. `session` is set ONLY by requireSession (M4 ticket
 // 04) — optional so ungated routes don't carry a lying type. `logger` is set
 // by requestLogging at the ROOT (M6 #183) — required, because the middleware
-// precedes every route including /health.
+// precedes every route including /health; requestId is set by the same root
+// middleware (#185 — the audit rows read it).
 export type ApiEnv = {
   Bindings: Env;
-  Variables: { db: Database; session?: SessionData; logger: RequestLogger };
+  Variables: { db: Database; session?: SessionData; logger: RequestLogger; requestId: string };
 };
 
 /**
