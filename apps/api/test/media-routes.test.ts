@@ -1,6 +1,8 @@
 import { galleryPhotos } from '@sevendays/db';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import app from '../src/index.js';
+import { resetErrorCapture, setErrorCapture } from '../src/observability/capture.js';
+import { MissingR2CredentialsError } from '../src/services/media.js';
 import { signUpSession } from './helpers/auth.js';
 import { createTestDb } from './helpers/db.js';
 import { testEnv } from './helpers/env.js';
@@ -87,6 +89,7 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
+  resetErrorCapture();
   vi.restoreAllMocks();
 });
 
@@ -186,6 +189,27 @@ describe('POST /api/v1/admin/media/presign', () => {
     const errors = parsed.filter((line) => line.evt === 'error');
     expect(errors).toHaveLength(1);
     expect(errors[0]?.name).toBe('MissingR2CredentialsError');
+  });
+
+  it('the curated 503 is captured at the onError seam (M6 #184) — MissingR2CredentialsError reaches Sentry', async () => {
+    const captured: unknown[] = [];
+    setErrorCapture((error) => captured.push(error));
+    const { token } = await signUpSession(url, 'presign-sentry@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/media/presign',
+      {
+        method: 'POST',
+        body: JSON.stringify({ purpose: 'gallery-photo', contentType: 'image/jpeg' }),
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+      },
+      { ...testEnv(url), ...MEDIA_VARS }
+    );
+    expect(res.status).toBe(503);
+    expect(captured).toHaveLength(1);
+    expect(captured[0]).toBeInstanceOf(MissingR2CredentialsError);
+    // The loud detail rides the capture (Sentry is the loud channel; the
+    // 503 line the guest sees stays curated — the leak-safe split).
+    expect((captured[0] as Error).message).toContain('R2_S3_ACCESS_KEY_ID');
   });
 
   it('a successful presign stays QUIET — no media event at all (the highest-frequency admin call)', async () => {

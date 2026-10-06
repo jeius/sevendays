@@ -12,6 +12,12 @@ import { z } from 'zod';
 //   credential failure (MissingR2CredentialsError), so a deploy made before
 //   the owner's token mint serves everything except presign — never a silent
 //   fallback there either.
+// - The Sentry trio (M6 #184): all three OPTIONAL — a deploy without them
+//   serves everything (Sentry stays disabled, captures no-op), the same
+//   no-op-without-DSN posture the frontends codified. SENTRY_DSN is a Worker
+//   secret; SENTRY_RELEASE (the deployed git SHA) and ENVIRONMENT
+//   (dev/teaser/v1) ride `wrangler deploy --var` from CI; the committed
+//   [vars] default is dev.
 //
 // MEDIA_BUCKET/IMAGES are REQUIRED bindings (they deploy with wrangler.toml
 // once the sevendays-media bucket exists — docs/media-bucket-runbook.md), and
@@ -30,6 +36,9 @@ export const envSchema = z.object({
   MEDIA_PUBLIC_BASE_URL: z.url(),
   R2_S3_ACCESS_KEY_ID: z.string().min(1).optional(),
   R2_S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+  SENTRY_DSN: z.string().min(1).optional(),
+  SENTRY_RELEASE: z.string().min(1).optional(),
+  ENVIRONMENT: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -88,6 +88,11 @@ jobs:
       MEDIA_PUBLIC_BASE_URL: ${{ vars.MEDIA_PUBLIC_BASE_URL }}
       R2_S3_ACCESS_KEY_ID: ${{ secrets.R2_S3_ACCESS_KEY_ID }}
       R2_S3_SECRET_ACCESS_KEY: ${{ secrets.R2_S3_SECRET_ACCESS_KEY }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      SENTRY_RELEASE: ${{ github.sha }}
+      VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
+      VITE_SENTRY_RELEASE: ${{ github.sha }}
+      VITE_SENTRY_ENVIRONMENT: teaser
     steps:
       - uses: actions/checkout@v4
 
@@ -115,7 +120,7 @@ jobs:
 
       - name: Deploy api (sevendays-api)
         working-directory: apps/api
-        run: pnpm exec wrangler deploy --name sevendays-api --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "MEDIA_PUBLIC_BASE_URL:$MEDIA_PUBLIC_BASE_URL"
+        run: pnpm exec wrangler deploy --name sevendays-api --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "MEDIA_PUBLIC_BASE_URL:$MEDIA_PUBLIC_BASE_URL" --var "SENTRY_RELEASE:$SENTRY_RELEASE" --var "ENVIRONMENT:teaser"
 
       - name: Sync api DATABASE_URL from the environment secret
         working-directory: apps/api
@@ -135,6 +140,15 @@ jobs:
           fi
           printf '%s' "$R2_S3_ACCESS_KEY_ID" | pnpm exec wrangler secret put R2_S3_ACCESS_KEY_ID --name sevendays-api
           printf '%s' "$R2_S3_SECRET_ACCESS_KEY" | pnpm exec wrangler secret put R2_S3_SECRET_ACCESS_KEY --name sevendays-api
+
+      - name: Sync api SENTRY_DSN secret (skip until the owner creates the Sentry project)
+        working-directory: apps/api
+        run: |
+          if [ -z "$SENTRY_DSN" ]; then
+            echo '::notice::SENTRY_DSN secret missing from the teaser GitHub environment — Sentry stays no-op on the api (one project "sevendays", M6 #184)'
+            exit 0
+          fi
+          printf '%s' "$SENTRY_DSN" | pnpm exec wrangler secret put SENTRY_DSN --name sevendays-api
 
       - name: Deploy landing (sevendays-landing)
         working-directory: apps/landing
@@ -171,6 +185,11 @@ jobs:
       MEDIA_PUBLIC_BASE_URL: ${{ vars.MEDIA_PUBLIC_BASE_URL }}
       R2_S3_ACCESS_KEY_ID: ${{ secrets.R2_S3_ACCESS_KEY_ID }}
       R2_S3_SECRET_ACCESS_KEY: ${{ secrets.R2_S3_SECRET_ACCESS_KEY }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      SENTRY_RELEASE: ${{ github.sha }}
+      VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
+      VITE_SENTRY_RELEASE: ${{ github.sha }}
+      VITE_SENTRY_ENVIRONMENT: v1
     steps:
       - uses: actions/checkout@v4
 
@@ -197,7 +216,7 @@ jobs:
 
       - name: Deploy api (sevendays-v1-api)
         working-directory: apps/api
-        run: pnpm exec wrangler deploy --name sevendays-v1-api --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "MEDIA_PUBLIC_BASE_URL:$MEDIA_PUBLIC_BASE_URL"
+        run: pnpm exec wrangler deploy --name sevendays-v1-api --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "MEDIA_PUBLIC_BASE_URL:$MEDIA_PUBLIC_BASE_URL" --var "SENTRY_RELEASE:$SENTRY_RELEASE" --var "ENVIRONMENT:v1"
 
       - name: Sync api DATABASE_URL from the environment secret
         working-directory: apps/api
@@ -217,6 +236,15 @@ jobs:
           fi
           printf '%s' "$R2_S3_ACCESS_KEY_ID" | pnpm exec wrangler secret put R2_S3_ACCESS_KEY_ID --name sevendays-v1-api
           printf '%s' "$R2_S3_SECRET_ACCESS_KEY" | pnpm exec wrangler secret put R2_S3_SECRET_ACCESS_KEY --name sevendays-v1-api
+
+      - name: Sync api SENTRY_DSN secret (skip until the owner creates the Sentry project)
+        working-directory: apps/api
+        run: |
+          if [ -z "$SENTRY_DSN" ]; then
+            echo '::notice::SENTRY_DSN secret missing from the v1 GitHub environment — Sentry stays no-op on the api (one project "sevendays", M6 #184)'
+            exit 0
+          fi
+          printf '%s' "$SENTRY_DSN" | pnpm exec wrangler secret put SENTRY_DSN --name sevendays-v1-api
 
       - name: Deploy landing (sevendays-v1-landing)
         working-directory: apps/landing
