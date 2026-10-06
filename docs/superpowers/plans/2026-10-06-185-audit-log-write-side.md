@@ -402,7 +402,7 @@ git commit -m "feat(types): the audit vocabulary — action/entity enums + the r
 
 - [ ] **Step 1: Write the failing tests**
 
-In `apps/api/test/admin-entities.test.ts`: extend the import from `@sevendays/db` to include `auditLog`, extend the vitest import to include `vi`, and append this describe block at the end of the file (the `authed`/`app`/`db`/`url`/`testEnv`/`bearer`/`signUpSession` bindings are the file's existing ones):
+In `apps/api/test/admin-entities.test.ts`: extend the import from `@sevendays/db` to include `auditLog`, extend the vitest import to include `vi`, and append this describe block at the end of the file (the `app`/`db`/`url`/`testEnv`/`bearer`/`signUpSession` bindings are the file's existing ones; `authed` does NOT exist in this file — copy it verbatim from `test/admin-mutation-log.test.ts`'s `authed` helper, the sibling pattern):
 
 ```ts
 describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => {
@@ -453,7 +453,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
   });
 
   it('PUT flipping isActive true→false records deactivate; a later reactivation records update', async () => {
-    const created = await authed('POST', '/api/v1/admin/branches', 'audit-flip@sevendays.test', {
+    const created = await authed('POST', '/api/v1/admin/branches', 'audit-flip-a@sevendays.test', {
       name: 'Flip Branch',
       address: '2 Flip St',
       phone: '+63 900 000 011',
@@ -464,14 +464,14 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
       address: '2 Flip St',
       phone: '+63 900 000 011',
     };
-    const off = await authed('PUT', `/api/v1/admin/branches/${id}`, 'audit-flip@sevendays.test', {
+    const off = await authed('PUT', `/api/v1/admin/branches/${id}`, 'audit-flip-b@sevendays.test', {
       ...body,
       isActive: false,
     });
     expect(off.status).toBe(200);
     const afterOff = (await rows()).filter((row) => row.entityId === id);
     expect(afterOff.filter((row) => row.action === 'deactivate')).toHaveLength(1);
-    const on = await authed('PUT', `/api/v1/admin/branches/${id}`, 'audit-flip@sevendays.test', {
+    const on = await authed('PUT', `/api/v1/admin/branches/${id}`, 'audit-flip-c@sevendays.test', {
       ...body,
       name: 'Flip Branch Renamed',
       isActive: true,
@@ -483,7 +483,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
   });
 
   it('failed writes record nothing: a 400 (duplicate name), a 404 (unknown id), and a 401 (anonymous) each leave the table empty', async () => {
-    const dup = await authed('POST', '/api/v1/admin/branches', 'audit-dup@sevendays.test', {
+    const dup = await authed('POST', '/api/v1/admin/branches', 'audit-dup-a@sevendays.test', {
       name: 'Test Branch A', // fixture name — the uniqueness collision
       address: 'X St',
       phone: '+63 900 000 000',
@@ -492,7 +492,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
     const missing = await authed(
       'PUT',
       '/api/v1/admin/branches/00000000-0000-4000-8000-000000000000',
-      'audit-dup@sevendays.test',
+      'audit-dup-b@sevendays.test',
       { name: 'Ghost', address: 'X St', phone: '+63 900 000 000' }
     );
     expect(missing.status).toBe(404);
@@ -981,19 +981,19 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
   });
 
   it('PUT flipping isActive → deactivate; a later same-state PUT (no flip) → update', async () => {
-    const created = await authed('POST', '/api/v1/admin/studio-services', 'audit-svc-flip@sevendays.test', {
+    const created = await authed('POST', '/api/v1/admin/studio-services', 'audit-svc-flip-a@sevendays.test', {
       name: 'Flip Service',
       description: 'd',
       priceCents: 2000,
     });
     const { id } = (await created.json()) as { id: string };
     const body = { name: 'Flip Service', description: 'd', priceCents: 2000 };
-    const off = await authed('PUT', `/api/v1/admin/studio-services/${id}`, 'audit-svc-flip@sevendays.test', {
+    const off = await authed('PUT', `/api/v1/admin/studio-services/${id}`, 'audit-svc-flip-b@sevendays.test', {
       ...body,
       isActive: false,
     });
     expect(off.status).toBe(200);
-    const stillOff = await authed('PUT', `/api/v1/admin/studio-services/${id}`, 'audit-svc-flip@sevendays.test', {
+    const stillOff = await authed('PUT', `/api/v1/admin/studio-services/${id}`, 'audit-svc-flip-c@sevendays.test', {
       ...body,
       description: 'edited while off',
       isActive: false,
@@ -1006,17 +1006,17 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
   });
 
   it('the branch-matrix PUT → ONE update row (request-grain): entityId = the service, summary = its name; an unknown-branch 400 records nothing', async () => {
-    const created = await authed('POST', '/api/v1/admin/studio-services', 'audit-matrix@sevendays.test', {
+    const created = await authed('POST', '/api/v1/admin/studio-services', 'audit-matrix-a@sevendays.test', {
       name: 'Audit Matrix Service',
       description: 'd',
       priceCents: 3000,
     });
     const { id } = (await created.json()) as { id: string };
-    const ok = await authed('PUT', `/api/v1/admin/studio-services/${id}/branches`, 'audit-matrix@sevendays.test', {
+    const ok = await authed('PUT', `/api/v1/admin/studio-services/${id}/branches`, 'audit-matrix-b@sevendays.test', {
       branchIds: [ids.branchA],
     });
     expect(ok.status).toBe(200);
-    const bad = await authed('PUT', `/api/v1/admin/studio-services/${id}/branches`, 'audit-matrix@sevendays.test', {
+    const bad = await authed('PUT', `/api/v1/admin/studio-services/${id}/branches`, 'audit-matrix-c@sevendays.test', {
       branchIds: ['00000000-0000-4000-8000-0000000000ff'],
     });
     expect(bad.status).toBe(400);
@@ -1204,12 +1204,12 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
   const rows = async () => db.select().from(auditLog);
 
   it('category POST → one create row with the name; a duplicate-name 400 records nothing', async () => {
-    const res = await authed('POST', '/api/v1/admin/gallery-categories', 'audit-cat@sevendays.test', {
+    const res = await authed('POST', '/api/v1/admin/gallery-categories', 'audit-cat-a@sevendays.test', {
       name: 'Audit Tab',
     });
     expect(res.status).toBe(201);
     const { id } = (await res.json()) as { id: string };
-    const dup = await authed('POST', '/api/v1/admin/gallery-categories', 'audit-cat@sevendays.test', {
+    const dup = await authed('POST', '/api/v1/admin/gallery-categories', 'audit-cat-b@sevendays.test', {
       name: 'Weddings', // fixture name — the uniqueness collision
     });
     expect(dup.status).toBe(400);
@@ -1220,7 +1220,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
       entityId: id,
       action: 'create',
       summary: 'Audit Tab',
-      actorEmail: 'audit-cat@sevendays.test',
+      actorEmail: 'audit-cat-a@sevendays.test',
     });
   });
 
@@ -1731,14 +1731,14 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
     const edited = await authed(
       'PUT',
       `/api/v1/admin/service-packages/${ids.packageSimple}`,
-      'audit-pkg-put@sevendays.test',
+      'audit-pkg-put-a@sevendays.test',
       put({ name: 'Simple Package Renamed', slug: 'simple-package' })
     );
     expect(edited.status).toBe(200);
     const off = await authed(
       'PUT',
       `/api/v1/admin/service-packages/${ids.packageSimple}`,
-      'audit-pkg-put@sevendays.test',
+      'audit-pkg-put-b@sevendays.test',
       put({ name: 'Simple Package Off', slug: 'simple-package', isActive: false })
     );
     expect(off.status).toBe(200);
