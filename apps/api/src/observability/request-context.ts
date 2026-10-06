@@ -10,8 +10,11 @@ import { createRequestLogger, type RootEnv } from './logger.js';
 // block sees the final status on success, 404, AND error paths (read from
 // hono 4.13.5's dist/compose.js). /health is the one silent path: the header
 // still rides the response, but no line is emitted (uptime-probe noise).
+// #185's audit rows read this same value from Variables — the durable
+// record correlates with the ephemeral lines and the header by construction.
 export const requestLogging: MiddlewareHandler<RootEnv> = async (c, next) => {
   const requestId = crypto.randomUUID();
+  c.set('requestId', requestId);
   c.set('logger', createRequestLogger(requestId));
   c.header('x-request-id', requestId);
   const start = Date.now();

@@ -1,3 +1,4 @@
+import type { AuditEntity } from '@sevendays/types';
 import type { Context } from 'hono';
 import type { ApiEnv } from '../services/db.js';
 import type { RequestLogger, RootEnv } from './logger.js';
@@ -13,16 +14,7 @@ import type { RequestLogger, RootEnv } from './logger.js';
 // Levels: access / admin_mutation / email-attempt / email-sent at info;
 // media_failure at warn; email-failed and error at error.
 
-export type AdminMutationEntity =
-  | 'branch'
-  | 'print-size'
-  | 'gallery-photo'
-  | 'attire'
-  | 'addon-service'
-  | 'studio-service'
-  | 'service-package'
-  | 'gallery-category'
-  | 'testimonial';
+export type AdminMutationEntity = AuditEntity; // #185 canonicalized the list in packages/types — the ephemeral events and the durable rows share one vocabulary.
 
 export type MediaFailureOp = 'presign' | 'commit' | 'thumbnail';
 

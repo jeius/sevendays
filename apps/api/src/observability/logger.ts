@@ -42,5 +42,5 @@ export function createRequestLogger(requestId: string): RequestLogger {
 // cycle while staying structurally satisfied by the real session.
 export type RootEnv = {
   Bindings: Env;
-  Variables: { logger: RequestLogger; session?: { user: { id: string } } };
+  Variables: { logger: RequestLogger; requestId: string; session?: { user: { id: string } } };
 };
