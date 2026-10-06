@@ -367,7 +367,7 @@ export const auditLogRowSchema = z.object({
 export type AuditLogRow = z.infer<typeof auditLogRowSchema>;
 ```
 
-In `packages/types/src/index.ts`, add the export in alphabetical position (first line):
+In `packages/types/src/index.ts`, add the export in alphabetical position (BETWEEN `attire.js` AND `branch.js` — `audit` sorts after `attire`, before `branch`; the plan's original "first line" was wrong, corrected by controller ruling during execution):
 
 ```ts
 export * from './audit.js';
