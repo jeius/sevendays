@@ -1109,7 +1109,8 @@ export async function collectContentCensus(
 // without the #155 class-erasure problem. Sentry span per the house rule
 // (no-op when Sentry is uninitialized — dev without VITE_SENTRY_DSN).
 import { startSpan } from '@sentry/tanstackstart-react';
-import { createServerFn, getRequestHeaders } from '@tanstack/react-start';
+import { getRequestHeaders } from '@tanstack/react-start/server';
+import { createServerFn } from '@tanstack/react-start';
 import { createDbClient } from '@sevendays/db';
 import { z } from 'zod';
 
