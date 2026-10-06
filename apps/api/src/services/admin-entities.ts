@@ -9,6 +9,7 @@ import {
   studioServices,
 } from '@sevendays/db';
 import type {
+  AuditAction,
   CreateAddonServiceInput,
   CreateAttireInput,
   CreateBranchInput,
@@ -29,6 +30,7 @@ import {
   guardUnique,
   invalidRefs,
 } from './admin-shared.js';
+import { type AuditActor, writeAuditRow } from './audit.js';
 import { groupChildren } from './group-children.js';
 
 // Admin CRUD for the simple catalog entities (M5 #137): list/get/create/
@@ -36,7 +38,10 @@ import { groupChildren } from './group-children.js';
 // no deletes. Each entity's unique column rides BOTH conflict mechanisms:
 // a deterministic pre-check answers the common case, guardUnique maps the
 // PG 23505 race through the same 400-with-field-details vocabulary. Routes
-// stay thin — every business fact lives here.
+// stay thin — every business fact lives here. M6 #185: every write now
+// opens a transaction whose LAST statement is its audit row — the row
+// commits exactly when the write does (the spec's transaction-is-the-gate
+// ruling).
 
 type BranchRow = typeof branches.$inferSelect;
 type PrintSizeRow = typeof printSizes.$inferSelect;
@@ -62,17 +67,27 @@ export async function getAdminBranch(db: Database, id: string): Promise<BranchRo
 
 export function createAdminBranch(
   db: Database,
+  audit: AuditActor,
   input: CreateBranchInput
 ): Promise<AdminCreateResult<BranchRow>> {
-  return guardUnique(BRANCH_UNIQUE, async () => {
-    const [row] = await db.insert(branches).values(input).returning();
-    if (!row) throw new Error('insert branches: no row returned');
-    return row;
-  });
+  return guardUnique(BRANCH_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx.insert(branches).values(input).returning();
+      if (!row) throw new Error('insert branches: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'branch',
+        entityId: row.id,
+        action: 'create',
+        summary: row.name,
+      });
+      return row;
+    })
+  );
 }
 
 export async function updateAdminBranch(
   db: Database,
+  audit: AuditActor,
   id: string,
   input: UpdateBranchInput
 ): Promise<AdminWriteResult<BranchRow>> {
@@ -86,15 +101,27 @@ export async function updateAdminBranch(
       .limit(1);
     if (clash) return conflict('name');
   }
-  return guardUnique(BRANCH_UNIQUE, async () => {
-    const [row] = await db
-      .update(branches)
-      .set({ ...input, updatedAt: new Date() })
-      .where(eq(branches.id, id))
-      .returning();
-    if (!row) throw new Error('update branches: no row returned');
-    return row;
-  });
+  // M6 #185: deactivation is a RULING on the flip — only true→false is
+  // 'deactivate'; reactivation and edits of deactivated rows are 'update'.
+  const action: AuditAction =
+    current.isActive && input.isActive === false ? 'deactivate' : 'update';
+  return guardUnique(BRANCH_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx
+        .update(branches)
+        .set({ ...input, updatedAt: new Date() })
+        .where(eq(branches.id, id))
+        .returning();
+      if (!row) throw new Error('update branches: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'branch',
+        entityId: id,
+        action,
+        summary: row.name,
+      });
+      return row;
+    })
+  );
 }
 
 // --- print sizes ------------------------------------------------------------
@@ -110,17 +137,27 @@ export async function getAdminPrintSize(db: Database, id: string): Promise<Print
 
 export function createAdminPrintSize(
   db: Database,
+  audit: AuditActor,
   input: CreatePrintSizeInput
 ): Promise<AdminCreateResult<PrintSizeRow>> {
-  return guardUnique(PRINT_SIZE_UNIQUE, async () => {
-    const [row] = await db.insert(printSizes).values(input).returning();
-    if (!row) throw new Error('insert print_sizes: no row returned');
-    return row;
-  });
+  return guardUnique(PRINT_SIZE_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx.insert(printSizes).values(input).returning();
+      if (!row) throw new Error('insert print_sizes: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'print-size',
+        entityId: row.id,
+        action: 'create',
+        summary: row.code,
+      });
+      return row;
+    })
+  );
 }
 
 export async function updateAdminPrintSize(
   db: Database,
+  audit: AuditActor,
   id: string,
   input: UpdatePrintSizeInput
 ): Promise<AdminWriteResult<PrintSizeRow>> {
@@ -134,15 +171,25 @@ export async function updateAdminPrintSize(
       .limit(1);
     if (clash) return conflict('code');
   }
-  return guardUnique(PRINT_SIZE_UNIQUE, async () => {
-    const [row] = await db
-      .update(printSizes)
-      .set({ ...input, updatedAt: new Date() })
-      .where(eq(printSizes.id, id))
-      .returning();
-    if (!row) throw new Error('update print_sizes: no row returned');
-    return row;
-  });
+  const action: AuditAction =
+    current.isActive && input.isActive === false ? 'deactivate' : 'update';
+  return guardUnique(PRINT_SIZE_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx
+        .update(printSizes)
+        .set({ ...input, updatedAt: new Date() })
+        .where(eq(printSizes.id, id))
+        .returning();
+      if (!row) throw new Error('update print_sizes: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'print-size',
+        entityId: id,
+        action,
+        summary: row.code,
+      });
+      return row;
+    })
+  );
 }
 
 // --- attires ----------------------------------------------------------------
@@ -158,17 +205,27 @@ export async function getAdminAttire(db: Database, id: string): Promise<AttireRo
 
 export function createAdminAttire(
   db: Database,
+  audit: AuditActor,
   input: CreateAttireInput
 ): Promise<AdminCreateResult<AttireRow>> {
-  return guardUnique(ATTIRE_UNIQUE, async () => {
-    const [row] = await db.insert(attires).values(input).returning();
-    if (!row) throw new Error('insert attires: no row returned');
-    return row;
-  });
+  return guardUnique(ATTIRE_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx.insert(attires).values(input).returning();
+      if (!row) throw new Error('insert attires: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'attire',
+        entityId: row.id,
+        action: 'create',
+        summary: row.name,
+      });
+      return row;
+    })
+  );
 }
 
 export async function updateAdminAttire(
   db: Database,
+  audit: AuditActor,
   id: string,
   input: UpdateAttireInput
 ): Promise<AdminWriteResult<AttireRow>> {
@@ -182,15 +239,25 @@ export async function updateAdminAttire(
       .limit(1);
     if (clash) return conflict('name');
   }
-  return guardUnique(ATTIRE_UNIQUE, async () => {
-    const [row] = await db
-      .update(attires)
-      .set({ ...input, updatedAt: new Date() })
-      .where(eq(attires.id, id))
-      .returning();
-    if (!row) throw new Error('update attires: no row returned');
-    return row;
-  });
+  const action: AuditAction =
+    current.isActive && input.isActive === false ? 'deactivate' : 'update';
+  return guardUnique(ATTIRE_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx
+        .update(attires)
+        .set({ ...input, updatedAt: new Date() })
+        .where(eq(attires.id, id))
+        .returning();
+      if (!row) throw new Error('update attires: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'attire',
+        entityId: id,
+        action,
+        summary: row.name,
+      });
+      return row;
+    })
+  );
 }
 
 // --- add-on services --------------------------------------------------------
@@ -209,17 +276,27 @@ export async function getAdminAddonService(
 
 export function createAdminAddonService(
   db: Database,
+  audit: AuditActor,
   input: CreateAddonServiceInput
 ): Promise<AdminCreateResult<AddonServiceRow>> {
-  return guardUnique(ADDON_UNIQUE, async () => {
-    const [row] = await db.insert(addonServices).values(input).returning();
-    if (!row) throw new Error('insert addon_services: no row returned');
-    return row;
-  });
+  return guardUnique(ADDON_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx.insert(addonServices).values(input).returning();
+      if (!row) throw new Error('insert addon_services: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'addon-service',
+        entityId: row.id,
+        action: 'create',
+        summary: row.name,
+      });
+      return row;
+    })
+  );
 }
 
 export async function updateAdminAddonService(
   db: Database,
+  audit: AuditActor,
   id: string,
   input: UpdateAddonServiceInput
 ): Promise<AdminWriteResult<AddonServiceRow>> {
@@ -233,15 +310,25 @@ export async function updateAdminAddonService(
       .limit(1);
     if (clash) return conflict('name');
   }
-  return guardUnique(ADDON_UNIQUE, async () => {
-    const [row] = await db
-      .update(addonServices)
-      .set({ ...input, updatedAt: new Date() })
-      .where(eq(addonServices.id, id))
-      .returning();
-    if (!row) throw new Error('update addon_services: no row returned');
-    return row;
-  });
+  const action: AuditAction =
+    current.isActive && input.isActive === false ? 'deactivate' : 'update';
+  return guardUnique(ADDON_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx
+        .update(addonServices)
+        .set({ ...input, updatedAt: new Date() })
+        .where(eq(addonServices.id, id))
+        .returning();
+      if (!row) throw new Error('update addon_services: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'addon-service',
+        entityId: id,
+        action,
+        summary: row.name,
+      });
+      return row;
+    })
+  );
 }
 
 // --- studio services + the two applicability matrices ----------------------
@@ -306,13 +393,22 @@ export async function getAdminStudioService(
 
 export async function createAdminStudioService(
   db: Database,
+  audit: AuditActor,
   input: CreateStudioServiceInput
 ): Promise<AdminCreateResult<StudioServiceWithBranches>> {
-  const result = await guardUnique(STUDIO_SERVICE_UNIQUE, async () => {
-    const [row] = await db.insert(studioServices).values(input).returning();
-    if (!row) throw new Error('insert studio_services: no row returned');
-    return row;
-  });
+  const result = await guardUnique(STUDIO_SERVICE_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx.insert(studioServices).values(input).returning();
+      if (!row) throw new Error('insert studio_services: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'studio-service',
+        entityId: row.id,
+        action: 'create',
+        summary: row.name,
+      });
+      return row;
+    })
+  );
   if (!result.ok) return result;
   const [assembled] = await assembleAdminStudioServices(db, [result.row]);
   if (!assembled) throw new Error('studio service create: assembly lost the row');
@@ -321,6 +417,7 @@ export async function createAdminStudioService(
 
 export async function updateAdminStudioService(
   db: Database,
+  audit: AuditActor,
   id: string,
   input: UpdateStudioServiceInput
 ): Promise<AdminWriteResult<StudioServiceWithBranches>> {
@@ -338,15 +435,25 @@ export async function updateAdminStudioService(
       .limit(1);
     if (clash) return conflict('name');
   }
-  const result = await guardUnique(STUDIO_SERVICE_UNIQUE, async () => {
-    const [row] = await db
-      .update(studioServices)
-      .set({ ...input, updatedAt: new Date() })
-      .where(eq(studioServices.id, id))
-      .returning();
-    if (!row) throw new Error('update studio_services: no row returned');
-    return row;
-  });
+  const action: AuditAction =
+    current.isActive && input.isActive === false ? 'deactivate' : 'update';
+  const result = await guardUnique(STUDIO_SERVICE_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx
+        .update(studioServices)
+        .set({ ...input, updatedAt: new Date() })
+        .where(eq(studioServices.id, id))
+        .returning();
+      if (!row) throw new Error('update studio_services: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'studio-service',
+        entityId: id,
+        action,
+        summary: row.name,
+      });
+      return row;
+    })
+  );
   if (!result.ok) return result;
   const [assembled] = await assembleAdminStudioServices(db, [result.row]);
   if (!assembled) throw new Error('studio service update: assembly lost the row');
@@ -363,6 +470,7 @@ export async function updateAdminStudioService(
  */
 export async function setStudioServiceBranchMatrix(
   db: Database,
+  audit: AuditActor,
   id: string,
   branchIds: string[]
 ): Promise<AdminWriteResult<StudioServiceWithBranches>> {
@@ -401,6 +509,14 @@ export async function setStudioServiceBranchMatrix(
         .insert(branchStudioServices)
         .values(toAdd.map((branchId) => ({ studioServiceId: id, branchId })));
     }
+    // M6 #185: ONE row per matrix REQUEST (request-grain) — the junction
+    // churn is the write; the row records the save, not the row count.
+    await writeAuditRow(tx, audit, {
+      entity: 'studio-service',
+      entityId: id,
+      action: 'update',
+      summary: service.name,
+    });
   });
   const read = await getAdminStudioService(db, id);
   if (!read) throw new Error('matrix save: read-back found no service row');
@@ -410,6 +526,7 @@ export async function setStudioServiceBranchMatrix(
 /** The add-on matrix — the branch matrix one junction over (same contract). */
 export async function setStudioServiceAddonMatrix(
   db: Database,
+  audit: AuditActor,
   id: string,
   addonServiceIds: string[]
 ): Promise<AdminWriteResult<StudioServiceWithBranches>> {
@@ -453,6 +570,14 @@ export async function setStudioServiceAddonMatrix(
         .insert(studioServiceAddonServices)
         .values(toAdd.map((addonId) => ({ studioServiceId: id, addonServiceId: addonId })));
     }
+    // M6 #185: ONE row per matrix REQUEST (request-grain) — the junction
+    // churn is the write; the row records the save, not the row count.
+    await writeAuditRow(tx, audit, {
+      entity: 'studio-service',
+      entityId: id,
+      action: 'update',
+      summary: service.name,
+    });
   });
   const read = await getAdminStudioService(db, id);
   if (!read) throw new Error('matrix save: read-back found no service row');

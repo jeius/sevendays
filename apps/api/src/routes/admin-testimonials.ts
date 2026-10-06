@@ -13,6 +13,7 @@ import {
   setTestimonialOrder,
   updateAdminTestimonial,
 } from '../services/admin-gallery.js';
+import { auditActor } from '../services/audit.js';
 import type { ApiEnv } from '../services/db.js';
 import { badRequest, notFound } from '../services/errors.js';
 import { validatedJson, validatedParam } from '../services/validator.js';
@@ -26,7 +27,7 @@ export const adminTestimonials = new Hono<ApiEnv>()
     return c.json(await listAdminTestimonials(c.get('db')));
   })
   .post('/', validatedJson(createTestimonialSchema), async (c) => {
-    const result = await createAdminTestimonial(c.get('db'), c.req.valid('json'));
+    const result = await createAdminTestimonial(c.get('db'), auditActor(c), c.req.valid('json'));
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
     }
@@ -35,7 +36,7 @@ export const adminTestimonials = new Hono<ApiEnv>()
   })
   .put('/order', validatedJson(testimonialOrderSchema), async (c) => {
     const { testimonialIds } = c.req.valid('json');
-    const result = await setTestimonialOrder(c.get('db'), testimonialIds);
+    const result = await setTestimonialOrder(c.get('db'), auditActor(c), testimonialIds);
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
     }
@@ -56,7 +57,12 @@ export const adminTestimonials = new Hono<ApiEnv>()
     validatedJson(updateTestimonialSchema),
     async (c) => {
       const { id } = c.req.valid('param');
-      const result = await updateAdminTestimonial(c.get('db'), id, c.req.valid('json'));
+      const result = await updateAdminTestimonial(
+        c.get('db'),
+        auditActor(c),
+        id,
+        c.req.valid('json')
+      );
       if (!result.ok) {
         if (result.reason === 'not_found') {
           return notFound(c, 'Testimonial not found.');

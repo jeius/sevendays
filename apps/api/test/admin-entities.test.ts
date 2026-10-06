@@ -1,5 +1,5 @@
-import { attires, branches, printSizes } from '@sevendays/db';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { attires, auditLog, branches, printSizes } from '@sevendays/db';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import app from '../src/index.js';
 import { signUpSession } from './helpers/auth.js';
 import { createTestDb } from './helpers/db.js';
@@ -13,6 +13,19 @@ const db = createTestDb(url);
 let ids: FixtureIds;
 
 const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
+
+const authed = async (method: string, path: string, email: string, body?: unknown) => {
+  const { token } = await signUpSession(url, email);
+  return app.request(
+    path,
+    {
+      method,
+      headers: { 'content-type': 'application/json', ...bearer(token) },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    },
+    testEnv(url)
+  );
+};
 
 beforeEach(async () => {
   await truncateAll(db);
@@ -526,5 +539,133 @@ describe('add-on services admin CRUD', () => {
     );
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: 'Authentication required.' });
+  });
+});
+
+describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => {
+  const rows = async () => db.select().from(auditLog);
+
+  it('POST branches → exactly one row with the ruled fields; requestId = the served X-Request-Id AND the admin_mutation line (the Application Log correlation)', async () => {
+    const lines: string[] = [];
+    const spy = vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      lines.push(String(args[0]));
+    });
+    try {
+      const { token, userId } = await signUpSession(url, 'audit-branch@sevendays.test');
+      const res = await app.request(
+        '/api/v1/admin/branches',
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', ...bearer(token) },
+          body: JSON.stringify({
+            name: 'Audit Branch',
+            address: '1 Audit St',
+            phone: '+63 900 000 010',
+          }),
+        },
+        testEnv(url)
+      );
+      expect(res.status).toBe(201);
+      const created = (await res.json()) as { id: string };
+      const all = await rows();
+      expect(all).toHaveLength(1);
+      const [row] = all;
+      if (!row) throw new Error('expected one audit row');
+      expect(row.entity).toBe('branch');
+      expect(row.entityId).toBe(created.id);
+      expect(row.action).toBe('create');
+      expect(row.summary).toBe('Audit Branch');
+      expect(row.actorId).toBe(userId);
+      expect(row.actorEmail).toBe('audit-branch@sevendays.test');
+      expect(row.requestId).toBe(res.headers.get('x-request-id'));
+      expect(row.occurredAt).toBeInstanceOf(Date);
+      const mutationLines = lines
+        .map((line) => JSON.parse(line) as Record<string, unknown>)
+        .filter((line) => line.evt === 'admin_mutation');
+      expect(mutationLines).toHaveLength(1);
+      expect(mutationLines[0]?.requestId).toBe(row.requestId);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('PUT flipping isActive true→false records deactivate; a later reactivation records update', async () => {
+    const created = await authed('POST', '/api/v1/admin/branches', 'audit-flip-a@sevendays.test', {
+      name: 'Flip Branch',
+      address: '2 Flip St',
+      phone: '+63 900 000 011',
+    });
+    const { id } = (await created.json()) as { id: string };
+    const body = {
+      name: 'Flip Branch',
+      address: '2 Flip St',
+      phone: '+63 900 000 011',
+    };
+    const off = await authed('PUT', `/api/v1/admin/branches/${id}`, 'audit-flip-b@sevendays.test', {
+      ...body,
+      isActive: false,
+    });
+    expect(off.status).toBe(200);
+    const afterOff = (await rows()).filter((row) => row.entityId === id);
+    expect(afterOff.filter((row) => row.action === 'deactivate')).toHaveLength(1);
+    const on = await authed('PUT', `/api/v1/admin/branches/${id}`, 'audit-flip-c@sevendays.test', {
+      ...body,
+      name: 'Flip Branch Renamed',
+      isActive: true,
+    });
+    expect(on.status).toBe(200);
+    const afterOn = (await rows()).filter((row) => row.entityId === id);
+    expect(afterOn.filter((row) => row.action === 'deactivate')).toHaveLength(1);
+    expect(afterOn.filter((row) => row.action === 'update')).toHaveLength(1);
+  });
+
+  it('failed writes record nothing: a 400 (duplicate name), a 404 (unknown id), and a 401 (anonymous) each leave the table empty', async () => {
+    const dup = await authed('POST', '/api/v1/admin/branches', 'audit-dup-a@sevendays.test', {
+      name: 'Test Branch A', // fixture name — the uniqueness collision
+      address: 'X St',
+      phone: '+63 900 000 000',
+    });
+    expect(dup.status).toBe(400);
+    const missing = await authed(
+      'PUT',
+      '/api/v1/admin/branches/00000000-0000-4000-8000-000000000000',
+      'audit-dup-b@sevendays.test',
+      { name: 'Ghost', address: 'X St', phone: '+63 900 000 000' }
+    );
+    expect(missing.status).toBe(404);
+    const anon = await app.request(
+      '/api/v1/admin/branches',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name: 'Nope', address: 'X', phone: 'y' }),
+      },
+      testEnv(url)
+    );
+    expect(anon.status).toBe(401);
+    expect(await rows()).toEqual([]);
+  });
+
+  it('print-size, attire, and add-on-service POSTs → one row each with the family summary (code or name)', async () => {
+    const ps = await authed('POST', '/api/v1/admin/print-sizes', 'audit-ps@sevendays.test', {
+      code: 'A4',
+      description: 'Audit size',
+    });
+    const at = await authed('POST', '/api/v1/admin/attires', 'audit-at@sevendays.test', {
+      name: 'Audit Barong',
+    });
+    const ad = await authed('POST', '/api/v1/admin/addon-services', 'audit-ad@sevendays.test', {
+      name: 'Audit Spray',
+      description: 'Hold that updo',
+      priceCents: 3000,
+    });
+    expect([ps.status, at.status, ad.status]).toEqual([201, 201, 201]);
+    const all = await rows();
+    expect(all.map((row) => [row.entity, row.summary]).sort()).toEqual([
+      ['addon-service', 'Audit Spray'],
+      ['attire', 'Audit Barong'],
+      ['print-size', 'A4'],
+    ]);
+    expect(all.every((row) => row.action === 'create')).toBe(true);
   });
 });

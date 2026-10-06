@@ -8,6 +8,7 @@ import {
   listAdminPrintSizes,
   updateAdminPrintSize,
 } from '../services/admin-entities.js';
+import { auditActor } from '../services/audit.js';
 import type { ApiEnv } from '../services/db.js';
 import { badRequest, notFound } from '../services/errors.js';
 import { validatedJson, validatedParam } from '../services/validator.js';
@@ -30,7 +31,7 @@ export const adminPrintSizes = new Hono<ApiEnv>()
     return c.json(row);
   })
   .post('/', validatedJson(createPrintSizeSchema), async (c) => {
-    const result = await createAdminPrintSize(c.get('db'), c.req.valid('json'));
+    const result = await createAdminPrintSize(c.get('db'), auditActor(c), c.req.valid('json'));
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
     }
@@ -43,7 +44,12 @@ export const adminPrintSizes = new Hono<ApiEnv>()
     validatedJson(updatePrintSizeSchema),
     async (c) => {
       const { id } = c.req.valid('param');
-      const result = await updateAdminPrintSize(c.get('db'), id, c.req.valid('json'));
+      const result = await updateAdminPrintSize(
+        c.get('db'),
+        auditActor(c),
+        id,
+        c.req.valid('json')
+      );
       if (!result.ok) {
         if (result.reason === 'not_found') {
           return notFound(c, 'Print size not found.');

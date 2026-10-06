@@ -1,6 +1,7 @@
 import type { Database } from '@sevendays/db';
 import { galleryCategories, galleryPhotos, testimonials } from '@sevendays/db';
 import type {
+  AuditAction,
   CreateGalleryCategoryInput,
   CreateGalleryPhotoInput,
   CreateTestimonialInput,
@@ -20,6 +21,7 @@ import {
   conflict,
   guardUnique,
 } from './admin-shared.js';
+import { type AuditActor, writeAuditRow } from './audit.js';
 import { commitUpload, resolveMediaUrl } from './media.js';
 
 // The positioned collections (M5 #137): position is SERVER-assigned and
@@ -28,6 +30,8 @@ import { commitUpload, resolveMediaUrl } from './media.js';
 // EVERY row of the collection exactly once (deactivated included — the
 // admin grid manages them all); a mismatch answers 400 and touches nothing.
 // No hard deletes anywhere. (The gallery-photos section joins in Task 8.)
+// M6 #185: every persist's transaction ends with its audit row; position
+// reads and bucket I/O stay outside the transactions.
 
 type CategoryRow = typeof galleryCategories.$inferSelect;
 type TestimonialRow = typeof testimonials.$inferSelect;
@@ -95,21 +99,31 @@ async function nextCategoryPosition(db: Database): Promise<number> {
 
 export async function createAdminGalleryCategory(
   db: Database,
+  audit: AuditActor,
   input: CreateGalleryCategoryInput
 ): Promise<AdminCreateResult<CategoryRow>> {
   const position = await nextCategoryPosition(db);
-  return guardUnique(CATEGORY_UNIQUE, async () => {
-    const [row] = await db
-      .insert(galleryCategories)
-      .values({ ...input, position })
-      .returning();
-    if (!row) throw new Error('insert gallery_categories: no row returned');
-    return row;
-  });
+  return guardUnique(CATEGORY_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx
+        .insert(galleryCategories)
+        .values({ ...input, position })
+        .returning();
+      if (!row) throw new Error('insert gallery_categories: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'gallery-category',
+        entityId: row.id,
+        action: 'create',
+        summary: row.name,
+      });
+      return row;
+    })
+  );
 }
 
 export async function updateAdminGalleryCategory(
   db: Database,
+  audit: AuditActor,
   id: string,
   input: UpdateGalleryCategoryInput
 ): Promise<AdminWriteResult<CategoryRow>> {
@@ -123,19 +137,30 @@ export async function updateAdminGalleryCategory(
       .limit(1);
     if (clash) return conflict('name');
   }
-  return guardUnique(CATEGORY_UNIQUE, async () => {
-    const [row] = await db
-      .update(galleryCategories)
-      .set({ ...input, updatedAt: new Date() })
-      .where(eq(galleryCategories.id, id))
-      .returning();
-    if (!row) throw new Error('update gallery_categories: no row returned');
-    return row;
-  });
+  const action: AuditAction =
+    current.isActive && input.isActive === false ? 'deactivate' : 'update';
+  return guardUnique(CATEGORY_UNIQUE, () =>
+    db.transaction(async (tx) => {
+      const [row] = await tx
+        .update(galleryCategories)
+        .set({ ...input, updatedAt: new Date() })
+        .where(eq(galleryCategories.id, id))
+        .returning();
+      if (!row) throw new Error('update gallery_categories: no row returned');
+      await writeAuditRow(tx, audit, {
+        entity: 'gallery-category',
+        entityId: id,
+        action,
+        summary: row.name,
+      });
+      return row;
+    })
+  );
 }
 
 export async function setGalleryCategoryOrder(
   db: Database,
+  audit: AuditActor,
   categoryIds: string[]
   // The order service never returns not_found (it reads first, checks, then
   // writes) — the declared union carries only the invalid arm, so the thin
@@ -151,6 +176,14 @@ export async function setGalleryCategoryOrder(
         .set({ position: index + 1, updatedAt: new Date() })
         .where(eq(galleryCategories.id, categoryId));
     }
+    // M6 #185: reorder is family-level — entityId AND summary are null
+    // (the #183 twin's entityId ruling, carried to the durable record).
+    await writeAuditRow(tx, audit, {
+      entity: 'gallery-category',
+      entityId: null,
+      action: 'reorder',
+      summary: null,
+    });
   });
   return { ok: true, row: await listAdminGalleryCategories(db) };
 }
@@ -178,33 +211,59 @@ async function nextTestimonialPosition(db: Database): Promise<number> {
 // path (the no-row guards are the only throws, and unreachable in practice).
 export async function createAdminTestimonial(
   db: Database,
+  audit: AuditActor,
   input: CreateTestimonialInput
 ): Promise<AdminCreateResult<TestimonialRow>> {
   const position = await nextTestimonialPosition(db);
-  const [row] = await db
-    .insert(testimonials)
-    .values({ ...input, position })
-    .returning();
-  if (!row) throw new Error('insert testimonials: no row returned');
-  return { ok: true, row };
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .insert(testimonials)
+      .values({ ...input, position })
+      .returning();
+    if (!row) throw new Error('insert testimonials: no row returned');
+    await writeAuditRow(tx, audit, {
+      entity: 'testimonial',
+      entityId: row.id,
+      action: 'create',
+      summary: row.person,
+    });
+    return { ok: true as const, row };
+  });
 }
 
 export async function updateAdminTestimonial(
   db: Database,
+  audit: AuditActor,
   id: string,
   input: UpdateTestimonialInput
 ): Promise<AdminWriteResult<TestimonialRow>> {
-  const [row] = await db
-    .update(testimonials)
-    .set({ ...input, updatedAt: new Date() })
-    .where(eq(testimonials.id, id))
-    .returning();
-  if (!row) return { ok: false, reason: 'not_found' };
-  return { ok: true, row };
+  // M6 #185: the pre-read joins the other entities' pattern — the
+  // deactivate ruling needs the BEFORE state; the not_found arm keeps its
+  // current meaning (no row → no write, no audit row).
+  const [current] = await db.select().from(testimonials).where(eq(testimonials.id, id)).limit(1);
+  if (!current) return { ok: false, reason: 'not_found' };
+  const action: AuditAction =
+    current.isActive && input.isActive === false ? 'deactivate' : 'update';
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .update(testimonials)
+      .set({ ...input, updatedAt: new Date() })
+      .where(eq(testimonials.id, id))
+      .returning();
+    if (!row) return { ok: false as const, reason: 'not_found' as const };
+    await writeAuditRow(tx, audit, {
+      entity: 'testimonial',
+      entityId: id,
+      action,
+      summary: row.person,
+    });
+    return { ok: true as const, row };
+  });
 }
 
 export async function setTestimonialOrder(
   db: Database,
+  audit: AuditActor,
   testimonialIds: string[]
 ): Promise<{ ok: true; row: TestimonialRow[] } | AdminWriteFailure> {
   const rows = await db.select().from(testimonials);
@@ -217,6 +276,14 @@ export async function setTestimonialOrder(
         .set({ position: index + 1, updatedAt: new Date() })
         .where(eq(testimonials.id, testimonialId));
     }
+    // M6 #185: reorder is family-level — entityId AND summary are null
+    // (the #183 twin's entityId ruling, carried to the durable record).
+    await writeAuditRow(tx, audit, {
+      entity: 'testimonial',
+      entityId: null,
+      action: 'reorder',
+      summary: null,
+    });
   });
   return { ok: true, row: await listAdminTestimonials(db) };
 }
@@ -311,6 +378,7 @@ async function assertCategoryExists(
 export async function createAdminGalleryPhoto(
   db: Database,
   env: PhotoEnv,
+  audit: AuditActor,
   input: CreateGalleryPhotoInput,
   log?: RequestLogger
 ): Promise<AdminCreateResult<GalleryPhoto>> {
@@ -323,23 +391,36 @@ export async function createAdminGalleryPhoto(
   const commit = await commitStagingKey(env, input.r2Key, log);
   if (!commit.ok) return commit;
   const position = await nextPhotoPosition(db);
-  const [row] = await db
-    .insert(galleryPhotos)
-    .values({
-      r2Key: commit.finalKey,
-      title: input.title ?? null,
-      caption: input.caption ?? null,
-      categoryId: input.categoryId ?? null,
-      position,
-    })
-    .returning();
-  if (!row) throw new Error('insert gallery_photos: no row returned');
-  return { ok: true, row: toPhotoRead(env, row) };
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .insert(galleryPhotos)
+      .values({
+        r2Key: commit.finalKey,
+        title: input.title ?? null,
+        caption: input.caption ?? null,
+        categoryId: input.categoryId ?? null,
+        position,
+      })
+      .returning();
+    if (!row) throw new Error('insert gallery_photos: no row returned');
+    // M6 #185 (the media commit's row): the commit promoted the object
+    // before this transaction; THIS row is the durable record of the whole
+    // request. Untitled photos fall back to the immutable final key — a
+    // stable, join-free identifier.
+    await writeAuditRow(tx, audit, {
+      entity: 'gallery-photo',
+      entityId: row.id,
+      action: 'create',
+      summary: row.title ?? row.r2Key,
+    });
+    return { ok: true as const, row: toPhotoRead(env, row) };
+  });
 }
 
 export async function updateAdminGalleryPhoto(
   db: Database,
   env: PhotoEnv,
+  audit: AuditActor,
   id: string,
   input: UpdateGalleryPhotoInput,
   log?: RequestLogger
@@ -356,21 +437,32 @@ export async function updateAdminGalleryPhoto(
     if (!commit.ok) return commit;
     finalKey = commit.finalKey;
   }
-  const [row] = await db
-    .update(galleryPhotos)
-    .set({
-      r2Key: finalKey,
-      title: input.title,
-      caption: input.caption,
-      categoryId: input.categoryId,
-      isActive: input.isActive,
-      updatedAt: new Date(),
-    })
-    .where(eq(galleryPhotos.id, id))
-    .returning();
-  if (!row) throw new Error('update gallery_photos: no row returned');
+  const action: AuditAction =
+    current.isActive && input.isActive === false ? 'deactivate' : 'update';
+  const row = await db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(galleryPhotos)
+      .set({
+        r2Key: finalKey,
+        title: input.title,
+        caption: input.caption,
+        categoryId: input.categoryId,
+        isActive: input.isActive,
+        updatedAt: new Date(),
+      })
+      .where(eq(galleryPhotos.id, id))
+      .returning();
+    if (!updated) throw new Error('update gallery_photos: no row returned');
+    await writeAuditRow(tx, audit, {
+      entity: 'gallery-photo',
+      entityId: id,
+      action,
+      summary: updated.title ?? updated.r2Key,
+    });
+    return updated;
+  });
   // Keys are immutable — replace is new key + row update + old-key delete,
-  // the old object deleted only AFTER the update committed.
+  // the old object deleted only AFTER the update (and its audit row) committed.
   if (finalKey !== current.r2Key) {
     await env.MEDIA_BUCKET.delete(current.r2Key);
   }
@@ -380,6 +472,7 @@ export async function updateAdminGalleryPhoto(
 export async function setGalleryPhotoOrder(
   db: Database,
   env: PhotoEnv,
+  audit: AuditActor,
   photoIds: string[]
   // Same declared union as the other two order services (never not_found —
   // it reads first, checks, then writes): the thin route's `!result.ok`
@@ -395,6 +488,14 @@ export async function setGalleryPhotoOrder(
         .set({ position: index + 1, updatedAt: new Date() })
         .where(eq(galleryPhotos.id, photoId));
     }
+    // M6 #185: reorder is family-level — entityId AND summary are null
+    // (the #183 twin's entityId ruling, carried to the durable record).
+    await writeAuditRow(tx, audit, {
+      entity: 'gallery-photo',
+      entityId: null,
+      action: 'reorder',
+      summary: null,
+    });
   });
   return { ok: true, row: await listAdminGalleryPhotos(db, env) };
 }
