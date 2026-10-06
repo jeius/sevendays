@@ -31,6 +31,9 @@ dist/
 
 # Testing
 coverage/
+playwright-report/
+test-results/
+playwright-browsers/
 
 # SDD/agent scratch workspaces
 .superpowers/

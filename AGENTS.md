@@ -27,6 +27,7 @@ Run from the repo root unless noted. All commands are powered by Turborepo and f
 - Lint/Format Fix: `pnpm fix` (or `pnpm fix:unsafe` for unsafe fixes)
 - Typecheck: `pnpm typecheck`
 - Test: `pnpm test`
+- E2E, browser smoke (chromium-only, walks a deployed environment via `E2E_BASE_URL`; never part of `pnpm check` — ADR-0022): first run `pnpm exec playwright install chromium`, then `E2E_BASE_URL=<deployment> pnpm test:e2e`
 - Everything (lint + format + typecheck + test): `pnpm check`
 - DB schema changes: `pnpm --filter @sevendays/db db:generate` then `pnpm --filter @sevendays/db db:migrate` (requires `DATABASE_MIGRATE_URL` in `packages/db/.env` — the session-mode pooler URL per `docs/adr/0007-database-connection-topology.md`)
 
@@ -35,6 +36,8 @@ Run from the repo root unless noted. All commands are powered by Turborepo and f
 - `apps/api` has real vitest tests. The M5-pinned suite debt is paid (#154): the media, admin-entity, cover, order-guard, and public-read branch gaps are pinned, the api-client loopback suite covers the gallery/testimonials wrappers (+4 tests; 18 in the loopback file), and the live media harness is try/finally-safe with reason-observable HEAD failures. Floors: api 26 files passed + 1 skipped (27) / 317 passed + 3 skipped; api-client 5 files / 33 tests.
 - `apps/landing` runs a real vitest suite (lib-seam tests, since M2 ticket 05).
 - `apps/admin` runs a real vitest suite (since M5 ticket 09, #143): landing-style plain-node lib-seam tests over the pure seams (`src/lib/*.test.ts`, plus the `bulk-counts` confirm-naming seam from #155) — no component/DOM tests, vitest as the only test dependency. The api and landing suites remain the behavioral backbones.
+
+The Playwright foundation (M6 #189) lives outside this umbrella: a root `test:e2e` script walks deployed environments (chromium-only; nightly + dispatch in `.github/workflows/e2e.yml`, cached browsers) and never joins `pnpm check` — commit-green and smoke-green stay separate verdicts (ADR-0022).
 
 ## Engineering Rules
 

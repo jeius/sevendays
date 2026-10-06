@@ -1,0 +1,73 @@
+name: E2E (Playwright)
+
+# The Playwright pre-flight's CI leg (M6 #189, ADR-0022): nightly + on-demand
+# against a deployed environment — NEVER PR-gating (the PR gate stays exactly
+# pnpm check + pnpm build; ci.yml is untouched by this file). Scheduled
+# workflows fire from the default branch only, and this whole file is
+# main-only by classification (scripts/seed-v1/paths.txt — .github/workflows/
+# is not seeded out), so v1 never sees it. #190's seven production assertions
+# run through this same workflow against the chosen environment's E2E_BASE_URL.
+on:
+  schedule:
+    # Nightly 19:07 UTC = 03:07 Asia/Manila (odd minute: off GitHub's
+    # top-of-hour schedule congestion).
+    - cron: '7 19 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment to walk (teaser now; v1 at ship per the runbook)'
+        type: choice
+        options: [teaser, v1]
+        default: teaser
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ inputs.environment || 'teaser' }}
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/playwright-browsers
+      E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The playwright version lives in the lockfile, so this key invalidates
+      # with it; restore-keys let a minor bump reuse the unchanged half of the
+      # browser cache.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/playwright-browsers
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-playwright-
+
+      - name: Install chromium (+ OS deps)
+        run: pnpm exec playwright install --with-deps chromium
+
+      # An unset E2E_BASE_URL fails here with the config's curated message —
+      # the visible, named fix is the environment variable.
+      - name: Run the e2e suite
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report (failure only)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
