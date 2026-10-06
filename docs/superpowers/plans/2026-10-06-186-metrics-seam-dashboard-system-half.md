@@ -321,7 +321,9 @@ export async function runContentCensus(exec: SqlExec): Promise<ContentCensus> {
   const rows = await Promise.all(
     keys.map((key) => exec(CONTENT_CENSUS_SQL[key]))
   );
-  return keys.map((key, index) => mungeContentRow(key, rows[index]));
+  // `?? []` satisfies noUncheckedIndexedAccess (packages/config base); the
+  // branch is unreachable — Promise.all preserves keys' 1:1 order.
+  return keys.map((key, index) => mungeContentRow(key, rows[index] ?? []));
 }
 ```
 
