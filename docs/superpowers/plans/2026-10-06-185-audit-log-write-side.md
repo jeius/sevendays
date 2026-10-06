@@ -96,7 +96,7 @@ apps/api/
 
 - [ ] **Step 1: Write the failing truncate pin**
 
-In `apps/api/test/helpers/truncate.test.ts`, change the second test to expect the new table (the list is `.sort()`ed — `audit_log` lands between `appointments` and `attires`):
+In `apps/api/test/helpers/truncate.test.ts`, change the second test to expect the new table (the list is `.sort()`ed — `audit_log` lands AFTER `attires`: ASCII sort orders `attires` < `audit_log`; the example order below is the actual sort output, corrected by controller ruling during execution):
 
 ```ts
   it('still truncates exactly the twenty-two known public tables (migrations 0000-0008)', () => {
@@ -105,8 +105,8 @@ In `apps/api/test/helpers/truncate.test.ts`, change the second test to expect th
       'addon_services',
       'appointment_addon_services',
       'appointments',
-      'audit_log',
       'attires',
+      'audit_log',
       'branch_studio_services',
       'branches',
       'frames',
@@ -169,7 +169,7 @@ export const auditLog = pgTable(
 );
 ```
 
-In `packages/db/src/schema/index.ts`, add the export in alphabetical position (after `auth.js`):
+In `packages/db/src/schema/index.ts`, add the export in alphabetical position (BEFORE `auth.js` — `audit-log.js` sorts first; corrected by controller ruling during execution):
 
 ```ts
 export * from './audit-log.js';
