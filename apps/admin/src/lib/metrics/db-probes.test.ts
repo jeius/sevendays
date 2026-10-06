@@ -17,6 +17,8 @@ import {
 } from '@sevendays/db';
 import { describe, expect, it } from 'vitest';
 
+import { collectContentCensus, collectDbProbes } from './db';
+
 describe('the probe SQL shapes (spike-proven against the compose db)', () => {
   it('latency is the timed round-trip statement', () => {
     expect(PROBE_LATENCY_SQL).toBe('select 1');
@@ -95,6 +97,35 @@ describe('mungeContentRow', () => {
       key: 'photos',
       activeCount: 0,
       lastUpdated: null,
+    });
+  });
+});
+
+describe('the result-union wrappers (the #155 class — failures resolve, never throw)', () => {
+  it('collectDbProbes maps an exec failure to unavailable', async () => {
+    const exec = async () => {
+      throw new Error('connection refused');
+    };
+    expect(await collectDbProbes(exec)).toEqual({
+      ok: false,
+      reason: 'unavailable',
+    });
+  });
+
+  it('collectContentCensus passes a healthy exec through unmunged', async () => {
+    const exec = async (statement: string) =>
+      statement === CONTENT_CENSUS_SQL.packages
+        ? [{ active: 2, last_updated: '2026-10-06 09:05:17.721406+00' }]
+        : [{ active: 0, last_updated: null }];
+    const result = await collectContentCensus(exec);
+    expect(result).toEqual({
+      ok: true,
+      data: [
+        { key: 'packages', activeCount: 2, lastUpdated: '2026-10-06T09:05:17.721Z' },
+        { key: 'addons', activeCount: 0, lastUpdated: null },
+        { key: 'photos', activeCount: 0, lastUpdated: null },
+        { key: 'testimonials', activeCount: 0, lastUpdated: null },
+      ],
     });
   });
 });
