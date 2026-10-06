@@ -944,7 +944,7 @@ export async function fetchWorkerMetrics(
 
 - [ ] **Step 5: Green + gates + commit**
 
-`pnpm --filter @sevendays/admin test -- --run src/lib/metrics` (Task 1's file stays green alongside), then `pnpm --filter @sevendays/admin fix`, then `pnpm check`. Admin floor now **9 files / 79 tests** (7/59 + 6 env + 14 cf). Commit:
+`pnpm --filter @sevendays/admin test -- --run src/lib/metrics` (Task 1's file stays green alongside), then `pnpm --filter @sevendays/admin fix`, then `pnpm check`. Admin floor now **10 files / 89 tests** (Task 1's 8/69 + 6 env + 14 cf — the original 9/79 here omitted Task 1's delta; corrected at execution, ruling T2). Commit:
 
 ```bash
 git add apps/admin/src/lib/metrics/env.ts apps/admin/src/lib/metrics/env.test.ts apps/admin/src/lib/metrics/cf.ts apps/admin/src/lib/metrics/cf.test.ts
