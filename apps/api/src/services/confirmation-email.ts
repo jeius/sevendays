@@ -10,6 +10,7 @@ import type { AppointmentWithAddons } from '@sevendays/types';
 import { eq } from 'drizzle-orm';
 import { Resend } from 'resend';
 import type { Env } from '../env.js';
+import { captureError } from '../observability/capture.js';
 import { logEmail } from '../observability/events.js';
 import type { RequestLogger } from '../observability/logger.js';
 
@@ -154,6 +155,12 @@ export function scheduleConfirmationEmail(
         code:
           error instanceof ResendRejectionError ? `resend:${error.rejectionName}` : 'send_failed',
       });
+      // #184: the Sentry capture at the send seam — no HTTP status signals
+      // an email failure (the booking already answered 201), so the original
+      // error is captured here: ResendRejectionError's message is classified
+      // (recipient-free by construction); the other throw sites name ids,
+      // never customers.
+      captureError(error);
     })
   );
 }

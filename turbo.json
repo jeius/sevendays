@@ -7,7 +7,7 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".output/**", "dist/**"],
-      "env": ["NODE_ENV"]
+      "env": ["NODE_ENV", "VITE_SENTRY_DSN", "VITE_SENTRY_RELEASE", "VITE_SENTRY_ENVIRONMENT"]
     },
     "dev": {
       "cache": false,

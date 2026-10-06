@@ -3,8 +3,9 @@ import { createAppointmentSchema } from '@sevendays/types';
 import { eq } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import app from '../src/index.js';
+import { resetErrorCapture, setErrorCapture } from '../src/observability/capture.js';
 import { createAppointment } from '../src/services/appointments.js';
-import { EMAIL_FROM } from '../src/services/confirmation-email.js';
+import { EMAIL_FROM, ResendRejectionError } from '../src/services/confirmation-email.js';
 import { signUpSession } from './helpers/auth.js';
 import { createTestDb } from './helpers/db.js';
 import { testEnv } from './helpers/env.js';
@@ -686,6 +687,7 @@ describe('POST /api/v1/appointments — service path (ticket 03)', () => {
 // TIME (inside waitUntil), which is what these assertions prove.
 describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
   afterEach(() => {
+    resetErrorCapture();
     vi.restoreAllMocks();
   });
 
@@ -768,6 +770,33 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
       code: 'resend:internal_server_error',
     });
     expect(failed[0]?.requestId).toBe(res.headers.get('x-request-id'));
+  });
+
+  it('a typed Resend failure is captured at the send seam (M6 #184) — the original error, recipient-free; a successful send is not captured', async () => {
+    const captured: unknown[] = [];
+    setErrorCapture((error) => captured.push(error));
+    // Success leg first: the beforeEach default sendMock resolves ok — a
+    // completed booking must never reach Sentry (failures only).
+    const okCtx = fakeExecCtx();
+    expect((await postBooking(okCtx)).status).toBe(201);
+    await Promise.all(okCtx.promises);
+    expect(captured).toHaveLength(0);
+    // Failure leg: the SDK's real shape — it resolves { data: null, error },
+    // and the send seam reifies it as ResendRejectionError.
+    sendMock.mockResolvedValue({
+      data: null,
+      error: { message: 'internal error', statusCode: 500, name: 'internal_server_error' },
+    });
+    const failCtx = fakeExecCtx();
+    const res = await postBooking(failCtx);
+    expect(res.status).toBe(201); // booking stands — capture rides the catch
+    await Promise.all(failCtx.promises);
+    expect(captured).toHaveLength(1);
+    expect(captured[0]).toBeInstanceOf(ResendRejectionError);
+    expect((captured[0] as ResendRejectionError).rejectionName).toBe('internal_server_error');
+    // PII floor: the captured message is the classified line — resend's
+    // free-text (which may echo the recipient) never rides the capture.
+    expect((captured[0] as Error).message).not.toContain('ana@example.com');
   });
 
   it('a thrown send failure never fails the booking either — code send_failed, 201 stands', async () => {
