@@ -1,4 +1,10 @@
-import { frames, packageInclusionAttires, packageInclusions, servicePackages } from '@sevendays/db';
+import {
+  auditLog,
+  frames,
+  packageInclusionAttires,
+  packageInclusions,
+  servicePackages,
+} from '@sevendays/db';
 import { eq, inArray } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
@@ -571,5 +577,83 @@ describe('the package cover lifecycle (commit-verified through ticket 02)', () =
     const body = (await res.json()) as { coverImageUrl: string | null };
     expect(body.coverImageUrl).toMatch(/^https:\/\/pub-test\.r2\.dev\/covers\//);
     expect(stub.deleteCalls).toEqual([STAGING]);
+  });
+});
+
+describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => {
+  const rows = async () => db.select().from(auditLog);
+
+  it('the atomic save POST → exactly ONE row (request-grain — frames, inclusions, junctions are one committed request); requestId = the served X-Request-Id', async () => {
+    const { token } = await signUpSession(url, 'audit-pkg@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/service-packages',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify(save()),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(201);
+    const created = (await res.json()) as { id: string };
+    const all = await rows();
+    expect(all).toHaveLength(1);
+    expect(all[0]).toMatchObject({
+      entity: 'service-package',
+      entityId: created.id,
+      action: 'create',
+      summary: 'Deluxe Package',
+      actorEmail: 'audit-pkg@sevendays.test',
+    });
+    expect(all[0]?.requestId).toBe(res.headers.get('x-request-id'));
+  });
+
+  it('PUT → one update row; a PUT flipping isActive → one deactivate row', async () => {
+    const edited = await authed(
+      'PUT',
+      `/api/v1/admin/service-packages/${ids.packageSimple}`,
+      'audit-pkg-put-a@sevendays.test',
+      put({ name: 'Simple Package Renamed', slug: 'simple-package' })
+    );
+    expect(edited.status).toBe(200);
+    const off = await authed(
+      'PUT',
+      `/api/v1/admin/service-packages/${ids.packageSimple}`,
+      'audit-pkg-put-b@sevendays.test',
+      put({ name: 'Simple Package Off', slug: 'simple-package', isActive: false })
+    );
+    expect(off.status).toBe(200);
+    const forPkg = (await rows()).filter((row) => row.entityId === ids.packageSimple);
+    expect(forPkg.filter((row) => row.action === 'update')).toHaveLength(1);
+    expect(forPkg.filter((row) => row.action === 'deactivate')).toHaveLength(1);
+    expect(forPkg.every((row) => row.entity === 'service-package')).toBe(true);
+  });
+
+  it('a mid-transaction failure (unknown printSizeId) → NO audit row and the whole save rolled back', async () => {
+    const res = await authed(
+      'PUT',
+      `/api/v1/admin/service-packages/${ids.packageCombined}`,
+      'audit-pkg-rollback@sevendays.test',
+      put({
+        name: 'Combined Package Renamed',
+        slug: 'combined-package',
+        inclusions: [
+          {
+            kind: 'print',
+            quantity: 1,
+            printSizeId: '00000000-0000-4000-8000-000000000000',
+            attireIds: [ids.attireToga],
+            description: null,
+          },
+        ],
+      })
+    );
+    expect(res.status).toBe(400);
+    expect(await rows()).toEqual([]);
+    const name = await db
+      .select({ name: servicePackages.name })
+      .from(servicePackages)
+      .where(eq(servicePackages.id, ids.packageCombined));
+    expect(name[0]?.name).toBe('Combined Package'); // the rename rolled back — and nothing recorded it
   });
 });

@@ -9,6 +9,7 @@ import {
 } from '@sevendays/db';
 import { slugifyName } from '@sevendays/db/catalog-rows';
 import type {
+  AuditAction,
   CreateServicePackageInput,
   PackageSaveInclusionInput,
   ServicePackageRead,
@@ -27,6 +28,7 @@ import {
   conflict,
   guardUnique,
 } from './admin-shared.js';
+import { type AuditActor, writeAuditRow } from './audit.js';
 import { commitUpload, resolveMediaUrl } from './media.js';
 import { assemblePackageRead } from './service-packages.js';
 
@@ -42,6 +44,8 @@ import { assemblePackageRead } from './service-packages.js';
 // COMMIT the rows already written; the throw is what makes drizzle roll
 // back (the "no partial junction writes" guarantee). The whole transaction
 // rides guardUnique so a raced 23505 lands in the same 400 vocabulary.
+// M6 #185: the save's transaction now ends with its audit row — one per
+// REQUEST (the spec's request-grain ruling).
 
 type PackageRow = typeof servicePackages.$inferSelect;
 type Detail = { path: string[]; message: string };
@@ -195,6 +199,7 @@ async function runPackageSave(
   db: Database,
   env: SaveEnv,
   args: {
+    audit: AuditActor;
     input: CreateServicePackageInput | UpdateServicePackageInput;
     slug: string;
     finalKey: string | null | undefined;
@@ -203,6 +208,7 @@ async function runPackageSave(
 ): Promise<AdminWriteResult<ServicePackageRead>> {
   let packageId = args.updateId ?? '';
   let oldCoverKey: string | null = null;
+  let wasActive = true; // M6 #185: the BEFORE state the deactivate ruling reads
   let outcome: { ok: true; row: PackageTxOutcome } | AdminWriteFailure;
   try {
     outcome = await guardUnique(PACKAGE_UNIQUE, () =>
@@ -215,6 +221,7 @@ async function runPackageSave(
             .limit(1);
           if (!current) return { ok: false, reason: 'not_found' };
           oldCoverKey = current.coverImageKey;
+          wasActive = current.isActive;
           if (args.input.name !== current.name) {
             const [nameClash] = await tx
               .select({ id: servicePackages.id })
@@ -384,6 +391,22 @@ async function runPackageSave(
         if (junctionPairs.length > 0) {
           await tx.insert(packageInclusionAttires).values(junctionPairs);
         }
+        // M6 #185: the atomic save is ONE committed request — entity row,
+        // children, and this audit row commit together or not at all (an
+        // AdminSaveError above has already rolled everything back, row
+        // included — the mid-tx test's gate).
+        const action: AuditAction =
+          args.updateId === null
+            ? 'create'
+            : wasActive && args.input.isActive === false
+              ? 'deactivate'
+              : 'update';
+        await writeAuditRow(tx, args.audit, {
+          entity: 'service-package',
+          entityId: packageId,
+          action,
+          summary: args.input.name,
+        });
         return { ok: true };
       })
     );
@@ -415,6 +438,7 @@ async function runPackageSave(
 export async function createAdminPackage(
   db: Database,
   env: SaveEnv,
+  audit: AuditActor,
   input: CreateServicePackageInput,
   log?: RequestLogger
 ): Promise<AdminCreateResult<ServicePackageRead>> {
@@ -422,6 +446,7 @@ export async function createAdminPackage(
   if (!cover.ok) return cover;
   const slug = slugifyName(input.name);
   const result = await runPackageSave(db, env, {
+    audit,
     input,
     slug,
     finalKey: cover.finalKey,
@@ -439,6 +464,7 @@ export async function createAdminPackage(
 export async function updateAdminPackage(
   db: Database,
   env: SaveEnv,
+  audit: AuditActor,
   id: string,
   input: UpdateServicePackageInput,
   log?: RequestLogger
@@ -456,6 +482,7 @@ export async function updateAdminPackage(
   const cover = await resolveCover(env, input.coverImageKey, log);
   if (!cover.ok) return cover;
   return runPackageSave(db, env, {
+    audit,
     input,
     slug: input.slug,
     finalKey: cover.finalKey,
