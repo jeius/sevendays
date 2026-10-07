@@ -31,4 +31,23 @@ describe('metricsQueries (spec-verbatim caching posture)', () => {
       metricsQueries.workers('30d').queryKey
     );
   });
+
+  it('the traffic section stales at 5 minutes and keys on the window', () => {
+    expect(metricsQueries.traffic('7d')).toMatchObject({
+      staleTime: 300_000,
+      refetchOnWindowFocus: true,
+    });
+    expect(metricsQueries.traffic('24h').queryKey).toEqual(['metrics', 'traffic', '24h']);
+    expect(metricsQueries.traffic('7d').queryKey).not.toEqual(
+      metricsQueries.traffic('30d').queryKey
+    );
+  });
+
+  it('the storage section stales at 10 minutes and keys on the window', () => {
+    expect(metricsQueries.storage('7d')).toMatchObject({
+      staleTime: 600_000,
+      refetchOnWindowFocus: true,
+    });
+    expect(metricsQueries.storage('30d').queryKey).toEqual(['metrics', 'storage', '30d']);
+  });
 });
