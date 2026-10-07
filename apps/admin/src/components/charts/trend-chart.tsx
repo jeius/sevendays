@@ -15,11 +15,13 @@ export function TrendChart({
   variant = 'bars',
   color = 'var(--chart-1)',
   ariaLabel,
+  className = 'h-16 w-full',
 }: {
   data: TrendDatum[];
   variant?: 'bars' | 'line';
   color?: string;
   ariaLabel: string;
+  className?: string;
 }) {
   if (data.length === 0) {
     return <p className='text-muted-foreground h-16 text-xs'>No data in this window.</p>;
@@ -36,7 +38,7 @@ export function TrendChart({
   return (
     <ChartContainer
       config={config}
-      className='h-16 w-full'
+      className={className}
       aria-label={`${ariaLabel} — latest ${String(data.at(-1)?.value ?? 0)}, peak ${String(Math.max(...data.map((datum) => datum.value)))}`}
     >
       {variant === 'bars' ? (

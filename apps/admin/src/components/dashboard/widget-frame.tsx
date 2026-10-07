@@ -34,14 +34,16 @@ export function WidgetFrame({
   badge,
   state,
   children,
+  className,
 }: {
   title: string;
   badge?: string;
   state: WidgetState;
   children?: ReactNode;
+  className?: string;
 }) {
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader className='pb-2'>
         <div className='flex items-center justify-between gap-2'>
           <CardTitle className='text-sm font-medium'>{title}</CardTitle>

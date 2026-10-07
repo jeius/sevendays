@@ -1,9 +1,10 @@
-// System Health (#186): the api's request/error-rate trends + CPU
-// quantiles, the DB probes (latency, pooler census, size), the two
-// per-frontend error widgets (#178), and the Sentry link-out — one
-// workers query (shared cache with the Sentry + frontend widgets) + one
-// probes query. Every widget folds to its curated state; the page never
-// 500s.
+// System Health (#186): the owner-ratified hierarchy-led composition
+// (Task 5, 2026-10-06) — ONE primary metric big (the api's request trend,
+// a LINE: requests are a trend over time, chart-design rule 2), the rate
+// and CPU stats compact beside it, the DB-probe stats + the Sentry
+// link-out below, then the per-frontend error widgets (#178, errors as
+// BARS — discrete counts). One workers query (shared cache) + one probes
+// query; every card folds to its curated state; the page never 500s.
 import { useQuery } from '@tanstack/react-query';
 import type { MetricsWindow, WorkerSeries } from '#/lib/metrics/cf';
 import { errorRate } from '#/lib/metrics/cf';
@@ -11,7 +12,7 @@ import { metricsQueries } from '#/lib/metrics-queries';
 import { TrendChart } from '../charts/trend-chart';
 import { formatBytes, formatCount, formatPercent } from './format';
 import { FrontendErrorWidget } from './frontend-error-widget';
-import { SentryLinkWidget } from './sentry-link';
+import { SENTRY_CONSOLE_URL } from './sentry-link';
 import { resolveWidgetState, WidgetFrame } from './widget-frame';
 
 // The frontend widgets render their own curated states off the shared
@@ -43,22 +44,29 @@ export function SystemHealth({ window }: { window: MetricsWindow }) {
   return (
     <section className='space-y-4' aria-label='System Health'>
       <h2 className='text-lg font-semibold tracking-tight'>System Health</h2>
-      <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
-        <WidgetFrame title='API requests' badge={window} state={workersState}>
+      <div className='grid gap-4 lg:grid-cols-4'>
+        <WidgetFrame
+          title='API requests'
+          badge={window}
+          state={workersState}
+          className='lg:col-span-2'
+        >
           {workers.data?.ok ? (
-            <>
-              <p className='text-2xl font-semibold tabular-nums'>
+            <div className='flex h-full flex-col justify-between gap-3'>
+              <p className='text-3xl font-semibold tabular-nums'>
                 {formatCount(workers.data.data.api.totals.requests)}
               </p>
               <TrendChart
                 ariaLabel='API request trend'
                 color='var(--chart-1)'
+                variant='line'
+                className='h-28 w-full'
                 data={workers.data.data.api.points.map((point) => ({
                   bucketStart: point.bucketStart,
                   value: point.requests,
                 }))}
               />
-            </>
+            </div>
           ) : null}
         </WidgetFrame>
         <WidgetFrame title='API error rate' badge={window} state={workersState}>
@@ -68,17 +76,8 @@ export function SystemHealth({ window }: { window: MetricsWindow }) {
                 {formatPercent(errorRate(workers.data.data.api))}
               </p>
               <p className='text-muted-foreground text-xs'>
-                {formatCount(workers.data.data.api.totals.errors)} errors
+                {formatCount(workers.data.data.api.totals.errors)} errors in window
               </p>
-              <TrendChart
-                ariaLabel='API error-rate trend'
-                color='var(--chart-2)'
-                variant='line'
-                data={workers.data.data.api.points.map((point) => ({
-                  bucketStart: point.bucketStart,
-                  value: point.requests > 0 ? point.errors / point.requests : 0,
-                }))}
-              />
             </>
           ) : null}
         </WidgetFrame>
@@ -94,23 +93,6 @@ export function SystemHealth({ window }: { window: MetricsWindow }) {
             </>
           ) : null}
         </WidgetFrame>
-        <SentryLinkWidget
-          window={window}
-          state={workersState}
-          errors={workers.data?.ok ? workers.data.data.api.totals.errors : null}
-        />
-        <FrontendErrorWidget
-          window={window}
-          app='landing'
-          series={workers.data?.ok ? workers.data.data.landing : EMPTY_SERIES}
-          state={workersState === 'ready' ? 'ready' : workersState}
-        />
-        <FrontendErrorWidget
-          window={window}
-          app='admin'
-          series={workers.data?.ok ? workers.data.data.admin : EMPTY_SERIES}
-          state={workersState === 'ready' ? 'ready' : workersState}
-        />
         <WidgetFrame title='DB latency' state={probesState}>
           {probes.data?.ok ? (
             <p className='text-2xl font-semibold tabular-nums'>{probes.data.data.latencyMs} ms</p>
@@ -140,6 +122,40 @@ export function SystemHealth({ window }: { window: MetricsWindow }) {
             </>
           ) : null}
         </WidgetFrame>
+        <WidgetFrame title='Sentry' badge={window} state={workersState}>
+          {workers.data?.ok ? (
+            <>
+              <p className='text-2xl font-semibold tabular-nums'>
+                {formatCount(workers.data.data.api.totals.errors)}
+              </p>
+              <p className='text-muted-foreground text-xs'>
+                errors captured, all apps ·{' '}
+                <a
+                  href={SENTRY_CONSOLE_URL}
+                  target='_blank'
+                  rel='noreferrer noopener'
+                  className='text-primary underline-offset-4 hover:underline'
+                >
+                  Open Sentry console
+                </a>
+              </p>
+            </>
+          ) : null}
+        </WidgetFrame>
+      </div>
+      <div className='grid gap-4 lg:grid-cols-2'>
+        <FrontendErrorWidget
+          window={window}
+          app='landing'
+          series={workers.data?.ok ? workers.data.data.landing : EMPTY_SERIES}
+          state={workersState === 'ready' ? 'ready' : workersState}
+        />
+        <FrontendErrorWidget
+          window={window}
+          app='admin'
+          series={workers.data?.ok ? workers.data.data.admin : EMPTY_SERIES}
+          state={workersState === 'ready' ? 'ready' : workersState}
+        />
       </div>
     </section>
   );
