@@ -29,7 +29,12 @@ export function WindowToggle({ window }: { window: MetricsWindow }) {
             aria-current={active ? 'page' : undefined}
             className={
               active
-                ? 'bg-primary text-primary-foreground px-3 py-1.5 text-xs font-medium'
+                ? // The active segment rides the design system's own
+                  // active/pressed stop (--brand-primary-active, the
+                  // tokens.css convention): white on #034356 is 10.82:1 —
+                  // the base primary's 5.65:1 read washed out at 12px
+                  // beside the ink-on-wash text around it (owner feedback).
+                  'bg-brand-800 text-primary-foreground px-3 py-1.5 text-xs font-medium'
                 : 'hover:bg-accent hover:text-accent-foreground px-3 py-1.5 text-xs'
             }
           >
