@@ -11,6 +11,7 @@ export interface SentryFrontendInit {
   sampleRate: 1;
   tracesSampleRate: 0;
   sendDefaultPii: false;
+  sendClientReports: false;
   dataCollection: { userInfo: false; httpBodies: [] };
   initialScope: { tags: { app: 'admin' } };
 }
@@ -30,6 +31,13 @@ export function buildSentryOptions(input: {
     sampleRate: 1,
     tracesSampleRate: 0,
     sendDefaultPii: false,
+    // Client-report tracking (the default) crashes module load in workerd:
+    // @sentry/node-core's interval needs Node Timer .unref() and
+    // process.on('beforeExit') — neither exists in the CF runtime the
+    // frontends SSR in (the #197-class teaser 500s; local dev 500s once a
+    // DSN is set). Dropped-event diagnostics add nothing to the
+    // errors-only posture.
+    sendClientReports: false,
     dataCollection: { userInfo: false, httpBodies: [] },
     initialScope: { tags: { app: APP } },
   };
