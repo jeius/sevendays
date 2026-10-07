@@ -16,6 +16,8 @@ import { createAuth } from '../auth';
 import { fetchWorkerMetrics, metricsWindowSchema } from './cf';
 import { collectContentCensus, collectDbProbes } from './db';
 import { readMetricsEnv } from './env';
+import { fetchTrafficMetrics } from './posthog';
+import { fetchStorageMetrics } from './r2';
 
 async function requireMetricsSession(): Promise<void> {
   const session = await createAuth().api.getSession({
@@ -58,3 +60,21 @@ export const fetchMetricsContent = createServerFn({ method: 'GET' }).handler(asy
     return collectContentCensus(db.execute.bind(db));
   });
 });
+
+export const fetchMetricsTraffic = createServerFn({ method: 'GET' })
+  .validator(z.object({ window: metricsWindowSchema }))
+  .handler(async ({ data }) => {
+    return startSpan({ name: 'metrics traffic' }, async () => {
+      await requireMetricsSession();
+      return fetchTrafficMetrics(readMetricsEnv(), data.window);
+    });
+  });
+
+export const fetchMetricsStorage = createServerFn({ method: 'GET' })
+  .validator(z.object({ window: metricsWindowSchema }))
+  .handler(async ({ data }) => {
+    return startSpan({ name: 'metrics storage' }, async () => {
+      await requireMetricsSession();
+      return fetchStorageMetrics(readMetricsEnv(), data.window);
+    });
+  });

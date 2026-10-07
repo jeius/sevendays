@@ -25,6 +25,7 @@ const ENV: MetricsEnv = {
       admin: 'sevendays-admin',
     },
   },
+  r2: null,
   posthog: null,
   dbUrl: null,
 };
@@ -199,7 +200,7 @@ describe('fetchWorkerMetrics', () => {
       throw new Error('must not be called');
     };
     const result = await fetchWorkerMetrics(
-      { cf: null, posthog: null, dbUrl: null },
+      { cf: null, r2: null, posthog: null, dbUrl: null },
       '7d',
       fetchImpl as unknown as typeof fetch
     );
