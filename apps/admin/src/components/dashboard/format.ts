@@ -26,3 +26,16 @@ export function formatPercent(value: number | null): string {
 export function formatCount(value: number): string {
   return new Intl.NumberFormat('en').format(value);
 }
+
+// Web vitals display (#187): LCP/FCP/INP arrive in milliseconds (seconds
+// read better above 1000); CLS is unitless.
+export function formatDurationMs(value: number | null): string {
+  if (value === null) return '—';
+  if (value >= 1000) return `${(value / 1000).toFixed(1)} s`;
+  return `${Math.round(value)} ms`;
+}
+
+export function formatCls(value: number | null): string {
+  if (value === null) return '—';
+  return value.toFixed(2);
+}
