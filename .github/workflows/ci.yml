@@ -93,6 +93,9 @@ jobs:
       VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
       VITE_SENTRY_RELEASE: ${{ github.sha }}
       VITE_SENTRY_ENVIRONMENT: teaser
+      CF_ANALYTICS_READ_TOKEN: ${{ secrets.CF_ANALYTICS_READ_TOKEN }}
+      POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+      POSTHOG_PROJECT_ID: ${{ secrets.POSTHOG_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -156,7 +159,7 @@ jobs:
 
       - name: Deploy admin (sevendays-admin)
         working-directory: apps/admin
-        run: pnpm exec wrangler deploy --name sevendays-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL"
+        run: pnpm exec wrangler deploy --name sevendays-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL" --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "CF_ANALYTICS_SCRIPT_API:sevendays-api" --var "CF_ANALYTICS_SCRIPT_LANDING:sevendays-landing" --var "CF_ANALYTICS_SCRIPT_ADMIN:sevendays-admin"
 
       - name: Sync admin DATABASE_URL from the environment secret
         working-directory: apps/admin
@@ -166,6 +169,21 @@ jobs:
             exit 1
           fi
           printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL --name sevendays-admin
+
+      - name: Sync admin analytics secrets (skip until the owner mints them)
+        working-directory: apps/admin
+        run: |
+          if [ -z "$CF_ANALYTICS_READ_TOKEN" ]; then
+            echo '::notice::CF_ANALYTICS_READ_TOKEN missing from the teaser GitHub environment — System Health renders its curated not-configured state (M6 #186)'
+            exit 0
+          fi
+          printf '%s' "$CF_ANALYTICS_READ_TOKEN" | pnpm exec wrangler secret put CF_ANALYTICS_READ_TOKEN --name sevendays-admin
+          if [ -n "$POSTHOG_PERSONAL_API_KEY" ] && [ -n "$POSTHOG_PROJECT_ID" ]; then
+            printf '%s' "$POSTHOG_PERSONAL_API_KEY" | pnpm exec wrangler secret put POSTHOG_PERSONAL_API_KEY --name sevendays-admin
+            printf '%s' "$POSTHOG_PROJECT_ID" | pnpm exec wrangler secret put POSTHOG_PROJECT_ID --name sevendays-admin
+          else
+            echo '::notice::PostHog pair missing from the teaser GitHub environment — Traffic lands with #187; put both then.'
+          fi
 
   deploy-v1:
     name: Deploy v1 (private)
@@ -190,6 +208,9 @@ jobs:
       VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
       VITE_SENTRY_RELEASE: ${{ github.sha }}
       VITE_SENTRY_ENVIRONMENT: v1
+      CF_ANALYTICS_READ_TOKEN: ${{ secrets.CF_ANALYTICS_READ_TOKEN }}
+      POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+      POSTHOG_PROJECT_ID: ${{ secrets.POSTHOG_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -252,7 +273,7 @@ jobs:
 
       - name: Deploy admin (sevendays-v1-admin)
         working-directory: apps/admin
-        run: pnpm exec wrangler deploy --name sevendays-v1-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL"
+        run: pnpm exec wrangler deploy --name sevendays-v1-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL" --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "CF_ANALYTICS_SCRIPT_API:sevendays-v1-api" --var "CF_ANALYTICS_SCRIPT_LANDING:sevendays-v1-landing" --var "CF_ANALYTICS_SCRIPT_ADMIN:sevendays-v1-admin"
 
       - name: Sync admin DATABASE_URL from the environment secret
         working-directory: apps/admin
@@ -262,3 +283,18 @@ jobs:
             exit 1
           fi
           printf '%s' "$DATABASE_URL" | pnpm exec wrangler secret put DATABASE_URL --name sevendays-v1-admin
+
+      - name: Sync admin analytics secrets (skip until the owner mints them)
+        working-directory: apps/admin
+        run: |
+          if [ -z "$CF_ANALYTICS_READ_TOKEN" ]; then
+            echo '::notice::CF_ANALYTICS_READ_TOKEN missing from the v1 GitHub environment — System Health renders its curated not-configured state (M6 #186)'
+            exit 0
+          fi
+          printf '%s' "$CF_ANALYTICS_READ_TOKEN" | pnpm exec wrangler secret put CF_ANALYTICS_READ_TOKEN --name sevendays-v1-admin
+          if [ -n "$POSTHOG_PERSONAL_API_KEY" ] && [ -n "$POSTHOG_PROJECT_ID" ]; then
+            printf '%s' "$POSTHOG_PERSONAL_API_KEY" | pnpm exec wrangler secret put POSTHOG_PERSONAL_API_KEY --name sevendays-v1-admin
+            printf '%s' "$POSTHOG_PROJECT_ID" | pnpm exec wrangler secret put POSTHOG_PROJECT_ID --name sevendays-v1-admin
+          else
+            echo '::notice::PostHog pair missing from the v1 GitHub environment — Traffic lands with #187; put both then.'
+          fi

@@ -10,6 +10,25 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* The #93 reversal made real (#186): data-viz tokens are ADMIN-LOCAL —
+   the admin is data-viz's only consumer, so --chart-* lives here in the
+   admin's @theme, not in packages/ui (whose header clause records the
+   reversal). These feed the app-local shadcn chart component
+   (ChartContainer themes by exactly this --chart-1..5 contract — the
+   owner's 2026-10-06 ruling); values derive from the shared brand tokens
+   (hexes/oklch stay canonical there); the vocabulary/count is ratified
+   via the #186 rendered variants. Promotion to packages/ui reopens only
+   if a second consumer appears (the spec's standing rule). */
+@theme inline {
+  --chart-1: var(--brand-primary); /* the primary series — requests, CPU */
+  --chart-2: var(--destructive); /* errors — the warm signal */
+  --chart-3: var(--brand-gray-mid); /* neutral/secondary series */
+  --chart-4: var(--brand-500); /* the lighter petrol (ramp 500) */
+  --chart-5: var(--brand-900); /* deepest petrol, emphasis */
+  --chart-grid: var(--border); /* hairlines */
+  --chart-text: var(--muted-foreground); /* axis + legend text */
+}
+
 html,
 body,
 #app {

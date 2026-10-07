@@ -3,5 +3,26 @@
   "extends": ["@sevendays/config/biome/base", "@sevendays/config/biome/vite"],
   "files": {
     "includes": ["!src/routeTree.gen.ts", "!!**/.output", "!!**/dist"]
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["src/components/**"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noNamespaceImport": "off"
+          },
+          "suspicious": {
+            "noArrayIndexKey": "off"
+          },
+          "security": {
+            "noDangerouslySetInnerHtml": "off"
+          },
+          "a11y": {
+            "useSemanticElements": "off"
+          }
+        }
+      }
+    }
+  ]
 }

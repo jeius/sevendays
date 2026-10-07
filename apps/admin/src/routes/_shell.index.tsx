@@ -1,20 +1,45 @@
+// The Analytics Dashboard (#186, ADR-0023): the admin's landing screen —
+// the #93 Dashboard stub dies here (the appointments stub at
+// /appointments stays; it is v2 payload). Any staff session sees it; every
+// source failure renders its widget's curated state; the page never 500s.
+// The window is a search param (shareable, SSR-stable); Traffic and
+// Storage & Media (#187) compose into this same page later.
 import { createFileRoute } from '@tanstack/react-router';
-import { StubScreen } from '#/components/stub-screen';
+import { z } from 'zod';
 
-export const Route = createFileRoute('/_shell/')({
-  head: () => ({ meta: [{ title: 'Dashboard | Sevendays Admin' }] }),
-  component: DashboardPage,
+import { PageHeader } from '#/components/cms/shared';
+import { ContentCensusSection } from '#/components/dashboard/content-census';
+import { RefreshButton } from '#/components/dashboard/refresh-button';
+import { SystemHealth } from '#/components/dashboard/system-health';
+import { WindowToggle } from '#/components/dashboard/window-toggle';
+import { metricsWindowSchema } from '#/lib/metrics/cf';
+
+const analyticsSearchSchema = z.object({
+  window: metricsWindowSchema.default('7d'),
 });
 
-function DashboardPage() {
-  // The honest empty state (#93): the appointments dashboard — its cards,
-  // filters, and table — is v2 payload, created wholesale then. Nothing
-  // dashboard-shaped ships in v1, so this screen ships empty on purpose.
+export const Route = createFileRoute('/_shell/')({
+  validateSearch: analyticsSearchSchema,
+  head: () => ({ meta: [{ title: 'Analytics | Sevendays Admin' }] }),
+  component: AnalyticsPage,
+});
+
+function AnalyticsPage() {
+  const { window } = Route.useSearch();
   return (
-    <StubScreen
-      title='Dashboard'
-      blurb='This screen ships empty for now — the appointments dashboard arrives with v2.'
-      milestone='v2'
-    />
+    <div className='space-y-8'>
+      <PageHeader
+        title='Analytics'
+        subline='System health, database, and content at a glance.'
+        actions={
+          <>
+            <WindowToggle window={window} />
+            <RefreshButton />
+          </>
+        }
+      />
+      <SystemHealth window={window} />
+      <ContentCensusSection />
+    </div>
   );
 }
