@@ -2104,7 +2104,7 @@ git commit -m "feat(admin): the owner-ratified audience-half composition — var
 - Consumes: the env names Task 1's reader consumes.
 - Produces: the deployed teaser + v1 admin Workers carrying `CF_ANALYTICS_BUCKET` + `POSTHOG_LANDING_HOSTS` as `--var`s (the values are per-edition deployment identity; v1's are convention-shaped seeds the ship runbook verifies at cutover — the dedicated v1 PostHog project is born at ship, and v1's landing host flips to the client domain then); updated fail-soft notices; the owner's dev-token handoff; the live probes' evidence.
 
-**Not here:** the v1 CI environment's secret VALUES (ship-day, #191's runbook); any api/landing CI change (the landing's `VITE_POSTHOG_*` ride the existing var-passing if the owner sets them — no new ci.yml plumbing); `.dev.vars` (dev uses `.env.local` via the dev script's dotenv — document, don't create).
+**Not here:** the v1 CI environment's secret VALUES (ship-day, #191's runbook); any api CI change (the landing's `VITE_POSTHOG_KEY`/`VITE_POSTHOG_HOST` DO join ci.yml — the final review's corrected ruling: GitHub vars reach builds only via explicit env mappings, the VITE_SENTRY_DSN precedent; both deploy jobs' env blocks carry them); `.dev.vars` (dev uses `.env.local` via the dev script's dotenv — document, don't create).
 
 - [ ] **Step 1: `apps/admin/.env.example` — document the three new names**
 
@@ -2127,7 +2127,7 @@ POSTHOG_API_HOST=
 Two edits. First, the admin deploy step's run line gains the two vars (full replacement):
 
 ```yaml
-        run: pnpm exec wrangler deploy --name sevendays-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL" --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "CF_ANALYTICS_SCRIPT_API:sevendays-api" --var "CF_ANALYTICS_SCRIPT_LANDING:sevendays-landing" --var "CF_ANALYTICS_SCRIPT_ADMIN:sevendays-admin" --var "CF_ANALYTICS_BUCKET:sevendays-media" --var "POSTHOG_LANDING_HOSTS:sevendays-landing.workers.dev"
+        run: pnpm exec wrangler deploy --name sevendays-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL" --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "CF_ANALYTICS_SCRIPT_API:sevendays-api" --var "CF_ANALYTICS_SCRIPT_LANDING:sevendays-landing" --var "CF_ANALYTICS_SCRIPT_ADMIN:sevendays-admin" --var "CF_ANALYTICS_BUCKET:sevendays-media" --var "POSTHOG_LANDING_HOSTS:sevendays-landing.pahamajulius.workers.dev"
 ```
 
 Second, in the existing `Sync admin analytics secrets` step, the two notice lines become:
@@ -2147,7 +2147,7 @@ and
 The v1 admin deploy step's run line becomes:
 
 ```yaml
-        run: pnpm exec wrangler deploy --name sevendays-v1-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL" --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "CF_ANALYTICS_SCRIPT_API:sevendays-v1-api" --var "CF_ANALYTICS_SCRIPT_LANDING:sevendays-v1-landing" --var "CF_ANALYTICS_SCRIPT_ADMIN:sevendays-v1-admin" --var "CF_ANALYTICS_BUCKET:sevendays-v1-media" --var "POSTHOG_LANDING_HOSTS:sevendays-v1-landing.workers.dev"
+        run: pnpm exec wrangler deploy --name sevendays-v1-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL" --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "CF_ANALYTICS_SCRIPT_API:sevendays-v1-api" --var "CF_ANALYTICS_SCRIPT_LANDING:sevendays-v1-landing" --var "CF_ANALYTICS_SCRIPT_ADMIN:sevendays-v1-admin" --var "CF_ANALYTICS_BUCKET:sevendays-v1-media" --var "POSTHOG_LANDING_HOSTS:sevendays-v1-landing.pahamajulius.workers.dev"
 ```
 
 (The v1 values are convention-shaped seeds: the bucket name + the workers.dev host hold until cutover, when #191's runbook points `POSTHOG_LANDING_HOSTS` at the client's real domain and verifies the bucket name against the provisioned one. The v1 sync step's notices get the same two-line update with `v1` in the environment name.)
@@ -2157,7 +2157,7 @@ The v1 admin deploy step's run line becomes:
 Post on #187 (owner-operated; nothing blocks this PR — the fail-soft steps ARE the interim):
 
 ```bash
-gh issue comment 187 --body "Owner handoff to light the audience half up on teaser (dev-account values per the spec — extends #186's ask): (1) if not yet minted: the CF API token with **Account Analytics:Read** (one token covers Workers AND R2 datasets) + the PostHog **personal API key** (query:read) + the project's numeric id; (2) teaser GitHub-environment secrets: CF_ANALYTICS_READ_TOKEN, POSTHOG_PERSONAL_API_KEY, POSTHOG_PROJECT_ID (CF_ANALYTICS_BUCKET=sevendays-media and POSTHOG_LANDING_HOSTS=sevendays-landing.workers.dev ride as deploy vars already); (3) local dev: the same CF values + CF_ANALYTICS_BUCKET=sevendays-media + the PostHog pair + POSTHOG_LANDING_HOSTS=localhost:<your landing dev port> into apps/admin/.env.local, and VITE_POSTHOG_KEY (+ VITE_POSTHOG_HOST if eu) into apps/landing/.env.local so the landing starts capturing pageviews + vitals; (4) visit the teaser landing once after (3) — Traffic populates within the minute. Until then the new sections serve their curated not-configured states — the deploy notices name the gap on every run. docs/ship-provisioning-runbook.md (#191) owns the production swap (dedicated v1 PostHog project + real domain in POSTHOG_LANDING_HOSTS at cutover)."
+gh issue comment 187 --body "Owner handoff to light the audience half up on teaser (dev-account values per the spec — extends #186's ask; corrected 2026-10-07: the landing host below carries the account subdomain — workers.dev hosts are <worker>.<account-subdomain>.workers.dev — and the landing's VITE_POSTHOG_* env mappings joined ci.yml): (1) if not yet minted: the CF API token with **Account Analytics:Read** (one token covers Workers AND R2 datasets) + the PostHog **personal API key** (query:read) + the project's numeric id; (2) teaser GitHub-environment secrets: CF_ANALYTICS_READ_TOKEN, POSTHOG_PERSONAL_API_KEY, POSTHOG_PROJECT_ID — plus the VARIABLES VITE_POSTHOG_KEY (+ VITE_POSTHOG_HOST if eu; public-by-design — the CI build maps them exactly like the Sentry trio); CF_ANALYTICS_BUCKET=sevendays-media and POSTHOG_LANDING_HOSTS=sevendays-landing.pahamajulius.workers.dev ride as deploy vars already; (3) local dev: the same CF values + CF_ANALYTICS_BUCKET=sevendays-media + the PostHog pair + POSTHOG_LANDING_HOSTS=localhost:<your landing dev port> into apps/admin/.env.local, and VITE_POSTHOG_KEY (+ VITE_POSTHOG_HOST if eu) into apps/landing/.env.local so the landing starts capturing pageviews + vitals; (4) visit the teaser landing once after (3) — Traffic populates within the minute. Until then the new sections serve their curated not-configured states — the deploy notices name the gap on every run. docs/ship-provisioning-runbook.md (#191) owns the production swap (dedicated v1 PostHog project + real domain in POSTHOG_LANDING_HOSTS at cutover)."
 ```
 
 - [ ] **Step 5: The live probes (when the dev values exist locally — else record deferred)**
@@ -2312,7 +2312,7 @@ Then the locks: `pnpm install --frozen-lockfile` (assert no lockfile diff), `pnp
 
 - [ ] **Step 6: Ledger + issue close**
 
-Append one row to `docs/agents/v1-picks.md`'s ledger table (the established format) with the actual SHAs: date 2026-10-07, issue #187, main squash SHA, verdict `split`, v1 SHA, and the description naming: the audience half (the HogQL client's four documents + the $host allowlist scope, the R2 datasets client + the pricing-docs classifier + the free-tier markers, the two server fns + 5m/10m factories, the Traffic/Storage sections at `/`, the landing provider's pageviews + web vitals PICK clean, the three deployment-identity vars + both CI legs' notices); the plain-SPLIT classification (no ruled divergence — #197 carried it; the main-only drops); the locks' results (incl. the v1 admin floor 13/134 and the no-lockfile-change assertion); the CI run numbers; the probe status (ran/deferred). Commit the ledger row to main:
+Append one row to `docs/agents/v1-picks.md`'s ledger table (the established format) with the actual SHAs: date 2026-10-07, issue #187, main squash SHA, verdict `split`, v1 SHA, and the description naming: the audience half (the HogQL client's four documents + the $host allowlist scope, the R2 datasets client + the pricing-docs classifier + the free-tier markers, the two server fns + 5m/10m factories, the Traffic/Storage sections at `/`, the landing provider's pageviews + web vitals PICK clean, the three deployment-identity vars + both CI legs' notices); the plain-SPLIT classification (no ruled divergence — #197 carried it; the main-only drops); the locks' results (incl. the v1 admin floor 13/132 and the no-lockfile-change assertion); the CI run numbers; the probe status (ran/deferred). Commit the ledger row to main:
 
 ```bash
 git checkout main && git pull && git add docs/agents/v1-picks.md
