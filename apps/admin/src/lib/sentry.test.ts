@@ -25,6 +25,7 @@ describe('buildSentryOptions (M6 #184)', () => {
       sampleRate: 1,
       tracesSampleRate: 0,
       sendDefaultPii: false,
+      sendClientReports: false,
       dataCollection: { userInfo: false, httpBodies: [] },
       initialScope: { tags: { app: 'admin' } },
     });
