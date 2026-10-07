@@ -1499,6 +1499,8 @@ git commit -m "feat(admin): the audience half's server fns + query factories —
 
 ### Task 4: `apps/admin` — the Traffic + Storage & Media widgets, the page composition
 
+> **Execution correction (2026-10-07, controller-ruled):** the two fenced section components below access the query payload ONE LEVEL SHALLOW (`traffic.data.totals`, `storage.data.latestObjectCount`, …) — the same plan defect #186's plan carried. The canonical access under the `MetricsResult` envelope is `traffic.data.data.totals` / `storage.data.data.latestObjectCount` (the `useQuery` `data` field holds the result union; `x.data?.ok ? x.data.data.<field>` narrows correctly), exactly as the landed `system-health.tsx` does (`workers.data.data.api.*`). Transcribe the fenced blocks with `.data.data.` at every payload access; everything else is verbatim.
+
 **Skill set (AGENTS.md rule, loads at execution):** `prototype` + `ui-ux-pro-max`, plus `design-system` / `ui-styling` as relevant. The compositions below are the **provisional composition** — Task 6's owner reaction is the ratification gate and may adjust layout/chart modes/hints (never the curated lines' semantics, the data mapping, or the staleTimes). They compose from #186's landed vocabulary only (`WidgetFrame`, `resolveWidgetState`, `TrendChart`, the format helpers) — no new tokens, no new chart components, no new dependencies.
 
 **Files:**
