@@ -4,5 +4,7 @@
 // drill-down. Never a rebuild. The card lives inline in system-health
 // (the ratified hierarchy composition); this module owns the URL. The
 // link opens in a new tab (owner ruling, 2026-10-06). URL owner-ratified
-// (same day, plan session): org slug sevendays-studio.
-export const SENTRY_CONSOLE_URL = 'https://sevendays-studio.sentry.io/issues/';
+// (2026-10-07): org slug jeius-dev — the dev/teaser org this edition
+// reports to. (sevendays-studio is the ship-day v1 org; flipping this
+// constant for v1 rides #191's cutover.)
+export const SENTRY_CONSOLE_URL = 'https://jeius-dev.sentry.io/issues/';
