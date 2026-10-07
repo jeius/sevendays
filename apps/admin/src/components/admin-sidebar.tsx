@@ -22,6 +22,7 @@ import {
 import { Link, useMatchRoute, useNavigate } from '@tanstack/react-router';
 import type { LucideIcon } from 'lucide-react';
 import {
+  Activity,
   Images,
   LogOut,
   MapPin,
@@ -35,6 +36,7 @@ import {
 import { authClient } from '#/lib/auth-client';
 
 type NavTo =
+  | '/'
   | '/packages'
   | '/add-ons'
   | '/studio-services'
@@ -70,9 +72,14 @@ function initials(name: string): string {
 }
 
 // The ruled taxonomy (#59), icons carried from the prototype unchanged.
-// This console ships only the CMS surfaces — the dashboard and
-// appointments destinations are out of scope in this build (#168).
+// Overview carries the Analytics dashboard (#186 — the #93 stub's
+// replacement); appointments destinations remain out of scope in this
+// build (#168); Catalog and Studio carry the live CMS surfaces.
 const navGroups: NavGroup[] = [
+  {
+    heading: 'Overview',
+    items: [{ to: '/', label: 'Analytics', icon: Activity }],
+  },
   {
     heading: 'Catalog',
     items: [

@@ -4,5 +4,8 @@
   "compatibility_date": "2025-09-02",
   "compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
   "main": "@tanstack/react-start/server-entry",
-  "services": [{ "binding": "API", "service": "sevendays-v1-api" }]
+  "services": [{ "binding": "API", "service": "sevendays-v1-api" }],
+  // The metrics seam's failure detail lands on console.error (#186) —
+  // Workers Logs retains it (3-day, free tier; wrangler tail is live).
+  "observability": { "enabled": true }
 }

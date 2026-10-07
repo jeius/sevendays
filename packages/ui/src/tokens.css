@@ -5,8 +5,9 @@
    maintained directly — it is never regenerated from a preset. Fixed
    brand points: primary #06708e and ink #0e131a only; the other four
    logo hexes are reference tones. Hexes are canonical; each oklch value
-   round-trips to the identical rendered color. No --chart-* tokens ship
-   (data-viz belongs to the v2 effort; #93 steering only). Dark mode is
+   round-trips to the identical rendered color. Data-viz tokens are admin-local (the #186
+   reversal of #93's steering): --chart-* lives in apps/admin's @theme —
+   promote to this shared file only if a second consumer appears. Dark mode is
    parked for v1: no .dark block — do not design or carry one. */
 
 :root {
