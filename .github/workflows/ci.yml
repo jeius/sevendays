@@ -93,6 +93,8 @@ jobs:
       VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
       VITE_SENTRY_RELEASE: ${{ github.sha }}
       VITE_SENTRY_ENVIRONMENT: teaser
+      VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
+      VITE_POSTHOG_HOST: ${{ vars.VITE_POSTHOG_HOST }}
       CF_ANALYTICS_READ_TOKEN: ${{ secrets.CF_ANALYTICS_READ_TOKEN }}
       POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
       POSTHOG_PROJECT_ID: ${{ secrets.POSTHOG_PROJECT_ID }}
@@ -159,7 +161,7 @@ jobs:
 
       - name: Deploy admin (sevendays-admin)
         working-directory: apps/admin
-        run: pnpm exec wrangler deploy --name sevendays-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL" --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "CF_ANALYTICS_SCRIPT_API:sevendays-api" --var "CF_ANALYTICS_SCRIPT_LANDING:sevendays-landing" --var "CF_ANALYTICS_SCRIPT_ADMIN:sevendays-admin"
+        run: pnpm exec wrangler deploy --name sevendays-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL" --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "CF_ANALYTICS_SCRIPT_API:sevendays-api" --var "CF_ANALYTICS_SCRIPT_LANDING:sevendays-landing" --var "CF_ANALYTICS_SCRIPT_ADMIN:sevendays-admin" --var "CF_ANALYTICS_BUCKET:sevendays-media" --var "POSTHOG_LANDING_HOSTS:sevendays-landing.pahamajulius.workers.dev"
 
       - name: Sync admin DATABASE_URL from the environment secret
         working-directory: apps/admin
@@ -174,7 +176,7 @@ jobs:
         working-directory: apps/admin
         run: |
           if [ -z "$CF_ANALYTICS_READ_TOKEN" ]; then
-            echo '::notice::CF_ANALYTICS_READ_TOKEN missing from the teaser GitHub environment — System Health renders its curated not-configured state (M6 #186)'
+            echo '::notice::CF_ANALYTICS_READ_TOKEN missing from the teaser GitHub environment — the CF-sourced widgets (System Health, Storage & Media) render their curated not-configured state (M6 #186/#187)'
             exit 0
           fi
           printf '%s' "$CF_ANALYTICS_READ_TOKEN" | pnpm exec wrangler secret put CF_ANALYTICS_READ_TOKEN --name sevendays-admin
@@ -182,7 +184,7 @@ jobs:
             printf '%s' "$POSTHOG_PERSONAL_API_KEY" | pnpm exec wrangler secret put POSTHOG_PERSONAL_API_KEY --name sevendays-admin
             printf '%s' "$POSTHOG_PROJECT_ID" | pnpm exec wrangler secret put POSTHOG_PROJECT_ID --name sevendays-admin
           else
-            echo '::notice::PostHog pair missing from the teaser GitHub environment — Traffic lands with #187; put both then.'
+            echo '::notice::PostHog pair missing from the teaser GitHub environment — Traffic renders its curated not-configured state (M6 #187; POSTHOG_LANDING_HOSTS is already a deploy var)'
           fi
 
   deploy-v1:
@@ -208,6 +210,8 @@ jobs:
       VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
       VITE_SENTRY_RELEASE: ${{ github.sha }}
       VITE_SENTRY_ENVIRONMENT: v1
+      VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
+      VITE_POSTHOG_HOST: ${{ vars.VITE_POSTHOG_HOST }}
       CF_ANALYTICS_READ_TOKEN: ${{ secrets.CF_ANALYTICS_READ_TOKEN }}
       POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
       POSTHOG_PROJECT_ID: ${{ secrets.POSTHOG_PROJECT_ID }}
@@ -273,7 +277,7 @@ jobs:
 
       - name: Deploy admin (sevendays-v1-admin)
         working-directory: apps/admin
-        run: pnpm exec wrangler deploy --name sevendays-v1-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL" --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "CF_ANALYTICS_SCRIPT_API:sevendays-v1-api" --var "CF_ANALYTICS_SCRIPT_LANDING:sevendays-v1-landing" --var "CF_ANALYTICS_SCRIPT_ADMIN:sevendays-v1-admin"
+        run: pnpm exec wrangler deploy --name sevendays-v1-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL" --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "CF_ANALYTICS_SCRIPT_API:sevendays-v1-api" --var "CF_ANALYTICS_SCRIPT_LANDING:sevendays-v1-landing" --var "CF_ANALYTICS_SCRIPT_ADMIN:sevendays-v1-admin" --var "CF_ANALYTICS_BUCKET:sevendays-v1-media" --var "POSTHOG_LANDING_HOSTS:sevendays-v1-landing.pahamajulius.workers.dev"
 
       - name: Sync admin DATABASE_URL from the environment secret
         working-directory: apps/admin
@@ -288,7 +292,7 @@ jobs:
         working-directory: apps/admin
         run: |
           if [ -z "$CF_ANALYTICS_READ_TOKEN" ]; then
-            echo '::notice::CF_ANALYTICS_READ_TOKEN missing from the v1 GitHub environment — System Health renders its curated not-configured state (M6 #186)'
+            echo '::notice::CF_ANALYTICS_READ_TOKEN missing from the v1 GitHub environment — the CF-sourced widgets (System Health, Storage & Media) render their curated not-configured state (M6 #186/#187)'
             exit 0
           fi
           printf '%s' "$CF_ANALYTICS_READ_TOKEN" | pnpm exec wrangler secret put CF_ANALYTICS_READ_TOKEN --name sevendays-v1-admin
@@ -296,5 +300,5 @@ jobs:
             printf '%s' "$POSTHOG_PERSONAL_API_KEY" | pnpm exec wrangler secret put POSTHOG_PERSONAL_API_KEY --name sevendays-v1-admin
             printf '%s' "$POSTHOG_PROJECT_ID" | pnpm exec wrangler secret put POSTHOG_PROJECT_ID --name sevendays-v1-admin
           else
-            echo '::notice::PostHog pair missing from the v1 GitHub environment — Traffic lands with #187; put both then.'
+            echo '::notice::PostHog pair missing from the v1 GitHub environment — Traffic renders its curated not-configured state (M6 #187; POSTHOG_LANDING_HOSTS is already a deploy var)'
           fi
