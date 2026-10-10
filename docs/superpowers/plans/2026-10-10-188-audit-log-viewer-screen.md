@@ -1495,7 +1495,14 @@ export function AuditLogScreen({ search }: { search: AuditLogSearch }) {
         <FilterDate label='From' value={search.from} onChange={(from) => patchSearch({ from })} />
         <FilterDate label='To' value={search.to} onChange={(to) => patchSearch({ to })} />
         {hasActiveFilters(search) ? (
-          <Button variant='ghost' size='sm' className='self-end' onClick={() => patchSearch({})}>
+          <Button
+            variant='ghost'
+            size='sm'
+            className='self-end'
+            onClick={() =>
+              patchSearch({ entity: undefined, action: undefined, actor: undefined, from: undefined, to: undefined })
+            }
+          >
             Clear filters
           </Button>
         ) : null}
