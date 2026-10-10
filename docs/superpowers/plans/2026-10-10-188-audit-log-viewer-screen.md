@@ -714,8 +714,10 @@ export const fetchAuditActors = createServerFn({ method: 'GET' }).handler(async 
 // no polling.
 import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 
+import type { AuditLogRow } from '@sevendays/types';
+
 import { fetchAuditActors, fetchAuditLogPage } from './audit.functions';
-import { parseAuditWireRows, type AuditLogRow, type AuditLogSearch } from './filters';
+import { parseAuditWireRows, type AuditLogSearch } from './filters';
 
 export type AuditLogPage = {
   rows: AuditLogRow[];
