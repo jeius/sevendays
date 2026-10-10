@@ -108,7 +108,11 @@ test('a smoke-staff sign-in reaches the authenticated surface', async ({ page })
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
 
   expect((await signIn).status()).toBe(200);
-  await page.waitForURL(`${adminBaseUrl}/`);
+  // The Analytics route's search schema normalizes the URL to /?window=7d
+  // (metricsWindowSchema's '7d' default rides the navigation — observed in
+  // dispatch run 38065133292): match the dashboard PATH, any search — a
+  // bounce to /login cannot match, so the gate proof survives.
+  await page.waitForURL((url) => url.origin === adminBaseUrl && url.pathname === '/');
   await expect(page.getByRole('heading', { name: 'Analytics', exact: true })).toBeVisible();
 
   // The production session cookie is __Secure--prefixed (the staff
