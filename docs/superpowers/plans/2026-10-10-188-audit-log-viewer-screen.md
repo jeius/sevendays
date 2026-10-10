@@ -764,14 +764,13 @@ git commit -m "feat(admin,db): the audit read module + owner-gated server fns + 
 **Files:**
 - Create (test-first): `apps/admin/src/lib/nav.test.ts`
 - Create: `apps/admin/src/lib/nav.ts`
-- Modify: `apps/admin/src/components/admin-sidebar.tsx`
 - Modify: `apps/admin/src/routes/_shell.tsx:20`
 
 **Interfaces:**
 - Consumes: nothing from Tasks 1–2 (independent — may run in parallel with them).
 - Produces (what Tasks 4–5 consume): `NavTo`, `NavItem` (gains `ownerOnly?: boolean`), `NavGroup`, `navGroups`, `visibleNavGroups(role: string | null | undefined) → NavGroup[]` from `#/lib/nav`; the shell route context's `user` widens to `{ name: string; email: string; role: string | null }` (what `_shell.audit-log.tsx`'s beforeLoad gates on, Task 5).
 
-**Not here:** the audit route itself (Task 5); the screen (Tasks 4–5); any change to the appointments stub or the dashboard routes; any M5.5 user-management surface (the role is read, never written).
+**Not here:** the audit route itself (Task 5); the screen (Tasks 4–5); **the sidebar's consumption of `visibleNavGroups` (Task 5 — sequencing law, ruled at execution: widening `NavTo` with `/audit-log` breaks the sidebar's `Link to={item.to}` / `matchRoute` typing until the route file registers the route, so the rewiring lands where the route exists)**; any change to the appointments stub or the dashboard routes; any M5.5 user-management surface (the role is read, never written).
 
 - [ ] **Step 1: Write the failing tests — `apps/admin/src/lib/nav.test.ts`**
 
@@ -804,7 +803,7 @@ describe('visibleNavGroups (the ADR-0018 gate)', () => {
     expect(visibleNavGroups(undefined).flatMap((group) => group.items).some((item) => item.to === '/audit-log')).toBe(false);
   });
 
-  it('Audit Log is the taxonomy's only owner-only item, and no group vanishes for staff', () => {
+  it("Audit Log is the taxonomy's only owner-only item, and no group vanishes for staff", () => {
     const ownerOnly = navGroups.flatMap((group) => group.items.filter((item) => item.ownerOnly));
     expect(ownerOnly.map((item) => item.to)).toEqual(['/audit-log']);
     expect(visibleNavGroups('staff').map((group) => group.heading)).toEqual(
@@ -917,9 +916,9 @@ export function visibleNavGroups(role: string | null | undefined): NavGroup[] {
 }
 ```
 
-- [ ] **Step 4: Green, then rewire the consumers**
+- [ ] **Step 4: Green, then rewire the shell**
 
-`pnpm --filter @sevendays/admin test -- --run src/lib/nav.test.ts` (4 tests green). Then two edits:
+`pnpm --filter @sevendays/admin test -- --run src/lib/nav.test.ts` (4 tests green). Then one edit:
 
 (a) `apps/admin/src/routes/_shell.tsx` — the gate's context return widens (line 20):
 
@@ -935,38 +934,12 @@ export function visibleNavGroups(role: string | null | undefined): NavGroup[] {
 
 (The spike-proven field: the admin plugin types `role` on the session user — read through our own `createAuth`, typecheck-clean 2026-10-10. The `?? null` is honest: the column is nullable, and nav treats null as non-owner.)
 
-(b) `apps/admin/src/components/admin-sidebar.tsx` — the taxonomy and its types leave the file. The icon import shrinks to `LogOut` (the nav icons now live in `#/lib/nav`); the local `NavTo`/`NavItem`/`NavGroup`/`navGroups` definitions are deleted; the header comment's taxonomy paragraph points at `#/lib/nav`. The full set of edits:
-
-The import block replaces the lucide import and adds the nav import:
-
-```ts
-import { LogOut } from 'lucide-react';
-import { authClient } from '#/lib/auth-client';
-import { visibleNavGroups } from '#/lib/nav';
-```
-
-The props interface widens:
-
-```ts
-interface AdminSidebarProps {
-  user: { name: string; email: string; role: string | null };
-}
-```
-
-And inside `AdminSidebar`, `navGroups.map(...)` becomes:
-
-```ts
-  const groups = visibleNavGroups(user.role);
-```
-
-with the render's `{navGroups.map((group, index) => (…))}` becoming `{groups.map((group, index) => (…))}` — everything else in the file (the rail logic, the user card, sign-out) is untouched.
-
 - [ ] **Step 5: Gates + commit**
 
 `pnpm --filter @sevendays/admin fix`, then `pnpm --filter @sevendays/admin test` (**17 files / 164 tests** — the full new floor), then `pnpm --filter @sevendays/admin typecheck`, then `pnpm check` (35/35 — no other package touched since Task 2). Commit:
 
 ```bash
-git add apps/admin/src/lib/nav.ts apps/admin/src/lib/nav.test.ts apps/admin/src/components/admin-sidebar.tsx apps/admin/src/routes/_shell.tsx
+git add apps/admin/src/lib/nav.ts apps/admin/src/lib/nav.test.ts apps/admin/src/routes/_shell.tsx
 git commit -m "feat(admin): the owner role through the shell — nav taxonomy extracted, the Audit Log entry owner-gated (#188)"
 ```
 
@@ -1305,10 +1278,11 @@ git commit -m "feat(admin): the owner-ratified Audit Log copy — variant labels
 **Files:**
 - Create: `apps/admin/src/routes/_shell.audit-log.tsx`
 - Create: `apps/admin/src/components/audit/audit-log-screen.tsx`
+- Modify: `apps/admin/src/components/admin-sidebar.tsx` (moved here from Task 3 at execution — the route must exist before the sidebar's `Link`/`matchRoute` typing accepts `/audit-log`)
 - Regen (this task's commit): `apps/admin/src/routeTree.gen.ts`
 
 **Interfaces:**
-- Consumes: Task 1's `auditLogSearchSchema`, `AuditLogSearch`, `AUDIT_ENTITY_LABELS`, `AUDIT_ACTION_LABELS`, `AUDIT_PAGE_SIZE`, `hasActiveFilters`, `pageWindow`; Task 2's `auditQueries`; Task 3's shell context `user.role`; the shared `PageHeader`, `formatUtc`, and the `packages/ui` table/select/badge/button/input primitives.
+- Consumes: Task 1's `auditLogSearchSchema`, `AuditLogSearch`, `AUDIT_ENTITY_LABELS`, `AUDIT_ACTION_LABELS`, `AUDIT_PAGE_SIZE`, `hasActiveFilters`, `pageWindow`; Task 2's `auditQueries`; Task 3's `visibleNavGroups` + shell context `user.role`; the shared `PageHeader`, `formatUtc`, and the `packages/ui` table/select/badge/button/input primitives.
 - Produces: the live screen at `/audit-log` (owner-only) — the ticket's deliverable; nothing downstream consumes it.
 
 **Not here:** the Analytics Dashboard (`_shell.index.tsx` is untouched — the Audit Log never joins it, the standing rule); the appointments stub; the sidebar (Task 3 landed the nav); any change to `packages/ui` or `packages/types`.
@@ -1605,7 +1579,35 @@ export function AuditLogScreen({ search }: { search: AuditLogSearch }) {
 
 (The final `: null` branch covers the transient stale-high-page render — an empty row list before the self-heal effect fires; the effect replaces the URL within a frame.)
 
-- [ ] **Step 3: Regenerate the route tree + verify the gate live**
+- [ ] **Step 3: Rewire the sidebar (moved from Task 3 at execution — the route now exists)**
+
+`apps/admin/src/components/admin-sidebar.tsx` — the taxonomy and its types leave the file. The icon import shrinks to `LogOut` (the nav icons now live in `#/lib/nav`); the local `NavTo`/`NavItem`/`NavGroup`/`navGroups` definitions are deleted; the header comment's taxonomy paragraph points at `#/lib/nav`. The full set of edits:
+
+The import block replaces the lucide import and adds the nav import:
+
+```ts
+import { LogOut } from 'lucide-react';
+import { authClient } from '#/lib/auth-client';
+import { visibleNavGroups } from '#/lib/nav';
+```
+
+The props interface widens:
+
+```ts
+interface AdminSidebarProps {
+  user: { name: string; email: string; role: string | null };
+}
+```
+
+And inside `AdminSidebar`, `navGroups.map(...)` becomes:
+
+```ts
+  const groups = visibleNavGroups(user.role);
+```
+
+with the render's `{navGroups.map((group, index) => (…))}` becoming `{groups.map((group, index) => (…))}` — everything else in the file (the rail logic, the user card, sign-out) is untouched.
+
+- [ ] **Step 4: Regenerate the route tree + verify the gate live**
 
 ```bash
 pnpm --filter @sevendays/admin generate-routes
@@ -1613,12 +1615,12 @@ pnpm --filter @sevendays/admin generate-routes
 
 `routeTree.gen.ts` gains the `/audit-log` route — it joins this task's commit (a regenerable the v1 pick WANTS to carry: v1 gains the route too). Then, with the dev server up and the local db reachable, verify the gate by hand: signed out → `/audit-log` bounces to `/login` (the shell gate); signed in as the owner (`role=admin`) → the screen renders; and a staff-role account (if one exists locally; else note deferred) sees no nav entry and `/audit-log` redirects to `/`. Record what was verifiable in the evidence dir (owner-role check is the required one; the staff-role check may ride the owner's own account if no staff row exists — the nav.test.ts suite already pins the staff law).
 
-- [ ] **Step 4: Gates + commit**
+- [ ] **Step 5: Gates + commit**
 
 `pnpm --filter @sevendays/admin fix`, then `pnpm --filter @sevendays/admin test` (**17 files / 164 tests**), then `pnpm --filter @sevendays/admin typecheck`, then `pnpm check` (35/35), then `pnpm --filter @sevendays/admin build`. Commit:
 
 ```bash
-git add apps/admin/src/routes/_shell.audit-log.tsx apps/admin/src/components/audit/audit-log-screen.tsx apps/admin/src/routeTree.gen.ts
+git add apps/admin/src/routes/_shell.audit-log.tsx apps/admin/src/components/audit/audit-log-screen.tsx apps/admin/src/components/admin-sidebar.tsx apps/admin/src/routeTree.gen.ts
 git commit -m "feat(admin): the Audit Log screen — owner-gated route, filters, table, pagination (#188)"
 ```
 
