@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ShellIndexRouteImport } from './routes/_shell.index'
 import { Route as ShellAddOnsRouteImport } from './routes/_shell.add-ons'
 import { Route as ShellAppointmentsRouteImport } from './routes/_shell.appointments'
+import { Route as ShellAuditLogRouteImport } from './routes/_shell.audit-log'
 import { Route as ShellBranchesRouteImport } from './routes/_shell.branches'
 import { Route as ShellGalleryRouteImport } from './routes/_shell.gallery'
 import { Route as ShellLookupsRouteImport } from './routes/_shell.lookups'
@@ -49,6 +50,11 @@ const ShellAddOnsRoute = ShellAddOnsRouteImport.update({
 const ShellAppointmentsRoute = ShellAppointmentsRouteImport.update({
   id: '/appointments',
   path: '/appointments',
+  getParentRoute: () => ShellRoute,
+} as any)
+const ShellAuditLogRoute = ShellAuditLogRouteImport.update({
+  id: '/audit-log',
+  path: '/audit-log',
   getParentRoute: () => ShellRoute,
 } as any)
 const ShellBranchesRoute = ShellBranchesRouteImport.update({
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/add-ons': typeof ShellAddOnsRoute
   '/appointments': typeof ShellAppointmentsRoute
+  '/audit-log': typeof ShellAuditLogRoute
   '/branches': typeof ShellBranchesRoute
   '/gallery': typeof ShellGalleryRoute
   '/lookups': typeof ShellLookupsRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/add-ons': typeof ShellAddOnsRoute
   '/appointments': typeof ShellAppointmentsRoute
+  '/audit-log': typeof ShellAuditLogRoute
   '/branches': typeof ShellBranchesRoute
   '/gallery': typeof ShellGalleryRoute
   '/lookups': typeof ShellLookupsRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_shell/add-ons': typeof ShellAddOnsRoute
   '/_shell/appointments': typeof ShellAppointmentsRoute
+  '/_shell/audit-log': typeof ShellAuditLogRoute
   '/_shell/branches': typeof ShellBranchesRoute
   '/_shell/gallery': typeof ShellGalleryRoute
   '/_shell/lookups': typeof ShellLookupsRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/add-ons'
     | '/appointments'
+    | '/audit-log'
     | '/branches'
     | '/gallery'
     | '/lookups'
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/add-ons'
     | '/appointments'
+    | '/audit-log'
     | '/branches'
     | '/gallery'
     | '/lookups'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_shell/add-ons'
     | '/_shell/appointments'
+    | '/_shell/audit-log'
     | '/_shell/branches'
     | '/_shell/gallery'
     | '/_shell/lookups'
@@ -268,6 +280,13 @@ declare module '@tanstack/react-router' {
       path: '/appointments'
       fullPath: '/appointments'
       preLoaderRoute: typeof ShellAppointmentsRouteImport
+      parentRoute: typeof ShellRoute
+    }
+    '/_shell/audit-log': {
+      id: '/_shell/audit-log'
+      path: '/audit-log'
+      fullPath: '/audit-log'
+      preLoaderRoute: typeof ShellAuditLogRouteImport
       parentRoute: typeof ShellRoute
     }
     '/_shell/branches': {
@@ -376,6 +395,7 @@ const ShellPackagesRouteWithChildren = ShellPackagesRoute._addFileChildren(
 interface ShellRouteChildren {
   ShellAddOnsRoute: typeof ShellAddOnsRoute
   ShellAppointmentsRoute: typeof ShellAppointmentsRoute
+  ShellAuditLogRoute: typeof ShellAuditLogRoute
   ShellBranchesRoute: typeof ShellBranchesRoute
   ShellGalleryRoute: typeof ShellGalleryRoute
   ShellLookupsRoute: typeof ShellLookupsRoute
@@ -389,6 +409,7 @@ interface ShellRouteChildren {
 const ShellRouteChildren: ShellRouteChildren = {
   ShellAddOnsRoute: ShellAddOnsRoute,
   ShellAppointmentsRoute: ShellAppointmentsRoute,
+  ShellAuditLogRoute: ShellAuditLogRoute,
   ShellBranchesRoute: ShellBranchesRoute,
   ShellGalleryRoute: ShellGalleryRoute,
   ShellLookupsRoute: ShellLookupsRoute,
