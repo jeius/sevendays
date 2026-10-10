@@ -6,14 +6,17 @@ Standalone `@playwright/test`, chromium-only, walking **deployed** environments 
 
 ```bash
 pnpm exec playwright install chromium   # once per machine (~150 MB)
-E2E_BASE_URL=https://sevendays-landing.pahamajulius.workers.dev pnpm test:e2e
+E2E_BASE_URL=https://sevendays-landing.pahamajulius.workers.dev \
+E2E_API_URL=https://sevendays-api.pahamajulius.workers.dev \
+E2E_ADMIN_URL=https://sevendays-admin.pahamajulius.workers.dev \
+pnpm test:e2e
 ```
 
-`E2E_BASE_URL` has no default on purpose: the config fails fast with a curated message when it is unset — a smoke run against the wrong target is worse than no run.
+`E2E_BASE_URL` has no default on purpose: the config fails fast with a curated message when it is unset — a smoke run against the wrong target is worse than no run. The three URLs cover the six public legs; the authenticated leg additionally wants `E2E_SMOKE_STAFF_EMAIL` + `E2E_SMOKE_STAFF_PASSWORD` (the dev `smoke-staff` account, provisioned per `docs/staff-provisioning.md`, sealed in the GitHub environment) — without them that one leg fails with the same curated posture, never a silent skip. In CI all five values arrive from the workflow's GitHub environment (`.github/workflows/e2e.yml`).
 
 ## Taxonomy
 
-- `smoke/` — deployed-stack presence assertions. The one-probe foundation spec is #189's; #190 lands the seven production assertions (health, home, CMS-fed surface, live media asset, booking page serves, admin sign-in page, real staff sign-in).
+- `smoke/` — the production smoke (#190, spec #182 § The verify gate): seven presence/status-level assertions over the deployed stack — api health, the landing home, the CMS-fed /about surface, a live media asset URL'd from the gallery payload, the booking page serving (never submitting), the admin sign-in page, and a real `smoke-staff` sign-in reaching the Analytics Dashboard. #189's one-probe foundation spec was this suite's doorway and is superseded (deleted when the seven landed).
 - `visual/` — arrives with M7's redesign regression; deliberately absent now.
 
 ## Rulings that bind every suite here
