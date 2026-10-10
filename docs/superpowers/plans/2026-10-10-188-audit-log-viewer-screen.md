@@ -295,6 +295,7 @@ const DAY_MS = 86_400_000;
 const dateParam = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD')
+  .refine(isCalendarDay, 'not a calendar day')
   .optional()
   .catch(undefined);
 
@@ -309,11 +310,18 @@ export const auditLogSearchSchema = z.object({
 
 export type AuditLogSearch = z.infer<typeof auditLogSearchSchema>;
 
-// A regex-valid but calendar-invalid day (2026-02-31 parses NaN) drops to
-// null — a half-open window, the tolerant posture of every field here.
-function dayStartUtc(day: string): Date | null {
+// A regex-valid but calendar-invalid day is not a day: 2026-13-99 passes
+// the \d{2} slots and 2026-02-31 ROLLS OVER to March in V8 instead of
+// parsing NaN (controller-probed live 2026-10-10) — the round-trip check
+// catches both, dropping the side to null (a half-open window, the
+// tolerant posture of every field here).
+function isCalendarDay(day: string): boolean {
   const parsed = new Date(`${day}T00:00:00.000Z`);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === day;
+}
+
+function dayStartUtc(day: string): Date | null {
+  return isCalendarDay(day) ? new Date(`${day}T00:00:00.000Z`) : null;
 }
 
 // UTC day boundaries by design (occurredAt is timestamptz and the screen
