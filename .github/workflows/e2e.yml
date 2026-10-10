@@ -31,6 +31,16 @@ jobs:
     env:
       PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/playwright-browsers
       E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}
+      # The smoke's other two targets + the sign-in credentials (#190),
+      # sourced from the SAME GitHub environment the job declared: the
+      # api/admin URLs derive from the deployment's own vars (one source
+      # of truth — the v1 environment carries its own values, and the
+      # ship runbook owns setting them at cutover), and the smoke-staff
+      # credentials are environment secrets, never repo content.
+      E2E_API_URL: ${{ vars.API_URL }}
+      E2E_ADMIN_URL: ${{ vars.BETTER_AUTH_URL }}
+      E2E_SMOKE_STAFF_EMAIL: ${{ secrets.E2E_SMOKE_STAFF_EMAIL }}
+      E2E_SMOKE_STAFF_PASSWORD: ${{ secrets.E2E_SMOKE_STAFF_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
