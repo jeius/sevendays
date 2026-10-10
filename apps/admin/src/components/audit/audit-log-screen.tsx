@@ -10,6 +10,7 @@
 // failure states follow the never-500 law: any thrown query error
 // (including a role-gate Unauthorized) renders the unavailable line.
 
+import type { AuditAction } from '@sevendays/types';
 import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
 import { Input } from '@sevendays/ui/components/input';
@@ -44,6 +45,19 @@ import {
 import { auditQueries } from '#/lib/audit/queries';
 
 const ALL = 'all';
+
+// The action badges' colors (the owner's variant ruling, 2026-10-10: A with
+// red/yellow/green/blue on the four actions): create → green, update →
+// blue, deactivate → red, reorder → amber — tinted bg + matched border +
+// dark text of the same hue, over the outline variant (cn/tw-merge lets
+// these override the variant's border/text). Default-palette utilities, the
+// #202 app-local-token pattern; the keys are the enum, only colors tune.
+export const AUDIT_ACTION_BADGE_CLASSES: Record<AuditAction, string> = {
+  create: 'border-green-200 bg-green-50 text-green-700',
+  update: 'border-blue-200 bg-blue-50 text-blue-700',
+  deactivate: 'border-red-200 bg-red-50 text-red-700',
+  reorder: 'border-amber-200 bg-amber-50 text-amber-700',
+};
 
 function FilterSelect({
   label,
@@ -222,7 +236,9 @@ export function AuditLogScreen({ search }: { search: AuditLogSearch }) {
                 </TableCell>
                 <TableCell className='max-w-56 truncate'>{row.actorEmail}</TableCell>
                 <TableCell>
-                  <Badge variant='outline'>{AUDIT_ACTION_LABELS[row.action]}</Badge>
+                  <Badge variant='outline' className={AUDIT_ACTION_BADGE_CLASSES[row.action]}>
+                    {AUDIT_ACTION_LABELS[row.action]}
+                  </Badge>
                 </TableCell>
                 <TableCell>{AUDIT_ENTITY_LABELS[row.entity]}</TableCell>
                 <TableCell className='max-w-72 truncate'>
