@@ -1,5 +1,6 @@
 // Admin-local Tier 2 (spec #94): the shell's sidebar — variant A's labeled
-// grouped nav (#59 ruling: Overview / Catalog / Studio), collapsing to the
+// grouped nav (the taxonomy lives in #/lib/nav — the #59 ruling, extracted
+// at #188 so the owner-visibility law is testable), collapsing to the
 // variant C icon-rail posture (tooltips + group dividers) via the top bar's
 // trigger. Brand = wordmark + primary only (the tool-neutral mapping);
 // the user card renders the gate's session identity (#120).
@@ -20,45 +21,12 @@ import {
   useSidebar,
 } from '@sevendays/ui/components/sidebar';
 import { Link, useMatchRoute, useNavigate } from '@tanstack/react-router';
-import type { LucideIcon } from 'lucide-react';
-import {
-  Activity,
-  Images,
-  LogOut,
-  MapPin,
-  Package,
-  PlusCircle,
-  Quote,
-  Settings,
-  Tags,
-  Wrench,
-} from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { authClient } from '#/lib/auth-client';
-
-type NavTo =
-  | '/'
-  | '/packages'
-  | '/add-ons'
-  | '/studio-services'
-  | '/gallery'
-  | '/testimonials'
-  | '/branches'
-  | '/lookups'
-  | '/settings';
-
-interface NavItem {
-  to: NavTo;
-  label: string;
-  icon: LucideIcon;
-}
-
-interface NavGroup {
-  heading: string;
-  items: NavItem[];
-}
+import { visibleNavGroups } from '#/lib/nav';
 
 interface AdminSidebarProps {
-  user: { name: string; email: string };
+  user: { name: string; email: string; role: string | null };
 }
 
 // Initials for the avatar chip: first letters of the first two name words.
@@ -70,35 +38,6 @@ function initials(name: string): string {
     .map((word) => word[0]?.toUpperCase() ?? '')
     .join('');
 }
-
-// The ruled taxonomy (#59), icons carried from the prototype unchanged.
-// Overview carries the Analytics dashboard (#186 — the #93 stub's
-// replacement); appointments destinations remain out of scope in this
-// build (#168); Catalog and Studio carry the live CMS surfaces.
-const navGroups: NavGroup[] = [
-  {
-    heading: 'Overview',
-    items: [{ to: '/', label: 'Analytics', icon: Activity }],
-  },
-  {
-    heading: 'Catalog',
-    items: [
-      { to: '/packages', label: 'Packages', icon: Package },
-      { to: '/add-ons', label: 'Add-ons', icon: PlusCircle },
-      { to: '/studio-services', label: 'Studio services', icon: Wrench },
-      { to: '/gallery', label: 'Gallery', icon: Images },
-      { to: '/testimonials', label: 'Testimonials', icon: Quote },
-    ],
-  },
-  {
-    heading: 'Studio',
-    items: [
-      { to: '/branches', label: 'Branches', icon: MapPin },
-      { to: '/lookups', label: 'Lookups', icon: Tags },
-      { to: '/settings', label: 'Settings', icon: Settings },
-    ],
-  },
-];
 
 export function AdminSidebar({ user }: AdminSidebarProps) {
   const navigate = useNavigate();
@@ -117,6 +56,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   // Group dividers belong to the icon-rail posture only (#59 variant C);
   // the labeled posture separates groups by its labels + spacing.
   const rail = state === 'collapsed';
+  const groups = visibleNavGroups(user.role);
 
   return (
     <Sidebar collapsible='icon'>
@@ -134,7 +74,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        {navGroups.map((group, index) => (
+        {groups.map((group, index) => (
           <SidebarGroup key={group.heading}>
             {rail && index > 0 && <Separator className='my-1' />}
             <SidebarGroupLabel>{group.heading}</SidebarGroupLabel>
@@ -150,7 +90,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                     <SidebarMenuButton
                       render={<Link to={item.to} />}
                       tooltip={item.label}
-                      isActive={Boolean(matchRoute({ to: item.to, fuzzy: true }))}
+                      isActive={Boolean(matchRoute({ to: item.to, fuzzy: item.to !== '/' }))}
                     >
                       <item.icon aria-hidden='true' />
                       <span>{item.label}</span>
