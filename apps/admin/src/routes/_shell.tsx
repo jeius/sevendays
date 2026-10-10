@@ -17,7 +17,13 @@ export const Route = createFileRoute('/_shell')({
     if (!session) {
       throw redirect({ to: '/login', search: { redirect: location.href } });
     }
-    return { user: { name: session.user.name, email: session.user.email } };
+    return {
+      user: {
+        name: session.user.name,
+        email: session.user.email,
+        role: session.user.role ?? null,
+      },
+    };
   },
   component: ShellLayout,
 });
