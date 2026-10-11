@@ -5,7 +5,8 @@ controller on 2026-09-26 and re-runnable from this document. The bucket is
 edition-shared by construction (ADR-0019 #5): both API Workers
 (`sevendays-api`, `sevendays-v1-api`) bind it, and bucket-level config (CORS,
 lifecycle, r2.dev, the future custom domain) is changed ONCE, deliberately,
-for both editions.
+for both editions. At ship, the dedicated account's fresh same-named bucket
+supersedes this sharing for the v1 workers — § Fresh bucket at ship below.
 
 ## What exists (verified 2026-09-26)
 
@@ -130,11 +131,41 @@ check` never needs — never touches — the bucket. It proves, live:
 - an object over the 50 MiB cap is deleted from the bucket and answered
   400-shaped with field details.
 
-## M6 pointer (not this milestone)
+## § Fresh bucket at ship (docs/ship-provisioning-runbook.md A4 + B1–B4)
 
-Attach the custom domain (requires the zone in the SAME Cloudflare account as
-the bucket — a recorded constraint on the ADR-0016 dedicated-account
-rotation; R2 has no bucket-move), flip `MEDIA_PUBLIC_BASE_URL` in both GitHub
-environments, disable the r2.dev URL, and start relying on the objects'
-`cacheControl: immutable` for edge caching. Read-time URL resolution only —
-no migration, no key rewrite.
+The dedicated ship account gets its own `sevendays-media` — bucket names are
+per-account (the dev account's bucket above is untouched), and the v1 api's
+`wrangler.toml` binding names `sevendays-media`, so the name carries.
+Recreate, in order (placeholders per the ship runbook):
+
+```bash
+export CLOUDFLARE_API_TOKEN="<ship-token>" CLOUDFLARE_ACCOUNT_ID="<account-id>"
+pnpm --filter @sevendays/api exec wrangler r2 bucket create sevendays-media
+# CORS — same rule shape as above, the ship account's three admin origins:
+#   http://localhost:3000
+#   https://sevendays-v1-admin.<subdomain>.workers.dev   (pre-domain window)
+#   https://admin.<domain>                                (production)
+pnpm --filter @sevendays/api exec wrangler r2 bucket cors set sevendays-media --file cors.json
+pnpm --filter @sevendays/api exec wrangler r2 bucket lifecycle add sevendays-media tmp-gc tmp/ --expire-days 1 -y
+pnpm --filter @sevendays/api exec wrangler r2 bucket dev-url enable sevendays-media
+```
+
+Then re-run § Owner handoff against the ship account: the fresh S3 token
+pair (Object Read & Write, scoped to `sevendays-media` only, no TTL) — the
+rotated pair of the at-ship accounting. Seal it in the `v1` GitHub
+environment (A5) and on `sevendays-v1-api` (A6).
+
+Media copies across once, scripted — `apps/api/scripts/ship-media-copy.mjs`,
+the ship runbook's B1: every committed object listed from the dev bucket and
+re-PUT into the fresh one with its content-type and immutable cache-control
+preserved; `tmp/` never copies. The objects' `cacheControl` then carries the
+custom domain's edge caching.
+
+The custom domain + the flip (the ship runbook's B2–B4, correcting this
+section's earlier both-environments claim): attach `media.<domain>` to the
+fresh bucket (same-account zone — ADR-0019 #4; R2 has no bucket-move), flip
+`MEDIA_PUBLIC_BASE_URL` in the **`v1` GitHub environment only** to
+`https://media.<domain>`, redeploy, verify with the production smoke, and
+only then disable the fresh bucket's r2.dev URL. The dev bucket's r2.dev URL
+STAYS ENABLED — the teaser reads it. Read-time URL resolution only: no
+migration, no key rewrite.
