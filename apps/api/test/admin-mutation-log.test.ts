@@ -207,6 +207,29 @@ describe('admin_mutation events (M6 #183 — one per committed CMS write)', () =
     expect(events[0]?.entity).toBe('service-package');
   });
 
+  it('the package save with a non-staging cover key → 400, one media_failure {op: commit, reason: foreign_key} re-pathed to coverImageKey, and NO mutation line', async () => {
+    const lines = captureLines();
+    const res = await authed(
+      'POST',
+      '/api/v1/admin/service-packages',
+      'mut-pkg-cover-fk@sevendays.test',
+      packageSave({ coverImageKey: 'gallery/00000000-0000-4000-8000-000000000000.jpg' })
+    );
+    expect(res.status).toBe(400);
+    const parsed = lines.map((line) => JSON.parse(line) as Record<string, unknown>);
+    const media = parsed.filter((line) => line.evt === 'media_failure');
+    expect(media).toHaveLength(1);
+    expect(media[0]).toMatchObject({ op: 'commit', reason: 'foreign_key' });
+    expect(parsed.filter((line) => line.evt === 'admin_mutation')).toEqual([]);
+    const body = (await res.json()) as { details: { path: string[]; message: string }[] };
+    expect(body.details).toEqual([
+      {
+        path: ['coverImageKey'],
+        message: 'must be a tmp/<uuid>.jpg staging key minted by presign',
+      },
+    ]);
+  });
+
   it('the gallery-category order PUT → one line with entityId null (the family, not a row)', async () => {
     const lines = captureLines();
     const a = await authed('POST', '/api/v1/admin/gallery-categories', 'mut-cat-a@sevendays.test', {

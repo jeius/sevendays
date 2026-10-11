@@ -148,13 +148,13 @@ export function SystemHealth({ window }: { window: MetricsWindow }) {
           window={window}
           app='landing'
           series={workers.data?.ok ? workers.data.data.landing : EMPTY_SERIES}
-          state={workersState === 'ready' ? 'ready' : workersState}
+          state={workersState}
         />
         <FrontendErrorWidget
           window={window}
           app='admin'
           series={workers.data?.ok ? workers.data.data.admin : EMPTY_SERIES}
-          state={workersState === 'ready' ? 'ready' : workersState}
+          state={workersState}
         />
       </div>
     </section>
