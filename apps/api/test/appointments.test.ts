@@ -782,10 +782,17 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
     await Promise.all(okCtx.promises);
     expect(captured).toHaveLength(0);
     // Failure leg: the SDK's real shape — it resolves { data: null, error },
-    // and the send seam reifies it as ResendRejectionError.
+    // and the send seam reifies it as ResendRejectionError. #208: the free
+    // text now ECHOES THE RECIPIENT (resend's real failure messages can),
+    // so the PII floor below actually discriminates — the #184 floor was
+    // weak because a PII-free mock message could never fail it.
     sendMock.mockResolvedValue({
       data: null,
-      error: { message: 'internal error', statusCode: 500, name: 'internal_server_error' },
+      error: {
+        message: 'internal error sending to ana@example.com',
+        statusCode: 500,
+        name: 'internal_server_error',
+      },
     });
     const failCtx = fakeExecCtx();
     const res = await postBooking(failCtx);
@@ -794,8 +801,10 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
     expect(captured).toHaveLength(1);
     expect(captured[0]).toBeInstanceOf(ResendRejectionError);
     expect((captured[0] as ResendRejectionError).rejectionName).toBe('internal_server_error');
-    // PII floor: the captured message is the classified line — resend's
-    // free-text (which may echo the recipient) never rides the capture.
+    // PII floor, now discriminating: the captured message is the CLASSIFIED
+    // line (built from the rejection name alone) — resend's recipient-
+    // echoing free text never rides the capture.
+    expect((captured[0] as Error).message).toBe('resend rejected the send (internal_server_error)');
     expect((captured[0] as Error).message).not.toContain('ana@example.com');
   });
 
