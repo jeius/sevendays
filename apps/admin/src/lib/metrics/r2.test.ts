@@ -4,7 +4,7 @@
 // the gauge munging (storage samples are MAXes within buckets, latest =
 // the freshest sample), and the fetch contract with its failure mapping.
 // Plain-node over stubbed fetch — no network, no browser.
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { CF_GRAPHQL_URL, windowToRange } from './cf';
 import type { MetricsEnv } from './env';
 import {
@@ -154,64 +154,110 @@ describe('mungeR2Storage', () => {
 
 describe('fetchStorageMetrics', () => {
   it('posts both documents with bearer auth and the bucket-scoped variables, then munges the union', async () => {
-    const calls: Array<{ url: string; init: RequestInit; body: Record<string, unknown> }> = [];
-    const fetchImpl = async (url: unknown, init: RequestInit) => {
-      calls.push({ url: String(url), init, body: JSON.parse(String(init.body)) });
-      const which = calls.length;
+    // #208: Date is pinned — the variables assertion recomputes
+    // windowToRange at assert time; the pinned clock makes the impl's
+    // read and the recompute the same instant (the once-seen #187 flake).
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-06T12:34:56.789Z') });
+    try {
+      const calls: Array<{ url: string; init: RequestInit; body: Record<string, unknown> }> = [];
+      const fetchImpl = async (url: unknown, init: RequestInit) => {
+        calls.push({ url: String(url), init, body: JSON.parse(String(init.body)) });
+        const which = calls.length;
+        return {
+          ok: true,
+          json: async () => ({
+            data: {
+              viewer: {
+                accounts: [
+                  which === 1
+                    ? {
+                        r2OperationsAdaptiveGroups: [
+                          { dimensions: { actionType: 'PutObject' }, sum: { requests: 40 } },
+                          { dimensions: { actionType: 'GetObject' }, sum: { requests: 900 } },
+                        ],
+                      }
+                    : {
+                        r2StorageAdaptiveGroups: [
+                          {
+                            dimensions: { datetime: '2026-10-06T11:00:00.000Z' },
+                            max: {
+                              objectCount: 12,
+                              uploadCount: 0,
+                              payloadSize: 1_000_000,
+                              metadataSize: 1024,
+                            },
+                          },
+                        ],
+                      },
+                ],
+              },
+            },
+          }),
+        };
+      };
+      const result = await fetchStorageMetrics(ENV, '7d', fetchImpl as unknown as typeof fetch);
+      expect(result).toEqual({
+        ok: true,
+        data: {
+          trend: [
+            {
+              bucketStart: '2026-10-06T00:00:00.000Z',
+              objectCount: 12,
+              payloadSizeBytes: 1_000_000,
+            },
+          ],
+          latestObjectCount: 12,
+          latestPayloadSizeBytes: 1_000_000,
+          ops: { classA: 40, classB: 900 },
+        },
+      });
+      expect(calls).toHaveLength(2);
+      expect(calls[0]?.url).toBe(CF_GRAPHQL_URL);
+      expect(new Headers(calls[0]?.init.headers).get('authorization')).toBe('Bearer cf-token');
+      expect(calls[0]?.body.variables).toEqual({
+        accountTag: 'account-id',
+        bucketName: 'sevendays-media',
+        since: windowToRange('7d').since,
+        until: windowToRange('7d').until,
+      });
+      expect(calls[1]?.body.query).toBe(R2_STORAGE_QUERY);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('computes the range ONCE — both documents share it even when the wall clock crosses a second boundary mid-flight (#208)', async () => {
+    const pinned = new Date('2026-10-06T12:34:56.789Z');
+    const variables: Array<Record<string, unknown>> = [];
+    let call = 0;
+    const fetchImpl = async (_url: unknown, init: RequestInit) => {
+      call += 1;
+      const body = JSON.parse(String(init.body)) as { variables: Record<string, unknown> };
+      variables.push(body.variables);
+      // Same probe as cf.test.ts: cross a second boundary between the two
+      // documents' arms — per-arm windowToRange calls shift the second
+      // document's range; one computed range cannot move.
+      vi.setSystemTime(new Date(pinned.getTime() + call * 1500));
       return {
         ok: true,
         json: async () => ({
-          data: {
-            viewer: {
-              accounts: [
-                which === 1
-                  ? {
-                      r2OperationsAdaptiveGroups: [
-                        { dimensions: { actionType: 'PutObject' }, sum: { requests: 40 } },
-                        { dimensions: { actionType: 'GetObject' }, sum: { requests: 900 } },
-                      ],
-                    }
-                  : {
-                      r2StorageAdaptiveGroups: [
-                        {
-                          dimensions: { datetime: '2026-10-06T11:00:00.000Z' },
-                          max: {
-                            objectCount: 12,
-                            uploadCount: 0,
-                            payloadSize: 1_000_000,
-                            metadataSize: 1024,
-                          },
-                        },
-                      ],
-                    },
-              ],
-            },
-          },
+          data: { viewer: { accounts: [{ r2OperationsAdaptiveGroups: [] }] } },
         }),
       };
     };
-    const result = await fetchStorageMetrics(ENV, '7d', fetchImpl as unknown as typeof fetch);
-    expect(result).toEqual({
-      ok: true,
-      data: {
-        trend: [
-          { bucketStart: '2026-10-06T00:00:00.000Z', objectCount: 12, payloadSizeBytes: 1_000_000 },
-        ],
-        latestObjectCount: 12,
-        latestPayloadSizeBytes: 1_000_000,
-        ops: { classA: 40, classB: 900 },
-      },
-    });
-    expect(calls).toHaveLength(2);
-    expect(calls[0]?.url).toBe(CF_GRAPHQL_URL);
-    expect(new Headers(calls[0]?.init.headers).get('authorization')).toBe('Bearer cf-token');
-    expect(calls[0]?.body.variables).toEqual({
-      accountTag: 'account-id',
-      bucketName: 'sevendays-media',
-      since: windowToRange('7d').since,
-      until: windowToRange('7d').until,
-    });
-    expect(calls[1]?.body.query).toBe(R2_STORAGE_QUERY);
+    vi.useFakeTimers({ toFake: ['Date'], now: pinned });
+    try {
+      const result = await fetchStorageMetrics(ENV, '7d', fetchImpl as unknown as typeof fetch);
+      expect(result).toMatchObject({ ok: true });
+      expect(variables).toHaveLength(2);
+      const expected = windowToRange('7d', pinned);
+      for (const vars of variables) {
+        expect(vars.since).toBe(expected.since);
+        expect(vars.until).toBe(expected.until);
+      }
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('an unconfigured r2 group resolves not-configured (no fetch at all)', async () => {

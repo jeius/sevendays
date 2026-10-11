@@ -48,8 +48,14 @@ export interface NavGroup {
 // Overview carries the Analytics dashboard (#186) and — owner-only — the
 // Audit Log (#188, beside Analytics); the appointments stub is absent here
 // (the #169 ruling, recurring at the taxonomy's new home); Catalog and
-// Studio carry the live CMS surfaces.
-export const navGroups: NavGroup[] = [
+// Studio carry the live CMS surfaces. #208: FROZEN read-only —
+// visibleNavGroups('admin') hands this very array back by reference (and
+// the filtered path's fresh arrays share the item objects), so a mutating
+// caller would corrupt the module state every render reads; frozen data
+// throws on mutation instead (modules run strict). No caller mutates
+// today — the freeze makes that permanent and loud. The lucide icon
+// values stay unfrozen: shared singletons, not ours to freeze.
+const taxonomy: NavGroup[] = [
   {
     heading: 'Overview',
     items: [
@@ -77,7 +83,16 @@ export const navGroups: NavGroup[] = [
   },
 ];
 
-export function visibleNavGroups(role: string | null | undefined): NavGroup[] {
+export const navGroups: readonly NavGroup[] = Object.freeze(
+  taxonomy.map((group) =>
+    Object.freeze({
+      ...group,
+      items: Object.freeze(group.items.map((item) => Object.freeze({ ...item }))) as NavItem[],
+    })
+  )
+);
+
+export function visibleNavGroups(role: string | null | undefined): readonly NavGroup[] {
   if (role === 'admin') {
     return navGroups;
   }

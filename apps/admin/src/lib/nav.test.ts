@@ -40,4 +40,20 @@ describe('visibleNavGroups (the ADR-0018 gate)', () => {
       navGroups.map((group) => group.heading)
     );
   });
+
+  it('the taxonomy is frozen read-only — the admin path hands back the same array, and mutation throws (#208)', () => {
+    expect(visibleNavGroups('admin')).toBe(navGroups); // the by-reference fast path
+    expect(Object.isFrozen(navGroups)).toBe(true);
+    for (const group of navGroups) {
+      expect(Object.isFrozen(group)).toBe(true);
+      expect(Object.isFrozen(group.items)).toBe(true);
+      for (const item of group.items) {
+        expect(Object.isFrozen(item)).toBe(true);
+      }
+    }
+    const first = navGroups[0];
+    if (!first) throw new Error('unreachable');
+    const items = first.items as unknown as unknown[];
+    expect(() => items.push({})).toThrow();
+  });
 });

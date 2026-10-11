@@ -166,6 +166,25 @@ describe('the munging', () => {
     ]);
   });
 
+  it('mungeTrafficSeries routes a non-finite aggregate through the guard → 0, never NaN (#208)', () => {
+    expect(
+      mungeTrafficSeries([{ day: '2026-10-06 00:00:00', pageviews: 'not-a-number', uniques: {} }])
+    ).toEqual([{ bucketStart: '2026-10-06T00:00:00.000Z', pageviews: 0, uniques: 0 }]);
+  });
+
+  it('mungeWindowTotals routes a non-finite aggregate through the guard → 0, never NaN (#208)', () => {
+    expect(mungeWindowTotals([{ pageviews: 'not-a-number', uniques: {} }])).toEqual({
+      pageviews: 0,
+      uniques: 0,
+    });
+  });
+
+  it('mungeTopPages routes a non-finite aggregate through the guard → 0, never NaN (#208)', () => {
+    expect(mungeTopPages([{ path: '/packages', pageviews: 'not-a-number' }])).toEqual([
+      { path: '/packages', pageviews: 0 },
+    ]);
+  });
+
   it('mungeVitals numbers present metrics, nulls absent ones, and folds null routes', () => {
     expect(
       mungeVitals([
