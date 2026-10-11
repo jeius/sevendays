@@ -172,10 +172,9 @@ async function fetchR2Dataset<T>(
   r2: R2AnalyticsConfig,
   query: string,
   dataset: 'r2OperationsAdaptiveGroups' | 'r2StorageAdaptiveGroups',
-  window: MetricsWindow,
+  range: { since: string; until: string },
   fetchImpl: typeof fetch
 ): Promise<T[]> {
-  const { since, until } = windowToRange(window);
   const res = await fetchImpl(CF_GRAPHQL_URL, {
     method: 'POST',
     headers: {
@@ -184,7 +183,7 @@ async function fetchR2Dataset<T>(
     },
     body: JSON.stringify({
       query,
-      variables: { accountTag: r2.accountId, bucketName: r2.bucket, since, until },
+      variables: { accountTag: r2.accountId, bucketName: r2.bucket, ...range },
     }),
   });
   if (!res.ok) {
@@ -213,13 +212,17 @@ export async function fetchStorageMetrics(
     return { ok: false, reason: 'not-configured' };
   }
   try {
+    // #208: ONE range for both documents (the #187 ledger's real-code
+    // straddle — per-arm windowToRange calls could straddle a second
+    // boundary and send the two documents' ranges 1s apart).
+    const range = windowToRange(window);
     const [opsRows, storageRows] = await Promise.all([
-      fetchR2Dataset<R2OpsRow>(r2, R2_OPS_QUERY, 'r2OperationsAdaptiveGroups', window, fetchImpl),
+      fetchR2Dataset<R2OpsRow>(r2, R2_OPS_QUERY, 'r2OperationsAdaptiveGroups', range, fetchImpl),
       fetchR2Dataset<R2StorageRow>(
         r2,
         R2_STORAGE_QUERY,
         'r2StorageAdaptiveGroups',
-        window,
+        range,
         fetchImpl
       ),
     ]);
