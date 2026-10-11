@@ -186,7 +186,7 @@ with:
 - [ ] **Step 6: Verify — nothing moved**
 
 ```bash
-grep -rn "import \* as Sentry" apps/admin/.cursorrules apps/landing/.cursorrules   # expect no output
+grep -n "import \* as Sentry from" apps/admin/.cursorrules apps/landing/.cursorrules   # expect no output — the scoped "from" anchor is required: the pinned prose line "(a named import — never `import * as Sentry`)" matches the unanchored pattern by design (controller ruling, #207 cycle)
 grep -n "All ten are optional-by-design" apps/admin/.env.example                    # expect line 23
 grep -n "pre-flight's CI leg" .github/workflows/e2e.yml                             # expect no output
 grep -c "pageleave" apps/landing/src/integrations/posthog/provider.tsx              # expect 3
