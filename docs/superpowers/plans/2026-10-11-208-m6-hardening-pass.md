@@ -623,7 +623,7 @@ pnpm --filter @sevendays/admin test 2>&1 | grep -E "Test Files|Tests " | tail -2
 pnpm --filter @sevendays/admin fix
 ```
 
-Expected: the file `1 passed` / `21 passed` (its 18 + 3); the suite `17 passed (17)` files / **`171 passed`** tests — exactly +3. The pre-existing munge tests stay green (`numOrNull('5')` is `5`; `numOrNull(12)` is `12`; the empty-totals case's `undefined` → `null` → `0`).
+Expected: the file `1 passed` / `22 passed` (its 19 + 3 — corrected post-execution: the file carried 19 pre-existing its, not 18); the suite `17 passed (17)` files / **`171 passed`** tests — exactly +3. The pre-existing munge tests stay green (`numOrNull('5')` is `5`; `numOrNull(12)` is `12`; the empty-totals case's `undefined` → `null` → `0`).
 
 ```bash
 git add apps/admin/src/lib/metrics/posthog.ts apps/admin/src/lib/metrics/posthog.test.ts
