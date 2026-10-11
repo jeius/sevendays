@@ -52,7 +52,7 @@ export function SystemHealth({ window }: { window: MetricsWindow }) {
           className='lg:col-span-2'
         >
           {workers.data?.ok ? (
-            <div className='flex h-full flex-col justify-between gap-3'>
+            <div className='flex flex-col justify-between gap-3'>
               <p className='text-3xl font-semibold tabular-nums'>
                 {formatCount(workers.data.data.api.totals.requests)}
               </p>
