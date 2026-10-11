@@ -27,7 +27,9 @@ export function buildSentryOptions(input: {
   return {
     dsn: input.dsn,
     environment: input.environment ?? 'dev',
-    ...(input.release !== undefined ? { release: input.release } : {}),
+    // #208: an empty-string release is unset too — a CI var that renders
+    // empty must not tag events with release: '' (the #184 ledger's edge).
+    ...(input.release ? { release: input.release } : {}),
     sampleRate: 1,
     tracesSampleRate: 0,
     sendDefaultPii: false,

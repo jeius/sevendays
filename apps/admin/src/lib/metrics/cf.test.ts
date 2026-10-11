@@ -3,7 +3,7 @@
 // contract, the envelope + failure mapping, and the widget munging
 // (bucketing, error rate, CPU µs→ms). Plain-node over stubbed fetch —
 // no network, no browser (the admin lib-seam pattern).
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   CF_GRAPHQL_URL,
   errorRate,
@@ -152,45 +152,88 @@ describe('errorRate', () => {
 
 describe('fetchWorkerMetrics', () => {
   it('posts the pinned document with bearer auth, one fetch per script, and munges each', async () => {
-    const calls: Array<{ url: unknown; init: RequestInit }> = [];
-    const fetchImpl = async (url: unknown, init: RequestInit) => {
-      calls.push({ url, init });
+    // #208: Date is pinned for the whole test — the assertion recomputes
+    // windowToRange at assert time, and a wall-clock second boundary
+    // between the impl's call and that recompute was the once-seen #187
+    // flake. Under the pinned clock both reads are the same instant.
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-06T12:34:56.789Z') });
+    try {
+      const calls: Array<{ url: unknown; init: RequestInit }> = [];
+      const fetchImpl = async (url: unknown, init: RequestInit) => {
+        calls.push({ url, init });
+        return {
+          ok: true,
+          json: async () => ({
+            data: {
+              viewer: {
+                accounts: [
+                  {
+                    workersInvocationsAdaptive: [
+                      row('2026-10-06T11:00:00Z', { requests: 3, errors: 0 }, { p50: 0, p99: 0 }),
+                    ],
+                  },
+                ],
+              },
+            },
+          }),
+        };
+      };
+      const result = await fetchWorkerMetrics(ENV, '7d', fetchImpl as unknown as typeof fetch);
+      expect(result).toMatchObject({ ok: true });
+      if (!result.ok) throw new Error('unreachable');
+      expect(result.data.api.scriptName).toBe('sevendays-api');
+      expect(result.data.landing.scriptName).toBe('sevendays-landing');
+      expect(result.data.admin.scriptName).toBe('sevendays-admin');
+      expect(calls).toHaveLength(3);
+      const first = calls[0];
+      if (!first) throw new Error('unreachable');
+      expect(first.url).toBe(CF_GRAPHQL_URL);
+      expect(new Headers(first.init.headers).get('authorization')).toBe('Bearer cf-token');
+      const body = JSON.parse(String(first.init.body));
+      expect(body.query).toBe(WORKER_INVOCATIONS_QUERY);
+      expect(body.variables).toEqual({
+        accountTag: 'account-id',
+        scriptName: 'sevendays-api',
+        since: windowToRange('7d').since,
+        until: windowToRange('7d').until,
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('computes the range ONCE — all three scripts share it even when the wall clock crosses a second boundary mid-flight (#208)', async () => {
+    const pinned = new Date('2026-10-06T12:34:56.789Z');
+    const variables: Array<Record<string, unknown>> = [];
+    let call = 0;
+    const fetchImpl = async (_url: unknown, init: RequestInit) => {
+      call += 1;
+      const body = JSON.parse(String(init.body)) as { variables: Record<string, unknown> };
+      variables.push(body.variables);
+      // Walk the faked clock PAST a second boundary between arms: with
+      // per-arm windowToRange calls the later documents carry shifted
+      // ranges; one range computed before the Promise.all cannot move.
+      vi.setSystemTime(new Date(pinned.getTime() + call * 1500));
       return {
         ok: true,
         json: async () => ({
-          data: {
-            viewer: {
-              accounts: [
-                {
-                  workersInvocationsAdaptive: [
-                    row('2026-10-06T11:00:00Z', { requests: 3, errors: 0 }, { p50: 0, p99: 0 }),
-                  ],
-                },
-              ],
-            },
-          },
+          data: { viewer: { accounts: [{ workersInvocationsAdaptive: [] }] } },
         }),
       };
     };
-    const result = await fetchWorkerMetrics(ENV, '7d', fetchImpl as unknown as typeof fetch);
-    expect(result).toMatchObject({ ok: true });
-    if (!result.ok) throw new Error('unreachable');
-    expect(result.data.api.scriptName).toBe('sevendays-api');
-    expect(result.data.landing.scriptName).toBe('sevendays-landing');
-    expect(result.data.admin.scriptName).toBe('sevendays-admin');
-    expect(calls).toHaveLength(3);
-    const first = calls[0];
-    if (!first) throw new Error('unreachable');
-    expect(first.url).toBe(CF_GRAPHQL_URL);
-    expect(new Headers(first.init.headers).get('authorization')).toBe('Bearer cf-token');
-    const body = JSON.parse(String(first.init.body));
-    expect(body.query).toBe(WORKER_INVOCATIONS_QUERY);
-    expect(body.variables).toEqual({
-      accountTag: 'account-id',
-      scriptName: 'sevendays-api',
-      since: windowToRange('7d').since,
-      until: windowToRange('7d').until,
-    });
+    vi.useFakeTimers({ toFake: ['Date'], now: pinned });
+    try {
+      const result = await fetchWorkerMetrics(ENV, '7d', fetchImpl as unknown as typeof fetch);
+      expect(result).toMatchObject({ ok: true });
+      expect(variables).toHaveLength(3);
+      const expected = windowToRange('7d', pinned);
+      for (const vars of variables) {
+        expect(vars.since).toBe(expected.since);
+        expect(vars.until).toBe(expected.until);
+      }
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('an unconfigured CF source resolves not-configured (no fetch at all)', async () => {

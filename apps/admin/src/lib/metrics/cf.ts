@@ -143,9 +143,9 @@ async function fetchOneSeries(
   cf: CfAnalyticsConfig,
   scriptName: string,
   window: MetricsWindow,
+  range: { since: string; until: string },
   fetchImpl: typeof fetch
 ): Promise<WorkerSeries> {
-  const { since, until } = windowToRange(window);
   const res = await fetchImpl(CF_GRAPHQL_URL, {
     method: 'POST',
     headers: {
@@ -157,8 +157,7 @@ async function fetchOneSeries(
       variables: {
         accountTag: cf.accountId,
         scriptName,
-        since,
-        until,
+        ...range,
       },
     }),
   });
@@ -192,10 +191,16 @@ export async function fetchWorkerMetrics(
     return { ok: false, reason: 'not-configured' };
   }
   try {
+    // #208: the range is computed ONCE and shared by all three scripts —
+    // per-arm windowToRange calls could straddle a wall-clock second
+    // boundary and send the documents' ranges 1s apart (the #187 ledger's
+    // real-code straddle; posthog.ts's fetchTrafficMetrics is the
+    // computed-once precedent).
+    const range = windowToRange(window);
     const [api, landing, admin] = await Promise.all([
-      fetchOneSeries(cf, cf.scripts.api, window, fetchImpl),
-      fetchOneSeries(cf, cf.scripts.landing, window, fetchImpl),
-      fetchOneSeries(cf, cf.scripts.admin, window, fetchImpl),
+      fetchOneSeries(cf, cf.scripts.api, window, range, fetchImpl),
+      fetchOneSeries(cf, cf.scripts.landing, window, range, fetchImpl),
+      fetchOneSeries(cf, cf.scripts.admin, window, range, fetchImpl),
     ]);
     return { ok: true, data: { api, landing, admin } };
   } catch (error) {

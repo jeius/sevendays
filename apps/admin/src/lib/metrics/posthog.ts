@@ -139,6 +139,10 @@ export function normalizeHogqlTimestamp(raw: unknown): string | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
 }
 
+// #208: the count munges route through this guard too — a non-finite
+// aggregate resolves to the ruled 0 (a count is zero when unknown; the
+// ?? 0 on missing already said so); the vitals keep null (a measurement
+// is absent, not zero).
 function numOrNull(raw: unknown): number | null {
   if (raw === null || raw === undefined) return null;
   const value = Number(raw);
@@ -153,8 +157,8 @@ export function mungeTrafficSeries(rows: Record<string, unknown>[]): TrafficPoin
   return rows
     .map((row) => ({
       bucketStart: normalizeHogqlTimestamp(row.day),
-      pageviews: Number(row.pageviews ?? 0),
-      uniques: Number(row.uniques ?? 0),
+      pageviews: numOrNull(row.pageviews) ?? 0,
+      uniques: numOrNull(row.uniques) ?? 0,
     }))
     .filter((point): point is TrafficPoint => point.bucketStart !== null)
     .sort((a, b) => a.bucketStart.localeCompare(b.bucketStart));
@@ -165,13 +169,13 @@ export function mungeWindowTotals(rows: Record<string, unknown>[]): {
   uniques: number;
 } {
   const row = rows[0] ?? {};
-  return { pageviews: Number(row.pageviews ?? 0), uniques: Number(row.uniques ?? 0) };
+  return { pageviews: numOrNull(row.pageviews) ?? 0, uniques: numOrNull(row.uniques) ?? 0 };
 }
 
 export function mungeTopPages(rows: Record<string, unknown>[]): TopPage[] {
   return rows.map((row) => ({
     path: pathOrNull(row.path),
-    pageviews: Number(row.pageviews ?? 0),
+    pageviews: numOrNull(row.pageviews) ?? 0,
   }));
 }
 
