@@ -1,6 +1,6 @@
 name: E2E (Playwright)
 
-# The Playwright pre-flight's CI leg (M6 #189, ADR-0022): nightly + on-demand
+# The E2E workflow (M6 #189's foundation + #190's production smoke; ADR-0022):
 # against a deployed environment — NEVER PR-gating (the PR gate stays exactly
 # pnpm check + pnpm build; ci.yml is untouched by this file). Scheduled
 # workflows fire from the default branch only, and this whole file is

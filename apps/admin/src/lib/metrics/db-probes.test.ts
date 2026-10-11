@@ -15,7 +15,7 @@ import {
   parsePgTimestamp,
   parseSizeBytes,
 } from '@sevendays/db';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { collectContentCensus, collectDbProbes } from './db';
 
@@ -127,5 +127,24 @@ describe('the result-union wrappers (the #155 class — failures resolve, never 
         { key: 'testimonials', activeCount: 0, lastUpdated: null },
       ],
     });
+  });
+});
+
+describe('the result-union wrappers (a probe failure resolves unavailable, never throws)', () => {
+  it('collectContentCensus logs one loud line and resolves { ok: false, reason: unavailable } when the exec throws', async () => {
+    const loud = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const boom = async () => {
+        throw new Error('census unreachable');
+      };
+      await expect(collectContentCensus(boom)).resolves.toEqual({
+        ok: false,
+        reason: 'unavailable',
+      });
+      expect(loud).toHaveBeenCalledTimes(1);
+      expect(loud.mock.calls[0]?.[0]).toBe('[metrics] content census source unavailable:');
+    } finally {
+      loud.mockRestore();
+    }
   });
 });

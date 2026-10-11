@@ -89,7 +89,7 @@ describe('the access line + requestId contract (M6 #183)', () => {
     const [line] = byEvt(lines, 'access');
     if (!line) throw new Error('expected one access line');
     expect(line.status).toBe(404);
-    expect(line.route).toBe('/nope'); // routePath is '' when unmatched → raw path
+    expect(line.route).toBe('/nope'); // routePath is the wildcard /* when unmatched → the raw path stands in
   });
 
   it('a thrown handler error → an access line at 500 PLUS one error line, both keyed to the response header; the error class carries name/message/stack', async () => {
@@ -137,7 +137,9 @@ describe('the access line + requestId contract (M6 #183)', () => {
       testEnv(url)
     );
     expect(res.status).toBe(200);
-    const [line] = byEvt(lines, 'access');
+    const access = byEvt(lines, 'access');
+    expect(access).toHaveLength(1);
+    const [line] = access;
     if (!line) throw new Error('expected one access line');
     expect(line.actorId).toBe(userId);
   });

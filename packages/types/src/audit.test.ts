@@ -77,4 +77,18 @@ describe('auditLogRowSchema', () => {
     expect(auditLogRowSchema.safeParse({ ...fullRow, entityId: 'not-a-uuid' }).success).toBe(false);
     expect(auditLogRowSchema.safeParse({ ...fullRow, actorEmail: '' }).success).toBe(false);
   });
+
+  it('id must be a uuid (the row key the viewer paginates over)', () => {
+    expect(auditLogRowSchema.safeParse({ ...fullRow, id: 'not-a-uuid' }).success).toBe(false);
+  });
+
+  it('requestId must be non-empty (the Application Log correlation key)', () => {
+    expect(auditLogRowSchema.safeParse({ ...fullRow, requestId: '' }).success).toBe(false);
+  });
+
+  it('occurredAt must be coercible to a Date (the UTC day windows key on it)', () => {
+    expect(auditLogRowSchema.safeParse({ ...fullRow, occurredAt: 'not-a-timestamp' }).success).toBe(
+      false
+    );
+  });
 });

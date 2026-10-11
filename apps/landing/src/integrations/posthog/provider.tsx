@@ -6,6 +6,11 @@
 // pageview/vitals-off: Traffic is landing-scoped by the host allowlist,
 // and the admin's own events never join it. Options grep-proven against
 // the installed posthog-js 1.422.5 / @posthog/types 1.407.1.
+// #187 ledger note: the flip implicitly enables $pageleave too — the SDK
+// default capture_pageleave 'if_capture_pageview' keys on pageviews being
+// on. An event class beyond pageviews + web vitals, landing-scoped by the
+// same host allowlist; mute explicitly with capture_pageleave: false if
+// its volume ever matters.
 import { PostHogProvider as BasePostHogProvider } from '@posthog/react';
 import posthog from 'posthog-js';
 import type { ReactNode } from 'react';

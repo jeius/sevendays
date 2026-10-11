@@ -42,4 +42,8 @@ describe('auditQueries (spec-verbatim caching posture)', () => {
   it('the actors key is stable across calls (one cache entry)', () => {
     expect(auditQueries.actors().queryKey).toEqual(auditQueries.actors().queryKey);
   });
+
+  it('the actors query carries NO placeholderData (only the page query keeps previous data)', () => {
+    expect('placeholderData' in auditQueries.actors()).toBe(false);
+  });
 });
