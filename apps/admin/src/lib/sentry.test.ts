@@ -48,4 +48,13 @@ describe('buildSentryOptions (M6 #184)', () => {
     });
     expect(options && 'release' in options).toBe(false);
   });
+
+  it('treats an empty-string release as unset too — the key is omitted, never release: "" (#208)', () => {
+    const options = buildSentryOptions({
+      dsn: 'https://key@o0.ingest.sentry.io/0',
+      release: '',
+      environment: 'v1',
+    });
+    expect(options && 'release' in options).toBe(false);
+  });
 });
