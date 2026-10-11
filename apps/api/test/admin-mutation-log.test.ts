@@ -193,6 +193,35 @@ describe('admin_mutation events (M6 #183 — one per committed CMS write)', () =
     expect(matrixLines[0]?.route).toBe('/api/v1/admin/studio-services/:id/branches');
   });
 
+  it('the studio-service update PUT emits the updated row id — the sibling-routers convention, pinned (#208)', async () => {
+    const lines = captureLines();
+    const created = await authed(
+      'POST',
+      '/api/v1/admin/studio-services',
+      'mut-ss-a@sevendays.test',
+      { name: 'Retouching', description: 'Retouch and restore', priceCents: 6000 }
+    );
+    const { id } = (await created.json()) as { id: string };
+    const res = await authed(
+      'PUT',
+      `/api/v1/admin/studio-services/${id}`,
+      'mut-ss-b@sevendays.test',
+      {
+        name: 'Retouching',
+        description: 'Retouch, restore, and colorize',
+        priceCents: 6500,
+      }
+    );
+    expect(res.status).toBe(200);
+    const updated = (await res.json()) as { id: string };
+    expect(updated.id).toBe(id); // the eq(id) update returns the same row
+    const putLines = mutations(lines).filter((line) => line.method === 'PUT');
+    expect(putLines).toHaveLength(1);
+    expect(putLines[0]?.entity).toBe('studio-service');
+    expect(putLines[0]?.entityId).toBe(updated.id);
+    expect(putLines[0]?.route).toBe('/api/v1/admin/studio-services/:id');
+  });
+
   it('the atomic package save → exactly ONE line (request-grain, not per DB row)', async () => {
     const lines = captureLines();
     const res = await authed(
