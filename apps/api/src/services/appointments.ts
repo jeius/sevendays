@@ -81,7 +81,9 @@ const appointmentProjection = {
  * Reference resolution is validation: a rejection returns a typed failure
  * whose `message` is the caller-facing wording (module-owned; the route
  * forwards it verbatim). The client never supplies a price — snapshots
- * come from the resolved rows. ADR-0011 untouched: `db` is the per-request
+ * come from the resolved rows (ADR-0020: an unpriced offering snapshots
+ * null; the invariant is "when the booked item had one"). ADR-0011
+ * untouched: `db` is the per-request
  * handle; the transaction lives inside this one request (verified over the
  * live pooler — ADR-0007 amendment).
  */
@@ -110,7 +112,9 @@ export async function createAppointment(
     // the path. Package path: unknown/inactive (unchanged). Service path:
     // unknown → inactive → bookable at THIS branch, all inside this same
     // transaction (the one write seam, ADR-0005).
-    let offeringPriceCents: number;
+    // number | null (ADR-0020): an unpriced offering snapshots null —
+    // everything downstream (the insert, the record, the wire) flows.
+    let offeringPriceCents: number | null;
     let serviceId: string | null = null;
     if (input.servicePackageId !== null) {
       const [packageRow] = await tx

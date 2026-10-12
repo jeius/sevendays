@@ -39,7 +39,9 @@ export interface EditorInclusion {
  *
  * - `durationInput` is a raw input string ('' = null after the builder).
  * - `priceCents` is the mapped centavos number (input × 100 at the
- *   component); `NaN` encodes an unparseable input and fails validation.
+ *   component); `NaN` encodes an unparseable OR absent entry — absent when
+ *   `hasPrice` is false (ADR-0020: unchecked saves null) and after either
+ *   checkbox flip (the re-entry contract).
  * - `coverImageKey` is the three-state media encoding: `undefined` =
  *   unchanged (absent from the PUT), `null` = clear, string = a fresh
  *   staging key (ADR-0019) to bind on the next atomic save.
@@ -47,6 +49,8 @@ export interface EditorInclusion {
 export interface PackageEditorState {
   name: string;
   description: string;
+  /** ADR-0020: false = unpriced — the payload saves null and the entry is discarded. */
+  hasPrice: boolean;
   priceCents: number;
   durationInput: string;
   isFeatured: boolean;
@@ -125,7 +129,8 @@ export function editorStateFromRead(read: ServicePackageRead): PackageEditorStat
   return {
     name: read.name,
     description: read.description,
-    priceCents: read.priceCents,
+    hasPrice: read.priceCents !== null,
+    priceCents: read.priceCents ?? Number.NaN,
     durationInput: read.durationMinutes == null ? '' : String(read.durationMinutes),
     isFeatured: read.isFeatured,
     isActive: read.isActive,
@@ -146,14 +151,16 @@ export function editorStateFromRead(read: ServicePackageRead): PackageEditorStat
 }
 
 /**
- * `#143 seam: create-mode initial state`. Empty strings, `priceCents: 0`,
- * active by default, no cover, no frames/inclusions.
+ * `#143 seam: create-mode initial state`. Empty strings, unchecked-unpriced.
+ * Create defaults unchecked (owner ruling 2026-10-12): pricing is an
+ * explicit act. Active by default, no cover, no frames/inclusions.
  */
 export function newEditorState(): PackageEditorState {
   return {
     name: '',
     description: '',
-    priceCents: 0,
+    hasPrice: false,
+    priceCents: Number.NaN,
     durationInput: '',
     isFeatured: false,
     isActive: true,
@@ -192,7 +199,7 @@ function basePayloadFields(state: PackageEditorState, attires: readonly Attire[]
   return {
     name: state.name,
     description: state.description,
-    priceCents: state.priceCents,
+    priceCents: state.hasPrice ? state.priceCents : null,
     durationMinutes: durationFromInput(state.durationInput),
     isActive: state.isActive,
     isFeatured: state.isFeatured,
@@ -289,10 +296,12 @@ export function validateEditorState(state: PackageEditorState): EditorFieldError
   if (state.description.trim().length < 1) {
     errors.description = 'Description is required.';
   }
-  if (!Number.isFinite(state.priceCents) || state.priceCents < 0) {
-    errors.price = 'Enter a price of zero or more.';
-  } else if (!Number.isInteger(state.priceCents)) {
-    errors.price = 'Enter whole centavos.';
+  if (state.hasPrice) {
+    if (!Number.isFinite(state.priceCents) || state.priceCents < 0) {
+      errors.price = 'Enter a price of zero or more.';
+    } else if (!Number.isInteger(state.priceCents)) {
+      errors.price = 'Enter whole centavos.';
+    }
   }
   for (const row of state.inclusions) {
     const rowErrors: InclusionFieldErrors = {};

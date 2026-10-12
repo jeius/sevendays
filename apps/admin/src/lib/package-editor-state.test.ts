@@ -129,6 +129,7 @@ describe('buildCreatePayload', () => {
       ...newEditorState(),
       name: 'Deluxe',
       description: 'The full set.',
+      hasPrice: true,
       priceCents: 150000,
       frames: [{ token: 'frame-b' }, { token: 'frame-a' }],
       inclusions: [
@@ -252,6 +253,7 @@ describe('validateEditorState', () => {
       ...newEditorState(),
       name: 'Deluxe',
       description: 'The full set.',
+      hasPrice: true,
       priceCents: 150000,
       frames: [{ token: 'f1' }],
       inclusions: [
@@ -270,7 +272,7 @@ describe('validateEditorState', () => {
   });
 
   it('blank name/description and a negative price flag their slots', () => {
-    const errors = validateEditorState({ ...newEditorState(), priceCents: -1 });
+    const errors = validateEditorState({ ...newEditorState(), hasPrice: true, priceCents: -1 });
     expect(errors.name).toBe('Name is required.');
     expect(errors.description).toBe('Description is required.');
     expect(errors.price).toBe('Enter a price of zero or more.');
@@ -328,6 +330,7 @@ describe('validateEditorState', () => {
       ...newEditorState(),
       name: 'n',
       description: 'd',
+      hasPrice: true,
       priceCents: 19950.5,
     });
     expect(errors.price).toBe('Enter whole centavos.');
@@ -373,5 +376,38 @@ describe('conflictFieldErrors', () => {
     expect(conflictFieldErrors([{ path: [], message: 'x' }])).toEqual({});
     expect(conflictFieldErrors([{ path: ['name'] }])).toEqual({});
     expect(conflictFieldErrors([null])).toEqual({});
+  });
+});
+
+describe('unpriced packages (ADR-2020)', () => {
+  it('an unpriced read opens unchecked with an empty entry; the update payload saves null', () => {
+    const state = editorStateFromRead({ ...read(), priceCents: null });
+    expect(state.hasPrice).toBe(false);
+    expect(Number.isNaN(state.priceCents)).toBe(true);
+    expect(buildUpdatePayload(state, []).priceCents).toBeNull();
+  });
+
+  it('create defaults unchecked (owner ruling 2026-10-12) — the fresh payload saves null', () => {
+    expect(newEditorState().hasPrice).toBe(false);
+    expect(buildCreatePayload(newEditorState(), []).priceCents).toBeNull();
+  });
+
+  it('re-checking requires re-entry: checked + no entry flags the price slot', () => {
+    const errors = validateEditorState({
+      ...newEditorState(),
+      name: 'n',
+      description: 'd',
+      hasPrice: true,
+    });
+    expect(errors.price).toBe('Enter a price of zero or more.');
+  });
+
+  it('unchecked skips the price rules entirely — an empty entry is a valid unpriced save', () => {
+    const errors = validateEditorState({ ...newEditorState(), name: 'n', description: 'd' });
+    expect(errors.price).toBeUndefined();
+  });
+
+  it('the table flip payload carries row.priceCents verbatim — null stays null', () => {
+    expect(buildRowFlipPayload({ ...read(), priceCents: null }, false).priceCents).toBeNull();
   });
 });

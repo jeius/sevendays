@@ -46,6 +46,9 @@ export interface BranchEditorState {
 export interface StudioServiceEditorState {
   name: string;
   description: string;
+  /** ADR-0020: false = unpriced — the payload saves null and the entry is discarded. */
+  hasPrice: boolean;
+  /** NaN = nothing entered (the re-entry encoding — meaningful only when hasPrice). */
   priceCents: number;
   isActive: boolean;
   branchIds: string[];
@@ -61,6 +64,9 @@ export interface StudioServiceEditorState {
 export interface AddonEditorState {
   name: string;
   description: string;
+  /** ADR-0020: false = unpriced — the payload saves null and the entry is discarded. */
+  hasPrice: boolean;
+  /** NaN = nothing entered (the re-entry encoding — meaningful only when hasPrice). */
   priceCents: number;
   isActive: boolean;
   appliesToServiceIds: string[];
@@ -153,7 +159,8 @@ export function studioServiceStateFromRead(
   return {
     name: row.name,
     description: row.description,
-    priceCents: row.priceCents,
+    hasPrice: row.priceCents !== null,
+    priceCents: row.priceCents ?? Number.NaN,
     isActive: row.isActive,
     // The state owns its own copy — a push on editor state must never
     // mutate the React Query cache row (#143 sweep: replace, never push).
@@ -163,13 +170,16 @@ export function studioServiceStateFromRead(
 
 /**
  * `#143 seam: create-mode studio-service state`. Empty strings,
- * `priceCents: 0`, active by default, no branches.
+ * unchecked-unpriced, active by default, no branches.
  */
 export function newStudioServiceState(): StudioServiceEditorState {
   return {
     name: '',
     description: '',
-    priceCents: 0,
+    // Owner ruling 2026-10-12: create defaults unchecked — pricing is an
+    // explicit act; the fresh payload saves null.
+    hasPrice: false,
+    priceCents: Number.NaN,
     isActive: true,
     branchIds: [],
   };
@@ -186,7 +196,7 @@ export function buildStudioServicePayload(
   return {
     name: state.name,
     description: state.description,
-    priceCents: state.priceCents,
+    priceCents: state.hasPrice ? state.priceCents : null,
     isActive: state.isActive,
   };
 }
@@ -229,21 +239,25 @@ export function addonStateFromRead(row: AddonService): AddonEditorState {
   return {
     name: row.name,
     description: row.description,
-    priceCents: row.priceCents,
+    hasPrice: row.priceCents !== null,
+    priceCents: row.priceCents ?? Number.NaN,
     isActive: row.isActive,
     appliesToServiceIds: [],
   };
 }
 
 /**
- * `#143 seam: create-mode add-on state`. Empty strings, `priceCents: 0`,
+ * `#143 seam: create-mode add-on state`. Empty strings, unchecked-unpriced,
  * active by default, applies to nothing yet.
  */
 export function newAddonState(): AddonEditorState {
   return {
     name: '',
     description: '',
-    priceCents: 0,
+    // Owner ruling 2026-10-12: create defaults unchecked — pricing is an
+    // explicit act; the fresh payload saves null.
+    hasPrice: false,
+    priceCents: Number.NaN,
     isActive: true,
     appliesToServiceIds: [],
   };
@@ -257,7 +271,7 @@ export function buildAddonPayload(state: AddonEditorState): UpdateAddonServiceIn
   return {
     name: state.name,
     description: state.description,
-    priceCents: state.priceCents,
+    priceCents: state.hasPrice ? state.priceCents : null,
     isActive: state.isActive,
   };
 }
@@ -352,7 +366,7 @@ export function validateStudioServiceState(state: StudioServiceEditorState): Lig
   if (state.description.trim().length < 1) {
     errors.description = 'Description is required.';
   }
-  if (!Number.isInteger(state.priceCents) || state.priceCents < 0) {
+  if (state.hasPrice && (!Number.isInteger(state.priceCents) || state.priceCents < 0)) {
     errors.price = 'Enter a valid price.';
   }
   return errors;
@@ -371,7 +385,7 @@ export function validateAddonState(state: AddonEditorState): LightFieldErrors {
   if (state.description.trim().length < 1) {
     errors.description = 'Description is required.';
   }
-  if (!Number.isInteger(state.priceCents) || state.priceCents < 0) {
+  if (state.hasPrice && (!Number.isInteger(state.priceCents) || state.priceCents < 0)) {
     errors.price = 'Enter a valid price.';
   }
   return errors;

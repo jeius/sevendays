@@ -299,6 +299,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
   const nameId = useId();
   const descriptionId = useId();
   const priceId = useId();
+  const hasPriceId = useId();
   const durationId = useId();
   const slugId = useId();
   const featuredId = useId();
@@ -764,23 +765,45 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
               </Field>
               <Field>
                 <FieldLabel htmlFor={priceId}>Price</FieldLabel>
-                <div className='relative'>
-                  <span className='text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-sm'>
-                    ₱
-                  </span>
-                  <Input
-                    id={priceId}
-                    type='number'
-                    className={`pl-7 tabular-nums ${fieldErrors?.price ? 'border-destructive' : ''}`}
-                    // NaN (an unparseable entry — the seam's encoding) renders
-                    // as an empty input; the save gate surfaces the error.
-                    value={Number.isNaN(state.priceCents) ? '' : state.priceCents / 100}
-                    onChange={(e) =>
-                      updateField('priceCents', Math.round(Number(e.target.value) * 100))
-                    }
+                <label htmlFor={hasPriceId} className='flex items-center gap-2 text-sm font-medium'>
+                  <Checkbox
+                    id={hasPriceId}
+                    checked={state.hasPrice}
+                    onCheckedChange={(checked) => {
+                      updateField('hasPrice', checked === true);
+                      // Either flip discards the entry — ADR-0020's
+                      // re-entry contract (re-check starts empty).
+                      updateField('priceCents', Number.NaN);
+                    }}
                   />
-                </div>
-                <FieldDescription>{PESO_HELPER}</FieldDescription>
+                  Priced
+                </label>
+                {state.hasPrice && (
+                  <div className='relative'>
+                    <span className='text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-sm'>
+                      ₱
+                    </span>
+                    <Input
+                      id={priceId}
+                      type='number'
+                      className={`pl-7 tabular-nums ${fieldErrors?.price ? 'border-destructive' : ''}`}
+                      // NaN (an unparseable entry — the seam's encoding) renders
+                      // as an empty input; the save gate surfaces the error.
+                      value={Number.isNaN(state.priceCents) ? '' : state.priceCents / 100}
+                      onChange={(e) =>
+                        updateField(
+                          'priceCents',
+                          e.target.value === ''
+                            ? Number.NaN
+                            : Math.round(Number(e.target.value) * 100)
+                        )
+                      }
+                    />
+                  </div>
+                )}
+                <FieldDescription>
+                  {state.hasPrice ? PESO_HELPER : 'No price — bookable on inquiry.'}
+                </FieldDescription>
                 {fieldErrors?.price ? (
                   <p className='text-destructive text-xs'>{fieldErrors.price}</p>
                 ) : null}

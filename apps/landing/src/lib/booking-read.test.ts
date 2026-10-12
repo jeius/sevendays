@@ -186,3 +186,25 @@ describe('offeringNameFor', () => {
     expect(offeringNameFor(record(), { packages: [], services: [] })).toBe('—');
   });
 });
+
+describe('unpriced confirmations (ADR-0020)', () => {
+  it('a null bookedPriceCents nulls the total — omitted, never ₱0', () => {
+    expect(confirmationTotalCents(record({ bookedPriceCents: null }))).toBeNull();
+  });
+
+  it('an unpriced add-on entry nulls the total while the record is otherwise priced', () => {
+    expect(
+      confirmationTotalCents(
+        record({
+          addonServices: [
+            {
+              addonServiceId: '55555555-5555-4555-8555-555555555555',
+              name: 'Makeup',
+              priceCents: null,
+            },
+          ],
+        })
+      )
+    ).toBeNull();
+  });
+});

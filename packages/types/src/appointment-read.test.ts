@@ -83,3 +83,22 @@ describe('appointmentWithAddonsSchema (generalized — M2 ticket 02)', () => {
     expect(result.success).toBe(false);
   });
 });
+
+describe('unpriced bookings (ADR-0020)', () => {
+  it('parses a null bookedPriceCents — the unpriced-offering snapshot', () => {
+    const parsed = appointmentWithAddonsSchema.parse({
+      ...base,
+      bookedPriceCents: null,
+      addonServices: [],
+    });
+    expect(parsed.bookedPriceCents).toBeNull();
+  });
+
+  it('parses a null add-on entry price — the unpriced add-on snapshot', () => {
+    const parsed = appointmentWithAddonsSchema.parse({
+      ...base,
+      addonServices: [{ addonServiceId: OTHER_UUID, name: 'Oncall stylist', priceCents: null }],
+    });
+    expect(parsed.addonServices[0]?.priceCents).toBeNull();
+  });
+});

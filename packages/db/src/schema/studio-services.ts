@@ -11,7 +11,9 @@ export const studioServices = pgTable(
     id: uuid('id').primaryKey().defaultRandom(),
     name: text('name').notNull(),
     description: text('description').notNull(),
-    priceCents: integer('price_cents').notNull(),
+    // Null = unpriced (ADR-0020): inquiry-priced offerings live in the
+    // catalog fully bookable; nullable since migration 0009. No sentinel.
+    priceCents: integer('price_cents'),
     // is_active gates the booking surface without deleting catalog history
     // (same posture as addon_services).
     isActive: boolean('is_active').notNull().default(true),

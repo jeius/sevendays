@@ -141,3 +141,20 @@ describe('studio-service matrix payloads (M5)', () => {
     expect(updateStudioServiceSchema).toBe(createStudioServiceSchema);
   });
 });
+
+describe('unpriced catalogs (ADR-0020)', () => {
+  it('the row shape parses a null price (unpriced studio service)', () => {
+    const parsed = studioServiceSchema.parse({ ...fullRow, priceCents: null });
+    expect(parsed.priceCents).toBeNull();
+  });
+
+  it('create accepts a null price — the unchecked Priced save', () => {
+    const parsed = createStudioServiceSchema.parse({
+      name: 'On-inquiry service',
+      description: 'Quoted per job.',
+      priceCents: null,
+    });
+    expect(parsed.priceCents).toBeNull();
+    expect(parsed.isActive).toBe(true);
+  });
+});
