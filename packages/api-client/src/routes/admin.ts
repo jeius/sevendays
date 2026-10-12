@@ -42,6 +42,11 @@ type GetAdminPackageEndpoint = AdminRpc['service-packages'][':id']['$get'];
 type CreateAdminPackageEndpoint = AdminRpc['service-packages']['$post'];
 type UpdateAdminPackageEndpoint = AdminRpc['service-packages'][':id']['$put'];
 
+// service-packages delete (M7 #213).
+type DeleteServicePackageEndpoint = AdminRpc['service-packages'][':id']['$delete'];
+/** The service-package DELETE args: `{ param: { id } }`. */
+export type DeleteServicePackageArgs = InferRequestType<DeleteServicePackageEndpoint>;
+
 /**
  * The atomic save's POST body, as the RPC surface declares it — the zod
  * INPUT side of createServicePackageSchema (the established precedent:
@@ -59,6 +64,9 @@ export type GetAdminPackageArgs = InferRequestType<GetAdminPackageEndpoint>;
 type GetAdminBranchEndpoint = AdminRpc['branches'][':id']['$get'];
 type CreateAdminBranchEndpoint = AdminRpc['branches']['$post'];
 type UpdateAdminBranchEndpoint = AdminRpc['branches'][':id']['$put'];
+type DeleteAdminBranchEndpoint = AdminRpc['branches'][':id']['$delete'];
+/** The admin branch DELETE args: `{ param: { id } }`. */
+export type DeleteAdminBranchArgs = InferRequestType<DeleteAdminBranchEndpoint>;
 
 type GetAdminBranchArgs = InferRequestType<GetAdminBranchEndpoint>;
 type CreateAdminBranchArgs = InferRequestType<CreateAdminBranchEndpoint>['json'];
@@ -70,6 +78,9 @@ type CreateAdminStudioServiceEndpoint = AdminRpc['studio-services']['$post'];
 type UpdateAdminStudioServiceEndpoint = AdminRpc['studio-services'][':id']['$put'];
 type SetBranchMatrixEndpoint = AdminRpc['studio-services'][':id']['branches']['$put'];
 type SetAddonMatrixEndpoint = AdminRpc['studio-services'][':id']['addons']['$put'];
+type DeleteAdminStudioServiceEndpoint = AdminRpc['studio-services'][':id']['$delete'];
+/** The admin studio-service DELETE args: `{ param: { id } }`. */
+export type DeleteAdminStudioServiceArgs = InferRequestType<DeleteAdminStudioServiceEndpoint>;
 
 type GetAdminStudioServiceArgs = InferRequestType<GetAdminStudioServiceEndpoint>;
 type CreateAdminStudioServiceArgs = InferRequestType<CreateAdminStudioServiceEndpoint>['json'];
@@ -84,6 +95,9 @@ export type SetAddonMatrixArgs = InferRequestType<SetAddonMatrixEndpoint>;
 type GetAdminAddonEndpoint = AdminRpc['addon-services'][':id']['$get'];
 type CreateAdminAddonEndpoint = AdminRpc['addon-services']['$post'];
 type UpdateAdminAddonEndpoint = AdminRpc['addon-services'][':id']['$put'];
+type DeleteAdminAddonEndpoint = AdminRpc['addon-services'][':id']['$delete'];
+/** The admin addon DELETE args: `{ param: { id } }`. */
+export type DeleteAdminAddonArgs = InferRequestType<DeleteAdminAddonEndpoint>;
 
 type GetAdminAddonArgs = InferRequestType<GetAdminAddonEndpoint>;
 /** The addon create body, as the RPC surface declares it. */
@@ -96,6 +110,9 @@ type GetAdminGalleryCategoryEndpoint = AdminRpc['gallery-categories'][':id']['$g
 type CreateAdminGalleryCategoryEndpoint = AdminRpc['gallery-categories']['$post'];
 type UpdateAdminGalleryCategoryEndpoint = AdminRpc['gallery-categories'][':id']['$put'];
 type SetGalleryCategoryOrderEndpoint = AdminRpc['gallery-categories']['order']['$put'];
+type DeleteAdminGalleryCategoryEndpoint = AdminRpc['gallery-categories'][':id']['$delete'];
+/** The admin gallery-category DELETE args: `{ param: { id } }`. */
+export type DeleteAdminGalleryCategoryArgs = InferRequestType<DeleteAdminGalleryCategoryEndpoint>;
 
 type GetAdminGalleryCategoryArgs = InferRequestType<GetAdminGalleryCategoryEndpoint>;
 /** The gallery-category create body, as the RPC surface declares it. */
@@ -112,6 +129,9 @@ type CreateAdminGalleryPhotoEndpoint = AdminRpc['gallery-photos']['$post'];
 type UpdateAdminGalleryPhotoEndpoint = AdminRpc['gallery-photos'][':id']['$put'];
 type SetGalleryPhotoOrderEndpoint = AdminRpc['gallery-photos']['order']['$put'];
 type GetGalleryPhotoThumbEndpoint = AdminRpc['gallery-photos'][':id']['thumb']['$get'];
+type DeleteAdminGalleryPhotoEndpoint = AdminRpc['gallery-photos'][':id']['$delete'];
+/** The admin gallery-photo DELETE args: `{ param: { id } }`. */
+export type DeleteAdminGalleryPhotoArgs = InferRequestType<DeleteAdminGalleryPhotoEndpoint>;
 
 type GetAdminGalleryPhotoArgs = InferRequestType<GetAdminGalleryPhotoEndpoint>;
 /** The gallery-photo create body, as the RPC surface declares it. */
@@ -128,6 +148,9 @@ type GetAdminTestimonialEndpoint = AdminRpc['testimonials'][':id']['$get'];
 type CreateAdminTestimonialEndpoint = AdminRpc['testimonials']['$post'];
 type UpdateAdminTestimonialEndpoint = AdminRpc['testimonials'][':id']['$put'];
 type SetTestimonialOrderEndpoint = AdminRpc['testimonials']['order']['$put'];
+type DeleteAdminTestimonialEndpoint = AdminRpc['testimonials'][':id']['$delete'];
+/** The admin testimonial DELETE args: `{ param: { id } }`. */
+export type DeleteAdminTestimonialArgs = InferRequestType<DeleteAdminTestimonialEndpoint>;
 
 type GetAdminTestimonialArgs = InferRequestType<GetAdminTestimonialEndpoint>;
 /** The testimonial create body, as the RPC surface declares it. */
@@ -141,6 +164,9 @@ export type TestimonialOrderArgs = InferRequestType<SetTestimonialOrderEndpoint>
 type GetAdminPrintSizeEndpoint = AdminRpc['print-sizes'][':id']['$get'];
 type CreateAdminPrintSizeEndpoint = AdminRpc['print-sizes']['$post'];
 type UpdateAdminPrintSizeEndpoint = AdminRpc['print-sizes'][':id']['$put'];
+type DeleteAdminPrintSizeEndpoint = AdminRpc['print-sizes'][':id']['$delete'];
+/** The admin print-size DELETE args: `{ param: { id } }`. */
+export type DeleteAdminPrintSizeArgs = InferRequestType<DeleteAdminPrintSizeEndpoint>;
 
 type GetAdminPrintSizeArgs = InferRequestType<GetAdminPrintSizeEndpoint>;
 /** The print-size create body, as the RPC surface declares it. */
@@ -152,6 +178,9 @@ export type UpdatePrintSizeArgs = InferRequestType<UpdateAdminPrintSizeEndpoint>
 type GetAdminAttireEndpoint = AdminRpc['attires'][':id']['$get'];
 type CreateAdminAttireEndpoint = AdminRpc['attires']['$post'];
 type UpdateAdminAttireEndpoint = AdminRpc['attires'][':id']['$put'];
+type DeleteAdminAttireEndpoint = AdminRpc['attires'][':id']['$delete'];
+/** The admin attire DELETE args: `{ param: { id } }`. */
+export type DeleteAdminAttireArgs = InferRequestType<DeleteAdminAttireEndpoint>;
 
 type GetAdminAttireArgs = InferRequestType<GetAdminAttireEndpoint>;
 /** The attire create body, as the RPC surface declares it. */
@@ -188,6 +217,13 @@ export function adminServicePackages(raw: RpcClient) {
       const res = await raw.api.v1.admin['service-packages'][':id'].$put(args);
       return unwrap(res, servicePackageReadSchema);
     },
+    /** DELETE /api/v1/admin/service-packages/:id — 204 No Content (the delete seam: no body to unwrap); blocked → 400 naming what blocks; the cover object goes with the row. */
+    async remove(args: DeleteServicePackageArgs): Promise<void> {
+      const res = await raw.api.v1.admin['service-packages'][':id'].$delete(args);
+      if (!res.ok) {
+        await unwrapError(res);
+      }
+    },
   };
 }
 
@@ -213,6 +249,13 @@ export function adminBranches(raw: RpcClient) {
     async update(args: UpdateAdminBranchArgs): Promise<Branch> {
       const res = await raw.api.v1.admin.branches[':id'].$put(args);
       return unwrap(res, branchSchema);
+    },
+    /** DELETE /api/v1/admin/branches/:id — 204 (the delete seam); blocked → 400 with the appointment count. */
+    async remove(args: DeleteAdminBranchArgs): Promise<void> {
+      const res = await raw.api.v1.admin.branches[':id'].$delete(args);
+      if (!res.ok) {
+        await unwrapError(res);
+      }
     },
   };
 }
@@ -250,6 +293,13 @@ export function adminStudioServices(raw: RpcClient) {
       const res = await raw.api.v1.admin['studio-services'][':id']['addons'].$put(args);
       return unwrap(res, studioServiceWithBranchesSchema);
     },
+    /** DELETE /api/v1/admin/studio-services/:id — 204 (the delete seam); blocked → 400; both matrices' rows go with the row. */
+    async remove(args: DeleteAdminStudioServiceArgs): Promise<void> {
+      const res = await raw.api.v1.admin['studio-services'][':id'].$delete(args);
+      if (!res.ok) {
+        await unwrapError(res);
+      }
+    },
   };
 }
 
@@ -275,6 +325,13 @@ export function adminAddonServices(raw: RpcClient) {
     async update(args: UpdateAddonArgs): Promise<AddonService> {
       const res = await raw.api.v1.admin['addon-services'][':id'].$put(args);
       return unwrap(res, addonServiceSchema);
+    },
+    /** DELETE /api/v1/admin/addon-services/:id — 204 (the delete seam); blocked → 400 with the appointment count. */
+    async remove(args: DeleteAdminAddonArgs): Promise<void> {
+      const res = await raw.api.v1.admin['addon-services'][':id'].$delete(args);
+      if (!res.ok) {
+        await unwrapError(res);
+      }
     },
   };
 }
@@ -302,6 +359,13 @@ export function adminPrintSizes(raw: RpcClient) {
       const res = await raw.api.v1.admin['print-sizes'][':id'].$put(args);
       return unwrap(res, printSizeSchema);
     },
+    /** DELETE /api/v1/admin/print-sizes/:id — 204 (the delete seam); blocked → 400 with the inclusion count. */
+    async remove(args: DeleteAdminPrintSizeArgs): Promise<void> {
+      const res = await raw.api.v1.admin['print-sizes'][':id'].$delete(args);
+      if (!res.ok) {
+        await unwrapError(res);
+      }
+    },
   };
 }
 
@@ -327,6 +391,13 @@ export function adminAttires(raw: RpcClient) {
     async update(args: UpdateAttireArgs): Promise<Attire> {
       const res = await raw.api.v1.admin.attires[':id'].$put(args);
       return unwrap(res, attireSchema);
+    },
+    /** DELETE /api/v1/admin/attires/:id — 204 (the delete seam); blocked → 400 with the junction count. */
+    async remove(args: DeleteAdminAttireArgs): Promise<void> {
+      const res = await raw.api.v1.admin.attires[':id'].$delete(args);
+      if (!res.ok) {
+        await unwrapError(res);
+      }
     },
   };
 }
@@ -358,6 +429,13 @@ export function adminGalleryCategories(raw: RpcClient) {
     async setOrder(json: GalleryCategoryOrderArgs): Promise<GalleryCategory[]> {
       const res = await raw.api.v1.admin['gallery-categories']['order'].$put({ json });
       return unwrap(res, galleryCategorySchema.array());
+    },
+    /** DELETE /api/v1/admin/gallery-categories/:id — 204 (the delete seam); blocked → 400 while any photo sits in the category. */
+    async remove(args: DeleteAdminGalleryCategoryArgs): Promise<void> {
+      const res = await raw.api.v1.admin['gallery-categories'][':id'].$delete(args);
+      if (!res.ok) {
+        await unwrapError(res);
+      }
     },
   };
 }
@@ -398,6 +476,13 @@ export function adminGalleryPhotos(raw: RpcClient) {
       }
       return res;
     },
+    /** DELETE /api/v1/admin/gallery-photos/:id — 204 (the delete seam); the image object goes with the row. */
+    async remove(args: DeleteAdminGalleryPhotoArgs): Promise<void> {
+      const res = await raw.api.v1.admin['gallery-photos'][':id'].$delete(args);
+      if (!res.ok) {
+        await unwrapError(res);
+      }
+    },
   };
 }
 
@@ -428,6 +513,13 @@ export function adminTestimonials(raw: RpcClient) {
     async setOrder(json: TestimonialOrderArgs): Promise<Testimonial[]> {
       const res = await raw.api.v1.admin.testimonials['order'].$put({ json });
       return unwrap(res, testimonialSchema.array());
+    },
+    /** DELETE /api/v1/admin/testimonials/:id — 204 (the delete seam); testimonials are blocked by nothing. */
+    async remove(args: DeleteAdminTestimonialArgs): Promise<void> {
+      const res = await raw.api.v1.admin.testimonials[':id'].$delete(args);
+      if (!res.ok) {
+        await unwrapError(res);
+      }
     },
   };
 }

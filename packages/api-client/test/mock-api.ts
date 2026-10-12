@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { z } from 'zod';
 
 // Fixture rows shaped to the shared schemas (valid v4 uuids — zod's z.uuid()
 // enforces RFC 4122 version/variant bits, so all-ones constants fail parse).
@@ -193,6 +194,40 @@ const makeApi = ({
     )
   );
 
+  // M7 #213: a minimal admin subtree — the delete wrappers' loopback leg.
+  // The mock mirrors the real DELETE envelopes: 204 with no body on success,
+  // the blocked 400 with details, the per-entity 404, and the uuid-param 400.
+  const admin = new Hono<MockEnv>()
+    .delete('/branches/:id', (c) => {
+      const id = c.req.param('id');
+      if (!z.uuid().safeParse(id).success) {
+        return c.json(
+          {
+            error: 'Invalid request payload.',
+            details: [{ path: ['id'], message: 'Invalid UUID' }],
+          },
+          400
+        );
+      }
+      if (id !== '11111111-1111-4111-8111-111111111111') {
+        return c.json({ error: 'Branch not found.' }, 404);
+      }
+      return c.body(null, 204);
+    })
+    .delete('/print-sizes/:id', (c) => {
+      const id = c.req.param('id');
+      if (id === '66666666-6666-4666-8666-666666666666') {
+        return c.json(
+          {
+            error: 'Blocked by existing references.',
+            details: [{ path: ['inclusions'], message: 'used by 3 package inclusion(s)' }],
+          },
+          400
+        );
+      }
+      return c.body(null, 204);
+    });
+
   const v1 = new Hono<MockEnv>()
     .use('*', async (_c, next) => {
       await next();
@@ -202,7 +237,8 @@ const makeApi = ({
     .route('/studio-services', studioServices)
     .route('/addon-services', addonServices)
     .route('/gallery', gallery)
-    .route('/testimonials', testimonials);
+    .route('/testimonials', testimonials)
+    .route('/admin', admin);
 
   return new Hono<MockEnv>()
     .use('*', async (_c, next) => {

@@ -47,7 +47,7 @@ describe('auditLogSearchSchema (tolerant parse — invalid drops, never throws)'
     // unknown enum value is absent, and the rest of the search survives.
     const dropped = auditLogSearchSchema.parse({
       entity: 'not-an-entity',
-      action: 'delete',
+      action: 'purge',
       actor: 'owner@studio.test',
     });
     expect(dropped.entity).toBeUndefined();

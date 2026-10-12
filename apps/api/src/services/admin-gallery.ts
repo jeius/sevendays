@@ -29,7 +29,9 @@ import { commitUpload, resolveMediaUrl } from './media.js';
 // 1..N in payload order. Reorder is atomic and TOTAL: the payload must list
 // EVERY row of the collection exactly once (deactivated included — the
 // admin grid manages them all); a mismatch answers 400 and touches nothing.
-// No hard deletes anywhere. (The gallery-photos section joins in Task 8.)
+// Hard deletes live in the admin-delete service since M7 #213 (guarded:
+// nothing may reference the row); this module keeps the positioned
+// collections' reads and writes.
 // M6 #185: every persist's transaction ends with its audit row; position
 // reads and bucket I/O stay outside the transactions.
 

@@ -351,3 +351,23 @@ describe('the gallery-photo commit seam (media_failure × commit + the photo mut
     ).toEqual([]);
   });
 });
+
+describe('delete mutation lines (M7 #213)', () => {
+  it('DELETE → one admin_mutation line with method DELETE and the deleted id', async () => {
+    const lines = captureLines();
+    const res = await authed(
+      'DELETE',
+      `/api/v1/admin/branches/${ids.branchB}`,
+      'mut-delete-branch@sevendays.test'
+    );
+    expect(res.status).toBe(204);
+    const events = mutations(lines);
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({
+      evt: 'admin_mutation',
+      entity: 'branch',
+      entityId: ids.branchB,
+      method: 'DELETE',
+    });
+  });
+});
