@@ -2,10 +2,12 @@ import { index, integer, pgTable, timestamp, unique, uuid } from 'drizzle-orm/pg
 import { addonServices } from './addon-services.js';
 import { appointments } from './appointments.js';
 
-// Booking-time attachment of paid add-on services. price_cents snapshots the
+// Booking-time attachment of add-on services. price_cents snapshots the
 // add-on's flat price at booking — later price edits don't rewrite history.
-// The unique pair means an add-on attaches at most once per appointment;
-// quantity lives in the inclusions model, not here.
+// Nullable since migration 0009 (ADR-0020): null = the add-on was unpriced
+// at booking; priced entries keep their snapshot. The unique pair means an
+// add-on attaches at most once per appointment; quantity lives in the
+// inclusions model, not here.
 export const appointmentAddonServices = pgTable(
   'appointment_addon_services',
   {
@@ -16,7 +18,7 @@ export const appointmentAddonServices = pgTable(
     addonServiceId: uuid('addon_service_id')
       .notNull()
       .references(() => addonServices.id),
-    priceCents: integer('price_cents').notNull(),
+    priceCents: integer('price_cents'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
