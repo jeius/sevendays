@@ -201,3 +201,33 @@ it('testimonials.list surfaces the uniform 404 envelope as ApiClientError', asyn
   expect((err as ApiClientError).status).toBe(404);
   expect((err as ApiClientError).details).toEqual({ error: 'Not found.' });
 });
+
+it('admin.branches.remove resolves undefined on 204 — the delete seam never unwraps a body', async () => {
+  const client = clientFor(mockApi);
+  await expect(
+    client.admin.branches.remove({ param: { id: '11111111-1111-4111-8111-111111111111' } })
+  ).resolves.toBeUndefined();
+});
+
+it('a blocked delete surfaces as ApiClientError with status 400 and the blocked details', async () => {
+  const client = clientFor(mockApi);
+  const err = await client.admin.printSizes
+    .remove({ param: { id: '66666666-6666-4666-8666-666666666666' } })
+    .catch((e) => e);
+  expect(err).toBeInstanceOf(ApiClientError);
+  expect((err as ApiClientError).status).toBe(400);
+  expect((err as ApiClientError).details).toEqual({
+    error: 'Blocked by existing references.',
+    details: [{ path: ['inclusions'], message: 'used by 3 package inclusion(s)' }],
+  });
+});
+
+it('admin delete 404 surfaces as ApiClientError through the unwrap gate', async () => {
+  const client = clientFor(mockApi);
+  const err = await client.admin.branches
+    .remove({ param: { id: 'f0000000-0000-4000-8000-000000000000' } })
+    .catch((e) => e);
+  expect(err).toBeInstanceOf(ApiClientError);
+  expect((err as ApiClientError).status).toBe(404);
+  expect((err as ApiClientError).details).toEqual({ error: 'Branch not found.' });
+});

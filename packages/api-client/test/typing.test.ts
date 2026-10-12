@@ -31,3 +31,10 @@ it('create input is the RPC-inferred zod input shape', () => {
   // (coerce input is `unknown`); pin that a string is always acceptable.
   expectTypeOf<string>().toMatchTypeOf<CreateInput['scheduledAt']>();
 });
+
+it('delete wrappers resolve void with the param-id args (the 204 seam)', () => {
+  expectTypeOf(client.admin.branches.remove).returns.toEqualTypeOf<Promise<void>>();
+  type DeleteBranchEndpoint = RpcClient['api']['v1']['admin']['branches'][':id']['$delete'];
+  type DeleteBranchArgs = InferRequestType<DeleteBranchEndpoint>;
+  expectTypeOf<DeleteBranchArgs>().toEqualTypeOf<{ param: { id: string } }>();
+});
