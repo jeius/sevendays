@@ -669,3 +669,27 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
     expect(all.every((row) => row.action === 'create')).toBe(true);
   });
 });
+
+describe('unpriced saves (ADR-0020 — add-on services)', () => {
+  it('POST with priceCents null creates an unpriced add-on — 201, wire echoes null', async () => {
+    const res = await authed(
+      'POST',
+      '/api/v1/admin/addon-services',
+      'admin-addons-unpriced@sevendays.test',
+      { name: 'Oncall Stylist', description: 'Quoted on the day.', priceCents: null }
+    );
+    expect(res.status).toBe(201);
+    expect(((await res.json()) as { priceCents: number | null }).priceCents).toBeNull();
+  });
+
+  it('PUT with priceCents null flips the priced fixture unpriced — 200, wire echoes null', async () => {
+    const res = await authed(
+      'PUT',
+      `/api/v1/admin/addon-services/${ids.addonMakeup}`,
+      'admin-addons-unpriced2@sevendays.test',
+      { name: 'Makeup', description: 'On-site makeup service', priceCents: null, isActive: true }
+    );
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { priceCents: number | null }).priceCents).toBeNull();
+  });
+});

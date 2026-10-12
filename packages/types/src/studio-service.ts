@@ -8,7 +8,9 @@ export const studioServiceSchema = z.object({
   id: z.uuid(),
   name: z.string().min(1),
   description: z.string().min(1),
-  priceCents: z.number().int().nonnegative(),
+  // Null = unpriced (ADR-0020): inquiry-priced offerings are fully bookable;
+  // no sentinel value. Nullable on reads AND writes alike.
+  priceCents: z.number().int().nonnegative().nullable(),
   isActive: z.boolean().default(true),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),

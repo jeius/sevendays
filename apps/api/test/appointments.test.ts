@@ -1,4 +1,10 @@
-import { appointmentAddonServices, appointments as appointmentsTable } from '@sevendays/db';
+import {
+  addonServices as addonServicesTable,
+  appointmentAddonServices,
+  appointments as appointmentsTable,
+  servicePackages as servicePackagesTable,
+  studioServices as studioServicesTable,
+} from '@sevendays/db';
 import { createAppointmentSchema } from '@sevendays/types';
 import { eq } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -906,5 +912,64 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
         expect(allowed.has(key)).toBe(true);
       }
     }
+  });
+});
+
+describe('unpriced bookings (ADR-0020)', () => {
+  // The CMS checkbox is the UI path; these pin the wire contract: null is
+  // the unpriced state end to end, and priced snapshots never rewrite.
+  // Catalog prices are nulled with direct db updates — the row-level truth,
+  // not another API call.
+
+  it('books an unpriced package — 201, null offering snapshot, priced add-on lines retained', async () => {
+    await db
+      .update(servicePackagesTable)
+      .set({ priceCents: null })
+      .where(eq(servicePackagesTable.id, ids.packageCombined));
+    const created = (await createViaApi(payload())) as {
+      bookedPriceCents: number | null;
+      addonServices: { addonServiceId: string; name: string; priceCents: number | null }[];
+    };
+    expect(created.bookedPriceCents).toBeNull();
+    expect(created.addonServices).toEqual([
+      { addonServiceId: ids.addonMakeup, name: 'Makeup', priceCents: 12000 },
+    ]);
+  });
+
+  it('books an unpriced studio service — 201, null snapshot (both offering paths unpriced-able)', async () => {
+    await db
+      .update(studioServicesTable)
+      .set({ priceCents: null })
+      .where(eq(studioServicesTable.id, ids.servicePortrait));
+    const created = (await createViaApi(
+      payload({ servicePackageId: null, studioServiceId: ids.servicePortrait })
+    )) as { bookedPriceCents: number | null };
+    expect(created.bookedPriceCents).toBeNull();
+  });
+
+  it('snapshots a null entry for an unpriced add-on while priced add-ons keep theirs', async () => {
+    await db
+      .update(addonServicesTable)
+      .set({ priceCents: null })
+      .where(eq(addonServicesTable.id, ids.addonMakeup));
+    const created = (await createViaApi(
+      payload({ addonServiceIds: [ids.addonMakeup, ids.addonHairstyle] })
+    )) as { addonServices: { addonServiceId: string; priceCents: number | null }[] };
+    const byId = new Map(created.addonServices.map((entry) => [entry.addonServiceId, entry]));
+    expect(byId.get(ids.addonMakeup)?.priceCents).toBeNull();
+    expect(byId.get(ids.addonHairstyle)?.priceCents).toBe(6000);
+  });
+
+  it("ADR-0020's invariant: a snapshot taken while priced keeps the price after the row goes unpriced", async () => {
+    const created = (await createViaApi(payload())) as { id: string };
+    await db
+      .update(servicePackagesTable)
+      .set({ priceCents: null })
+      .where(eq(servicePackagesTable.id, ids.packageCombined));
+    const res = await app.request(`/api/v1/appointments/${created.id}`, undefined, testEnv(url));
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { bookedPriceCents: number | null }).bookedPriceCents).toBe(
+      150000
+    );
   });
 });

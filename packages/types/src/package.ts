@@ -8,7 +8,9 @@ export const servicePackageSchema = z.object({
   id: z.uuid(),
   name: z.string().min(1),
   description: z.string().min(1),
-  priceCents: z.number().int().nonnegative(),
+  // Null = unpriced (ADR-0020): inquiry-priced offerings are fully bookable;
+  // no sentinel value. Nullable on reads AND writes alike.
+  priceCents: z.number().int().nonnegative().nullable(),
   // The catalog specifies no durations and availability (ADR-0005) ignores
   // duration — nullable until the client supplies real values.
   durationMinutes: z.number().int().positive().nullable(),
@@ -74,7 +76,7 @@ export type PackageSaveInclusionInput = z.infer<typeof packageSaveInclusionSchem
 const packageSaveObjectSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
-  priceCents: z.number().int().nonnegative(),
+  priceCents: z.number().int().nonnegative().nullable(),
   // The catalog specifies no durations and availability (ADR-0005) ignores
   // duration — nullable until the client supplies real values.
   durationMinutes: z.number().int().positive().nullable(),

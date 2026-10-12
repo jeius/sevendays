@@ -657,3 +657,27 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
     expect(name[0]?.name).toBe('Combined Package'); // the rename rolled back — and nothing recorded it
   });
 });
+
+describe('unpriced saves (ADR-0020)', () => {
+  it('POST with priceCents null creates an unpriced package — 201, wire echoes null', async () => {
+    const res = await authed(
+      'POST',
+      '/api/v1/admin/service-packages',
+      'admin-pkg-unpriced@sevendays.test',
+      save({ name: 'Inquiry Only Package', priceCents: null })
+    );
+    expect(res.status).toBe(201);
+    expect(((await res.json()) as { priceCents: number | null }).priceCents).toBeNull();
+  });
+
+  it('PUT with priceCents null flips the priced fixture unpriced — 200, wire echoes null', async () => {
+    const res = await authed(
+      'PUT',
+      `/api/v1/admin/service-packages/${ids.packageCombined}`,
+      'admin-pkg-unpriced2@sevendays.test',
+      put({ priceCents: null })
+    );
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { priceCents: number | null }).priceCents).toBeNull();
+  });
+});
