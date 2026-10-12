@@ -47,16 +47,19 @@ import { auditQueries } from '#/lib/audit/queries';
 const ALL = 'all';
 
 // The action badges' colors (the owner's variant ruling, 2026-10-10: A with
-// red/yellow/green/blue on the four actions): create → green, update →
-// blue, deactivate → red, reorder → amber — tinted bg + matched border +
-// dark text of the same hue, over the outline variant (cn/tw-merge lets
-// these override the variant's border/text). Default-palette utilities, the
+// red/yellow/green/blue on the four actions; delete → violet joins with M7
+// #213, controller-ruled 2026-10-12 for distinctness — retunable at the
+// variants step): create → green, update → blue, deactivate → red,
+// reorder → amber, delete → violet — tinted bg + matched border + dark
+// text of the same hue, over the outline variant (cn/tw-merge lets these
+// override the variant's border/text). Default-palette utilities, the
 // #202 app-local-token pattern; the keys are the enum, only colors tune.
 export const AUDIT_ACTION_BADGE_CLASSES: Record<AuditAction, string> = {
   create: 'border-green-200 bg-green-50 text-green-700',
   update: 'border-blue-200 bg-blue-50 text-blue-700',
   deactivate: 'border-red-200 bg-red-50 text-red-700',
   reorder: 'border-amber-200 bg-amber-50 text-amber-700',
+  delete: 'border-violet-200 bg-violet-50 text-violet-700',
 };
 
 function FilterSelect({

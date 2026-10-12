@@ -8,7 +8,10 @@ import { z } from 'zod';
 // mirrors packages/db's audit_log table 1:1: the write side inserts rows
 // that satisfy it, and the #188 viewer parses rows through it. No
 // before/after fields exist anywhere in the contract (v2-if-ever).
-export const auditActionSchema = z.enum(['create', 'update', 'deactivate', 'reorder']);
+// 'delete' joined with M7 #213 (guarded DELETE, owner-confirmed 2026-10-12):
+// a committed delete is a committed admin mutation — one audit row, in the
+// delete's own transaction. The db column is text; no migration rides this.
+export const auditActionSchema = z.enum(['create', 'update', 'deactivate', 'reorder', 'delete']);
 
 export type AuditAction = z.infer<typeof auditActionSchema>;
 
