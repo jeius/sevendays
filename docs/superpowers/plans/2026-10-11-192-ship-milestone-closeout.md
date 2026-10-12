@@ -198,7 +198,7 @@ Fill the walk log's Pre-flight lines with this task's outputs (dates, the flag's
 
 OWNER, dashboard, per runbook § A1 items 1–5: create the account (note `<account-id>`); set the account's workers.dev subdomain to `<subdomain>`; keep membership minimal (owner seat + at most one operator); mint the **ship token** (My Profile → API Tokens → Create Token, Custom) with exactly Account scopes `Workers Scripts:Edit`, `Workers R2 Storage:Edit`, `Cloudflare Images:Edit`, `Account Settings:Read`, `User Details:Read`; subscribe Images (free) if not already.
 
-OWNER then fills the values file: `SHIP_ACCOUNT_ID`, `SHIP_SUBDOMAIN`, `SHIP_TOKEN`.
+OWNER then fills the values file: `SHIP_ACCOUNT_ID`, `SHIP_SUBDOMAIN` (the **bare label** — the dashboard shows `<label>.workers.dev`; fill `<label>` only, commands append the suffix), `SHIP_TOKEN` (a user or account token both verify — the account-scoped probe endpoint `/accounts/<account-id>/tokens/verify` covers `cfat_`-prefixed account tokens).
 
 - [ ] **Step 2: AGENT — verify the ship token (A1's evidence)**
 
@@ -323,21 +323,25 @@ set -a; source .scratch/192-ship-values.env; set +a
 export CLOUDFLARE_API_TOKEN="$SHIP_TOKEN" CLOUDFLARE_ACCOUNT_ID="$SHIP_ACCOUNT_ID"
 pnpm --filter @sevendays/api exec wrangler r2 bucket create sevendays-media
 cat > .scratch/192-cors.json <<EOF
-[
-  {
-    "AllowedOrigins": [
-      "http://localhost:3000",
-      "https://sevendays-v1-admin.${SHIP_SUBDOMAIN}.workers.dev",
-      "https://admin.${SHIP_DOMAIN}"
-    ],
-    "AllowedMethods": ["PUT"],
-    "AllowedHeaders": ["content-type"],
-    "ExposeHeaders": ["ETag"],
-    "MaxAgeSeconds": 3600
-  }
-]
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": [
+          "http://localhost:3000",
+          "https://sevendays-v1-admin.${SHIP_SUBDOMAIN}.workers.dev",
+          "https://admin.${SHIP_DOMAIN}"
+        ],
+        "methods": ["PUT"],
+        "headers": ["content-type"]
+      },
+      "exposeHeaders": ["ETag"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+}
 EOF
-pnpm --filter @sevendays/api exec wrangler r2 bucket cors set sevendays-media --file .scratch/192-cors.json
+pnpm --filter @sevendays/api exec wrangler r2 bucket cors set sevendays-media --file /home/jeius/Projects/sevendays/.scratch/192-cors.json -y
 pnpm --filter @sevendays/api exec wrangler r2 bucket lifecycle add sevendays-media tmp-gc tmp/ --expire-days 1 -y
 pnpm --filter @sevendays/api exec wrangler r2 bucket dev-url enable sevendays-media
 pnpm --filter @sevendays/api exec wrangler r2 bucket dev-url get sevendays-media
