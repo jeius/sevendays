@@ -84,3 +84,17 @@ describe('selectFeaturedPackages', () => {
     expect(result.packages).toEqual([]);
   });
 });
+
+it('unpriced packages lead the strip, priced ascend after (owner ruling 2026-10-12)', () => {
+  const unpricedZ = pkg({ name: 'Zephyr Wedding', priceCents: null, isFeatured: true });
+  const unpricedA = pkg({ name: 'Atelier Prenup', priceCents: null, isFeatured: true });
+  const priced = pkg({ ...B, isFeatured: true });
+  const cheaper = pkg({ ...BASIC, isFeatured: true });
+  const { packages } = selectFeaturedPackages([priced, unpricedZ, cheaper, unpricedA]);
+  expect(packages.map((p) => p.name)).toEqual([
+    'Atelier Prenup',
+    'Zephyr Wedding',
+    'Basic Package',
+    'Package B',
+  ]);
+});

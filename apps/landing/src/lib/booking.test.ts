@@ -5,6 +5,7 @@ import type {
   StudioServiceWithBranches,
 } from '@sevendays/types';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { BookingCatalog } from './booking';
 import {
   addonTotalCents,
   applicableAddonsFor,
@@ -366,5 +367,31 @@ describe('buildCreatePayload', () => {
     expect(payload.servicePackageId).toBeNull();
     expect(payload.addonServiceIds).toEqual([]);
     expect(payload.notes).toBeUndefined();
+  });
+});
+
+describe('unpriced totals (ADR-0020)', () => {
+  const UNPRICED_PKG_ID = '00000000-0000-4000-8000-0000000000a1';
+  const PRICED_PKG_ID = '00000000-0000-4000-8000-0000000000a2';
+  const UNPRICED_ADDON_ID = '00000000-0000-4000-8000-0000000000a3';
+  const PRICED_ADDON_ID = '00000000-0000-4000-8000-0000000000a4';
+  const unpricedCatalog: BookingCatalog = {
+    branches: [branch('00000000-0000-4000-8000-0000000000a5')],
+    packages: [{ ...pkg(UNPRICED_PKG_ID, 0), priceCents: null }, pkg(PRICED_PKG_ID, 90000)],
+    services: [],
+    addons: [{ ...addon(UNPRICED_ADDON_ID, 0), priceCents: null }, addon(PRICED_ADDON_ID, 12000)],
+  };
+
+  it('an unpriced offering nulls offeringPriceCents and totalCents — never a ₱0 stand-in', () => {
+    const offering = { kind: 'package' as const, id: UNPRICED_PKG_ID };
+    expect(offeringPriceCents(offering, unpricedCatalog)).toBeNull();
+    expect(totalCents(offering, [PRICED_ADDON_ID], unpricedCatalog)).toBeNull();
+  });
+
+  it('a SELECTED unpriced add-on nulls the total; an unselected one does not; a found-priced booking still totals', () => {
+    const offering = { kind: 'package' as const, id: PRICED_PKG_ID };
+    expect(totalCents(offering, [UNPRICED_ADDON_ID], unpricedCatalog)).toBeNull();
+    expect(totalCents(offering, [PRICED_ADDON_ID], unpricedCatalog)).toBe(102000);
+    expect(totalCents(offering, [], unpricedCatalog)).toBe(90000);
   });
 });

@@ -6,7 +6,9 @@
 // simulated past-datetime floor (the API owns it — the form renders the
 // hint and the typed rejection card), and packagePriceCents (renamed
 // bookedPriceCents in ticket 02; nothing here reads a snapshot — the
-// pre-submit rail keeps LIVE prices, spec ruling).
+// pre-submit rail keeps LIVE prices, spec ruling); the totals are
+// null-honest since ADR-0020 — an unpriced offering or selected add-on
+// nulls the Total (never a ₱0 stand-in).
 
 import type { CreateAppointmentArgs } from '@sevendays/api-client';
 import type {
@@ -124,27 +126,36 @@ export function applicableAddonsFor(offering: Offering, catalog: BookingCatalog)
   return catalog.addons.filter((a) => applicable.has(a.id));
 }
 
-export function offeringPriceCents(offering: Offering, catalog: BookingCatalog): number {
+export function offeringPriceCents(offering: Offering, catalog: BookingCatalog): number | null {
   if (!offering) return 0;
-  if (offering.kind === 'package') {
-    return catalog.packages.find((p) => p.id === offering.id)?.priceCents ?? 0;
-  }
-  return catalog.services.find((s) => s.id === offering.id)?.priceCents ?? 0;
+  const row =
+    offering.kind === 'package'
+      ? catalog.packages.find((p) => p.id === offering.id)
+      : catalog.services.find((s) => s.id === offering.id);
+  // Not-found keeps today's 0 (a vanished row mid-flow is not "unpriced");
+  // a FOUND row's null IS the unpriced state (ADR-0020) and flows through.
+  return row ? row.priceCents : 0;
 }
 
-export function addonTotalCents(addonIds: string[], catalog: BookingCatalog): number {
-  return addonIds.reduce(
-    (sum, id) => sum + (catalog.addons.find((a) => a.id === id)?.priceCents ?? 0),
-    0
-  );
+export function addonTotalCents(addonIds: string[], catalog: BookingCatalog): number | null {
+  let sum = 0;
+  for (const id of addonIds) {
+    const row = catalog.addons.find((a) => a.id === id);
+    if (row && row.priceCents === null) return null; // an unpriced component omits the Total
+    sum += row?.priceCents ?? 0; // not-found contributes 0 (today's semantics)
+  }
+  return sum;
 }
 
 export function totalCents(
   offering: Offering,
   addonIds: string[],
   catalog: BookingCatalog
-): number {
-  return offeringPriceCents(offering, catalog) + addonTotalCents(addonIds, catalog);
+): number | null {
+  const offeringPrice = offeringPriceCents(offering, catalog);
+  const addons = addonTotalCents(addonIds, catalog);
+  if (offeringPrice === null || addons === null) return null;
+  return offeringPrice + addons;
 }
 
 /** Steps: 1 branch · 2 offering · 3 add-ons · 4 date/time · 5 contact. */

@@ -13,9 +13,18 @@ import type {
   StudioServiceWithBranches,
 } from '@sevendays/types';
 
-/** Total due, from the record only: offering snapshot + add-on entry snapshots. */
-export function confirmationTotalCents(record: AppointmentWithAddons): number {
-  return record.bookedPriceCents + record.addonServices.reduce((sum, a) => sum + a.priceCents, 0);
+/**
+ * Total due, from the record only: offering snapshot + add-on entry
+ * snapshots. Null (ADR-0020) when ANY snapshot is unpriced — the Total is
+ * omitted entirely; priced add-on entries keep their per-item lines
+ * elsewhere. Never a ₱0 stand-in.
+ */
+export function confirmationTotalCents(record: AppointmentWithAddons): number | null {
+  if (record.bookedPriceCents === null) return null;
+  if (record.addonServices.some((a) => a.priceCents === null)) return null;
+  return (
+    record.bookedPriceCents + record.addonServices.reduce((sum, a) => sum + (a.priceCents ?? 0), 0)
+  ); // guarded above
 }
 
 /** Branch display name joined from the branches read; '—' when unresolvable. */
