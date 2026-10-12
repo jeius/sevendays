@@ -94,7 +94,7 @@ export function pageWindow(
   };
 }
 
-// Filter-option and cell copy — the nine entity families and four
+// Filter-option and cell copy — the nine entity families and five
 // actions, human-labeled once (owner-ratifiable at the variants step).
 export const AUDIT_ENTITY_LABELS: Record<AuditEntity, string> = {
   branch: 'Branches',
@@ -113,6 +113,7 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   update: 'Update',
   deactivate: 'Deactivate',
   reorder: 'Reorder',
+  delete: 'Delete',
 };
 
 export function hasActiveFilters(search: AuditLogSearch): boolean {

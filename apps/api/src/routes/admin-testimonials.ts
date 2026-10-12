@@ -6,6 +6,7 @@ import {
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { logAdminMutation } from '../observability/events.js';
+import { deleteAdminTestimonial } from '../services/admin-delete.js';
 import {
   createAdminTestimonial,
   getAdminTestimonial,
@@ -72,4 +73,16 @@ export const adminTestimonials = new Hono<ApiEnv>()
       logAdminMutation(c, { entity: 'testimonial', entityId: result.row.id });
       return c.json(result.row);
     }
-  );
+  )
+  .delete('/:id', validatedParam(z.object({ id: z.uuid() })), async (c) => {
+    const { id } = c.req.valid('param');
+    const result = await deleteAdminTestimonial(c.get('db'), auditActor(c), id);
+    if (!result.ok) {
+      if (result.reason === 'not_found') {
+        return notFound(c, 'Testimonial not found.');
+      }
+      return badRequest(c, result.message, result.details);
+    }
+    logAdminMutation(c, { entity: 'testimonial', entityId: id });
+    return c.body(null, 204);
+  });

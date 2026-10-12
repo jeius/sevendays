@@ -20,14 +20,14 @@ const fullRow = {
 };
 
 describe('auditActionSchema', () => {
-  it('accepts exactly the four spec-pinned values', () => {
-    for (const action of ['create', 'update', 'deactivate', 'reorder']) {
+  it('accepts exactly the five spec-pinned values', () => {
+    for (const action of ['create', 'update', 'deactivate', 'reorder', 'delete']) {
       expect(auditActionSchema.parse(action)).toBe(action);
     }
   });
 
-  it('rejects anything else — delete is not in the vocabulary', () => {
-    expect(auditActionSchema.safeParse('delete').success).toBe(false);
+  it('rejects a non-action string', () => {
+    expect(auditActionSchema.safeParse('purge').success).toBe(false);
   });
 });
 
