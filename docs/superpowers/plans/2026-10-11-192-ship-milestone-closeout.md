@@ -482,7 +482,7 @@ printf '%s' "$SHIP_POSTHOG_PROJECT_ID"   | pnpm exec wrangler secret put POSTHOG
 unset CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID
 ```
 
-Expected: eleven `✨ Success!` outputs (values never printed). A changed worker secret is live immediately — no redeploy needed.
+Expected: ten `✨ Success!` outputs (five on the api, five on the admin; the landing worker carries no secrets — values never printed). A changed worker secret is live immediately — no redeploy needed.
 
 - [ ] **Step 6: AGENT + OWNER — the A6 evidence curls + the dashboard render**
 
