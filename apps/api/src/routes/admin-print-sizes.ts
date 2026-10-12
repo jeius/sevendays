@@ -2,6 +2,7 @@ import { createPrintSizeSchema, updatePrintSizeSchema } from '@sevendays/types';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { logAdminMutation } from '../observability/events.js';
+import { deleteAdminPrintSize } from '../services/admin-delete.js';
 import {
   createAdminPrintSize,
   getAdminPrintSize,
@@ -59,4 +60,16 @@ export const adminPrintSizes = new Hono<ApiEnv>()
       logAdminMutation(c, { entity: 'print-size', entityId: result.row.id });
       return c.json(result.row);
     }
-  );
+  )
+  .delete('/:id', validatedParam(z.object({ id: z.uuid() })), async (c) => {
+    const { id } = c.req.valid('param');
+    const result = await deleteAdminPrintSize(c.get('db'), auditActor(c), id);
+    if (!result.ok) {
+      if (result.reason === 'not_found') {
+        return notFound(c, 'Print size not found.');
+      }
+      return badRequest(c, result.message, result.details);
+    }
+    logAdminMutation(c, { entity: 'print-size', entityId: id });
+    return c.body(null, 204);
+  });
