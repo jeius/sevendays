@@ -10,8 +10,15 @@ export function selectFeaturedPackages(packages: ServicePackageRead[]): {
   heading: string;
   packages: ServicePackageRead[];
 } {
-  const byPrice = (a: ServicePackageRead, b: ServicePackageRead) =>
-    a.priceCents - b.priceCents || a.name.localeCompare(b.name);
+  // ADR-0020 + owner ruling 2026-10-12: unpriced packages LEAD the strip
+  // (name-ordered within the group), priced follow ascending (name
+  // tiebreak) — inquiry-priced reads as the headliner, not the tail.
+  const byPrice = (a: ServicePackageRead, b: ServicePackageRead) => {
+    if (a.priceCents === null && b.priceCents === null) return a.name.localeCompare(b.name);
+    if (a.priceCents === null) return -1;
+    if (b.priceCents === null) return 1;
+    return a.priceCents - b.priceCents || a.name.localeCompare(b.name);
+  };
   const featured = packages.filter((p) => p.isFeatured).sort(byPrice);
   if (featured.length > 0) {
     return { heading: FEATURED_HEADING, packages: featured };

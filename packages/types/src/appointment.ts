@@ -44,8 +44,10 @@ export const appointmentFieldsSchema = z.object({
   kind: appointmentKindSchema.default('scheduled'),
   // Booking-time snapshot of the booked offering's price — written by the
   // server, never supplied by the client. Renamed from packagePriceCents
-  // (M2 ticket 02): it now snapshots either offering kind.
-  bookedPriceCents: z.number().int().nonnegative(),
+  // (M2 ticket 02): it now snapshots either offering kind. Null = the booked
+  // item was unpriced (ADR-0020): every appointment carries its quoted price
+  // WHEN the booked item had one.
+  bookedPriceCents: z.number().int().nonnegative().nullable(),
   notes: z.string().nullable(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),

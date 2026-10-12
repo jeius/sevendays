@@ -366,3 +366,25 @@ describe('packageSaveInclusionSchema (the inclusion row inside the save)', () =>
     expect(ungranted.success).toBe(true);
   });
 });
+
+describe('unpriced catalogs (ADR-0020)', () => {
+  it('the row shape parses a null price (unpriced package)', () => {
+    const parsed = servicePackageSchema.parse({ ...fullRow, priceCents: null });
+    expect(parsed.priceCents).toBeNull();
+  });
+
+  it('create accepts a null price — the unchecked Priced save', () => {
+    const parsed = createServicePackageSchema.parse({
+      name: 'Inquiry Package',
+      description: 'Priced on inquiry.',
+      priceCents: null,
+      durationMinutes: null,
+      frames: [],
+      inclusions: [],
+    });
+    // Assert on the parsed OUTPUT: null survives, the defaults applied.
+    expect(parsed.priceCents).toBeNull();
+    expect(parsed.isActive).toBe(true);
+    expect(parsed.isFeatured).toBe(false);
+  });
+});

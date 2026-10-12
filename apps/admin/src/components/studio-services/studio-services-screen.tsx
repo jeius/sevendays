@@ -163,6 +163,7 @@ export function StudioServicesScreen() {
   const nameId = useId();
   const descriptionId = useId();
   const priceId = useId();
+  const hasPriceId = useId();
   const activeId = useId();
 
   // Badge-join vocabulary: id → branch for the row's bookableBranchIds, and
@@ -681,26 +682,48 @@ export function StudioServicesScreen() {
           </Field>
           <Field>
             <FieldLabel htmlFor={priceId}>Price</FieldLabel>
-            <div className='relative'>
-              <span className='text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-sm'>
-                ₱
-              </span>
-              <Input
-                id={priceId}
-                type='number'
-                className='pl-7 tabular-nums'
-                value={editorState.priceCents / 100}
-                onChange={(e) =>
+            <label htmlFor={hasPriceId} className='flex items-center gap-2 text-sm font-medium'>
+              <Checkbox
+                id={hasPriceId}
+                checked={editorState.hasPrice}
+                onCheckedChange={(checked) =>
                   setEditorState({
                     ...editorState,
-                    // The pinned controlled mapping (prototype-verbatim):
-                    // pesos in the box, centavos in state.
-                    priceCents: Math.round(Number(e.target.value) * 100) || 0,
+                    // Either flip discards the entry — ADR-0020's
+                    // re-entry contract.
+                    hasPrice: checked === true,
+                    priceCents: Number.NaN,
                   })
                 }
               />
-            </div>
-            <FieldDescription>Stored as centavos.</FieldDescription>
+              Priced
+            </label>
+            {editorState.hasPrice && (
+              <div className='relative'>
+                <span className='text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-sm'>
+                  ₱
+                </span>
+                <Input
+                  id={priceId}
+                  type='number'
+                  className='pl-7 tabular-nums'
+                  value={Number.isNaN(editorState.priceCents) ? '' : editorState.priceCents / 100}
+                  onChange={(e) =>
+                    setEditorState({
+                      ...editorState,
+                      // '' maps to NaN (nothing entered) — never a silent 0.
+                      priceCents:
+                        e.target.value === ''
+                          ? Number.NaN
+                          : Math.round(Number(e.target.value) * 100),
+                    })
+                  }
+                />
+              </div>
+            )}
+            <FieldDescription>
+              {editorState.hasPrice ? 'Stored as centavos.' : 'No price — bookable on inquiry.'}
+            </FieldDescription>
             {fieldErrors.price ? (
               <p className='text-destructive text-xs'>{fieldErrors.price}</p>
             ) : null}

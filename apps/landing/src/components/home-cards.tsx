@@ -83,7 +83,11 @@ export function ServiceImageCard({ service }: { service: StudioServiceWithBranch
   return (
     <Link
       to='/services'
-      aria-label={`View ${service.name} (₱${(service.priceCents / 100).toFixed(0)})`}
+      aria-label={
+        service.priceCents === null
+          ? `View ${service.name}`
+          : `View ${service.name} (₱${(service.priceCents / 100).toFixed(0)})`
+      }
       className='group border-line-soft relative block h-64 overflow-hidden rounded-xl border shadow-sm focus-visible:ring-brand-focus-ring focus-visible:ring-3 focus-visible:outline-none'
     >
       <img

@@ -204,3 +204,68 @@ describe('studio-service state', () => {
     expect(light.conflictFieldErrors).toBe(pkg.conflictFieldErrors);
   });
 });
+
+describe('unpriced editors (ADR-0020)', () => {
+  // The add-on fixture (the file's other price-bearing row) is parsed inline
+  // inside the round-trip test above — re-parsed here, describe-local.
+  const addon = addonServiceSchema.parse({
+    id: uuid(4),
+    name: 'Rush delivery',
+    description: '48h turnaround.',
+    priceCents: 50000,
+    isActive: true,
+    createdAt: STAMP,
+    updatedAt: STAMP,
+  });
+
+  it('studio-service: an unpriced read opens unchecked with an empty entry; the payload saves null', () => {
+    const state = light.studioServiceStateFromRead({ ...service, priceCents: null });
+    expect(state.hasPrice).toBe(false);
+    expect(Number.isNaN(state.priceCents)).toBe(true);
+    expect(light.buildStudioServicePayload(state).priceCents).toBeNull();
+  });
+
+  it('studio-service: create defaults unchecked (owner ruling 2026-10-12) — the fresh payload saves null', () => {
+    expect(light.newStudioServiceState().hasPrice).toBe(false);
+    expect(light.buildStudioServicePayload(light.newStudioServiceState()).priceCents).toBeNull();
+  });
+
+  it('studio-service: validation demands entry when checked, skips the price entirely when unchecked', () => {
+    const checkedEmpty = light.validateStudioServiceState({
+      ...light.newStudioServiceState(),
+      name: 'n',
+      description: 'd',
+      hasPrice: true,
+    });
+    expect(checkedEmpty.price).toBe('Enter a valid price.');
+    expect(light.validateStudioServiceState(light.newStudioServiceState()).price).toBeUndefined();
+  });
+
+  it('addon: an unpriced read opens unchecked; create defaults unchecked; both payloads save null', () => {
+    const state = light.addonStateFromRead({ ...addon, priceCents: null });
+    expect(state.hasPrice).toBe(false);
+    expect(light.buildAddonPayload(state).priceCents).toBeNull();
+    expect(light.newAddonState().hasPrice).toBe(false);
+    expect(light.buildAddonPayload(light.newAddonState()).priceCents).toBeNull();
+  });
+
+  it('addon: validation demands entry when checked, skips the price when unchecked', () => {
+    const checkedEmpty = light.validateAddonState({
+      ...light.newAddonState(),
+      name: 'n',
+      description: 'd',
+      hasPrice: true,
+    });
+    expect(checkedEmpty.price).toBe('Enter a valid price.');
+    expect(light.validateAddonState(light.newAddonState()).price).toBeUndefined();
+  });
+
+  it('the table flip payloads carry row.priceCents verbatim — null stays null, never a 0', () => {
+    expect(
+      light.buildStudioServiceFlipPayload({ ...service, priceCents: null }, false).priceCents
+    ).toBeNull();
+    expect(
+      light.buildAddonFlipPayload({ ...addon, priceCents: null }, false).priceCents
+    ).toBeNull();
+  });
+});

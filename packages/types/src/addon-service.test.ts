@@ -43,3 +43,27 @@ describe('addonServiceSchema', () => {
     expect(updateAddonServiceSchema).toBe(createAddonServiceSchema);
   });
 });
+
+describe('unpriced catalogs (ADR-0020)', () => {
+  it('the row shape parses a null price (unpriced add-on)', () => {
+    const parsed = addonServiceSchema.parse({
+      id: UUID,
+      name: 'Oncall stylist',
+      description: 'Quoted on the day.',
+      priceCents: null,
+      isActive: true,
+      createdAt: '2026-08-31T00:00:00.000Z',
+      updatedAt: '2026-08-31T00:00:00.000Z',
+    });
+    expect(parsed.priceCents).toBeNull();
+  });
+
+  it('create accepts a null price — the unchecked Priced save', () => {
+    const parsed = createAddonServiceSchema.parse({
+      name: 'Oncall stylist',
+      description: 'Quoted on the day.',
+      priceCents: null,
+    });
+    expect(parsed.priceCents).toBeNull();
+  });
+});

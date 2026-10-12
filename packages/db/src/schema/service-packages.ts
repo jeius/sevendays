@@ -15,7 +15,9 @@ export const servicePackages = pgTable(
     slug: text('slug').notNull().unique('service_packages_slug_unique'),
     // Home-page featured strip flag; owner-controlled via seed until the M5 CMS.
     isFeatured: boolean('is_featured').notNull().default(false),
-    priceCents: integer('price_cents').notNull(),
+    // Null = unpriced (ADR-0020): inquiry-priced offerings live in the
+    // catalog fully bookable; nullable since migration 0009. No sentinel.
+    priceCents: integer('price_cents'),
     // The catalog specifies no durations; availability (ADR-0005) ignores
     // duration. Nullable until the client supplies real values.
     durationMinutes: integer('duration_minutes'),

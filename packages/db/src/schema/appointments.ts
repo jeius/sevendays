@@ -43,8 +43,12 @@ export const appointments = pgTable(
     // Booking-time snapshot of the booked offering's price — the quoted
     // price survives later catalog price changes. Server-written at booking
     // (M1.4). Renamed from package_price_cents (M2 ticket 02): it now
-    // snapshots either offering kind.
-    bookedPriceCents: integer('booked_price_cents').notNull(),
+    // snapshots either offering kind. Nullable since migration 0009
+    // (ADR-0020): null = the booked item was unpriced. The invariant reads
+    // amended — every appointment carries its quoted price WHEN the booked
+    // item had one; a snapshot taken while priced keeps that price forever
+    // (a row later going unpriced never rewrites history).
+    bookedPriceCents: integer('booked_price_cents'),
     notes: text('notes'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

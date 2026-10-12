@@ -40,8 +40,9 @@ import { AnimatePresence, motion } from 'motion/react';
 import type { ComponentProps, ReactElement, ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
-/** Peso format pinned to the landing precedent (test-pinned there as ₱1,100.00). */
-export function peso(cents: number): string {
+/** Peso format pinned to the landing precedent (test-pinned there as ₱1,100.00). Null (unpriced, ADR-0020) renders nothing. */
+export function peso(cents: number | null): string | null {
+  if (cents === null) return null;
   return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
 }
 

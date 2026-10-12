@@ -11,7 +11,9 @@ import {
 export const appointmentAddonEntrySchema = z.object({
   addonServiceId: z.uuid(),
   name: z.string().min(1),
-  priceCents: z.number().int().nonnegative(),
+  // Booking-time snapshot (ADR-0013); null = the add-on was unpriced at
+  // booking (ADR-0020).
+  priceCents: z.number().int().nonnegative().nullable(),
 });
 
 export type AppointmentAddonEntry = z.infer<typeof appointmentAddonEntrySchema>;
