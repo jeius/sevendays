@@ -1,8 +1,16 @@
 import {
+  appointmentAddonServices,
+  appointments as appointmentsTable,
   attires as attiresTable,
   auditLog,
+  branchStudioServices,
+  frames as framesTable,
   galleryCategories as galleryCategoriesTable,
   galleryPhotos as galleryPhotosTable,
+  packageInclusions as inclusionsTable,
+  packageInclusionAttires as junctionsTable,
+  servicePackages as servicePackagesTable,
+  studioServiceAddonServices,
   testimonials as testimonialsTable,
 } from '@sevendays/db';
 import { and, eq } from 'drizzle-orm';
@@ -248,6 +256,333 @@ describe('guarded DELETE — the reference-guarded lookups', () => {
     );
     expect(res.status).toBe(404);
     expect(await res.json()).toEqual({ error: 'Attire not found.' });
+  });
+});
+
+const insertAppointment = async (overrides: Record<string, unknown> = {}) => {
+  const [row] = await db
+    .insert(appointmentsTable)
+    .values({
+      branchId: ids.branchA,
+      servicePackageId: ids.packageCombined,
+      customerName: 'History Holder',
+      customerEmail: 'history@sevendays.test',
+      customerPhone: '+63 900 000 000',
+      scheduledAt: new Date('2026-01-15T09:00:00.000Z'),
+      ...overrides,
+    })
+    .returning({ id: appointmentsTable.id });
+  if (!row) throw new Error('delete suite: appointment insert returned no row');
+  return row.id;
+};
+
+describe('guarded DELETE — the appointment-bearing entities (any Appointment ever)', () => {
+  it('branch with any appointment → 400 with the appointment count', async () => {
+    await insertAppointment({ branchId: ids.branchB, servicePackageId: ids.packageCombined });
+    const res = await authed(
+      'DELETE',
+      `/api/v1/admin/branches/${ids.branchB}`,
+      'delete-branch-blocked@sevendays.test'
+    );
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({
+      error: 'Blocked by existing references.',
+      details: [{ path: ['appointments'], message: 'referenced by 1 appointment(s)' }],
+    });
+  });
+
+  it('a CANCELLED appointment still blocks — "any Appointment ever" is status-blind', async () => {
+    await insertAppointment({
+      branchId: ids.branchB,
+      servicePackageId: ids.packageCombined,
+      status: 'cancelled',
+    });
+    const res = await authed(
+      'DELETE',
+      `/api/v1/admin/branches/${ids.branchB}`,
+      'delete-branch-cancelled@sevendays.test'
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("branch with no appointments deletes clean — its matrix rows cascade, its siblings' stay, the audit row lands", async () => {
+    const res = await authed(
+      'DELETE',
+      `/api/v1/admin/branches/${ids.branchB}`,
+      'delete-branch-ok@sevendays.test'
+    );
+    expect(res.status).toBe(204);
+    const bLinks = await db
+      .select()
+      .from(branchStudioServices)
+      .where(eq(branchStudioServices.branchId, ids.branchB));
+    expect(bLinks).toHaveLength(0);
+    const aLinks = await db
+      .select()
+      .from(branchStudioServices)
+      .where(eq(branchStudioServices.branchId, ids.branchA));
+    expect(aLinks).toHaveLength(3);
+    const [auditRow] = await db
+      .select()
+      .from(auditLog)
+      .where(and(eq(auditLog.entity, 'branch'), eq(auditLog.entityId, ids.branchB)))
+      .limit(1);
+    expect(auditRow?.action).toBe('delete');
+  });
+
+  it('branch unknown id → the uniform per-entity 404', async () => {
+    const res = await authed(
+      'DELETE',
+      '/api/v1/admin/branches/00000000-0000-4000-8000-000000000000',
+      'delete-branch-404@sevendays.test'
+    );
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: 'Branch not found.' });
+  });
+
+  it('add-on attached to any appointment → 400 (the snapshot junction is history)', async () => {
+    const appointmentId = await insertAppointment({ servicePackageId: ids.packageCombined });
+    await db
+      .insert(appointmentAddonServices)
+      .values({ appointmentId, addonServiceId: ids.addonMakeup });
+    const res = await authed(
+      'DELETE',
+      `/api/v1/admin/addon-services/${ids.addonMakeup}`,
+      'delete-addon-blocked@sevendays.test'
+    );
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({
+      error: 'Blocked by existing references.',
+      details: [{ path: ['appointments'], message: 'referenced by 1 appointment(s)' }],
+    });
+  });
+
+  it('add-on with no history deletes clean — its applicability-matrix rows cascade', async () => {
+    const res = await authed(
+      'DELETE',
+      `/api/v1/admin/addon-services/${ids.addonRetired}`,
+      'delete-addon-ok@sevendays.test'
+    );
+    expect(res.status).toBe(204);
+    const retiredLinks = await db
+      .select()
+      .from(studioServiceAddonServices)
+      .where(eq(studioServiceAddonServices.addonServiceId, ids.addonRetired));
+    expect(retiredLinks).toHaveLength(0);
+    const makeupLinks = await db
+      .select()
+      .from(studioServiceAddonServices)
+      .where(eq(studioServiceAddonServices.addonServiceId, ids.addonMakeup));
+    expect(makeupLinks).toHaveLength(1);
+  });
+
+  it('add-on unknown id → the uniform per-entity 404', async () => {
+    const res = await authed(
+      'DELETE',
+      '/api/v1/admin/addon-services/00000000-0000-4000-8000-000000000000',
+      'delete-addon-404@sevendays.test'
+    );
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: 'Add-on Service not found.' });
+  });
+
+  it('studio service with any appointment → 400', async () => {
+    await insertAppointment({ servicePackageId: null, studioServiceId: ids.servicePortrait });
+    const res = await authed(
+      'DELETE',
+      `/api/v1/admin/studio-services/${ids.servicePortrait}`,
+      'delete-service-blocked@sevendays.test'
+    );
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({
+      error: 'Blocked by existing references.',
+      details: [{ path: ['appointments'], message: 'referenced by 1 appointment(s)' }],
+    });
+  });
+
+  it("studio service with no history deletes clean — BOTH matrices' rows cascade", async () => {
+    const res = await authed(
+      'DELETE',
+      `/api/v1/admin/studio-services/${ids.serviceStudio}`,
+      'delete-service-ok@sevendays.test'
+    );
+    expect(res.status).toBe(204);
+    const branchLinks = await db
+      .select()
+      .from(branchStudioServices)
+      .where(eq(branchStudioServices.studioServiceId, ids.serviceStudio));
+    expect(branchLinks).toHaveLength(0);
+    const addonLinks = await db
+      .select()
+      .from(studioServiceAddonServices)
+      .where(eq(studioServiceAddonServices.studioServiceId, ids.serviceStudio));
+    expect(addonLinks).toHaveLength(0);
+    const portraitBranchLinks = await db
+      .select()
+      .from(branchStudioServices)
+      .where(eq(branchStudioServices.studioServiceId, ids.servicePortrait));
+    expect(portraitBranchLinks).toHaveLength(2);
+  });
+
+  it('studio service unknown id → the uniform per-entity 404', async () => {
+    const res = await authed(
+      'DELETE',
+      '/api/v1/admin/studio-services/00000000-0000-4000-8000-000000000000',
+      'delete-service-404@sevendays.test'
+    );
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: 'Studio Service not found.' });
+  });
+
+  it('package with any appointment → 400 — and a blocked delete never touches the bucket', async () => {
+    await db
+      .update(servicePackagesTable)
+      .set({ coverImageKey: 'covers/00000000-0000-4000-8000-0000000000c1.jpg' })
+      .where(eq(servicePackagesTable.id, ids.packageCombined));
+    await insertAppointment({ servicePackageId: ids.packageCombined });
+    const stub = stubCommitBucket();
+    const { token } = await signUpSession(url, 'delete-package-blocked@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/service-packages/${ids.packageCombined}`,
+      { method: 'DELETE', headers: bearer(token) },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({
+      error: 'Blocked by existing references.',
+      details: [{ path: ['appointments'], message: 'referenced by 1 appointment(s)' }],
+    });
+    expect(stub.deleteCalls).toEqual([]);
+  });
+
+  it('package with no history deletes clean — frames, inclusions, and their junctions all go', async () => {
+    const [inclusion] = await db
+      .select({ id: inclusionsTable.id })
+      .from(inclusionsTable)
+      .where(eq(inclusionsTable.servicePackageId, ids.packageSimple))
+      .limit(1);
+    if (!inclusion) throw new Error('delete suite: simple-package inclusion missing');
+    const res = await authed(
+      'DELETE',
+      `/api/v1/admin/service-packages/${ids.packageSimple}`,
+      'delete-package-ok@sevendays.test'
+    );
+    expect(res.status).toBe(204);
+    const frames = await db
+      .select()
+      .from(framesTable)
+      .where(eq(framesTable.servicePackageId, ids.packageSimple));
+    expect(frames).toHaveLength(0);
+    const inclusions = await db
+      .select()
+      .from(inclusionsTable)
+      .where(eq(inclusionsTable.servicePackageId, ids.packageSimple));
+    expect(inclusions).toHaveLength(0);
+    // The junctions rode the DB-level ON DELETE CASCADE on inclusion_id.
+    const junctions = await db
+      .select()
+      .from(junctionsTable)
+      .where(eq(junctionsTable.inclusionId, inclusion.id));
+    expect(junctions).toHaveLength(0);
+    const combinedInclusions = await db
+      .select()
+      .from(inclusionsTable)
+      .where(eq(inclusionsTable.servicePackageId, ids.packageCombined));
+    expect(combinedInclusions).toHaveLength(4);
+  });
+
+  it("the cover object deletes only after the row's commit", async () => {
+    await db
+      .update(servicePackagesTable)
+      .set({ coverImageKey: 'covers/00000000-0000-4000-8000-0000000000c2.jpg' })
+      .where(eq(servicePackagesTable.id, ids.packageRetired));
+    const stub = stubCommitBucket();
+    const { token } = await signUpSession(url, 'delete-package-cover@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/service-packages/${ids.packageRetired}`,
+      { method: 'DELETE', headers: bearer(token) },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(204);
+    expect(stub.deleteCalls).toEqual(['covers/00000000-0000-4000-8000-0000000000c2.jpg']);
+  });
+
+  it('delete frees the unique name + slug — a new row may take both', async () => {
+    const res = await authed(
+      'DELETE',
+      `/api/v1/admin/service-packages/${ids.packageRetired}`,
+      'delete-package-free@sevendays.test'
+    );
+    expect(res.status).toBe(204);
+    const created = await authed(
+      'POST',
+      '/api/v1/admin/service-packages',
+      'delete-package-free2@sevendays.test',
+      {
+        name: 'Retired Package',
+        description: 'Back by popular demand.',
+        priceCents: 100000,
+        durationMinutes: null,
+        isActive: true,
+        isFeatured: false,
+        frames: [],
+        inclusions: [],
+      }
+    );
+    expect(created.status).toBe(201);
+    expect(((await created.json()) as { slug: string }).slug).toBe('retired-package');
+  });
+
+  it('package unknown id → the uniform per-entity 404', async () => {
+    const res = await authed(
+      'DELETE',
+      '/api/v1/admin/service-packages/00000000-0000-4000-8000-000000000000',
+      'delete-package-404@sevendays.test'
+    );
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: 'Package not found.' });
+  });
+});
+
+describe('guarded DELETE — the 401 gate precedes validation (appointment-bearing half)', () => {
+  it('anonymous DELETE with a non-uuid id → 401 BEFORE validation (branches)', async () => {
+    const res = await app.request(
+      '/api/v1/admin/branches/not-a-uuid',
+      { method: 'DELETE' },
+      testEnv(url)
+    );
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: 'Authentication required.' });
+  });
+
+  it('anonymous DELETE with a non-uuid id → 401 BEFORE validation (addon-services)', async () => {
+    const res = await app.request(
+      '/api/v1/admin/addon-services/not-a-uuid',
+      { method: 'DELETE' },
+      testEnv(url)
+    );
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: 'Authentication required.' });
+  });
+
+  it('anonymous DELETE with a non-uuid id → 401 BEFORE validation (studio-services)', async () => {
+    const res = await app.request(
+      '/api/v1/admin/studio-services/not-a-uuid',
+      { method: 'DELETE' },
+      testEnv(url)
+    );
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: 'Authentication required.' });
+  });
+
+  it('anonymous DELETE with a non-uuid id → 401 BEFORE validation (service-packages)', async () => {
+    const res = await app.request(
+      '/api/v1/admin/service-packages/not-a-uuid',
+      { method: 'DELETE' },
+      testEnv(url)
+    );
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: 'Authentication required.' });
   });
 });
 

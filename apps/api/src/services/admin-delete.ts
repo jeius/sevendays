@@ -1,15 +1,25 @@
 import type { Database } from '@sevendays/db';
 import {
+  addonServices,
+  appointmentAddonServices,
+  appointments,
   attires,
+  branches,
+  branchStudioServices,
+  frames,
   galleryCategories,
   galleryPhotos,
   packageInclusionAttires,
   packageInclusions,
   printSizes,
+  servicePackages,
+  studioServiceAddonServices,
+  studioServices,
   testimonials,
 } from '@sevendays/db';
 import { count, eq } from 'drizzle-orm';
 import type { PhotoEnv } from './admin-gallery.js';
+import type { SaveEnv } from './admin-packages.js';
 import type { AdminDetail } from './admin-shared.js';
 import { type AuditActor, writeAuditRow } from './audit.js';
 
@@ -183,5 +193,161 @@ export async function deleteAdminAttire(
       summary: current.name,
     });
   });
+  return { ok: true };
+}
+
+// --- branches (blocked by any Appointment ever; matrix rows cascade) --------
+
+export async function deleteAdminBranch(
+  db: Database,
+  audit: AuditActor,
+  id: string
+): Promise<AdminDeleteResult> {
+  const [current] = await db.select().from(branches).where(eq(branches.id, id)).limit(1);
+  if (!current) return { ok: false, reason: 'not_found' };
+  const [apptCount] = await db
+    .select({ value: count() })
+    .from(appointments)
+    .where(eq(appointments.branchId, id));
+  const blocking = apptCount?.value ?? 0;
+  if (blocking > 0) {
+    return blocked([
+      { path: ['appointments'], message: `referenced by ${blocking} appointment(s)` },
+    ]);
+  }
+  await db.transaction(async (tx) => {
+    // branch_id carries no DB-level cascade — the explicit delete IS the cascade.
+    await tx.delete(branchStudioServices).where(eq(branchStudioServices.branchId, id));
+    await tx.delete(branches).where(eq(branches.id, id));
+    await writeAuditRow(tx, audit, {
+      entity: 'branch',
+      entityId: id,
+      action: 'delete',
+      summary: current.name,
+    });
+  });
+  return { ok: true };
+}
+
+// --- add-on services (blocked by any Appointment ever; matrix rows cascade) --
+
+export async function deleteAdminAddonService(
+  db: Database,
+  audit: AuditActor,
+  id: string
+): Promise<AdminDeleteResult> {
+  const [current] = await db.select().from(addonServices).where(eq(addonServices.id, id)).limit(1);
+  if (!current) return { ok: false, reason: 'not_found' };
+  const [attachmentCount] = await db
+    .select({ value: count() })
+    .from(appointmentAddonServices)
+    .where(eq(appointmentAddonServices.addonServiceId, id));
+  const blocking = attachmentCount?.value ?? 0;
+  if (blocking > 0) {
+    return blocked([
+      { path: ['appointments'], message: `referenced by ${blocking} appointment(s)` },
+    ]);
+  }
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(studioServiceAddonServices)
+      .where(eq(studioServiceAddonServices.addonServiceId, id));
+    await tx.delete(addonServices).where(eq(addonServices.id, id));
+    await writeAuditRow(tx, audit, {
+      entity: 'addon-service',
+      entityId: id,
+      action: 'delete',
+      summary: current.name,
+    });
+  });
+  return { ok: true };
+}
+
+// --- studio services (blocked by any Appointment ever; both matrices cascade)-
+
+export async function deleteAdminStudioService(
+  db: Database,
+  audit: AuditActor,
+  id: string
+): Promise<AdminDeleteResult> {
+  const [current] = await db
+    .select()
+    .from(studioServices)
+    .where(eq(studioServices.id, id))
+    .limit(1);
+  if (!current) return { ok: false, reason: 'not_found' };
+  const [apptCount] = await db
+    .select({ value: count() })
+    .from(appointments)
+    .where(eq(appointments.studioServiceId, id));
+  const blocking = apptCount?.value ?? 0;
+  if (blocking > 0) {
+    return blocked([
+      { path: ['appointments'], message: `referenced by ${blocking} appointment(s)` },
+    ]);
+  }
+  await db.transaction(async (tx) => {
+    // Both matrices' studio_service_id sides DO carry DB-level cascades —
+    // the explicit deletes keep the transaction's writes observable and
+    // uniform with every other entity here.
+    await tx.delete(branchStudioServices).where(eq(branchStudioServices.studioServiceId, id));
+    await tx
+      .delete(studioServiceAddonServices)
+      .where(eq(studioServiceAddonServices.studioServiceId, id));
+    await tx.delete(studioServices).where(eq(studioServices.id, id));
+    await writeAuditRow(tx, audit, {
+      entity: 'studio-service',
+      entityId: id,
+      action: 'delete',
+      summary: current.name,
+    });
+  });
+  return { ok: true };
+}
+
+// --- service packages (blocked by any Appointment ever; children cascade; ----
+// --- the cover object deletes after the commit) ------------------------------
+
+export async function deleteAdminPackage(
+  db: Database,
+  env: SaveEnv,
+  audit: AuditActor,
+  id: string
+): Promise<AdminDeleteResult> {
+  const [current] = await db
+    .select()
+    .from(servicePackages)
+    .where(eq(servicePackages.id, id))
+    .limit(1);
+  if (!current) return { ok: false, reason: 'not_found' };
+  const [apptCount] = await db
+    .select({ value: count() })
+    .from(appointments)
+    .where(eq(appointments.servicePackageId, id));
+  const blocking = apptCount?.value ?? 0;
+  if (blocking > 0) {
+    return blocked([
+      { path: ['appointments'], message: `referenced by ${blocking} appointment(s)` },
+    ]);
+  }
+  await db.transaction(async (tx) => {
+    // Inclusions before frames (inclusions hold the frame FK — the atomic
+    // save's own order); the inclusion-attire junctions ride the DB-level
+    // ON DELETE CASCADE on inclusion_id.
+    await tx.delete(packageInclusions).where(eq(packageInclusions.servicePackageId, id));
+    await tx.delete(frames).where(eq(frames.servicePackageId, id));
+    await tx.delete(servicePackages).where(eq(servicePackages.id, id));
+    await writeAuditRow(tx, audit, {
+      entity: 'service-package',
+      entityId: id,
+      action: 'delete',
+      summary: current.name,
+    });
+  });
+  // ADR-0019 §5 + the #137 precedent: the cover object goes only after the
+  // row's commit — a blocked or rolled-back delete never touches the bucket.
+  if (current.coverImageKey) {
+    await env.MEDIA_BUCKET.delete(current.coverImageKey);
+  }
   return { ok: true };
 }
