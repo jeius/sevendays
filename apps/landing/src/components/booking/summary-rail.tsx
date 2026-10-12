@@ -1,5 +1,5 @@
 import type { BookingWizard } from '../../lib/booking';
-import { peso, phDateTime } from '../../lib/format';
+import { labeledPrice, peso, phDateTime } from '../../lib/format';
 
 export function SummaryRail({ wizard }: { wizard: BookingWizard }) {
   return (
@@ -20,9 +20,7 @@ export function SummaryRail({ wizard }: { wizard: BookingWizard }) {
         {wizard.selectedAddons.map((a) => (
           <div key={a.id} className='flex justify-between gap-3'>
             <dt className='text-muted-foreground'>Add-on</dt>
-            <dd className='text-right'>
-              {a.name} · {peso(a.priceCents)}
-            </dd>
+            <dd className='text-right'>{labeledPrice(a.name, a.priceCents)}</dd>
           </div>
         ))}
         <div className='flex justify-between gap-3'>
@@ -31,10 +29,12 @@ export function SummaryRail({ wizard }: { wizard: BookingWizard }) {
             {wizard.scheduledAt ? phDateTime(wizard.scheduledAt.toISOString()) : '—'} (PHT)
           </dd>
         </div>
-        <div className='flex justify-between gap-3 border-t pt-2 font-semibold'>
-          <dt>Total</dt>
-          <dd>{peso(wizard.totalCents)}</dd>
-        </div>
+        {wizard.totalCents !== null && (
+          <div className='flex justify-between gap-3 border-t pt-2 font-semibold'>
+            <dt>Total</dt>
+            <dd>{peso(wizard.totalCents)}</dd>
+          </div>
+        )}
       </dl>
     </aside>
   );

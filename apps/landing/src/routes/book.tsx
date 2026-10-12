@@ -21,7 +21,7 @@ import {
   type RejectionReason,
   useBookingWizard,
 } from '../lib/booking';
-import { peso } from '../lib/format';
+import { peso, priceSuffix } from '../lib/format';
 import {
   addonServiceQueries,
   branchQueries,
@@ -230,7 +230,7 @@ function BookPage() {
                     'focus-visible:ring-brand-focus-ring mt-4 focus-visible:ring-3'
                   )}
                 >
-                  Continue · {peso(wizard.totalCents)}
+                  Continue{priceSuffix(wizard.totalCents)}
                 </button>
               ) : (
                 <button
@@ -362,7 +362,9 @@ function BookPage() {
                   'focus-visible:ring-brand-focus-ring mt-1 focus-visible:ring-3'
                 )}
               >
-                {wizard.submitting ? 'Booking…' : `Confirm booking · ${peso(wizard.totalCents)}`}
+                {wizard.submitting
+                  ? 'Booking…'
+                  : `Confirm booking${priceSuffix(wizard.totalCents)}`}
               </button>
             </section>
           )}

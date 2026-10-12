@@ -1,6 +1,6 @@
 import type { AppointmentWithAddons } from '@sevendays/types';
 import { confirmationTotalCents } from '../../lib/booking-read';
-import { peso, phDateTime } from '../../lib/format';
+import { labeledPrice, peso, phDateTime } from '../../lib/format';
 
 // The /booking/:id snapshot read-back (#58: extracted from the confirmation
 // page). Every literal is owner-pinned from the M2 prototype and asserted by
@@ -16,6 +16,7 @@ export function ConfirmationCard({
   branchName: string;
   offeringName: string;
 }) {
+  const total = confirmationTotalCents(record);
   return (
     <div className='mx-auto mt-8 max-w-lg rounded-xl border border-brand-gray-cool bg-card p-6 shadow-sm'>
       <p className='text-brand-ink font-semibold text-lg'>Booking confirmed ✓</p>
@@ -35,19 +36,19 @@ export function ConfirmationCard({
         {record.addonServices.map((a) => (
           <div key={a.addonServiceId} className='flex justify-between gap-4'>
             <dt className='text-muted-foreground'>Add-on</dt>
-            <dd>
-              {a.name} · {peso(a.priceCents)}
-            </dd>
+            <dd>{labeledPrice(a.name, a.priceCents)}</dd>
           </div>
         ))}
         <div className='flex justify-between gap-4'>
           <dt className='text-muted-foreground'>Schedule</dt>
           <dd>{phDateTime(record.scheduledAt.toISOString())} (PHT)</dd>
         </div>
-        <div className='flex justify-between gap-4 border-t pt-2 font-semibold'>
-          <dt>Total</dt>
-          <dd>{peso(confirmationTotalCents(record))}</dd>
-        </div>
+        {total !== null && (
+          <div className='flex justify-between gap-4 border-t pt-2 font-semibold'>
+            <dt>Total</dt>
+            <dd>{peso(total)}</dd>
+          </div>
+        )}
       </dl>
       <p className='mt-4 text-sm'>A confirmation email was sent to {record.customerEmail}.</p>
       <p className='text-muted-foreground mt-1 text-sm'>

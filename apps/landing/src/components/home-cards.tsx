@@ -12,7 +12,7 @@ import {
 } from '@sevendays/ui/components/popover';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
-import { peso } from '../lib/format';
+import { bookAriaLabel, peso } from '../lib/format';
 import { CoverPanel } from './cover-panel';
 
 // The ruled card system (#111 Track 2, variant D build target): uniformity
@@ -85,7 +85,7 @@ export function ServiceImageCard({ service }: { service: StudioServiceWithBranch
     <Link
       to='/book'
       search={{ service: service.id }}
-      aria-label={`Book ${service.name} (₱${(service.priceCents / 100).toFixed(0)})`}
+      aria-label={bookAriaLabel(service.name, service.priceCents)}
       className='group border-line-soft relative block h-64 overflow-hidden rounded-xl border shadow-sm focus-visible:ring-brand-focus-ring focus-visible:ring-3 focus-visible:outline-none'
     >
       <img
