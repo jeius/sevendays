@@ -15,7 +15,7 @@ const okFile = () => new File(['bytes'], `p-${Math.random()}.jpg`, { type: 'imag
 type CommitResult = ReturnType<BatchUploadDeps['commit']>;
 
 function item(n: number): BatchItem {
-  return { id: uuid(n), file: okFile(), categoryId: null, title: `Photo ${n}` };
+  return { id: uuid(n), file: okFile(), categoryId: null, title: `Photo ${n}`, caption: null };
 }
 
 function deps(overrides: Partial<BatchUploadDeps> = {}): BatchUploadDeps & {
@@ -62,6 +62,16 @@ describe('runBatchUpload', () => {
     expect(phases).toContain('queued');
     expect(phases).toContain('committing');
     expect(phases.at(-1)).toBe('done');
+  });
+
+  it('commits the item caption unchanged — the pass-through seam (M7 #214; null at enqueue, editing ruled out)', async () => {
+    const commit = vi.fn(
+      async (): CommitResult => ({ ok: true, photo: { id: uuid(98) } as never })
+    );
+    const d = deps({ commit });
+    const captioned = { ...item(1), caption: 'Studio batch 1' };
+    await runBatchUpload([captioned], d);
+    expect(commit).toHaveBeenCalledWith(expect.objectContaining({ caption: 'Studio batch 1' }));
   });
 
   it('a pre-check failure settles failed immediately with zero network calls', async () => {
