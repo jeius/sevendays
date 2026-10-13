@@ -318,7 +318,7 @@ describe('the wire rename (ADR-0019: no read shape exposes a raw R2 key)', () =>
   it('the public gallery read parses the assembled payload (categories + categorized photos)', () => {
     const result = galleryReadSchema.safeParse({
       categories: [{ id: UUID2, name: 'Graduation' }],
-      photos: [{ id: UUID, photoUrl: PHOTO_URL, title: null, categoryId: UUID2 }],
+      photos: [{ id: UUID, photoUrl: PHOTO_URL, title: null, caption: null, categoryId: UUID2 }],
     });
     expect(result.success).toBe(true);
   });
