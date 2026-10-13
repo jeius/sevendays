@@ -61,6 +61,9 @@ describe('create→read round-trips (the canonical fixtures, all nine entities)'
       phone: '+63 900 000 004',
       acceptsWalkIns: true,
       isActive: false,
+      // M7 #214: the row shape gained the nullable cover key — the canonical
+      // fixture completes it by hand (born-null is the default state).
+      coverImageKey: null,
       createdAt: DATE,
       updatedAt: DATE,
     });

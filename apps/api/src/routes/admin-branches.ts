@@ -23,18 +23,24 @@ import { validatedJson, validatedParam } from '../services/validator.js';
 // silent.
 export const adminBranches = new Hono<ApiEnv>()
   .get('/', async (c) => {
-    return c.json(await listAdminBranches(c.get('db')));
+    return c.json(await listAdminBranches(c.get('db'), c.env));
   })
   .get('/:id', validatedParam(z.object({ id: z.uuid() })), async (c) => {
     const { id } = c.req.valid('param');
-    const row = await getAdminBranch(c.get('db'), id);
-    if (!row) {
+    const read = await getAdminBranch(c.get('db'), c.env, id);
+    if (!read) {
       return notFound(c, 'Branch not found.');
     }
-    return c.json(row);
+    return c.json(read);
   })
   .post('/', validatedJson(createBranchSchema), async (c) => {
-    const result = await createAdminBranch(c.get('db'), auditActor(c), c.req.valid('json'));
+    const result = await createAdminBranch(
+      c.get('db'),
+      c.env,
+      auditActor(c),
+      c.req.valid('json'),
+      c.get('logger')
+    );
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
     }
@@ -47,7 +53,14 @@ export const adminBranches = new Hono<ApiEnv>()
     validatedJson(updateBranchSchema),
     async (c) => {
       const { id } = c.req.valid('param');
-      const result = await updateAdminBranch(c.get('db'), auditActor(c), id, c.req.valid('json'));
+      const result = await updateAdminBranch(
+        c.get('db'),
+        c.env,
+        auditActor(c),
+        id,
+        c.req.valid('json'),
+        c.get('logger')
+      );
       if (!result.ok) {
         if (result.reason === 'not_found') {
           return notFound(c, 'Branch not found.');
@@ -60,7 +73,7 @@ export const adminBranches = new Hono<ApiEnv>()
   )
   .delete('/:id', validatedParam(z.object({ id: z.uuid() })), async (c) => {
     const { id } = c.req.valid('param');
-    const result = await deleteAdminBranch(c.get('db'), auditActor(c), id);
+    const result = await deleteAdminBranch(c.get('db'), c.env, auditActor(c), id);
     if (!result.ok) {
       if (result.reason === 'not_found') {
         return notFound(c, 'Branch not found.');

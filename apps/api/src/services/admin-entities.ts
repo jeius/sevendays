@@ -10,6 +10,7 @@ import {
 } from '@sevendays/db';
 import type {
   AuditAction,
+  BranchRead,
   CreateAddonServiceInput,
   CreateAttireInput,
   CreateBranchInput,
@@ -23,8 +24,12 @@ import type {
   UpdateStudioServiceInput,
 } from '@sevendays/types';
 import { and, asc, eq, inArray, ne } from 'drizzle-orm';
+import type { Env } from '../env.js';
+import { logMediaFailure } from '../observability/events.js';
+import type { RequestLogger } from '../observability/logger.js';
 import {
   type AdminCreateResult,
+  type AdminWriteFailure,
   type AdminWriteResult,
   conflict,
   guardUnique,
@@ -32,6 +37,7 @@ import {
 } from './admin-shared.js';
 import { type AuditActor, writeAuditRow } from './audit.js';
 import { groupChildren } from './group-children.js';
+import { commitUpload, resolveMediaUrl } from './media.js';
 
 // Admin CRUD for the simple catalog entities (M5 #137): list/get/create/
 // update per entity — full-object PUTs, deactivation as the isActive flip,
@@ -43,7 +49,6 @@ import { groupChildren } from './group-children.js';
 // commits exactly when the write does (the spec's transaction-is-the-gate
 // ruling).
 
-type BranchRow = typeof branches.$inferSelect;
 type PrintSizeRow = typeof printSizes.$inferSelect;
 type AttireRow = typeof attires.$inferSelect;
 type AddonServiceRow = typeof addonServices.$inferSelect;
@@ -55,24 +60,84 @@ const ADDON_UNIQUE: Record<string, string> = { addon_services_name_unique: 'name
 
 // --- branches ---------------------------------------------------------------
 
-export async function listAdminBranches(db: Database): Promise<BranchRow[]> {
-  // Admin read: ALL rows including deactivated (spec § Route topology).
-  return db.select().from(branches).orderBy(asc(branches.name));
+type BranchEnv = Pick<Env, 'MEDIA_BUCKET' | 'MEDIA_PUBLIC_BASE_URL'>;
+
+type Detail = { path: string[]; message: string };
+
+function toBranchRead(row: typeof branches.$inferSelect, env: BranchEnv): BranchRead {
+  const { coverImageKey, ...rest } = row;
+  return { ...rest, coverImageUrl: resolveMediaUrl(env, coverImageKey) };
 }
 
-export async function getAdminBranch(db: Database, id: string): Promise<BranchRow | null> {
-  const [row] = await db.select().from(branches).where(eq(branches.id, id)).limit(1);
-  return row ?? null;
+// The branch-cover commit (M7 #214, admin-packages.ts's resolveCover
+// controller ruling): HEAD-verify through commitUpload ONLY when a key is
+// present — presence-encoding makes "changed" structural (stored keys are
+// immutable final keys, inputs are staging keys, and the staging-key regex
+// rejects final keys, so a present string is always a new bind).
+// undefined = unchanged, null = clear, string = bind/replace. A commit
+// failure re-paths its details onto the payload field and resolves as the
+// conflict failure (→ 400). Runs BEFORE the transaction — bucket I/O
+// never holds a tx open.
+async function resolveBranchCover(
+  env: BranchEnv,
+  key: string | null | undefined,
+  log?: RequestLogger
+): Promise<{ ok: true; finalKey: string | null | undefined } | AdminWriteFailure> {
+  if (key === undefined) return { ok: true, finalKey: undefined };
+  if (key === null) return { ok: true, finalKey: null };
+  const commit = await commitUpload(env.MEDIA_BUCKET, {
+    stagingKey: key,
+    purpose: 'branch-cover',
+  });
+  if (!commit.ok) {
+    // M6 #183: the cover-commit seam's typed failure (see admin-packages's
+    // resolveCover — the route-level 'conflict' cannot name it).
+    if (log) {
+      logMediaFailure(log, { op: 'commit', reason: commit.reason });
+    }
+    return {
+      ok: false,
+      reason: 'conflict',
+      message: commit.message,
+      details: (commit.details ?? [{ path: ['key'], message: commit.message }]).map(
+        (detail): Detail => ({ path: ['coverImageKey'], message: detail.message })
+      ),
+    };
+  }
+  return { ok: true, finalKey: commit.finalKey };
 }
 
-export function createAdminBranch(
+export async function listAdminBranches(db: Database, env: BranchEnv): Promise<BranchRead[]> {
+  // Admin read: ALL rows including deactivated (spec § Route topology),
+  // covers resolved — raw keys never leave.
+  const rows = await db.select().from(branches).orderBy(asc(branches.name));
+  return rows.map((row) => toBranchRead(row, env));
+}
+
+export async function getAdminBranch(
   db: Database,
+  env: BranchEnv,
+  id: string
+): Promise<BranchRead | null> {
+  const [row] = await db.select().from(branches).where(eq(branches.id, id)).limit(1);
+  return row ? toBranchRead(row, env) : null;
+}
+
+export async function createAdminBranch(
+  db: Database,
+  env: BranchEnv,
   audit: AuditActor,
-  input: CreateBranchInput
-): Promise<AdminCreateResult<BranchRow>> {
-  return guardUnique(BRANCH_UNIQUE, () =>
+  input: CreateBranchInput,
+  log?: RequestLogger
+): Promise<AdminCreateResult<BranchRead>> {
+  const cover = await resolveBranchCover(env, input.coverImageKey, log);
+  if (!cover.ok) return cover;
+  const result = await guardUnique(BRANCH_UNIQUE, () =>
     db.transaction(async (tx) => {
-      const [row] = await tx.insert(branches).values(input).returning();
+      const [row] = await tx
+        .insert(branches)
+        .values({ ...input, coverImageKey: cover.finalKey ?? null })
+        .returning();
       if (!row) throw new Error('insert branches: no row returned');
       await writeAuditRow(tx, audit, {
         entity: 'branch',
@@ -83,15 +148,19 @@ export function createAdminBranch(
       return row;
     })
   );
+  if (!result.ok) return result;
+  return { ok: true, row: toBranchRead(result.row, env) };
 }
 
 export async function updateAdminBranch(
   db: Database,
+  env: BranchEnv,
   audit: AuditActor,
   id: string,
-  input: UpdateBranchInput
-): Promise<AdminWriteResult<BranchRow>> {
-  const current = await getAdminBranch(db, id);
+  input: UpdateBranchInput,
+  log?: RequestLogger
+): Promise<AdminWriteResult<BranchRead>> {
+  const current = await getAdminBranchRow(db, id);
   if (!current) return { ok: false, reason: 'not_found' };
   if (input.name !== current.name) {
     const [clash] = await db
@@ -101,15 +170,28 @@ export async function updateAdminBranch(
       .limit(1);
     if (clash) return conflict('name');
   }
+  const cover = await resolveBranchCover(env, input.coverImageKey, log);
+  if (!cover.ok) return cover;
   // M6 #185: deactivation is a RULING on the flip — only true→false is
   // 'deactivate'; reactivation and edits of deactivated rows are 'update'.
   const action: AuditAction =
     current.isActive && input.isActive === false ? 'deactivate' : 'update';
-  return guardUnique(BRANCH_UNIQUE, () =>
+  // The cover tri-state composes the stored key: absent = keep the
+  // current one, null = clear, string = the committed final key.
+  const storedCover = cover.finalKey === undefined ? current.coverImageKey : cover.finalKey;
+  const result = await guardUnique(BRANCH_UNIQUE, () =>
     db.transaction(async (tx) => {
       const [row] = await tx
         .update(branches)
-        .set({ ...input, updatedAt: new Date() })
+        .set({
+          name: input.name,
+          address: input.address,
+          phone: input.phone,
+          acceptsWalkIns: input.acceptsWalkIns,
+          isActive: input.isActive,
+          coverImageKey: storedCover,
+          updatedAt: new Date(),
+        })
         .where(eq(branches.id, id))
         .returning();
       if (!row) throw new Error('update branches: no row returned');
@@ -122,6 +204,20 @@ export async function updateAdminBranch(
       return row;
     })
   );
+  if (!result.ok) return result;
+  // After-commit bucket hygiene (#137's precedent): the replaced/cleared
+  // cover's old object is deleted only AFTER the save committed — a
+  // rolled-back save never deletes (the row still points at it).
+  if (current.coverImageKey && storedCover !== current.coverImageKey) {
+    await env.MEDIA_BUCKET.delete(current.coverImageKey);
+  }
+  return { ok: true, row: toBranchRead(result.row, env) };
+}
+
+/** The raw-row read the update composes against (covers resolve at the end). */
+async function getAdminBranchRow(db: Database, id: string) {
+  const [row] = await db.select().from(branches).where(eq(branches.id, id)).limit(1);
+  return row ?? null;
 }
 
 // --- print sizes ------------------------------------------------------------
