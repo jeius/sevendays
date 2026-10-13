@@ -84,6 +84,9 @@ export interface BatchItem {
   file: File;
   categoryId: string | null;
   title: string;
+  /** M7 #214: the caption pass-through seam — captured at enqueue (null;
+   * pre-commit metadata editing is ruled out) and committed unchanged. */
+  caption: string | null;
 }
 
 /**
@@ -221,6 +224,7 @@ export async function runBatchUpload(
       const result = await deps.commit({
         r2Key: stagingKey,
         title: item.title,
+        caption: item.caption,
         categoryId: item.categoryId,
       });
       if (result.ok) {

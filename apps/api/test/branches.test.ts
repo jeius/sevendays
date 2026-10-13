@@ -1,3 +1,5 @@
+import { branches } from '@sevendays/db';
+import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
 import { signUpSession } from './helpers/auth.js';
@@ -26,6 +28,25 @@ describe('GET /api/v1/branches', () => {
     expect(body).toHaveLength(2);
     expect(body.map((b) => b.name).sort()).toEqual(['Test Branch A', 'Test Branch B']);
     expect(body.some((b) => b.id === ids.branchA)).toBe(true);
+  });
+
+  it('resolves coverImageUrl for a covered branch; bare rows carry null; the raw key never appears (M7 #214)', async () => {
+    // Direct db-state seeding (the #212 precedent) — the guard reads rows,
+    // not API history. A FINAL key shape, as the commit pipeline stores it.
+    await db
+      .update(branches)
+      .set({ coverImageKey: 'covers/aaaaaaaa-0000-4000-8000-0000000000aa.jpg' })
+      .where(eq(branches.id, ids.branchA));
+    const res = await app.request('/api/v1/branches', undefined, testEnv(url));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { id: string; coverImageUrl: string | null }[];
+    const covered = body.find((b) => b.id === ids.branchA);
+    const bare = body.find((b) => b.id === ids.branchB);
+    expect(covered?.coverImageUrl).toBe(
+      'https://pub-test.r2.dev/covers/aaaaaaaa-0000-4000-8000-0000000000aa.jpg'
+    );
+    expect(bare?.coverImageUrl).toBeNull();
+    expect(covered).not.toHaveProperty('coverImageKey');
   });
 });
 

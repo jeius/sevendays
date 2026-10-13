@@ -103,6 +103,19 @@ describe('uploadCover', () => {
     });
   });
 
+  it('passes the caller purpose through to presign (M7 #214: branch covers presign as branch-cover)', async () => {
+    const seen: CoverUploadStatus[] = [];
+    const presign = vi.fn(() => Promise.resolve({ key: 'tmp/k.jpg', uploadUrl: 'https://r2/put' }));
+    const promise = uploadCover(JPEG, presign, (s) => seen.push(s), 'branch-cover');
+    await vi.waitFor(() => expect(FakeXhr.last).toBeDefined());
+    FakeXhr.last?.onload?.();
+    await expect(promise).resolves.toBeUndefined();
+    expect(presign).toHaveBeenCalledWith({
+      purpose: 'branch-cover',
+      contentType: 'image/jpeg',
+    });
+  });
+
   it('a non-2xx PUT emits failed with the status and RESOLVES (the HTTP story is the machine’s)', async () => {
     const seen: CoverUploadStatus[] = [];
     const { promise, xhr } = await started(seen);

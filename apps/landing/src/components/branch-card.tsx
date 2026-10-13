@@ -1,6 +1,7 @@
-import type { Branch } from '@sevendays/types';
+import type { BranchRead } from '@sevendays/types';
 import { buttonVariants } from '@sevendays/ui/components/button';
 import { cn } from 'cn';
+import { CoverPanel } from './cover-panel';
 import { WalkInBadge } from './walk-in-badge';
 
 // Full branch card (/branches): address, phone, walk-in badge, and the
@@ -11,9 +12,11 @@ import { WalkInBadge } from './walk-in-badge';
 // secondary (the number is useful on main too); the v1 scrub drops the
 // booking CTA at pick time, leaving tel: primary — never a runtime branch
 // (the #97 convention).
-export function BranchCard({ branch }: { branch: Branch }) {
+// M7 #214: the branch wears its CMS cover via the ruled CoverPanel — null falls back to today's placeholder verbatim.
+export function BranchCard({ branch }: { branch: BranchRead }) {
   return (
     <article className='flex flex-col gap-2 rounded-xl border border-brand-gray-cool bg-card p-6 shadow-sm'>
+      <CoverPanel name={branch.name} coverImageUrl={branch.coverImageUrl} />
       <h3 className='font-semibold text-brand-ink text-xl'>{branch.name}</h3>
       <p className='text-muted-text'>{branch.address}</p>
       <p className='text-muted-text'>{branch.phone}</p>

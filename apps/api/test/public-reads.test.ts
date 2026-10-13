@@ -48,6 +48,22 @@ describe('GET /api/v1/gallery (the assembled public read, #138)', () => {
     expect(photoB).not.toHaveProperty('r2Key');
   });
 
+  it('photos carry caption when present; bare photos carry null (M7 #214 passthrough)', async () => {
+    await db
+      .update(galleryPhotos)
+      .set({ caption: 'Golden hour at the amphitheater' })
+      .where(eq(galleryPhotos.id, gallery.photoA));
+    const res = await app.request('/api/v1/gallery', undefined, testEnv(url));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      photos: { id: string; caption: string | null }[];
+    };
+    const photoA = body.photos.find((p) => p.id === gallery.photoA);
+    const photoB = body.photos.find((p) => p.id === gallery.photoB);
+    expect(photoA?.caption).toBe('Golden hour at the amphitheater');
+    expect(photoB?.caption).toBeNull();
+  });
+
   it('an ACTIVE uncategorized photo is absent (the staff-only state)', async () => {
     await db.insert(galleryPhotos).values({
       r2Key: 'gallery/aaaaaaaa-0000-4000-8000-000000000009.jpg',

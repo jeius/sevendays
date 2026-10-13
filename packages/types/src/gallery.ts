@@ -100,6 +100,9 @@ export const publicGalleryPhotoSchema = z.object({
   id: z.uuid(),
   photoUrl: z.url(),
   title: z.string().nullable(),
+  // M7 #214: the caption rides the public wire (null = renders nothing
+  // extra); the admin wire + editor have carried it since M5.
+  caption: z.string().nullable(),
   categoryId: z.uuid(),
 });
 

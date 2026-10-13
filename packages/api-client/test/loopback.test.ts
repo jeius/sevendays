@@ -26,6 +26,10 @@ it('branches.list parses the payload into typed data', async () => {
   expect(rows[0]?.name).toBe('Main Studio');
   expect(rows[0]?.acceptsWalkIns).toBe(true);
   expect(rows[0]?.createdAt).toBeInstanceOf(Date);
+  expect(rows[0]?.coverImageUrl).toBe(
+    'https://pub-test.r2.dev/covers/11111111-1111-4111-8111-111111111111.jpg'
+  );
+  expect(rows[1]?.coverImageUrl).toBeNull();
 });
 
 it('servicePackages.list carries resolved lookups as typed data', async () => {
@@ -100,6 +104,7 @@ it('gallery.list parses the assembled read into typed data', async () => {
     'https://pub-test.r2.dev/gallery/aaaaaaaa-0000-4000-8000-000000000001.jpg'
   );
   expect(read.photos[0]?.categoryId).toBe(read.categories[0]?.id);
+  expect(read.photos[0]?.caption).toBe('Golden hour at the amphitheater');
 });
 
 it('gallery.list surfaces the uniform 404 envelope as ApiClientError', async () => {

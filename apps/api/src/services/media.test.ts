@@ -161,6 +161,16 @@ describe('commitUpload', () => {
     expect(result.finalKey).toMatch(/^gallery\//);
   });
 
+  it('branch-cover purpose promotes to covers/ (M7 #214: branch covers share the covers prefix)', async () => {
+    const stub = stubBucket({ [STAGING_KEY]: { size: 1024, contentType: 'image/jpeg' } });
+    const result = await commitUpload(stub.bucket, {
+      stagingKey: STAGING_KEY,
+      purpose: 'branch-cover',
+    });
+    if (!result.ok) throw new Error(`expected ok, got ${result.reason}`);
+    expect(result.finalKey).toMatch(/^covers\//);
+  });
+
   it('answers the typed 400 WITHOUT deleting on a foreign key (a client-supplied covers/… key must never delete a promoted object)', async () => {
     const FOREIGN = 'covers/00000000-0000-4000-8000-000000000000.jpg';
     const stub = stubBucket({ [FOREIGN]: { size: 1024, contentType: 'image/jpeg' } });

@@ -10,7 +10,7 @@ import { ApiClientError } from '@sevendays/api-client';
 import type {
   AddonService,
   Attire,
-  Branch,
+  BranchRead,
   GalleryCategory,
   GalleryPhoto,
   MediaPresignResponse,
@@ -234,7 +234,7 @@ export const saveAdminBranchCreate = createServerFn({
   strict: { output: false },
 })
   .validator(createBranchSchema)
-  .handler(async ({ data }): Promise<AdminMutationResult<Branch>> => {
+  .handler(async ({ data }): Promise<AdminMutationResult<BranchRead>> => {
     return startSpan({ name: 'POST /api/v1/admin/branches' }, async () => {
       const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
       try {
@@ -260,7 +260,7 @@ export const saveAdminBranchUpdate = createServerFn({
   strict: { output: false },
 })
   .validator(z.object({ id: z.uuid(), payload: updateBranchSchema }))
-  .handler(async ({ data }): Promise<AdminMutationResult<Branch>> => {
+  .handler(async ({ data }): Promise<AdminMutationResult<BranchRead>> => {
     return startSpan({ name: 'PUT /api/v1/admin/branches/:id' }, async () => {
       const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
       const { id, payload } = data;

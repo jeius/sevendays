@@ -28,6 +28,7 @@ export async function getPublicGallery(db: Database, env: MediaEnv): Promise<Gal
       id: galleryPhotos.id,
       r2Key: galleryPhotos.r2Key,
       title: galleryPhotos.title,
+      caption: galleryPhotos.caption,
       categoryId: galleryPhotos.categoryId,
     })
     .from(galleryPhotos)
@@ -43,7 +44,13 @@ export async function getPublicGallery(db: Database, env: MediaEnv): Promise<Gal
       // Unreachable over a NOT NULL r2_key — loud rather than a silent ''.
       throw new Error('gallery read: a photo row carried no r2Key');
     }
-    photos.push({ id: row.id, photoUrl, title: row.title, categoryId: row.categoryId });
+    photos.push({
+      id: row.id,
+      photoUrl,
+      title: row.title,
+      caption: row.caption,
+      categoryId: row.categoryId,
+    });
   }
 
   return { categories: categoryRows, photos };

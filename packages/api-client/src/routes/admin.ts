@@ -7,7 +7,7 @@
 import type {
   AddonService,
   Attire,
-  Branch,
+  BranchRead,
   GalleryCategory,
   GalleryPhoto,
   MediaPresignResponse,
@@ -19,7 +19,7 @@ import type {
 import {
   addonServiceSchema,
   attireSchema,
-  branchSchema,
+  branchReadSchema,
   galleryCategorySchema,
   galleryPhotoSchema,
   mediaPresignResponseSchema,
@@ -231,24 +231,24 @@ export function adminServicePackages(raw: RpcClient) {
 export function adminBranches(raw: RpcClient) {
   return {
     /** GET /api/v1/admin/branches — ALL branches incl. deactivated. */
-    async list(): Promise<Branch[]> {
+    async list(): Promise<BranchRead[]> {
       const res = await raw.api.v1.admin.branches.$get();
-      return unwrap(res, branchSchema.array());
+      return unwrap(res, branchReadSchema.array());
     },
     /** GET /api/v1/admin/branches/:id — one branch; 404 when unknown. */
-    async byId(args: GetAdminBranchArgs): Promise<Branch> {
+    async byId(args: GetAdminBranchArgs): Promise<BranchRead> {
       const res = await raw.api.v1.admin.branches[':id'].$get(args);
-      return unwrap(res, branchSchema);
+      return unwrap(res, branchReadSchema);
     },
     /** POST /api/v1/admin/branches — 201 with the created branch. */
-    async create(json: CreateAdminBranchArgs): Promise<Branch> {
+    async create(json: CreateAdminBranchArgs): Promise<BranchRead> {
       const res = await raw.api.v1.admin.branches.$post({ json });
-      return unwrap(res, branchSchema);
+      return unwrap(res, branchReadSchema);
     },
     /** PUT /api/v1/admin/branches/:id — full-object update; the refreshed branch. */
-    async update(args: UpdateAdminBranchArgs): Promise<Branch> {
+    async update(args: UpdateAdminBranchArgs): Promise<BranchRead> {
       const res = await raw.api.v1.admin.branches[':id'].$put(args);
-      return unwrap(res, branchSchema);
+      return unwrap(res, branchReadSchema);
     },
     /** DELETE /api/v1/admin/branches/:id — 204 (the delete seam); blocked → 400 with the appointment count. */
     async remove(args: DeleteAdminBranchArgs): Promise<void> {

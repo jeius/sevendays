@@ -4,12 +4,13 @@
 // screens/branches.tsx, rounds 1–9), with the #131 bulk column + bar riding
 // Task 4's pieces. The prototype's local fixture state is replaced by the
 // task seams: `adminBranchQueries.all()` for the list; Task 3's state seam
-// (`branchStateFromRead` / `newBranchState` / `buildBranchPayload` /
-// `buildBranchFlipPayload` / `validateBranchState`) driving the create/edit
+// (`branchStateFromRead` / `newBranchState` / `buildBranchCreatePayload` /
+// `buildBranchUpdatePayload` / `buildBranchFlipPayload` / `validateBranchState`)
+// driving the create/edit
 // Sheet editor and the optimistic single flips through the result-valued
 // `saveAdminBranchUpdate` server fn. No hours/capacity fields — v2 (the
 // subline says so); the address's only full-text slot is the expand reveal.
-import type { Branch } from '@sevendays/types';
+import type { BranchRead, MediaPresignRequest, MediaPresignResponse } from '@sevendays/types';
 import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent } from '@sevendays/ui/components/card';
@@ -28,8 +29,8 @@ import {
 } from '@sevendays/ui/components/table';
 import { TooltipProvider } from '@sevendays/ui/components/tooltip';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { SquarePen } from 'lucide-react';
-import { Fragment, useId, useState } from 'react';
+import { Image, SquarePen } from 'lucide-react';
+import { Fragment, useEffect, useId, useRef, useState } from 'react';
 import { BulkActionBar, BulkSelectCell, BulkSelectHeader } from '#/components/cms/bulk-bar';
 import {
   ActionTooltip,
@@ -46,21 +47,27 @@ import {
   RowIconActions,
   StatusBadge,
 } from '#/components/cms/shared';
-import { saveAdminBranchCreate, saveAdminBranchUpdate } from '#/lib/admin.functions';
+import {
+  presignAdminCoverUpload,
+  saveAdminBranchCreate,
+  saveAdminBranchUpdate,
+} from '#/lib/admin.functions';
 import { bulkConfirmName } from '#/lib/bulk-counts';
 import { adminBranchQueries } from '#/lib/cms-queries';
+import { type CoverUploadStatus, uploadCover } from '#/lib/cover-upload';
 import type { BranchEditorState, LightFieldErrors } from '#/lib/light-entity-state';
 import {
   branchStateFromRead,
+  buildBranchCreatePayload,
   buildBranchFlipPayload,
-  buildBranchPayload,
+  buildBranchUpdatePayload,
   conflictFieldErrors,
   newBranchState,
   validateBranchState,
 } from '#/lib/light-entity-state';
 
 /** The editor's mode switch: create (from `New branch`) or edit (a row snapshot). */
-type EditingTarget = { mode: 'create' } | { mode: 'edit'; row: Branch };
+type EditingTarget = { mode: 'create' } | { mode: 'edit'; row: BranchRead };
 
 /** One editor save: the target plus the exact field state the user saw. */
 type SaveBranchInput = EditingTarget & { state: BranchEditorState };
@@ -74,7 +81,7 @@ interface BulkFlipOutcome {
 
 /** One flip of the row switch: the source row (payload donor) + the target. */
 interface FlipInput {
-  row: Branch;
+  row: BranchRead;
   isActive: boolean;
 }
 
@@ -105,6 +112,62 @@ export function BranchesScreen() {
   const [editorNonce, setEditorNonce] = useState(0);
   const [editorState, setEditorState] = useState<BranchEditorState>(newBranchState);
   const [fieldErrors, setFieldErrors] = useState<LightFieldErrors>({});
+  // The cover loop (M7 #214 — the packages editor's Cover card, ported):
+  // presign → XHR PUT → the staging key rides the NEXT save. The preview
+  // object URL is revoked on replace/remove/unmount (the loop's contract).
+  const [coverStatus, setCoverStatus] = useState<CoverUploadStatus>({ phase: 'idle' });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
+  const coverUploading = coverStatus.phase === 'presigning' || coverStatus.phase === 'uploading';
+
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+    };
+  }, []);
+
+  async function presign(req: MediaPresignRequest): Promise<MediaPresignResponse> {
+    const result = await presignAdminCoverUpload({ data: req });
+    if (!result.ok) {
+      throw new Error(result.message);
+    }
+    return result.data;
+  }
+
+  function handleCoverStatus(next: CoverUploadStatus) {
+    setCoverStatus(next);
+    if (next.phase === 'bound') {
+      // Re-upload replaces the key (and revokes the replaced preview URL);
+      // binding happens only through the save — the preview reflects
+      // state, never commits.
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+      previewUrlRef.current = next.previewUrl;
+      setEditorState((prev) => ({ ...prev, coverImageKey: next.stagingKey }));
+    }
+  }
+
+  async function startCoverUpload(file: File) {
+    try {
+      await uploadCover(file, presign, handleCoverStatus, 'branch-cover');
+    } catch {
+      // XHR error/abort already emitted `failed` through onStatus — the
+      // machine never stalls; nothing further to surface here.
+    }
+  }
+
+  function removeCover() {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+    setCoverStatus({ phase: 'idle' });
+    // Three-state encoding: null = explicit clear on the next save.
+    setEditorState((prev) => ({ ...prev, coverImageKey: null }));
+  }
   const nameId = useId();
   const addressId = useId();
   const phoneId = useId();
@@ -130,8 +193,8 @@ export function BranchesScreen() {
     },
     onMutate: async ({ row, isActive }) => {
       await queryClient.cancelQueries({ queryKey: adminBranchQueries.all().queryKey });
-      const previous = queryClient.getQueryData<Branch[]>(adminBranchQueries.all().queryKey);
-      queryClient.setQueryData<Branch[]>(adminBranchQueries.all().queryKey, (old) =>
+      const previous = queryClient.getQueryData<BranchRead[]>(adminBranchQueries.all().queryKey);
+      queryClient.setQueryData<BranchRead[]>(adminBranchQueries.all().queryKey, (old) =>
         old?.map((candidate) => (candidate.id === row.id ? { ...candidate, isActive } : candidate))
       );
       return { previous };
@@ -155,9 +218,9 @@ export function BranchesScreen() {
     mutationFn: async (input: SaveBranchInput) => {
       const result =
         input.mode === 'create'
-          ? await saveAdminBranchCreate({ data: buildBranchPayload(input.state) })
+          ? await saveAdminBranchCreate({ data: buildBranchCreatePayload(input.state) })
           : await saveAdminBranchUpdate({
-              data: { id: input.row.id, payload: buildBranchPayload(input.state) },
+              data: { id: input.row.id, payload: buildBranchUpdatePayload(input.state) },
             });
       return { input, result };
     },
@@ -241,13 +304,27 @@ export function BranchesScreen() {
   }
 
   function openCreate() {
+    // The Sheet's children stay mounted across keepEditorOpen (unlike the
+    // packages editor's unmount), so the upload state resets explicitly —
+    // a reopened Sheet never shows a stale preview.
+    setCoverStatus({ phase: 'idle' });
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
     setEditorState(newBranchState());
     setFieldErrors({});
     setEditing({ mode: 'create' });
     setEditorOpen(true);
   }
 
-  function openEdit(row: Branch) {
+  function openEdit(row: BranchRead) {
+    // Same explicit reset as openCreate (the port's lifecycle law).
+    setCoverStatus({ phase: 'idle' });
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
     setEditorState(branchStateFromRead(row));
     setFieldErrors({});
     setEditing({ mode: 'edit', row });
@@ -284,7 +361,7 @@ export function BranchesScreen() {
 
   // The table's one action shape: the sheet-opening Edit icon (packages
   // routes to an editor screen — branches opens the Sheet in place).
-  function editButton(row: Branch) {
+  function editButton(row: BranchRead) {
     return (
       <Button
         variant='ghost'
@@ -577,6 +654,80 @@ export function BranchesScreen() {
               />
               Active
             </label>
+          </div>
+          <div className='space-y-3 rounded-lg border p-4'>
+            <p className='text-sm font-medium'>Cover</p>
+            {/* Preview precedence (the packages editor's law): a fresh
+                bound upload shows the local object URL; a pending removal
+                (coverImageKey: null) shows the placeholder; else the
+                read's coverImageUrl; else the placeholder. The preview
+                reflects state, never commits. */}
+            {coverStatus.phase === 'bound' ? (
+              <img
+                src={coverStatus.previewUrl}
+                alt={`${editorState.name} cover`}
+                className='aspect-[3/2] w-full rounded-md object-cover'
+              />
+            ) : editorState.coverImageKey === null ? (
+              <div className='bg-muted text-muted-foreground grid aspect-[3/2] w-full place-items-center rounded-md'>
+                <Image aria-hidden='true' className='size-8' />
+              </div>
+            ) : editorState.coverImageUrl ? (
+              <img
+                src={editorState.coverImageUrl}
+                alt={`${editorState.name} cover`}
+                className='aspect-[3/2] w-full rounded-md object-cover'
+              />
+            ) : (
+              <div className='bg-muted text-muted-foreground grid aspect-[3/2] w-full place-items-center rounded-md'>
+                <Image aria-hidden='true' className='size-8' />
+              </div>
+            )}
+            <div className='flex items-center gap-2'>
+              <input
+                ref={fileInputRef}
+                type='file'
+                accept='image/jpeg'
+                className='hidden'
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = '';
+                  if (file) {
+                    void startCoverUpload(file);
+                  }
+                }}
+              />
+              <Button
+                variant='outline'
+                type='button'
+                disabled={coverUploading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Upload cover
+              </Button>
+              <Button variant='ghost' type='button' disabled={coverUploading} onClick={removeCover}>
+                Remove cover
+              </Button>
+            </div>
+            {coverStatus.phase === 'presigning' ? (
+              <p className='text-muted-foreground text-xs'>Presigning…</p>
+            ) : null}
+            {coverStatus.phase === 'uploading' ? (
+              <p className='text-muted-foreground text-xs'>
+                Uploading…{' '}
+                {coverStatus.total > 0
+                  ? Math.round((coverStatus.sent / coverStatus.total) * 100)
+                  : 0}
+                %
+              </p>
+            ) : null}
+            {coverStatus.phase === 'bound' ? (
+              <p className='text-muted-foreground text-xs'>Cover ready — save to bind it.</p>
+            ) : null}
+            {coverStatus.phase === 'failed' ? (
+              <p className='text-destructive text-xs'>Upload failed: {coverStatus.message}</p>
+            ) : null}
+            <p className='text-muted-foreground text-xs'>JPG only, up to 50 MiB.</p>
           </div>
         </LightEntityEditor>
       ) : null}

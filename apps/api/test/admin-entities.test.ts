@@ -1,4 +1,5 @@
 import { attires, auditLog, branches, printSizes } from '@sevendays/db';
+import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import app from '../src/index.js';
 import { signUpSession } from './helpers/auth.js';
@@ -6,6 +7,7 @@ import { createTestDb } from './helpers/db.js';
 import { testEnv } from './helpers/env.js';
 import type { FixtureIds } from './helpers/fixtures.js';
 import { loadFixtures } from './helpers/fixtures.js';
+import { stubCommitBucket } from './helpers/r2-stub.js';
 import { truncateAll } from './helpers/truncate.js';
 
 const url = process.env.TEST_DATABASE_URL as string;
@@ -204,6 +206,141 @@ describe('branches admin CRUD', () => {
     );
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: 'Authentication required.' });
+  });
+
+  const STAGING = 'tmp/00000000-0000-4000-8000-00000000000c.jpg';
+
+  it('POST with a staging cover → 201, the cover promoted + resolved (raw key never on the read)', async () => {
+    const stub = stubCommitBucket({ [STAGING]: { size: 1024, contentType: 'image/jpeg' } });
+    const { token } = await signUpSession(url, 'admin-branches-cover-create@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/branches',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Fifth Branch',
+          address: '5 New St',
+          phone: '+63 900 000 005',
+          coverImageKey: STAGING,
+        }),
+      },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { coverImageUrl: string | null };
+    expect(body.coverImageUrl).toMatch(/^https:\/\/pub-test\.r2\.dev\/covers\/[0-9a-f-]+\.jpg$/);
+    expect(body).not.toHaveProperty('coverImageKey');
+    // The promote happened: one put at the final key, the staging deleted.
+    expect(stub.putCalls).toHaveLength(1);
+    expect(stub.deleteCalls).toEqual([STAGING]);
+  });
+
+  it('PUT with a new staging key replaces the cover; the OLD object deletes only after the commit', async () => {
+    const OLD_KEY = 'covers/aaaaaaaa-0000-4000-8000-0000000000bb.jpg';
+    await db.update(branches).set({ coverImageKey: OLD_KEY }).where(eq(branches.id, ids.branchA));
+    const stub = stubCommitBucket({ [STAGING]: { size: 1024, contentType: 'image/jpeg' } });
+    const { token } = await signUpSession(url, 'admin-branches-cover-replace@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/branches/${ids.branchA}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Test Branch A',
+          address: '1 Test St',
+          phone: '+63 900 000 001',
+          acceptsWalkIns: false,
+          isActive: true,
+          coverImageKey: STAGING,
+        }),
+      },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { coverImageUrl: string | null };
+    expect(body.coverImageUrl).not.toBe(`https://pub-test.r2.dev/${OLD_KEY}`);
+    expect(stub.deleteCalls).toContain(OLD_KEY);
+  });
+
+  it('PUT with coverImageKey null clears the cover and deletes the old object', async () => {
+    const OLD_KEY = 'covers/aaaaaaaa-0000-4000-8000-0000000000bc.jpg';
+    await db.update(branches).set({ coverImageKey: OLD_KEY }).where(eq(branches.id, ids.branchA));
+    const stub = stubCommitBucket();
+    const { token } = await signUpSession(url, 'admin-branches-cover-clear@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/branches/${ids.branchA}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Test Branch A',
+          address: '1 Test St',
+          phone: '+63 900 000 001',
+          acceptsWalkIns: false,
+          isActive: true,
+          coverImageKey: null,
+        }),
+      },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { coverImageUrl: string | null };
+    expect(body.coverImageUrl).toBeNull();
+    expect(stub.deleteCalls).toEqual([OLD_KEY]);
+  });
+
+  it('PUT without the cover field leaves the cover UNCHANGED (absent = unchanged; no bucket touch)', async () => {
+    const OLD_KEY = 'covers/aaaaaaaa-0000-4000-8000-0000000000bd.jpg';
+    await db.update(branches).set({ coverImageKey: OLD_KEY }).where(eq(branches.id, ids.branchA));
+    const stub = stubCommitBucket();
+    const { token } = await signUpSession(url, 'admin-branches-cover-keep@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/branches/${ids.branchA}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Test Branch A',
+          address: '1 Test St',
+          phone: '+63 900 000 001',
+          acceptsWalkIns: false,
+          isActive: true,
+        }),
+      },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { coverImageUrl: string | null };
+    expect(body.coverImageUrl).toBe(`https://pub-test.r2.dev/${OLD_KEY}`);
+    expect(stub.deleteCalls).toEqual([]);
+  });
+
+  it('PUT with a staging key that has no object → 400 with the coverImageKey field detail (the commit re-path)', async () => {
+    const stub = stubCommitBucket(); // empty — head misses
+    const { token } = await signUpSession(url, 'admin-branches-cover-miss@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/branches/${ids.branchA}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Test Branch A',
+          address: '1 Test St',
+          phone: '+63 900 000 001',
+          acceptsWalkIns: false,
+          isActive: true,
+          coverImageKey: STAGING,
+        }),
+      },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as {
+      error: string;
+      details: { path: string[]; message: string }[];
+    };
+    expect(body.details[0]?.path).toEqual(['coverImageKey']);
   });
 });
 

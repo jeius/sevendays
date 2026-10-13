@@ -900,7 +900,7 @@ export function GalleryScreen() {
       data: {
         r2Key: input.r2Key,
         title: input.title || null,
-        caption: null,
+        caption: input.caption,
         categoryId: input.categoryId,
       },
     });
@@ -947,6 +947,7 @@ export function GalleryScreen() {
       id: crypto.randomUUID(),
       file,
       title: titleFromFileName(file.name),
+      caption: null,
       categoryId: filter === 'all' ? null : filter,
     }));
     setTrayItems((prev) => [...prev, ...items]);

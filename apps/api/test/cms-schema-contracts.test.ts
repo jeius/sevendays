@@ -61,6 +61,9 @@ describe('create→read round-trips (the canonical fixtures, all nine entities)'
       phone: '+63 900 000 004',
       acceptsWalkIns: true,
       isActive: false,
+      // M7 #214: the row shape gained the nullable cover key — the canonical
+      // fixture completes it by hand (born-null is the default state).
+      coverImageKey: null,
       createdAt: DATE,
       updatedAt: DATE,
     });
@@ -315,7 +318,7 @@ describe('the wire rename (ADR-0019: no read shape exposes a raw R2 key)', () =>
   it('the public gallery read parses the assembled payload (categories + categorized photos)', () => {
     const result = galleryReadSchema.safeParse({
       categories: [{ id: UUID2, name: 'Graduation' }],
-      photos: [{ id: UUID, photoUrl: PHOTO_URL, title: null, categoryId: UUID2 }],
+      photos: [{ id: UUID, photoUrl: PHOTO_URL, title: null, caption: null, categoryId: UUID2 }],
     });
     expect(result.success).toBe(true);
   });

@@ -4,7 +4,7 @@
 // the staging key rides the NEXT atomic package save, whose commit is the
 // real verify/promote gate (#136/#137). Framework-free on purpose: #143's
 // lib-seam suite drives this loop with a fake presign + a stubbed XHR.
-import type { MediaPresignRequest, MediaPresignResponse } from '@sevendays/types';
+import type { MediaPresignRequest, MediaPresignResponse, MediaPurpose } from '@sevendays/types';
 
 /**
  * The upload status machine the caller renders. `#143 seam: the cover
@@ -25,8 +25,9 @@ export type CoverUploadStatus =
  *    `image/jpeg`, size ≤ 50 MiB. The commit re-verifies server-side
  *    (#136's contract); the client check is courtesy, never trusted.
  * 2. `presigning` → the injected `presign` fn (the component wires the
- *    admin server fn in) with `{ purpose: 'package-cover',
- *    contentType: 'image/jpeg' }`.
+ *    admin server fn in) with `{ purpose, contentType: 'image/jpeg' }`
+ *    (the caller's purpose — 'package-cover' by default, 'branch-cover'
+ *    from the branch editor since M7 #214).
  * 3. `uploading` — XHR PUT (fetch has no upload progress — the spec's XHR
  *    ruling) with `Content-Type: image/jpeg`; progress events map to
  *    `{ sent, total }`; a non-2xx response fails with the status code.
@@ -45,7 +46,8 @@ export type CoverUploadStatus =
 export async function uploadCover(
   file: File,
   presign: (req: MediaPresignRequest) => Promise<MediaPresignResponse>,
-  onStatus: (status: CoverUploadStatus) => void
+  onStatus: (status: CoverUploadStatus) => void,
+  purpose: MediaPurpose = 'package-cover'
 ): Promise<void> {
   // (1) Courtesy pre-checks, before any network call. The commit is the
   // real gate — these are never trusted server-side (#136).
@@ -64,7 +66,7 @@ export async function uploadCover(
   let stagingKey: string;
   let uploadUrl: string;
   try {
-    const presigned = await presign({ purpose: 'package-cover', contentType: 'image/jpeg' });
+    const presigned = await presign({ purpose, contentType: 'image/jpeg' });
     stagingKey = presigned.key;
     uploadUrl = presigned.uploadUrl;
   } catch (error) {
