@@ -11,6 +11,7 @@ import {
   fetchAdminStudioServices,
   fetchAdminTestimonials,
 } from './admin.functions';
+import { getSiteSettings } from './api.functions';
 
 // Query key factories for the admin CMS (M5 #139) — the branchQueries
 // precedent, one factory per resource the ticket 05 screens consume.
@@ -82,5 +83,14 @@ export const adminTestimonialQueries = {
     queryOptions({
       queryKey: ['admin', 'testimonials'],
       queryFn: fetchAdminTestimonials,
+    }),
+};
+
+// M7 #215: the singleton's one query — the public read the Site tab loads.
+export const siteSettingsQuery = {
+  all: () =>
+    queryOptions({
+      queryKey: ['site-settings'],
+      queryFn: getSiteSettings,
     }),
 };
