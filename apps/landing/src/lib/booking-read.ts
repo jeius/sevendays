@@ -8,7 +8,7 @@
 
 import type {
   AppointmentWithAddons,
-  Branch,
+  BranchRead,
   ServicePackageRead,
   StudioServiceWithBranches,
 } from '@sevendays/types';
@@ -28,7 +28,7 @@ export function confirmationTotalCents(record: AppointmentWithAddons): number | 
 }
 
 /** Branch display name joined from the branches read; '—' when unresolvable. */
-export function branchNameFor(record: AppointmentWithAddons, branches: Branch[]): string {
+export function branchNameFor(record: AppointmentWithAddons, branches: BranchRead[]): string {
   return branches.find((b) => b.id === record.branchId)?.name ?? '—';
 }
 

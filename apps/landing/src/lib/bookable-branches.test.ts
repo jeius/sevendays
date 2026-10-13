@@ -1,14 +1,15 @@
-import type { Branch, StudioServiceWithBranches } from '@sevendays/types';
+import type { BranchRead, StudioServiceWithBranches } from '@sevendays/types';
 import { describe, expect, it } from 'vitest';
 import { bookableBranchNames } from './bookable-branches';
 
-function branch(name: string): Branch {
+function branch(name: string): BranchRead {
   return {
     id: crypto.randomUUID(),
     name,
     address: 'test address',
     phone: '+63 900 000 000',
     acceptsWalkIns: false,
+    coverImageUrl: null,
     isActive: true,
     createdAt: new Date('2026-01-01T00:00:00Z'),
     updatedAt: new Date('2026-01-01T00:00:00Z'),

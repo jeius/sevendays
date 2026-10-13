@@ -1,4 +1,4 @@
-import type { Branch, StudioServiceWithBranches } from '@sevendays/types';
+import type { BranchRead, StudioServiceWithBranches } from '@sevendays/types';
 
 /**
  * Branch-name chips for a Studio Service card (/services): the branches this
@@ -8,7 +8,7 @@ import type { Branch, StudioServiceWithBranches } from '@sevendays/types';
  */
 export function bookableBranchNames(
   service: StudioServiceWithBranches,
-  branches: Branch[]
+  branches: BranchRead[]
 ): string[] {
   const bookable = new Set(service.bookableBranchIds);
   return branches.filter((b) => bookable.has(b.id)).map((b) => b.name);

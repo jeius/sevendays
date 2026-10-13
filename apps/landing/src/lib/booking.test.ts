@@ -1,6 +1,6 @@
 import type {
   AddonService,
-  Branch,
+  BranchRead,
   ServicePackageRead,
   StudioServiceWithBranches,
 } from '@sevendays/types';
@@ -35,13 +35,14 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-function branch(id: string): Branch {
+function branch(id: string): BranchRead {
   return {
     id,
     name: `Branch ${id.slice(-4)}`,
     address: 'test address',
     phone: '+63 900 000 000',
     acceptsWalkIns: false,
+    coverImageUrl: 'https://pub-test.r2.dev/covers/branch-a.jpg',
     isActive: true,
     createdAt: new Date('2026-01-01T00:00:00Z'),
     updatedAt: new Date('2026-01-01T00:00:00Z'),

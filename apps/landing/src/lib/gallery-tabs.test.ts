@@ -13,6 +13,7 @@ function photo(categoryId: string): PublicGalleryPhoto {
     id: `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`,
     photoUrl: `https://pub-test.r2.dev/gallery/${String(n).padStart(12, '0')}.jpg`,
     title: `Photo ${n}`,
+    caption: null,
     categoryId,
   };
 }
@@ -81,5 +82,13 @@ describe('photosForTab', () => {
     const gallery: GalleryRead = { categories: [weddings], photos: [stray] };
     expect(photosForTab(gallery, ALL_TAB_ID)).toEqual([stray]);
     expect(photosForTab(gallery, weddings.id)).toEqual([]);
+  });
+
+  it('passes photo captions through untouched (M7 #214: the wall renders them when present)', () => {
+    const weddings = category('Weddings');
+    const withCaption = { ...photo(weddings.id), caption: 'The last frame of the day' };
+    const gallery: GalleryRead = { categories: [weddings], photos: [withCaption] };
+    expect(photosForTab(gallery, weddings.id)[0]?.caption).toBe('The last frame of the day');
+    expect(photosForTab(gallery, ALL_TAB_ID)[0]?.caption).toBe('The last frame of the day');
   });
 });
