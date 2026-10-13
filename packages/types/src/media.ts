@@ -8,9 +8,15 @@ import { z } from 'zod';
 // carry a size condition, so the commit-time HEAD is the real gate.
 export const MEDIA_CONTENT_TYPES = ['image/jpeg'] as const;
 
-// 'branch-cover' joined with M7 #214: branch covers ride the same
-// presign/commit pipeline under their own purpose (covers/ prefix).
-export const mediaPurposeSchema = z.enum(['package-cover', 'branch-cover', 'gallery-photo']);
+// 'branch-cover' joined with M7 #214; 'site-logo' with M7 #215: the brand
+// logo rides the same presign/commit pipeline under its own purpose (the
+// brand/ prefix — a logo is not a cover).
+export const mediaPurposeSchema = z.enum([
+  'package-cover',
+  'branch-cover',
+  'site-logo',
+  'gallery-photo',
+]);
 
 export type MediaPurpose = z.infer<typeof mediaPurposeSchema>;
 
