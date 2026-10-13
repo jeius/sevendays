@@ -13,7 +13,8 @@
 import type {
   AddonService,
   Attire,
-  Branch,
+  BranchRead,
+  CreateBranchInput,
   PrintSize,
   StudioServiceAddonMatrixInput,
   StudioServiceBranchMatrixInput,
@@ -29,6 +30,11 @@ import type {
 
 /**
  * The branch editor's whole state. `#143 seam: the branch state shape`.
+ * `coverImageUrl`/`coverImageKey` are the three-state media encoding
+ * (M7 #214, the package seam's law): the URL is the read's resolved cover
+ * (preview fallback), `undefined` = unchanged (absent from the PUT),
+ * `null` = clear, string = a fresh staging key (ADR-0019) to bind on the
+ * next save.
  */
 export interface BranchEditorState {
   name: string;
@@ -36,6 +42,8 @@ export interface BranchEditorState {
   phone: string;
   acceptsWalkIns: boolean;
   isActive: boolean;
+  coverImageUrl: string | null;
+  coverImageKey: string | null | undefined;
 }
 
 /**
@@ -90,21 +98,25 @@ export type LightFieldErrors = {
 
 /**
  * `#143 seam: read → branch state`. The read row minus server-managed
- * fields (id/createdAt/updatedAt).
+ * fields (id/createdAt/updatedAt); `coverImageKey` starts `undefined` (a
+ * read never echoes keys, so there is nothing to echo — the cover is
+ * unchanged until the editor says otherwise).
  */
-export function branchStateFromRead(row: Branch): BranchEditorState {
+export function branchStateFromRead(row: BranchRead): BranchEditorState {
   return {
     name: row.name,
     address: row.address,
     phone: row.phone,
     acceptsWalkIns: row.acceptsWalkIns,
     isActive: row.isActive,
+    coverImageUrl: row.coverImageUrl,
+    coverImageKey: undefined,
   };
 }
 
 /**
  * `#143 seam: create-mode branch state`. Empty strings,
- * `acceptsWalkIns: false`, active by default.
+ * `acceptsWalkIns: false`, active by default, no cover.
  */
 export function newBranchState(): BranchEditorState {
   return {
@@ -113,33 +125,53 @@ export function newBranchState(): BranchEditorState {
     phone: '',
     acceptsWalkIns: false,
     isActive: true,
+    coverImageUrl: null,
+    coverImageKey: undefined,
   };
 }
 
 /**
- * `#143 seam: branch state → full-object PUT payload`. All five fields
- * explicit — the schema's `.default(false)`/`.default(true)` are never
- * trusted client-side (#137's full-object PUT: no undefined-vs-null
- * merge semantics).
+ * `#143 seam: branch state → create payload` (M7 #214 split, the
+ * package seam's law). The five fields explicit — the schema's defaults
+ * are never trusted client-side (#137's full-object PUT). `coverImageKey`
+ * is included ONLY when the state carries a fresh staging key string.
  */
-export function buildBranchPayload(state: BranchEditorState): UpdateBranchInput {
+export function buildBranchCreatePayload(state: BranchEditorState): CreateBranchInput {
   return {
     name: state.name,
     address: state.address,
     phone: state.phone,
     acceptsWalkIns: state.acceptsWalkIns,
     isActive: state.isActive,
+    ...(typeof state.coverImageKey === 'string' ? { coverImageKey: state.coverImageKey } : {}),
   };
 }
 
 /**
- * `#143 seam: read → branch flip payload`. The table's deactivate/
- * reactivate: the read reshaped back into the full-object update payload
- * with ONLY `isActive` flipped — the flip never drops a field, because
- * the PUT is full-object and a missing field would overwrite real data
- * with the schema default (#137's deactivation contract).
+ * `#143 seam: branch state → full-object PUT payload`. The create mapping
+ * plus the three-state cover encoding: `undefined` = property ABSENT from
+ * the object (unchanged), `null` = explicit clear, string = bind the
+ * fresh staging key (#137's update shape / ADR-0019).
  */
-export function buildBranchFlipPayload(row: Branch, isActive: boolean): UpdateBranchInput {
+export function buildBranchUpdatePayload(state: BranchEditorState): UpdateBranchInput {
+  return {
+    name: state.name,
+    address: state.address,
+    phone: state.phone,
+    acceptsWalkIns: state.acceptsWalkIns,
+    isActive: state.isActive,
+    ...(state.coverImageKey !== undefined ? { coverImageKey: state.coverImageKey } : {}),
+  };
+}
+
+/**
+ * `#143 seam: read → branch flip payload`. The read reshaped back into the
+ * full-object update payload with ONLY `isActive` flipped. `coverImageKey`
+ * is deliberately ABSENT: the absence is what makes a flip never re-verify
+ * or clobber media — the cover is untouched by the PUT (the tri-state
+ * encoding; the read never echoes keys anyway).
+ */
+export function buildBranchFlipPayload(row: BranchRead, isActive: boolean): UpdateBranchInput {
   return {
     name: row.name,
     address: row.address,

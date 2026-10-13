@@ -3,6 +3,7 @@ import {
   appointments as appointmentsTable,
   attires as attiresTable,
   auditLog,
+  branches as branchesTable,
   branchStudioServices,
   frames as framesTable,
   galleryCategories as galleryCategoriesTable,
@@ -35,7 +36,13 @@ let gids: GalleryFixtureIds;
 
 const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
 
-const authed = async (method: string, path: string, email: string, body?: unknown) => {
+const authed = async (
+  method: string,
+  path: string,
+  email: string,
+  body?: unknown,
+  env?: Record<string, unknown>
+) => {
   const { token } = await signUpSession(url, email);
   return app.request(
     path,
@@ -44,7 +51,7 @@ const authed = async (method: string, path: string, email: string, body?: unknow
       headers: { 'content-type': 'application/json', ...bearer(token) },
       body: body === undefined ? undefined : JSON.stringify(body),
     },
-    testEnv(url)
+    { ...testEnv(url), ...env }
   );
 };
 
@@ -328,6 +335,26 @@ describe('guarded DELETE — the appointment-bearing entities (any Appointment e
       .where(and(eq(auditLog.entity, 'branch'), eq(auditLog.entityId, ids.branchB)))
       .limit(1);
     expect(auditRow?.action).toBe('delete');
+  });
+
+  it('a deleted branch cover object goes with the row (ADR-0019 §5: commit first, then the object delete)', async () => {
+    const COVER_KEY = 'covers/aaaaaaaa-0000-4000-8000-0000000000be.jpg';
+    // branchB deletes clean (its only reference is the portrait matrix row,
+    // which cascades in-transaction) — the #213 fixture ground truth.
+    await db
+      .update(branchesTable)
+      .set({ coverImageKey: COVER_KEY })
+      .where(eq(branchesTable.id, ids.branchB));
+    const stub = stubCommitBucket();
+    const res = await authed(
+      'DELETE',
+      `/api/v1/admin/branches/${ids.branchB}`,
+      'delete-branch-cover@sevendays.test',
+      undefined,
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(204);
+    expect(stub.deleteCalls).toEqual([COVER_KEY]);
   });
 
   it('branch unknown id → the uniform per-entity 404', async () => {

@@ -1,7 +1,7 @@
 import type {
   AddonService,
   AppointmentWithAddons,
-  Branch,
+  BranchRead,
   ServicePackageRead,
 } from '@sevendays/types';
 import type { InferRequestType } from 'hono/client';
@@ -16,7 +16,7 @@ const client = createApiClient({ baseUrl: 'http://localhost:4949/' });
 // the acceptance criterion "type-level inference assertions" plus the
 // drift-kill visible at the wrapper level.
 it('wrapper return types come from the shared schemas', () => {
-  expectTypeOf(client.branches.list).returns.toEqualTypeOf<Promise<Branch[]>>();
+  expectTypeOf(client.branches.list).returns.toEqualTypeOf<Promise<BranchRead[]>>();
   expectTypeOf(client.servicePackages.list).returns.toEqualTypeOf<Promise<ServicePackageRead[]>>();
   expectTypeOf(client.addonServices.list).returns.toEqualTypeOf<Promise<AddonService[]>>();
   expectTypeOf(client.appointments.list).returns.toEqualTypeOf<Promise<AppointmentWithAddons[]>>();

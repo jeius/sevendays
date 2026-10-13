@@ -13,7 +13,7 @@
 import type { CreateAppointmentArgs } from '@sevendays/api-client';
 import type {
   AddonService,
-  Branch,
+  BranchRead,
   ServicePackageRead,
   StudioServiceWithBranches,
 } from '@sevendays/types';
@@ -22,7 +22,7 @@ import { z } from 'zod';
 
 /** One wizard read snapshot — the four reads the route loader prefetches. */
 export interface BookingCatalog {
-  branches: Branch[];
+  branches: BranchRead[];
   packages: ServicePackageRead[];
   services: StudioServiceWithBranches[];
   addons: AddonService[];
@@ -109,7 +109,7 @@ export function branchFilterServiceId(
   return null;
 }
 
-export function branchChoicesFor(catalog: BookingCatalog, serviceId: string | null): Branch[] {
+export function branchChoicesFor(catalog: BookingCatalog, serviceId: string | null): BranchRead[] {
   if (!serviceId) return catalog.branches;
   const svc = catalog.services.find((s) => s.id === serviceId);
   if (!svc) return catalog.branches;

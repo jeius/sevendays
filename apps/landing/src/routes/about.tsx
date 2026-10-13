@@ -106,6 +106,11 @@ function AboutPage() {
                       {photo.title}
                     </figcaption>
                   )}
+                  {photo.caption && (
+                    <p className='text-muted-text px-3 pb-2 text-xs leading-relaxed'>
+                      {photo.caption}
+                    </p>
+                  )}
                 </figure>
               ))}
             </div>

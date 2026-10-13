@@ -24,6 +24,9 @@ const EXTENSIONS = { 'image/jpeg': 'jpg' } as const;
 
 const FINAL_PREFIXES: Record<MediaPurpose, string> = {
   'package-cover': 'covers',
+  // M7 #214: branch covers share the covers/ prefix — one immutable-cover
+  // directory; the purpose still names its owner for the presign contract.
+  'branch-cover': 'covers',
   'gallery-photo': 'gallery',
 };
 

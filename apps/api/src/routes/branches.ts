@@ -9,5 +9,5 @@ import type { ApiEnv } from '../services/db.js';
 // drift-kill suite is the regression guard).
 export const branches = new Hono<ApiEnv>().get('/', async (c) => {
   const db = c.get('db');
-  return c.json(await listBranches(db));
+  return c.json(await listBranches(db, c.env));
 });

@@ -22,6 +22,14 @@ describe('mediaPresignRequestSchema', () => {
     ).toBe(false);
   });
 
+  it('parses the branch-cover purpose (M7 #214: branches join the covers pipeline)', () => {
+    const parsed = mediaPresignRequestSchema.parse({
+      purpose: 'branch-cover',
+      contentType: 'image/jpeg',
+    });
+    expect(parsed.purpose).toBe('branch-cover');
+  });
+
   it('rejects a non-jpeg contentType (the M5 cap: image/jpeg only)', () => {
     expect(
       mediaPresignRequestSchema.safeParse({ purpose: 'gallery-photo', contentType: 'image/png' })

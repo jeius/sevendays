@@ -1,7 +1,7 @@
 import {
   addonServiceSchema,
   attireSchema,
-  branchSchema,
+  branchReadSchema,
   printSizeSchema,
   studioServiceWithBranchesSchema,
   testimonialSchema,
@@ -13,13 +13,14 @@ import * as light from './light-entity-state';
 const uuid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const STAMP = '2026-08-31T00:00:00.000Z';
 
-const branch = branchSchema.parse({
+const branch = branchReadSchema.parse({
   id: uuid(1),
   name: 'Main Studio',
   address: '12 Sample St.',
   phone: '+63 900 000 0001',
   acceptsWalkIns: true,
   isActive: true,
+  coverImageUrl: null,
   createdAt: STAMP,
   updatedAt: STAMP,
 });
@@ -43,7 +44,7 @@ describe('studio-service state', () => {
     expect(state.branchIds).not.toBe(service.bookableBranchIds);
   });
 
-  it('branch state/payload round-trip; the flip carries every field with ONLY isActive flipped', () => {
+  it('branch state/payload round-trip; the flip carries every editable field with ONLY isActive flipped and NO cover key', () => {
     const state = light.branchStateFromRead(branch);
     expect(state).toEqual({
       name: 'Main Studio',
@@ -51,15 +52,56 @@ describe('studio-service state', () => {
       phone: '+63 900 000 0001',
       acceptsWalkIns: true,
       isActive: true,
+      coverImageUrl: null,
     });
-    expect(light.buildBranchPayload(state)).toEqual({
+    expect(light.buildBranchCreatePayload(state)).toEqual({
       name: 'Main Studio',
       address: '12 Sample St.',
       phone: '+63 900 000 0001',
       acceptsWalkIns: true,
       isActive: true,
     });
-    expect(light.buildBranchFlipPayload(branch, false)).toEqual({ ...state, isActive: false });
+    const flip = light.buildBranchFlipPayload(branch, false);
+    expect(flip).toEqual({
+      name: 'Main Studio',
+      address: '12 Sample St.',
+      phone: '+63 900 000 0001',
+      acceptsWalkIns: true,
+      isActive: false,
+    });
+    // The cover is deliberately ABSENT from a flip — the absence is what
+    // makes a flip never re-verify or clobber media (the tri-state law).
+    expect('coverImageKey' in flip).toBe(false);
+  });
+
+  it('create payload includes the cover ONLY when the state carries a fresh staging key', () => {
+    const state = light.branchStateFromRead(branch);
+    expect('coverImageKey' in light.buildBranchCreatePayload(state)).toBe(false);
+    const bound = { ...state, coverImageKey: 'tmp/00000000-0000-4000-8000-00000000000c.jpg' };
+    expect(light.buildBranchCreatePayload(bound).coverImageKey).toBe(
+      'tmp/00000000-0000-4000-8000-00000000000c.jpg'
+    );
+  });
+
+  it('update payload encodes the cover tri-state: absent = property ABSENT, null = clear, string = bind', () => {
+    const state = light.branchStateFromRead(branch);
+    expect('coverImageKey' in light.buildBranchUpdatePayload(state)).toBe(false);
+    expect(
+      light.buildBranchUpdatePayload({ ...state, coverImageKey: null }).coverImageKey
+    ).toBeNull();
+    expect(
+      light.buildBranchUpdatePayload({
+        ...state,
+        coverImageKey: 'tmp/00000000-0000-4000-8000-00000000000c.jpg',
+      }).coverImageKey
+    ).toBe('tmp/00000000-0000-4000-8000-00000000000c.jpg');
+  });
+
+  it('a read with a cover seeds coverImageUrl; the editor key starts undefined (a read never echoes keys)', () => {
+    const covered = { ...branch, coverImageUrl: 'https://pub-test.r2.dev/covers/aaaa.jpg' };
+    const state = light.branchStateFromRead(covered);
+    expect(state.coverImageUrl).toBe('https://pub-test.r2.dev/covers/aaaa.jpg');
+    expect(state.coverImageKey).toBeUndefined();
   });
 
   it('studio-service payload round-trip and flip', () => {

@@ -1,7 +1,7 @@
 import { ApiClientError } from '@sevendays/api-client';
 import type {
   AppointmentWithAddons,
-  Branch,
+  BranchRead,
   ServicePackageRead,
   StudioServiceWithBranches,
 } from '@sevendays/types';
@@ -62,13 +62,14 @@ const B2 = branch('22222222-2222-4222-8222-222222222222', 'Branch Two');
 const PKG = pkg('44444444-4444-4444-8444-444444444444', 'Package A');
 const SVC = service('33333333-3333-4333-8333-333333333333', 'Portraits & ID Photo');
 
-function branch(id: string, name: string): Branch {
+function branch(id: string, name: string): BranchRead {
   return {
     id,
     name,
     address: 'test address',
     phone: '+63 900 000 000',
     acceptsWalkIns: false,
+    coverImageUrl: null,
     isActive: true,
     createdAt: new Date('2026-01-01T00:00:00Z'),
     updatedAt: new Date('2026-01-01T00:00:00Z'),

@@ -1,0 +1,1 @@
+ALTER TABLE "branches" ADD COLUMN "cover_image_key" text;

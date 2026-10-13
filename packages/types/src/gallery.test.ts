@@ -7,6 +7,7 @@ import {
   galleryPhotoOrderSchema,
   galleryPhotoSchema,
   galleryReadSchema,
+  publicGalleryPhotoSchema,
   updateGalleryCategorySchema,
   updateGalleryPhotoSchema,
 } from './gallery.js';
@@ -137,10 +138,43 @@ describe('galleryReadSchema (the public assembled read)', () => {
         { id: UUID, name: 'Family' },
       ],
       photos: [
-        { id: UUID, photoUrl: PHOTO_URL, title: 'Toga portrait', categoryId: UUID2 },
-        { id: UUID2, photoUrl: PHOTO_URL, title: null, categoryId: UUID2 },
+        {
+          id: UUID,
+          photoUrl: PHOTO_URL,
+          title: 'Toga portrait',
+          caption: 'Toga toss at the quad',
+          categoryId: UUID2,
+        },
+        { id: UUID2, photoUrl: PHOTO_URL, title: null, caption: null, categoryId: UUID2 },
       ],
     });
     expect(result.success).toBe(true);
+  });
+
+  it('caption passes through untouched (M7 #214: the wire carries it; walls render when present)', () => {
+    const parsed = galleryReadSchema.parse({
+      categories: [],
+      photos: [
+        {
+          id: UUID,
+          photoUrl: PHOTO_URL,
+          title: null,
+          caption: 'The last frame of the day',
+          categoryId: UUID2,
+        },
+      ],
+    });
+    expect(parsed.photos[0]?.caption).toBe('The last frame of the day');
+  });
+
+  it('a bare photo parses with caption null (no caption renders nothing extra)', () => {
+    const bare = publicGalleryPhotoSchema.parse({
+      id: UUID,
+      photoUrl: PHOTO_URL,
+      title: null,
+      caption: null,
+      categoryId: UUID2,
+    });
+    expect(bare.caption).toBeNull();
   });
 });

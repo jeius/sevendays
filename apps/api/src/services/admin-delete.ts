@@ -18,6 +18,7 @@ import {
   testimonials,
 } from '@sevendays/db';
 import { count, eq } from 'drizzle-orm';
+import type { Env } from '../env.js';
 import type { PhotoEnv } from './admin-gallery.js';
 import type { SaveEnv } from './admin-packages.js';
 import type { AdminDetail } from './admin-shared.js';
@@ -200,6 +201,7 @@ export async function deleteAdminAttire(
 
 export async function deleteAdminBranch(
   db: Database,
+  env: Pick<Env, 'MEDIA_BUCKET'>,
   audit: AuditActor,
   id: string
 ): Promise<AdminDeleteResult> {
@@ -226,6 +228,10 @@ export async function deleteAdminBranch(
       summary: current.name,
     });
   });
+  // ADR-0019 §5: the row committed; its cover object goes with it.
+  if (current.coverImageKey) {
+    await env.MEDIA_BUCKET.delete(current.coverImageKey);
+  }
   return { ok: true };
 }
 
