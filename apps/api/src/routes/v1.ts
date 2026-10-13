@@ -7,6 +7,7 @@ import { appointments } from './appointments.js';
 import { branches } from './branches.js';
 import { gallery } from './gallery.js';
 import { servicePackages } from './service-packages.js';
+import { siteSettingsRoutes } from './site-settings.js';
 import { studioServices } from './studio-services.js';
 import { testimonials } from './testimonials.js';
 
@@ -32,4 +33,5 @@ export const v1 = new Hono<ApiEnv>()
   .route('/addon-services', addonServices)
   .route('/gallery', gallery)
   .route('/testimonials', testimonials)
+  .route('/site-settings', siteSettingsRoutes)
   .route('/admin', admin);

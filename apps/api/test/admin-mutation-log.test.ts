@@ -282,6 +282,42 @@ describe('admin_mutation events (M6 #183 — one per committed CMS write)', () =
     expect(orderLines[0]?.entityId).toBeNull();
   });
 
+  it('PUT site-settings → one line: entity site-settings, entityId null (the singleton is family-grain on the wire — the order-PUT law)', async () => {
+    const lines = captureLines();
+    const res = await authed('PUT', '/api/v1/admin/site-settings', 'mut-site@sevendays.test', {
+      brandName: 'Sevendays Studio',
+      brandTagline: 'Photography',
+      homeTitle: 'Three branches. One standard of light.',
+      homeDescription: null,
+      packagesTitle: 'Packages',
+      packagesDescription: null,
+      branchesTitle: 'Branches',
+      branchesDescription: null,
+      servicesTitle: 'Services',
+      servicesDescription: null,
+      aboutTitle: 'About',
+      aboutDescription: null,
+      aboutStory: null,
+      kickerGallery: null,
+      kickerPackages: null,
+      kickerServices: null,
+      kickerTestimonials: null,
+      socialInstagram: null,
+      socialFacebook: null,
+      socialTiktok: null,
+      bannerTitle: null,
+      bannerBody: null,
+      bannerIsActive: false,
+      contactEmail: null,
+      contactPhone: null,
+    });
+    expect(res.status).toBe(200);
+    const siteLines = mutations(lines).filter((line) => line.entity === 'site-settings');
+    expect(siteLines).toHaveLength(1);
+    expect(siteLines[0]?.entityId).toBeNull();
+    expect(siteLines[0]?.route).toBe('/api/v1/admin/site-settings');
+  });
+
   it('every remaining entity family emits with its own entity name', async () => {
     const lines = captureLines();
     const ps = await authed('POST', '/api/v1/admin/print-sizes', 'mut-ps@sevendays.test', {

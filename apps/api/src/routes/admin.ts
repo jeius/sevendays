@@ -8,6 +8,7 @@ import { adminGalleryCategories } from './admin-gallery-categories.js';
 import { adminMedia } from './admin-media.js';
 import { adminPrintSizes } from './admin-print-sizes.js';
 import { adminServicePackages } from './admin-service-packages.js';
+import { adminSiteSettings } from './admin-site-settings.js';
 import { adminStudioServices } from './admin-studio-services.js';
 import { adminTestimonials } from './admin-testimonials.js';
 import { galleryPhotos } from './gallery-photos.js';
@@ -30,4 +31,5 @@ export const admin = new Hono<ApiEnv>()
   .route('/studio-services', adminStudioServices)
   .route('/service-packages', adminServicePackages)
   .route('/gallery-categories', adminGalleryCategories)
-  .route('/testimonials', adminTestimonials);
+  .route('/testimonials', adminTestimonials)
+  .route('/site-settings', adminSiteSettings);
