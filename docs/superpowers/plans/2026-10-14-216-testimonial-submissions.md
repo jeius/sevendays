@@ -1473,7 +1473,7 @@ git commit -m "feat(api-client): the testimonialSubmissions wrappers - the publi
 - Modify: `apps/landing/src/lib/api.server.ts`, `apps/landing/src/lib/api.functions.ts`
 
 **Interfaces:**
-- Produces (what Task 6 consumes): `getApiClientForwardingIp(clientIp: string | null)` (the IP-scoped client — sets `X-Client-IP` per request); `submitTestimonial({ data: CreateTestimonialSubmissionInput })` (server fn; resolves the accepted body; rejects with `ApiClientError(429)` carrying the ruled line); the seam — `TestimonialFormValues`, `testimonialFormErrors(values)`, `canSubmitTestimonialForm(values)`, `buildTestimonialSubmissionPayload(values)`, `GENERIC_SEND_FAILURE_LINE`, `QUOTE_TOO_SHORT_LINE`, `PERSON_TOO_SHORT_LINE`.
+- Produces (what Task 6 consumes): `getApiClientForwardingIp(clientIp: string | null)` (the IP-scoped client — sets `X-Client-IP` per request); `submitTestimonial({ data: CreateTestimonialSubmissionInput })` (server fn; resolves the accepted body; rejects with `ApiClientError(429)` — the ruled line rides `details.error`, since the client's `.message` is prefixed `API <status>:` per the booking seam's documented split; Task 6 renders `details.error`); the seam — `TestimonialFormValues`, `testimonialFormErrors(values)`, `canSubmitTestimonialForm(values)`, `buildTestimonialSubmissionPayload(values)`, `GENERIC_SEND_FAILURE_LINE`, `QUOTE_TOO_SHORT_LINE`, `PERSON_TOO_SHORT_LINE`.
 - Consumes: Task 2's bounds constants (from the built dist); Task 4's `client.testimonialSubmissions.create`.
 
 **Not here:** the page + CTA (Task 6); the admin side of anything (#218); any query factory (a one-shot mutation needs no queryOptions — the page holds local state, the prototype's shape); toast/Toaster (the landing has none and gains none — the spec's own line).
@@ -1751,13 +1751,16 @@ function ShareYourStoryPage() {
       await submitTestimonial({ data: buildTestimonialSubmissionPayload(values) });
       setSubmitted(true);
     } catch (error) {
-      // 429 carries the ruled customer line verbatim; everything else
-      // (bounds race, network) is the generic catch-all.
-      setFailure(
-        error instanceof ApiClientError && error.status === 429
-          ? error.message
-          : GENERIC_SEND_FAILURE_LINE
-      );
+      // 429 carries the ruled customer line in the parsed envelope
+      // (details.error — the client's .message is prefixed "API <status>:",
+      // the booking seam's documented split at booking.ts:215). Everything
+      // else (bounds race, network) is the generic catch-all.
+      const details = (error as { details?: { error?: unknown } } | undefined)?.details;
+      const ruled =
+        error instanceof ApiClientError && error.status === 429 && typeof details?.error === 'string'
+          ? details.error
+          : null;
+      setFailure(ruled ?? GENERIC_SEND_FAILURE_LINE);
     } finally {
       setSending(false);
     }
