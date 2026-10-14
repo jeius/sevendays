@@ -75,8 +75,9 @@ export const createAppointment = createServerFn()
 /**
  * Public testimonial submission (M7 #216) — v1's only public write surface.
  * The visitor's IP rides X-Client-IP for the API's rate limiter (see
- * api.server.ts). Rejections reject with ApiClientError — the 429 message
- * is the ruled customer line and the form renders it verbatim.
+ * api.server.ts). Rejections reject with ApiClientError — the ruled 429
+ * line rides `details.error` (the client's `.message` is prefixed
+ * `API <status>:`) and the form renders it verbatim.
  */
 export const submitTestimonial = createServerFn()
   .validator((input: CreateTestimonialSubmissionInput) => input)

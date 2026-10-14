@@ -12,7 +12,7 @@ export type CreateTestimonialSubmissionArgs = InferRequestType<CreateEndpoint>['
 /** Testimonial-submission wrappers: POST /api/v1/testimonial-submissions (the public write, M7 #216). */
 export function testimonialSubmissionsRoutes(raw: RpcClient) {
   return {
-    /** POST /api/v1/testimonial-submissions — 201 with the generic body (no row echo); 429 rejects with ApiClientError whose message is the ruled customer line. */
+    /** POST /api/v1/testimonial-submissions — 201 with the generic body (no row echo); 429 rejects with ApiClientError — the ruled line rides `details.error` (the `message` is prefixed `API <status>:`). */
     async create(json: CreateTestimonialSubmissionArgs): Promise<TestimonialSubmissionAccepted> {
       const res = await raw.api.v1['testimonial-submissions'].$post({ json });
       return unwrap(res, testimonialSubmissionAcceptedSchema);
