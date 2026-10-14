@@ -128,7 +128,7 @@ export const testimonialSubmissions = pgTable('testimonial_submissions', {
 });
 ```
 
-Then `packages/db/src/schema/index.ts` — insert the barrel line immediately BEFORE `export * from './testimonials.js';` (alphabetical: the hyphen sorts before the 's'):
+Then `packages/db/src/schema/index.ts` — insert the barrel line immediately BEFORE `export * from './testimonials.js';` (alphabetical: the hyphen sorts before the 's'): _(2026-10-14 note: the db package's biome leaves this hyphen-first order untouched — `biome check` is clean on it and Task 1's fix pass made no move; the db and types packages' biome behavior differs on this pair, and biome is the arbiter in each. Verified empirically at the Task 3 close.)_
 
 ```ts
 export * from './testimonial-submissions.js';
@@ -378,7 +378,7 @@ export const testimonialSubmissionAcceptedSchema = z.object({
 export type TestimonialSubmissionAccepted = z.infer<typeof testimonialSubmissionAcceptedSchema>;
 ```
 
-(b) `packages/types/src/index.ts` — insert the barrel line immediately BEFORE `export * from './testimonial.js';` (alphabetical, the hyphen rule):
+(b) `packages/types/src/index.ts` — insert the barrel line immediately BEFORE `export * from './testimonial.js';` (alphabetical, the hyphen rule): _(2026-10-14 supersession, controller-ruled after Task 3's fix pass empirically reordered it: the types package's biome collation orders `./testimonial.js` FIRST — the hyphen is ignored at primary strength — so the biome-canonical barrel reads `./testimonial.js` then `./testimonial-submission.js`, and Task 3's commit `12a29d2` carries exactly that. Reproduced deterministically via stdin: feeding the hyphen-first variant through `biome check --stdin-file-path --write` flips it. The Task 2 fix round enforced the prose over the tooling; do not re-move the line — biome's fix is the arbiter per Global Constraints.)_
 
 ```ts
 export * from './testimonial-submission.js';
