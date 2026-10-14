@@ -1,5 +1,10 @@
 import { zValidator } from '@hono/zod-validator';
-import { saveSiteSettingsSchema } from '@sevendays/types';
+import {
+  acceptTestimonialSubmissionSchema,
+  createTestimonialSubmissionSchema,
+  saveSiteSettingsSchema,
+  TESTIMONIAL_SUBMISSION_ACCEPTED,
+} from '@sevendays/types';
 import { Hono } from 'hono';
 import { type ZodSchema, z } from 'zod';
 
@@ -186,6 +191,30 @@ const SITE_SETTINGS_SAVED = {
   logoImageUrl: 'https://pub-test.r2.dev/brand/00000000-0000-4000-8000-0000000000e1.jpg',
 };
 
+// M7 #216: the submissions subtree's state — mutable module state like
+// MOCK_SITE_SETTINGS_SAVED, seeded newest-first; the loopback's mutation
+// its run in file order over these two rows.
+const SUBMISSION_NOW = new Date('2026-10-14T00:00:00.000Z');
+const SUBMISSION_OLDER = new Date('2026-10-13T00:00:00.000Z');
+let MOCK_SUBMISSIONS = [
+  {
+    id: 'b0000000-0000-4000-8000-000000000001',
+    quote: 'The photos came out better than we hoped.',
+    person: 'Maria, batch 2026',
+    status: 'pending',
+    createdAt: SUBMISSION_NOW,
+    updatedAt: SUBMISSION_NOW,
+  },
+  {
+    id: 'b0000000-0000-4000-8000-000000000002',
+    quote: 'Quick turnaround and lovely prints.',
+    person: 'John B.',
+    status: 'rejected',
+    createdAt: SUBMISSION_OLDER,
+    updatedAt: SUBMISSION_OLDER,
+  },
+];
+
 // The API's uniform-error hook, mirrored. Duplicated (not runtime-imported
 // from apps/api) because the API is consumed types-only by rule.
 const validatedJson = <S extends ZodSchema>(schema: S) =>
@@ -244,6 +273,30 @@ const makeApi = ({
 
   const testimonials = new Hono<MockEnv>().get('/', (c) =>
     brokenTestimonials ? c.json({ error: 'Not found.' }, 404) : c.json(TESTIMONIALS)
+  );
+
+  // M7 #216: the public POST — the generic body for inserts AND honeypot
+  // discards alike (byte-identical, the no-echo law).
+  const testimonialSubmissions = new Hono<MockEnv>().post(
+    '/',
+    validatedJson(createTestimonialSubmissionSchema),
+    (c) => {
+      const input = c.req.valid('json');
+      if (!input.website) {
+        MOCK_SUBMISSIONS = [
+          {
+            id: 'b0000000-0000-4000-8000-000000000003',
+            quote: input.quote,
+            person: input.person,
+            status: 'pending',
+            createdAt: SUBMISSION_NOW,
+            updatedAt: SUBMISSION_NOW,
+          },
+          ...MOCK_SUBMISSIONS,
+        ];
+      }
+      return c.json(TESTIMONIAL_SUBMISSION_ACCEPTED, 201);
+    }
   );
 
   const siteSettingsRoutes = new Hono<MockEnv>().get('/', (c) =>
@@ -305,6 +358,30 @@ const makeApi = ({
             ? 'https://pub-test.r2.dev/brand/00000000-0000-4000-8000-0000000000e1.jpg'
             : null,
       });
+    })
+    .get('/testimonial-submissions', (c) => c.json(MOCK_SUBMISSIONS))
+    .post(
+      '/testimonial-submissions/:id/accept',
+      validatedJson(acceptTestimonialSubmissionSchema),
+      (c) => {
+        const row = MOCK_SUBMISSIONS.find((s) => s.id === c.req.param('id'));
+        if (!row) return c.json({ error: 'Testimonial submission not found.' }, 404);
+        const input = c.req.valid('json');
+        row.quote = input.quote ?? row.quote;
+        row.person = input.person ?? row.person;
+        row.status = 'accepted';
+        return c.json(row);
+      }
+    )
+    .post('/testimonial-submissions/:id/reject', (c) => {
+      const row = MOCK_SUBMISSIONS.find((s) => s.id === c.req.param('id'));
+      if (!row) return c.json({ error: 'Testimonial submission not found.' }, 404);
+      row.status = 'rejected';
+      return c.json(row);
+    })
+    .delete('/testimonial-submissions/:id', (c) => {
+      MOCK_SUBMISSIONS = MOCK_SUBMISSIONS.filter((s) => s.id !== c.req.param('id'));
+      return c.body(null, 204);
     });
 
   const v1 = new Hono<MockEnv>()
@@ -317,6 +394,7 @@ const makeApi = ({
     .route('/addon-services', addonServices)
     .route('/gallery', gallery)
     .route('/testimonials', testimonials)
+    .route('/testimonial-submissions', testimonialSubmissions)
     .route('/site-settings', siteSettingsRoutes)
     .route('/admin', admin);
 

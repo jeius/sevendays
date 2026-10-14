@@ -17,4 +17,5 @@ export * from './service-packages.js';
 export * from './site-settings.js';
 export * from './studio-service-addon-services.js';
 export * from './studio-services.js';
+export * from './testimonial-submissions.js';
 export * from './testimonials.js';

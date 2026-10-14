@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as BranchesRouteImport } from './routes/branches'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as ShareYourStoryRouteImport } from './routes/share-your-story'
 import { Route as PackagesIndexRouteImport } from './routes/packages/index'
 import { Route as PackagesSlugRouteImport } from './routes/packages/$slug'
 
@@ -36,6 +37,11 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShareYourStoryRoute = ShareYourStoryRouteImport.update({
+  id: '/share-your-story',
+  path: '/share-your-story',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PackagesIndexRoute = PackagesIndexRouteImport.update({
   id: '/packages/',
   path: '/packages/',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/branches': typeof BranchesRoute
   '/services': typeof ServicesRoute
+  '/share-your-story': typeof ShareYourStoryRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages/': typeof PackagesIndexRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/branches': typeof BranchesRoute
   '/services': typeof ServicesRoute
+  '/share-your-story': typeof ShareYourStoryRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages': typeof PackagesIndexRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/branches': typeof BranchesRoute
   '/services': typeof ServicesRoute
+  '/share-your-story': typeof ShareYourStoryRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages/': typeof PackagesIndexRoute
 }
@@ -79,17 +88,25 @@ export interface FileRouteTypes {
     | '/about'
     | '/branches'
     | '/services'
+    | '/share-your-story'
     | '/packages/$slug'
     | '/packages/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/about' | '/branches' | '/services' | '/packages/$slug' | '/packages'
+    | '/'
+    | '/about'
+    | '/branches'
+    | '/services'
+    | '/share-your-story'
+    | '/packages/$slug'
+    | '/packages'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/branches'
     | '/services'
+    | '/share-your-story'
     | '/packages/$slug'
     | '/packages/'
   fileRoutesById: FileRoutesById
@@ -99,6 +116,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   BranchesRoute: typeof BranchesRoute
   ServicesRoute: typeof ServicesRoute
+  ShareYourStoryRoute: typeof ShareYourStoryRoute
   PackagesSlugRoute: typeof PackagesSlugRoute
   PackagesIndexRoute: typeof PackagesIndexRoute
 }
@@ -133,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/share-your-story': {
+      id: '/share-your-story'
+      path: '/share-your-story'
+      fullPath: '/share-your-story'
+      preLoaderRoute: typeof ShareYourStoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/packages/': {
       id: '/packages/'
       path: '/packages'
@@ -155,9 +180,19 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   BranchesRoute: BranchesRoute,
   ServicesRoute: ServicesRoute,
+  ShareYourStoryRoute: ShareYourStoryRoute,
   PackagesSlugRoute: PackagesSlugRoute,
   PackagesIndexRoute: PackagesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

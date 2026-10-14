@@ -32,6 +32,7 @@ describe('the anonymous 401 envelope on every admin router', () => {
     '/api/v1/admin/gallery-categories',
     '/api/v1/admin/gallery-photos',
     '/api/v1/admin/testimonials',
+    '/api/v1/admin/testimonial-submissions',
   ];
 
   for (const router of routers) {
@@ -49,6 +50,20 @@ describe('the anonymous 401 envelope on every admin router', () => {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
         body: '{"brandName": 42}', // garbage — validation never runs
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: 'Authentication required.' });
+  });
+
+  it('POST /api/v1/admin/testimonial-submissions/:id/accept → 401 for an anonymous caller, even with an invalid body (the gate precedes validation)', async () => {
+    const res = await app.request(
+      '/api/v1/admin/testimonial-submissions/11111111-1111-4111-8111-111111111111/accept',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: '{"quote": 42}', // garbage — validation never runs
       },
       testEnv(url)
     );

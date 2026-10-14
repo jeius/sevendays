@@ -204,7 +204,9 @@ export async function getAdminTestimonial(
   return row ?? null;
 }
 
-async function nextTestimonialPosition(db: Database): Promise<number> {
+// Shared with the submissions accept since M7 #216 — the append rule is
+// ONE rule: max+1 over every row, the spec's own citation.
+export async function nextTestimonialPosition(db: Database): Promise<number> {
   const [row] = await db.select({ value: max(testimonials.position) }).from(testimonials);
   return (row?.value ?? 0) + 1;
 }

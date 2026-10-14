@@ -9,6 +9,7 @@ describe('parseEnv', () => {
       MEDIA_PUBLIC_BASE_URL: 'https://pub-test.r2.dev',
       MEDIA_BUCKET: {},
       IMAGES: {},
+      RATE_LIMITER: {},
     });
     expect(env.DATABASE_URL).toBe('postgres://u:p@host:5432/db');
   });
@@ -36,6 +37,7 @@ describe('parseEnv', () => {
       MEDIA_PUBLIC_BASE_URL: 'https://pub-test.r2.dev',
       MEDIA_BUCKET: {},
       IMAGES: {},
+      RATE_LIMITER: {},
     });
     expect(env.BETTER_AUTH_SECRET).toBeUndefined();
   });
@@ -62,6 +64,7 @@ describe('parseEnv — media keys (M5 #136)', () => {
       ...mediaVars(),
       MEDIA_BUCKET: {},
       IMAGES: {},
+      RATE_LIMITER: {},
     });
     expect(env.CLOUDFLARE_ACCOUNT_ID).toBe('0123456789abcdef0123456789abcdef');
     expect(env.MEDIA_PUBLIC_BASE_URL).toBe('https://pub-test.r2.dev');

@@ -179,6 +179,69 @@ it('admin.siteSettings.update round-trips the full-object save through the parse
   expect(after.brandName).toBe('Sevendays Studio');
 });
 
+it('testimonialSubmissions.create parses the generic accepted body (message, nothing else)', async () => {
+  const client = clientFor(mockApi);
+  const accepted = await client.testimonialSubmissions.create({
+    quote: 'The photographer made our graduation shoot feel effortless.',
+    person: 'Loopback Sender',
+  });
+  expect(accepted).toEqual({ message: 'Thank you — your story is on its way.' });
+});
+
+it('a honeypot-filled create answers the byte-identical body (the discard is indistinguishable)', async () => {
+  const client = clientFor(mockApi);
+  const discarded = await client.testimonialSubmissions.create({
+    quote: 'The photographer made our graduation shoot feel effortless.',
+    person: 'Bot Sender',
+    website: 'https://spam.example',
+  });
+  expect(discarded).toEqual({ message: 'Thank you — your story is on its way.' });
+  // And the queue never saw it: no row anywhere is 'Bot Sender'.
+  const rows = await client.admin.testimonialSubmissions.list();
+  expect(rows.some((r) => r.person === 'Bot Sender')).toBe(false);
+});
+
+it('admin.testimonialSubmissions.list parses rows newest-first with the status enum + Date fields', async () => {
+  const client = clientFor(mockApi);
+  const rows = await client.admin.testimonialSubmissions.list();
+  // The first create it unshifted 'Loopback Sender' ahead of the two seeds
+  // — newest-first, and the honeypot row from the it above is absent.
+  expect(rows.map((r) => r.person)).toEqual(['Loopback Sender', 'Maria, batch 2026', 'John B.']);
+  expect(rows[0]?.status).toBe('pending');
+  expect(rows[0]?.createdAt).toBeInstanceOf(Date);
+  expect(rows[2]?.status).toBe('rejected');
+});
+
+it('admin.testimonialSubmissions.accept applies the edit and returns the updated row', async () => {
+  const client = clientFor(mockApi);
+  const accepted = await client.admin.testimonialSubmissions.accept(
+    'b0000000-0000-4000-8000-000000000001',
+    { person: 'Maria D.' }
+  );
+  expect(accepted.status).toBe('accepted');
+  expect(accepted.person).toBe('Maria D.');
+  expect(accepted.quote).toBe('The photos came out better than we hoped.'); // absent key = kept
+});
+
+it('admin.testimonialSubmissions.reject flips the row to rejected', async () => {
+  const client = clientFor(mockApi);
+  // The mock mirrors the WIRE, not the pending-only transition law (the
+  // api suite owns that law) — row 2 answers the rejected wire shape.
+  const rejected = await client.admin.testimonialSubmissions.reject(
+    'b0000000-0000-4000-8000-000000000002'
+  );
+  expect(rejected.status).toBe('rejected');
+});
+
+it('admin.testimonialSubmissions.remove resolves void on 204', async () => {
+  const client = clientFor(mockApi);
+  await expect(
+    client.admin.testimonialSubmissions.remove('b0000000-0000-4000-8000-000000000002')
+  ).resolves.toBeUndefined();
+  const rows = await client.admin.testimonialSubmissions.list();
+  expect(rows.some((r) => r.id === 'b0000000-0000-4000-8000-000000000002')).toBe(false);
+});
+
 it('admin.branches.remove resolves undefined on 204 — the delete seam never unwraps a body', async () => {
   const client = clientFor(mockApi);
   await expect(

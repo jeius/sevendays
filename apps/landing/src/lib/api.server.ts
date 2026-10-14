@@ -39,3 +39,21 @@ if (!import.meta.env?.DEV) {
 export function getApiClient() {
   return createApiClient({ baseUrl: getApiUrl(), fetch: serviceBindingFetch });
 }
+
+// M7 #216: the submissions client forwards the visitor's IP. The API's
+// rate limiter keys on CF-Connecting-IP (direct callers — unspoofable, it
+// wins) else X-Client-IP. In production the landing calls over the API
+// service binding (ADR-0016), where the edge header is absent: this fn
+// re-sets it from the LANDING's own incoming request (set by our Worker,
+// never by the browser — the browser never calls the API). The admin's
+// fetchWithBearer precedent.
+export function getApiClientForwardingIp(clientIp: string | null) {
+  const underlying = serviceBindingFetch ?? fetch;
+  const fetchWithClientIp: typeof fetch = async (input, init) => {
+    if (!clientIp) return underlying(input, init);
+    const headers = new Headers(init?.headers);
+    headers.set('X-Client-IP', clientIp);
+    return underlying(input, { ...init, headers });
+  };
+  return createApiClient({ baseUrl: getApiUrl(), fetch: fetchWithClientIp });
+}

@@ -8,6 +8,7 @@ import { gallery } from './gallery.js';
 import { servicePackages } from './service-packages.js';
 import { siteSettingsRoutes } from './site-settings.js';
 import { studioServices } from './studio-services.js';
+import { testimonialSubmissionsRoutes } from './testimonial-submissions.js';
 import { testimonials } from './testimonials.js';
 
 // Acquisition middleware (candidate D): runs for every /api/v1 request,
@@ -32,4 +33,5 @@ export const v1 = new Hono<ApiEnv>()
   .route('/gallery', gallery)
   .route('/testimonials', testimonials)
   .route('/site-settings', siteSettingsRoutes)
+  .route('/testimonial-submissions', testimonialSubmissionsRoutes)
   .route('/admin', admin);

@@ -27,11 +27,14 @@ import { z } from 'zod';
 // a mid-route TypeError. The ambient generated global in
 // worker-configuration.d.ts stays no longer load-bearing anywhere (the
 // R2Bucket/ImagesBinding types come from @cloudflare/workers-types).
+// RATE_LIMITER (M7 #216) is the rate-limit binding — same required-binding
+// posture, `wrangler dev` simulates it locally.
 export const envSchema = z.object({
   DATABASE_URL: z.url(),
   BETTER_AUTH_SECRET: z.string().min(1).optional(),
   MEDIA_BUCKET: z.custom<R2Bucket>((v) => v !== null && typeof v === 'object'),
   IMAGES: z.custom<ImagesBinding>((v) => v !== null && typeof v === 'object'),
+  RATE_LIMITER: z.custom<RateLimit>((v) => v !== null && typeof v === 'object'),
   CLOUDFLARE_ACCOUNT_ID: z.string().min(1),
   MEDIA_PUBLIC_BASE_URL: z.url(),
   R2_S3_ACCESS_KEY_ID: z.string().min(1).optional(),
