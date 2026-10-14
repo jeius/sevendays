@@ -29,3 +29,12 @@ export function serviceUnavailable(c: Context, message: string) {
 export function notFound(c: Context, message = 'Not found.') {
   return c.json({ error: message }, 404);
 }
+
+/**
+ * The rate-limit rejection (M7 #216): the one-error shape at 429 — the
+ * message is the owner-ratified customer line; the landing form renders
+ * this exact string (one source).
+ */
+export function tooManyRequests(c: Context, message: string) {
+  return c.json({ error: message }, 429);
+}

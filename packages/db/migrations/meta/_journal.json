@@ -85,6 +85,13 @@
       "when": 1791886226150,
       "tag": "0011_luxuriant_leech",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791970523167,
+      "tag": "0012_easy_manta",
+      "breakpoints": true
     }
   ]
 }

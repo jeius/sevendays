@@ -20,8 +20,16 @@ const fullRow = {
 };
 
 describe('auditActionSchema', () => {
-  it('accepts exactly the five spec-pinned values', () => {
-    for (const action of ['create', 'update', 'deactivate', 'reorder', 'delete']) {
+  it('accepts exactly the seven pinned values', () => {
+    for (const action of [
+      'create',
+      'update',
+      'deactivate',
+      'reorder',
+      'delete',
+      'accept',
+      'reject',
+    ]) {
       expect(auditActionSchema.parse(action)).toBe(action);
     }
   });
@@ -32,7 +40,7 @@ describe('auditActionSchema', () => {
 });
 
 describe('auditEntitySchema', () => {
-  it('accepts the ten route-segment names', () => {
+  it('accepts the eleven route-segment names', () => {
     for (const entity of [
       'branch',
       'print-size',
@@ -43,6 +51,7 @@ describe('auditEntitySchema', () => {
       'service-package',
       'gallery-category',
       'testimonial',
+      'testimonial-submission',
       'site-settings',
     ]) {
       expect(auditEntitySchema.parse(entity)).toBe(entity);

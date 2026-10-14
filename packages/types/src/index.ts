@@ -14,3 +14,4 @@ export * from './print-size.js';
 export * from './site-settings.js';
 export * from './studio-service.js';
 export * from './testimonial.js';
+export * from './testimonial-submission.js';

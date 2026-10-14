@@ -1,6 +1,8 @@
+import { buttonVariants } from '@sevendays/ui/components/button';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { cn } from 'cn';
+import { PenLine } from 'lucide-react';
 import { useState } from 'react';
 import {
   ALL_TAB_ID,
@@ -56,6 +58,22 @@ function AboutPage() {
             ))}
           </div>
         )}
+        {/* The submissions CTA (M7 #216, the #164 Round-4-ruled card): the
+            only door to /share-your-story — v1's only public write surface. */}
+        <div className='mt-10 flex flex-col items-start justify-between gap-4 rounded-xl border border-line-soft bg-card p-6 shadow-sm sm:flex-row sm:items-center'>
+          <div>
+            <h3 className='font-semibold font-serif text-brand-ink text-xl'>
+              Shot with us recently?
+            </h3>
+            <p className='mt-1 text-muted-foreground text-sm'>
+              Share a few words about your session — we'd love to hear it.
+            </p>
+          </div>
+          <Link to='/share-your-story' className={cn(buttonVariants(), 'shrink-0')}>
+            <PenLine className='size-4' aria-hidden='true' />
+            Share your story
+          </Link>
+        </div>
       </section>
       <section className='mx-auto mt-12 max-w-5xl border-line-soft border-t px-6 pt-12 pb-12'>
         <h2 className='font-semibold font-serif text-2xl text-brand-ink'>Portfolio</h2>

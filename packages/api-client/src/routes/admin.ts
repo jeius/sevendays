@@ -5,6 +5,7 @@
  * #141 gallery/testimonials/lookups).
  */
 import type {
+  AcceptTestimonialSubmissionInput,
   AddonService,
   Attire,
   BranchRead,
@@ -17,6 +18,7 @@ import type {
   SiteSettings,
   StudioServiceWithBranches,
   Testimonial,
+  TestimonialSubmission,
 } from '@sevendays/types';
 import {
   addonServiceSchema,
@@ -30,6 +32,7 @@ import {
   siteSettingsSchema,
   studioServiceWithBranchesSchema,
   testimonialSchema,
+  testimonialSubmissionSchema,
 } from '@sevendays/types';
 import type { InferRequestType } from 'hono/client';
 import type { RpcClient } from '../client.js';
@@ -527,6 +530,42 @@ export function adminTestimonials(raw: RpcClient) {
   };
 }
 
+/** Testimonial-submission moderation wrappers over /api/v1/admin/testimonial-submissions (M7 #216 — the media action-endpoint precedent). */
+export function adminTestimonialSubmissions(raw: RpcClient) {
+  return {
+    /** GET — the whole queue, newest-first (pending + rejected retained — the audit trail). */
+    async list(): Promise<TestimonialSubmission[]> {
+      const res = await raw.api.v1.admin['testimonial-submissions'].$get();
+      return unwrap(res, testimonialSubmissionSchema.array());
+    },
+    /** POST /:id/accept — optionally edited {quote, person}; the Testimonial appends at the end of render order. */
+    async accept(
+      id: string,
+      json: AcceptTestimonialSubmissionInput = {}
+    ): Promise<TestimonialSubmission> {
+      const res = await raw.api.v1.admin['testimonial-submissions'][':id'].accept.$post({
+        param: { id },
+        json,
+      });
+      return unwrap(res, testimonialSubmissionSchema);
+    },
+    /** POST /:id/reject — retains the row as rejected (no body: the route carries no validator). */
+    async reject(id: string): Promise<TestimonialSubmission> {
+      const res = await raw.api.v1.admin['testimonial-submissions'][':id'].reject.$post({
+        param: { id },
+      });
+      return unwrap(res, testimonialSubmissionSchema);
+    },
+    /** DELETE /:id — regardless of status; 204 (the delete seam: no body to unwrap). */
+    async remove(id: string): Promise<void> {
+      const res = await raw.api.v1.admin['testimonial-submissions'][':id'].$delete({
+        param: { id },
+      });
+      if (!res.ok) await unwrapError(res);
+    },
+  };
+}
+
 /** Media wrappers over /api/v1/admin/media (ticket 02's presign route). */
 export function adminMedia(raw: RpcClient) {
   return {
@@ -563,5 +602,6 @@ export function adminRoutes(raw: RpcClient) {
     galleryCategories: adminGalleryCategories(raw),
     galleryPhotos: adminGalleryPhotos(raw),
     testimonials: adminTestimonials(raw),
+    testimonialSubmissions: adminTestimonialSubmissions(raw),
   };
 }

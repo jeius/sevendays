@@ -8,6 +8,7 @@ import { galleryRoutes } from './routes/gallery.js';
 import { servicePackagesRoutes } from './routes/service-packages.js';
 import { siteSettingsRoutes } from './routes/site-settings.js';
 import { studioServicesRoutes } from './routes/studio-services.js';
+import { testimonialSubmissionsRoutes } from './routes/testimonial-submissions.js';
 import { testimonialsRoutes } from './routes/testimonials.js';
 
 /** The full client surface: raw RPC + one route-tree group per resource. */
@@ -16,6 +17,7 @@ export interface ApiClient {
   branches: ReturnType<typeof branchesRoutes>;
   gallery: ReturnType<typeof galleryRoutes>;
   testimonials: ReturnType<typeof testimonialsRoutes>;
+  testimonialSubmissions: ReturnType<typeof testimonialSubmissionsRoutes>;
   siteSettings: ReturnType<typeof siteSettingsRoutes>;
   servicePackages: ReturnType<typeof servicePackagesRoutes>;
   addonServices: ReturnType<typeof addonServicesRoutes>;
@@ -50,6 +52,7 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
     branches: branchesRoutes(raw),
     gallery: galleryRoutes(raw),
     testimonials: testimonialsRoutes(raw),
+    testimonialSubmissions: testimonialSubmissionsRoutes(raw),
     siteSettings: siteSettingsRoutes(raw),
     servicePackages: servicePackagesRoutes(raw),
     addonServices: addonServicesRoutes(raw),
@@ -86,3 +89,4 @@ export type {
   UpdateTestimonialArgs,
 } from './routes/admin.js';
 export type { CreateAppointmentArgs } from './routes/appointments.js';
+export type { CreateTestimonialSubmissionArgs } from './routes/testimonial-submissions.js';

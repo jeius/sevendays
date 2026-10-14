@@ -1,3 +1,4 @@
+import { testimonialSubmissions } from '@sevendays/db';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import app from '../src/index.js';
 import { signUpSession } from './helpers/auth.js';
@@ -316,6 +317,43 @@ describe('admin_mutation events (M6 #183 — one per committed CMS write)', () =
     expect(siteLines).toHaveLength(1);
     expect(siteLines[0]?.entityId).toBeNull();
     expect(siteLines[0]?.route).toBe('/api/v1/admin/site-settings');
+  });
+
+  it('accept testimonial-submission → one line: entity testimonial-submission, entityId = the submission id (M7 #216)', async () => {
+    const lines = captureLines();
+    expect(
+      (
+        await app.request(
+          '/api/v1/testimonial-submissions',
+          {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              quote: 'The photographer made our graduation shoot feel effortless.',
+              person: 'Maria, batch 2026',
+            }),
+          },
+          testEnv(url)
+        )
+      ).status
+    ).toBe(201);
+    const rows = await db.select().from(testimonialSubmissions).limit(1);
+    const id = rows[0]?.id;
+    const res = await authed(
+      'POST',
+      `/api/v1/admin/testimonial-submissions/${id}/accept`,
+      'mut-submission@sevendays.test',
+      {}
+    );
+    expect(res.status).toBe(200);
+    const submissionLines = mutations(lines).filter(
+      (line) => line.entity === 'testimonial-submission'
+    );
+    expect(submissionLines).toHaveLength(1);
+    expect(submissionLines[0]?.entityId).toBe(id);
+    expect(submissionLines[0]?.route).toBe('/api/v1/admin/testimonial-submissions/:id/accept');
+    // The public POST emits NO mutation line — only the staff accept does.
+    expect(mutations(lines)).toHaveLength(1);
   });
 
   it('every remaining entity family emits with its own entity name', async () => {

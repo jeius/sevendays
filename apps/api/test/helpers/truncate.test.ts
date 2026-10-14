@@ -14,7 +14,7 @@ describe('publicTableNames', () => {
     expect(publicTableNames()).toEqual(fromBarrel);
   });
 
-  it('still truncates exactly the twenty-three known public tables (migrations 0000-0011)', () => {
+  it('still truncates exactly the twenty-four known public tables (migrations 0000-0012)', () => {
     expect(publicTableNames()).toEqual([
       'account',
       'addon_services',
@@ -36,6 +36,7 @@ describe('publicTableNames', () => {
       'site_settings',
       'studio_service_addon_services',
       'studio_services',
+      'testimonial_submissions',
       'testimonials',
       'user',
       'verification',

@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as BookRouteImport } from './routes/book'
 import { Route as BranchesRouteImport } from './routes/branches'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as ShareYourStoryRouteImport } from './routes/share-your-story'
 import { Route as BookingIdRouteImport } from './routes/booking.$id'
 import { Route as PackagesIndexRouteImport } from './routes/packages/index'
 import { Route as PackagesSlugRouteImport } from './routes/packages/$slug'
@@ -43,6 +44,11 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShareYourStoryRoute = ShareYourStoryRouteImport.update({
+  id: '/share-your-story',
+  path: '/share-your-story',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BookingIdRoute = BookingIdRouteImport.update({
   id: '/booking/$id',
   path: '/booking/$id',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/book': typeof BookRoute
   '/branches': typeof BranchesRoute
   '/services': typeof ServicesRoute
+  '/share-your-story': typeof ShareYourStoryRoute
   '/booking/$id': typeof BookingIdRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages/': typeof PackagesIndexRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/book': typeof BookRoute
   '/branches': typeof BranchesRoute
   '/services': typeof ServicesRoute
+  '/share-your-story': typeof ShareYourStoryRoute
   '/booking/$id': typeof BookingIdRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages': typeof PackagesIndexRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/book': typeof BookRoute
   '/branches': typeof BranchesRoute
   '/services': typeof ServicesRoute
+  '/share-your-story': typeof ShareYourStoryRoute
   '/booking/$id': typeof BookingIdRoute
   '/packages/$slug': typeof PackagesSlugRoute
   '/packages/': typeof PackagesIndexRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/book'
     | '/branches'
     | '/services'
+    | '/share-your-story'
     | '/booking/$id'
     | '/packages/$slug'
     | '/packages/'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/book'
     | '/branches'
     | '/services'
+    | '/share-your-story'
     | '/booking/$id'
     | '/packages/$slug'
     | '/packages'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/book'
     | '/branches'
     | '/services'
+    | '/share-your-story'
     | '/booking/$id'
     | '/packages/$slug'
     | '/packages/'
@@ -129,6 +141,7 @@ export interface RootRouteChildren {
   BookRoute: typeof BookRoute
   BranchesRoute: typeof BranchesRoute
   ServicesRoute: typeof ServicesRoute
+  ShareYourStoryRoute: typeof ShareYourStoryRoute
   BookingIdRoute: typeof BookingIdRoute
   PackagesSlugRoute: typeof PackagesSlugRoute
   PackagesIndexRoute: typeof PackagesIndexRoute
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/share-your-story': {
+      id: '/share-your-story'
+      path: '/share-your-story'
+      fullPath: '/share-your-story'
+      preLoaderRoute: typeof ShareYourStoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/booking/$id': {
       id: '/booking/$id'
       path: '/booking/$id'
@@ -201,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   BookRoute: BookRoute,
   BranchesRoute: BranchesRoute,
   ServicesRoute: ServicesRoute,
+  ShareYourStoryRoute: ShareYourStoryRoute,
   BookingIdRoute: BookingIdRoute,
   PackagesSlugRoute: PackagesSlugRoute,
   PackagesIndexRoute: PackagesIndexRoute,

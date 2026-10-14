@@ -1,8 +1,9 @@
 import { startSpan } from '@sentry/tanstackstart-react';
 import type { CreateAppointmentArgs } from '@sevendays/api-client';
-import type { AppointmentWithAddons } from '@sevendays/types';
+import type { AppointmentWithAddons, CreateTestimonialSubmissionInput } from '@sevendays/types';
 import { createServerFn } from '@tanstack/react-start';
-import { getApiClient } from './api.server';
+import { getRequestHeaders } from '@tanstack/react-start/server';
+import { getApiClient, getApiClientForwardingIp } from './api.server';
 
 export const getBranches = createServerFn().handler(async () => {
   // .cursorrules: server functions get a Sentry span (no-op when Sentry is
@@ -68,6 +69,22 @@ export const createAppointment = createServerFn()
   .handler(async ({ data }): Promise<AppointmentWithAddons> => {
     return startSpan({ name: 'POST /api/v1/appointments' }, async () => {
       return getApiClient().appointments.create(data);
+    });
+  });
+
+/**
+ * Public testimonial submission (M7 #216) — v1's only public write surface.
+ * The visitor's IP rides X-Client-IP for the API's rate limiter (see
+ * api.server.ts). Rejections reject with ApiClientError — the ruled 429
+ * line rides `details.error` (the client's `.message` is prefixed
+ * `API <status>:`) and the form renders it verbatim.
+ */
+export const submitTestimonial = createServerFn()
+  .validator((input: CreateTestimonialSubmissionInput) => input)
+  .handler(async ({ data }) => {
+    return startSpan({ name: 'POST /api/v1/testimonial-submissions' }, async () => {
+      const clientIp = getRequestHeaders().get('CF-Connecting-IP');
+      return getApiClientForwardingIp(clientIp).testimonialSubmissions.create(data);
     });
   });
 
