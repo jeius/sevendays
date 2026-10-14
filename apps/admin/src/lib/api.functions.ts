@@ -10,3 +10,12 @@ export const getBranches = createServerFn().handler(async () => {
     return getApiClient().branches.list();
   });
 });
+
+// M7 #215: the public singleton read — the Site tab's load (the spec's
+// two-endpoint ruling: no admin GET exists; the public read IS the
+// editor's load).
+export const getSiteSettings = createServerFn({ method: 'GET' }).handler(async () => {
+  return startSpan({ name: 'GET /api/v1/site-settings' }, async () => {
+    return getApiClient().siteSettings.get();
+  });
+});

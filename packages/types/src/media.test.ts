@@ -30,6 +30,14 @@ describe('mediaPresignRequestSchema', () => {
     expect(parsed.purpose).toBe('branch-cover');
   });
 
+  it('parses the site-logo purpose (M7 #215: the brand logo rides the pipeline under its own purpose)', () => {
+    const parsed = mediaPresignRequestSchema.parse({
+      purpose: 'site-logo',
+      contentType: 'image/jpeg',
+    });
+    expect(parsed.purpose).toBe('site-logo');
+  });
+
   it('rejects a non-jpeg contentType (the M5 cap: image/jpeg only)', () => {
     expect(
       mediaPresignRequestSchema.safeParse({ purpose: 'gallery-photo', contentType: 'image/png' })

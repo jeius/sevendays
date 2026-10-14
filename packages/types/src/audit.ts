@@ -3,7 +3,7 @@ import { z } from 'zod';
 // The Audit Log row (M6 #185, spec § The Audit Log): the durable
 // who/what/when of a committed CMS write. The action enum is the spec's
 // pin (create | update | deactivate | reorder | delete); the entity names are the
-// nine admin-router segments (the same vocabulary the Application Log's
+// ten admin-router segments (the same vocabulary the Application Log's
 // admin_mutation events carry — one list, canonicalized here). This schema
 // mirrors packages/db's audit_log table 1:1: the write side inserts rows
 // that satisfy it, and the #188 viewer parses rows through it. No
@@ -25,6 +25,9 @@ export const auditEntitySchema = z.enum([
   'service-package',
   'gallery-category',
   'testimonial',
+  // M7 #215: the singleton site-settings save is a committed admin
+  // mutation — one row per PUT (create on the first save, update after).
+  'site-settings',
 ]);
 
 export type AuditEntity = z.infer<typeof auditEntitySchema>;

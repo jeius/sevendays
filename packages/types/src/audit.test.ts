@@ -32,7 +32,7 @@ describe('auditActionSchema', () => {
 });
 
 describe('auditEntitySchema', () => {
-  it('accepts the nine route-segment names', () => {
+  it('accepts the ten route-segment names', () => {
     for (const entity of [
       'branch',
       'print-size',
@@ -43,6 +43,7 @@ describe('auditEntitySchema', () => {
       'service-package',
       'gallery-category',
       'testimonial',
+      'site-settings',
     ]) {
       expect(auditEntitySchema.parse(entity)).toBe(entity);
     }

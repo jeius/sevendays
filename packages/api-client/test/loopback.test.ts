@@ -131,6 +131,54 @@ it('testimonials.list surfaces the uniform 404 envelope as ApiClientError', asyn
   expect((err as ApiClientError).details).toEqual({ error: 'Not found.' });
 });
 
+it('siteSettings.get parses the born-empty singleton wire into typed data', async () => {
+  const client = clientFor(mockApi);
+  const settings = await client.siteSettings.get();
+  expect(settings.brandName).toBeNull();
+  expect(settings.bannerIsActive).toBe(false);
+  expect(settings.logoImageUrl).toBeNull();
+  expect('logoImageKey' in settings).toBe(false);
+});
+
+it('admin.siteSettings.update round-trips the full-object save through the parse gate', async () => {
+  const client = clientFor(mockApi);
+  const saved = await client.admin.siteSettings.update({
+    brandName: 'Sevendays Studio',
+    brandTagline: null,
+    homeTitle: null,
+    homeDescription: null,
+    packagesTitle: null,
+    packagesDescription: null,
+    branchesTitle: null,
+    branchesDescription: null,
+    servicesTitle: null,
+    servicesDescription: null,
+    aboutTitle: null,
+    aboutDescription: null,
+    aboutStory: null,
+    kickerGallery: null,
+    kickerPackages: null,
+    kickerServices: null,
+    kickerTestimonials: null,
+    socialInstagram: null,
+    socialFacebook: null,
+    socialTiktok: null,
+    bannerTitle: null,
+    bannerBody: null,
+    bannerIsActive: true,
+    contactEmail: 'hello@sevendays.ph',
+    contactPhone: null,
+    logoImageKey: 'tmp/00000000-0000-4000-8000-00000000000f.jpg',
+  });
+  expect(saved.brandName).toBe('Sevendays Studio');
+  expect(saved.logoImageUrl).toBe(
+    'https://pub-test.r2.dev/brand/00000000-0000-4000-8000-0000000000e1.jpg'
+  );
+  // The mock's GET now answers the saved state — the editor's load-after-save.
+  const after = await client.siteSettings.get();
+  expect(after.brandName).toBe('Sevendays Studio');
+});
+
 it('admin.branches.remove resolves undefined on 204 — the delete seam never unwraps a body', async () => {
   const client = clientFor(mockApi);
   await expect(
