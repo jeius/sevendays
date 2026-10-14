@@ -60,6 +60,11 @@ export const AUDIT_ACTION_BADGE_CLASSES: Record<AuditAction, string> = {
   deactivate: 'border-red-200 bg-red-50 text-red-700',
   reorder: 'border-amber-200 bg-amber-50 text-amber-700',
   delete: 'border-violet-200 bg-violet-50 text-violet-700',
+  // M7 #216 moderation verbs (controller-ruled 2026-10-14): accept → teal,
+  // the only remaining saturated family not neighboring a taken hue;
+  // reject → slate, deliberately neutral — a terminal, non-alarm state.
+  accept: 'border-teal-200 bg-teal-50 text-teal-700',
+  reject: 'border-slate-200 bg-slate-50 text-slate-700',
 };
 
 function FilterSelect({

@@ -19,6 +19,18 @@ bucket_name = "sevendays-media"
 [images]
 binding = "IMAGES"
 
+# Testimonial submissions (M7 #216, spec § the public testimonial form):
+# the Workers Rate Limiting binding's FIRST USER — the public POST's per-IP
+# gate. 5 per 60s: the binding's simple mode supports only 10s/60s windows
+# (probed against wrangler 4.127.1's config schema), so the spec's "~5 per
+# 10 min" reconciles to a 5-per-minute burst cap (owner-ratified
+# 2026-10-14); the honeypot + length bounds are the other legs, Turnstile
+# the written-down escalation. namespace_id 1001 = production traffic.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+simple = { limit = 5, period = 60 }
+
 # Workers Logs (M6 #183, spec § logging): the Application Log's sink —
 # `wrangler tail` is the live viewer; 3-day retention accepted as v1's bar
 # (Logpush stays off, paid-only). No head_sampling_rate: v1 traffic is far

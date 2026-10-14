@@ -106,6 +106,7 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntity, string> = {
   'service-package': 'Packages',
   'gallery-category': 'Gallery categories',
   testimonial: 'Testimonials',
+  'testimonial-submission': 'Testimonial submissions',
   'site-settings': 'Site settings',
 };
 
@@ -115,6 +116,8 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   deactivate: 'Deactivate',
   reorder: 'Reorder',
   delete: 'Delete',
+  accept: 'Accept',
+  reject: 'Reject',
 };
 
 export function hasActiveFilters(search: AuditLogSearch): boolean {
