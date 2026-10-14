@@ -16,6 +16,7 @@ import type {
   MediaPresignResponse,
   PrintSize,
   ServicePackageRead,
+  SiteSettings,
   StudioServiceWithBranches,
   Testimonial,
 } from '@sevendays/types';
@@ -32,6 +33,7 @@ import {
   galleryCategoryOrderSchema,
   galleryPhotoOrderSchema,
   mediaPresignRequestSchema,
+  saveSiteSettingsSchema,
   studioServiceAddonMatrixSchema,
   studioServiceBranchMatrixSchema,
   testimonialOrderSchema,
@@ -269,6 +271,33 @@ export const saveAdminBranchUpdate = createServerFn({
           ok: true,
           data: await client.admin.branches.update({ param: { id }, json: payload }),
         };
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          return {
+            ok: false,
+            status: error.status,
+            message: error.message,
+            details: error.details,
+          };
+        }
+        throw error; // not an API failure (serialization, session loss) — loud
+      }
+    });
+  });
+
+// M7 #215: the singleton full-object save — one PUT, no per-field patching.
+export const saveAdminSiteSettings = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(saveSiteSettingsSchema)
+  .handler(async ({ data }): Promise<AdminMutationResult<SiteSettings>> => {
+    return startSpan({ name: 'PUT /api/v1/admin/site-settings' }, async () => {
+      const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+      try {
+        return { ok: true, data: await client.admin.siteSettings.update(data) };
       } catch (error) {
         if (error instanceof ApiClientError) {
           return {

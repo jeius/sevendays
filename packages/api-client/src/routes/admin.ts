@@ -12,7 +12,9 @@ import type {
   GalleryPhoto,
   MediaPresignResponse,
   PrintSize,
+  SaveSiteSettingsInput,
   ServicePackageRead,
+  SiteSettings,
   StudioServiceWithBranches,
   Testimonial,
 } from '@sevendays/types';
@@ -25,6 +27,7 @@ import {
   mediaPresignResponseSchema,
   printSizeSchema,
   servicePackageReadSchema,
+  siteSettingsSchema,
   studioServiceWithBranchesSchema,
   testimonialSchema,
 } from '@sevendays/types';
@@ -535,6 +538,17 @@ export function adminMedia(raw: RpcClient) {
   };
 }
 
+/** Site-settings wrappers over /api/v1/admin/site-settings (the singleton full-object PUT, M7 #215). */
+export function adminSiteSettings(raw: RpcClient) {
+  return {
+    /** PUT /api/v1/admin/site-settings — the one full-object save (no per-field patching); the refreshed read. */
+    async update(json: SaveSiteSettingsInput): Promise<SiteSettings> {
+      const res = await raw.api.v1.admin['site-settings'].$put({ json });
+      return unwrap(res, siteSettingsSchema);
+    },
+  };
+}
+
 /** The gated admin subtree's client surface: one group per resource (ApiClient.admin). */
 export function adminRoutes(raw: RpcClient) {
   return {
@@ -545,6 +559,7 @@ export function adminRoutes(raw: RpcClient) {
     printSizes: adminPrintSizes(raw),
     attires: adminAttires(raw),
     media: adminMedia(raw),
+    siteSettings: adminSiteSettings(raw),
     galleryCategories: adminGalleryCategories(raw),
     galleryPhotos: adminGalleryPhotos(raw),
     testimonials: adminTestimonials(raw),

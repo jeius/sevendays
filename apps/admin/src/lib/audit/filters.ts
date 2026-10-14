@@ -106,6 +106,7 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntity, string> = {
   'service-package': 'Packages',
   'gallery-category': 'Gallery categories',
   testimonial: 'Testimonials',
+  'site-settings': 'Site settings',
 };
 
 export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {

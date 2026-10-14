@@ -171,6 +171,16 @@ describe('commitUpload', () => {
     expect(result.finalKey).toMatch(/^covers\//);
   });
 
+  it('site-logo purpose promotes to brand/ (M7 #215: the logo gets its own immutable directory)', async () => {
+    const stub = stubBucket({ [STAGING_KEY]: { size: 1024, contentType: 'image/jpeg' } });
+    const result = await commitUpload(stub.bucket, {
+      stagingKey: STAGING_KEY,
+      purpose: 'site-logo',
+    });
+    if (!result.ok) throw new Error(`expected ok, got ${result.reason}`);
+    expect(result.finalKey).toMatch(/^brand\//);
+  });
+
   it('answers the typed 400 WITHOUT deleting on a foreign key (a client-supplied covers/… key must never delete a promoted object)', async () => {
     const FOREIGN = 'covers/00000000-0000-4000-8000-000000000000.jpg';
     const stub = stubBucket({ [FOREIGN]: { size: 1024, contentType: 'image/jpeg' } });

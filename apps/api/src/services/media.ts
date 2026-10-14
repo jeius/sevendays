@@ -27,6 +27,9 @@ const FINAL_PREFIXES: Record<MediaPurpose, string> = {
   // M7 #214: branch covers share the covers/ prefix — one immutable-cover
   // directory; the purpose still names its owner for the presign contract.
   'branch-cover': 'covers',
+  // M7 #215: the brand logo gets its own immutable directory — a logo is
+  // not a cover (the purpose names the owner, the prefix names the class).
+  'site-logo': 'brand',
   'gallery-photo': 'gallery',
 };
 

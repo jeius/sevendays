@@ -6,6 +6,7 @@ import { appointmentsRoutes } from './routes/appointments.js';
 import { branchesRoutes } from './routes/branches.js';
 import { galleryRoutes } from './routes/gallery.js';
 import { servicePackagesRoutes } from './routes/service-packages.js';
+import { siteSettingsRoutes } from './routes/site-settings.js';
 import { studioServicesRoutes } from './routes/studio-services.js';
 import { testimonialsRoutes } from './routes/testimonials.js';
 
@@ -15,6 +16,7 @@ export interface ApiClient {
   branches: ReturnType<typeof branchesRoutes>;
   gallery: ReturnType<typeof galleryRoutes>;
   testimonials: ReturnType<typeof testimonialsRoutes>;
+  siteSettings: ReturnType<typeof siteSettingsRoutes>;
   servicePackages: ReturnType<typeof servicePackagesRoutes>;
   addonServices: ReturnType<typeof addonServicesRoutes>;
   appointments: ReturnType<typeof appointmentsRoutes>;
@@ -48,6 +50,7 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
     branches: branchesRoutes(raw),
     gallery: galleryRoutes(raw),
     testimonials: testimonialsRoutes(raw),
+    siteSettings: siteSettingsRoutes(raw),
     servicePackages: servicePackagesRoutes(raw),
     addonServices: addonServicesRoutes(raw),
     appointments: appointmentsRoutes(raw),

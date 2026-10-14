@@ -41,6 +41,20 @@ describe('the anonymous 401 envelope on every admin router', () => {
       expect(await res.json()).toEqual({ error: 'Authentication required.' });
     });
   }
+
+  it('PUT /api/v1/admin/site-settings → 401 for an anonymous caller, even with an invalid body (the gate precedes validation)', async () => {
+    const res = await app.request(
+      '/api/v1/admin/site-settings',
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: '{"brandName": 42}', // garbage — validation never runs
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: 'Authentication required.' });
+  });
 });
 
 // AC-2 (public-absence half): a deactivated row appears in the admin read

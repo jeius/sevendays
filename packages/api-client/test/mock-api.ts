@@ -1,5 +1,5 @@
 import { zValidator } from '@hono/zod-validator';
-import { createAppointmentSchema } from '@sevendays/types';
+import { createAppointmentSchema, saveSiteSettingsSchema } from '@sevendays/types';
 import { Hono } from 'hono';
 import { type ZodSchema, z } from 'zod';
 
@@ -166,6 +166,46 @@ const TESTIMONIALS = [
   },
 ];
 
+// M7 #215: the born-empty singleton (the mock answers the saved state after
+// any PUT — the loopback's update round-trip).
+let MOCK_SITE_SETTINGS_SAVED = false;
+const SITE_SETTINGS_EMPTY = {
+  brandName: null,
+  brandTagline: null,
+  logoImageUrl: null,
+  homeTitle: null,
+  homeDescription: null,
+  packagesTitle: null,
+  packagesDescription: null,
+  branchesTitle: null,
+  branchesDescription: null,
+  servicesTitle: null,
+  servicesDescription: null,
+  aboutTitle: null,
+  aboutDescription: null,
+  aboutStory: null,
+  kickerGallery: null,
+  kickerPackages: null,
+  kickerServices: null,
+  kickerTestimonials: null,
+  socialInstagram: null,
+  socialFacebook: null,
+  socialTiktok: null,
+  bannerTitle: null,
+  bannerBody: null,
+  bannerIsActive: false,
+  contactEmail: null,
+  contactPhone: null,
+};
+
+const SITE_SETTINGS_SAVED = {
+  ...SITE_SETTINGS_EMPTY,
+  brandName: 'Sevendays Studio',
+  contactEmail: 'hello@sevendays.ph',
+  bannerIsActive: true,
+  logoImageUrl: 'https://pub-test.r2.dev/brand/00000000-0000-4000-8000-0000000000e1.jpg',
+};
+
 // The API's uniform-error hook, mirrored. Duplicated (not runtime-imported
 // from apps/api) because the API is consumed types-only by rule.
 const validatedJson = <S extends ZodSchema>(schema: S) =>
@@ -224,6 +264,10 @@ const makeApi = ({
 
   const testimonials = new Hono<MockEnv>().get('/', (c) =>
     brokenTestimonials ? c.json({ error: 'Not found.' }, 404) : c.json(TESTIMONIALS)
+  );
+
+  const siteSettingsRoutes = new Hono<MockEnv>().get('/', (c) =>
+    c.json(MOCK_SITE_SETTINGS_SAVED ? SITE_SETTINGS_SAVED : SITE_SETTINGS_EMPTY)
   );
 
   const studioServices = new Hono<MockEnv>().get('/', (c) =>
@@ -348,6 +392,18 @@ const makeApi = ({
         );
       }
       return c.body(null, 204);
+    })
+    .put('/site-settings', validatedJson(saveSiteSettingsSchema), (c) => {
+      const input = c.req.valid('json');
+      MOCK_SITE_SETTINGS_SAVED = true;
+      const { logoImageKey: _key, ...fields } = input;
+      return c.json({
+        ...fields,
+        logoImageUrl:
+          typeof input.logoImageKey === 'string'
+            ? 'https://pub-test.r2.dev/brand/00000000-0000-4000-8000-0000000000e1.jpg'
+            : null,
+      });
     });
 
   const v1 = new Hono<MockEnv>()
@@ -360,6 +416,7 @@ const makeApi = ({
     .route('/addon-services', addonServices)
     .route('/gallery', gallery)
     .route('/testimonials', testimonials)
+    .route('/site-settings', siteSettingsRoutes)
     .route('/appointments', appointments)
     .route('/admin', admin);
 
