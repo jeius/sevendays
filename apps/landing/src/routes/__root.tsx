@@ -1,3 +1,4 @@
+import { ThemeProvider } from '@sevendays/ui/components/theme-provider';
 import { TanStackDevtools } from '@tanstack/react-devtools';
 import type { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, HeadContent, Scripts } from '@tanstack/react-router';
@@ -40,29 +41,36 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='en'>
+    <html lang='en' suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body>
-        <PostHogProvider>
-          <div className='flex min-h-screen flex-col'>
-            <SiteHeader />
-            <main className='flex-1'>{children}</main>
-            <SiteFooter />
-          </div>
-          <TanStackDevtools
-            config={{
-              position: 'bottom-right',
-            }}
-            plugins={[
-              {
-                name: 'Tanstack Router',
-                render: <TanStackRouterDevtoolsPanel />,
-              },
-            ]}
-          />
-        </PostHogProvider>
+        <ThemeProvider
+          attribute='class'
+          defaultTheme='light'
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <PostHogProvider>
+            <div className='flex min-h-screen flex-col'>
+              <SiteHeader />
+              <main className='flex-1'>{children}</main>
+              <SiteFooter />
+            </div>
+            <TanStackDevtools
+              config={{
+                position: 'bottom-right',
+              }}
+              plugins={[
+                {
+                  name: 'Tanstack Router',
+                  render: <TanStackRouterDevtoolsPanel />,
+                },
+              ]}
+            />
+          </PostHogProvider>
+        </ThemeProvider>
         <Scripts />
       </body>
     </html>
