@@ -8,7 +8,9 @@
    round-trips to the identical rendered color. Data-viz tokens are admin-local (the #186
    reversal of #93's steering): --chart-* lives in apps/admin's @theme —
    promote to this shared file only if a second consumer appears. Dark mode is
-   parked for v1: no .dark block — do not design or carry one. */
+   LIVE (M7 #217, from zero per #162): the .dark block below is the ONE dark
+   source for both apps — default light, the next-themes class strategy, the
+   shared ThemeProvider/ThemeToggle primitives in this package's components. */
 
 :root {
   /* — Fixed brand points (#90; hexes are canonical, oklch conversions
@@ -82,6 +84,89 @@
   --font-sans: "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Roboto Slab Variable", Georgia, serif;
   --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* — Dark (M7 #217, designed from zero per #162's ruling; the ruled values
+     are the #164 prototype's ONE dark round — owner-ratified with the
+     base — mined verbatim from the branch sketch; ratios measured by
+     scripts/measure-theme-pairs.mjs, the harness that gates this block).
+     The owner-picked base oklch(0.2336 0.0089 255.6) (#1b1e22) re-derived
+     as a shade family at hue 255.6 PAIRED WITH brand-ink oklch(0.185 0.0164
+     256.833) — the same blue family within a degree of hue; ink anchors
+     the floor (the bands keep it), the canvas sits a lightness step above,
+     elevation climbs in lightness never shadow (cards +1, popovers +2 —
+     the dark-mode-design skill's surface + elevation laws), text tiers
+     87/60 never pure white, hairlines white-alpha, photographs dim to
+     92%. Fixed brand points and the brand ramp are UNCHANGED — the dark
+     link pair lifts onto the existing brand-300/200. Hexes canonical;
+     oklch round-trips verified. This block is the ONLY .dark in the
+     design system; app-local dark CSS is forbidden except the admin's
+     two-line chart pair (#186's admin-local ruling). The block sits after
+     :root on purpose: equal specificity, source order decides. — */
+.dark {
+  /* canvas + atmosphere (the sketch's ruled literals) */
+  --wash-base: oklch(0.215 0.012 255.6); /* #161a1f — the page */
+  --wash-a: oklch(0.237 0.011 255.6); /* #1b1f24 */
+  --wash-b: oklch(0.252 0.01 255.6); /* #1f2227 */
+  --surface-glass: oklch(0.282 0.009 255.6 / 74%); /* #262a2e at 74% */
+  --surface-strong: oklch(0.296 0.009 255.6 / 90%); /* #2a2d31 at 90% */
+  --line-soft: oklch(1 0 0 / 8%); /* hairlines: white alpha, they adapt */
+  /* biome-ignore format: owner-ruled literal must stay single-line — scripts/measure-theme-pairs.mjs parses this exact form */
+  --brand-gray-light: oklch(0.31 0.008 255.6); /* #2e3134 — the emphasis strip lifts; 87 text on it 8.82:1 */
+  --muted-text: oklch(0.72 0.01 255.6); /* #a0a5ab — the 60% tier */
+  /* biome-ignore format: owner-ruled literal must stay single-line — scripts/measure-theme-pairs.mjs parses this exact form */
+  --destructive: oklch(0.704 0.191 22.216); /* #ff6467 — shadcn's dark red, 5.53:1 on the dark card (the light 0.577 red measures 3.35:1 there and fails the admin's text-destructive lines) */
+
+  /* shadcn semantic layer (the sketch's ruled literals) */
+  --background: var(--wash-base);
+  /* biome-ignore format: owner-ruled literal must stay single-line — scripts/measure-theme-pairs.mjs parses this exact form */
+  --foreground: oklch(0.87 0.006 255.6); /* #d2d4d8 — the 87% tier, never pure white; on background 11.77:1 */
+  --card: oklch(0.252 0.009 255.6); /* #1f2226 — the +1 elevation */
+  --card-foreground: var(--foreground); /* 10.76:1 */
+  --popover: oklch(0.282 0.009 255.6); /* #262a2e — the +2 */
+  --popover-foreground: var(--foreground); /* 9.74:1 */
+  --primary: var(--brand-primary); /* the fixed point stays the action color */
+  --primary-foreground: oklch(1 0 0); /* white on petrol 5.65:1, unchanged */
+  --secondary: oklch(0.282 0.009 255.6); /* #262a2e */
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.267 0.009 255.6); /* #23262a */
+  --muted-foreground: var(--muted-text); /* 7.04:1 on background, 6.44:1 on card */
+  --accent: oklch(0.282 0.009 255.6); /* #262a2e */
+  --accent-foreground: var(--foreground);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: var(--brand-focus-ring); /* brand-400: 6.70:1 on background, 6.13:1 on card — non-text */
+
+  /* sidebar joins the ramp (#162's ruling; derived + measured — the admin
+     rail, one step above the canvas and below the cards; --sidebar-accent
+     needs no line: its var(--brand-gray-light) reference resolves against
+     the 0.31 override on the same element) */
+  --sidebar: oklch(0.237 0.011 255.6); /* #1b1f24 */
+  --sidebar-foreground: var(--foreground); /* 11.16:1 */
+  --sidebar-accent-foreground: var(--foreground); /* on the 0.31 accent 8.82:1 */
+  --sidebar-border: oklch(1 0 0 / 12%);
+}
+
+/* Images dim on the dark canvas so they never glare past the content
+   (the ink scrims already carry the hero and service cards) — the sketch's
+   ruled rule, verbatim. */
+.dark img {
+  filter: brightness(0.92);
+}
+
+/* The link pair inverts with the canvas (brand-700 on the dark canvas
+   ≈ 2.2:1; brand-300 on it 10.81:1, hover brand-200 11.94:1). Layered
+   base — utilities keep winning over it (the #111 law); both apps' own
+   `a` rules sit in the same layer, .dark's specificity wins when the
+   class is on. */
+@layer base {
+  .dark a {
+    color: var(--brand-300);
+  }
+
+  .dark a:hover {
+    color: var(--brand-200);
+  }
 }
 
 @theme inline {

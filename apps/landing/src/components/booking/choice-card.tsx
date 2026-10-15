@@ -27,9 +27,12 @@ export function ChoiceCard({
       onClick={onSelect}
       className={cn(
         'focus-visible:ring-brand-focus-ring rounded-xl border p-4 text-left transition-colors focus-visible:ring-3',
+        // DM-2 (#217): the name span inherits the card's state color —
+        // selected keeps ink on the fixed near-white chip; unselected rides
+        // the token card as it flips.
         selected
-          ? 'border-primary bg-brand-50 ring-1 ring-primary'
-          : 'border-brand-gray-cool bg-card hover:border-brand-400'
+          ? 'border-primary bg-brand-50 text-brand-ink ring-1 ring-primary'
+          : 'border-brand-gray-cool bg-card text-foreground hover:border-brand-400'
       )}
     >
       {children}

@@ -7,6 +7,7 @@ import { Button } from '@sevendays/ui/components/button';
 import { Input } from '@sevendays/ui/components/input';
 import { Separator } from '@sevendays/ui/components/separator';
 import { SidebarTrigger } from '@sevendays/ui/components/sidebar';
+import { ThemeToggle } from '@sevendays/ui/components/theme-toggle';
 import { Bell } from 'lucide-react';
 
 export function AdminTopbar() {
@@ -23,6 +24,7 @@ export function AdminTopbar() {
       <Button variant='ghost' size='icon' aria-label='Notifications' className='ml-auto'>
         <Bell aria-hidden='true' />
       </Button>
+      <ThemeToggle />
     </header>
   );
 }

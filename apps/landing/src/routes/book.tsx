@@ -122,7 +122,7 @@ function BookPage() {
               ← Back
             </button>
           )}
-          <h2 className='text-brand-ink font-bold text-2xl'>{QUESTIONS[wizard.step - 1]}</h2>
+          <h2 className='text-foreground font-bold text-2xl'>{QUESTIONS[wizard.step - 1]}</h2>
 
           {wizard.step === 1 && (
             <section data-step='1' className='mt-5 grid gap-3 sm:grid-cols-2'>
@@ -135,7 +135,7 @@ function BookPage() {
                     wizard.goNext();
                   }}
                 >
-                  <span className='text-brand-ink block font-semibold'>{b.name}</span>
+                  <span className='block font-semibold'>{b.name}</span>
                   <span className='text-muted-foreground mt-1 block text-sm'>{b.address}</span>
                   <span className='mt-2 block'>
                     <WalkInBadge acceptsWalkIns={b.acceptsWalkIns} />
@@ -157,7 +157,7 @@ function BookPage() {
                       selected={wizard.offering?.kind === 'package' && wizard.offering.id === p.id}
                       onSelect={() => wizard.chooseOffering({ kind: 'package', id: p.id })}
                     >
-                      <span className='text-brand-ink block font-semibold'>{p.name}</span>
+                      <span className='block font-semibold'>{p.name}</span>
                       <span className='mt-1 block font-semibold'>{peso(p.priceCents)}</span>
                     </ChoiceCard>
                   ))}
@@ -187,7 +187,7 @@ function BookPage() {
                           }
                           onSelect={() => wizard.chooseOffering({ kind: 'service', id: s.id })}
                         >
-                          <span className='text-brand-ink block font-semibold'>{s.name}</span>
+                          <span className='block font-semibold'>{s.name}</span>
                           <span className='mt-1 block font-semibold'>{peso(s.priceCents)}</span>
                         </ChoiceCard>
                       ))}
@@ -209,7 +209,7 @@ function BookPage() {
                       selected={wizard.addonIds.includes(a.id)}
                       onSelect={() => wizard.toggleAddon(a.id)}
                     >
-                      <span className='text-brand-ink block font-semibold'>{a.name}</span>
+                      <span className='block font-semibold'>{a.name}</span>
                       <span className='text-muted-foreground mt-1 block text-sm'>
                         {a.description}
                       </span>
