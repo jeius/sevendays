@@ -1,4 +1,5 @@
 import { Toaster } from '@sevendays/ui/components/sonner';
+import { ThemeProvider } from '@sevendays/ui/components/theme-provider';
 import { TanStackDevtools } from '@tanstack/react-devtools';
 import type { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, HeadContent, Scripts } from '@tanstack/react-router';
@@ -39,30 +40,37 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='en'>
+    <html lang='en' suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body>
-        <PostHogProvider>
-          {/* The #131 popup ruling: every popup/overlay animation runs on the Motion
-           * channel with the OS reduced-motion preference honored app-wide. */}
-          <MotionConfig reducedMotion='user'>
-            {children}
-            <Toaster />
-          </MotionConfig>
-          <TanStackDevtools
-            config={{
-              position: 'bottom-right',
-            }}
-            plugins={[
-              {
-                name: 'Tanstack Router',
-                render: <TanStackRouterDevtoolsPanel />,
-              },
-            ]}
-          />
-        </PostHogProvider>
+        <ThemeProvider
+          attribute='class'
+          defaultTheme='light'
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <PostHogProvider>
+            {/* The #131 popup ruling: every popup/overlay animation runs on the Motion
+             * channel with the OS reduced-motion preference honored app-wide. */}
+            <MotionConfig reducedMotion='user'>
+              {children}
+              <Toaster />
+            </MotionConfig>
+            <TanStackDevtools
+              config={{
+                position: 'bottom-right',
+              }}
+              plugins={[
+                {
+                  name: 'Tanstack Router',
+                  render: <TanStackRouterDevtoolsPanel />,
+                },
+              ]}
+            />
+          </PostHogProvider>
+        </ThemeProvider>
         <Scripts />
       </body>
     </html>

@@ -1,4 +1,5 @@
 import { buttonVariants } from '@sevendays/ui/components/button';
+import { ThemeToggle } from '@sevendays/ui/components/theme-toggle';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
 import { NAV_LINKS } from '../lib/nav';
@@ -56,6 +57,7 @@ export function SiteHeader() {
           >
             Call us
           </Link>
+          <ThemeToggle className='inline-flex size-10 rounded-md text-white/85 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring' />
           <MobileNav links={NAV_LINKS} />
         </div>
       </div>

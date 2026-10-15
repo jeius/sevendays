@@ -17,7 +17,7 @@ export function BranchCard({ branch }: { branch: BranchRead }) {
   return (
     <article className='flex flex-col gap-2 rounded-xl border border-brand-gray-cool bg-card p-6 shadow-sm'>
       <CoverPanel name={branch.name} coverImageUrl={branch.coverImageUrl} />
-      <h3 className='font-semibold text-brand-ink text-xl'>{branch.name}</h3>
+      <h3 className='font-semibold text-foreground text-xl'>{branch.name}</h3>
       <p className='text-muted-text'>{branch.address}</p>
       <p className='text-muted-text'>{branch.phone}</p>
       <WalkInBadge acceptsWalkIns={branch.acceptsWalkIns} />

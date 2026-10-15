@@ -37,12 +37,12 @@ function AboutPage() {
   return (
     <div>
       <section className='mx-auto max-w-5xl px-6 pt-12'>
-        <h1 className='font-bold font-serif text-4xl text-brand-ink'>About</h1>
+        <h1 className='font-bold font-serif text-4xl text-foreground'>About</h1>
         {/* TODO(owner-copy): static studio story — replaced when the client supplies copy. */}
         <p className='mt-4 max-w-prose text-muted-foreground'>Our studio story is coming soon.</p>
       </section>
       <section className='mx-auto mt-12 max-w-5xl border-line-soft border-t px-6 pt-12'>
-        <h2 className='font-semibold font-serif text-2xl text-brand-ink'>Testimonials</h2>
+        <h2 className='font-semibold font-serif text-2xl text-foreground'>Testimonials</h2>
         {testimonials.length === 0 ? (
           <div>
             {/* TODO(owner-copy): testimonial placeholders — client copy pending. M5 drop-in slot. */}
@@ -52,7 +52,7 @@ function AboutPage() {
           <div className='mt-6 flex flex-col gap-6'>
             {testimonials.map((t) => (
               <figure key={t.id} className='border-line-soft border-l-2 pl-4'>
-                <blockquote className='text-brand-ink'>{t.quote}</blockquote>
+                <blockquote className='text-foreground'>{t.quote}</blockquote>
                 <figcaption className='text-muted-text mt-2 text-sm'>{t.person}</figcaption>
               </figure>
             ))}
@@ -62,7 +62,7 @@ function AboutPage() {
             only door to /share-your-story — v1's only public write surface. */}
         <div className='mt-10 flex flex-col items-start justify-between gap-4 rounded-xl border border-line-soft bg-card p-6 shadow-sm sm:flex-row sm:items-center'>
           <div>
-            <h3 className='font-semibold font-serif text-brand-ink text-xl'>
+            <h3 className='font-semibold font-serif text-foreground text-xl'>
               Shot with us recently?
             </h3>
             <p className='mt-1 text-muted-foreground text-sm'>
@@ -76,7 +76,7 @@ function AboutPage() {
         </div>
       </section>
       <section className='mx-auto mt-12 max-w-5xl border-line-soft border-t px-6 pt-12 pb-12'>
-        <h2 className='font-semibold font-serif text-2xl text-brand-ink'>Portfolio</h2>
+        <h2 className='font-semibold font-serif text-2xl text-foreground'>Portfolio</h2>
         {!hasPortfolioPhotos(gallery) ? (
           // Zero photos (or no photo-holding categories): the tab row hides
           // and the spec-verbatim placeholder renders. No grid, no tabs.

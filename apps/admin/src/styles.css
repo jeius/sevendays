@@ -43,14 +43,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  color: var(--brand-700); /* link pair: 8.22:1 on white — the #92 measured table */
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-}
+/* Layered base (M7 #217, the #111 precedent landed on admin): this pair
+   used to sit UNLAYERED, and unlayered author styles beat every Tailwind
+   utility layer — it would pin brand-700 over the shared dark link pair
+   (tokens.css's .dark a) and over any color utility on a link. Moved into
+   @layer base so utilities and the dark pair win again. */
+@layer base {
+  a {
+    color: var(--brand-700); /* link pair: 8.22:1 on white — the #92 measured table */
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
 
-a:hover {
-  color: var(--brand-800);
+  a:hover {
+    color: var(--brand-800);
+  }
 }
 
 code {
@@ -87,4 +94,21 @@ pre code {
   html {
     @apply font-sans;
   }
+}
+
+/* Dark chart counterparts (M7 #217): data-viz tokens stay ADMIN-LOCAL
+   (#186's ruling), so their dark pair lives here — the ONLY app-local
+   dark CSS; the design-system .dark block lives in @sevendays/ui
+   tokens.css. Chart colors are consumed at runtime as var(--chart-N), so
+   these two overrides re-point the pair. On the dark card
+   (oklch(0.252 0.009 255.6)): the fixed petrol (chart-1) measures 2.83:1
+   and brand-900 (chart-5) 1.11:1 — under the 3:1 non-text floor (the
+   emphasis series vanishes); the dark pair lifts them onto the light
+   petrols — brand-400 measures 6.13:1, brand-300 9.88:1. chart-2 rides
+   --destructive's dark override (5.53:1); chart-3/4 already pass
+   (3.98/4.14); --chart-grid/--chart-text reference --border/
+   --muted-foreground and flip free. */
+.dark {
+  --chart-1: var(--brand-400);
+  --chart-5: var(--brand-300);
 }
