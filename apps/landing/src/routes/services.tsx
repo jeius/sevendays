@@ -46,7 +46,7 @@ function ServicesPage() {
             <h2 className='font-semibold font-serif text-foreground text-xl'>
               Need a service at one of our branches?
             </h2>
-            <p className='mt-1 text-brand-700 text-sm'>
+            <p className='mt-1 text-brand-700 text-sm dark:text-brand-400'>
               Call or visit a branch — we will confirm availability.
             </p>
           </div>

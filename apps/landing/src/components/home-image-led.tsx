@@ -80,7 +80,7 @@ export function HomeImageLed({
       {/* 2 — Gallery: the masonry wall. */}
       <section className='border-line-soft border-b' data-strip='gallery'>
         <div className='mx-auto max-w-5xl px-6 py-16'>
-          <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
+          <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase dark:text-brand-400'>
             {KICKERS.gallery}
           </p>
           <h2 className='text-foreground mt-2 font-serif text-3xl font-semibold'>The work</h2>
@@ -111,7 +111,7 @@ export function HomeImageLed({
           the selection (a flagless catalog still falls back to first-4). */}
       {packages.length > 0 && (
         <section className='mx-auto max-w-5xl px-6 py-16' data-strip='featured'>
-          <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
+          <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase dark:text-brand-400'>
             {KICKERS.packages}
           </p>
           <h2 className='text-foreground mt-2 font-serif text-3xl font-semibold'>{heading}</h2>
@@ -126,7 +126,7 @@ export function HomeImageLed({
       {/* 4 — Services: full-image-background cards. */}
       <section className='border-line-soft bg-wash-a border-y' data-strip='services'>
         <div className='mx-auto max-w-5xl px-6 py-16'>
-          <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
+          <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase dark:text-brand-400'>
             {KICKERS.services}
           </p>
           <div className='mt-8 grid gap-4 md:grid-cols-2'>
@@ -136,7 +136,7 @@ export function HomeImageLed({
           </div>
           <Link
             to='/services'
-            className='text-brand-700 hover:text-brand-800 mt-6 inline-block text-sm font-medium underline underline-offset-4'
+            className='text-brand-700 hover:text-brand-800 mt-6 inline-block text-sm font-medium underline underline-offset-4 dark:text-brand-300 dark:hover:text-brand-200'
           >
             View all services
           </Link>
@@ -147,7 +147,7 @@ export function HomeImageLed({
             placeholder. */}
       <section className='bg-wash-b border-line-soft border-y' data-strip='testimonials'>
         <div className='mx-auto max-w-5xl px-6 py-16'>
-          <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
+          <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase dark:text-brand-400'>
             {KICKERS.testimonials}
           </p>
           <div className='mt-8 grid gap-8 md:grid-cols-5'>
@@ -156,7 +156,7 @@ export function HomeImageLed({
                 “{TESTIMONIALS_PLACEHOLDER[0].quote}”
               </blockquote>
               <figcaption className='mt-4'>
-                <p className='text-brand-700 font-mono text-xs font-bold tracking-wider uppercase'>
+                <p className='text-brand-700 font-mono text-xs font-bold tracking-wider uppercase dark:text-brand-400'>
                   {TESTIMONIALS_PLACEHOLDER[0].name}
                 </p>
                 <p className='text-muted-text mt-1 text-sm'>
@@ -169,7 +169,7 @@ export function HomeImageLed({
                 <figure key={t.context} className='border-line-soft border-l-2 pl-4'>
                   <blockquote className='text-foreground'>{t.quote}</blockquote>
                   <figcaption className='mt-2'>
-                    <p className='text-brand-700 font-mono text-xs font-bold tracking-wider uppercase'>
+                    <p className='text-brand-700 font-mono text-xs font-bold tracking-wider uppercase dark:text-brand-400'>
                       {t.name}
                     </p>
                     <p className='text-muted-text mt-1 text-sm'>{t.context}</p>
@@ -191,7 +191,7 @@ export function HomeImageLed({
             <h2 className='text-foreground font-serif text-xl font-semibold'>
               Not sure which session fits?
             </h2>
-            <p className='text-brand-700 mt-1 text-sm'>
+            <p className='text-brand-700 mt-1 text-sm dark:text-brand-400'>
               Call or visit a branch — we will help you choose.
             </p>
           </div>

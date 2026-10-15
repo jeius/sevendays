@@ -88,7 +88,7 @@ function ShareYourStoryPage() {
         // customer cannot tell a stored submission from a honeypot
         // discard, which is exactly the posture.
         <div className='mt-10 flex flex-col items-start gap-4 rounded-xl border border-line-soft bg-card p-6 shadow-sm'>
-          <CheckCircle2 className='text-brand-700 size-8' aria-hidden='true' />
+          <CheckCircle2 className='text-brand-700 size-8 dark:text-brand-400' aria-hidden='true' />
           <h2 className='font-semibold font-serif text-2xl text-foreground'>
             Thank you — your story is on its way.
           </h2>
