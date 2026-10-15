@@ -40,8 +40,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/routes/__root.tsx": {
-    "mtime": 1790437563.8423696,
-    "ast_hash": "d753f9487a3da3f0ee9902c5578b0310",
+    "mtime": 1792052774.8786912,
+    "ast_hash": "465aa902ef2af2da6ef724f66b173b60",
     "semantic_hash": ""
   },
   "apps/admin/tsconfig.json": {
@@ -245,8 +245,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/routes/__root.tsx": {
-    "mtime": 1791382639.2232163,
-    "ast_hash": "e8c0d9e79d9dda1991fa0e8559226192",
+    "mtime": 1792052774.8830419,
+    "ast_hash": "e341399f78d516263a1d96f78ecb131c",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/index.tsx": {
@@ -700,8 +700,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1791979489.5114741,
-    "ast_hash": "b582f250f446fe8bb35a342fe7cd6f86",
+    "mtime": 1792052774.8786912,
+    "ast_hash": "41c35414512f183b2457d3d166c4f7e4",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -830,13 +830,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1791979489.5155618,
-    "ast_hash": "4faeb22d5540bc5cdec901453cc4402d",
+    "mtime": 1792052774.8873925,
+    "ast_hash": "3021aad70bbc00dec98062b76f9bcf3c",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1791979489.5155618,
-    "ast_hash": "4cb8c908c96064e002b99216b1782bbe",
+    "mtime": 1792052774.8873925,
+    "ast_hash": "2924f42c92aac1d7454e788867877cd2",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2600,13 +2600,13 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/booking/summary-rail.tsx": {
-    "mtime": 1791775729.4877508,
-    "ast_hash": "2c024b0cc469637672013b8bd8583a52",
+    "mtime": 1792052774.8786912,
+    "ast_hash": "48b140fd705d5efee1a0814e52e7551a",
     "semantic_hash": ""
   },
   "apps/landing/src/components/branch-card.tsx": {
-    "mtime": 1791869095.403882,
-    "ast_hash": "b2a9e5479a37d33ca424292727a9bc81",
+    "mtime": 1792052774.8786912,
+    "ast_hash": "588925ec8b502ff8525c667a479c2eca",
     "semantic_hash": ""
   },
   "apps/landing/src/components/branch-strip-item.tsx": {
@@ -2625,13 +2625,13 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/package-card.tsx": {
-    "mtime": 1790626031.663335,
-    "ast_hash": "a67a7e0367e5a7451407c5ba813e78f3",
+    "mtime": 1792052774.8830419,
+    "ast_hash": "66b1945dd0e16903561b13e0ab487f09",
     "semantic_hash": ""
   },
   "apps/landing/src/components/service-card.tsx": {
-    "mtime": 1789574104.6433425,
-    "ast_hash": "68d80c91a12bd07bbec52dd2b402991d",
+    "mtime": 1792052774.8830419,
+    "ast_hash": "27b912e48f58289564e7883be24b98cc",
     "semantic_hash": ""
   },
   "apps/landing/src/components/service-teaser-item.tsx": {
@@ -2640,8 +2640,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/site-header.tsx": {
-    "mtime": 1789574104.6433425,
-    "ast_hash": "34346f209481aa2d606fd39c575de8fe",
+    "mtime": 1792052774.8830419,
+    "ast_hash": "affa3f6c0d85b0c85503935fefaf3b88",
     "semantic_hash": ""
   },
   "apps/landing/src/components/walk-in-badge.tsx": {
@@ -2715,38 +2715,38 @@
     "semantic_hash": ""
   },
   "apps/landing/src/routes/about.tsx": {
-    "mtime": 1791979489.5114741,
-    "ast_hash": "35fd0d7802c2b158178a5cec33d0bee7",
+    "mtime": 1792052774.8830419,
+    "ast_hash": "a3cbab32ca528bbdf26f8154c6c5f220",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/book.tsx": {
-    "mtime": 1791775729.4921508,
-    "ast_hash": "1d624cd17dbe7383185e6ddfc1df9a84",
+    "mtime": 1792052774.8830419,
+    "ast_hash": "eadbc56457efa8765b1a24fb43c4c7f9",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/booking.$id.tsx": {
-    "mtime": 1789863178.1344657,
-    "ast_hash": "bc302fe24f4de736eb8b07ac14389e60",
+    "mtime": 1792052774.8830419,
+    "ast_hash": "e5c2a5dd3315e7d0d4b2f97984430e11",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/branches.tsx": {
-    "mtime": 1789990933.54283,
-    "ast_hash": "b13eb4b684521c0f28480b484f0b2678",
+    "mtime": 1792052774.8830419,
+    "ast_hash": "202540a2306cbbbdd3343319a02284bc",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/packages/$slug.tsx": {
-    "mtime": 1789990933.54283,
-    "ast_hash": "aede9092e8371a21756fa848eddefa25",
+    "mtime": 1792052774.8830419,
+    "ast_hash": "178b2349dd95e4ea5161b30c3e1c3211",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/packages/index.tsx": {
-    "mtime": 1790626031.663335,
-    "ast_hash": "b7c267122b1acfbcf411c5b56f52a6aa",
+    "mtime": 1792052774.8830419,
+    "ast_hash": "9258a2e1a0754e5916680d7089fa6f9b",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/services.tsx": {
-    "mtime": 1789990933.54283,
-    "ast_hash": "301b939903dfa268d21ea22b2c99bbf1",
+    "mtime": 1792052774.8830419,
+    "ast_hash": "a1f1c1f99e7956f5e750256c5fc6eb3c",
     "semantic_hash": ""
   },
   "apps/landing/vitest.config.ts": {
@@ -2870,8 +2870,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1791980818.9859705,
-    "ast_hash": "f4e0682eacead790646fcbe6746c3f5d",
+    "mtime": 1792053855.1487894,
+    "ast_hash": "48b183d0f16c178a481b218eeb57dde2",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -2955,8 +2955,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/admin-topbar.tsx": {
-    "mtime": 1789489137.646315,
-    "ast_hash": "94d29b4bcf16b79995414960d0e0ecee",
+    "mtime": 1792052774.8786912,
+    "ast_hash": "51c334e57925c19be53f72c852fdd5ba",
     "semantic_hash": ""
   },
   "apps/admin/src/components/stub-screen.tsx": {
@@ -3115,13 +3115,13 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/booking/choice-card.tsx": {
-    "mtime": 1789863178.1261115,
-    "ast_hash": "1722e4a546988bd0bf5956d08ab72bfb",
+    "mtime": 1792052774.8786912,
+    "ast_hash": "6ee0eff1422c0c4e2795389b44ada7ae",
     "semantic_hash": ""
   },
   "apps/landing/src/components/booking/confirmation-card.tsx": {
-    "mtime": 1791775729.4877508,
-    "ast_hash": "dbf1940528875f90526542128baedbc3",
+    "mtime": 1792052774.8786912,
+    "ast_hash": "176da3ab89d7aa2d77b4201ef5460e62",
     "semantic_hash": ""
   },
   "apps/landing/src/components/booking/hour-chip-grid.tsx": {
@@ -3250,8 +3250,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/home-image-led.tsx": {
-    "mtime": 1790626031.663335,
-    "ast_hash": "6937a9e96ba8f078e0f51fe557b0c97f",
+    "mtime": 1792052774.8786912,
+    "ast_hash": "83bc2e6dd089866adc5b85b8bc49908e",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-20-101-m3-verification-closeout.md": {
@@ -4500,8 +4500,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/routes/share-your-story.tsx": {
-    "mtime": 1791979489.5114741,
-    "ast_hash": "a3b3375bdcea9c97f279c5a0bba41f52",
+    "mtime": 1792052774.8830419,
+    "ast_hash": "7740c7e2e296f4782476e809d590a325",
     "semantic_hash": ""
   },
   "packages/api-client/src/routes/testimonial-submissions.ts": {
@@ -4537,6 +4537,26 @@
   "docs/superpowers/plans/2026-10-14-216-testimonial-submissions.md": {
     "mtime": 1791979489.5155618,
     "ast_hash": "2e39a4e60be40a71a8bb425da86a0a24",
+    "semantic_hash": ""
+  },
+  "packages/ui/src/components/theme-provider.tsx": {
+    "mtime": 1792052774.8873925,
+    "ast_hash": "eb8ba8ef52af39613062ca114f9d1a65",
+    "semantic_hash": ""
+  },
+  "packages/ui/src/components/theme-toggle.tsx": {
+    "mtime": 1792052774.8873925,
+    "ast_hash": "2b434910bb8b0c6b9281cc5842afdf21",
+    "semantic_hash": ""
+  },
+  "scripts/measure-theme-pairs.mjs": {
+    "mtime": 1792052774.8917432,
+    "ast_hash": "59f26342ffae0d803f61c484d0017b25",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-10-14-217-dark-mode.md": {
+    "mtime": 1792052774.8873925,
+    "ast_hash": "2ab9fcc87ffd5c238e0b42a276235d89",
     "semantic_hash": ""
   }
 }
