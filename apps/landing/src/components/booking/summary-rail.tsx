@@ -7,7 +7,7 @@ export function SummaryRail({ wizard }: { wizard: BookingWizard }) {
       data-summary-rail
       className='md:sticky md:top-6 h-fit rounded-xl border border-brand-gray-cool bg-card p-4 shadow-sm'
     >
-      <p className='text-brand-ink font-semibold text-sm'>Your booking</p>
+      <p className='text-foreground font-semibold text-sm'>Your booking</p>
       <dl className='mt-3 space-y-2 text-sm'>
         <div className='flex justify-between gap-3'>
           <dt className='text-muted-foreground'>Branch</dt>

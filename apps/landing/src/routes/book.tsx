@@ -122,7 +122,7 @@ function BookPage() {
               ← Back
             </button>
           )}
-          <h2 className='text-brand-ink font-bold text-2xl'>{QUESTIONS[wizard.step - 1]}</h2>
+          <h2 className='text-foreground font-bold text-2xl'>{QUESTIONS[wizard.step - 1]}</h2>
 
           {wizard.step === 1 && (
             <section data-step='1' className='mt-5 grid gap-3 sm:grid-cols-2'>

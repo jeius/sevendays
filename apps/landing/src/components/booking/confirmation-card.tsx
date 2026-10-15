@@ -19,7 +19,7 @@ export function ConfirmationCard({
   const total = confirmationTotalCents(record);
   return (
     <div className='mx-auto mt-8 max-w-lg rounded-xl border border-brand-gray-cool bg-card p-6 shadow-sm'>
-      <p className='text-brand-ink font-semibold text-lg'>Booking confirmed ✓</p>
+      <p className='text-foreground font-semibold text-lg'>Booking confirmed ✓</p>
       <dl className='mt-4 space-y-2 text-sm'>
         <div className='flex justify-between gap-4'>
           <dt className='text-muted-foreground'>Confirmation #</dt>

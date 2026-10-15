@@ -39,7 +39,7 @@ export const Route = createFileRoute('/booking/$id')({
   notFoundComponent: () => (
     <div className='mx-auto max-w-5xl px-6'>
       <div className='mt-16 flex flex-col items-center gap-4 rounded-xl border border-brand-gray-cool bg-card p-10 text-center shadow-sm'>
-        <h1 className='text-brand-ink font-semibold text-2xl'>Booking not found.</h1>
+        <h1 className='text-foreground font-semibold text-2xl'>Booking not found.</h1>
         <p className='text-muted-text text-sm'>
           This booking doesn't exist or is no longer available.
         </p>

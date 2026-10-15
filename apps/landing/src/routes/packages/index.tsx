@@ -20,7 +20,7 @@ function PackagesPage() {
   return (
     <div>
       <section className='mx-auto max-w-5xl px-6 pt-12'>
-        <h1 className='font-bold font-serif text-4xl text-brand-ink'>Packages</h1>
+        <h1 className='font-bold font-serif text-4xl text-foreground'>Packages</h1>
         {packages.length === 0 ? (
           // TODO(owner-copy): packages empty-state line — replaced when the
           // client supplies copy. Text is CDP-assertable (the ⇔ rule in

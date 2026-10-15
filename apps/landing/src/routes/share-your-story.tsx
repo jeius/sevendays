@@ -77,7 +77,7 @@ function ShareYourStoryPage() {
 
   return (
     <div className='mx-auto max-w-2xl px-6 pt-12 pb-16'>
-      <h1 className='font-bold font-serif text-4xl text-brand-ink'>Share your story</h1>
+      <h1 className='font-bold font-serif text-4xl text-foreground'>Share your story</h1>
       <p className='mt-3 max-w-prose text-muted-foreground'>
         Shot with us recently? A few words about your session help the next customer choose with
         confidence. Selected stories appear on our About page.
@@ -89,7 +89,7 @@ function ShareYourStoryPage() {
         // discard, which is exactly the posture.
         <div className='mt-10 flex flex-col items-start gap-4 rounded-xl border border-line-soft bg-card p-6 shadow-sm'>
           <CheckCircle2 className='text-brand-700 size-8' aria-hidden='true' />
-          <h2 className='font-semibold font-serif text-2xl text-brand-ink'>
+          <h2 className='font-semibold font-serif text-2xl text-foreground'>
             Thank you — your story is on its way.
           </h2>
           <p className='text-muted-foreground'>

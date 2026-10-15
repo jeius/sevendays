@@ -83,7 +83,7 @@ export function HomeImageLed({
           <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
             {KICKERS.gallery}
           </p>
-          <h2 className='text-brand-ink mt-2 font-serif text-3xl font-semibold'>The work</h2>
+          <h2 className='text-foreground mt-2 font-serif text-3xl font-semibold'>The work</h2>
           <div className='mt-8 columns-2 gap-4 md:columns-3 [&>figure]:mb-4'>
             {GALLERY_STANDINS.map((item) => (
               <figure
@@ -114,7 +114,7 @@ export function HomeImageLed({
           <p className='text-brand-700 font-mono text-xs font-bold tracking-[0.16em] uppercase'>
             {KICKERS.packages}
           </p>
-          <h2 className='text-brand-ink mt-2 font-serif text-3xl font-semibold'>{heading}</h2>
+          <h2 className='text-foreground mt-2 font-serif text-3xl font-semibold'>{heading}</h2>
           <div className='mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
             {strip.map((p) => (
               <PackageCoverCard key={p.id} pkg={p} />
@@ -152,7 +152,7 @@ export function HomeImageLed({
           </p>
           <div className='mt-8 grid gap-8 md:grid-cols-5'>
             <figure className='md:col-span-3'>
-              <blockquote className='text-brand-ink font-serif text-3xl leading-snug font-semibold'>
+              <blockquote className='text-foreground font-serif text-3xl leading-snug font-semibold'>
                 “{TESTIMONIALS_PLACEHOLDER[0].quote}”
               </blockquote>
               <figcaption className='mt-4'>
@@ -167,7 +167,7 @@ export function HomeImageLed({
             <div className='flex flex-col gap-6 md:col-span-2'>
               {TESTIMONIALS_PLACEHOLDER.slice(1).map((t) => (
                 <figure key={t.context} className='border-line-soft border-l-2 pl-4'>
-                  <blockquote className='text-brand-ink'>{t.quote}</blockquote>
+                  <blockquote className='text-foreground'>{t.quote}</blockquote>
                   <figcaption className='mt-2'>
                     <p className='text-brand-700 font-mono text-xs font-bold tracking-wider uppercase'>
                       {t.name}
@@ -188,7 +188,7 @@ export function HomeImageLed({
       <section className='bg-brand-gray-light border-line-soft border-t' data-strip='call-visit'>
         <div className='mx-auto flex max-w-5xl flex-col items-start justify-between gap-4 px-6 py-8 md:flex-row md:items-center'>
           <div>
-            <h2 className='text-brand-ink font-serif text-xl font-semibold'>
+            <h2 className='text-foreground font-serif text-xl font-semibold'>
               Not sure which session fits?
             </h2>
             <p className='text-brand-700 mt-1 text-sm'>
