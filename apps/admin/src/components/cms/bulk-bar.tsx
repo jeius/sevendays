@@ -140,7 +140,7 @@ export function BulkActionBar({
             variant='outline'
             type='button'
             disabled={busy}
-            className='text-green-600'
+            className='text-green-700 hover:text-green-700 dark:text-green-400 dark:hover:text-green-400'
             onClick={onReactivate}
           >
             <Power aria-hidden='true' />

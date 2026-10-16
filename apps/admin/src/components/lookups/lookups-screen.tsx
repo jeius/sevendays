@@ -43,6 +43,7 @@ import {
   ActionTooltip,
   Collapse,
   DeactivateConfirm,
+  DeleteGuardDialog,
   EmptyState,
   ExpandPanel,
   ExpandRow,
@@ -52,8 +53,11 @@ import {
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
+  StatusSegmented,
 } from '#/components/cms/shared';
 import {
+  removeAdminAttire,
+  removeAdminPrintSize,
   saveAdminAttireCreate,
   saveAdminAttireUpdate,
   saveAdminPrintSizeCreate,
@@ -78,6 +82,8 @@ import {
   validateAttireState,
   validatePrintSizeState,
 } from '#/lib/light-entity-state';
+import { blockerLines } from '#/lib/save-contract';
+import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 /**
  * The editor's mode switch across BOTH sections: create (from a section's
@@ -133,6 +139,15 @@ export function LookupsScreen() {
   // Deep-linkable in the prototype frame pass; here a plain selection. One
   // confirm id spans both sections — uuid ids never collide.
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  // The two sections' toolbar segments (#218): default All per visit, never
+  // persisted; the filtered views are render-time only — the caches and
+  // mutations ride the full lists. One delete target spans both sections
+  // (uuid ids never collide), with its last blockers (empty until a blocked
+  // 400 answers).
+  const [sizeSegment, setSizeSegment] = useState<StatusSegment>('all');
+  const [attireSegment, setAttireSegment] = useState<StatusSegment>('all');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The editor's create/edit switch and its open flag are separate: the
   // async Save contract (#218) closes the shell ONLY on a resolved-true —
   // a held save (veto, failure) keeps the sheet open over the intact
@@ -246,6 +261,49 @@ export function LookupsScreen() {
     },
   });
 
+  // The pending-guarded deletes (#218, the #213 routes): busy confirm via
+  // the dialog's `pending`; a blocked 400 keeps the dialog open with the
+  // blockers in-body; success closes + invalidates.
+  const removeSize = useMutation({
+    mutationFn: async (row: PrintSize) => {
+      return removeAdminPrintSize({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminLookupQueries.printSizes().queryKey });
+        setDeleteId(null);
+        setDeleteBlockers([]);
+        toast.success('Deleted.');
+        return;
+      }
+      setDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const removeAttire = useMutation({
+    mutationFn: async (row: Attire) => {
+      return removeAdminAttire({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminLookupQueries.attires().queryKey });
+        setDeleteId(null);
+        setDeleteBlockers([]);
+        toast.success('Deleted.');
+        return;
+      }
+      setDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   function toggleExpanded(id: string) {
     setExpandedId((prev) => (prev === id ? null : id));
   }
@@ -348,6 +406,8 @@ export function LookupsScreen() {
 
   const confirmSize = printSizes?.find((row) => row.id === confirmId);
   const confirmAttire = attires?.find((row) => row.id === confirmId);
+  const deleteSize = printSizes?.find((row) => row.id === deleteId);
+  const deleteAttire = attires?.find((row) => row.id === deleteId);
 
   return (
     <section className='space-y-4'>
@@ -364,6 +424,9 @@ export function LookupsScreen() {
         onEdit={openSizeEdit}
         onDeactivate={(row) => setConfirmId(row.id)}
         onReactivate={(row) => flipSize.mutate({ row, isActive: true })}
+        segment={sizeSegment}
+        onSegmentChange={setSizeSegment}
+        onDelete={(row) => setDeleteId(row.id)}
       />
       <AttiresSection
         attires={attires}
@@ -376,6 +439,9 @@ export function LookupsScreen() {
         onEdit={openAttireEdit}
         onDeactivate={(row) => setConfirmId(row.id)}
         onReactivate={(row) => flipAttire.mutate({ row, isActive: true })}
+        segment={attireSegment}
+        onSegmentChange={setAttireSegment}
+        onDelete={(row) => setDeleteId(row.id)}
       />
 
       {editing?.kind === 'size' ? (
@@ -494,6 +560,38 @@ export function LookupsScreen() {
           }}
         />
       ) : null}
+
+      {deleteSize ? (
+        <DeleteGuardDialog
+          name={deleteSize.code}
+          blockers={deleteBlockers}
+          pending={removeSize.isPending}
+          open={deleteId === deleteSize.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteId(null);
+              setDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeSize.mutate(deleteSize)}
+        />
+      ) : null}
+
+      {deleteAttire ? (
+        <DeleteGuardDialog
+          name={deleteAttire.name}
+          blockers={deleteBlockers}
+          pending={removeAttire.isPending}
+          open={deleteId === deleteAttire.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteId(null);
+              setDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeAttire.mutate(deleteAttire)}
+        />
+      ) : null}
     </section>
   );
 }
@@ -505,6 +603,13 @@ interface SizeSectionHandlers {
   onEdit: (row: PrintSize) => void;
   onDeactivate: (row: PrintSize) => void;
   onReactivate: (row: PrintSize) => void;
+}
+
+/** The section toolbar's segment + delete threading (#218). */
+interface SectionSegmentProps {
+  segment: StatusSegment;
+  onSegmentChange: (next: StatusSegment) => void;
+  onDelete: (row: PrintSize | Attire) => void;
 }
 
 /**
@@ -524,13 +629,17 @@ function PrintSizesSection({
   onEdit,
   onDeactivate,
   onReactivate,
+  segment,
+  onSegmentChange,
+  onDelete,
 }: {
   printSizes?: PrintSize[];
   isPending: boolean;
   isError: boolean;
   onRetry: () => void;
   expandedId: string | null;
-} & SizeSectionHandlers) {
+} & SizeSectionHandlers &
+  SectionSegmentProps) {
   // The table's one action shape: the sheet-opening Edit icon (the parent
   // owns the editor state; the row hands over its snapshot).
   function editButton(row: PrintSize) {
@@ -620,11 +729,16 @@ function PrintSizesSection({
     );
   }
 
+  // The segment's filtered view is render-time only (#218) — the parent's
+  // caches and mutations keep operating on the full list.
+  const rows = filterByStatusSegment(printSizes, segment);
+
   return (
     <Card className='@container rounded-lg'>
       <CardHeader>
         <CardTitle>Print sizes</CardTitle>
-        <CardAction>
+        <CardAction className='flex items-center gap-2'>
+          <StatusSegmented value={segment} onChange={onSegmentChange} />
           <Button onClick={onCreate} size='sm' type='button' variant='outline'>
             New print size
           </Button>
@@ -649,7 +763,7 @@ function PrintSizesSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {printSizes.map((row) => {
+              {rows.map((row) => {
                 const expanded = expandedId === row.id;
                 return (
                   <Fragment key={row.id}>
@@ -702,6 +816,7 @@ function PrintSizesSection({
                           isActive={row.isActive}
                           onDeactivate={() => onDeactivate(row)}
                           onReactivate={() => onReactivate(row)}
+                          onDelete={() => onDelete(row)}
                         />
                       </TableCell>
                     </ExpandRow>
@@ -720,7 +835,7 @@ function PrintSizesSection({
         {/* Stacked posture (below 700px container width): the whole
             two-line header toggles the animated reveal (M1). */}
         <div className='hidden flex-col @max-[700px]:flex'>
-          {printSizes.map((row) => {
+          {rows.map((row) => {
             const expanded = expandedId === row.id;
             return (
               <div key={row.id} className='border-border border-b py-2 last:border-b-0'>
@@ -753,6 +868,7 @@ function PrintSizesSection({
                         isActive={row.isActive}
                         onDeactivate={() => onDeactivate(row)}
                         onReactivate={() => onReactivate(row)}
+                        onDelete={() => onDelete(row)}
                       />
                     </div>
                   </div>
@@ -782,6 +898,9 @@ function AttiresSection({
   onEdit,
   onDeactivate,
   onReactivate,
+  segment,
+  onSegmentChange,
+  onDelete,
 }: {
   attires?: Attire[];
   isPending: boolean;
@@ -791,7 +910,7 @@ function AttiresSection({
   onEdit: (row: Attire) => void;
   onDeactivate: (row: Attire) => void;
   onReactivate: (row: Attire) => void;
-}) {
+} & SectionSegmentProps) {
   function editButton(row: Attire) {
     return (
       <Button
@@ -875,11 +994,16 @@ function AttiresSection({
     );
   }
 
+  // The segment's filtered view is render-time only (#218) — the parent's
+  // caches and mutations keep operating on the full list.
+  const rows = filterByStatusSegment(attires, segment);
+
   return (
     <Card className='@container rounded-lg'>
       <CardHeader>
         <CardTitle>Attires</CardTitle>
-        <CardAction>
+        <CardAction className='flex items-center gap-2'>
+          <StatusSegmented value={segment} onChange={onSegmentChange} />
           <Button onClick={onCreate} size='sm' type='button' variant='outline'>
             New attire
           </Button>
@@ -895,7 +1019,7 @@ function AttiresSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {attires.map((row) => (
+              {rows.map((row) => (
                 <TableRow key={row.id} className='group'>
                   <TableCell>
                     {/* L2: status dot FIRST, then the name — no description
@@ -915,6 +1039,7 @@ function AttiresSection({
                       isActive={row.isActive}
                       onDeactivate={() => onDeactivate(row)}
                       onReactivate={() => onReactivate(row)}
+                      onDelete={() => onDelete(row)}
                     />
                   </TableCell>
                 </TableRow>
@@ -926,7 +1051,7 @@ function AttiresSection({
         {/* Stacked posture — attires carry no secondary field, so the dot
             leads and the icon actions sit inline (nothing to reveal). */}
         <div className='hidden flex-col @max-[700px]:flex'>
-          {attires.map((row) => (
+          {rows.map((row) => (
             <div
               key={row.id}
               className='border-border flex items-center gap-2 border-b py-2 last:border-b-0'
@@ -939,6 +1064,7 @@ function AttiresSection({
                   isActive={row.isActive}
                   onDeactivate={() => onDeactivate(row)}
                   onReactivate={() => onReactivate(row)}
+                  onDelete={() => onDelete(row)}
                 />
               </div>
             </div>

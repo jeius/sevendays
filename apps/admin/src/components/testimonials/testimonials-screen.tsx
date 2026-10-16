@@ -8,8 +8,9 @@
 // `validateTestimonialState`) driving the create/edit Sheet editor and the
 // optimistic single flips; Task 3's result-valued save fns. No Position
 // column and no position field anywhere — array order is the display order,
-// owned by the order PUT that fires on drop (optimistic via Task 4's
-// `reorderIds` + `buildTestimonialOrderPayload`; `!ok` → snapshot restore +
+// owned by the order PUT that fires on drop (optimistic via
+// `reorderVisiblePhotos` — the #218 slot-swap law over the full global
+// order — + `buildTestimonialOrderPayload`; `!ok` → snapshot restore +
 // toast + invalidate, AR-9). Round-3 ruling: rows drag by the GripVertical
 // grip ONLY (activation lives on the handle; the row's clean click toggles
 // expansion), pinned to PointerSensor distance 4 — no TouchSensor long-press
@@ -56,6 +57,7 @@ import {
   ActionTooltip,
   Collapse,
   DeactivateConfirm,
+  DeleteGuardDialog,
   EmptyState,
   ExpandPanel,
   ExpandRow,
@@ -66,14 +68,16 @@ import {
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
+  StatusSegmented,
 } from '#/components/cms/shared';
 import {
+  removeAdminTestimonial,
   saveAdminTestimonialCreate,
   saveAdminTestimonialOrder,
   saveAdminTestimonialUpdate,
 } from '#/lib/admin.functions';
 import { adminTestimonialQueries } from '#/lib/cms-queries';
-import { buildTestimonialOrderPayload, reorderIds } from '#/lib/gallery-state';
+import { buildTestimonialOrderPayload, reorderVisiblePhotos } from '#/lib/gallery-state';
 import type { LightFieldErrors, TestimonialEditorState } from '#/lib/light-entity-state';
 import {
   buildTestimonialFlipPayload,
@@ -82,6 +86,8 @@ import {
   testimonialStateFromRead,
   validateTestimonialState,
 } from '#/lib/light-entity-state';
+import { blockerLines } from '#/lib/save-contract';
+import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 /** The editor's mode switch: create (from `New testimonial`) or edit (a row snapshot). */
 type EditingTarget = { mode: 'create' } | { mode: 'edit'; row: Testimonial };
@@ -213,6 +219,15 @@ export function TestimonialsScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  // The toolbar segment (#218): default All per visit, never persisted; the
+  // filtered view is render-time only — the caches and mutations ride the
+  // full list.
+  const [segment, setSegment] = useState<StatusSegment>('all');
+  // The delete dialog's target + its last blockers (empty until a blocked
+  // 400 answers — testimonials are blocked by nothing, but the wiring is
+  // the same everywhere).
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The editor's create/edit switch and its open flag are separate: the
   // async Save contract (#218) closes the shell ONLY on a resolved-true —
   // a held save (veto, failure) keeps the sheet open over the intact
@@ -234,6 +249,9 @@ export function TestimonialsScreen() {
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
+
+  const rows = filterByStatusSegment(testimonials ?? [], segment);
+  const deleteRow = testimonials?.find((row) => row.id === deleteId);
 
   // Single-row flips: optimistic on the list cache (cancel + snapshot + patch
   // ONLY isActive; rollback + toast on error; invalidate either way) — the
@@ -273,10 +291,10 @@ export function TestimonialsScreen() {
     },
   });
 
-  // The order PUT on drop (AR-9): optimistic — Task 4's `reorderIds` over
-  // the full list produces the reordered ROW array; the cache array is
-  // REPLACE-d in that order (never a push into an aliased read row); a
-  // failure restores the snapshot + toasts + invalidates.
+  // The order PUT on drop (AR-9): optimistic — `reorderVisiblePhotos`'s
+  // slot-swap law over the full global order produces the reordered ROW
+  // array; the cache array is REPLACE-d in that order (never a push into an
+  // aliased read row); a failure restores the snapshot + toasts + invalidates.
   const order = useMutation({
     mutationFn: async (reordered: Testimonial[]) => {
       const result = await saveAdminTestimonialOrder({
@@ -325,6 +343,29 @@ export function TestimonialsScreen() {
               data: { id: input.row.id, payload: buildTestimonialPayload(input.state) },
             });
       return { input, result };
+    },
+  });
+
+  // The pending-guarded delete (#218, the #213 route): busy confirm via the
+  // dialog's `pending`; a blocked 400 keeps the dialog open with the
+  // blockers in-body; success closes + invalidates.
+  const removeRow = useMutation({
+    mutationFn: async (row: Testimonial) => {
+      return removeAdminTestimonial({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminTestimonialQueries.all().queryKey });
+        setDeleteId(null);
+        setDeleteBlockers([]);
+        toast.success('Deleted.');
+        return;
+      }
+      setDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -377,17 +418,24 @@ export function TestimonialsScreen() {
     }
   }
 
-  // A drop reorders the ONE rows array (array order is the display order —
-  // there is no position column), then the order PUT fires with the FULL
-  // id list (Task 4's `reorderIds` — TOTAL full-replace, never a delta).
+  // A drop reorders the ONE rows array (array order is the display order),
+  // then the order PUT fires with the FULL id list (TOTAL full-replace,
+  // never a delta). Under a segment filter the slot-swap law applies (the
+  // gallery precedent): invisible rows keep their slots, so a filtered
+  // drag can never collide with positions held outside the filter.
   function onDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id || !testimonials) {
       return;
     }
-    const ids = testimonials.map((row) => row.id);
-    const reorderedIds = reorderIds(ids, String(active.id), String(over.id));
-    if (reorderedIds === ids) {
+    const globalIds = testimonials.map((row) => row.id);
+    const reorderedIds = reorderVisiblePhotos(
+      globalIds,
+      rows.map((row) => row.id),
+      String(active.id),
+      String(over.id)
+    );
+    if (reorderedIds === globalIds) {
       return;
     }
     const byId = new Map(testimonials.map((row) => [row.id, row]));
@@ -424,9 +472,12 @@ export function TestimonialsScreen() {
         title='Testimonials'
         subline='Client quotes shown on the /about page, ordered.'
         actions={
-          <Button type='button' onClick={openCreate}>
-            New testimonial
-          </Button>
+          <>
+            <StatusSegmented value={segment} onChange={setSegment} />
+            <Button type='button' onClick={openCreate}>
+              New testimonial
+            </Button>
+          </>
         }
       />
 
@@ -488,10 +539,10 @@ export function TestimonialsScreen() {
                     onDragEnd={onDragEnd}
                   >
                     <SortableContext
-                      items={testimonials.map((row) => row.id)}
+                      items={rows.map((row) => row.id)}
                       strategy={verticalListSortingStrategy}
                     >
-                      {testimonials.map((row) => {
+                      {rows.map((row) => {
                         const expanded = expandedId === row.id;
                         return (
                           <Fragment key={row.id}>
@@ -547,6 +598,7 @@ export function TestimonialsScreen() {
                                   isActive={row.isActive}
                                   onDeactivate={() => setConfirmId(row.id)}
                                   onReactivate={() => flip.mutate({ row, isActive: true })}
+                                  onDelete={() => setDeleteId(row.id)}
                                 />
                               </TableCell>
                             </SortableTestimonialRow>
@@ -571,11 +623,11 @@ export function TestimonialsScreen() {
                 context would register each id twice. */}
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
               <SortableContext
-                items={testimonials.map((row) => row.id)}
+                items={rows.map((row) => row.id)}
                 strategy={verticalListSortingStrategy}
               >
                 <div className='hidden flex-col @max-[700px]:flex'>
-                  {testimonials.map((row) => {
+                  {rows.map((row) => {
                     const expanded = expandedId === row.id;
                     return (
                       <SortableStackRow
@@ -613,6 +665,7 @@ export function TestimonialsScreen() {
                                 isActive={row.isActive}
                                 onDeactivate={() => setConfirmId(row.id)}
                                 onReactivate={() => flip.mutate({ row, isActive: true })}
+                                onDelete={() => setDeleteId(row.id)}
                               />
                             </div>
                           </div>
@@ -691,6 +744,22 @@ export function TestimonialsScreen() {
             flip.mutate({ row: confirmRow, isActive: false });
             setConfirmId(null);
           }}
+        />
+      ) : null}
+
+      {deleteRow ? (
+        <DeleteGuardDialog
+          name={deleteRow.person}
+          blockers={deleteBlockers}
+          pending={removeRow.isPending}
+          open={deleteId === deleteRow.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteId(null);
+              setDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeRow.mutate(deleteRow)}
         />
       ) : null}
     </section>

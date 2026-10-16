@@ -51,6 +51,7 @@ import {
   ActionTooltip,
   Collapse,
   DeactivateConfirm,
+  DeleteGuardDialog,
   EmptyState,
   ExpandPanel,
   ExpandRow,
@@ -62,9 +63,11 @@ import {
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
+  StatusSegmented,
 } from '#/components/cms/shared';
 import type { AdminMutationResult } from '#/lib/admin.functions';
 import {
+  removeAdminAddon,
   saveAdminAddonCreate,
   saveAdminAddonUpdate,
   saveAdminStudioServiceAddonMatrix,
@@ -81,6 +84,8 @@ import {
   newAddonState,
   validateAddonState,
 } from '#/lib/light-entity-state';
+import { blockerLines } from '#/lib/save-contract';
+import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 /**
  * The editor's mode switch: create (from `New add-on`) or edit (a row
@@ -150,6 +155,14 @@ export function AddonsScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  // The toolbar segment (#218): default All per visit, never persisted; the
+  // filtered view is render-time only — the caches and mutations ride the
+  // full list.
+  const [segment, setSegment] = useState<StatusSegment>('all');
+  // The delete dialog's target + its last blockers (empty until a blocked
+  // 400 answers).
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The #131 bulk ruling: selection rides the loaded row ids; the bar mounts
   // only while a selection exists. Sets REPLACE — never mutate in place.
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
@@ -175,6 +188,9 @@ export function AddonsScreen() {
   const mutedServiceNames = new Set(
     (services ?? []).filter((service) => !service.isActive).map((service) => service.name)
   );
+
+  const rows = filterByStatusSegment(addons ?? [], segment);
+  const deleteRow = addons?.find((row) => row.id === deleteId);
 
   // Single-row flips: optimistic on the list cache (cancel + snapshot + patch
   // ONLY isActive; rollback + toast on error; invalidate either way) — the
@@ -295,12 +311,38 @@ export function AddonsScreen() {
     },
   });
 
+  // The pending-guarded delete (#218, the #213 route): busy confirm via the
+  // dialog's `pending`; a blocked 400 keeps the dialog open with the
+  // blockers in-body; success closes + invalidates both lists (the addon's
+  // service-matrix rows cascade with the delete; the badges live on the
+  // services read).
+  const removeRow = useMutation({
+    mutationFn: async (row: AddonService) => {
+      return removeAdminAddon({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminAddonQueries.all().queryKey });
+        queryClient.invalidateQueries({ queryKey: adminStudioServiceQueries.all().queryKey });
+        setDeleteId(null);
+        setDeleteBlockers([]);
+        toast.success('Deleted.');
+        return;
+      }
+      setDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   function toggleExpanded(id: string) {
     setExpandedId((prev) => (prev === id ? null : id));
   }
 
   function toggleAll(next: boolean) {
-    setSelected(next ? new Set((addons ?? []).map((row) => row.id)) : new Set());
+    setSelected(next ? new Set(rows.map((row) => row.id)) : new Set());
   }
 
   function toggleSelected(id: string, next: boolean) {
@@ -433,9 +475,12 @@ export function AddonsScreen() {
         title='Add-ons'
         subline='Extras attached at booking time, with the services they apply to.'
         actions={
-          <Button type='button' onClick={openCreate}>
-            New add-on
-          </Button>
+          <>
+            <StatusSegmented value={segment} onChange={setSegment} />
+            <Button type='button' onClick={openCreate}>
+              New add-on
+            </Button>
+          </>
         }
       />
 
@@ -491,7 +536,7 @@ export function AddonsScreen() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {addons.map((row) => {
+                  {rows.map((row) => {
                     // The DERIVED relation: the services whose
                     // applicableAddonServiceIds include this add-on.
                     const applyingNames = (services ?? [])
@@ -561,6 +606,7 @@ export function AddonsScreen() {
                               isActive={row.isActive}
                               onDeactivate={() => setConfirmId(row.id)}
                               onReactivate={() => flip.mutate({ row, isActive: true })}
+                              onDelete={() => setDeleteId(row.id)}
                             />
                           </TableCell>
                         </ExpandRow>
@@ -579,7 +625,7 @@ export function AddonsScreen() {
                 two-line header toggles the animated reveal (M1); service
                 badges live ONLY in the reveal (S2). */}
             <div className='hidden flex-col @max-[700px]:flex'>
-              {addons.map((row) => {
+              {rows.map((row) => {
                 const applyingNames = (services ?? [])
                   .filter((service) => service.applicableAddonServiceIds.includes(row.id))
                   .map((service) => service.name);
@@ -619,6 +665,7 @@ export function AddonsScreen() {
                             isActive={row.isActive}
                             onDeactivate={() => setConfirmId(row.id)}
                             onReactivate={() => flip.mutate({ row, isActive: true })}
+                            onDelete={() => setDeleteId(row.id)}
                           />
                         </div>
                       </div>
@@ -776,6 +823,22 @@ export function AddonsScreen() {
             flip.mutate({ row: confirmRow, isActive: false });
             setConfirmId(null);
           }}
+        />
+      ) : null}
+
+      {deleteRow ? (
+        <DeleteGuardDialog
+          name={deleteRow.name}
+          blockers={deleteBlockers}
+          pending={removeRow.isPending}
+          open={deleteId === deleteRow.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteId(null);
+              setDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeRow.mutate(deleteRow)}
         />
       ) : null}
 

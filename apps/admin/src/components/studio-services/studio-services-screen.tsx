@@ -44,6 +44,7 @@ import {
   ActionTooltip,
   Collapse,
   DeactivateConfirm,
+  DeleteGuardDialog,
   EmptyState,
   ExpandPanel,
   ExpandRow,
@@ -55,9 +56,11 @@ import {
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
+  StatusSegmented,
 } from '#/components/cms/shared';
 import type { AdminMutationResult } from '#/lib/admin.functions';
 import {
+  removeAdminStudioService,
   saveAdminStudioServiceBranchMatrix,
   saveAdminStudioServiceCreate,
   saveAdminStudioServiceUpdate,
@@ -73,6 +76,8 @@ import {
   studioServiceStateFromRead,
   validateStudioServiceState,
 } from '#/lib/light-entity-state';
+import { blockerLines } from '#/lib/save-contract';
+import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 /** The editor's mode switch: create (from `New studio service`) or edit (a row snapshot). */
 type EditingTarget = { mode: 'create' } | { mode: 'edit'; row: StudioServiceWithBranches };
@@ -142,6 +147,14 @@ export function StudioServicesScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  // The toolbar segment (#218): default All per visit, never persisted; the
+  // filtered view is render-time only — the caches and mutations ride the
+  // full list.
+  const [segment, setSegment] = useState<StatusSegment>('all');
+  // The delete dialog's target + its last blockers (empty until a blocked
+  // 400 answers).
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The #131 bulk ruling: selection rides the loaded row ids; the bar mounts
   // only while a selection exists. Sets REPLACE — never mutate in place.
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
@@ -167,6 +180,9 @@ export function StudioServicesScreen() {
   const mutedBranchNames = new Set(
     (branches ?? []).filter((branch) => !branch.isActive).map((branch) => branch.name)
   );
+
+  const rows = filterByStatusSegment(services ?? [], segment);
+  const deleteRow = services?.find((row) => row.id === deleteId);
 
   // Single-row flips: optimistic on the list cache (cancel + snapshot + patch
   // ONLY isActive; rollback + toast on error; invalidate either way) — the
@@ -344,12 +360,37 @@ export function StudioServicesScreen() {
     },
   });
 
+  // The pending-guarded delete (#218, the #213 route): busy confirm via the
+  // dialog's `pending`; a blocked 400 keeps the dialog open with the
+  // blockers in-body; success closes + invalidates both lists (the branch
+  // matrix rows cascade with the delete).
+  const removeRow = useMutation({
+    mutationFn: async (row: StudioServiceWithBranches) => {
+      return removeAdminStudioService({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminStudioServiceQueries.all().queryKey });
+        queryClient.invalidateQueries({ queryKey: adminBranchQueries.all().queryKey });
+        setDeleteId(null);
+        setDeleteBlockers([]);
+        toast.success('Deleted.');
+        return;
+      }
+      setDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   function toggleExpanded(id: string) {
     setExpandedId((prev) => (prev === id ? null : id));
   }
 
   function toggleAll(next: boolean) {
-    setSelected(next ? new Set((services ?? []).map((row) => row.id)) : new Set());
+    setSelected(next ? new Set(rows.map((row) => row.id)) : new Set());
   }
 
   function toggleSelected(id: string, next: boolean) {
@@ -411,9 +452,12 @@ export function StudioServicesScreen() {
         title='Studio services'
         subline='Standalone services bookable on their own, with per-branch availability.'
         actions={
-          <Button type='button' onClick={openCreate}>
-            New studio service
-          </Button>
+          <>
+            <StatusSegmented value={segment} onChange={setSegment} />
+            <Button type='button' onClick={openCreate}>
+              New studio service
+            </Button>
+          </>
         }
       />
 
@@ -469,7 +513,7 @@ export function StudioServicesScreen() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {services.map((row) => {
+                  {rows.map((row) => {
                     const bookableNames = row.bookableBranchIds
                       .map((id) => branchesById.get(id)?.name)
                       .filter((name): name is string => name !== undefined);
@@ -537,6 +581,7 @@ export function StudioServicesScreen() {
                               isActive={row.isActive}
                               onDeactivate={() => setConfirmId(row.id)}
                               onReactivate={() => flip.mutate({ row, isActive: true })}
+                              onDelete={() => setDeleteId(row.id)}
                             />
                           </TableCell>
                         </ExpandRow>
@@ -555,7 +600,7 @@ export function StudioServicesScreen() {
                 two-line header toggles the animated reveal (M1); branch
                 badges live ONLY in the reveal (S2). */}
             <div className='hidden flex-col @max-[700px]:flex'>
-              {services.map((row) => {
+              {rows.map((row) => {
                 const bookableNames = row.bookableBranchIds
                   .map((id) => branchesById.get(id)?.name)
                   .filter((name): name is string => name !== undefined);
@@ -595,6 +640,7 @@ export function StudioServicesScreen() {
                             isActive={row.isActive}
                             onDeactivate={() => setConfirmId(row.id)}
                             onReactivate={() => flip.mutate({ row, isActive: true })}
+                            onDelete={() => setDeleteId(row.id)}
                           />
                         </div>
                       </div>
@@ -746,6 +792,22 @@ export function StudioServicesScreen() {
             flip.mutate({ row: confirmRow, isActive: false });
             setConfirmId(null);
           }}
+        />
+      ) : null}
+
+      {deleteRow ? (
+        <DeleteGuardDialog
+          name={deleteRow.name}
+          blockers={deleteBlockers}
+          pending={removeRow.isPending}
+          open={deleteId === deleteRow.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteId(null);
+              setDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeRow.mutate(deleteRow)}
         />
       ) : null}
 

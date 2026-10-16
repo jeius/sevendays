@@ -36,6 +36,7 @@ import {
   ActionTooltip,
   Collapse,
   DeactivateConfirm,
+  DeleteGuardDialog,
   EmptyState,
   ExpandPanel,
   ExpandRow,
@@ -46,9 +47,11 @@ import {
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
+  StatusSegmented,
 } from '#/components/cms/shared';
 import {
   presignAdminCoverUpload,
+  removeAdminBranch,
   saveAdminBranchCreate,
   saveAdminBranchUpdate,
 } from '#/lib/admin.functions';
@@ -65,6 +68,8 @@ import {
   newBranchState,
   validateBranchState,
 } from '#/lib/light-entity-state';
+import { blockerLines } from '#/lib/save-contract';
+import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 /** The editor's mode switch: create (from `New branch`) or edit (a row snapshot). */
 type EditingTarget = { mode: 'create' } | { mode: 'edit'; row: BranchRead };
@@ -95,6 +100,14 @@ export function BranchesScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  // The toolbar segment (#218): default All per visit, never persisted; the
+  // filtered view is render-time only — the caches and mutations ride the
+  // full list.
+  const [segment, setSegment] = useState<StatusSegment>('all');
+  // The delete dialog's target + its last blockers (empty until a blocked
+  // 400 answers).
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The #131 bulk ruling: selection rides the loaded row ids; the bar mounts
   // only while a selection exists. Sets REPLACE — never mutate in place.
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
@@ -169,6 +182,9 @@ export function BranchesScreen() {
   const phoneId = useId();
   const walkInsId = useId();
   const activeId = useId();
+
+  const rows = filterByStatusSegment(branches ?? [], segment);
+  const deleteRow = branches?.find((row) => row.id === deleteId);
 
   // Single-row flips: optimistic on the list cache (cancel + snapshot + patch
   // ONLY isActive; rollback + toast on error; invalidate either way) — the
@@ -291,12 +307,35 @@ export function BranchesScreen() {
     },
   });
 
+  // The pending-guarded delete (#218, the #213 route): busy confirm via the
+  // dialog's `pending`; a blocked 400 keeps the dialog open with the
+  // blockers in-body; success closes + invalidates.
+  const removeRow = useMutation({
+    mutationFn: async (row: BranchRead) => {
+      return removeAdminBranch({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminBranchQueries.all().queryKey });
+        setDeleteId(null);
+        setDeleteBlockers([]);
+        toast.success('Deleted.');
+        return;
+      }
+      setDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   function toggleExpanded(id: string) {
     setExpandedId((prev) => (prev === id ? null : id));
   }
 
   function toggleAll(next: boolean) {
-    setSelected(next ? new Set((branches ?? []).map((row) => row.id)) : new Set());
+    setSelected(next ? new Set(rows.map((row) => row.id)) : new Set());
   }
 
   function toggleSelected(id: string, next: boolean) {
@@ -363,9 +402,12 @@ export function BranchesScreen() {
         title='Branches'
         subline='The three studio locations. Hours and slot capacity arrive with v2.'
         actions={
-          <Button type='button' onClick={openCreate}>
-            New branch
-          </Button>
+          <>
+            <StatusSegmented value={segment} onChange={setSegment} />
+            <Button type='button' onClick={openCreate}>
+              New branch
+            </Button>
+          </>
         }
       />
 
@@ -429,7 +471,7 @@ export function BranchesScreen() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {branches.map((row) => {
+                  {rows.map((row) => {
                     const expanded = expandedId === row.id;
                     return (
                       <Fragment key={row.id}>
@@ -497,6 +539,7 @@ export function BranchesScreen() {
                               isActive={row.isActive}
                               onDeactivate={() => setConfirmId(row.id)}
                               onReactivate={() => flip.mutate({ row, isActive: true })}
+                              onDelete={() => setDeleteId(row.id)}
                             />
                           </TableCell>
                         </ExpandRow>
@@ -516,7 +559,7 @@ export function BranchesScreen() {
                 two-line header toggles the animated reveal (M1); line 1's
                 right value is the Walk-in badge, phone moves to the reveal. */}
             <div className='hidden flex-col @max-[700px]:flex'>
-              {branches.map((row) => {
+              {rows.map((row) => {
                 const expanded = expandedId === row.id;
                 return (
                   <div key={row.id} className='border-border border-b py-2 last:border-b-0'>
@@ -553,6 +596,7 @@ export function BranchesScreen() {
                             isActive={row.isActive}
                             onDeactivate={() => setConfirmId(row.id)}
                             onReactivate={() => flip.mutate({ row, isActive: true })}
+                            onDelete={() => setDeleteId(row.id)}
                           />
                         </div>
                       </div>
@@ -724,6 +768,23 @@ export function BranchesScreen() {
             flip.mutate({ row: confirmRow, isActive: false });
             setConfirmId(null);
           }}
+        />
+      ) : null}
+
+      {deleteRow ? (
+        <DeleteGuardDialog
+          name={deleteRow.name}
+          mediaNote='Its cover image goes with it.'
+          blockers={deleteBlockers}
+          pending={removeRow.isPending}
+          open={deleteId === deleteRow.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteId(null);
+              setDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeRow.mutate(deleteRow)}
         />
       ) : null}
 
