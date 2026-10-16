@@ -213,17 +213,13 @@ export function TestimonialsScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
-  // The editor's create/edit switch and its open flag are separate on
-  // purpose: the shared Save handler closes the Sheet unconditionally
-  // (latch + exit), so a FAILED save re-arms `editorOpen` after the exit to
-  // honor the stays-open-on-failure posture; `editing` carries the retry
-  // target and the parent-held `editorState` keeps the user's input intact.
+  // The editor's create/edit switch and its open flag are separate: the
+  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // a held save (veto, failure) keeps the sheet open over the intact
+  // parent-held state; onOpenChange(false) (Cancel, overlay, or the
+  // post-success exit) clears both.
   const [editing, setEditing] = useState<EditingTarget | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
-  // Remounts the editor on a failed save's reopen: the component's visible
-  // latch re-arms only on mount or an `open` false→true flip, and the flip
-  // alone is lost when the failure lands mid-exit (open never went false).
-  const [editorNonce, setEditorNonce] = useState(0);
   const [editorState, setEditorState] = useState<TestimonialEditorState>(newTestimonialState);
   const [fieldErrors, setFieldErrors] = useState<LightFieldErrors>({});
   const personId = useId();
@@ -315,10 +311,11 @@ export function TestimonialsScreen() {
   });
 
   // Editor saves: NON-optimistic — the form state is the source of truth;
-  // success invalidates + toasts + (the shared handler's) close, failure
-  // keeps the editor open with the state intact (retry is safe — the save is
-  // a full-object PUT). No unique fields on this table, so no conflict
-  // mapping — every !ok surfaces as its message toast.
+  // the async Save contract owns the flow: await the full-object PUT,
+  // resolve true on ok (the shell closes), false on any hold (retry is
+  // safe — the save is a full-object PUT). No unique fields on this
+  // table, so no conflict mapping — every !ok surfaces as its message
+  // toast.
   const saveTestimonial = useMutation({
     mutationFn: async (input: SaveTestimonialInput) => {
       const result =
@@ -328,23 +325,6 @@ export function TestimonialsScreen() {
               data: { id: input.row.id, payload: buildTestimonialPayload(input.state) },
             });
       return { input, result };
-    },
-    onSuccess: ({ input, result }) => {
-      if (result.ok) {
-        queryClient.invalidateQueries({ queryKey: adminTestimonialQueries.all().queryKey });
-        toast.success('Saved.');
-        return;
-      }
-      // !ok: keep open + the message toast; the reopen replays the enter
-      // animation over the intact state.
-      toast.error(result.message);
-      keepEditorOpen(input);
-    },
-    onError: (error, input) => {
-      // Not an API failure (serialization, session loss) — loud toast, same
-      // keep-open posture.
-      toast.error(error.message);
-      keepEditorOpen(input);
     },
   });
 
@@ -366,32 +346,35 @@ export function TestimonialsScreen() {
     setEditorOpen(true);
   }
 
-  /** Re-arms the editor after a failed save (see the state comments above). */
-  function keepEditorOpen(input: SaveTestimonialInput) {
-    setEditing(input.mode === 'create' ? { mode: 'create' } : { mode: 'edit', row: input.row });
-    setEditorOpen(true);
-    setEditorNonce((n) => n + 1);
-  }
-
-  function handleEditorSave() {
+  async function handleEditorSave(): Promise<boolean> {
     if (!editing) {
-      return;
+      return false;
     }
     const errors = validateTestimonialState(editorState);
     if (errors.person || errors.quote) {
       setFieldErrors(errors);
       toast.error('Fix the highlighted fields.');
-      // Veto-throw: the shared Save button closes the Sheet only when onSave
-      // returns normally — a throw is the keep-open veto and is swallowed there
-      // (#143). The inline errors + toast are the UX.
-      throw new Error('testimonial-editor-validation-hold');
+      return false; // the async contract's hold — no throw, no remount
     }
     setFieldErrors({});
-    saveTestimonial.mutate(
-      editing.mode === 'create'
-        ? { mode: 'create', state: editorState }
-        : { mode: 'edit', row: editing.row, state: editorState }
-    );
+    try {
+      const { result } = await saveTestimonial.mutateAsync(
+        editing.mode === 'create'
+          ? { mode: 'create', state: editorState }
+          : { mode: 'edit', row: editing.row, state: editorState }
+      );
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminTestimonialQueries.all().queryKey });
+        toast.success('Saved.');
+        return true;
+      }
+      toast.error(result.message);
+      return false;
+    } catch (error) {
+      // Not an API failure (serialization, session loss) — loud toast, same hold.
+      toast.error(error instanceof Error ? error.message : 'The save failed.');
+      return false;
+    }
   }
 
   // A drop reorders the ONE rows array (array order is the display order —
@@ -646,7 +629,6 @@ export function TestimonialsScreen() {
 
       {editing ? (
         <LightEntityEditor
-          key={editorNonce}
           title={editing.mode === 'create' ? 'New testimonial' : editing.row.person}
           description='The quote and the person it belongs to.'
           open={editorOpen}

@@ -650,16 +650,11 @@ export function GalleryScreen() {
   // of the hover/tap reveal; hover covers desktop via group-hover). Only ONE
   // expanded-actions card at a time.
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
-  // The photo editor: edit-only (photos are created by upload). `editing`
-  // carries the retry target; the parent-held `editorState` keeps the user's
-  // input intact through a failed save (the branches screen's posture).
+  // The photo editor: edit-only (photos are created by upload); the async
+  // Save contract owns the flow (#218) — a held save keeps the sheet open
+  // over the intact parent-held state; onOpenChange(false) clears both.
   const [editing, setEditing] = useState<{ row: GalleryPhoto } | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
-  // Remounts the editor on a failed save's reopen: the shared Save handler
-  // closes the Sheet unconditionally, so a failure re-arms `editorOpen` and
-  // bumps the nonce to remount (the visible latch only re-arms on mount or
-  // an `open` false→true flip).
-  const [editorNonce, setEditorNonce] = useState(0);
   const [editorState, setEditorState] = useState<PhotoEditorState>({
     title: '',
     caption: '',
@@ -853,32 +848,34 @@ export function GalleryScreen() {
     },
   });
 
-  // Editor saves: NON-optimistic — the form state is the source of truth;
-  // success invalidates + toasts + closes, failure keeps the editor open
-  // with the state intact (retry is safe — the save is a full-object PUT).
-  // No inline Field slot — every photo 400 is toast-carried.
+  // Editor saves: NON-optimistic; await the full-object PUT, resolve true
+  // on ok. No inline Field slot — every photo 400 is toast-carried.
   const photoSave = useMutation({
     mutationFn: async (input: { row: GalleryPhoto; state: PhotoEditorState }) => {
       return saveAdminGalleryPhotoUpdate({
         data: { id: input.row.id, payload: buildPhotoPayload(input.state) },
       });
     },
-    onSuccess: (result, input) => {
+  });
+
+  async function handleEditorSave(): Promise<boolean> {
+    if (!editing) {
+      return false;
+    }
+    try {
+      const result = await photoSave.mutateAsync({ row: editing.row, state: editorState });
       if (result.ok) {
         queryClient.invalidateQueries({ queryKey: adminGalleryQueries.photos().queryKey });
         toast.success('Saved.');
-        setEditing(null);
-        setEditorOpen(false);
-        return;
+        return true;
       }
       toast.error(result.message);
-      keepEditorOpen(input.row);
-    },
-    onError: (error, input) => {
-      toast.error(error.message);
-      keepEditorOpen(input.row);
-    },
-  });
+      return false;
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'The save failed.');
+      return false;
+    }
+  }
 
   // --- Upload wiring (Task 6's pool) ---
 
@@ -1081,13 +1078,6 @@ export function GalleryScreen() {
     setEditorOpen(true);
   }
 
-  /** Re-arms the editor after a failed save (see the state comments above). */
-  function keepEditorOpen(row: GalleryPhoto) {
-    setEditing({ row });
-    setEditorOpen(true);
-    setEditorNonce((n) => n + 1);
-  }
-
   if (categoriesError || photosError) {
     // Error posture (#155): either read failed — Retry re-runs both.
     return (
@@ -1263,7 +1253,6 @@ export function GalleryScreen() {
 
       {editing ? (
         <LightEntityEditor
-          key={editorNonce}
           title={editing.row.title ?? 'Untitled photo'}
           description='Title, caption, category, and the active flag.'
           open={editorOpen}
@@ -1273,7 +1262,7 @@ export function GalleryScreen() {
               setEditing(null);
             }
           }}
-          onSave={() => photoSave.mutate({ row: editing.row, state: editorState })}
+          onSave={handleEditorSave}
         >
           {/* Thumb preview — the same gated proxy (AR-1). */}
           <div className='bg-muted relative aspect-[4/3] w-28 overflow-hidden rounded-md'>

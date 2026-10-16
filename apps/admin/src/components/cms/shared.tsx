@@ -41,7 +41,7 @@ import { ChevronDown, LoaderCircle, Power, PowerOff, Trash2 } from 'lucide-react
 import { AnimatePresence, motion } from 'motion/react';
 import type { ComponentProps, ReactElement, ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-import { DELETING_LABEL } from '#/lib/save-contract';
+import { DELETING_LABEL, SAVING_LABEL } from '#/lib/save-contract';
 import { STATUS_SEGMENTS, type StatusSegment } from '#/lib/status-segment';
 
 /** Peso format pinned to the landing precedent (test-pinned there as ₱1,100.00). Null (unpriced, ADR-0020) renders nothing. */
@@ -749,10 +749,15 @@ export function DeleteGuardDialog({
  * exit finishes. The visible-latch + onExitComplete discipline is identical
  * to DeactivateConfirm's (the screens render the editor conditionally).
  *
- * Veto contract: onSave may THROW to keep the editor open (validation
- * holds, AQ-5). The Save button closes only when onSave returns normally;
- * a throw is swallowed — the screen's inline errors + toast are the UX,
- * and React never sees the error.
+ * The async Save contract (M7 #218, replacing the M5 veto-throw channel):
+ * onSave returns a promise — resolve true = success (the shell closes);
+ * resolve false = hold (the sheet stays open, its field state intact,
+ * retry safe); throw = hold (swallowed; the screen's inline errors + toast
+ * are the UX). The shell owns the pending state: Save disabled + the
+ * LoaderCircle spinner + the "Saving…" label swap + aria-busy in flight,
+ * Cancel disabled alongside. The close is the shell's alone — a failed
+ * save can never silently discard edits. The editorNonce remount machinery
+ * this replaces is deleted, not extended.
  */
 export function LightEntityEditor({
   title,
@@ -767,15 +772,36 @@ export function LightEntityEditor({
   description: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: () => void;
+  onSave: () => Promise<boolean>;
   saveLabel?: string;
   children: ReactNode;
 }) {
   const isMobile = useIsMobile();
   const [visible, setVisible] = useState(false);
+  const [saving, setSaving] = useState(false);
   useEffect(() => {
     setVisible(open);
   }, [open]);
+
+  // The async Save contract: the shell awaits onSave; ONLY a resolved-true
+  // closes — a resolved-false (validation veto, failed save, matrix
+  // failure) or a throw holds the sheet open over the intact state.
+  async function handleSave() {
+    if (saving) {
+      return;
+    }
+    setSaving(true);
+    let ok = false;
+    try {
+      ok = await onSave();
+    } catch {
+      ok = false; // unexpected: hold; the screen's toast owns the signal
+    }
+    setSaving(false);
+    if (ok) {
+      setVisible(false);
+    }
+  }
   const variants = isMobile
     ? {
         initial: { opacity: 0, transform: 'translateY(100%)' },
@@ -818,23 +844,24 @@ export function LightEntityEditor({
             </SheetHeader>
             <div className='flex-1 space-y-5 overflow-y-auto px-6 pb-6'>{children}</div>
             <SheetFooter>
-              <Button variant='outline' type='button' onClick={() => setVisible(false)}>
+              <Button
+                variant='outline'
+                type='button'
+                disabled={saving}
+                onClick={() => setVisible(false)}
+              >
                 Cancel
               </Button>
               <Button
                 type='button'
+                disabled={saving}
+                aria-busy={saving}
                 onClick={() => {
-                  try {
-                    onSave();
-                    setVisible(false);
-                  } catch {
-                    // Vetoed: the screen keeps the editor open and signals
-                    // inline (AQ-5). The synchronous throw is the documented
-                    // keep-open channel — swallowed here, never console noise.
-                  }
+                  void handleSave();
                 }}
               >
-                {saveLabel ?? 'Save changes'}
+                {saving ? <PendingSpinner /> : null}
+                {saving ? SAVING_LABEL : (saveLabel ?? 'Save changes')}
               </Button>
             </SheetFooter>
           </SheetContent>

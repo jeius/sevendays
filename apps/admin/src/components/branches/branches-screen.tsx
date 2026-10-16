@@ -99,17 +99,13 @@ export function BranchesScreen() {
   // only while a selection exists. Sets REPLACE — never mutate in place.
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
-  // The editor's create/edit switch and its open flag are separate on
-  // purpose: the shared Save handler closes the Sheet unconditionally
-  // (latch + exit), so a FAILED save re-arms `editorOpen` after the exit to
-  // honor the stays-open-on-failure posture; `editing` carries the retry
-  // target and the parent-held `editorState` keeps the user's input intact.
+  // The editor's create/edit switch and its open flag are separate: the
+  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // a held save (veto, failure) keeps the sheet open over the intact
+  // parent-held state; onOpenChange(false) (Cancel, overlay, or the
+  // post-success exit) clears both.
   const [editing, setEditing] = useState<EditingTarget | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
-  // Remounts the editor on a failed save's reopen: the component's visible
-  // latch re-arms only on mount or an `open` false→true flip, and the flip
-  // alone is lost when the failure lands mid-exit (open never went false).
-  const [editorNonce, setEditorNonce] = useState(0);
   const [editorState, setEditorState] = useState<BranchEditorState>(newBranchState);
   const [fieldErrors, setFieldErrors] = useState<LightFieldErrors>({});
   // The cover loop (M7 #214 — the packages editor's Cover card, ported):
@@ -210,10 +206,9 @@ export function BranchesScreen() {
     },
   });
 
-  // Editor saves: NON-optimistic — the form state is the source of truth;
-  // success invalidates + toasts + (the shared handler's) close, failure
-  // keeps the editor open with the state intact (retry is safe — the save is
-  // a full-object PUT).
+  // Editor saves: NON-optimistic; the async Save contract owns the flow
+  // (#218). A name conflict marks the Name Field; no details → the message
+  // toast.
   const saveBranch = useMutation({
     mutationFn: async (input: SaveBranchInput) => {
       const result =
@@ -224,14 +219,30 @@ export function BranchesScreen() {
             });
       return { input, result };
     },
-    onSuccess: ({ input, result }) => {
+  });
+
+  async function handleEditorSave(): Promise<boolean> {
+    if (!editing) {
+      return false;
+    }
+    const errors = validateBranchState(editorState);
+    if (errors.name || errors.address || errors.phone) {
+      setFieldErrors(errors);
+      toast.error('Fix the highlighted fields.');
+      return false;
+    }
+    setFieldErrors({});
+    try {
+      const { result } = await saveBranch.mutateAsync(
+        editing.mode === 'create'
+          ? { mode: 'create', state: editorState }
+          : { mode: 'edit', row: editing.row, state: editorState }
+      );
       if (result.ok) {
         queryClient.invalidateQueries({ queryKey: adminBranchQueries.all().queryKey });
         toast.success('Saved.');
-        return;
+        return true;
       }
-      // !ok: a name conflict marks the Name Field; no details → the message
-      // toast. The reopen replays the enter animation over the intact state.
       const nameConflict = conflictFieldErrors(result.details).name;
       if (nameConflict) {
         setFieldErrors({ name: nameConflict });
@@ -239,15 +250,12 @@ export function BranchesScreen() {
       if (!result.details) {
         toast.error(result.message);
       }
-      keepEditorOpen(input);
-    },
-    onError: (error, input) => {
-      // Not an API failure (serialization, session loss) — loud toast, same
-      // keep-open posture.
-      toast.error(error.message);
-      keepEditorOpen(input);
-    },
-  });
+      return false;
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'The save failed.');
+      return false;
+    }
+  }
 
   // Bulk flips: NOT optimistic — the sequential loop is the source of truth;
   // the invalidate refetches. SEQUENTIAL in list order over the selected rows
@@ -304,9 +312,9 @@ export function BranchesScreen() {
   }
 
   function openCreate() {
-    // The Sheet's children stay mounted across keepEditorOpen (unlike the
-    // packages editor's unmount), so the upload state resets explicitly —
-    // a reopened Sheet never shows a stale preview.
+    // The Sheet's children stay mounted across the async Save contract's
+    // held saves (unlike the packages editor's unmount), so the upload
+    // state resets explicitly — a reopened Sheet never shows a stale preview.
     setCoverStatus({ phase: 'idle' });
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
@@ -329,34 +337,6 @@ export function BranchesScreen() {
     setFieldErrors({});
     setEditing({ mode: 'edit', row });
     setEditorOpen(true);
-  }
-
-  /** Re-arms the editor after a failed save (see the state comments above). */
-  function keepEditorOpen(input: SaveBranchInput) {
-    setEditing(input.mode === 'create' ? { mode: 'create' } : { mode: 'edit', row: input.row });
-    setEditorOpen(true);
-    setEditorNonce((n) => n + 1);
-  }
-
-  function handleEditorSave() {
-    if (!editing) {
-      return;
-    }
-    const errors = validateBranchState(editorState);
-    if (errors.name || errors.address || errors.phone) {
-      setFieldErrors(errors);
-      toast.error('Fix the highlighted fields.');
-      // Veto-throw: the shared Save button closes the Sheet only when onSave
-      // returns normally — a throw is the keep-open veto and is swallowed there
-      // (#143). The inline errors + toast are the UX.
-      throw new Error('branch-editor-validation-hold');
-    }
-    setFieldErrors({});
-    saveBranch.mutate(
-      editing.mode === 'create'
-        ? { mode: 'create', state: editorState }
-        : { mode: 'edit', row: editing.row, state: editorState }
-    );
   }
 
   // The table's one action shape: the sheet-opening Edit icon (packages
@@ -587,7 +567,6 @@ export function BranchesScreen() {
 
       {editing ? (
         <LightEntityEditor
-          key={editorNonce}
           title={editing.mode === 'create' ? 'New branch' : editing.row.name}
           description='Name, address, phone, and the walk-in flag.'
           open={editorOpen}

@@ -133,18 +133,13 @@ export function LookupsScreen() {
   // Deep-linkable in the prototype frame pass; here a plain selection. One
   // confirm id spans both sections — uuid ids never collide.
   const [confirmId, setConfirmId] = useState<string | null>(null);
-  // The editor's create/edit switch (kind picks the field set) and its open
-  // flag are separate on purpose: the shared Save handler closes the Sheet
-  // unconditionally (latch + exit), so a FAILED save re-arms `editorOpen`
-  // after the exit to honor the stays-open-on-failure posture; `editing`
-  // carries the retry target and the parent-held field states keep the
-  // user's input intact.
+  // The editor's create/edit switch and its open flag are separate: the
+  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // a held save (veto, failure) keeps the sheet open over the intact
+  // parent-held state; onOpenChange(false) (Cancel, overlay, or the
+  // post-success exit) clears both.
   const [editing, setEditing] = useState<EditingTarget | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
-  // Remounts the editor on a failed save's reopen: the component's visible
-  // latch re-arms only on mount or an `open` false→true flip, and the flip
-  // alone is lost when the failure lands mid-exit (open never went false).
-  const [editorNonce, setEditorNonce] = useState(0);
   // One editor pair, two field sets: the section states ride separately so
   // the shared Save handler validates with the kind's own validator.
   const [sizeState, setSizeState] = useState<PrintSizeEditorState>(newPrintSizeState);
@@ -224,11 +219,9 @@ export function LookupsScreen() {
     },
   });
 
-  // Editor saves: NON-optimistic — the form state is the source of truth;
-  // success invalidates + toasts + (the shared handler's) close, failure
-  // keeps the editor open with the state intact (retry is safe — the save
-  // is a full-object PUT). A conflict (duplicate code / name) marks the
-  // field inline per the branches mirror; no details → the message toast.
+  // Editor saves: NON-optimistic; the async Save contract owns the flow
+  // (#218). A conflict (duplicate code / name) marks the field inline; no
+  // details → the message toast. One handler branches on the kind.
   const saveSize = useMutation({
     mutationFn: async (input: SaveSizeInput) => {
       const result =
@@ -238,37 +231,6 @@ export function LookupsScreen() {
               data: { id: input.row.id, payload: buildPrintSizePayload(input.state) },
             });
       return { input, result };
-    },
-    onSuccess: ({ input, result }) => {
-      if (result.ok) {
-        queryClient.invalidateQueries({ queryKey: adminLookupQueries.printSizes().queryKey });
-        toast.success('Saved.');
-        return;
-      }
-      // !ok: a code conflict marks the Code Field; no details → the message
-      // toast. The reopen replays the enter animation over the intact state.
-      const codeConflict = conflictFieldErrors(result.details).code;
-      if (codeConflict) {
-        setSizeErrors({ code: codeConflict });
-      }
-      if (!result.details) {
-        toast.error(result.message);
-      }
-      keepEditorOpen(
-        input.mode === 'create'
-          ? { kind: 'size', mode: 'create' }
-          : { kind: 'size', mode: 'edit', row: input.row }
-      );
-    },
-    onError: (error, input) => {
-      // Not an API failure (serialization, session loss) — loud toast, same
-      // keep-open posture.
-      toast.error(error.message);
-      keepEditorOpen(
-        input.mode === 'create'
-          ? { kind: 'size', mode: 'create' }
-          : { kind: 'size', mode: 'edit', row: input.row }
-      );
     },
   });
 
@@ -281,35 +243,6 @@ export function LookupsScreen() {
               data: { id: input.row.id, payload: buildAttirePayload(input.state) },
             });
       return { input, result };
-    },
-    onSuccess: ({ input, result }) => {
-      if (result.ok) {
-        queryClient.invalidateQueries({ queryKey: adminLookupQueries.attires().queryKey });
-        toast.success('Saved.');
-        return;
-      }
-      // !ok: a name conflict marks the Name Field; no details → the message
-      // toast. The reopen replays the enter animation over the intact state.
-      const nameConflict = conflictFieldErrors(result.details).name;
-      if (nameConflict) {
-        setAttireErrors({ name: nameConflict });
-      }
-      if (!result.details) {
-        toast.error(result.message);
-      }
-      keepEditorOpen(
-        input.mode === 'create'
-          ? { kind: 'attire', mode: 'create' }
-          : { kind: 'attire', mode: 'edit', row: input.row }
-      );
-    },
-    onError: (error, input) => {
-      toast.error(error.message);
-      keepEditorOpen(
-        input.mode === 'create'
-          ? { kind: 'attire', mode: 'create' }
-          : { kind: 'attire', mode: 'edit', row: input.row }
-      );
     },
   });
 
@@ -345,47 +278,72 @@ export function LookupsScreen() {
     setEditorOpen(true);
   }
 
-  /** Re-arms the editor after a failed save (see the state comments above). */
-  function keepEditorOpen(target: EditingTarget) {
-    setEditing(target);
-    setEditorOpen(true);
-    setEditorNonce((n) => n + 1);
-  }
-
-  function handleEditorSave() {
+  async function handleEditorSave(): Promise<boolean> {
     if (!editing) {
-      return;
+      return false;
     }
     if (editing.kind === 'size') {
       const errors = validatePrintSizeState(sizeState);
       if (errors.code || errors.description) {
         setSizeErrors(errors);
         toast.error('Fix the highlighted fields.');
-        // Veto-throw: the shared Save button closes the Sheet only when onSave
-        // returns normally — a throw is the keep-open veto and is swallowed there
-        // (#143). The inline errors + toast are the UX.
-        throw new Error('lookups-editor-validation-hold');
+        return false;
       }
       setSizeErrors({});
-      saveSize.mutate(
-        editing.mode === 'create'
-          ? { mode: 'create', state: sizeState }
-          : { mode: 'edit', row: editing.row, state: sizeState }
-      );
-      return;
+      try {
+        const { result } = await saveSize.mutateAsync(
+          editing.mode === 'create'
+            ? { mode: 'create', state: sizeState }
+            : { mode: 'edit', row: editing.row, state: sizeState }
+        );
+        if (result.ok) {
+          queryClient.invalidateQueries({ queryKey: adminLookupQueries.printSizes().queryKey });
+          toast.success('Saved.');
+          return true;
+        }
+        const codeConflict = conflictFieldErrors(result.details).code;
+        if (codeConflict) {
+          setSizeErrors({ code: codeConflict });
+        }
+        if (!result.details) {
+          toast.error(result.message);
+        }
+        return false;
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'The save failed.');
+        return false;
+      }
     }
     const errors = validateAttireState(attireState);
     if (errors.name) {
       setAttireErrors(errors);
       toast.error('Fix the highlighted fields.');
-      throw new Error('lookups-editor-validation-hold');
+      return false;
     }
     setAttireErrors({});
-    saveAttire.mutate(
-      editing.mode === 'create'
-        ? { mode: 'create', state: attireState }
-        : { mode: 'edit', row: editing.row, state: attireState }
-    );
+    try {
+      const { result } = await saveAttire.mutateAsync(
+        editing.mode === 'create'
+          ? { mode: 'create', state: attireState }
+          : { mode: 'edit', row: editing.row, state: attireState }
+      );
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminLookupQueries.attires().queryKey });
+        toast.success('Saved.');
+        return true;
+      }
+      const nameConflict = conflictFieldErrors(result.details).name;
+      if (nameConflict) {
+        setAttireErrors({ name: nameConflict });
+      }
+      if (!result.details) {
+        toast.error(result.message);
+      }
+      return false;
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'The save failed.');
+      return false;
+    }
   }
 
   const confirmSize = printSizes?.find((row) => row.id === confirmId);
@@ -422,7 +380,6 @@ export function LookupsScreen() {
 
       {editing?.kind === 'size' ? (
         <LightEntityEditor
-          key={editorNonce}
           title={editing.mode === 'create' ? 'New print size' : editing.row.code}
           description='The size code and what it means.'
           open={editorOpen}
@@ -471,7 +428,6 @@ export function LookupsScreen() {
 
       {editing?.kind === 'attire' ? (
         <LightEntityEditor
-          key={editorNonce}
           title={editing.mode === 'create' ? 'New attire' : editing.row.name}
           description='The attire name.'
           open={editorOpen}
