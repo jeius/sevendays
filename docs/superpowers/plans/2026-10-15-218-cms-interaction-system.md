@@ -582,60 +582,82 @@ export type AdminDeleteResult =
   | { ok: true }
   | { ok: false; status: number; message: string; details?: unknown };
 
-// The shared body for the result-valued action fns below: run the wrapper,
-// map ApiClientError to the failure arm, rethrow anything else (not an API
-// failure — serialization, session loss — loud). The failure arm unions
-// with the action's own success return, so each fn's declared result type
-// stays the plain result union — no casts.
-type AdminClient = ReturnType<typeof getSessionScopedApiClient>;
-type AdminActionFailure = { ok: false; status: number; message: string; details?: unknown };
+// (RULING 2026-10-16, superseding the helper design below — the original
+// runAdminAction/adminDeleteFn helpers lived as plain module-scope functions
+// in THIS file, so their server-only references survived the client
+// transform and the production build failed import-protection: "Import
+// denied in client environment … Import: ./api.server". The helpers now
+// live in src/lib/admin.functions.server.ts, and every delete fn is an
+// explicit createServerFn whose handler body is the ONLY runAdminAction
+// reference — handler-body-only references to ./admin.functions.server are
+// stripped from client builds exactly like the file's existing ./api.server
+// import. The build gate (`pnpm --filter @sevendays/admin build`) is part
+// of this task's gates from the ruling on.)
 
-async function runAdminAction<T>(
-  spanName: string,
-  action: (client: AdminClient) => Promise<T>
-): Promise<T | AdminActionFailure> {
-  return startSpan({ name: spanName }, async () => {
-    const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
-    try {
-      return await action(client);
-    } catch (error) {
-      if (error instanceof ApiClientError) {
-        return { ok: false, status: error.status, message: error.message, details: error.details };
-      }
-      throw error;
-    }
-  });
-}
+// admin.functions.server.ts (NEW file) — the server-only helper half:
+//
+// import { startSpan } from '@sentry/tanstackstart-react';
+// import { ApiClientError } from '@sevendays/api-client';
+// import { getRequestHeaders } from '@tanstack/react-start/server';
+// import { getSessionScopedApiClient } from './api.server';
+//
+// export type AdminClient = ReturnType<typeof getSessionScopedApiClient>;
+// export type AdminActionFailure = { ok: false; status: number; message: string; details?: unknown };
+//
+// export async function runAdminAction<T>(
+//   spanName: string,
+//   action: (client: AdminClient) => Promise<T>
+// ): Promise<T | AdminActionFailure> {
+//   return startSpan({ name: spanName }, async () => {
+//     const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+//     try {
+//       return await action(client);
+//     } catch (error) {
+//       if (error instanceof ApiClientError) {
+//         return { ok: false, status: error.status, message: error.message, details: error.details };
+//       }
+//       throw error;
+//     }
+//   });
+// }
 
-function adminDeleteFn(
-  spanName: string,
-  run: (client: AdminClient, id: string) => Promise<void>
-) {
-  return createServerFn({
-    method: 'POST',
-    // See presignAdminCoverUpload — output strictness waived for the result
-    // value (details?: unknown rides through by design).
-    strict: { output: false },
-  })
-    .validator(z.object({ id: z.uuid() }))
-    .handler(async ({ data }): Promise<AdminDeleteResult> => {
-      return runAdminAction(spanName, async (client) => {
-        await run(client, data.id);
-        return { ok: true as const };
-      });
+// admin.functions.ts gains `import { runAdminAction } from './admin.functions.server';`
+// and the nine deletes as explicit createServerFn blocks (the canonical
+// saveAdminSiteSettings shape; only the span name and wrapper call differ):
+//
+export const removeAdminPackage = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminDeleteResult> => {
+    return runAdminAction('DELETE /api/v1/admin/service-packages/:id', async (client) => {
+      await client.admin.servicePackages.remove({ param: { id: data.id } });
+      return { ok: true as const };
     });
-}
+  });
 
-export const removeAdminPackage = adminDeleteFn('DELETE /api/v1/admin/service-packages/:id', (client, id) => client.admin.servicePackages.remove({ param: { id } }));
-export const removeAdminBranch = adminDeleteFn('DELETE /api/v1/admin/branches/:id', (client, id) => client.admin.branches.remove({ param: { id } }));
-export const removeAdminStudioService = adminDeleteFn('DELETE /api/v1/admin/studio-services/:id', (client, id) => client.admin.studioServices.remove({ param: { id } }));
-export const removeAdminAddon = adminDeleteFn('DELETE /api/v1/admin/addon-services/:id', (client, id) => client.admin.addons.remove({ param: { id } }));
-export const removeAdminPrintSize = adminDeleteFn('DELETE /api/v1/admin/print-sizes/:id', (client, id) => client.admin.printSizes.remove({ param: { id } }));
-export const removeAdminAttire = adminDeleteFn('DELETE /api/v1/admin/attires/:id', (client, id) => client.admin.attires.remove({ param: { id } }));
-export const removeAdminGalleryCategory = adminDeleteFn('DELETE /api/v1/admin/gallery-categories/:id', (client, id) => client.admin.galleryCategories.remove({ param: { id } }));
-export const removeAdminGalleryPhoto = adminDeleteFn('DELETE /api/v1/admin/gallery-photos/:id', (client, id) => client.admin.galleryPhotos.remove({ param: { id } }));
-export const removeAdminTestimonial = adminDeleteFn('DELETE /api/v1/admin/testimonials/:id', (client, id) => client.admin.testimonials.remove({ param: { id } }));
-export const removeAdminTestimonialSubmission = adminDeleteFn('DELETE /api/v1/admin/testimonial-submissions/:id', (client, id) => client.admin.testimonialSubmissions.remove(id));
+// removeAdminBranch / removeAdminStudioService / removeAdminAddon /
+// removeAdminPrintSize / removeAdminAttire / removeAdminGalleryCategory /
+// removeAdminGalleryPhoto / removeAdminTestimonial follow the identical
+// block with their own span names + wrapper groups:
+//   branches.remove / studioServices.remove / addons.remove /
+//   printSizes.remove / attires.remove / galleryCategories.remove /
+//   galleryPhotos.remove / testimonials.remove — each { param: { id } }.
+
+export const removeAdminTestimonialSubmission = createServerFn({
+  method: 'POST',
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminDeleteResult> => {
+    return runAdminAction('DELETE /api/v1/admin/testimonial-submissions/:id', async (client) => {
+      await client.admin.testimonialSubmissions.remove(data.id);
+      return { ok: true as const };
+    });
+  });
 
 // M7 #218: the Submissions tab's read + moderation fns over #216's
 // endpoints (the media action-endpoint precedent — accept/reject are
@@ -675,7 +697,7 @@ export const rejectAdminTestimonialSubmission = createServerFn({
   });
 ```
 
-**Design note (the helpers):** twelve fns share one validator, one strictness waiver, and one error-map — the helpers keep the #216-plan's per-fn boilerplate from being pasted twelve times. `runAdminAction`'s failure arm unions with the action's success return (no casts); `AdminDeleteResult` is exactly `{ ok: true } | AdminActionFailure`. If biome's formatter reflows the one-line fns, accept the rewrite.
+**Design note (superseded 2026-10-16):** the original helper design (shared `runAdminAction`/`adminDeleteFn` at this file's module scope) broke the production build — plain module-scope functions keep their server-only references in the client transform, and import-protection denies the build. The corrected shape above moves the helper to `admin.functions.server.ts` (handler-body-only reference → stripped client-side) and writes the nine deletes as explicit blocks. The accept/reject fns below already call `runAdminAction` inside their handler bodies and keep their shape. `pnpm --filter @sevendays/admin build` joins this task's gates.
 
 - [ ] **Step 3: cms-queries.ts — the submissions factory**
 
