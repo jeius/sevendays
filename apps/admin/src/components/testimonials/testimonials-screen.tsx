@@ -8,8 +8,9 @@
 // `validateTestimonialState`) driving the create/edit Sheet editor and the
 // optimistic single flips; Task 3's result-valued save fns. No Position
 // column and no position field anywhere — array order is the display order,
-// owned by the order PUT that fires on drop (optimistic via Task 4's
-// `reorderIds` + `buildTestimonialOrderPayload`; `!ok` → snapshot restore +
+// owned by the order PUT that fires on drop (optimistic via
+// `reorderVisiblePhotos` — the #218 slot-swap law over the full global
+// order — + `buildTestimonialOrderPayload`; `!ok` → snapshot restore +
 // toast + invalidate, AR-9). Round-3 ruling: rows drag by the GripVertical
 // grip ONLY (activation lives on the handle; the row's clean click toggles
 // expansion), pinned to PointerSensor distance 4 — no TouchSensor long-press
@@ -56,6 +57,7 @@ import {
   ActionTooltip,
   Collapse,
   DeactivateConfirm,
+  DeleteGuardDialog,
   EmptyState,
   ExpandPanel,
   ExpandRow,
@@ -65,15 +67,19 @@ import {
   QueryErrorState,
   RowActionsCluster,
   RowIconActions,
+  SegmentedControl,
   StatusBadge,
+  StatusSegmented,
 } from '#/components/cms/shared';
+import { SubmissionsTab } from '#/components/testimonials/submissions-tab';
 import {
+  removeAdminTestimonial,
   saveAdminTestimonialCreate,
   saveAdminTestimonialOrder,
   saveAdminTestimonialUpdate,
 } from '#/lib/admin.functions';
 import { adminTestimonialQueries } from '#/lib/cms-queries';
-import { buildTestimonialOrderPayload, reorderIds } from '#/lib/gallery-state';
+import { buildTestimonialOrderPayload, reorderVisiblePhotos } from '#/lib/gallery-state';
 import type { LightFieldErrors, TestimonialEditorState } from '#/lib/light-entity-state';
 import {
   buildTestimonialFlipPayload,
@@ -82,6 +88,8 @@ import {
   testimonialStateFromRead,
   validateTestimonialState,
 } from '#/lib/light-entity-state';
+import { blockerLines } from '#/lib/save-contract';
+import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 /** The editor's mode switch: create (from `New testimonial`) or edit (a row snapshot). */
 type EditingTarget = { mode: 'create' } | { mode: 'edit'; row: Testimonial };
@@ -211,19 +219,28 @@ export function TestimonialsScreen() {
   const queryClient = useQueryClient();
   // T3: controlled disclosure — one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  // The screen's two tabs (#218): the published list and the moderation
+  // queue — local state, no routes (the queue is a stop on an existing
+  // screen, not a new place to remember).
+  const [tab, setTab] = useState<'testimonials' | 'submissions'>('testimonials');
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
-  // The editor's create/edit switch and its open flag are separate on
-  // purpose: the shared Save handler closes the Sheet unconditionally
-  // (latch + exit), so a FAILED save re-arms `editorOpen` after the exit to
-  // honor the stays-open-on-failure posture; `editing` carries the retry
-  // target and the parent-held `editorState` keeps the user's input intact.
+  // The toolbar segment (#218): default All per visit, never persisted; the
+  // filtered view is render-time only — the caches and mutations ride the
+  // full list.
+  const [segment, setSegment] = useState<StatusSegment>('all');
+  // The delete dialog's target + its last blockers (empty until a blocked
+  // 400 answers — testimonials are blocked by nothing, but the wiring is
+  // the same everywhere).
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
+  // The editor's create/edit switch and its open flag are separate: the
+  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // a held save (veto, failure) keeps the sheet open over the intact
+  // parent-held state; onOpenChange(false) (Cancel, overlay, or the
+  // post-success exit) clears both.
   const [editing, setEditing] = useState<EditingTarget | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
-  // Remounts the editor on a failed save's reopen: the component's visible
-  // latch re-arms only on mount or an `open` false→true flip, and the flip
-  // alone is lost when the failure lands mid-exit (open never went false).
-  const [editorNonce, setEditorNonce] = useState(0);
   const [editorState, setEditorState] = useState<TestimonialEditorState>(newTestimonialState);
   const [fieldErrors, setFieldErrors] = useState<LightFieldErrors>({});
   const personId = useId();
@@ -238,6 +255,9 @@ export function TestimonialsScreen() {
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
+
+  const rows = filterByStatusSegment(testimonials ?? [], segment);
+  const deleteRow = testimonials?.find((row) => row.id === deleteId);
 
   // Single-row flips: optimistic on the list cache (cancel + snapshot + patch
   // ONLY isActive; rollback + toast on error; invalidate either way) — the
@@ -277,10 +297,10 @@ export function TestimonialsScreen() {
     },
   });
 
-  // The order PUT on drop (AR-9): optimistic — Task 4's `reorderIds` over
-  // the full list produces the reordered ROW array; the cache array is
-  // REPLACE-d in that order (never a push into an aliased read row); a
-  // failure restores the snapshot + toasts + invalidates.
+  // The order PUT on drop (AR-9): optimistic — `reorderVisiblePhotos`'s
+  // slot-swap law over the full global order produces the reordered ROW
+  // array; the cache array is REPLACE-d in that order (never a push into an
+  // aliased read row); a failure restores the snapshot + toasts + invalidates.
   const order = useMutation({
     mutationFn: async (reordered: Testimonial[]) => {
       const result = await saveAdminTestimonialOrder({
@@ -315,10 +335,11 @@ export function TestimonialsScreen() {
   });
 
   // Editor saves: NON-optimistic — the form state is the source of truth;
-  // success invalidates + toasts + (the shared handler's) close, failure
-  // keeps the editor open with the state intact (retry is safe — the save is
-  // a full-object PUT). No unique fields on this table, so no conflict
-  // mapping — every !ok surfaces as its message toast.
+  // the async Save contract owns the flow: await the full-object PUT,
+  // resolve true on ok (the shell closes), false on any hold (retry is
+  // safe — the save is a full-object PUT). No unique fields on this
+  // table, so no conflict mapping — every !ok surfaces as its message
+  // toast.
   const saveTestimonial = useMutation({
     mutationFn: async (input: SaveTestimonialInput) => {
       const result =
@@ -329,22 +350,28 @@ export function TestimonialsScreen() {
             });
       return { input, result };
     },
-    onSuccess: ({ input, result }) => {
+  });
+
+  // The pending-guarded delete (#218, the #213 route): busy confirm via the
+  // dialog's `pending`; a blocked 400 keeps the dialog open with the
+  // blockers in-body; success closes + invalidates.
+  const removeRow = useMutation({
+    mutationFn: async (row: Testimonial) => {
+      return removeAdminTestimonial({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
       if (result.ok) {
         queryClient.invalidateQueries({ queryKey: adminTestimonialQueries.all().queryKey });
-        toast.success('Saved.');
+        setDeleteId(null);
+        setDeleteBlockers([]);
+        toast.success('Deleted.');
         return;
       }
-      // !ok: keep open + the message toast; the reopen replays the enter
-      // animation over the intact state.
+      setDeleteBlockers(blockerLines(result.details));
       toast.error(result.message);
-      keepEditorOpen(input);
     },
-    onError: (error, input) => {
-      // Not an API failure (serialization, session loss) — loud toast, same
-      // keep-open posture.
+    onError: (error) => {
       toast.error(error.message);
-      keepEditorOpen(input);
     },
   });
 
@@ -366,45 +393,55 @@ export function TestimonialsScreen() {
     setEditorOpen(true);
   }
 
-  /** Re-arms the editor after a failed save (see the state comments above). */
-  function keepEditorOpen(input: SaveTestimonialInput) {
-    setEditing(input.mode === 'create' ? { mode: 'create' } : { mode: 'edit', row: input.row });
-    setEditorOpen(true);
-    setEditorNonce((n) => n + 1);
-  }
-
-  function handleEditorSave() {
+  async function handleEditorSave(): Promise<boolean> {
     if (!editing) {
-      return;
+      return false;
     }
     const errors = validateTestimonialState(editorState);
     if (errors.person || errors.quote) {
       setFieldErrors(errors);
       toast.error('Fix the highlighted fields.');
-      // Veto-throw: the shared Save button closes the Sheet only when onSave
-      // returns normally — a throw is the keep-open veto and is swallowed there
-      // (#143). The inline errors + toast are the UX.
-      throw new Error('testimonial-editor-validation-hold');
+      return false; // the async contract's hold — no throw, no remount
     }
     setFieldErrors({});
-    saveTestimonial.mutate(
-      editing.mode === 'create'
-        ? { mode: 'create', state: editorState }
-        : { mode: 'edit', row: editing.row, state: editorState }
-    );
+    try {
+      const { result } = await saveTestimonial.mutateAsync(
+        editing.mode === 'create'
+          ? { mode: 'create', state: editorState }
+          : { mode: 'edit', row: editing.row, state: editorState }
+      );
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminTestimonialQueries.all().queryKey });
+        toast.success('Saved.');
+        return true;
+      }
+      toast.error(result.message);
+      return false;
+    } catch (error) {
+      // Not an API failure (serialization, session loss) — loud toast, same hold.
+      toast.error(error instanceof Error ? error.message : 'The save failed.');
+      return false;
+    }
   }
 
-  // A drop reorders the ONE rows array (array order is the display order —
-  // there is no position column), then the order PUT fires with the FULL
-  // id list (Task 4's `reorderIds` — TOTAL full-replace, never a delta).
+  // A drop reorders the ONE rows array (array order is the display order),
+  // then the order PUT fires with the FULL id list (TOTAL full-replace,
+  // never a delta). Under a segment filter the slot-swap law applies (the
+  // gallery precedent): invisible rows keep their slots, so a filtered
+  // drag can never collide with positions held outside the filter.
   function onDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id || !testimonials) {
       return;
     }
-    const ids = testimonials.map((row) => row.id);
-    const reorderedIds = reorderIds(ids, String(active.id), String(over.id));
-    if (reorderedIds === ids) {
+    const globalIds = testimonials.map((row) => row.id);
+    const reorderedIds = reorderVisiblePhotos(
+      globalIds,
+      rows.map((row) => row.id),
+      String(active.id),
+      String(over.id)
+    );
+    if (reorderedIds === globalIds) {
       return;
     }
     const byId = new Map(testimonials.map((row) => [row.id, row]));
@@ -441,84 +478,100 @@ export function TestimonialsScreen() {
         title='Testimonials'
         subline='Client quotes shown on the /about page, ordered.'
         actions={
-          <Button type='button' onClick={openCreate}>
-            New testimonial
-          </Button>
+          tab === 'testimonials' ? (
+            <>
+              <StatusSegmented value={segment} onChange={setSegment} />
+              <Button type='button' onClick={openCreate}>
+                New testimonial
+              </Button>
+            </>
+          ) : undefined
         }
       />
 
-      {isError ? (
-        <QueryErrorState
-          line={QUERY_ERROR_LINE}
-          onRetry={() => {
-            void refetch();
-          }}
-        />
-      ) : isPending || !testimonials ? (
-        // Pending posture: skeleton rows echoing the row anatomy (grip,
-        // person + quote, actions) at the table's rhythm.
-        <Card className='@container rounded-lg'>
-          <CardContent className='space-y-4'>
-            {PENDING_ROW_KEYS.map((key) => (
-              <div key={key} className='flex items-center gap-4 py-1'>
-                <Skeleton className='size-4 rounded-sm' />
-                <div className='flex-1 space-y-1.5'>
-                  <Skeleton className='h-4 w-1/3' />
-                  <Skeleton className='h-3 w-2/3' />
+      <SegmentedControl
+        options={[
+          { value: 'testimonials', label: 'Testimonials' },
+          { value: 'submissions', label: 'Submissions' },
+        ]}
+        value={tab}
+        onChange={setTab}
+        ariaLabel='Testimonials sections'
+      />
+
+      {tab === 'testimonials' ? (
+        isError ? (
+          <QueryErrorState
+            line={QUERY_ERROR_LINE}
+            onRetry={() => {
+              void refetch();
+            }}
+          />
+        ) : isPending || !testimonials ? (
+          // Pending posture: skeleton rows echoing the row anatomy (grip,
+          // person + quote, actions) at the table's rhythm.
+          <Card className='@container rounded-lg'>
+            <CardContent className='space-y-4'>
+              {PENDING_ROW_KEYS.map((key) => (
+                <div key={key} className='flex items-center gap-4 py-1'>
+                  <Skeleton className='size-4 rounded-sm' />
+                  <div className='flex-1 space-y-1.5'>
+                    <Skeleton className='h-4 w-1/3' />
+                    <Skeleton className='h-3 w-2/3' />
+                  </div>
+                  <Skeleton className='h-4 w-28' />
                 </div>
-                <Skeleton className='h-4 w-28' />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ) : testimonials.length === 0 ? (
-        // TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items)
-        <EmptyState line='No testimonials yet.'>
-          <Button type='button' onClick={openCreate}>
-            New testimonial
-          </Button>
-        </EmptyState>
-      ) : (
-        <Card className='@container rounded-lg'>
-          <CardContent>
-            {/* @container: the table folds into stacked rows below a 700px
+              ))}
+            </CardContent>
+          </Card>
+        ) : testimonials.length === 0 ? (
+          // TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items)
+          <EmptyState line='No testimonials yet.'>
+            <Button type='button' onClick={openCreate}>
+              New testimonial
+            </Button>
+          </EmptyState>
+        ) : (
+          <Card className='@container rounded-lg'>
+            <CardContent>
+              {/* @container: the table folds into stacked rows below a 700px
                 CONTAINER width (Tailwind v4 native container queries). The
                 TooltipProvider is the per-table one the person tooltips use
                 (A3). The TODO(token-ruling) radius step-down is flagged at
                 its ruling site in the pattern library, not re-declared. */}
-            <TooltipProvider>
-              <Table className='@max-[700px]:hidden'>
-                <TableHeader>
-                  <TableRow>
-                    {/* Drag-handle column (round-3 ruling) — no header label. */}
-                    <TableHead className='w-10' />
-                    <TableHead>Person</TableHead>
-                    {/* T2: the Actions header renders empty — the icons carry
+              <TooltipProvider>
+                <Table className='@max-[700px]:hidden'>
+                  <TableHeader>
+                    <TableRow>
+                      {/* Drag-handle column (round-3 ruling) — no header label. */}
+                      <TableHead className='w-10' />
+                      <TableHead>Person</TableHead>
+                      {/* T2: the Actions header renders empty — the icons carry
                       their own labels. */}
-                    <TableHead className='text-right' />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={onDragEnd}
-                  >
-                    <SortableContext
-                      items={testimonials.map((row) => row.id)}
-                      strategy={verticalListSortingStrategy}
+                      <TableHead className='text-right' />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={onDragEnd}
                     >
-                      {testimonials.map((row) => {
-                        const expanded = expandedId === row.id;
-                        return (
-                          <Fragment key={row.id}>
-                            <SortableTestimonialRow
-                              id={row.id}
-                              expanded={expanded}
-                              onClick={() => toggleExpanded(row.id)}
-                            >
-                              <TableCell className='cursor-pointer'>
-                                {/* TM1: person is the identity (the Packages
+                      <SortableContext
+                        items={rows.map((row) => row.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {rows.map((row) => {
+                          const expanded = expandedId === row.id;
+                          return (
+                            <Fragment key={row.id}>
+                              <SortableTestimonialRow
+                                id={row.id}
+                                expanded={expanded}
+                                onClick={() => toggleExpanded(row.id)}
+                              >
+                                <TableCell className='cursor-pointer'>
+                                  {/* TM1: person is the identity (the Packages
                                   format); quote is the one-line secondary
                                   (full quote on expand). Round 4: the dot
                                   sits BESIDE the person so it never strands
@@ -526,127 +579,135 @@ export function TestimonialsScreen() {
                                   the person truncates when the column is
                                   squeezed and the tooltip carries the full
                                   text. */}
-                                <div className='space-y-0.5'>
-                                  <div className='flex items-center gap-2'>
-                                    <StatusBadge isActive={row.isActive} />
-                                    <ActionTooltip
-                                      label={row.person}
-                                      button={
-                                        <p className='min-w-0 truncate font-semibold'>
-                                          {row.person}
-                                        </p>
-                                      }
-                                    />
-                                  </div>
-                                  {/* N2: the truncated quote hides while
+                                  <div className='space-y-0.5'>
+                                    <div className='flex items-center gap-2'>
+                                      <StatusBadge isActive={row.isActive} />
+                                      <ActionTooltip
+                                        label={row.person}
+                                        button={
+                                          <p className='min-w-0 truncate font-semibold'>
+                                            {row.person}
+                                          </p>
+                                        }
+                                      />
+                                    </div>
+                                    {/* N2: the truncated quote hides while
                                     expanded — the reveal carries the full
                                     text. A1: the line indents by the dot
                                     (size-2.5) + its gap-2 — 4.5 spacing
                                     steps — so the text aligns with the
                                     person above it. */}
-                                  {expanded ? null : (
-                                    <div className='flex min-w-0 items-center pl-4.5'>
-                                      <p className='text-muted-foreground truncate text-xs'>
-                                        {row.quote}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                              </TableCell>
-                              <TableCell
-                                className='text-right'
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <RowActionsCluster
-                                  expanded={expanded}
-                                  onToggle={() => toggleExpanded(row.id)}
-                                  edit={editButton(row)}
-                                  isActive={row.isActive}
-                                  onDeactivate={() => setConfirmId(row.id)}
-                                  onReactivate={() => flip.mutate({ row, isActive: true })}
-                                />
-                              </TableCell>
-                            </SortableTestimonialRow>
-                            {/* T3 desktop reveal: the FULL quote (spans the
+                                    {expanded ? null : (
+                                      <div className='flex min-w-0 items-center pl-4.5'>
+                                        <p className='text-muted-foreground truncate text-xs'>
+                                          {row.quote}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell
+                                  className='text-right'
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <RowActionsCluster
+                                    expanded={expanded}
+                                    onToggle={() => toggleExpanded(row.id)}
+                                    edit={editButton(row)}
+                                    isActive={row.isActive}
+                                    onDeactivate={() => setConfirmId(row.id)}
+                                    onReactivate={() => flip.mutate({ row, isActive: true })}
+                                    onDelete={() => setDeleteId(row.id)}
+                                  />
+                                </TableCell>
+                              </SortableTestimonialRow>
+                              {/* T3 desktop reveal: the FULL quote (spans the
                               grip + identity + actions columns). */}
-                            <ExpandPanel open={expanded} colSpan={3}>
-                              {row.quote}
-                            </ExpandPanel>
-                          </Fragment>
-                        );
-                      })}
-                    </SortableContext>
-                  </DndContext>
-                </TableBody>
-              </Table>
-            </TooltipProvider>
+                              <ExpandPanel open={expanded} colSpan={3}>
+                                {row.quote}
+                              </ExpandPanel>
+                            </Fragment>
+                          );
+                        })}
+                      </SortableContext>
+                    </DndContext>
+                  </TableBody>
+                </Table>
+              </TooltipProvider>
 
-            {/* Stacked posture (below 700px container width): the two-line
+              {/* Stacked posture (below 700px container width): the two-line
                 header toggles the animated reveal (M1); rows drag by the grip
                 (round-3 ruling). A second DndContext — the prototype's
                 posture: both lists render the same sortable ids, and one
                 context would register each id twice. */}
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-              <SortableContext
-                items={testimonials.map((row) => row.id)}
-                strategy={verticalListSortingStrategy}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={onDragEnd}
               >
-                <div className='hidden flex-col @max-[700px]:flex'>
-                  {testimonials.map((row) => {
-                    const expanded = expandedId === row.id;
-                    return (
-                      <SortableStackRow
-                        key={row.id}
-                        id={row.id}
-                        header={
-                          <button
-                            type='button'
-                            aria-expanded={expanded}
-                            className='w-full cursor-pointer text-left'
-                            onClick={() => toggleExpanded(row.id)}
-                          >
-                            <div className='flex items-center justify-between gap-3'>
-                              <div className='flex min-w-0 items-center gap-2'>
-                                <StatusBadge isActive={row.isActive} />
-                                <p className='truncate font-medium'>{row.person}</p>
+                <SortableContext
+                  items={rows.map((row) => row.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className='hidden flex-col @max-[700px]:flex'>
+                    {rows.map((row) => {
+                      const expanded = expandedId === row.id;
+                      return (
+                        <SortableStackRow
+                          key={row.id}
+                          id={row.id}
+                          header={
+                            <button
+                              type='button'
+                              aria-expanded={expanded}
+                              className='w-full cursor-pointer text-left'
+                              onClick={() => toggleExpanded(row.id)}
+                            >
+                              <div className='flex items-center justify-between gap-3'>
+                                <div className='flex min-w-0 items-center gap-2'>
+                                  <StatusBadge isActive={row.isActive} />
+                                  <p className='truncate font-medium'>{row.person}</p>
+                                </div>
+                              </div>
+                              {/* N2: the quote line hides while expanded. A1:
+                                dot-width indent, same as the desktop line 2. */}
+                              {expanded ? null : (
+                                <p className='text-muted-foreground mt-1 truncate pl-4.5 text-xs'>
+                                  {row.quote}
+                                </p>
+                              )}
+                            </button>
+                          }
+                        >
+                          <Collapse open={expanded}>
+                            <div className='mt-2 space-y-2'>
+                              <p className='text-muted-foreground text-sm'>{row.quote}</p>
+                              <div className='flex gap-1'>
+                                <RowIconActions
+                                  edit={editButton(row)}
+                                  isActive={row.isActive}
+                                  onDeactivate={() => setConfirmId(row.id)}
+                                  onReactivate={() => flip.mutate({ row, isActive: true })}
+                                  onDelete={() => setDeleteId(row.id)}
+                                />
                               </div>
                             </div>
-                            {/* N2: the quote line hides while expanded. A1:
-                                dot-width indent, same as the desktop line 2. */}
-                            {expanded ? null : (
-                              <p className='text-muted-foreground mt-1 truncate pl-4.5 text-xs'>
-                                {row.quote}
-                              </p>
-                            )}
-                          </button>
-                        }
-                      >
-                        <Collapse open={expanded}>
-                          <div className='mt-2 space-y-2'>
-                            <p className='text-muted-foreground text-sm'>{row.quote}</p>
-                            <div className='flex gap-1'>
-                              <RowIconActions
-                                edit={editButton(row)}
-                                isActive={row.isActive}
-                                onDeactivate={() => setConfirmId(row.id)}
-                                onReactivate={() => flip.mutate({ row, isActive: true })}
-                              />
-                            </div>
-                          </div>
-                        </Collapse>
-                      </SortableStackRow>
-                    );
-                  })}
-                </div>
-              </SortableContext>
-            </DndContext>
-          </CardContent>
-        </Card>
+                          </Collapse>
+                        </SortableStackRow>
+                      );
+                    })}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            </CardContent>
+          </Card>
+        )
+      ) : (
+        <SubmissionsTab />
       )}
 
       {editing ? (
         <LightEntityEditor
-          key={editorNonce}
           title={editing.mode === 'create' ? 'New testimonial' : editing.row.person}
           description='The quote and the person it belongs to.'
           open={editorOpen}
@@ -709,6 +770,22 @@ export function TestimonialsScreen() {
             flip.mutate({ row: confirmRow, isActive: false });
             setConfirmId(null);
           }}
+        />
+      ) : null}
+
+      {deleteRow ? (
+        <DeleteGuardDialog
+          name={deleteRow.person}
+          blockers={deleteBlockers}
+          pending={removeRow.isPending}
+          open={deleteId === deleteRow.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteId(null);
+              setDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeRow.mutate(deleteRow)}
         />
       ) : null}
     </section>

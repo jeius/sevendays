@@ -44,6 +44,7 @@ import {
   ActionTooltip,
   Collapse,
   DeactivateConfirm,
+  DeleteGuardDialog,
   EmptyState,
   ExpandPanel,
   ExpandRow,
@@ -55,9 +56,11 @@ import {
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
+  StatusSegmented,
 } from '#/components/cms/shared';
 import type { AdminMutationResult } from '#/lib/admin.functions';
 import {
+  removeAdminStudioService,
   saveAdminStudioServiceBranchMatrix,
   saveAdminStudioServiceCreate,
   saveAdminStudioServiceUpdate,
@@ -73,6 +76,8 @@ import {
   studioServiceStateFromRead,
   validateStudioServiceState,
 } from '#/lib/light-entity-state';
+import { blockerLines } from '#/lib/save-contract';
+import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 /** The editor's mode switch: create (from `New studio service`) or edit (a row snapshot). */
 type EditingTarget = { mode: 'create' } | { mode: 'edit'; row: StudioServiceWithBranches };
@@ -142,22 +147,25 @@ export function StudioServicesScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  // The toolbar segment (#218): default All per visit, never persisted; the
+  // filtered view is render-time only — the caches and mutations ride the
+  // full list.
+  const [segment, setSegment] = useState<StatusSegment>('all');
+  // The delete dialog's target + its last blockers (empty until a blocked
+  // 400 answers).
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The #131 bulk ruling: selection rides the loaded row ids; the bar mounts
   // only while a selection exists. Sets REPLACE — never mutate in place.
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
-  // The editor's create/edit switch and its open flag are separate on
-  // purpose: the shared Save handler closes the Sheet unconditionally
-  // (latch + exit), so a FAILED save re-arms `editorOpen` after the exit to
-  // honor the stays-open-on-failure posture; `editing` carries the retry
-  // target — INCLUDING AQ-4's create→edit promotion after a matrix failure
-  // — and the parent-held `editorState` keeps the user's input intact.
+  // The editor's create/edit switch and its open flag are separate: the
+  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // a held save keeps the sheet open over the intact parent-held state,
+  // INCLUDING AQ-4's create→edit promotion after a matrix failure;
+  // onOpenChange(false) clears both.
   const [editing, setEditing] = useState<EditingTarget | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
-  // Remounts the editor on a failed save's reopen: the component's visible
-  // latch re-arms only on mount or an `open` false→true flip, and the flip
-  // alone is lost when the failure lands mid-exit (open never went false).
-  const [editorNonce, setEditorNonce] = useState(0);
   const [editorState, setEditorState] = useState<StudioServiceEditorState>(newStudioServiceState());
   const [fieldErrors, setFieldErrors] = useState<LightFieldErrors>({});
   const nameId = useId();
@@ -172,6 +180,9 @@ export function StudioServicesScreen() {
   const mutedBranchNames = new Set(
     (branches ?? []).filter((branch) => !branch.isActive).map((branch) => branch.name)
   );
+
+  const rows = filterByStatusSegment(services ?? [], segment);
+  const deleteRow = services?.find((row) => row.id === deleteId);
 
   // Single-row flips: optimistic on the list cache (cancel + snapshot + patch
   // ONLY isActive; rollback + toast on error; invalidate either way) — the
@@ -224,11 +235,11 @@ export function StudioServicesScreen() {
    * entity and runs the matrix only when the selection's SET differs from
    * the snapshot's `bookableBranchIds` (order-insensitive — junction order
    * is the fact, membership is what round-trips). A matrix `!ok` does NOT
-   * undo the entity write: onSuccess keeps the editor open with the
-   * selections intact (AQ-5 — the retry's Save re-runs both PUTs; the
-   * full-object PUT is idempotent) and switches a create-mode editor over
-   * to edit-over-the-created-row, so the next Save re-runs as an UPDATE +
-   * matrix — never a duplicate create. That mode switch is the
+   * undo the entity write: the async Save handler keeps the editor open
+   * with the selections intact (AQ-5 — the retry's Save re-runs both PUTs;
+   * the full-object PUT is idempotent) and switches a create-mode editor
+   * over to edit-over-the-created-row, so the next Save re-runs as an
+   * UPDATE + matrix — never a duplicate create. That mode switch is the
    * `matrix-failed` branch's promotion below.
    */
   const saveStudioService = useMutation({
@@ -263,60 +274,57 @@ export function StudioServicesScreen() {
       }
       return { kind: 'saved' };
     },
-    onSuccess: (outcome) => {
+  });
+
+  async function handleEditorSave(): Promise<boolean> {
+    if (!editing) {
+      return false;
+    }
+    const errors = validateStudioServiceState(editorState);
+    if (errors.name || errors.description || errors.price) {
+      setFieldErrors(errors);
+      toast.error('Fix the highlighted fields.');
+      return false;
+    }
+    setFieldErrors({});
+    const input: SaveStudioServiceInput =
+      editing.mode === 'create'
+        ? { mode: 'create', state: editorState }
+        : { mode: 'edit', row: editing.row, state: editorState };
+    try {
+      const outcome = await saveStudioService.mutateAsync(input);
+      if (outcome.kind === 'saved') {
+        queryClient.invalidateQueries({ queryKey: adminStudioServiceQueries.all().queryKey });
+        queryClient.invalidateQueries({ queryKey: adminBranchQueries.all().queryKey });
+        toast.success('Saved.');
+        return true;
+      }
       if (outcome.kind === 'matrix-failed') {
-        // The entity write landed; the matrix PUT failed. The editor STAYS
-        // OPEN with the selections intact — the retry's Save re-runs both
-        // PUTs. AQ-4's mode switch: a create that already created promotes
-        // to edit-over-the-created-row, so the retry is an UPDATE + matrix,
-        // never a duplicate create. The services list invalidates — the
-        // entity half of the save is real in the DB either way.
-        // `editing` re-arms for BOTH modes: the shared Save handler closed
-        // the Sheet and `onExitComplete` nulls `editing` after the 300ms
-        // exit — this handler lands AFTER that (two full round trips), so
-        // without the re-arm `setEditorOpen(true)` renders nothing behind
-        // the `editing ?` guard. Create promotes to the created row (AQ-4);
-        // edit re-arms the outcome input's row — the snapshot the save ran
-        // against, not a stale closure.
-        if (outcome.input.mode === 'create') {
-          setEditing({ mode: 'edit', row: outcome.created });
-        } else {
-          setEditing({ mode: 'edit', row: outcome.input.row });
-        }
-        setEditorOpen(true);
-        setEditorNonce((n) => n + 1);
+        // The entity write landed; the branch matrix PUT failed. The sheet
+        // HOLDS with the selections intact — the retry re-runs both PUTs.
+        // AQ-4's mode switch: create promotes to the created row.
+        setEditing(
+          outcome.input.mode === 'create'
+            ? { mode: 'edit', row: outcome.created }
+            : { mode: 'edit', row: outcome.input.row }
+        );
         queryClient.invalidateQueries({ queryKey: adminStudioServiceQueries.all().queryKey });
         toast.error(`Saved, but the branch matrix failed: ${outcome.message}`);
-        return;
+        return false;
       }
-      if (outcome.kind === 'entity-failed') {
-        // !ok: a name conflict marks the Name Field; no details → the message
-        // toast. The reopen replays the enter animation over the intact state.
-        const nameConflict = conflictFieldErrors(outcome.result.details).name;
-        if (nameConflict) {
-          setFieldErrors({ name: nameConflict });
-        }
-        if (!outcome.result.details) {
-          toast.error(outcome.result.message);
-        }
-        keepEditorOpen(outcome.input);
-        return;
+      const nameConflict = conflictFieldErrors(outcome.result.details).name;
+      if (nameConflict) {
+        setFieldErrors({ name: nameConflict });
       }
-      queryClient.invalidateQueries({ queryKey: adminStudioServiceQueries.all().queryKey });
-      queryClient.invalidateQueries({ queryKey: adminBranchQueries.all().queryKey });
-      toast.success('Saved.');
-    },
-    onError: (error, input) => {
-      // Bounded duplicate-POST window: a fast double-submit (or the
-      // thrown-create retry re-arming create mode) can fire the create
-      // twice — the second lands on the unique-name constraint and
-      // surfaces as its 400 conflict message, never a duplicate row.
-      // Not an API failure (serialization, session loss) — loud toast, same
-      // keep-open posture.
-      toast.error(error.message);
-      keepEditorOpen(input);
-    },
-  });
+      if (!outcome.result.details) {
+        toast.error(outcome.result.message);
+      }
+      return false;
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'The save failed.');
+      return false;
+    }
+  }
 
   // Bulk flips: NOT optimistic — the sequential loop is the source of truth;
   // the invalidate refetches. SEQUENTIAL in list order over the selected rows
@@ -352,12 +360,37 @@ export function StudioServicesScreen() {
     },
   });
 
+  // The pending-guarded delete (#218, the #213 route): busy confirm via the
+  // dialog's `pending`; a blocked 400 keeps the dialog open with the
+  // blockers in-body; success closes + invalidates both lists (the branch
+  // matrix rows cascade with the delete).
+  const removeRow = useMutation({
+    mutationFn: async (row: StudioServiceWithBranches) => {
+      return removeAdminStudioService({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminStudioServiceQueries.all().queryKey });
+        queryClient.invalidateQueries({ queryKey: adminBranchQueries.all().queryKey });
+        setDeleteId(null);
+        setDeleteBlockers([]);
+        toast.success('Deleted.');
+        return;
+      }
+      setDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   function toggleExpanded(id: string) {
     setExpandedId((prev) => (prev === id ? null : id));
   }
 
   function toggleAll(next: boolean) {
-    setSelected(next ? new Set((services ?? []).map((row) => row.id)) : new Set());
+    setSelected(next ? new Set(rows.map((row) => row.id)) : new Set());
   }
 
   function toggleSelected(id: string, next: boolean) {
@@ -396,34 +429,6 @@ export function StudioServicesScreen() {
     setEditorOpen(true);
   }
 
-  /** Re-arms the editor after a failed save (see the state comments above). */
-  function keepEditorOpen(input: SaveStudioServiceInput) {
-    setEditing(input.mode === 'create' ? { mode: 'create' } : { mode: 'edit', row: input.row });
-    setEditorOpen(true);
-    setEditorNonce((n) => n + 1);
-  }
-
-  function handleEditorSave() {
-    if (!editing) {
-      return;
-    }
-    const errors = validateStudioServiceState(editorState);
-    if (errors.name || errors.description || errors.price) {
-      setFieldErrors(errors);
-      toast.error('Fix the highlighted fields.');
-      // Veto-throw: the shared Save button closes the Sheet only when onSave
-      // returns normally — a throw is the keep-open veto and is swallowed there
-      // (#143). The inline errors + toast are the UX.
-      throw new Error('studio-service-editor-validation-hold');
-    }
-    setFieldErrors({});
-    saveStudioService.mutate(
-      editing.mode === 'create'
-        ? { mode: 'create', state: editorState }
-        : { mode: 'edit', row: editing.row, state: editorState }
-    );
-  }
-
   // The table's one action shape: the sheet-opening Edit icon.
   function editButton(row: StudioServiceWithBranches) {
     return (
@@ -447,9 +452,12 @@ export function StudioServicesScreen() {
         title='Studio services'
         subline='Standalone services bookable on their own, with per-branch availability.'
         actions={
-          <Button type='button' onClick={openCreate}>
-            New studio service
-          </Button>
+          <>
+            <StatusSegmented value={segment} onChange={setSegment} />
+            <Button type='button' onClick={openCreate}>
+              New studio service
+            </Button>
+          </>
         }
       />
 
@@ -505,7 +513,7 @@ export function StudioServicesScreen() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {services.map((row) => {
+                  {rows.map((row) => {
                     const bookableNames = row.bookableBranchIds
                       .map((id) => branchesById.get(id)?.name)
                       .filter((name): name is string => name !== undefined);
@@ -573,6 +581,7 @@ export function StudioServicesScreen() {
                               isActive={row.isActive}
                               onDeactivate={() => setConfirmId(row.id)}
                               onReactivate={() => flip.mutate({ row, isActive: true })}
+                              onDelete={() => setDeleteId(row.id)}
                             />
                           </TableCell>
                         </ExpandRow>
@@ -591,7 +600,7 @@ export function StudioServicesScreen() {
                 two-line header toggles the animated reveal (M1); branch
                 badges live ONLY in the reveal (S2). */}
             <div className='hidden flex-col @max-[700px]:flex'>
-              {services.map((row) => {
+              {rows.map((row) => {
                 const bookableNames = row.bookableBranchIds
                   .map((id) => branchesById.get(id)?.name)
                   .filter((name): name is string => name !== undefined);
@@ -631,6 +640,7 @@ export function StudioServicesScreen() {
                             isActive={row.isActive}
                             onDeactivate={() => setConfirmId(row.id)}
                             onReactivate={() => flip.mutate({ row, isActive: true })}
+                            onDelete={() => setDeleteId(row.id)}
                           />
                         </div>
                       </div>
@@ -645,7 +655,6 @@ export function StudioServicesScreen() {
 
       {editing ? (
         <LightEntityEditor
-          key={editorNonce}
           title={editing.mode === 'create' ? 'New studio service' : editing.row.name}
           description='Fields plus the branches this service is bookable at.'
           open={editorOpen}
@@ -783,6 +792,22 @@ export function StudioServicesScreen() {
             flip.mutate({ row: confirmRow, isActive: false });
             setConfirmId(null);
           }}
+        />
+      ) : null}
+
+      {deleteRow ? (
+        <DeleteGuardDialog
+          name={deleteRow.name}
+          blockers={deleteBlockers}
+          pending={removeRow.isPending}
+          open={deleteId === deleteRow.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteId(null);
+              setDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeRow.mutate(deleteRow)}
         />
       ) : null}
 

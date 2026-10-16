@@ -43,6 +43,7 @@ import {
   ActionTooltip,
   Collapse,
   DeactivateConfirm,
+  DeleteGuardDialog,
   EmptyState,
   ExpandPanel,
   ExpandRow,
@@ -52,8 +53,11 @@ import {
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
+  StatusSegmented,
 } from '#/components/cms/shared';
 import {
+  removeAdminAttire,
+  removeAdminPrintSize,
   saveAdminAttireCreate,
   saveAdminAttireUpdate,
   saveAdminPrintSizeCreate,
@@ -78,6 +82,8 @@ import {
   validateAttireState,
   validatePrintSizeState,
 } from '#/lib/light-entity-state';
+import { blockerLines } from '#/lib/save-contract';
+import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 /**
  * The editor's mode switch across BOTH sections: create (from a section's
@@ -133,18 +139,22 @@ export function LookupsScreen() {
   // Deep-linkable in the prototype frame pass; here a plain selection. One
   // confirm id spans both sections — uuid ids never collide.
   const [confirmId, setConfirmId] = useState<string | null>(null);
-  // The editor's create/edit switch (kind picks the field set) and its open
-  // flag are separate on purpose: the shared Save handler closes the Sheet
-  // unconditionally (latch + exit), so a FAILED save re-arms `editorOpen`
-  // after the exit to honor the stays-open-on-failure posture; `editing`
-  // carries the retry target and the parent-held field states keep the
-  // user's input intact.
+  // The two sections' toolbar segments (#218): default All per visit, never
+  // persisted; the filtered views are render-time only — the caches and
+  // mutations ride the full lists. One delete target spans both sections
+  // (uuid ids never collide), with its last blockers (empty until a blocked
+  // 400 answers).
+  const [sizeSegment, setSizeSegment] = useState<StatusSegment>('all');
+  const [attireSegment, setAttireSegment] = useState<StatusSegment>('all');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
+  // The editor's create/edit switch and its open flag are separate: the
+  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // a held save (veto, failure) keeps the sheet open over the intact
+  // parent-held state; onOpenChange(false) (Cancel, overlay, or the
+  // post-success exit) clears both.
   const [editing, setEditing] = useState<EditingTarget | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
-  // Remounts the editor on a failed save's reopen: the component's visible
-  // latch re-arms only on mount or an `open` false→true flip, and the flip
-  // alone is lost when the failure lands mid-exit (open never went false).
-  const [editorNonce, setEditorNonce] = useState(0);
   // One editor pair, two field sets: the section states ride separately so
   // the shared Save handler validates with the kind's own validator.
   const [sizeState, setSizeState] = useState<PrintSizeEditorState>(newPrintSizeState);
@@ -224,11 +234,9 @@ export function LookupsScreen() {
     },
   });
 
-  // Editor saves: NON-optimistic — the form state is the source of truth;
-  // success invalidates + toasts + (the shared handler's) close, failure
-  // keeps the editor open with the state intact (retry is safe — the save
-  // is a full-object PUT). A conflict (duplicate code / name) marks the
-  // field inline per the branches mirror; no details → the message toast.
+  // Editor saves: NON-optimistic; the async Save contract owns the flow
+  // (#218). A conflict (duplicate code / name) marks the field inline; no
+  // details → the message toast. One handler branches on the kind.
   const saveSize = useMutation({
     mutationFn: async (input: SaveSizeInput) => {
       const result =
@@ -238,37 +246,6 @@ export function LookupsScreen() {
               data: { id: input.row.id, payload: buildPrintSizePayload(input.state) },
             });
       return { input, result };
-    },
-    onSuccess: ({ input, result }) => {
-      if (result.ok) {
-        queryClient.invalidateQueries({ queryKey: adminLookupQueries.printSizes().queryKey });
-        toast.success('Saved.');
-        return;
-      }
-      // !ok: a code conflict marks the Code Field; no details → the message
-      // toast. The reopen replays the enter animation over the intact state.
-      const codeConflict = conflictFieldErrors(result.details).code;
-      if (codeConflict) {
-        setSizeErrors({ code: codeConflict });
-      }
-      if (!result.details) {
-        toast.error(result.message);
-      }
-      keepEditorOpen(
-        input.mode === 'create'
-          ? { kind: 'size', mode: 'create' }
-          : { kind: 'size', mode: 'edit', row: input.row }
-      );
-    },
-    onError: (error, input) => {
-      // Not an API failure (serialization, session loss) — loud toast, same
-      // keep-open posture.
-      toast.error(error.message);
-      keepEditorOpen(
-        input.mode === 'create'
-          ? { kind: 'size', mode: 'create' }
-          : { kind: 'size', mode: 'edit', row: input.row }
-      );
     },
   });
 
@@ -282,34 +259,48 @@ export function LookupsScreen() {
             });
       return { input, result };
     },
-    onSuccess: ({ input, result }) => {
+  });
+
+  // The pending-guarded deletes (#218, the #213 routes): busy confirm via
+  // the dialog's `pending`; a blocked 400 keeps the dialog open with the
+  // blockers in-body; success closes + invalidates.
+  const removeSize = useMutation({
+    mutationFn: async (row: PrintSize) => {
+      return removeAdminPrintSize({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
       if (result.ok) {
-        queryClient.invalidateQueries({ queryKey: adminLookupQueries.attires().queryKey });
-        toast.success('Saved.');
+        queryClient.invalidateQueries({ queryKey: adminLookupQueries.printSizes().queryKey });
+        setDeleteId(null);
+        setDeleteBlockers([]);
+        toast.success('Deleted.');
         return;
       }
-      // !ok: a name conflict marks the Name Field; no details → the message
-      // toast. The reopen replays the enter animation over the intact state.
-      const nameConflict = conflictFieldErrors(result.details).name;
-      if (nameConflict) {
-        setAttireErrors({ name: nameConflict });
-      }
-      if (!result.details) {
-        toast.error(result.message);
-      }
-      keepEditorOpen(
-        input.mode === 'create'
-          ? { kind: 'attire', mode: 'create' }
-          : { kind: 'attire', mode: 'edit', row: input.row }
-      );
+      setDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
     },
-    onError: (error, input) => {
+    onError: (error) => {
       toast.error(error.message);
-      keepEditorOpen(
-        input.mode === 'create'
-          ? { kind: 'attire', mode: 'create' }
-          : { kind: 'attire', mode: 'edit', row: input.row }
-      );
+    },
+  });
+
+  const removeAttire = useMutation({
+    mutationFn: async (row: Attire) => {
+      return removeAdminAttire({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminLookupQueries.attires().queryKey });
+        setDeleteId(null);
+        setDeleteBlockers([]);
+        toast.success('Deleted.');
+        return;
+      }
+      setDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -345,51 +336,78 @@ export function LookupsScreen() {
     setEditorOpen(true);
   }
 
-  /** Re-arms the editor after a failed save (see the state comments above). */
-  function keepEditorOpen(target: EditingTarget) {
-    setEditing(target);
-    setEditorOpen(true);
-    setEditorNonce((n) => n + 1);
-  }
-
-  function handleEditorSave() {
+  async function handleEditorSave(): Promise<boolean> {
     if (!editing) {
-      return;
+      return false;
     }
     if (editing.kind === 'size') {
       const errors = validatePrintSizeState(sizeState);
       if (errors.code || errors.description) {
         setSizeErrors(errors);
         toast.error('Fix the highlighted fields.');
-        // Veto-throw: the shared Save button closes the Sheet only when onSave
-        // returns normally — a throw is the keep-open veto and is swallowed there
-        // (#143). The inline errors + toast are the UX.
-        throw new Error('lookups-editor-validation-hold');
+        return false;
       }
       setSizeErrors({});
-      saveSize.mutate(
-        editing.mode === 'create'
-          ? { mode: 'create', state: sizeState }
-          : { mode: 'edit', row: editing.row, state: sizeState }
-      );
-      return;
+      try {
+        const { result } = await saveSize.mutateAsync(
+          editing.mode === 'create'
+            ? { mode: 'create', state: sizeState }
+            : { mode: 'edit', row: editing.row, state: sizeState }
+        );
+        if (result.ok) {
+          queryClient.invalidateQueries({ queryKey: adminLookupQueries.printSizes().queryKey });
+          toast.success('Saved.');
+          return true;
+        }
+        const codeConflict = conflictFieldErrors(result.details).code;
+        if (codeConflict) {
+          setSizeErrors({ code: codeConflict });
+        }
+        if (!result.details) {
+          toast.error(result.message);
+        }
+        return false;
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'The save failed.');
+        return false;
+      }
     }
     const errors = validateAttireState(attireState);
     if (errors.name) {
       setAttireErrors(errors);
       toast.error('Fix the highlighted fields.');
-      throw new Error('lookups-editor-validation-hold');
+      return false;
     }
     setAttireErrors({});
-    saveAttire.mutate(
-      editing.mode === 'create'
-        ? { mode: 'create', state: attireState }
-        : { mode: 'edit', row: editing.row, state: attireState }
-    );
+    try {
+      const { result } = await saveAttire.mutateAsync(
+        editing.mode === 'create'
+          ? { mode: 'create', state: attireState }
+          : { mode: 'edit', row: editing.row, state: attireState }
+      );
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminLookupQueries.attires().queryKey });
+        toast.success('Saved.');
+        return true;
+      }
+      const nameConflict = conflictFieldErrors(result.details).name;
+      if (nameConflict) {
+        setAttireErrors({ name: nameConflict });
+      }
+      if (!result.details) {
+        toast.error(result.message);
+      }
+      return false;
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'The save failed.');
+      return false;
+    }
   }
 
   const confirmSize = printSizes?.find((row) => row.id === confirmId);
   const confirmAttire = attires?.find((row) => row.id === confirmId);
+  const deleteSize = printSizes?.find((row) => row.id === deleteId);
+  const deleteAttire = attires?.find((row) => row.id === deleteId);
 
   return (
     <section className='space-y-4'>
@@ -406,6 +424,9 @@ export function LookupsScreen() {
         onEdit={openSizeEdit}
         onDeactivate={(row) => setConfirmId(row.id)}
         onReactivate={(row) => flipSize.mutate({ row, isActive: true })}
+        segment={sizeSegment}
+        onSegmentChange={setSizeSegment}
+        onDelete={(row) => setDeleteId(row.id)}
       />
       <AttiresSection
         attires={attires}
@@ -418,11 +439,13 @@ export function LookupsScreen() {
         onEdit={openAttireEdit}
         onDeactivate={(row) => setConfirmId(row.id)}
         onReactivate={(row) => flipAttire.mutate({ row, isActive: true })}
+        segment={attireSegment}
+        onSegmentChange={setAttireSegment}
+        onDelete={(row) => setDeleteId(row.id)}
       />
 
       {editing?.kind === 'size' ? (
         <LightEntityEditor
-          key={editorNonce}
           title={editing.mode === 'create' ? 'New print size' : editing.row.code}
           description='The size code and what it means.'
           open={editorOpen}
@@ -471,7 +494,6 @@ export function LookupsScreen() {
 
       {editing?.kind === 'attire' ? (
         <LightEntityEditor
-          key={editorNonce}
           title={editing.mode === 'create' ? 'New attire' : editing.row.name}
           description='The attire name.'
           open={editorOpen}
@@ -538,6 +560,38 @@ export function LookupsScreen() {
           }}
         />
       ) : null}
+
+      {deleteSize ? (
+        <DeleteGuardDialog
+          name={deleteSize.code}
+          blockers={deleteBlockers}
+          pending={removeSize.isPending}
+          open={deleteId === deleteSize.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteId(null);
+              setDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeSize.mutate(deleteSize)}
+        />
+      ) : null}
+
+      {deleteAttire ? (
+        <DeleteGuardDialog
+          name={deleteAttire.name}
+          blockers={deleteBlockers}
+          pending={removeAttire.isPending}
+          open={deleteId === deleteAttire.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteId(null);
+              setDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeAttire.mutate(deleteAttire)}
+        />
+      ) : null}
     </section>
   );
 }
@@ -549,6 +603,13 @@ interface SizeSectionHandlers {
   onEdit: (row: PrintSize) => void;
   onDeactivate: (row: PrintSize) => void;
   onReactivate: (row: PrintSize) => void;
+}
+
+/** The section toolbar's segment + delete threading (#218). */
+interface SectionSegmentProps {
+  segment: StatusSegment;
+  onSegmentChange: (next: StatusSegment) => void;
+  onDelete: (row: PrintSize | Attire) => void;
 }
 
 /**
@@ -568,13 +629,17 @@ function PrintSizesSection({
   onEdit,
   onDeactivate,
   onReactivate,
+  segment,
+  onSegmentChange,
+  onDelete,
 }: {
   printSizes?: PrintSize[];
   isPending: boolean;
   isError: boolean;
   onRetry: () => void;
   expandedId: string | null;
-} & SizeSectionHandlers) {
+} & SizeSectionHandlers &
+  SectionSegmentProps) {
   // The table's one action shape: the sheet-opening Edit icon (the parent
   // owns the editor state; the row hands over its snapshot).
   function editButton(row: PrintSize) {
@@ -664,11 +729,16 @@ function PrintSizesSection({
     );
   }
 
+  // The segment's filtered view is render-time only (#218) — the parent's
+  // caches and mutations keep operating on the full list.
+  const rows = filterByStatusSegment(printSizes, segment);
+
   return (
     <Card className='@container rounded-lg'>
       <CardHeader>
         <CardTitle>Print sizes</CardTitle>
-        <CardAction>
+        <CardAction className='flex items-center gap-2'>
+          <StatusSegmented value={segment} onChange={onSegmentChange} />
           <Button onClick={onCreate} size='sm' type='button' variant='outline'>
             New print size
           </Button>
@@ -693,7 +763,7 @@ function PrintSizesSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {printSizes.map((row) => {
+              {rows.map((row) => {
                 const expanded = expandedId === row.id;
                 return (
                   <Fragment key={row.id}>
@@ -746,6 +816,7 @@ function PrintSizesSection({
                           isActive={row.isActive}
                           onDeactivate={() => onDeactivate(row)}
                           onReactivate={() => onReactivate(row)}
+                          onDelete={() => onDelete(row)}
                         />
                       </TableCell>
                     </ExpandRow>
@@ -764,7 +835,7 @@ function PrintSizesSection({
         {/* Stacked posture (below 700px container width): the whole
             two-line header toggles the animated reveal (M1). */}
         <div className='hidden flex-col @max-[700px]:flex'>
-          {printSizes.map((row) => {
+          {rows.map((row) => {
             const expanded = expandedId === row.id;
             return (
               <div key={row.id} className='border-border border-b py-2 last:border-b-0'>
@@ -797,6 +868,7 @@ function PrintSizesSection({
                         isActive={row.isActive}
                         onDeactivate={() => onDeactivate(row)}
                         onReactivate={() => onReactivate(row)}
+                        onDelete={() => onDelete(row)}
                       />
                     </div>
                   </div>
@@ -826,6 +898,9 @@ function AttiresSection({
   onEdit,
   onDeactivate,
   onReactivate,
+  segment,
+  onSegmentChange,
+  onDelete,
 }: {
   attires?: Attire[];
   isPending: boolean;
@@ -835,7 +910,7 @@ function AttiresSection({
   onEdit: (row: Attire) => void;
   onDeactivate: (row: Attire) => void;
   onReactivate: (row: Attire) => void;
-}) {
+} & SectionSegmentProps) {
   function editButton(row: Attire) {
     return (
       <Button
@@ -919,11 +994,16 @@ function AttiresSection({
     );
   }
 
+  // The segment's filtered view is render-time only (#218) — the parent's
+  // caches and mutations keep operating on the full list.
+  const rows = filterByStatusSegment(attires, segment);
+
   return (
     <Card className='@container rounded-lg'>
       <CardHeader>
         <CardTitle>Attires</CardTitle>
-        <CardAction>
+        <CardAction className='flex items-center gap-2'>
+          <StatusSegmented value={segment} onChange={onSegmentChange} />
           <Button onClick={onCreate} size='sm' type='button' variant='outline'>
             New attire
           </Button>
@@ -939,7 +1019,7 @@ function AttiresSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {attires.map((row) => (
+              {rows.map((row) => (
                 <TableRow key={row.id} className='group'>
                   <TableCell>
                     {/* L2: status dot FIRST, then the name — no description
@@ -959,6 +1039,7 @@ function AttiresSection({
                       isActive={row.isActive}
                       onDeactivate={() => onDeactivate(row)}
                       onReactivate={() => onReactivate(row)}
+                      onDelete={() => onDelete(row)}
                     />
                   </TableCell>
                 </TableRow>
@@ -970,7 +1051,7 @@ function AttiresSection({
         {/* Stacked posture — attires carry no secondary field, so the dot
             leads and the icon actions sit inline (nothing to reveal). */}
         <div className='hidden flex-col @max-[700px]:flex'>
-          {attires.map((row) => (
+          {rows.map((row) => (
             <div
               key={row.id}
               className='border-border flex items-center gap-2 border-b py-2 last:border-b-0'
@@ -983,6 +1064,7 @@ function AttiresSection({
                   isActive={row.isActive}
                   onDeactivate={() => onDeactivate(row)}
                   onReactivate={() => onReactivate(row)}
+                  onDelete={() => onDelete(row)}
                 />
               </div>
             </div>

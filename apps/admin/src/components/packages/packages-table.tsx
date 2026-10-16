@@ -31,6 +31,7 @@ import {
   ActionTooltip,
   Collapse,
   DeactivateConfirm,
+  DeleteGuardDialog,
   EmptyState,
   ExpandPanel,
   ExpandRow,
@@ -40,10 +41,13 @@ import {
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
+  StatusSegmented,
 } from '#/components/cms/shared';
-import { saveAdminPackageUpdate } from '#/lib/admin.functions';
+import { removeAdminPackage, saveAdminPackageUpdate } from '#/lib/admin.functions';
 import { adminPackageQueries } from '#/lib/cms-queries';
 import { buildRowFlipPayload } from '#/lib/package-editor-state';
+import { blockerLines } from '#/lib/save-contract';
+import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 /** One flip of the row switch: the source row (payload donor) + the target. */
 interface FlipInput {
@@ -62,6 +66,34 @@ export function PackagesTable() {
   // Deep-linkable in the prototype frame pass; here a plain selection —
   // ?confirm=<id> died with the prototype's search params.
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  // The toolbar segment (#218) + the pending-guarded delete (the #213
+  // route; a package with any Appointment ever is blocked — the dialog
+  // answers with the blockers in-body).
+  const [segment, setSegment] = useState<StatusSegment>('all');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
+  const rows = filterByStatusSegment(packages ?? [], segment);
+  const deleteRow = packages?.find((row) => row.id === deleteId);
+
+  const removeRow = useMutation({
+    mutationFn: async (row: ServicePackageRead) => {
+      return removeAdminPackage({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminPackageQueries.all().queryKey });
+        setDeleteId(null);
+        setDeleteBlockers([]);
+        toast.success('Deleted.');
+        return;
+      }
+      setDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   const flip = useMutation({
     // Result-valued fn (Task 2's seam): ok:false converts to a throw so the
@@ -166,6 +198,9 @@ export function PackagesTable() {
 
   return (
     <>
+      <div className='flex justify-end'>
+        <StatusSegmented value={segment} onChange={setSegment} />
+      </div>
       <Card className='@container rounded-lg'>
         <CardContent>
           {/* @container: the table folds into stacked rows below a 700px
@@ -186,7 +221,7 @@ export function PackagesTable() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {packages.map((row) => {
+                {rows.map((row) => {
                   const expanded = expandedId === row.id;
                   return (
                     <Fragment key={row.id}>
@@ -261,6 +296,7 @@ export function PackagesTable() {
                             isActive={row.isActive}
                             onDeactivate={() => setConfirmId(row.id)}
                             onReactivate={() => flip.mutate({ row, isActive: true })}
+                            onDelete={() => setDeleteId(row.id)}
                           />
                         </TableCell>
                       </ExpandRow>
@@ -278,7 +314,7 @@ export function PackagesTable() {
           {/* Stacked posture (below 700px container width): the whole
               two-line header toggles the animated reveal (M1). */}
           <div className='hidden flex-col @max-[700px]:flex'>
-            {packages.map((row) => {
+            {rows.map((row) => {
               const expanded = expandedId === row.id;
               return (
                 <div key={row.id} className='border-border border-b py-2 last:border-b-0'>
@@ -321,6 +357,7 @@ export function PackagesTable() {
                           isActive={row.isActive}
                           onDeactivate={() => setConfirmId(row.id)}
                           onReactivate={() => flip.mutate({ row, isActive: true })}
+                          onDelete={() => setDeleteId(row.id)}
                         />
                       </div>
                     </div>
@@ -345,6 +382,23 @@ export function PackagesTable() {
             flip.mutate({ row: confirmRow, isActive: false });
             setConfirmId(null);
           }}
+        />
+      ) : null}
+
+      {deleteRow ? (
+        <DeleteGuardDialog
+          name={deleteRow.name}
+          mediaNote='Its cover image goes with it.'
+          blockers={deleteBlockers}
+          pending={removeRow.isPending}
+          open={deleteId === deleteRow.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteId(null);
+              setDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeRow.mutate(deleteRow)}
         />
       ) : null}
     </>
