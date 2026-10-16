@@ -70,6 +70,7 @@ import { ChevronDown, Frame, Gift, GripVertical, Image, Plus, X } from 'lucide-r
 import { useEffect, useId, useRef, useState } from 'react';
 import {
   PACKAGE_NOT_FOUND_LINE,
+  PendingSpinner,
   QUERY_ERROR_LINE,
   QueryErrorState,
   StatusBadge,
@@ -95,6 +96,7 @@ import {
   PESO_HELPER,
   validateEditorState,
 } from '#/lib/package-editor-state';
+import { SAVING_LABEL, UPLOADING_LABEL } from '#/lib/save-contract';
 
 const KIND_ICONS = {
   framed_picture: Frame,
@@ -721,8 +723,14 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
             </h1>
             {mode === 'edit' ? <StatusBadge isActive={state.isActive} /> : null}
           </div>
-          <Button type='button' disabled={savePending} onClick={saveChanges}>
-            Save changes
+          <Button
+            type='button'
+            disabled={savePending}
+            aria-busy={savePending}
+            onClick={saveChanges}
+          >
+            {savePending ? <PendingSpinner /> : null}
+            {savePending ? SAVING_LABEL : 'Save changes'}
           </Button>
         </div>
       </header>
@@ -888,9 +896,11 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
                   variant='outline'
                   type='button'
                   disabled={uploading}
+                  aria-busy={uploading}
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  Upload cover
+                  {uploading ? <PendingSpinner /> : null}
+                  {uploading ? UPLOADING_LABEL : 'Upload cover'}
                 </Button>
                 <Button variant='ghost' type='button' disabled={uploading} onClick={removeCover}>
                   Remove cover

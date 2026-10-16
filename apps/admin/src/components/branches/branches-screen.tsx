@@ -42,6 +42,7 @@ import {
   ExpandRow,
   LightEntityEditor,
   PageHeader,
+  PendingSpinner,
   QUERY_ERROR_LINE,
   QueryErrorState,
   RowActionsCluster,
@@ -68,7 +69,7 @@ import {
   newBranchState,
   validateBranchState,
 } from '#/lib/light-entity-state';
-import { blockerLines } from '#/lib/save-contract';
+import { blockerLines, UPLOADING_LABEL } from '#/lib/save-contract';
 import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 /** The editor's mode switch: create (from `New branch`) or edit (a row snapshot). */
@@ -724,9 +725,11 @@ export function BranchesScreen() {
                 variant='outline'
                 type='button'
                 disabled={coverUploading}
+                aria-busy={coverUploading}
                 onClick={() => fileInputRef.current?.click()}
               >
-                Upload cover
+                {coverUploading ? <PendingSpinner /> : null}
+                {coverUploading ? UPLOADING_LABEL : 'Upload cover'}
               </Button>
               <Button variant='ghost' type='button' disabled={coverUploading} onClick={removeCover}>
                 Remove cover
