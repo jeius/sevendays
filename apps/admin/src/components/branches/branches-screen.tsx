@@ -36,19 +36,23 @@ import {
   ActionTooltip,
   Collapse,
   DeactivateConfirm,
+  DeleteGuardDialog,
   EmptyState,
   ExpandPanel,
   ExpandRow,
   LightEntityEditor,
   PageHeader,
+  PendingSpinner,
   QUERY_ERROR_LINE,
   QueryErrorState,
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
+  StatusSegmented,
 } from '#/components/cms/shared';
 import {
   presignAdminCoverUpload,
+  removeAdminBranch,
   saveAdminBranchCreate,
   saveAdminBranchUpdate,
 } from '#/lib/admin.functions';
@@ -65,6 +69,8 @@ import {
   newBranchState,
   validateBranchState,
 } from '#/lib/light-entity-state';
+import { blockerLines, UPLOADING_LABEL } from '#/lib/save-contract';
+import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 /** The editor's mode switch: create (from `New branch`) or edit (a row snapshot). */
 type EditingTarget = { mode: 'create' } | { mode: 'edit'; row: BranchRead };
@@ -95,21 +101,25 @@ export function BranchesScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  // The toolbar segment (#218): default All per visit, never persisted; the
+  // filtered view is render-time only — the caches and mutations ride the
+  // full list.
+  const [segment, setSegment] = useState<StatusSegment>('all');
+  // The delete dialog's target + its last blockers (empty until a blocked
+  // 400 answers).
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The #131 bulk ruling: selection rides the loaded row ids; the bar mounts
   // only while a selection exists. Sets REPLACE — never mutate in place.
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
-  // The editor's create/edit switch and its open flag are separate on
-  // purpose: the shared Save handler closes the Sheet unconditionally
-  // (latch + exit), so a FAILED save re-arms `editorOpen` after the exit to
-  // honor the stays-open-on-failure posture; `editing` carries the retry
-  // target and the parent-held `editorState` keeps the user's input intact.
+  // The editor's create/edit switch and its open flag are separate: the
+  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // a held save (veto, failure) keeps the sheet open over the intact
+  // parent-held state; onOpenChange(false) (Cancel, overlay, or the
+  // post-success exit) clears both.
   const [editing, setEditing] = useState<EditingTarget | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
-  // Remounts the editor on a failed save's reopen: the component's visible
-  // latch re-arms only on mount or an `open` false→true flip, and the flip
-  // alone is lost when the failure lands mid-exit (open never went false).
-  const [editorNonce, setEditorNonce] = useState(0);
   const [editorState, setEditorState] = useState<BranchEditorState>(newBranchState);
   const [fieldErrors, setFieldErrors] = useState<LightFieldErrors>({});
   // The cover loop (M7 #214 — the packages editor's Cover card, ported):
@@ -174,6 +184,9 @@ export function BranchesScreen() {
   const walkInsId = useId();
   const activeId = useId();
 
+  const rows = filterByStatusSegment(branches ?? [], segment);
+  const deleteRow = branches?.find((row) => row.id === deleteId);
+
   // Single-row flips: optimistic on the list cache (cancel + snapshot + patch
   // ONLY isActive; rollback + toast on error; invalidate either way) — the
   // posture 139's packages table pinned.
@@ -210,10 +223,9 @@ export function BranchesScreen() {
     },
   });
 
-  // Editor saves: NON-optimistic — the form state is the source of truth;
-  // success invalidates + toasts + (the shared handler's) close, failure
-  // keeps the editor open with the state intact (retry is safe — the save is
-  // a full-object PUT).
+  // Editor saves: NON-optimistic; the async Save contract owns the flow
+  // (#218). A name conflict marks the Name Field; no details → the message
+  // toast.
   const saveBranch = useMutation({
     mutationFn: async (input: SaveBranchInput) => {
       const result =
@@ -224,14 +236,30 @@ export function BranchesScreen() {
             });
       return { input, result };
     },
-    onSuccess: ({ input, result }) => {
+  });
+
+  async function handleEditorSave(): Promise<boolean> {
+    if (!editing) {
+      return false;
+    }
+    const errors = validateBranchState(editorState);
+    if (errors.name || errors.address || errors.phone) {
+      setFieldErrors(errors);
+      toast.error('Fix the highlighted fields.');
+      return false;
+    }
+    setFieldErrors({});
+    try {
+      const { result } = await saveBranch.mutateAsync(
+        editing.mode === 'create'
+          ? { mode: 'create', state: editorState }
+          : { mode: 'edit', row: editing.row, state: editorState }
+      );
       if (result.ok) {
         queryClient.invalidateQueries({ queryKey: adminBranchQueries.all().queryKey });
         toast.success('Saved.');
-        return;
+        return true;
       }
-      // !ok: a name conflict marks the Name Field; no details → the message
-      // toast. The reopen replays the enter animation over the intact state.
       const nameConflict = conflictFieldErrors(result.details).name;
       if (nameConflict) {
         setFieldErrors({ name: nameConflict });
@@ -239,15 +267,12 @@ export function BranchesScreen() {
       if (!result.details) {
         toast.error(result.message);
       }
-      keepEditorOpen(input);
-    },
-    onError: (error, input) => {
-      // Not an API failure (serialization, session loss) — loud toast, same
-      // keep-open posture.
-      toast.error(error.message);
-      keepEditorOpen(input);
-    },
-  });
+      return false;
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'The save failed.');
+      return false;
+    }
+  }
 
   // Bulk flips: NOT optimistic — the sequential loop is the source of truth;
   // the invalidate refetches. SEQUENTIAL in list order over the selected rows
@@ -283,12 +308,35 @@ export function BranchesScreen() {
     },
   });
 
+  // The pending-guarded delete (#218, the #213 route): busy confirm via the
+  // dialog's `pending`; a blocked 400 keeps the dialog open with the
+  // blockers in-body; success closes + invalidates.
+  const removeRow = useMutation({
+    mutationFn: async (row: BranchRead) => {
+      return removeAdminBranch({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminBranchQueries.all().queryKey });
+        setDeleteId(null);
+        setDeleteBlockers([]);
+        toast.success('Deleted.');
+        return;
+      }
+      setDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   function toggleExpanded(id: string) {
     setExpandedId((prev) => (prev === id ? null : id));
   }
 
   function toggleAll(next: boolean) {
-    setSelected(next ? new Set((branches ?? []).map((row) => row.id)) : new Set());
+    setSelected(next ? new Set(rows.map((row) => row.id)) : new Set());
   }
 
   function toggleSelected(id: string, next: boolean) {
@@ -304,9 +352,9 @@ export function BranchesScreen() {
   }
 
   function openCreate() {
-    // The Sheet's children stay mounted across keepEditorOpen (unlike the
-    // packages editor's unmount), so the upload state resets explicitly —
-    // a reopened Sheet never shows a stale preview.
+    // The Sheet's children stay mounted across the async Save contract's
+    // held saves (unlike the packages editor's unmount), so the upload
+    // state resets explicitly — a reopened Sheet never shows a stale preview.
     setCoverStatus({ phase: 'idle' });
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
@@ -329,34 +377,6 @@ export function BranchesScreen() {
     setFieldErrors({});
     setEditing({ mode: 'edit', row });
     setEditorOpen(true);
-  }
-
-  /** Re-arms the editor after a failed save (see the state comments above). */
-  function keepEditorOpen(input: SaveBranchInput) {
-    setEditing(input.mode === 'create' ? { mode: 'create' } : { mode: 'edit', row: input.row });
-    setEditorOpen(true);
-    setEditorNonce((n) => n + 1);
-  }
-
-  function handleEditorSave() {
-    if (!editing) {
-      return;
-    }
-    const errors = validateBranchState(editorState);
-    if (errors.name || errors.address || errors.phone) {
-      setFieldErrors(errors);
-      toast.error('Fix the highlighted fields.');
-      // Veto-throw: the shared Save button closes the Sheet only when onSave
-      // returns normally — a throw is the keep-open veto and is swallowed there
-      // (#143). The inline errors + toast are the UX.
-      throw new Error('branch-editor-validation-hold');
-    }
-    setFieldErrors({});
-    saveBranch.mutate(
-      editing.mode === 'create'
-        ? { mode: 'create', state: editorState }
-        : { mode: 'edit', row: editing.row, state: editorState }
-    );
   }
 
   // The table's one action shape: the sheet-opening Edit icon (packages
@@ -383,9 +403,12 @@ export function BranchesScreen() {
         title='Branches'
         subline='The three studio locations. Hours and slot capacity arrive with v2.'
         actions={
-          <Button type='button' onClick={openCreate}>
-            New branch
-          </Button>
+          <>
+            <StatusSegmented value={segment} onChange={setSegment} />
+            <Button type='button' onClick={openCreate}>
+              New branch
+            </Button>
+          </>
         }
       />
 
@@ -449,7 +472,7 @@ export function BranchesScreen() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {branches.map((row) => {
+                  {rows.map((row) => {
                     const expanded = expandedId === row.id;
                     return (
                       <Fragment key={row.id}>
@@ -517,6 +540,7 @@ export function BranchesScreen() {
                               isActive={row.isActive}
                               onDeactivate={() => setConfirmId(row.id)}
                               onReactivate={() => flip.mutate({ row, isActive: true })}
+                              onDelete={() => setDeleteId(row.id)}
                             />
                           </TableCell>
                         </ExpandRow>
@@ -536,7 +560,7 @@ export function BranchesScreen() {
                 two-line header toggles the animated reveal (M1); line 1's
                 right value is the Walk-in badge, phone moves to the reveal. */}
             <div className='hidden flex-col @max-[700px]:flex'>
-              {branches.map((row) => {
+              {rows.map((row) => {
                 const expanded = expandedId === row.id;
                 return (
                   <div key={row.id} className='border-border border-b py-2 last:border-b-0'>
@@ -573,6 +597,7 @@ export function BranchesScreen() {
                             isActive={row.isActive}
                             onDeactivate={() => setConfirmId(row.id)}
                             onReactivate={() => flip.mutate({ row, isActive: true })}
+                            onDelete={() => setDeleteId(row.id)}
                           />
                         </div>
                       </div>
@@ -587,7 +612,6 @@ export function BranchesScreen() {
 
       {editing ? (
         <LightEntityEditor
-          key={editorNonce}
           title={editing.mode === 'create' ? 'New branch' : editing.row.name}
           description='Name, address, phone, and the walk-in flag.'
           open={editorOpen}
@@ -701,9 +725,11 @@ export function BranchesScreen() {
                 variant='outline'
                 type='button'
                 disabled={coverUploading}
+                aria-busy={coverUploading}
                 onClick={() => fileInputRef.current?.click()}
               >
-                Upload cover
+                {coverUploading ? <PendingSpinner /> : null}
+                {coverUploading ? UPLOADING_LABEL : 'Upload cover'}
               </Button>
               <Button variant='ghost' type='button' disabled={coverUploading} onClick={removeCover}>
                 Remove cover
@@ -745,6 +771,23 @@ export function BranchesScreen() {
             flip.mutate({ row: confirmRow, isActive: false });
             setConfirmId(null);
           }}
+        />
+      ) : null}
+
+      {deleteRow ? (
+        <DeleteGuardDialog
+          name={deleteRow.name}
+          mediaNote='Its cover image goes with it.'
+          blockers={deleteBlockers}
+          pending={removeRow.isPending}
+          open={deleteId === deleteRow.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteId(null);
+              setDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeRow.mutate(deleteRow)}
         />
       ) : null}
 

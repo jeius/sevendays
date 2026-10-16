@@ -9,6 +9,7 @@ import {
   fetchAdminPackages,
   fetchAdminPrintSizes,
   fetchAdminStudioServices,
+  fetchAdminTestimonialSubmissions,
   fetchAdminTestimonials,
 } from './admin.functions';
 import { getSiteSettings } from './api.functions';
@@ -83,6 +84,15 @@ export const adminTestimonialQueries = {
     queryOptions({
       queryKey: ['admin', 'testimonials'],
       queryFn: fetchAdminTestimonials,
+    }),
+};
+
+// M7 #218: the Submissions tab's queue — newest-first from the API (#216's list).
+export const adminTestimonialSubmissionQueries = {
+  all: () =>
+    queryOptions({
+      queryKey: ['admin', 'testimonial-submissions'],
+      queryFn: fetchAdminTestimonialSubmissions,
     }),
 };
 

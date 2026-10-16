@@ -57,17 +57,31 @@ import { Textarea } from '@sevendays/ui/components/textarea';
 import { useIsMobile } from '@sevendays/ui/hooks/use-mobile';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { cn } from 'cn';
-import { Check, ImagePlus, Images, Plus, Power, PowerOff, SquarePen, X } from 'lucide-react';
+import {
+  Check,
+  ImagePlus,
+  Images,
+  Plus,
+  Power,
+  PowerOff,
+  SquarePen,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { type ChangeEvent, useId, useRef, useState } from 'react';
 import {
   DeactivateConfirm,
+  DeleteGuardDialog,
   EmptyState,
   LightEntityEditor,
   QUERY_ERROR_LINE,
   QueryErrorState,
+  StatusSegmented,
 } from '#/components/cms/shared';
 import {
   presignAdminCoverUpload,
+  removeAdminGalleryCategory,
+  removeAdminGalleryPhoto,
   saveAdminGalleryCategoryCreate,
   saveAdminGalleryCategoryOrder,
   saveAdminGalleryCategoryUpdate,
@@ -88,6 +102,8 @@ import {
   reorderVisiblePhotos,
   titleFromFileName,
 } from '#/lib/gallery-state';
+import { blockerLines } from '#/lib/save-contract';
+import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 const UNCATEGORIZED = 'uncategorized';
 
@@ -162,6 +178,7 @@ function SortablePhotoCard({
   onEdit,
   onDeactivate,
   onReactivate,
+  onDelete,
 }: {
   photo: GalleryPhoto;
   categoryName: string;
@@ -170,6 +187,7 @@ function SortablePhotoCard({
   onEdit: (id: string) => void;
   onDeactivate: (id: string) => void;
   onReactivate: (id: string) => void;
+  onDelete: (id: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: photo.id,
@@ -250,6 +268,20 @@ function SortablePhotoCard({
               <Power aria-hidden='true' />
             </Button>
           )}
+          <Button
+            variant='ghost'
+            size='icon-sm'
+            type='button'
+            aria-label='Delete'
+            title='Delete'
+            className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(photo.id);
+            }}
+          >
+            <Trash2 aria-hidden='true' />
+          </Button>
         </div>
       </div>
       <CardContent className='space-y-2 p-3'>
@@ -283,6 +315,7 @@ function SortableCategoryEntry({
   onDraftChange,
   onDeactivate,
   onReactivate,
+  onCategoryDelete,
 }: {
   category: GalleryCategory;
   count: number;
@@ -297,6 +330,7 @@ function SortableCategoryEntry({
   onDraftChange: (next: string) => void;
   onDeactivate: () => void;
   onReactivate: () => void;
+  onCategoryDelete: (id: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: category.id,
@@ -407,6 +441,17 @@ function SortableCategoryEntry({
             <Power aria-hidden='true' />
           </Button>
         )}
+        <Button
+          variant='ghost'
+          size='icon-sm'
+          type='button'
+          aria-label='Delete'
+          title='Delete'
+          className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+          onClick={() => onCategoryDelete(category.id)}
+        >
+          <Trash2 aria-hidden='true' />
+        </Button>
       </div>
     </div>
   );
@@ -507,6 +552,7 @@ function CategoryRail({
   onCancelRename,
   onCategoryDeactivate,
   onCategoryReactivate,
+  onCategoryDelete,
   onDragEnd,
 }: {
   categories: GalleryCategory[];
@@ -527,6 +573,7 @@ function CategoryRail({
   onCancelRename: () => void;
   onCategoryDeactivate: (category: GalleryCategory) => void;
   onCategoryReactivate: (category: GalleryCategory) => void;
+  onCategoryDelete: (categoryId: string) => void;
   onDragEnd: (event: DragEndEvent) => void;
 }) {
   function countIn(categoryId: string): number {
@@ -568,6 +615,7 @@ function CategoryRail({
                 onDraftChange={onDraftChange}
                 onDeactivate={() => onCategoryDeactivate(category)}
                 onReactivate={() => onCategoryReactivate(category)}
+                onCategoryDelete={onCategoryDelete}
               />
             ))}
           </SortableContext>
@@ -646,20 +694,18 @@ export function GalleryScreen() {
   const isMobile = useIsMobile();
   // 'all' = the All photos rail entry; otherwise a category id.
   const [filter, setFilter] = useState<string>('all');
+  // The grid's status segment (#218): composes AFTER the category filter;
+  // the rail's counts stay unfiltered staff-truth totals.
+  const [segment, setSegment] = useState<StatusSegment>('all');
   // GL1: a tap on a card toggles the actions-visible state (the mobile half
   // of the hover/tap reveal; hover covers desktop via group-hover). Only ONE
   // expanded-actions card at a time.
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
-  // The photo editor: edit-only (photos are created by upload). `editing`
-  // carries the retry target; the parent-held `editorState` keeps the user's
-  // input intact through a failed save (the branches screen's posture).
+  // The photo editor: edit-only (photos are created by upload); the async
+  // Save contract owns the flow (#218) — a held save keeps the sheet open
+  // over the intact parent-held state; onOpenChange(false) clears both.
   const [editing, setEditing] = useState<{ row: GalleryPhoto } | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
-  // Remounts the editor on a failed save's reopen: the shared Save handler
-  // closes the Sheet unconditionally, so a failure re-arms `editorOpen` and
-  // bumps the nonce to remount (the visible latch only re-arms on mount or
-  // an `open` false→true flip).
-  const [editorNonce, setEditorNonce] = useState(0);
   const [editorState, setEditorState] = useState<PhotoEditorState>({
     title: '',
     caption: '',
@@ -668,6 +714,12 @@ export function GalleryScreen() {
   });
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [categoryConfirmId, setCategoryConfirmId] = useState<string | null>(null);
+  // The pending-guarded deletes (#218): ids + the blockers a blocked 400
+  // fills in-body (photo vs category, each dialog over the FULL list).
+  const [photoDeleteId, setPhotoDeleteId] = useState<string | null>(null);
+  const [photoDeleteBlockers, setPhotoDeleteBlockers] = useState<string[]>([]);
+  const [categoryDeleteId, setCategoryDeleteId] = useState<string | null>(null);
+  const [categoryDeleteBlockers, setCategoryDeleteBlockers] = useState<string[]>([]);
   // The rail's one create affordance + the inline rename state.
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [renamingCategoryId, setRenamingCategoryId] = useState<string | null>(null);
@@ -724,6 +776,29 @@ export function GalleryScreen() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: adminGalleryQueries.photos().queryKey });
+    },
+  });
+
+  // The pending-guarded photo delete (#218): the image object goes with the
+  // row per ADR-0019 §5 (the API's side); the dialog holds busy + stays
+  // open on failure.
+  const removePhoto = useMutation({
+    mutationFn: async (row: GalleryPhoto) => {
+      return removeAdminGalleryPhoto({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminGalleryQueries.photos().queryKey });
+        setPhotoDeleteId(null);
+        setPhotoDeleteBlockers([]);
+        toast.success('Deleted.');
+        return;
+      }
+      setPhotoDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -853,32 +928,57 @@ export function GalleryScreen() {
     },
   });
 
-  // Editor saves: NON-optimistic — the form state is the source of truth;
-  // success invalidates + toasts + closes, failure keeps the editor open
-  // with the state intact (retry is safe — the save is a full-object PUT).
-  // No inline Field slot — every photo 400 is toast-carried.
+  // The pending-guarded category delete (#218): a deleted category holds no
+  // photos — the API's guard guarantees it — so only the categories cache
+  // invalidates.
+  const removeCategory = useMutation({
+    mutationFn: async (row: GalleryCategory) => {
+      return removeAdminGalleryCategory({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminGalleryQueries.categories().queryKey });
+        setCategoryDeleteId(null);
+        setCategoryDeleteBlockers([]);
+        toast.success('Deleted.');
+        return;
+      }
+      setCategoryDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Editor saves: NON-optimistic; await the full-object PUT, resolve true
+  // on ok. No inline Field slot — every photo 400 is toast-carried.
   const photoSave = useMutation({
     mutationFn: async (input: { row: GalleryPhoto; state: PhotoEditorState }) => {
       return saveAdminGalleryPhotoUpdate({
         data: { id: input.row.id, payload: buildPhotoPayload(input.state) },
       });
     },
-    onSuccess: (result, input) => {
+  });
+
+  async function handleEditorSave(): Promise<boolean> {
+    if (!editing) {
+      return false;
+    }
+    try {
+      const result = await photoSave.mutateAsync({ row: editing.row, state: editorState });
       if (result.ok) {
         queryClient.invalidateQueries({ queryKey: adminGalleryQueries.photos().queryKey });
         toast.success('Saved.');
-        setEditing(null);
-        setEditorOpen(false);
-        return;
+        return true;
       }
       toast.error(result.message);
-      keepEditorOpen(input.row);
-    },
-    onError: (error, input) => {
-      toast.error(error.message);
-      keepEditorOpen(input.row);
-    },
-  });
+      return false;
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'The save failed.');
+      return false;
+    }
+  }
 
   // --- Upload wiring (Task 6's pool) ---
 
@@ -1081,13 +1181,6 @@ export function GalleryScreen() {
     setEditorOpen(true);
   }
 
-  /** Re-arms the editor after a failed save (see the state comments above). */
-  function keepEditorOpen(row: GalleryPhoto) {
-    setEditing({ row });
-    setEditorOpen(true);
-    setEditorNonce((n) => n + 1);
-  }
-
   if (categoriesError || photosError) {
     // Error posture (#155): either read failed — Retry re-runs both.
     return (
@@ -1137,13 +1230,17 @@ export function GalleryScreen() {
   // --- Derived (post-narrowing) ---
 
   // The reads arrive in list order — (position, id) is the display order.
-  const visiblePhotos = filter === 'all' ? photos : photos.filter((p) => p.categoryId === filter);
+  const inCategory = filter === 'all' ? photos : photos.filter((p) => p.categoryId === filter);
+  const visiblePhotos = filterByStatusSegment(inCategory, segment);
   const filterName =
     filter === 'all'
       ? 'All photos'
       : (categories.find((c) => c.id === filter)?.name ?? 'All photos');
   const confirmPhoto = photos.find((p) => p.id === confirmId);
   const confirmCategory = categories.find((c) => c.id === categoryConfirmId);
+  // The delete dialogs ride the FULL lists (never the narrowed view).
+  const deletePhoto = photos.find((p) => p.id === photoDeleteId);
+  const deleteCategory = categories.find((c) => c.id === categoryDeleteId);
   const categoryNameFor = (photo: GalleryPhoto): string =>
     categories.find((c) => c.id === photo.categoryId)?.name ?? 'Uncategorized';
 
@@ -1189,12 +1286,16 @@ export function GalleryScreen() {
           onCategoryReactivate={(category) =>
             categorySave.mutate({ mode: 'flip', row: category, isActive: true })
           }
+          onCategoryDelete={setCategoryDeleteId}
           onDragEnd={onCategoryDragEnd}
         />
 
         {/* Toolbar + upload tray + photo grid */}
         <div className='min-w-0 flex-1 space-y-3'>
-          <h2 className='text-lg font-semibold tracking-tight'>{filterName}</h2>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <h2 className='text-lg font-semibold tracking-tight'>{filterName}</h2>
+            <StatusSegmented value={segment} onChange={setSegment} />
+          </div>
 
           {trayVisible ? (
             <UploadTray
@@ -1252,6 +1353,7 @@ export function GalleryScreen() {
                           photoFlip.mutate({ row, isActive: true });
                         }
                       }}
+                      onDelete={setPhotoDeleteId}
                     />
                   ))}
                 </div>
@@ -1263,7 +1365,6 @@ export function GalleryScreen() {
 
       {editing ? (
         <LightEntityEditor
-          key={editorNonce}
           title={editing.row.title ?? 'Untitled photo'}
           description='Title, caption, category, and the active flag.'
           open={editorOpen}
@@ -1273,7 +1374,7 @@ export function GalleryScreen() {
               setEditing(null);
             }
           }}
-          onSave={() => photoSave.mutate({ row: editing.row, state: editorState })}
+          onSave={handleEditorSave}
         >
           {/* Thumb preview — the same gated proxy (AR-1). */}
           <div className='bg-muted relative aspect-[4/3] w-28 overflow-hidden rounded-md'>
@@ -1376,6 +1477,39 @@ export function GalleryScreen() {
             categorySave.mutate({ mode: 'flip', row: confirmCategory, isActive: false });
             setCategoryConfirmId(null);
           }}
+        />
+      ) : null}
+
+      {deletePhoto ? (
+        <DeleteGuardDialog
+          name={deletePhoto.title ?? 'Untitled photo'}
+          mediaNote='Its image goes with it.'
+          blockers={photoDeleteBlockers}
+          pending={removePhoto.isPending}
+          open={photoDeleteId === deletePhoto.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setPhotoDeleteId(null);
+              setPhotoDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removePhoto.mutate(deletePhoto)}
+        />
+      ) : null}
+
+      {deleteCategory ? (
+        <DeleteGuardDialog
+          name={deleteCategory.name}
+          blockers={categoryDeleteBlockers}
+          pending={removeCategory.isPending}
+          open={categoryDeleteId === deleteCategory.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setCategoryDeleteId(null);
+              setCategoryDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeCategory.mutate(deleteCategory)}
         />
       ) : null}
     </section>

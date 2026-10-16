@@ -51,6 +51,7 @@ import {
   ActionTooltip,
   Collapse,
   DeactivateConfirm,
+  DeleteGuardDialog,
   EmptyState,
   ExpandPanel,
   ExpandRow,
@@ -62,9 +63,11 @@ import {
   RowActionsCluster,
   RowIconActions,
   StatusBadge,
+  StatusSegmented,
 } from '#/components/cms/shared';
 import type { AdminMutationResult } from '#/lib/admin.functions';
 import {
+  removeAdminAddon,
   saveAdminAddonCreate,
   saveAdminAddonUpdate,
   saveAdminStudioServiceAddonMatrix,
@@ -81,6 +84,8 @@ import {
   newAddonState,
   validateAddonState,
 } from '#/lib/light-entity-state';
+import { blockerLines } from '#/lib/save-contract';
+import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 /**
  * The editor's mode switch: create (from `New add-on`) or edit (a row
@@ -150,23 +155,25 @@ export function AddonsScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  // The toolbar segment (#218): default All per visit, never persisted; the
+  // filtered view is render-time only — the caches and mutations ride the
+  // full list.
+  const [segment, setSegment] = useState<StatusSegment>('all');
+  // The delete dialog's target + its last blockers (empty until a blocked
+  // 400 answers).
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The #131 bulk ruling: selection rides the loaded row ids; the bar mounts
   // only while a selection exists. Sets REPLACE — never mutate in place.
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
-  // The editor's create/edit switch and its open flag are separate on
-  // purpose: the shared Save handler closes the Sheet unconditionally
-  // (latch + exit), so a FAILED save re-arms `editorOpen` after the exit to
-  // honor the stays-open-on-failure posture; `editing` carries the retry
-  // target — INCLUDING AQ-4's create→edit promotion after a matrix failure
-  // — plus the pinned services snapshot, and the parent-held `editorState`
-  // keeps the user's input intact.
+  // The editor's create/edit switch and its open flag are separate: the
+  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // a held save keeps the sheet open over the intact parent-held state,
+  // INCLUDING AQ-4's create→edit promotion after a matrix failure;
+  // onOpenChange(false) clears both.
   const [editing, setEditing] = useState<EditingTarget | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
-  // Remounts the editor on a failed save's reopen: the component's visible
-  // latch re-arms only on mount or an `open` false→true flip, and the flip
-  // alone is lost when the failure lands mid-exit (open never went false).
-  const [editorNonce, setEditorNonce] = useState(0);
   const [editorState, setEditorState] = useState<AddonEditorState>(newAddonState());
   const [fieldErrors, setFieldErrors] = useState<LightFieldErrors>({});
   const nameId = useId();
@@ -181,6 +188,9 @@ export function AddonsScreen() {
   const mutedServiceNames = new Set(
     (services ?? []).filter((service) => !service.isActive).map((service) => service.name)
   );
+
+  const rows = filterByStatusSegment(addons ?? [], segment);
+  const deleteRow = addons?.find((row) => row.id === deleteId);
 
   // Single-row flips: optimistic on the list cache (cancel + snapshot + patch
   // ONLY isActive; rollback + toast on error; invalidate either way) — the
@@ -227,9 +237,9 @@ export function AddonsScreen() {
    * stops the loop). The diff empty = zero PUTs — an unchanged edit's
    * matrix rides entirely on the entity PUT, and a create with an empty
    * selection fans out nothing. A matrix `!ok` does NOT undo the entity
-   * write (nor the PUTs before the failure): onSuccess keeps the editor
-   * open with the checks intact (AQ-5 — the retry's Save re-runs the whole
-   * chain; every PUT is a full-replace/idempotent) and switches a
+   * write (nor the PUTs before the failure): the async Save handler keeps
+   * the editor open with the checks intact (AQ-5 — the retry's Save re-runs
+   * the whole chain; every PUT is a full-replace/idempotent) and switches a
    * create-mode editor over to edit-over-the-created-row, so the next Save
    * re-runs as an UPDATE + fan-out — never a duplicate create. That mode
    * switch is the `matrix-failed` branch's promotion below.
@@ -264,68 +274,6 @@ export function AddonsScreen() {
         }
       }
       return { kind: 'saved' };
-    },
-    onSuccess: (outcome) => {
-      if (outcome.kind === 'matrix-failed') {
-        // The entity write landed (and possibly earlier fan-out PUTs); the
-        // failing matrix PUT did not. The editor STAYS OPEN with the checks
-        // intact — the retry's Save re-runs the chain. AQ-4's mode switch:
-        // a create that already created promotes to edit-over-the-created-
-        // row, so the retry is an UPDATE + fan-out, never a duplicate
-        // create. BOTH lists invalidate — the entity half is real in the DB
-        // either way, and the PUTs before the failure may have landed too.
-        // `editing` re-arms for BOTH modes: the shared Save handler closed
-        // the Sheet and `onExitComplete` nulls `editing` after the 300ms
-        // exit — this handler lands AFTER that (two full round trips), so
-        // without the re-arm `setEditorOpen(true)` renders nothing behind
-        // the `editing ?` guard. Create promotes to the created row (AQ-4);
-        // edit re-arms the outcome input's row — the snapshot the save ran
-        // against, not a stale closure.
-        if (outcome.input.mode === 'create') {
-          setEditing({ mode: 'edit', row: outcome.created, services: outcome.input.services });
-        } else {
-          setEditing({
-            mode: 'edit',
-            row: outcome.input.row,
-            services: outcome.input.services,
-          });
-        }
-        setEditorOpen(true);
-        setEditorNonce((n) => n + 1);
-        queryClient.invalidateQueries({ queryKey: adminAddonQueries.all().queryKey });
-        queryClient.invalidateQueries({ queryKey: adminStudioServiceQueries.all().queryKey });
-        toast.error(
-          `Saved, but the ${outcome.failedServiceName} matrix failed: ${outcome.message}`
-        );
-        return;
-      }
-      if (outcome.kind === 'entity-failed') {
-        // !ok: a name conflict marks the Name Field; no details → the message
-        // toast. The reopen replays the enter animation over the intact state.
-        const nameConflict = conflictFieldErrors(outcome.result.details).name;
-        if (nameConflict) {
-          setFieldErrors({ name: nameConflict });
-        }
-        if (!outcome.result.details) {
-          toast.error(outcome.result.message);
-        }
-        keepEditorOpen(outcome.input);
-        return;
-      }
-      // The badges live on the services read — both lists invalidate.
-      queryClient.invalidateQueries({ queryKey: adminAddonQueries.all().queryKey });
-      queryClient.invalidateQueries({ queryKey: adminStudioServiceQueries.all().queryKey });
-      toast.success('Saved.');
-    },
-    onError: (error, input) => {
-      // Bounded duplicate-POST window: a fast double-submit (or the
-      // thrown-create retry re-arming create mode) can fire the create
-      // twice — the second lands on the unique-name constraint and
-      // surfaces as its 400 conflict message, never a duplicate row.
-      // Not an API failure (serialization, session loss) — loud toast, same
-      // keep-open posture.
-      toast.error(error.message);
-      keepEditorOpen(input);
     },
   });
 
@@ -363,12 +311,38 @@ export function AddonsScreen() {
     },
   });
 
+  // The pending-guarded delete (#218, the #213 route): busy confirm via the
+  // dialog's `pending`; a blocked 400 keeps the dialog open with the
+  // blockers in-body; success closes + invalidates both lists (the addon's
+  // service-matrix rows cascade with the delete; the badges live on the
+  // services read).
+  const removeRow = useMutation({
+    mutationFn: async (row: AddonService) => {
+      return removeAdminAddon({ data: { id: row.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: adminAddonQueries.all().queryKey });
+        queryClient.invalidateQueries({ queryKey: adminStudioServiceQueries.all().queryKey });
+        setDeleteId(null);
+        setDeleteBlockers([]);
+        toast.success('Deleted.');
+        return;
+      }
+      setDeleteBlockers(blockerLines(result.details));
+      toast.error(result.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   function toggleExpanded(id: string) {
     setExpandedId((prev) => (prev === id ? null : id));
   }
 
   function toggleAll(next: boolean) {
-    setSelected(next ? new Set((addons ?? []).map((row) => row.id)) : new Set());
+    setSelected(next ? new Set(rows.map((row) => row.id)) : new Set());
   }
 
   function toggleSelected(id: string, next: boolean) {
@@ -417,36 +391,65 @@ export function AddonsScreen() {
     setEditorOpen(true);
   }
 
-  /** Re-arms the editor after a failed save (see the state comments above). */
-  function keepEditorOpen(input: SaveAddonInput) {
-    setEditing(
-      input.mode === 'create'
-        ? { mode: 'create', services: input.services }
-        : { mode: 'edit', row: input.row, services: input.services }
-    );
-    setEditorOpen(true);
-    setEditorNonce((n) => n + 1);
-  }
-
-  function handleEditorSave() {
+  async function handleEditorSave(): Promise<boolean> {
     if (!editing) {
-      return;
+      return false;
     }
     const errors = validateAddonState(editorState);
     if (errors.name || errors.description || errors.price) {
       setFieldErrors(errors);
       toast.error('Fix the highlighted fields.');
-      // Veto-throw: the shared Save button closes the Sheet only when onSave
-      // returns normally — a throw is the keep-open veto and is swallowed there
-      // (#143). The inline errors + toast are the UX.
-      throw new Error('addon-editor-validation-hold');
+      return false;
     }
     setFieldErrors({});
-    saveAddon.mutate(
+    const input: SaveAddonInput =
       editing.mode === 'create'
         ? { mode: 'create', services: editing.services, state: editorState }
-        : { mode: 'edit', row: editing.row, services: editing.services, state: editorState }
-    );
+        : { mode: 'edit', row: editing.row, services: editing.services, state: editorState };
+    try {
+      const outcome = await saveAddon.mutateAsync(input);
+      if (outcome.kind === 'saved') {
+        // The badges live on the services read — both lists invalidate.
+        queryClient.invalidateQueries({ queryKey: adminAddonQueries.all().queryKey });
+        queryClient.invalidateQueries({ queryKey: adminStudioServiceQueries.all().queryKey });
+        toast.success('Saved.');
+        return true;
+      }
+      if (outcome.kind === 'matrix-failed') {
+        // The entity write landed (and possibly earlier fan-out PUTs); the
+        // failing matrix PUT did not. The sheet HOLDS with the checks
+        // intact — the retry's Save re-runs the chain. AQ-4's mode switch:
+        // a create that already created promotes to edit-over-the-created-
+        // row, so the retry is an UPDATE + fan-out, never a duplicate
+        // create. Both lists invalidate — the entity half is real either
+        // way, and the PUTs before the failure may have landed too.
+        setEditing(
+          outcome.input.mode === 'create'
+            ? { mode: 'edit', row: outcome.created, services: outcome.input.services }
+            : { mode: 'edit', row: outcome.input.row, services: outcome.input.services }
+        );
+        queryClient.invalidateQueries({ queryKey: adminAddonQueries.all().queryKey });
+        queryClient.invalidateQueries({ queryKey: adminStudioServiceQueries.all().queryKey });
+        toast.error(
+          `Saved, but the ${outcome.failedServiceName} matrix failed: ${outcome.message}`
+        );
+        return false;
+      }
+      const nameConflict = conflictFieldErrors(outcome.result.details).name;
+      if (nameConflict) {
+        setFieldErrors({ name: nameConflict });
+      }
+      if (!outcome.result.details) {
+        toast.error(outcome.result.message);
+      }
+      return false;
+    } catch (error) {
+      // Bounded duplicate-POST window: a fast double-submit can fire the
+      // create twice — the second lands on the unique-name constraint and
+      // surfaces as its 400 conflict message, never a duplicate row.
+      toast.error(error instanceof Error ? error.message : 'The save failed.');
+      return false;
+    }
   }
 
   // The table's one action shape: the sheet-opening Edit icon.
@@ -472,9 +475,12 @@ export function AddonsScreen() {
         title='Add-ons'
         subline='Extras attached at booking time, with the services they apply to.'
         actions={
-          <Button type='button' onClick={openCreate}>
-            New add-on
-          </Button>
+          <>
+            <StatusSegmented value={segment} onChange={setSegment} />
+            <Button type='button' onClick={openCreate}>
+              New add-on
+            </Button>
+          </>
         }
       />
 
@@ -530,7 +536,7 @@ export function AddonsScreen() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {addons.map((row) => {
+                  {rows.map((row) => {
                     // The DERIVED relation: the services whose
                     // applicableAddonServiceIds include this add-on.
                     const applyingNames = (services ?? [])
@@ -600,6 +606,7 @@ export function AddonsScreen() {
                               isActive={row.isActive}
                               onDeactivate={() => setConfirmId(row.id)}
                               onReactivate={() => flip.mutate({ row, isActive: true })}
+                              onDelete={() => setDeleteId(row.id)}
                             />
                           </TableCell>
                         </ExpandRow>
@@ -618,7 +625,7 @@ export function AddonsScreen() {
                 two-line header toggles the animated reveal (M1); service
                 badges live ONLY in the reveal (S2). */}
             <div className='hidden flex-col @max-[700px]:flex'>
-              {addons.map((row) => {
+              {rows.map((row) => {
                 const applyingNames = (services ?? [])
                   .filter((service) => service.applicableAddonServiceIds.includes(row.id))
                   .map((service) => service.name);
@@ -658,6 +665,7 @@ export function AddonsScreen() {
                             isActive={row.isActive}
                             onDeactivate={() => setConfirmId(row.id)}
                             onReactivate={() => flip.mutate({ row, isActive: true })}
+                            onDelete={() => setDeleteId(row.id)}
                           />
                         </div>
                       </div>
@@ -672,7 +680,6 @@ export function AddonsScreen() {
 
       {editing ? (
         <LightEntityEditor
-          key={editorNonce}
           title={editing.mode === 'create' ? 'New add-on' : editing.row.name}
           description='Fields plus the studio services this add-on applies to.'
           open={editorOpen}
@@ -816,6 +823,22 @@ export function AddonsScreen() {
             flip.mutate({ row: confirmRow, isActive: false });
             setConfirmId(null);
           }}
+        />
+      ) : null}
+
+      {deleteRow ? (
+        <DeleteGuardDialog
+          name={deleteRow.name}
+          blockers={deleteBlockers}
+          pending={removeRow.isPending}
+          open={deleteId === deleteRow.id}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteId(null);
+              setDeleteBlockers([]);
+            }
+          }}
+          onDelete={() => removeRow.mutate(deleteRow)}
         />
       ) : null}
 

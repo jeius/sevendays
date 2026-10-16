@@ -19,8 +19,10 @@ import type {
   SiteSettings,
   StudioServiceWithBranches,
   Testimonial,
+  TestimonialSubmission,
 } from '@sevendays/types';
 import {
+  acceptTestimonialSubmissionSchema,
   createAddonServiceSchema,
   createAttireSchema,
   createBranchSchema,
@@ -50,6 +52,7 @@ import {
 import { createServerFn } from '@tanstack/react-start';
 import { getRequestHeaders } from '@tanstack/react-start/server';
 import { z } from 'zod';
+import { runAdminAction } from './admin.functions.server';
 import { getSessionScopedApiClient } from './api.server';
 
 // Mutations-as-results (the #139 plan ruling): a write server fn resolves to
@@ -859,4 +862,214 @@ export const saveAdminAttireUpdate = createServerFn({
         throw error; // not an API failure (serialization, session loss) — loud
       }
     });
+  });
+
+// M7 #218: the guarded-delete server fns over the #213 remove() wrappers.
+// A 204 has no data, so the delete result carries only ok — and !ok keeps
+// the result-value channel's details (the blocked-delete 400's one
+// { path, message } per blocking family) for the delete dialogs' in-body
+// blockers (blockerLines in lib/save-contract.ts).
+export type AdminDeleteResult =
+  | { ok: true }
+  | { ok: false; status: number; message: string; details?: unknown };
+
+// (RULING 2026-10-16, superseding the helper design below — the original
+// runAdminAction/adminDeleteFn helpers lived as plain module-scope functions
+// in THIS file, so their server-only references survived the client
+// transform and the production build failed import-protection: "Import
+// denied in client environment … Import: ./api.server". The helpers now
+// live in src/lib/admin.functions.server.ts, and every delete fn is an
+// explicit createServerFn whose handler body is the ONLY runAdminAction
+// reference — handler-body-only references to ./admin.functions.server are
+// stripped from client builds exactly like the file's existing ./api.server
+// import. The build gate (`pnpm --filter @sevendays/admin build`) is part
+// of this task's gates from the ruling on.)
+
+export const removeAdminPackage = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminDeleteResult> => {
+    return runAdminAction('DELETE /api/v1/admin/service-packages/:id', async (client) => {
+      await client.admin.servicePackages.remove({ param: { id: data.id } });
+      return { ok: true as const };
+    });
+  });
+
+// removeAdminBranch / removeAdminStudioService / removeAdminAddon /
+// removeAdminPrintSize / removeAdminAttire / removeAdminGalleryCategory /
+// removeAdminGalleryPhoto / removeAdminTestimonial follow the identical
+// block with their own span names + wrapper groups:
+//   branches.remove / studioServices.remove / addons.remove /
+//   printSizes.remove / attires.remove / galleryCategories.remove /
+//   galleryPhotos.remove / testimonials.remove — each { param: { id } }.
+
+export const removeAdminBranch = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminDeleteResult> => {
+    return runAdminAction('DELETE /api/v1/admin/branches/:id', async (client) => {
+      await client.admin.branches.remove({ param: { id: data.id } });
+      return { ok: true as const };
+    });
+  });
+
+export const removeAdminStudioService = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminDeleteResult> => {
+    return runAdminAction('DELETE /api/v1/admin/studio-services/:id', async (client) => {
+      await client.admin.studioServices.remove({ param: { id: data.id } });
+      return { ok: true as const };
+    });
+  });
+
+export const removeAdminAddon = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminDeleteResult> => {
+    return runAdminAction('DELETE /api/v1/admin/addon-services/:id', async (client) => {
+      await client.admin.addons.remove({ param: { id: data.id } });
+      return { ok: true as const };
+    });
+  });
+
+export const removeAdminPrintSize = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminDeleteResult> => {
+    return runAdminAction('DELETE /api/v1/admin/print-sizes/:id', async (client) => {
+      await client.admin.printSizes.remove({ param: { id: data.id } });
+      return { ok: true as const };
+    });
+  });
+
+export const removeAdminAttire = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminDeleteResult> => {
+    return runAdminAction('DELETE /api/v1/admin/attires/:id', async (client) => {
+      await client.admin.attires.remove({ param: { id: data.id } });
+      return { ok: true as const };
+    });
+  });
+
+export const removeAdminGalleryCategory = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminDeleteResult> => {
+    return runAdminAction('DELETE /api/v1/admin/gallery-categories/:id', async (client) => {
+      await client.admin.galleryCategories.remove({ param: { id: data.id } });
+      return { ok: true as const };
+    });
+  });
+
+export const removeAdminGalleryPhoto = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminDeleteResult> => {
+    return runAdminAction('DELETE /api/v1/admin/gallery-photos/:id', async (client) => {
+      await client.admin.galleryPhotos.remove({ param: { id: data.id } });
+      return { ok: true as const };
+    });
+  });
+
+export const removeAdminTestimonial = createServerFn({
+  method: 'POST',
+  // See presignAdminCoverUpload — output strictness waived for the result
+  // value (details?: unknown rides through by design).
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminDeleteResult> => {
+    return runAdminAction('DELETE /api/v1/admin/testimonials/:id', async (client) => {
+      await client.admin.testimonials.remove({ param: { id: data.id } });
+      return { ok: true as const };
+    });
+  });
+
+export const removeAdminTestimonialSubmission = createServerFn({
+  method: 'POST',
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminDeleteResult> => {
+    return runAdminAction('DELETE /api/v1/admin/testimonial-submissions/:id', async (client) => {
+      await client.admin.testimonialSubmissions.remove(data.id);
+      return { ok: true as const };
+    });
+  });
+
+// M7 #218: the Submissions tab's read + moderation fns over #216's
+// endpoints (the media action-endpoint precedent — accept/reject are
+// action POSTs, not full-object PUTs).
+export const fetchAdminTestimonialSubmissions = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    return startSpan({ name: 'GET /api/v1/admin/testimonial-submissions' }, async () => {
+      return getSessionScopedApiClient(
+        getRequestHeaders().get('cookie')
+      ).admin.testimonialSubmissions.list();
+    });
+  }
+);
+
+export const acceptAdminTestimonialSubmission = createServerFn({
+  method: 'POST',
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid(), payload: acceptTestimonialSubmissionSchema }))
+  .handler(async ({ data }): Promise<AdminMutationResult<TestimonialSubmission>> => {
+    return runAdminAction(
+      'POST /api/v1/admin/testimonial-submissions/:id/accept',
+      async (client) => ({
+        ok: true as const,
+        data: await client.admin.testimonialSubmissions.accept(data.id, data.payload),
+      })
+    );
+  });
+
+export const rejectAdminTestimonialSubmission = createServerFn({
+  method: 'POST',
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminMutationResult<TestimonialSubmission>> => {
+    return runAdminAction(
+      'POST /api/v1/admin/testimonial-submissions/:id/reject',
+      async (client) => ({
+        ok: true as const,
+        data: await client.admin.testimonialSubmissions.reject(data.id),
+      })
+    );
   });
