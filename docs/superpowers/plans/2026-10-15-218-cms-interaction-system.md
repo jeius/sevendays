@@ -614,7 +614,10 @@ export type AdminDeleteResult =
 //       return await action(client);
 //     } catch (error) {
 //       if (error instanceof ApiClientError) {
-//         return { ok: false, status: error.status, message: error.message, details: error.details };
+//         // ApiClientError.details is the parsed apiErrorSchema ENVELOPE
+//         // { error, details? } — unwrap so consumers get the inner array.
+//         const envelope = error.details as { details?: unknown } | undefined;
+//         return { ok: false, status: error.status, message: error.message, details: envelope?.details };
 //       }
 //       throw error;
 //     }
