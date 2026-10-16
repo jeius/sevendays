@@ -5,6 +5,7 @@
 // Token flags: the status palette + radius step-down are flagged TODO at
 // their use sites pending the owner's design-system ruling — never promote
 // them into packages/ui silently.
+import type { TestimonialSubmissionStatus } from '@sevendays/types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +18,7 @@ import {
   AlertDialogPortal,
   AlertDialogTitle,
 } from '@sevendays/ui/components/alert-dialog';
+import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
 import {
   Sheet,
@@ -35,15 +37,87 @@ import {
 } from '@sevendays/ui/components/tooltip';
 import { useIsMobile } from '@sevendays/ui/hooks/use-mobile';
 import { cn } from 'cn';
-import { ChevronDown, Power, PowerOff } from 'lucide-react';
+import { ChevronDown, LoaderCircle, Power, PowerOff, Trash2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { ComponentProps, ReactElement, ReactNode } from 'react';
 import { useEffect, useState } from 'react';
+import { DELETING_LABEL } from '#/lib/save-contract';
+import { STATUS_SEGMENTS, type StatusSegment } from '#/lib/status-segment';
 
 /** Peso format pinned to the landing precedent (test-pinned there as ₱1,100.00). Null (unpriced, ADR-0020) renders nothing. */
 export function peso(cents: number | null): string | null {
   if (cents === null) return null;
   return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
+}
+
+/** M7 #218: the pending vocabulary's spinner — LoaderCircle, animate-spin, currentColor, aria-hidden. Icon-only buttons render this IN PLACE of their icon; labeled buttons prefix it. */
+export function PendingSpinner() {
+  return <LoaderCircle aria-hidden='true' className='animate-spin' />;
+}
+
+/**
+ * The segmented control (M7 #218) — the WindowToggle recipe (dashboard) as
+ * pressed buttons: role=group + aria-label on an inline-flex bordered
+ * container; the active segment rides the design system's own active stop
+ * (--brand-primary-active, the tokens.css convention — white on #034356 is
+ * 10.82:1); the inactive segments hover on accent. Local state at the call
+ * site — no routes, no persistence.
+ */
+export function SegmentedControl<T extends string>({
+  options,
+  value,
+  onChange,
+  ariaLabel,
+}: {
+  options: ReadonlyArray<{ value: T; label: string }>;
+  value: T;
+  onChange: (next: T) => void;
+  ariaLabel: string;
+}) {
+  return (
+    <div
+      role='group'
+      aria-label={ariaLabel}
+      className='border-input bg-background inline-flex overflow-hidden rounded-lg border'
+    >
+      {options.map(({ value: option, label }) => {
+        const active = value === option;
+        return (
+          <button
+            key={option}
+            type='button'
+            aria-pressed={active}
+            className={
+              active
+                ? 'bg-brand-800 text-primary-foreground px-3 py-1.5 text-xs font-medium'
+                : 'hover:bg-accent hover:text-accent-foreground px-3 py-1.5 text-xs'
+            }
+            onClick={() => onChange(option)}
+          >
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** The All/Active/Deactivated triple — the spec's retired-row filter, default All per visit at the call site. */
+export function StatusSegmented({
+  value,
+  onChange,
+}: {
+  value: StatusSegment;
+  onChange: (next: StatusSegment) => void;
+}) {
+  return (
+    <SegmentedControl
+      options={STATUS_SEGMENTS}
+      value={value}
+      onChange={onChange}
+      ariaLabel='Status filter'
+    />
+  );
 }
 
 /** One h1 per screen — house rule. Subline muted under it, actions right-aligned on the row. */
@@ -77,10 +151,48 @@ export function StatusBadge({ isActive }: { isActive: boolean }) {
       {/* TODO(token-ruling): status-dot palette pending the owner's design-system ruling (#134 open items) */}
       <span
         aria-hidden='true'
-        className={`size-2.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-400'}`}
+        className={`size-2.5 rounded-full ${
+          isActive ? 'bg-green-500 dark:bg-green-400' : 'bg-gray-400 dark:bg-zinc-500'
+        }`}
       />
       <span className='sr-only'>{isActive ? 'Active' : 'Deactivated'}</span>
     </span>
+  );
+}
+
+// The submissions queue's status palette (M7 #218): the audit viewer's
+// badge discipline (outline Badge + hue family, audit-log-screen.tsx:57)
+// on the three moderation states.
+// TODO(token-ruling): status palette pending the owner's variants round —
+// the classes are candidates, retunable at this ticket's Task 8.
+const SUBMISSION_STATUS_META: Record<
+  TestimonialSubmissionStatus,
+  { label: string; className: string }
+> = {
+  pending: {
+    label: 'Pending',
+    className:
+      'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-300',
+  },
+  accepted: {
+    label: 'Accepted',
+    className:
+      'border-green-300 bg-green-50 text-green-800 dark:border-green-400/30 dark:bg-green-400/10 dark:text-green-300',
+  },
+  rejected: {
+    label: 'Rejected',
+    className:
+      'border-slate-300 bg-slate-50 text-slate-700 dark:border-slate-400/30 dark:bg-slate-400/10 dark:text-slate-300',
+  },
+};
+
+/** One moderation state — visible text, never color alone. */
+export function SubmissionStatusBadge({ status }: { status: TestimonialSubmissionStatus }) {
+  const meta = SUBMISSION_STATUS_META[status];
+  return (
+    <Badge variant='outline' className={meta.className}>
+      {meta.label}
+    </Badge>
   );
 }
 
@@ -221,11 +333,13 @@ export function RowIconActions({
   edit,
   isActive,
   onDeactivate,
+  onDelete,
   onReactivate,
 }: {
   edit: ReactElement;
   isActive: boolean;
   onDeactivate: () => void;
+  onDelete?: () => void;
   onReactivate: () => void;
 }) {
   return (
@@ -257,7 +371,7 @@ export function RowIconActions({
               size='icon-sm'
               type='button'
               aria-label='Reactivate'
-              className='text-green-600 hover:bg-green-600/10 hover:text-green-600'
+              className='text-green-700 hover:bg-green-600/10 hover:text-green-700 dark:text-green-400 dark:hover:bg-green-400/10 dark:hover:text-green-400'
               onClick={onReactivate}
             >
               <Power aria-hidden='true' />
@@ -265,6 +379,23 @@ export function RowIconActions({
           }
         />
       )}
+      {onDelete ? (
+        <ActionTooltip
+          label='Delete'
+          button={
+            <Button
+              variant='ghost'
+              size='icon-sm'
+              type='button'
+              aria-label='Delete'
+              className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+              onClick={onDelete}
+            >
+              <Trash2 aria-hidden='true' />
+            </Button>
+          }
+        />
+      ) : null}
     </TooltipProvider>
   );
 }
@@ -278,6 +409,7 @@ export function RowActionsCluster({
   edit,
   isActive,
   onDeactivate,
+  onDelete,
   onReactivate,
   onToggle,
   expanded = false,
@@ -285,6 +417,7 @@ export function RowActionsCluster({
   edit: ReactElement;
   isActive: boolean;
   onDeactivate: () => void;
+  onDelete?: () => void;
   onReactivate: () => void;
   onToggle?: () => void;
   expanded?: boolean;
@@ -296,6 +429,7 @@ export function RowActionsCluster({
           edit={edit}
           isActive={isActive}
           onDeactivate={onDeactivate}
+          onDelete={onDelete}
           onReactivate={onReactivate}
         />
       </div>
@@ -431,6 +565,168 @@ export function DeactivateConfirm({
         )}
       </AnimatePresence>
     </AlertDialog>
+  );
+}
+
+/**
+ * The guarded-action confirm (M7 #218): DeactivateConfirm's motion recipe
+ * (visible latch + AnimatePresence exit + the mobile dock) on a
+ * PENDING-GUARDED action — the confirm button goes disabled + spinner + the
+ * busy label swap + aria-busy while the parent's mutation runs; the dialog
+ * STAYS OPEN on failure with the blocking references rendered in-body
+ * (never toast-and-close); the parent clears `open` on success. Cancel is
+ * disabled while pending (a close mid-flight would orphan the result).
+ */
+export function GuardedConfirm({
+  title,
+  description,
+  confirmLabel,
+  busyLabel,
+  pending,
+  blockers,
+  open,
+  onOpenChange,
+  onConfirm,
+}: {
+  title: string;
+  description: ReactNode;
+  confirmLabel: string;
+  busyLabel: string;
+  pending: boolean;
+  blockers: string[];
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+}) {
+  const isMobile = useIsMobile();
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    setVisible(open);
+  }, [open]);
+  const variants = isMobile
+    ? {
+        initial: { opacity: 0, transform: 'translateY(100%)' },
+        animate: { opacity: 1, transform: 'translateY(0)' },
+        exit: { opacity: 0, transform: 'translateY(100%)' },
+      }
+    : {
+        initial: { opacity: 0, scale: 0.95 },
+        animate: { opacity: 1, scale: 1 },
+        exit: { opacity: 0, scale: 0.95 },
+      };
+  return (
+    <AlertDialog
+      open={visible && open}
+      onOpenChange={(next) => {
+        if (next) {
+          onOpenChange(true);
+        } else {
+          setVisible(false);
+        }
+      }}
+    >
+      <AnimatePresence onExitComplete={() => onOpenChange(false)}>
+        {visible && (
+          <AlertDialogPortal keepMounted>
+            <AlertDialogOverlay
+              render={
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                />
+              }
+            />
+            <AlertDialogContent
+              render={
+                <motion.div
+                  initial={variants.initial}
+                  animate={variants.animate}
+                  exit={variants.exit}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                />
+              }
+              className='top-auto bottom-0 left-0 translate-x-0 translate-y-0 rounded-b-none data-[size=default]:max-w-none max-sm:rounded-t-xl sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-b-[min(var(--radius-4xl),24px)]'
+            >
+              <AlertDialogHeader>
+                <AlertDialogTitle>{title}</AlertDialogTitle>
+                <AlertDialogDescription>{description}</AlertDialogDescription>
+                {blockers.length > 0 ? (
+                  <div className='text-destructive space-y-1 text-sm' role='alert'>
+                    <p className='font-medium'>Blocked by:</p>
+                    <ul className='list-disc space-y-0.5 pl-5'>
+                      {blockers.map((line) => (
+                        <li key={line}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant='destructive'
+                  disabled={pending}
+                  aria-busy={pending}
+                  onClick={onConfirm}
+                >
+                  {pending ? <PendingSpinner /> : null}
+                  {pending ? busyLabel : confirmLabel}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogPortal>
+        )}
+      </AnimatePresence>
+    </AlertDialog>
+  );
+}
+
+/**
+ * The delete confirm (M7 #218, spec § Confirmation UX): GuardedConfirm with
+ * the delete copy — names the row, states the irreversible, and where the
+ * entity carries media, `mediaNote` states the images go with it (audit
+ * story 37). No typed-name gate (guarded deletes destroy no booking
+ * history). Blockers arrive only after a blocked 400 — the dialog's first
+ * open shows none.
+ */
+export function DeleteGuardDialog({
+  name,
+  mediaNote,
+  blockers,
+  pending,
+  open,
+  onOpenChange,
+  onDelete,
+}: {
+  name: string;
+  mediaNote?: string;
+  blockers: string[];
+  pending: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onDelete: () => void;
+}) {
+  return (
+    <GuardedConfirm
+      title={`Delete ${name}?`}
+      description={
+        <>
+          {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items).
+              Spans, not <p> — AlertDialogDescription renders its own <p>. */}
+          <span className='block'>This permanently deletes it from the catalog.</span>
+          {mediaNote ? <span className='block'>{mediaNote}</span> : null}
+        </>
+      }
+      confirmLabel='Delete'
+      busyLabel={DELETING_LABEL}
+      pending={pending}
+      blockers={blockers}
+      open={open}
+      onOpenChange={onOpenChange}
+      onConfirm={onDelete}
+    />
   );
 }
 
