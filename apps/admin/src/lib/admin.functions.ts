@@ -19,8 +19,10 @@ import type {
   SiteSettings,
   StudioServiceWithBranches,
   Testimonial,
+  TestimonialSubmission,
 } from '@sevendays/types';
 import {
+  acceptTestimonialSubmissionSchema,
   createAddonServiceSchema,
   createAttireSchema,
   createBranchSchema,
@@ -859,4 +861,136 @@ export const saveAdminAttireUpdate = createServerFn({
         throw error; // not an API failure (serialization, session loss) — loud
       }
     });
+  });
+
+// M7 #218: the guarded-delete server fns over the #213 remove() wrappers.
+// A 204 has no data, so the delete result carries only ok — and !ok keeps
+// the result-value channel's details (the blocked-delete 400's one
+// { path, message } per blocking family) for the delete dialogs' in-body
+// blockers (blockerLines in lib/save-contract.ts).
+export type AdminDeleteResult =
+  | { ok: true }
+  | { ok: false; status: number; message: string; details?: unknown };
+
+// The shared body for the result-valued action fns below: run the wrapper,
+// map ApiClientError to the failure arm, rethrow anything else (not an API
+// failure — serialization, session loss — loud). The failure arm unions
+// with the action's own success return, so each fn's declared result type
+// stays the plain result union — no casts.
+type AdminClient = ReturnType<typeof getSessionScopedApiClient>;
+type AdminActionFailure = { ok: false; status: number; message: string; details?: unknown };
+
+async function runAdminAction<T>(
+  spanName: string,
+  action: (client: AdminClient) => Promise<T>
+): Promise<T | AdminActionFailure> {
+  return startSpan({ name: spanName }, async () => {
+    const client = getSessionScopedApiClient(getRequestHeaders().get('cookie'));
+    try {
+      return await action(client);
+    } catch (error) {
+      if (error instanceof ApiClientError) {
+        return { ok: false, status: error.status, message: error.message, details: error.details };
+      }
+      throw error;
+    }
+  });
+}
+
+function adminDeleteFn(spanName: string, run: (client: AdminClient, id: string) => Promise<void>) {
+  return createServerFn({
+    method: 'POST',
+    // See presignAdminCoverUpload — output strictness waived for the result
+    // value (details?: unknown rides through by design).
+    strict: { output: false },
+  })
+    .validator(z.object({ id: z.uuid() }))
+    .handler(async ({ data }): Promise<AdminDeleteResult> => {
+      return runAdminAction(spanName, async (client) => {
+        await run(client, data.id);
+        return { ok: true as const };
+      });
+    });
+}
+
+export const removeAdminPackage = adminDeleteFn(
+  'DELETE /api/v1/admin/service-packages/:id',
+  (client, id) => client.admin.servicePackages.remove({ param: { id } })
+);
+export const removeAdminBranch = adminDeleteFn('DELETE /api/v1/admin/branches/:id', (client, id) =>
+  client.admin.branches.remove({ param: { id } })
+);
+export const removeAdminStudioService = adminDeleteFn(
+  'DELETE /api/v1/admin/studio-services/:id',
+  (client, id) => client.admin.studioServices.remove({ param: { id } })
+);
+export const removeAdminAddon = adminDeleteFn(
+  'DELETE /api/v1/admin/addon-services/:id',
+  (client, id) => client.admin.addons.remove({ param: { id } })
+);
+export const removeAdminPrintSize = adminDeleteFn(
+  'DELETE /api/v1/admin/print-sizes/:id',
+  (client, id) => client.admin.printSizes.remove({ param: { id } })
+);
+export const removeAdminAttire = adminDeleteFn('DELETE /api/v1/admin/attires/:id', (client, id) =>
+  client.admin.attires.remove({ param: { id } })
+);
+export const removeAdminGalleryCategory = adminDeleteFn(
+  'DELETE /api/v1/admin/gallery-categories/:id',
+  (client, id) => client.admin.galleryCategories.remove({ param: { id } })
+);
+export const removeAdminGalleryPhoto = adminDeleteFn(
+  'DELETE /api/v1/admin/gallery-photos/:id',
+  (client, id) => client.admin.galleryPhotos.remove({ param: { id } })
+);
+export const removeAdminTestimonial = adminDeleteFn(
+  'DELETE /api/v1/admin/testimonials/:id',
+  (client, id) => client.admin.testimonials.remove({ param: { id } })
+);
+export const removeAdminTestimonialSubmission = adminDeleteFn(
+  'DELETE /api/v1/admin/testimonial-submissions/:id',
+  (client, id) => client.admin.testimonialSubmissions.remove(id)
+);
+
+// M7 #218: the Submissions tab's read + moderation fns over #216's
+// endpoints (the media action-endpoint precedent — accept/reject are
+// action POSTs, not full-object PUTs).
+export const fetchAdminTestimonialSubmissions = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    return startSpan({ name: 'GET /api/v1/admin/testimonial-submissions' }, async () => {
+      return getSessionScopedApiClient(
+        getRequestHeaders().get('cookie')
+      ).admin.testimonialSubmissions.list();
+    });
+  }
+);
+
+export const acceptAdminTestimonialSubmission = createServerFn({
+  method: 'POST',
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid(), payload: acceptTestimonialSubmissionSchema }))
+  .handler(async ({ data }): Promise<AdminMutationResult<TestimonialSubmission>> => {
+    return runAdminAction(
+      'POST /api/v1/admin/testimonial-submissions/:id/accept',
+      async (client) => ({
+        ok: true as const,
+        data: await client.admin.testimonialSubmissions.accept(data.id, data.payload),
+      })
+    );
+  });
+
+export const rejectAdminTestimonialSubmission = createServerFn({
+  method: 'POST',
+  strict: { output: false },
+})
+  .validator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }): Promise<AdminMutationResult<TestimonialSubmission>> => {
+    return runAdminAction(
+      'POST /api/v1/admin/testimonial-submissions/:id/reject',
+      async (client) => ({
+        ok: true as const,
+        data: await client.admin.testimonialSubmissions.reject(data.id),
+      })
+    );
   });
