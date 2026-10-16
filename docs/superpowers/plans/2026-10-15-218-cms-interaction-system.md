@@ -1519,7 +1519,7 @@ grep -rn "editorNonce\|keepEditorOpen" apps/admin/src; echo "exit=$?"
 grep -rn "validation-hold" apps/admin/src; echo "exit=$?"
 ```
 
-Expected: **both print nothing and `exit=1`** (zero hits). Record in the evidence dir. Then `pnpm --filter @sevendays/admin fix` → `test -- --run` (21/217 unchanged) → `typecheck` (the wall: green ONLY if all seven sites converted). Commit:
+Expected (re-scoped, 2026-10-16 controller ruling after the live run): the `editorNonce\|keepEditorOpen` pattern cannot reach literal zero — this JSDoc's own pinned text plus save-contract.ts's module comment match it in prose. The gate PASSES when the only hits are comment prose and the FUNCTIONAL markers are all zero (`grep -rn "setEditorNonce\|key={editorNonce}\|keepEditorOpen(" apps/admin/src` → exit=1) and `validation-hold` is zero (exit=1). Record both outputs in the evidence dir. Then `pnpm --filter @sevendays/admin fix` → `test -- --run` (21/217 unchanged) → `typecheck` (the wall: green ONLY if all seven sites converted). Bare `catch (error)` blocks take the house idiom `error instanceof Error ? error.message : 'The save failed.'` (TS18046 under strict; the plan's fences predate the check). Commit:
 
 ```bash
 git add apps/admin/src/components/cms/shared.tsx apps/admin/src/components/testimonials/testimonials-screen.tsx apps/admin/src/components/lookups/lookups-screen.tsx apps/admin/src/components/addons/addons-screen.tsx apps/admin/src/components/branches/branches-screen.tsx apps/admin/src/components/studio-services/studio-services-screen.tsx apps/admin/src/components/gallery/gallery-screen.tsx
@@ -2187,7 +2187,7 @@ export function SubmissionsTab() {
       toast.error(result.message);
       return false;
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error instanceof Error ? error.message : 'The save failed.');
       return false;
     }
   }
