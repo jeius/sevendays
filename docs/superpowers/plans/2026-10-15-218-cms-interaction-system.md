@@ -2067,11 +2067,7 @@ import {
   removeAdminTestimonialSubmission,
 } from '#/lib/admin.functions';
 import { adminTestimonialQueries, adminTestimonialSubmissionQueries } from '#/lib/cms-queries';
-import {
-  ACCEPTING_LABEL,
-  REJECTING_LABEL,
-  blockerLines,
-} from '#/lib/save-contract';
+import { REJECTING_LABEL, blockerLines } from '#/lib/save-contract';
 import {
   SUBMISSION_SEGMENTS,
   acceptEditStateFromSubmission,
@@ -2386,7 +2382,7 @@ export function SubmissionsTab() {
 }
 ```
 
-Notes: (a) the `LightEntityEditor`'s busy Save label is `SAVING_LABEL` by contract — the sheet shows 'Saving…' over the 'Accept' label while in flight; `ACCEPTING_LABEL` is therefore consumed only by the owner-copy round (if the owner rules the accept-specific label, swap the shell to accept a `busyLabel` prop in the retune commit — do NOT widen the component speculatively now). (b) the accept sheet's `description` and the two confirm descriptions carry `TODO(owner-copy)` per the convention — the fenced strings are the proposals the round ratifies or retunes. (c) `PENDING_ROW_KEYS` is this file's own local (the other screens' constants are module-private to theirs).
+Notes: (a) the `LightEntityEditor`'s busy Save label is `SAVING_LABEL` by contract — the sheet shows 'Saving…' over the 'Accept' label while in flight; `ACCEPTING_LABEL` is therefore consumed only by the owner-copy round (if the owner rules the accept-specific label, swap the shell to accept a `busyLabel` prop in the retune commit — do NOT widen the component speculatively now). (Ruling 2026-10-16, live run: the import is therefore NOT fenced into the file — `noUnusedLocals` fails the typecheck gate on it (TS6133); the retune commit re-adds it if the owner rules it.) (b) the accept sheet's `description` and the two confirm descriptions carry `TODO(owner-copy)` per the convention — the fenced strings are the proposals the round ratifies or retunes. (c) `PENDING_ROW_KEYS` is this file's own local (the other screens' constants are module-private to theirs).
 
 - [ ] **Step 2: Wire the tab switch into `testimonials-screen.tsx`**
 
