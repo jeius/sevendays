@@ -67,9 +67,11 @@ import {
   QueryErrorState,
   RowActionsCluster,
   RowIconActions,
+  SegmentedControl,
   StatusBadge,
   StatusSegmented,
 } from '#/components/cms/shared';
+import { SubmissionsTab } from '#/components/testimonials/submissions-tab';
 import {
   removeAdminTestimonial,
   saveAdminTestimonialCreate,
@@ -217,6 +219,10 @@ export function TestimonialsScreen() {
   const queryClient = useQueryClient();
   // T3: controlled disclosure — one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  // The screen's two tabs (#218): the published list and the moderation
+  // queue — local state, no routes (the queue is a stop on an existing
+  // screen, not a new place to remember).
+  const [tab, setTab] = useState<'testimonials' | 'submissions'>('testimonials');
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
   // The toolbar segment (#218): default All per visit, never persisted; the
@@ -472,87 +478,100 @@ export function TestimonialsScreen() {
         title='Testimonials'
         subline='Client quotes shown on the /about page, ordered.'
         actions={
-          <>
-            <StatusSegmented value={segment} onChange={setSegment} />
-            <Button type='button' onClick={openCreate}>
-              New testimonial
-            </Button>
-          </>
+          tab === 'testimonials' ? (
+            <>
+              <StatusSegmented value={segment} onChange={setSegment} />
+              <Button type='button' onClick={openCreate}>
+                New testimonial
+              </Button>
+            </>
+          ) : undefined
         }
       />
 
-      {isError ? (
-        <QueryErrorState
-          line={QUERY_ERROR_LINE}
-          onRetry={() => {
-            void refetch();
-          }}
-        />
-      ) : isPending || !testimonials ? (
-        // Pending posture: skeleton rows echoing the row anatomy (grip,
-        // person + quote, actions) at the table's rhythm.
-        <Card className='@container rounded-lg'>
-          <CardContent className='space-y-4'>
-            {PENDING_ROW_KEYS.map((key) => (
-              <div key={key} className='flex items-center gap-4 py-1'>
-                <Skeleton className='size-4 rounded-sm' />
-                <div className='flex-1 space-y-1.5'>
-                  <Skeleton className='h-4 w-1/3' />
-                  <Skeleton className='h-3 w-2/3' />
+      <SegmentedControl
+        options={[
+          { value: 'testimonials', label: 'Testimonials' },
+          { value: 'submissions', label: 'Submissions' },
+        ]}
+        value={tab}
+        onChange={setTab}
+        ariaLabel='Testimonials sections'
+      />
+
+      {tab === 'testimonials' ? (
+        isError ? (
+          <QueryErrorState
+            line={QUERY_ERROR_LINE}
+            onRetry={() => {
+              void refetch();
+            }}
+          />
+        ) : isPending || !testimonials ? (
+          // Pending posture: skeleton rows echoing the row anatomy (grip,
+          // person + quote, actions) at the table's rhythm.
+          <Card className='@container rounded-lg'>
+            <CardContent className='space-y-4'>
+              {PENDING_ROW_KEYS.map((key) => (
+                <div key={key} className='flex items-center gap-4 py-1'>
+                  <Skeleton className='size-4 rounded-sm' />
+                  <div className='flex-1 space-y-1.5'>
+                    <Skeleton className='h-4 w-1/3' />
+                    <Skeleton className='h-3 w-2/3' />
+                  </div>
+                  <Skeleton className='h-4 w-28' />
                 </div>
-                <Skeleton className='h-4 w-28' />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ) : testimonials.length === 0 ? (
-        // TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items)
-        <EmptyState line='No testimonials yet.'>
-          <Button type='button' onClick={openCreate}>
-            New testimonial
-          </Button>
-        </EmptyState>
-      ) : (
-        <Card className='@container rounded-lg'>
-          <CardContent>
-            {/* @container: the table folds into stacked rows below a 700px
+              ))}
+            </CardContent>
+          </Card>
+        ) : testimonials.length === 0 ? (
+          // TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items)
+          <EmptyState line='No testimonials yet.'>
+            <Button type='button' onClick={openCreate}>
+              New testimonial
+            </Button>
+          </EmptyState>
+        ) : (
+          <Card className='@container rounded-lg'>
+            <CardContent>
+              {/* @container: the table folds into stacked rows below a 700px
                 CONTAINER width (Tailwind v4 native container queries). The
                 TooltipProvider is the per-table one the person tooltips use
                 (A3). The TODO(token-ruling) radius step-down is flagged at
                 its ruling site in the pattern library, not re-declared. */}
-            <TooltipProvider>
-              <Table className='@max-[700px]:hidden'>
-                <TableHeader>
-                  <TableRow>
-                    {/* Drag-handle column (round-3 ruling) — no header label. */}
-                    <TableHead className='w-10' />
-                    <TableHead>Person</TableHead>
-                    {/* T2: the Actions header renders empty — the icons carry
+              <TooltipProvider>
+                <Table className='@max-[700px]:hidden'>
+                  <TableHeader>
+                    <TableRow>
+                      {/* Drag-handle column (round-3 ruling) — no header label. */}
+                      <TableHead className='w-10' />
+                      <TableHead>Person</TableHead>
+                      {/* T2: the Actions header renders empty — the icons carry
                       their own labels. */}
-                    <TableHead className='text-right' />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={onDragEnd}
-                  >
-                    <SortableContext
-                      items={rows.map((row) => row.id)}
-                      strategy={verticalListSortingStrategy}
+                      <TableHead className='text-right' />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={onDragEnd}
                     >
-                      {rows.map((row) => {
-                        const expanded = expandedId === row.id;
-                        return (
-                          <Fragment key={row.id}>
-                            <SortableTestimonialRow
-                              id={row.id}
-                              expanded={expanded}
-                              onClick={() => toggleExpanded(row.id)}
-                            >
-                              <TableCell className='cursor-pointer'>
-                                {/* TM1: person is the identity (the Packages
+                      <SortableContext
+                        items={rows.map((row) => row.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {rows.map((row) => {
+                          const expanded = expandedId === row.id;
+                          return (
+                            <Fragment key={row.id}>
+                              <SortableTestimonialRow
+                                id={row.id}
+                                expanded={expanded}
+                                onClick={() => toggleExpanded(row.id)}
+                              >
+                                <TableCell className='cursor-pointer'>
+                                  {/* TM1: person is the identity (the Packages
                                   format); quote is the one-line secondary
                                   (full quote on expand). Round 4: the dot
                                   sits BESIDE the person so it never strands
@@ -560,124 +579,131 @@ export function TestimonialsScreen() {
                                   the person truncates when the column is
                                   squeezed and the tooltip carries the full
                                   text. */}
-                                <div className='space-y-0.5'>
-                                  <div className='flex items-center gap-2'>
-                                    <StatusBadge isActive={row.isActive} />
-                                    <ActionTooltip
-                                      label={row.person}
-                                      button={
-                                        <p className='min-w-0 truncate font-semibold'>
-                                          {row.person}
-                                        </p>
-                                      }
-                                    />
-                                  </div>
-                                  {/* N2: the truncated quote hides while
+                                  <div className='space-y-0.5'>
+                                    <div className='flex items-center gap-2'>
+                                      <StatusBadge isActive={row.isActive} />
+                                      <ActionTooltip
+                                        label={row.person}
+                                        button={
+                                          <p className='min-w-0 truncate font-semibold'>
+                                            {row.person}
+                                          </p>
+                                        }
+                                      />
+                                    </div>
+                                    {/* N2: the truncated quote hides while
                                     expanded — the reveal carries the full
                                     text. A1: the line indents by the dot
                                     (size-2.5) + its gap-2 — 4.5 spacing
                                     steps — so the text aligns with the
                                     person above it. */}
-                                  {expanded ? null : (
-                                    <div className='flex min-w-0 items-center pl-4.5'>
-                                      <p className='text-muted-foreground truncate text-xs'>
-                                        {row.quote}
-                                      </p>
-                                    </div>
-                                  )}
+                                    {expanded ? null : (
+                                      <div className='flex min-w-0 items-center pl-4.5'>
+                                        <p className='text-muted-foreground truncate text-xs'>
+                                          {row.quote}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell
+                                  className='text-right'
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <RowActionsCluster
+                                    expanded={expanded}
+                                    onToggle={() => toggleExpanded(row.id)}
+                                    edit={editButton(row)}
+                                    isActive={row.isActive}
+                                    onDeactivate={() => setConfirmId(row.id)}
+                                    onReactivate={() => flip.mutate({ row, isActive: true })}
+                                    onDelete={() => setDeleteId(row.id)}
+                                  />
+                                </TableCell>
+                              </SortableTestimonialRow>
+                              {/* T3 desktop reveal: the FULL quote (spans the
+                              grip + identity + actions columns). */}
+                              <ExpandPanel open={expanded} colSpan={3}>
+                                {row.quote}
+                              </ExpandPanel>
+                            </Fragment>
+                          );
+                        })}
+                      </SortableContext>
+                    </DndContext>
+                  </TableBody>
+                </Table>
+              </TooltipProvider>
+
+              {/* Stacked posture (below 700px container width): the two-line
+                header toggles the animated reveal (M1); rows drag by the grip
+                (round-3 ruling). A second DndContext — the prototype's
+                posture: both lists render the same sortable ids, and one
+                context would register each id twice. */}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={onDragEnd}
+              >
+                <SortableContext
+                  items={rows.map((row) => row.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className='hidden flex-col @max-[700px]:flex'>
+                    {rows.map((row) => {
+                      const expanded = expandedId === row.id;
+                      return (
+                        <SortableStackRow
+                          key={row.id}
+                          id={row.id}
+                          header={
+                            <button
+                              type='button'
+                              aria-expanded={expanded}
+                              className='w-full cursor-pointer text-left'
+                              onClick={() => toggleExpanded(row.id)}
+                            >
+                              <div className='flex items-center justify-between gap-3'>
+                                <div className='flex min-w-0 items-center gap-2'>
+                                  <StatusBadge isActive={row.isActive} />
+                                  <p className='truncate font-medium'>{row.person}</p>
                                 </div>
-                              </TableCell>
-                              <TableCell
-                                className='text-right'
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <RowActionsCluster
-                                  expanded={expanded}
-                                  onToggle={() => toggleExpanded(row.id)}
+                              </div>
+                              {/* N2: the quote line hides while expanded. A1:
+                                dot-width indent, same as the desktop line 2. */}
+                              {expanded ? null : (
+                                <p className='text-muted-foreground mt-1 truncate pl-4.5 text-xs'>
+                                  {row.quote}
+                                </p>
+                              )}
+                            </button>
+                          }
+                        >
+                          <Collapse open={expanded}>
+                            <div className='mt-2 space-y-2'>
+                              <p className='text-muted-foreground text-sm'>{row.quote}</p>
+                              <div className='flex gap-1'>
+                                <RowIconActions
                                   edit={editButton(row)}
                                   isActive={row.isActive}
                                   onDeactivate={() => setConfirmId(row.id)}
                                   onReactivate={() => flip.mutate({ row, isActive: true })}
                                   onDelete={() => setDeleteId(row.id)}
                                 />
-                              </TableCell>
-                            </SortableTestimonialRow>
-                            {/* T3 desktop reveal: the FULL quote (spans the
-                              grip + identity + actions columns). */}
-                            <ExpandPanel open={expanded} colSpan={3}>
-                              {row.quote}
-                            </ExpandPanel>
-                          </Fragment>
-                        );
-                      })}
-                    </SortableContext>
-                  </DndContext>
-                </TableBody>
-              </Table>
-            </TooltipProvider>
-
-            {/* Stacked posture (below 700px container width): the two-line
-                header toggles the animated reveal (M1); rows drag by the grip
-                (round-3 ruling). A second DndContext — the prototype's
-                posture: both lists render the same sortable ids, and one
-                context would register each id twice. */}
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-              <SortableContext
-                items={rows.map((row) => row.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <div className='hidden flex-col @max-[700px]:flex'>
-                  {rows.map((row) => {
-                    const expanded = expandedId === row.id;
-                    return (
-                      <SortableStackRow
-                        key={row.id}
-                        id={row.id}
-                        header={
-                          <button
-                            type='button'
-                            aria-expanded={expanded}
-                            className='w-full cursor-pointer text-left'
-                            onClick={() => toggleExpanded(row.id)}
-                          >
-                            <div className='flex items-center justify-between gap-3'>
-                              <div className='flex min-w-0 items-center gap-2'>
-                                <StatusBadge isActive={row.isActive} />
-                                <p className='truncate font-medium'>{row.person}</p>
                               </div>
                             </div>
-                            {/* N2: the quote line hides while expanded. A1:
-                                dot-width indent, same as the desktop line 2. */}
-                            {expanded ? null : (
-                              <p className='text-muted-foreground mt-1 truncate pl-4.5 text-xs'>
-                                {row.quote}
-                              </p>
-                            )}
-                          </button>
-                        }
-                      >
-                        <Collapse open={expanded}>
-                          <div className='mt-2 space-y-2'>
-                            <p className='text-muted-foreground text-sm'>{row.quote}</p>
-                            <div className='flex gap-1'>
-                              <RowIconActions
-                                edit={editButton(row)}
-                                isActive={row.isActive}
-                                onDeactivate={() => setConfirmId(row.id)}
-                                onReactivate={() => flip.mutate({ row, isActive: true })}
-                                onDelete={() => setDeleteId(row.id)}
-                              />
-                            </div>
-                          </div>
-                        </Collapse>
-                      </SortableStackRow>
-                    );
-                  })}
-                </div>
-              </SortableContext>
-            </DndContext>
-          </CardContent>
-        </Card>
+                          </Collapse>
+                        </SortableStackRow>
+                      );
+                    })}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            </CardContent>
+          </Card>
+        )
+      ) : (
+        <SubmissionsTab />
       )}
 
       {editing ? (
