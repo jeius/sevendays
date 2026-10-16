@@ -135,7 +135,7 @@ export function BulkActionBar({
             <PowerOff aria-hidden='true' />
             Deactivate
           </Button>
-          {/* TODO(token-ruling): status palette pending the owner's design-system ruling (#134 open items) */}
+          {/* Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families — never promote into packages/ui. */}
           <Button
             variant='outline'
             type='button'

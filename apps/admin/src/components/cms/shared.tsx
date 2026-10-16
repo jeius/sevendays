@@ -148,7 +148,7 @@ export function PageHeader({
 export function StatusBadge({ isActive }: { isActive: boolean }) {
   return (
     <span className='inline-flex items-center gap-1.5'>
-      {/* TODO(token-ruling): status-dot palette pending the owner's design-system ruling (#134 open items) */}
+      {/* Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families — never promote into packages/ui. */}
       <span
         aria-hidden='true'
         className={`size-2.5 rounded-full ${
@@ -163,8 +163,7 @@ export function StatusBadge({ isActive }: { isActive: boolean }) {
 // The submissions queue's status palette (M7 #218): the audit viewer's
 // badge discipline (outline Badge + hue family, audit-log-screen.tsx:57)
 // on the three moderation states.
-// TODO(token-ruling): status palette pending the owner's variants round —
-// the classes are candidates, retunable at this ticket's Task 8.
+// Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families — never promote into packages/ui.
 const SUBMISSION_STATUS_META: Record<
   TestimonialSubmissionStatus,
   { label: string; className: string }
@@ -365,7 +364,7 @@ export function RowIconActions({
         <ActionTooltip
           label='Reactivate'
           button={
-            // TODO(token-ruling): status-dot palette pending the owner's design-system ruling (#134 open items)
+            // Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families — never promote into packages/ui.
             <Button
               variant='ghost'
               size='icon-sm'
