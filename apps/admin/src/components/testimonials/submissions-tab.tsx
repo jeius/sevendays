@@ -2,7 +2,8 @@
 // pending queue on the Testimonials screen — a stop on an existing screen,
 // not a new place to remember. Pending-guarded accept-with-edit (the
 // accept sheet rides LightEntityEditor's async Save contract, saveLabel
-// 'Accept' — busy 'Accepting…'), reject-retains (GuardedConfirm), and
+// 'Accept' — the shell's busy 'Saving…' per #218's Task 7 note (a)),
+// reject-retains (GuardedConfirm), and
 // delete-any-status (DeleteGuardDialog — a submission references nothing,
 // so blockers never arrive). The tab's own status segment defaults to
 // Pending: the queue IS the work. The list renders newest-first as the API
