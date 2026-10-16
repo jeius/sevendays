@@ -147,7 +147,7 @@ describe('closesOnEvent (the close-only-on-success rule)', () => {
   });
 });
 
-describe('blockerLines (the delete dialog's in-body blockers, from the #213 400 details)', () => {
+describe('blockerLines (the delete dialog’s in-body blockers, from the #213 400 details)', () => {
   it('derives one capitalized-family line per detail, order preserved', () => {
     expect(
       blockerLines([
@@ -248,6 +248,7 @@ const base = {
   id: '11111111-1111-4111-8111-111111111111',
   quote: 'The photographer made our graduation shoot feel effortless.',
   person: 'Maria, batch 2026',
+  status: 'pending' as const,
   createdAt: new Date('2026-10-14T08:30:00.000Z'),
   updatedAt: new Date('2026-10-14T08:30:00.000Z'),
 };
@@ -314,7 +315,7 @@ describe('acceptEditStateFromSubmission + validateAcceptEdit + buildAcceptPayloa
   });
 });
 
-describe('submittedOn (the queue's UTC date line)', () => {
+describe('submittedOn (the queue’s UTC date line)', () => {
   it('formats UTC-stable — pinned on full-ICU Node (never edit the expectation; fix the runtime instead)', () => {
     expect(submittedOn(base)).toBe('Oct 14, 2026');
     expect(submittedOn({ ...base, createdAt: new Date('2026-01-02T23:59:00.000Z') })).toBe(
