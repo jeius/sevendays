@@ -411,7 +411,7 @@ grep -rn "export function peso" apps/admin/src
 grep -rn "Intl.NumberFormat" apps/admin/src
 ```
 
-Expected: the first answers exactly `apps/admin/src/lib/peso.ts` (one site); the second answers exactly the same single site (the format lives once). Then `pnpm --filter @sevendays/admin fix` → `test -- --run` → `typecheck`. Commit:
+Expected: the first answers exactly `apps/admin/src/lib/peso.ts` (one site); the second — scoped to the currency format, `grep -rn "Intl.NumberFormat('en-PH'" apps/admin/src` — answers exactly the same single site (the peso format lives once; the unrelated M6 `Intl.NumberFormat('en')` count formatter at `components/dashboard/format.ts:27` is a legal pre-existing site, not a gate failure). Then `pnpm --filter @sevendays/admin fix` → `test -- --run` → `typecheck`. Commit:
 
 ```bash
 git add apps/admin/src/lib/package-expanded-row.ts apps/admin/src/lib/package-expanded-row.test.ts apps/admin/src/lib/peso.ts apps/admin/src/lib/peso.test.ts apps/admin/src/components/cms/shared.tsx apps/admin/src/components/packages/packages-table.tsx apps/admin/src/components/addons/addons-screen.tsx apps/admin/src/components/studio-services/studio-services-screen.tsx
