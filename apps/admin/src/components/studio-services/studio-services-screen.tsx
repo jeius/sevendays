@@ -50,7 +50,6 @@ import {
   ExpandRow,
   LightEntityEditor,
   PageHeader,
-  peso,
   QUERY_ERROR_LINE,
   QueryErrorState,
   RowActionsCluster,
@@ -76,6 +75,7 @@ import {
   studioServiceStateFromRead,
   validateStudioServiceState,
 } from '#/lib/light-entity-state';
+import { peso } from '#/lib/peso';
 import { blockerLines } from '#/lib/save-contract';
 import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 

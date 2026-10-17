@@ -44,12 +44,6 @@ import { useEffect, useState } from 'react';
 import { DELETING_LABEL, SAVING_LABEL } from '#/lib/save-contract';
 import { STATUS_SEGMENTS, type StatusSegment } from '#/lib/status-segment';
 
-/** Peso format pinned to the landing precedent (test-pinned there as ₱1,100.00). Null (unpriced, ADR-0020) renders nothing. */
-export function peso(cents: number | null): string | null {
-  if (cents === null) return null;
-  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
-}
-
 /** M7 #218: the pending vocabulary's spinner — LoaderCircle, animate-spin, currentColor, aria-hidden. Icon-only buttons render this IN PLACE of their icon; labeled buttons prefix it. */
 export function PendingSpinner() {
   return <LoaderCircle aria-hidden='true' className='animate-spin' />;
