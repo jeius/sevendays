@@ -574,6 +574,7 @@ export function GuardedConfirm({
   title,
   description,
   confirmLabel,
+  cancelLabel = 'Cancel',
   busyLabel,
   pending,
   blockers,
@@ -584,6 +585,8 @@ export function GuardedConfirm({
   title: string;
   description: ReactNode;
   confirmLabel: string;
+  /** The stay-side label — 'Cancel' everywhere except the leaving-mid-upload guard (#220), where 'Stay' reads as the answer. */
+  cancelLabel?: string;
   busyLabel: string;
   pending: boolean;
   blockers: string[];
@@ -657,7 +660,7 @@ export function GuardedConfirm({
                 ) : null}
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+                <AlertDialogCancel disabled={pending}>{cancelLabel}</AlertDialogCancel>
                 <AlertDialogAction
                   variant='destructive'
                   disabled={pending}
