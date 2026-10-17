@@ -30,7 +30,7 @@
 - **The picker law (binding):** the hidden input, its `id='gallery-upload-input'`, its JPG-only `accept`, the route's `label`/`htmlFor` pair, and the `JPG files up to 50 MiB.` cap line are untouched — the picker keeps working verbatim beside the drop zone (the ticket's "the picker unchanged" is an acceptance criterion, re-verified in Task 3).
 - **Copy law:** every string the executor must produce lands verbatim in this plan's fenced blocks. New unrated staff-facing copy carries the house `TODO(owner-copy)` marker per the on-disk convention — here: `'Canceled'` (the tray status line), `'Cancel'` (the tray button), `'Drop photos to upload'` (the armed overlay), `'Leave while uploading?'` + `'Uploads are still in flight. Leaving now cancels the ones that haven't finished.'` + `'Leave anyway'` (spec-verbatim) + `'Stay'` (the dialog), and `'Leaving…'` (the never-rendered busyLabel — `pending` is always false). Task 3's owner round ratifies or retunes them; markers retire as ruled; if copy retunes, the code changes in the same commit (no suite pins these strings — they are component-side).
 - **Theme law (binding, #217's ramp):** the overlay and tray additions use semantic tokens and tailwind utilities only (`border-primary`, `bg-background/80`, `text-foreground` …) — no new tokens, no `packages/ui` change. Both themes render from the same classes; the round verifies dark, never a second class set.
-- **Scope fence (verbatim):** Task 1 edits only `apps/admin/src/lib/{batch-photo-upload.ts, batch-photo-upload.test.ts, gallery-state.ts, gallery-state.test.ts}`. Task 2 edits only `apps/admin/src/components/{cms/shared.tsx (the one additive optional prop), gallery/gallery-screen.tsx}`. Task 3 edits only the files Tasks 1–2 landed (copy/class retunes) + writes evidence. Task 4 rotates `docs/plan.md`, `docs/progress.md`, `AGENTS.md`, `docs/agents/v1-picks.md` (post-merge), `graphify-out/`, and works the PR/pick/issues — nothing else. NOT here: everything in the header's sibling-fences bullet.
+- **Scope fence (verbatim):** Task 1 edits only `apps/admin/src/lib/{batch-photo-upload.ts, batch-photo-upload.test.ts, gallery-state.ts, gallery-state.test.ts}` + Step 6(d)'s one `trayStatusText` line in `apps/admin/src/components/gallery/gallery-screen.tsx` (ruled at execution — the type widening's own consumer fix). Task 2 edits only `apps/admin/src/components/{cms/shared.tsx (the one additive optional prop), gallery/gallery-screen.tsx}`. Task 3 edits only the files Tasks 1–2 landed (copy/class retunes) + writes evidence. Task 4 rotates `docs/plan.md`, `docs/progress.md`, `AGENTS.md`, `docs/agents/v1-picks.md` (post-merge), `graphify-out/`, and works the PR/pick/issues — nothing else. NOT here: everything in the header's sibling-fences bullet.
 
 ## File Structure
 
@@ -55,12 +55,13 @@ Plain data in and out; the Task 2 screen renders what this task derives. The mod
 **Files:**
 - Modify (test-first): `apps/admin/src/lib/batch-photo-upload.test.ts`, `apps/admin/src/lib/gallery-state.test.ts`
 - Modify: `apps/admin/src/lib/batch-photo-upload.ts`, `apps/admin/src/lib/gallery-state.ts`
+- Modify (Step 6d, the type widening's one consumer fix — ruled into Task 1 at execution): `apps/admin/src/components/gallery/gallery-screen.tsx`
 
 **Interfaces:**
 - Produces (what Task 2 consumes): from `batch-photo-upload.ts` — `runBatchUpload(items: BatchItem[], deps: BatchUploadDeps, signal?: AbortSignal): Promise<{ done: BatchItem[]; failed: BatchItem[]; canceled: BatchItem[] }>` (the extended status machine gains `{ phase: 'canceled' }`); `BatchUploadDeps.put` gains `signal?: AbortSignal` as its 4th parameter; `putFileToPresignedUrl(file, uploadUrl, onProgress, signal?)`; `hasUnsettledUploads(items: BatchItem[], statuses: Map<string, BatchItemStatus>): boolean`; `trayIsVisible(items: BatchItem[], statuses: Map<string, BatchItemStatus>): boolean`. From `gallery-state.ts` — `batchItemsFromFiles(files: File[], categoryId: string | null): BatchItem[]` and `isFileDrag(types: readonly string[]): boolean`.
 - Consumes: nothing new — `@sevendays/types` shapes and the module's own existing exports.
 
-**Not here:** any component (Task 2); the leave guard's wiring (Task 2 — this task only builds the predicate it consumes); the cover path (`cover-upload.ts` untouched); pre-commit metadata editing; any API/wire change (zero-API law).
+**Not here:** any component beyond Step 6(d)'s one `trayStatusText` line (the rest is Task 2); the leave guard's wiring (Task 2 — this task only builds the predicate it consumes); the cover path (`cover-upload.ts` untouched); pre-commit metadata editing; any API/wire change (zero-API law).
 
 - [ ] **Step 1: Write the failing tests (a) — the abort law**
 
@@ -199,22 +200,35 @@ Append to the same file (below the new describe):
 ```ts
 describe('the tray + leave-guard predicates (M7 #220)', () => {
   it('hasUnsettledUploads: enqueued(undefined)/queued/uploading/committing are unsettled; done/failed/canceled are terminal; an empty tray is settled', () => {
-    const items = [1, 2, 3, 4, 5, 6].map(item);
+    // Named consts, never an indexed array: noUncheckedIndexedAccess types
+    // every `items[n]` read `BatchItem | undefined` (ruled at execution,
+    // 2026-10-17 — the indexed first cut was a plan defect).
+    const enqueued = item(1);
+    const queued = item(2);
+    const uploadingItem = item(3);
+    const committing = item(4);
+    const doneItem = item(5);
+    const failedItem = item(6);
     const statuses = new Map<string, BatchItemStatus>([
-      [items[1].id, { phase: 'queued' }],
-      [items[2].id, { phase: 'uploading', sent: 1, total: 2 }],
-      [items[3].id, { phase: 'committing' }],
-      [items[4].id, { phase: 'done', photo: { id: uuid(96) } as never }],
-      [items[5].id, { phase: 'failed', kind: 'transient', message: 'x', attempts: 2 }],
+      [queued.id, { phase: 'queued' }],
+      [uploadingItem.id, { phase: 'uploading', sent: 1, total: 2 }],
+      [committing.id, { phase: 'committing' }],
+      [doneItem.id, { phase: 'done', photo: { id: uuid(96) } as never }],
+      [failedItem.id, { phase: 'failed', kind: 'transient', message: 'x', attempts: 2 }],
     ]);
-    // items[0] carries NO status yet — enqueued, the pool has not reported.
-    expect(hasUnsettledUploads(items, statuses)).toBe(true);
+    // enqueued carries NO status yet — the pool has not reported.
+    expect(
+      hasUnsettledUploads(
+        [enqueued, queued, uploadingItem, committing, doneItem, failedItem],
+        statuses
+      )
+    ).toBe(true);
     const terminal = new Map<string, BatchItemStatus>([
-      [items[0].id, { phase: 'done', photo: { id: uuid(95) } as never }],
-      [items[1].id, { phase: 'failed', kind: 'permanent', message: 'x', attempts: 1 }],
-      [items[2].id, { phase: 'canceled' }],
+      [enqueued.id, { phase: 'done', photo: { id: uuid(95) } as never }],
+      [queued.id, { phase: 'failed', kind: 'permanent', message: 'x', attempts: 1 }],
+      [uploadingItem.id, { phase: 'canceled' }],
     ]);
-    expect(hasUnsettledUploads([items[0], items[1], items[2]], terminal)).toBe(false);
+    expect(hasUnsettledUploads([enqueued, queued, uploadingItem], terminal)).toBe(false);
     expect(hasUnsettledUploads([], new Map())).toBe(false);
   });
 
@@ -699,12 +713,22 @@ export function isFileDrag(types: readonly string[]): boolean {
 }
 ```
 
+(d) The type widening's one consumer fix (ruled into Task 1 at execution, 2026-10-17 — the `{ phase: 'canceled' }` union member breaks `trayStatusText`'s `Failed:` fallback the moment Task 1 lands, so the fix travels with the type change, not with Task 2): in `apps/admin/src/components/gallery/gallery-screen.tsx`'s `trayStatusText`, insert before the final `return`:
+
+```tsx
+  if (status.phase === 'canceled') {
+    return 'Canceled';
+  }
+```
+
+No other line of the screen changes in Task 1.
+
 - [ ] **Step 7: Green + gates + commit**
 
 `pnpm --filter @sevendays/admin test -- --run` — **23 files / 240 tests passed** (229 + the 11 new; batch-photo-upload 10 → 19 its, gallery-state 9 → 11). Then `pnpm --filter @sevendays/admin fix` → re-run `test -- --run` → `typecheck`. Commit:
 
 ```bash
-git add apps/admin/src/lib/batch-photo-upload.ts apps/admin/src/lib/batch-photo-upload.test.ts apps/admin/src/lib/gallery-state.ts apps/admin/src/lib/gallery-state.test.ts
+git add apps/admin/src/lib/batch-photo-upload.ts apps/admin/src/lib/batch-photo-upload.test.ts apps/admin/src/lib/gallery-state.ts apps/admin/src/lib/gallery-state.test.ts apps/admin/src/components/gallery/gallery-screen.tsx
 git commit -m "feat(admin): the upload abort seam - cancel settles canceled, never a retry; the tray/guard predicates + the shared enqueue (#220)"
 ```
 
@@ -771,13 +795,7 @@ import {
 
 - [ ] **Step 3: The tray vocabulary — Canceled line, Cancel button, Done-guarding**
 
-(a) `trayStatusText` gains the canceled class — insert before the final `return`:
-
-```tsx
-  if (status.phase === 'canceled') {
-    return 'Canceled';
-  }
-```
+(a) `trayStatusText`'s canceled line — **already landed in Task 1 (Step 6(d), execution ruling 2026-10-17)**; verify it's present, nothing to edit.
 
 (b) `UploadTray`'s props gain `onCancel: () => void;` (after `onRetryFailed`), its destructure gains `onCancel,`, and inside the component (above `return`) add:
 
