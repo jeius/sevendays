@@ -35,7 +35,6 @@ import {
   EmptyState,
   ExpandPanel,
   ExpandRow,
-  peso,
   QUERY_ERROR_LINE,
   QueryErrorState,
   RowActionsCluster,
@@ -46,6 +45,7 @@ import {
 import { removeAdminPackage, saveAdminPackageUpdate } from '#/lib/admin.functions';
 import { adminPackageQueries } from '#/lib/cms-queries';
 import { buildRowFlipPayload } from '#/lib/package-editor-state';
+import { peso } from '#/lib/peso';
 import { blockerLines } from '#/lib/save-contract';
 import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
