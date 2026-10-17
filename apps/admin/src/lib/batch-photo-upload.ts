@@ -9,6 +9,12 @@
 // concurrency cap, the retry classes, and the status machine with fake
 // presign/put/commit fns. The XHR implementation is injected too (the
 // component wires the cover-upload loop's browser-direct PUT).
+// M7 #220 adds the abort seam: an optional AbortSignal settles every
+// unsettled item `canceled` — never a retry (the pre-#220 pool classed the
+// XHR abort-reject `transient` and would have re-queued a canceled upload),
+// no new network call starts after the abort, and a commit already in
+// flight completes with its verdict standing. The tray/guard predicates
+// below are the one vocabulary both the tray UI and the leaving guard read.
 import type {
   CreateGalleryPhotoInput,
   GalleryPhoto,
@@ -49,7 +55,8 @@ export type BatchItemStatus =
   | { phase: 'uploading'; sent: number; total: number }
   | { phase: 'committing' }
   | { phase: 'done'; photo: GalleryPhoto }
-  | { phase: 'failed'; kind: BatchFailureKind; message: string; attempts: number };
+  | { phase: 'failed'; kind: BatchFailureKind; message: string; attempts: number }
+  | { phase: 'canceled' };
 
 /**
  * The injected I/O — the pool owns no network of its own.
@@ -66,7 +73,8 @@ export interface BatchUploadDeps {
   put(
     file: File,
     uploadUrl: string,
-    onProgress: (sent: number, total: number) => void
+    onProgress: (sent: number, total: number) => void,
+    signal?: AbortSignal
   ): Promise<void>;
   commit(
     input: CreateGalleryPhotoInput
@@ -123,17 +131,40 @@ export async function preCheckFile(file: File): Promise<string | null> {
  * presigns fresh — an expired URL never poisons the retry); else it
  * settles `failed`.
  *
- * Settlement is guaranteed: every item ends `done` or `failed`, the promise
- * resolves with the two lists, and `onStatus` has told the full story.
- * Continue-with-successes / retry-failures — never an all-or-nothing
- * barrier: only committed files become savable.
+ * M7 #220 — the abort seam: an optional `signal`. Once aborted, no new
+ * network call starts (checked at attempt start and after every awaited
+ * hop), in-flight PUTs abort through the injected signal, and every
+ * unsettled item settles `{ phase: 'canceled' }` — cancel is a verdict,
+ * never a failure class and never a retry. A commit already in flight
+ * completes and its verdict stands; an abort after the PUT still cancels
+ * (nothing canceled is promoted — the staged object is the tmp/ lifecycle
+ * GC's). Settlement is guaranteed either way: every item ends `done`,
+ * `failed`, or `canceled` exactly once, and `onStatus` has told the full
+ * story. Continue-with-successes / retry-failures — never an
+ * all-or-nothing barrier: only committed files become savable.
  */
 export async function runBatchUpload(
   items: BatchItem[],
-  deps: BatchUploadDeps
-): Promise<{ done: BatchItem[]; failed: BatchItem[] }> {
+  deps: BatchUploadDeps,
+  signal?: AbortSignal
+): Promise<{ done: BatchItem[]; failed: BatchItem[]; canceled: BatchItem[] }> {
   const done: BatchItem[] = [];
   const failed: BatchItem[] = [];
+  const canceled: BatchItem[] = [];
+  // Settlement bookkeeping: every item ends done | failed | canceled
+  // exactly once — the post-drain sweep reads this to settle never-run
+  // items after an abort without double-settling retried entries.
+  const settled = new Set<string>();
+  const aborted = () => signal?.aborted === true;
+
+  const settleCanceled = (item: BatchItem) => {
+    if (settled.has(item.id)) {
+      return;
+    }
+    settled.add(item.id);
+    deps.onStatus(item.id, { phase: 'canceled' });
+    canceled.push(item);
+  };
 
   interface QueueEntry {
     item: BatchItem;
@@ -153,19 +184,32 @@ export async function runBatchUpload(
     const attempt = entry.attemptsUsed + 1;
 
     const fail = (kind: BatchFailureKind, message: string) => {
+      settled.add(item.id);
       deps.onStatus(item.id, { phase: 'failed', kind, message, attempts: attempt });
       failed.push(item);
     };
 
     // A `transient` failure: re-queue if attempts remain (the retry gets a
-    // fresh presign), else settle `failed`.
+    // fresh presign), else settle `failed`. An ABORTED pool never
+    // re-queues — cancel is a verdict, not a failure class (#220).
     const retryOrFail = (message: string) => {
+      if (aborted()) {
+        settleCanceled(item);
+        return;
+      }
       if (attempt < MAX_UPLOAD_ATTEMPTS) {
         queue.push({ item, attemptsUsed: attempt, preChecked: true });
       } else {
         fail('transient', message);
       }
     };
+
+    if (aborted()) {
+      // A canceled run never even claims "queued" — a pre-aborted pool
+      // settles straight to canceled (the suite pins phases exactly).
+      settleCanceled(item);
+      return;
+    }
 
     deps.onStatus(item.id, { phase: 'queued' });
 
@@ -178,10 +222,15 @@ export async function runBatchUpload(
         fail('pre-check', problem);
         return;
       }
+      if (aborted()) {
+        settleCanceled(item);
+        return;
+      }
     }
 
     // (2) Presign — the server assigns the staging key; the client never
-    // supplies key text (ADR-0019). A throw is `transient`.
+    // supplies key text (ADR-0019). A throw is `transient`; an abort that
+    // landed mid-await stops the next hop.
     let stagingKey: string;
     let uploadUrl: string;
     try {
@@ -195,16 +244,28 @@ export async function runBatchUpload(
       retryOrFail(error instanceof Error ? error.message : 'Could not start the upload.');
       return;
     }
+    if (aborted()) {
+      settleCanceled(item);
+      return;
+    }
 
     // (3) The XHR PUT; progress events map to `uploading`. Non-2xx arrives
     // as a typed PutUploadError — 400 is `permanent`, the rest `transient`.
-    // An `error`/`abort` reject is `transient`.
+    // An `error`/`abort` reject is `transient` — UNLESS the pool was
+    // aborted, when it settles `canceled` (never a retry).
     try {
-      await deps.put(item.file, uploadUrl, (sent, total) => {
-        deps.onStatus(item.id, { phase: 'uploading', sent, total });
-      });
+      await deps.put(
+        item.file,
+        uploadUrl,
+        (sent, total) => {
+          deps.onStatus(item.id, { phase: 'uploading', sent, total });
+        },
+        signal
+      );
     } catch (error) {
-      if (error instanceof PutUploadError) {
+      if (aborted()) {
+        settleCanceled(item);
+      } else if (error instanceof PutUploadError) {
         if (error.status === 400) {
           fail('permanent', error.message);
         } else {
@@ -215,10 +276,17 @@ export async function runBatchUpload(
       }
       return;
     }
+    if (aborted()) {
+      // The PUT finished, but the operator canceled — nothing canceled is
+      // promoted; the staged object is the tmp/ lifecycle GC's.
+      settleCanceled(item);
+      return;
+    }
 
     // (4) The commit — its own POST /admin/gallery-photos, the
-    // verify/promote gate. ok → `done` (the row IS the grid's new card);
-    // 400 → `permanent` with the API message; anything else `transient`.
+    // verify/promote gate. An abort BEFORE it fires cancels (above); once
+    // in flight, its verdict stands. ok → `done`; 400 → `permanent` with
+    // the API message; anything else `transient`.
     deps.onStatus(item.id, { phase: 'committing' });
     try {
       const result = await deps.commit({
@@ -228,6 +296,7 @@ export async function runBatchUpload(
         categoryId: item.categoryId,
       });
       if (result.ok) {
+        settled.add(item.id);
         deps.onStatus(item.id, { phase: 'done', photo: result.photo });
         done.push(item);
       } else if (result.status === 400) {
@@ -244,6 +313,9 @@ export async function runBatchUpload(
 
   const worker = async (): Promise<void> => {
     while (next < queue.length) {
+      if (aborted()) {
+        break; // an aborted pool stops dequeueing
+      }
       const entry = queue[next];
       if (entry === undefined) break; // unreachable below queue.length
       next += 1;
@@ -253,7 +325,14 @@ export async function runBatchUpload(
 
   await Promise.all(Array.from({ length: BATCH_CONCURRENCY }, () => worker()));
 
-  return { done, failed };
+  // The abort sweep: workers stopped before dequeueing every entry — each
+  // never-run (or mid-retry-queue) item settles `canceled` now. Without an
+  // abort this is a no-op (every item already settled).
+  for (const entry of queue) {
+    settleCanceled(entry.item);
+  }
+
+  return { done, failed, canceled };
 }
 
 /**
@@ -276,7 +355,11 @@ export class PutUploadError extends Error {
  * (fetch has no upload progress — the spec's XHR ruling), 2xx resolves.
  * Unlike the cover loop it THROWS a typed `PutUploadError` on non-2xx and
  * rejects on `error`/`abort`, so the pool's retry-class map stays in one
- * place.
+ * place. M7 #220: the optional `signal` is the cancel wire — an already-
+ * aborted signal rejects without sending; an abort mid-flight calls
+ * `xhr.abort()`, whose `onabort` reject ('Upload canceled.') the pool
+ * settles `canceled` (never a retry). The listener is `once`-style and
+ * removed on every settle.
  *
  * `#143 seam: the injected PUT` — exported for the component's `deps.put`
  * wiring and for the suite's stubbing seam.
@@ -284,16 +367,24 @@ export class PutUploadError extends Error {
 export async function putFileToPresignedUrl(
   file: File,
   uploadUrl: string,
-  onProgress: (sent: number, total: number) => void
+  onProgress: (sent: number, total: number) => void,
+  signal?: AbortSignal
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new Error('Upload canceled.'));
+      return;
+    }
     const xhr = new XMLHttpRequest();
+    const onAbort = () => xhr.abort();
+    signal?.addEventListener('abort', onAbort);
     xhr.open('PUT', uploadUrl);
     xhr.setRequestHeader('Content-Type', 'image/jpeg');
     xhr.upload.onprogress = (event) => {
       onProgress(event.loaded, event.total);
     };
     xhr.onload = () => {
+      signal?.removeEventListener('abort', onAbort);
       if (xhr.status >= 200 && xhr.status < 300) {
         resolve();
       } else {
@@ -301,11 +392,56 @@ export async function putFileToPresignedUrl(
       }
     };
     xhr.onerror = () => {
+      signal?.removeEventListener('abort', onAbort);
       reject(new Error('Upload failed: network error.'));
     };
     xhr.onabort = () => {
+      signal?.removeEventListener('abort', onAbort);
       reject(new Error('Upload canceled.'));
     };
     xhr.send(file);
+  });
+}
+
+/**
+ * `#220 seam: the leave-guard predicate` — true while ANY item has not
+ * reached a terminal status. `undefined` counts (enqueued; the pool has
+ * not reported yet), as do queued/uploading/committing; done/failed/
+ * canceled are terminal. BOTH navigation guards consume this one
+ * predicate — the router blocker and the browser beforeunload — so the
+ * two classes can never disagree about what "unsettled" means.
+ */
+export function hasUnsettledUploads(
+  items: BatchItem[],
+  statuses: Map<string, BatchItemStatus>
+): boolean {
+  return items.some((item) => {
+    const status = statuses.get(item.id);
+    if (status === undefined) {
+      return true;
+    }
+    return (
+      status.phase === 'queued' || status.phase === 'uploading' || status.phase === 'committing'
+    );
+  });
+}
+
+/**
+ * `#220 seam: the tray's visibility law` — the tray renders while anything
+ * is unsettled OR any row still needs staff eyes (a failure to retry, a
+ * canceled row to acknowledge); an all-done tray hides itself. Canceled
+ * rows hold the tray open: after a mid-batch cancel the operator still
+ * sees what did NOT upload (Done clears).
+ */
+export function trayIsVisible(items: BatchItem[], statuses: Map<string, BatchItemStatus>): boolean {
+  if (items.length === 0) {
+    return false;
+  }
+  if (hasUnsettledUploads(items, statuses)) {
+    return true;
+  }
+  return items.some((item) => {
+    const phase = statuses.get(item.id)?.phase;
+    return phase === 'failed' || phase === 'canceled';
   });
 }

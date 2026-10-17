@@ -1,11 +1,13 @@
 import { galleryPhotoSchema } from '@sevendays/types';
 import { describe, expect, it } from 'vitest';
 import {
+  batchItemsFromFiles,
   buildCategoryOrderPayload,
   buildPhotoFlipPayload,
   buildPhotoOrderPayload,
   buildPhotoPayload,
   buildTestimonialOrderPayload,
+  isFileDrag,
   photoStateFromRead,
   reorderIds,
   reorderVisiblePhotos,
@@ -123,5 +125,27 @@ describe('titles and order payloads', () => {
         },
       ])
     ).toEqual({ testimonialIds: [uuid(7)] });
+  });
+});
+
+describe('batchItemsFromFiles + isFileDrag (M7 #220 — the shared enqueue + the file-drag gate)', () => {
+  it('maps every file by the AR-11 enqueue law: title from file name, caption null, category passthrough, fresh unique ids, input order', () => {
+    const a = new File(['a'], 'Graduation 2026.jpg', { type: 'image/jpeg' });
+    const b = new File(['b'], 'studio.batch.2.jpg', { type: 'image/jpeg' });
+    const categoryId = '00000000-0000-4000-8000-000000000009';
+    const items = batchItemsFromFiles([a, b], categoryId);
+    expect(items.map((i) => i.title)).toEqual(['Graduation 2026', 'studio.batch.2']);
+    expect(items.every((i) => i.caption === null)).toBe(true);
+    expect(items.every((i) => i.categoryId === categoryId)).toBe(true);
+    expect(items.map((i) => i.file)).toEqual([a, b]);
+    expect(new Set(items.map((i) => i.id)).size).toBe(2);
+    expect(batchItemsFromFiles([a], null).at(0)?.categoryId).toBeNull();
+  });
+
+  it('isFileDrag: only Files-carrying drags count — dnd-kit/text drags never arm the zone', () => {
+    expect(isFileDrag(['Files'])).toBe(true);
+    expect(isFileDrag(['Files', 'text/uri-list'])).toBe(true);
+    expect(isFileDrag(['text/plain'])).toBe(false);
+    expect(isFileDrag([])).toBe(false);
   });
 });

@@ -149,6 +149,9 @@ function trayStatusText(status: BatchItemStatus | undefined): string {
   if (status.phase === 'done') {
     return 'Done';
   }
+  if (status.phase === 'canceled') {
+    return 'Canceled';
+  }
   return `Failed: ${status.message}`;
 }
 
