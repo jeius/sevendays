@@ -6,8 +6,8 @@
 // Task 3's `buildRowFlipPayload` driving the optimistic activate/deactivate
 // flips through the result-valued `saveAdminPackageUpdate` server fn (a flip
 // re-PUTs the full read with ONLY `isActive` changed — media untouched).
-// `durationMinutes`, `frames`, and resolved `inclusions` render nowhere —
-// the editor's concern (Task 6).
+// `durationMinutes`, `frames`, and resolved `inclusions` render in the
+// expanded row (#219) — the editor edits them, the table answers them.
 import type { ServicePackageRead } from '@sevendays/types';
 import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
@@ -42,6 +42,7 @@ import {
   StatusBadge,
   StatusSegmented,
 } from '#/components/cms/shared';
+import { PackageExpandedContent } from '#/components/packages/package-expanded-content';
 import { removeAdminPackage, saveAdminPackageUpdate } from '#/lib/admin.functions';
 import { adminPackageQueries } from '#/lib/cms-queries';
 import { buildRowFlipPayload } from '#/lib/package-editor-state';
@@ -300,9 +301,10 @@ export function PackagesTable() {
                           />
                         </TableCell>
                       </ExpandRow>
-                      {/* T3 desktop reveal: the FULL description. */}
+                      {/* T3 desktop reveal (#219): the whole answer —
+                          description, duration, frames, inclusions. */}
                       <ExpandPanel open={expanded} colSpan={4}>
-                        {row.description}
+                        <PackageExpandedContent row={row} />
                       </ExpandPanel>
                     </Fragment>
                   );
@@ -339,13 +341,13 @@ export function PackagesTable() {
                       </p>
                     )}
                   </button>
-                  {/* B1: the mobile reveal carries the FULL description —
-                      the dedup hides line 2 while expanded, so without this
-                      paragraph the description is nowhere on packages
-                      mobile. */}
+                  {/* B1 (#219): the mobile reveal renders the SAME
+                      composition as the desktop panel — one component,
+                      never drift. The dedup still hides line 2 while
+                      expanded. */}
                   <Collapse open={expanded}>
                     <div className='mt-2 space-y-2'>
-                      <p className='text-muted-foreground text-sm'>{row.description}</p>
+                      <PackageExpandedContent row={row} />
                       {row.isFeatured ? (
                         <Badge variant='default' className='text-xs'>
                           Featured
