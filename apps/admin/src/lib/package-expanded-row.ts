@@ -9,11 +9,10 @@
 // the seam never sorts. Pure rendering, zero API work: the read shape
 // already carries every field.
 //
-// TODO(owner-copy): the three string forms — the duration line ("60
-// minutes" beside a Clock icon), the chip prefix ("Frame 1"), and the
-// bullet grammar ("1 framed picture · 8x10 · Toga") — await the owner's
-// ratification (#134 open items); the variants round retunes them here
-// and the suite follows in the same commit.
+// (owner-reacted 2026-10-17, #219's variants round): the three string
+// forms ratified as rendered — the duration line ("60 minutes" beside a
+// Clock icon), the chip prefix ("Frame 1"), and the bullet grammar
+// ("1 framed picture · 8x10 · Toga"; privileges description-alone).
 import type {
   PackageInclusionKind,
   ResolvedPackageInclusion,

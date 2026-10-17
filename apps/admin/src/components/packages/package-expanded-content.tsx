@@ -20,8 +20,8 @@ export function PackageExpandedContent({ row }: { row: ServicePackageRead }) {
           both postures (the desktop panel's muted wrapper is overridden
           by the explicit class; the round may restore muted). */}
       <p className='text-foreground text-sm leading-relaxed'>{description}</p>
-      {/* TODO(owner-copy): the duration line's form (Clock + "60 minutes")
-          awaits the owner's ratification (#134 open items). */}
+      {/* (owner-reacted 2026-10-17, #219's variants round): the duration
+          line's form (Clock + "60 minutes") ratified as rendered. */}
       {durationLine ? (
         <p className='text-muted-foreground flex items-center gap-1.5 text-xs'>
           <Clock className='size-3.5' aria-hidden='true' />
