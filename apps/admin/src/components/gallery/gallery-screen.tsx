@@ -157,6 +157,7 @@ function trayStatusText(status: BatchItemStatus | undefined): string {
   if (status.phase === 'done') {
     return 'Done';
   }
+  // (owner-reacted 2026-10-18, #220's variants round): 'Canceled' ratified as rendered.
   if (status.phase === 'canceled') {
     return 'Canceled';
   }
