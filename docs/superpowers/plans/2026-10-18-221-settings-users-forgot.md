@@ -1407,11 +1407,16 @@ export type UsersActionResult<T> =
 const TEMP_PASSWORD_MIN = 12; // matches emailAndPassword.minPasswordLength
 
 async function pluginErrorToResult(error: unknown): Promise<never> {
-  // BetterAuth's APIError carries status/message; anything else rethrows —
+  // BetterAuth's APIError carries statusCode/message; anything else rethrows —
   // not a user-management refusal (serialization, session loss) — loud.
+  // Read .statusCode, never .status: in better-call 1.4.0, .status is the
+  // status-NAME string ("FORBIDDEN"), while .statusCode is the HTTP number
+  // the #155 result-value union carries. (Controller amendment, 2026-10-18:
+  // this plan's original snippet read error.status — the Task 3 review's
+  // runtime trace caught it; fixed at 97d4d58.)
   const { APIError } = await import('better-auth/api');
   if (error instanceof APIError) {
-    return { ok: false, status: error.status, message: error.message } as never;
+    return { ok: false, status: error.statusCode, message: error.message } as never;
   }
   throw error;
 }
