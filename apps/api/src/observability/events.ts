@@ -9,7 +9,8 @@ import type { RequestLogger, RootEnv } from './logger.js';
 // the schema. PII floor: no raw bodies, no email addresses, no IP, no
 // User-Agent, no referrer — the email-failure `code` is classified
 // (`resend:<error.name>` | `send_failed`) precisely to keep resend's
-// free-text error messages (which may echo the recipient) out of the log.
+// free-text error messages (which may echo the recipient) out of the log;
+// the reset purpose carries no appointmentId.
 //
 // Levels: access / admin_mutation / email-attempt / email-sent at info;
 // media_failure at warn; email-failed and error at error.
@@ -82,12 +83,20 @@ export function logMediaFailure(
 /** The confirmation email's attempt + Resend outcome (no customer PII). */
 export function logEmail(
   log: RequestLogger,
-  fields: { phase: EmailPhase; appointmentId: string; code?: string }
+  fields: {
+    phase: EmailPhase;
+    /** Which email class — the booking confirmation (default) or the staff reset (#221). */
+    purpose?: 'confirmation' | 'reset';
+    /** Present for confirmations only — the reset flow has no appointment. */
+    appointmentId?: string;
+    code?: string;
+  }
 ): void {
   const line = log.withMetadata({
     evt: 'email',
     phase: fields.phase,
-    appointmentId: fields.appointmentId,
+    purpose: fields.purpose ?? 'confirmation',
+    ...(fields.appointmentId !== undefined ? { appointmentId: fields.appointmentId } : {}),
     ...(fields.code !== undefined ? { code: fields.code } : {}),
   });
   if (fields.phase === 'failed') {

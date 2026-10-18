@@ -902,6 +902,7 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
       'phase',
       'appointmentId',
       'code',
+      'purpose',
       'name',
       'message',
       'stack',

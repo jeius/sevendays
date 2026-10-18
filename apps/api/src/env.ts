@@ -21,6 +21,13 @@ import { z } from 'zod';
 //   secret; SENTRY_RELEASE (the deployed git SHA) and ENVIRONMENT
 //   (dev/teaser/v1) ride `wrangler deploy --var` from CI; the committed
 //   [vars] default is dev.
+// - The reset-email pair (M7 #221, ADR-0021): INTERNAL_SEND_TOKEN is the
+//   shared secret guarding the internal send endpoint (a Worker secret on
+//   the api AND the admin — `wrangler secret put`, never committed; unset
+//   = the endpoint answers the curated 503 and nothing else degrades);
+//   RESET_EMAIL_FROM is the per-environment sender (the LANDING_ORIGIN
+//   pattern — #222 sets no-reply@<verified-domain>; until then the
+//   sandbox EMAIL_FROM fallback sends).
 //
 // MEDIA_BUCKET/IMAGES are REQUIRED bindings (they deploy with wrangler.toml
 // once the sevendays-media bucket exists — docs/media-bucket-runbook.md), and
@@ -47,6 +54,8 @@ export const envSchema = z.object({
   SENTRY_DSN: z.string().min(1).optional(),
   SENTRY_RELEASE: z.string().min(1).optional(),
   ENVIRONMENT: z.string().min(1).optional(),
+  INTERNAL_SEND_TOKEN: z.string().min(1).optional(),
+  RESET_EMAIL_FROM: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

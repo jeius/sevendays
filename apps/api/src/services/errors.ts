@@ -38,3 +38,11 @@ export function notFound(c: Context, message = 'Not found.') {
 export function tooManyRequests(c: Context, message: string) {
   return c.json({ error: message }, 429);
 }
+
+export function unauthorized(c: Context, message = 'Unauthorized.') {
+  return c.json({ error: message }, 401);
+}
+
+export function badGateway(c: Context, message: string) {
+  return c.json({ error: message }, 502);
+}

@@ -13,6 +13,10 @@
 // stub answers every suite that never exercises the submissions gate; the
 // submissions suite spreads its own recording stub over this (the r2-stub
 // posture).
+// The reset-email pair (M7 #221) is intentionally absent here: the optional
+// INTERNAL_SEND_TOKEN / RESET_EMAIL_FROM stay unset unless a suite spreads
+// its own values (the reset-email suite does) — the 503 path is the default
+// posture every other suite sees, which is exactly the deployment's.
 export const TEST_AUTH_SECRET = 'integration-test-secret-0123456789-0123456789-0123456789';
 
 export function testEnv(databaseUrl: string) {

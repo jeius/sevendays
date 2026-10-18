@@ -3,6 +3,7 @@ import { captureError } from './observability/capture.js';
 import { logError } from './observability/events.js';
 import type { RootEnv } from './observability/logger.js';
 import { requestLogging } from './observability/request-context.js';
+import { internalRoutes } from './routes/internal.js';
 import { v1 } from './routes/v1.js';
 import { internalError, serviceUnavailable } from './services/errors.js';
 import { MissingR2CredentialsError } from './services/media.js';
@@ -55,6 +56,7 @@ const app = new Hono<RootEnv>()
   .notFound((c) => c.json({ error: 'Not found.' }, 404))
 
   .get('/health', (c) => c.json({ status: 'ok' }))
+  .route('/internal', internalRoutes)
   .route('/api/v1', v1);
 
 export default app;
