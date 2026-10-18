@@ -1,10 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   type BatchItem,
+  type BatchItemStatus,
   type BatchUploadDeps,
+  hasUnsettledUploads,
   PutUploadError,
   preCheckFile,
   runBatchUpload,
+  trayIsVisible,
 } from './batch-photo-upload';
 
 const uuid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
@@ -169,5 +172,190 @@ describe('runBatchUpload', () => {
       },
     });
     await expect(runBatchUpload([item(1)], d)).rejects.toThrow('listener bug');
+  });
+});
+
+describe('runBatchUpload — the abort seam (M7 #220: cancel settles canceled, never a retry)', () => {
+  it('a PRE-ABORTED signal settles every item canceled with zero network calls', async () => {
+    const d = deps();
+    const controller = new AbortController();
+    controller.abort();
+    const one = item(1);
+    const two = item(2);
+    const result = await runBatchUpload([one, two], d, controller.signal);
+    expect(result.done).toHaveLength(0);
+    expect(result.failed).toHaveLength(0);
+    expect(result.canceled.map((i) => i.id)).toEqual([one.id, two.id]);
+    expect(d.presign).not.toHaveBeenCalled();
+    expect(d.put).not.toHaveBeenCalled();
+    const phases = (d.onStatus as ReturnType<typeof vi.fn>).mock.calls.map((c) => c[1].phase);
+    expect(phases).toEqual(['canceled', 'canceled']);
+  });
+
+  it('an abort while PRESIGN is in flight settles the item canceled — the PUT never fires, no retry presign', async () => {
+    let releasePresign: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      releasePresign = resolve;
+    });
+    const d = deps({
+      presign: vi.fn(async () => {
+        await gate;
+        return { key: 'tmp/1.jpg', uploadUrl: 'https://r2/1' };
+      }),
+    });
+    const controller = new AbortController();
+    const one = item(1);
+    const pending = runBatchUpload([one], d, controller.signal);
+    await vi.waitFor(() => expect(d.presign).toHaveBeenCalledTimes(1));
+    controller.abort();
+    releasePresign();
+    const result = await pending;
+    expect(result.canceled.map((i) => i.id)).toEqual([one.id]);
+    expect(d.put).not.toHaveBeenCalled();
+    expect(d.presign).toHaveBeenCalledTimes(1); // the abort consumed no retry
+  });
+
+  it('an abort during the PUT settles canceled — the abort reject is NEVER a transient retry (the pre-#220 pool would have re-queued it)', async () => {
+    const d = deps({
+      put: vi.fn(
+        (_file: File, _uploadUrl: string, _onProgress: unknown, signal?: AbortSignal) =>
+          new Promise<void>((_, reject) => {
+            signal?.addEventListener('abort', () => reject(new Error('Upload canceled.')));
+          })
+      ),
+    });
+    const controller = new AbortController();
+    const one = item(1);
+    const pending = runBatchUpload([one], d, controller.signal);
+    await vi.waitFor(() => expect(d.put).toHaveBeenCalledTimes(1));
+    controller.abort();
+    const result = await pending;
+    expect(result.canceled.map((i) => i.id)).toEqual([one.id]);
+    expect(result.failed).toHaveLength(0);
+    expect(d.presignCalls).toEqual(['p1']); // attempt 2 never presigned
+    const last = (d.onStatus as ReturnType<typeof vi.fn>).mock.calls.at(-1);
+    expect(last?.[1]).toEqual({ phase: 'canceled' });
+  });
+
+  it('an abort settles QUEUED items canceled too — never-run items make no network calls (the settlement guarantee extends)', async () => {
+    const d = deps({
+      put: vi.fn(
+        (_file: File, _uploadUrl: string, _onProgress: unknown, signal?: AbortSignal) =>
+          new Promise<void>((_, reject) => {
+            signal?.addEventListener('abort', () => reject(new Error('Upload canceled.')));
+          })
+      ),
+    });
+    const controller = new AbortController();
+    const six = [1, 2, 3, 4, 5, 6].map(item);
+    const pending = runBatchUpload(six, d, controller.signal);
+    await vi.waitFor(() => expect(d.put).toHaveBeenCalledTimes(4)); // BATCH_CONCURRENCY
+    controller.abort();
+    const result = await pending;
+    expect(result.canceled.map((i) => i.id)).toEqual(six.map((i) => i.id));
+    expect(result.done).toHaveLength(0);
+    expect(d.presignCalls).toHaveLength(4); // items 5–6 never presigned
+  });
+
+  it('an abort while the COMMIT is in flight lets its verdict stand — done stays done, never canceled', async () => {
+    let releaseCommit: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      releaseCommit = resolve;
+    });
+    const d = deps({
+      commit: vi.fn(async (): CommitResult => {
+        await gate;
+        return { ok: true, photo: { id: uuid(97) } as never };
+      }),
+    });
+    const controller = new AbortController();
+    const one = item(1);
+    const pending = runBatchUpload([one], d, controller.signal);
+    await vi.waitFor(() => expect(d.commit).toHaveBeenCalledTimes(1));
+    controller.abort();
+    releaseCommit();
+    const result = await pending;
+    expect(result.done).toHaveLength(1);
+    expect(result.canceled).toHaveLength(0);
+  });
+
+  it('an abort AFTER the PUT resolves still cancels — a canceled item is never promoted (the staged object is the tmp/ GC’s)', async () => {
+    let releasePut: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      releasePut = resolve;
+    });
+    const d = deps({
+      put: vi.fn((_file: File, _uploadUrl: string, _onProgress: unknown) =>
+        gate.then(() => undefined)
+      ),
+    });
+    const controller = new AbortController();
+    const one = item(1);
+    const pending = runBatchUpload([one], d, controller.signal);
+    await vi.waitFor(() => expect(d.put).toHaveBeenCalledTimes(1));
+    controller.abort();
+    releasePut(); // the PUT resolves NORMALLY after the abort
+    const result = await pending;
+    expect(result.canceled.map((i) => i.id)).toEqual([one.id]);
+    expect(d.commit).not.toHaveBeenCalled();
+  });
+});
+
+describe('the tray + leave-guard predicates (M7 #220)', () => {
+  it('hasUnsettledUploads: enqueued(undefined)/queued/uploading/committing are unsettled; done/failed/canceled are terminal; an empty tray is settled', () => {
+    // Named consts, never an indexed array: noUncheckedIndexedAccess types
+    // every `items[n]` read `BatchItem | undefined` (ruled at execution,
+    // 2026-10-17 — the indexed first cut was a plan defect).
+    const enqueued = item(1);
+    const queued = item(2);
+    const uploadingItem = item(3);
+    const committing = item(4);
+    const doneItem = item(5);
+    const failedItem = item(6);
+    const statuses = new Map<string, BatchItemStatus>([
+      [queued.id, { phase: 'queued' }],
+      [uploadingItem.id, { phase: 'uploading', sent: 1, total: 2 }],
+      [committing.id, { phase: 'committing' }],
+      [doneItem.id, { phase: 'done', photo: { id: uuid(96) } as never }],
+      [failedItem.id, { phase: 'failed', kind: 'transient', message: 'x', attempts: 2 }],
+    ]);
+    // enqueued carries NO status yet — the pool has not reported.
+    expect(
+      hasUnsettledUploads(
+        [enqueued, queued, uploadingItem, committing, doneItem, failedItem],
+        statuses
+      )
+    ).toBe(true);
+    const terminal = new Map<string, BatchItemStatus>([
+      [enqueued.id, { phase: 'done', photo: { id: uuid(95) } as never }],
+      [queued.id, { phase: 'failed', kind: 'permanent', message: 'x', attempts: 1 }],
+      [uploadingItem.id, { phase: 'canceled' }],
+    ]);
+    expect(hasUnsettledUploads([enqueued, queued, uploadingItem], terminal)).toBe(false);
+    expect(hasUnsettledUploads([], new Map())).toBe(false);
+  });
+
+  it('trayIsVisible holds the tray open on failures AND on canceled rows — a mid-batch cancel never silently swallows the story', () => {
+    const one = item(1);
+    const two = item(2);
+    const onFailed = new Map<string, BatchItemStatus>([
+      [one.id, { phase: 'done', photo: { id: uuid(94) } as never }],
+      [two.id, { phase: 'failed', kind: 'transient', message: 'x', attempts: 2 }],
+    ]);
+    expect(trayIsVisible([one, two], onFailed)).toBe(true);
+    const onCanceled = new Map<string, BatchItemStatus>([
+      [one.id, { phase: 'done', photo: { id: uuid(93) } as never }],
+      [two.id, { phase: 'canceled' }],
+    ]);
+    expect(trayIsVisible([one, two], onCanceled)).toBe(true);
+  });
+
+  it('trayIsVisible auto-hides the all-done tray and never shows an empty one', () => {
+    const one = item(1);
+    const allDone = new Map<string, BatchItemStatus>([
+      [one.id, { phase: 'done', photo: { id: uuid(92) } as never }],
+    ]);
+    expect(trayIsVisible([one], allDone)).toBe(false);
+    expect(trayIsVisible([], new Map())).toBe(false);
   });
 });

@@ -1,6 +1,7 @@
 // The gallery screens' pure seam (M5 #141): the photo editor's state ↔ the
-// full-object metadata payload, the two drag-reorder helpers, and the
-// upload title derivation. Everything here is a plain function over plain
+// full-object metadata payload, the two drag-reorder helpers, the upload
+// title derivation, and (M7 #220) the shared picker/drop enqueue + the
+// file-drag gate. Everything here is a plain function over plain
 // data — no React, no network, no DOM — so #143's lib-seam suite can pin
 // the photo payload law (r2Key ABSENT — presence-encoded replace stays
 // unexposed), the visible-subset slot-swap reorder, and the flat reorder
@@ -15,6 +16,7 @@ import type {
   TestimonialOrderInput,
   UpdateGalleryPhotoInput,
 } from '@sevendays/types';
+import type { BatchItem } from './batch-photo-upload';
 
 /**
  * The photo editor's whole state. `#143 seam: the photo state shape`.
@@ -192,4 +194,35 @@ export function buildPhotoOrderPayload(photos: GalleryPhoto[]): GalleryPhotoOrde
  */
 export function buildTestimonialOrderPayload(rows: Testimonial[]): TestimonialOrderInput {
   return { testimonialIds: rows.map((row) => row.id) };
+}
+
+/**
+ * `#220 seam: files → staged items` — the ONE enqueue law the picker and
+ * the drop zone share (AR-11): category = the open rail filter captured AT
+ * ENQUEUE (the caller resolves `'all'` → `null`), title = file name minus
+ * its LAST extension (`titleFromFileName`), caption null (pre-commit
+ * metadata editing is ruled out), ids fresh per item. Dropped non-JPG or
+ * oversized files ride the SAME courtesy pre-check the picker's `accept`
+ * approximates — the pool's `pre-check` failure row is the answer, never
+ * a drop-side filter.
+ */
+export function batchItemsFromFiles(files: File[], categoryId: string | null): BatchItem[] {
+  return files.map((file) => ({
+    id: crypto.randomUUID(),
+    file,
+    title: titleFromFileName(file.name),
+    caption: null,
+    categoryId,
+  }));
+}
+
+/**
+ * `#220 seam: the file-drag gate` — ONLY drags whose `dataTransfer.types`
+ * carry `'Files'` arm the drop zone. dnd-kit's pointer/touch/keyboard
+ * drags never start an HTML5 drag (no `dataTransfer` types at all), and
+ * text/element drags carry no `'Files'` — so the sortable grid and the
+ * drop zone cannot interfere by construction.
+ */
+export function isFileDrag(types: readonly string[]): boolean {
+  return types.includes('Files');
 }
