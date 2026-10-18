@@ -2009,7 +2009,7 @@ const sessionsQuery = useQuery({
 });
 ```
 
-The expanded cell (colspan the full table) renders the shaped rows — `shapeSessionRows(sessions)` — as a compact list: created date, expires date, `ipAddress ?? '—'`, `userAgent` (trimmed to 48 chars + ellipsis), and per-session **Revoke** (`revokeAdminUserSession`), plus a **Revoke all sessions** button at the row's head (`revokeAdminUserSessions`). Revokes invalidate the sessions query + toast on failure. **The token never renders — it is not in the shaped row** (Task 3's test pins the strip).
+The expanded cell (colspan the full table) renders the shaped rows — `shapeSessionRows(sessions)` — as a compact list: created date, expires date, `ipAddress ?? '—'`, `userAgent` (trimmed to 48 chars + ellipsis), and per-session **Revoke** (`revokeAdminUserSession`), plus a **Revoke all sessions** button at the row's head (`revokeAdminUserSessions`). Revokes invalidate the sessions query + toast on failure. **The token never renders — it is not in the shaped row** (Task 3's test pins the strip). **Controller amendment, 2026-10-18 at Task 3 execution:** better-auth 1.7.5's `revokeUserSession` deletes BY TOKEN (`routes.mjs`: `internalAdapter.deleteSession(ctx.body.sessionToken)`), so the landed server fn takes `{ sessionToken }` — the component keeps the RAW `fetchAdminUserSessions` rows in memory for the mutation arg (`session.token`) and renders only the shaped rows; a session id would silently no-op the delete.
 
 - [ ] **Step 4: The create Sheet**
 
