@@ -500,7 +500,7 @@ function UploadTray({
         <div className='flex items-center justify-between gap-3'>
           <h3 className='text-sm font-semibold'>Uploading {items.length} photos</h3>
           <div className='flex items-center gap-2'>
-            {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+            {/* (owner-reacted 2026-10-18, #220's variants round): copy ratified as rendered. */}
             {unsettled ? (
               <Button variant='outline' size='sm' type='button' onClick={onCancel}>
                 Cancel
@@ -1477,7 +1477,7 @@ export function GalleryScreen() {
               <div className='pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-lg border-2 border-dashed border-primary bg-background/80'>
                 <p className='flex items-center gap-2 text-sm font-medium'>
                   <ImagePlus className='size-4' aria-hidden='true' />
-                  {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+                  {/* (owner-reacted 2026-10-18, #220's variants round): copy ratified as rendered. */}
                   Drop photos to upload
                 </p>
               </div>
@@ -1649,7 +1649,7 @@ export function GalleryScreen() {
         title='Leave while uploading?'
         description={
           <span className='block'>
-            {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+            {/* (owner-reacted 2026-10-18, #220's variants round): copy ratified as rendered. */}
             Uploads are still in flight. Leaving now cancels the ones that haven't finished.
           </span>
         }
