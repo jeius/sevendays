@@ -56,6 +56,7 @@ import { toast } from '@sevendays/ui/components/sonner';
 import { Textarea } from '@sevendays/ui/components/textarea';
 import { useIsMobile } from '@sevendays/ui/hooks/use-mobile';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useBlocker } from '@tanstack/react-router';
 import { cn } from 'cn';
 import {
   Check,
@@ -68,11 +69,12 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { type ChangeEvent, useId, useRef, useState } from 'react';
+import { type ChangeEvent, type DragEvent, useCallback, useId, useRef, useState } from 'react';
 import {
   DeactivateConfirm,
   DeleteGuardDialog,
   EmptyState,
+  GuardedConfirm,
   LightEntityEditor,
   QUERY_ERROR_LINE,
   QueryErrorState,
@@ -90,17 +92,23 @@ import {
   saveAdminGalleryPhotoUpdate,
 } from '#/lib/admin.functions';
 import type { BatchItem, BatchItemStatus } from '#/lib/batch-photo-upload';
-import { putFileToPresignedUrl, runBatchUpload } from '#/lib/batch-photo-upload';
+import {
+  hasUnsettledUploads,
+  putFileToPresignedUrl,
+  runBatchUpload,
+  trayIsVisible,
+} from '#/lib/batch-photo-upload';
 import { adminGalleryQueries } from '#/lib/cms-queries';
 import {
+  batchItemsFromFiles,
   buildCategoryOrderPayload,
   buildPhotoFlipPayload,
   buildPhotoPayload,
+  isFileDrag,
   type PhotoEditorState,
   photoStateFromRead,
   reorderIds,
   reorderVisiblePhotos,
-  titleFromFileName,
 } from '#/lib/gallery-state';
 import { blockerLines } from '#/lib/save-contract';
 import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
@@ -148,6 +156,10 @@ function trayStatusText(status: BatchItemStatus | undefined): string {
   }
   if (status.phase === 'done') {
     return 'Done';
+  }
+  // (owner-reacted 2026-10-18, #220's variants round): 'Canceled' ratified as rendered.
+  if (status.phase === 'canceled') {
+    return 'Canceled';
   }
   return `Failed: ${status.message}`;
 }
@@ -468,30 +480,42 @@ function UploadTray({
   statuses,
   onRetry,
   onRetryFailed,
+  onCancel,
   onDone,
 }: {
   items: BatchItem[];
   statuses: Map<string, BatchItemStatus>;
   onRetry: (item: BatchItem) => void;
   onRetryFailed: () => void;
+  onCancel: () => void;
   onDone: () => void;
 }) {
   const transientFailures = items.filter((item) => {
     const status = statuses.get(item.id);
     return status !== undefined && status.phase === 'failed' && status.kind === 'transient';
   });
+  const unsettled = hasUnsettledUploads(items, statuses);
   return (
     <Card className='rounded-lg'>
       <CardContent className='space-y-3 p-4'>
         <div className='flex items-center justify-between gap-3'>
           <h3 className='text-sm font-semibold'>Uploading {items.length} photos</h3>
           <div className='flex items-center gap-2'>
+            {/* (owner-reacted 2026-10-18, #220's variants round): copy ratified as rendered. */}
+            {unsettled ? (
+              <Button variant='outline' size='sm' type='button' onClick={onCancel}>
+                Cancel
+              </Button>
+            ) : null}
             {transientFailures.length > 0 ? (
               <Button variant='outline' size='sm' type='button' onClick={onRetryFailed}>
                 Retry failed
               </Button>
             ) : null}
-            <Button variant='ghost' size='sm' type='button' onClick={onDone}>
+            {/* Done clears only a SETTLED tray: clearing mid-flight would
+                orphan the running pool and silently drop the leave-guard
+                (hasUnsettled reads trayItems). Cancel is the way out. */}
+            <Button variant='ghost' size='sm' type='button' disabled={unsettled} onClick={onDone}>
               Done
             </Button>
           </div>
@@ -727,6 +751,11 @@ export function GalleryScreen() {
   // The tray (AR-3): the staged items + the pool's per-file statuses.
   const [trayItems, setTrayItems] = useState<BatchItem[]>([]);
   const [trayStatuses, setTrayStatuses] = useState<Map<string, BatchItemStatus>>(new Map());
+  // The drop zone (#220): armed only while a Files-carrying drag hovers the
+  // grid column; the depth counter absorbs dragenter/dragleave churn from
+  // child elements (every child fires the pair on the way in/out).
+  const [dropArmed, setDropArmed] = useState(false);
+  const dragDepth = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const titleId = useId();
   const captionId = useId();
@@ -982,6 +1011,11 @@ export function GalleryScreen() {
 
   // --- Upload wiring (Task 6's pool) ---
 
+  // The cancel wire (#220): one AbortController per pool RUN — the picker,
+  // a drop, a per-row Retry, and Retry failed each start their own run;
+  // Cancel aborts every live one. Settled runs remove themselves.
+  const activeRuns = useRef(new Set<AbortController>());
+
   // `presignAdminCoverUpload` is the #139-historical name — its schema
   // already carries `purpose: 'gallery-photo'` (the pool sends it); the
   // result union converts to a throw, the pool's `transient` class.
@@ -1010,48 +1044,101 @@ export function GalleryScreen() {
   }
 
   async function runThroughPool(items: BatchItem[]) {
-    const { done } = await runBatchUpload(items, {
-      presign,
-      put: putFileToPresignedUrl,
-      commit,
-      onStatus: (itemId, status) => {
-        // The Task-6 review's throwing-onStatus minor, consumer side: this
-        // tap is a pure setState + one invalidate — it cannot throw, so the
-        // pool's settlement guarantee holds for this wiring.
-        setTrayStatuses((prev) => {
-          const next = new Map(prev);
-          next.set(itemId, status);
-          return next;
-        });
-        // Every done invalidates — the row becomes a real card ("only
-        // committed files become savable", structurally).
-        if (status.phase === 'done') {
-          queryClient.invalidateQueries({ queryKey: adminGalleryQueries.photos().queryKey });
-        }
-      },
-    });
-    if (done.length > 0) {
-      toast.success(`Uploaded ${done.length} photos.`);
+    const controller = new AbortController();
+    activeRuns.current.add(controller);
+    try {
+      const { done } = await runBatchUpload(
+        items,
+        {
+          presign,
+          put: putFileToPresignedUrl,
+          commit,
+          onStatus: (itemId, status) => {
+            // The Task-6 review's throwing-onStatus minor, consumer side: this
+            // tap is a pure setState + one invalidate — it cannot throw, so the
+            // pool's settlement guarantee holds for this wiring.
+            setTrayStatuses((prev) => {
+              const next = new Map(prev);
+              next.set(itemId, status);
+              return next;
+            });
+            // Every done invalidates — the row becomes a real card ("only
+            // committed files become savable", structurally).
+            if (status.phase === 'done') {
+              queryClient.invalidateQueries({ queryKey: adminGalleryQueries.photos().queryKey });
+            }
+          },
+        },
+        controller.signal
+      );
+      if (done.length > 0) {
+        toast.success(`Uploaded ${done.length} photos.`);
+      }
+    } finally {
+      activeRuns.current.delete(controller);
     }
+  }
+
+  function cancelAllUploads() {
+    for (const controller of activeRuns.current) {
+      controller.abort();
+    }
+  }
+
+  // The ONE enqueue path (#220): the picker and the drop zone both land
+  // here, over the Task-1 seam, so the two can never drift (AR-11: the
+  // category is the open rail filter at enqueue; title from file name;
+  // caption null — pre-commit metadata editing is ruled out).
+  function enqueueFiles(files: File[]) {
+    if (files.length === 0) {
+      return;
+    }
+    const items = batchItemsFromFiles(files, filter === 'all' ? null : filter);
+    setTrayItems((prev) => [...prev, ...items]);
+    void runThroughPool(items);
+  }
+
+  function onFileDragEnter(event: DragEvent<HTMLDivElement>) {
+    if (!isFileDrag(event.dataTransfer.types)) {
+      return;
+    }
+    event.preventDefault();
+    dragDepth.current += 1;
+    setDropArmed(true);
+  }
+
+  function onFileDragOver(event: DragEvent<HTMLDivElement>) {
+    if (!isFileDrag(event.dataTransfer.types)) {
+      return;
+    }
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+  }
+
+  function onFileDragLeave() {
+    if (dragDepth.current === 0) {
+      return;
+    }
+    dragDepth.current -= 1;
+    if (dragDepth.current === 0) {
+      setDropArmed(false);
+    }
+  }
+
+  function onFileDrop(event: DragEvent<HTMLDivElement>) {
+    if (!isFileDrag(event.dataTransfer.types)) {
+      return;
+    }
+    event.preventDefault();
+    dragDepth.current = 0;
+    setDropArmed(false);
+    enqueueFiles(Array.from(event.dataTransfer.files));
   }
 
   function onFilesChosen(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
     event.target.value = ''; // allow re-picking the same file
-    if (files.length === 0) {
-      return;
-    }
-    // AR-11: category = the open rail filter; title = file name minus its
-    // extension, captured AT ENQUEUE.
-    const items: BatchItem[] = files.map((file) => ({
-      id: crypto.randomUUID(),
-      file,
-      title: titleFromFileName(file.name),
-      caption: null,
-      categoryId: filter === 'all' ? null : filter,
-    }));
-    setTrayItems((prev) => [...prev, ...items]);
-    void runThroughPool(items);
+    enqueueFiles(files);
   }
 
   function retryItem(item: BatchItem) {
@@ -1074,13 +1161,27 @@ export function GalleryScreen() {
     setTrayStatuses(new Map());
   }
 
-  // The tray renders while ANY item is non-settled or a failure exists.
-  const hasUnsettled = trayItems.some((item) => {
-    const status = trayStatuses.get(item.id);
-    return status === undefined || (status.phase !== 'done' && status.phase !== 'failed');
+  // The leave-guard predicate (#220): ONE seam answers both the router
+  // blocker and the browser beforeunload (they can never disagree), and
+  // the tray's visibility law reads the same module. `undefined` counts
+  // as unsettled — an item enqueued the pool has not reported yet.
+  const hasUnsettled = hasUnsettledUploads(trayItems, trayStatuses);
+  const trayVisible = trayIsVisible(trayItems, trayStatuses);
+
+  // useBlocker (1.170.41, probed): the object-opts form with
+  // withResolver:true registers ONE history block answering BOTH
+  // navigation classes — a router navigation awaits the resolver (Stay
+  // resets, Leave anyway proceeds), and enableBeforeUnload feeds the same
+  // registration's native beforeunload prompt. The callbacks are
+  // stabilized on hasUnsettled so the effect re-subscribes only when
+  // unsettled-ness flips, never per status tick.
+  const shouldBlockFn = useCallback(() => hasUnsettled, [hasUnsettled]);
+  const shouldPromptBeforeUnload = useCallback(() => hasUnsettled, [hasUnsettled]);
+  const blocker = useBlocker({
+    shouldBlockFn,
+    enableBeforeUnload: shouldPromptBeforeUnload,
+    withResolver: true,
   });
-  const hasFailure = trayItems.some((item) => trayStatuses.get(item.id)?.phase === 'failed');
-  const trayVisible = trayItems.length > 0 && (hasUnsettled || hasFailure);
 
   // --- Rail handlers ---
 
@@ -1303,63 +1404,86 @@ export function GalleryScreen() {
               statuses={trayStatuses}
               onRetry={retryItem}
               onRetryFailed={retryFailed}
+              onCancel={cancelAllUploads}
               onDone={clearTray}
             />
           ) : null}
 
-          {visiblePhotos.length === 0 ? (
-            filter === 'all' ? (
-              // TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items)
-              <EmptyState line='No photos yet.'>
-                <Button type='button' onClick={() => fileInputRef.current?.click()}>
-                  <ImagePlus aria-hidden='true' />
-                  Upload photos
-                </Button>
-              </EmptyState>
+          {/* The drop zone (#220): the grid column — the ruled surface ("onto
+              the gallery grid"), covering both the populated grid and the
+              category empty state. Only Files-carrying drags arm it (the
+              Task-1 gate); dnd-kit's pointer drags never do. */}
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: the HTML5 drop target is pointer-only by nature — the keyboard upload path stays the hidden input behind the "Upload photos" button (the picker law) */}
+          <div
+            className='relative'
+            onDragEnter={onFileDragEnter}
+            onDragOver={onFileDragOver}
+            onDragLeave={onFileDragLeave}
+            onDrop={onFileDrop}
+          >
+            {visiblePhotos.length === 0 ? (
+              filter === 'all' ? (
+                // TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items)
+                <EmptyState line='No photos yet.'>
+                  <Button type='button' onClick={() => fileInputRef.current?.click()}>
+                    <ImagePlus aria-hidden='true' />
+                    Upload photos
+                  </Button>
+                </EmptyState>
+              ) : (
+                // TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items)
+                <EmptyState line='No photos in this category yet.' />
+              )
             ) : (
-              // TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items)
-              <EmptyState line='No photos in this category yet.' />
-            )
-          ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={onPhotoDragEnd}
-            >
-              <SortableContext
-                items={visiblePhotos.map((p) => p.id)}
-                strategy={rectSortingStrategy}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={onPhotoDragEnd}
               >
-                <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-                  {visiblePhotos.map((photo) => (
-                    <SortablePhotoCard
-                      key={photo.id}
-                      photo={photo}
-                      categoryName={categoryNameFor(photo)}
-                      selected={selectedPhotoId === photo.id}
-                      onToggleSelect={(id) =>
-                        setSelectedPhotoId((prev) => (prev === id ? null : id))
-                      }
-                      onEdit={(id) => {
-                        const row = photos.find((p) => p.id === id);
-                        if (row) {
-                          openEdit(row);
+                <SortableContext
+                  items={visiblePhotos.map((p) => p.id)}
+                  strategy={rectSortingStrategy}
+                >
+                  <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+                    {visiblePhotos.map((photo) => (
+                      <SortablePhotoCard
+                        key={photo.id}
+                        photo={photo}
+                        categoryName={categoryNameFor(photo)}
+                        selected={selectedPhotoId === photo.id}
+                        onToggleSelect={(id) =>
+                          setSelectedPhotoId((prev) => (prev === id ? null : id))
                         }
-                      }}
-                      onDeactivate={setConfirmId}
-                      onReactivate={(id) => {
-                        const row = photos.find((p) => p.id === id);
-                        if (row) {
-                          photoFlip.mutate({ row, isActive: true });
-                        }
-                      }}
-                      onDelete={setPhotoDeleteId}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
-            </DndContext>
-          )}
+                        onEdit={(id) => {
+                          const row = photos.find((p) => p.id === id);
+                          if (row) {
+                            openEdit(row);
+                          }
+                        }}
+                        onDeactivate={setConfirmId}
+                        onReactivate={(id) => {
+                          const row = photos.find((p) => p.id === id);
+                          if (row) {
+                            photoFlip.mutate({ row, isActive: true });
+                          }
+                        }}
+                        onDelete={setPhotoDeleteId}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+            {dropArmed ? (
+              <div className='pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-lg border-2 border-dashed border-primary bg-background/80'>
+                <p className='flex items-center gap-2 text-sm font-medium'>
+                  <ImagePlus className='size-4' aria-hidden='true' />
+                  {/* (owner-reacted 2026-10-18, #220's variants round): copy ratified as rendered. */}
+                  Drop photos to upload
+                </p>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 
@@ -1512,6 +1636,40 @@ export function GalleryScreen() {
           onDelete={() => removeCategory.mutate(deleteCategory)}
         />
       ) : null}
+
+      {/* The leaving-mid-upload guard (#220): GuardedConfirm over the
+          router blocker. "Leave anyway" aborts every active run THEN
+          proceeds — leaving is never a leak (nothing canceled is promoted;
+          a commit already in flight completes and stands). The blocker's
+          promise settles once: proceed() resolves synchronously from the
+          confirm click, before Base UI's action-close can reach reset(),
+          so the status guard in onOpenChange is belt-and-suspenders both
+          ways. pending is always false — leaving is instant; 'Leaving…'
+          never renders. */}
+      <GuardedConfirm
+        title='Leave while uploading?'
+        description={
+          <span className='block'>
+            {/* (owner-reacted 2026-10-18, #220's variants round): copy ratified as rendered. */}
+            Uploads are still in flight. Leaving now cancels the ones that haven't finished.
+          </span>
+        }
+        confirmLabel='Leave anyway'
+        busyLabel='Leaving…'
+        cancelLabel='Stay'
+        pending={false}
+        blockers={[]}
+        open={blocker.status === 'blocked'}
+        onOpenChange={(next) => {
+          if (!next && blocker.status === 'blocked') {
+            blocker.reset?.();
+          }
+        }}
+        onConfirm={() => {
+          cancelAllUploads();
+          blocker.proceed?.();
+        }}
+      />
     </section>
   );
 }
