@@ -9,13 +9,21 @@
 // server-fns live in auth.functions.ts, not this file.
 import { createFileRoute } from '@tanstack/react-router';
 
+import { getInternalFetchDeps } from '#/lib/api.server';
 import { createAuth } from '#/lib/auth';
+import { makeSendResetPassword } from '#/lib/reset-email';
 
 export const Route = createFileRoute('/api/auth/$')({
   server: {
     handlers: {
-      GET: ({ request }) => createAuth().handler(request),
-      POST: ({ request }) => createAuth().handler(request),
+      // M7 #221: the runtime instance wires the reset-email forward seam
+      // (ADR-0021 — the admin Worker stays Resend-free; the send crosses
+      // the API service binding). The CLI shape (auth.config.ts) stays
+      // unwired by design.
+      GET: ({ request }) =>
+        createAuth(undefined, makeSendResetPassword(getInternalFetchDeps())).handler(request),
+      POST: ({ request }) =>
+        createAuth(undefined, makeSendResetPassword(getInternalFetchDeps())).handler(request),
     },
   },
 });
