@@ -18,6 +18,11 @@ import { authClient } from '#/lib/auth-client';
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),
+  // TanStack's default search serializer JSON-round-trips values: ?reset=1 arrives as the NUMBER 1 — accept both, normalize to string (live-proof finding, #221).
+  reset: z
+    .union([z.string(), z.number()])
+    .transform((v) => String(v))
+    .optional(),
 });
 
 export const Route = createFileRoute('/login')({
@@ -53,11 +58,13 @@ function AdminLockup() {
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { redirect: redirectTo } = Route.useSearch();
+  const { redirect: redirectTo, reset } = Route.useSearch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [failure, setFailure] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [mode, setMode] = useState<'signin' | 'forgot'>('signin');
+  const [sent, setSent] = useState(false);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -101,47 +108,130 @@ function LoginPage() {
         <div className='lg:hidden'>
           <AdminLockup />
         </div>
+        {reset === '1' && (
+          <p role='status' className='text-muted-foreground max-w-sm text-center text-sm'>
+            {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
+            Password updated. Sign in with your new password.
+          </p>
+        )}
         <Card className='w-full max-w-sm'>
           <CardHeader>
-            <h1 className='text-lg font-semibold'>Welcome back</h1>
-            <CardDescription>Sign in to the Sevendays studio console</CardDescription>
+            {mode === 'forgot' ? (
+              <>
+                {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
+                <h1 className='text-lg font-semibold'>Reset your password</h1>
+                <CardDescription>
+                  {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
+                  Enter your account email and we’ll send a reset link.
+                </CardDescription>
+              </>
+            ) : (
+              <>
+                <h1 className='text-lg font-semibold'>Welcome back</h1>
+                <CardDescription>Sign in to the Sevendays studio console</CardDescription>
+              </>
+            )}
           </CardHeader>
           <CardContent>
-            <form className='space-y-4' onSubmit={(event) => void onSubmit(event)}>
-              <div className='space-y-2'>
-                <Label htmlFor='login-email'>Email</Label>
-                <Input
-                  id='login-email'
-                  type='email'
-                  autoComplete='email'
-                  required
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                />
-              </div>
-              <div className='space-y-2'>
-                <Label htmlFor='login-password'>Password</Label>
-                <Input
-                  id='login-password'
-                  type='password'
-                  autoComplete='current-password'
-                  required
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                />
-              </div>
-              {failure && (
-                <p role='alert' className='text-destructive text-sm'>
-                  Invalid email or password.
+            {/* The forgot-password toggle (M7 #221): one card, two modes — the
+                anti-enumeration law is ONE generic line for every outcome (unknown
+                email, limiter 429, send failure — BetterAuth already answers 200
+                identically for the miss; the UI matches). */}
+            {mode === 'forgot' ? (
+              <form
+                className='space-y-4'
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  setSubmitting(true);
+                  await authClient.requestPasswordReset({
+                    email,
+                    redirectTo: `${window.location.origin}/login/reset`,
+                  });
+                  setSent(true); // every outcome — see the anti-enumeration note above
+                  setSubmitting(false);
+                }}
+              >
+                <div className='space-y-2'>
+                  <Label htmlFor='login-email'>Email</Label>
+                  <Input
+                    id='login-email'
+                    type='email'
+                    autoComplete='email'
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                  />
+                </div>
+                {sent && (
+                  <p role='status' className='text-muted-foreground text-sm'>
+                    {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
+                    If that account exists, a reset link is on its way.
+                  </p>
+                )}
+                <Button type='submit' className='w-full' disabled={submitting}>
+                  {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
+                  Send reset link
+                </Button>
+                <button
+                  type='button'
+                  className='text-muted-foreground w-full text-center text-xs underline-offset-4 hover:underline'
+                  onClick={() => {
+                    setMode('signin');
+                    setSent(false);
+                  }}
+                >
+                  {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
+                  Back to sign in
+                </button>
+              </form>
+            ) : (
+              <form className='space-y-4' onSubmit={(event) => void onSubmit(event)}>
+                <div className='space-y-2'>
+                  <Label htmlFor='login-email'>Email</Label>
+                  <Input
+                    id='login-email'
+                    type='email'
+                    autoComplete='email'
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='login-password'>Password</Label>
+                  <Input
+                    id='login-password'
+                    type='password'
+                    autoComplete='current-password'
+                    required
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                  />
+                </div>
+                {failure && (
+                  <p role='alert' className='text-destructive text-sm'>
+                    Invalid email or password.
+                  </p>
+                )}
+                <Button type='submit' className='w-full' disabled={submitting}>
+                  Sign in
+                </Button>
+                <p className='text-center text-xs text-muted-foreground'>
+                  Accounts are provisioned by the studio owner.
                 </p>
-              )}
-              <Button type='submit' className='w-full' disabled={submitting}>
-                Sign in
-              </Button>
-              <p className='text-center text-xs text-muted-foreground'>
-                Accounts are provisioned by the studio owner.
-              </p>
-            </form>
+                <button
+                  type='button'
+                  className='text-muted-foreground w-full text-center text-xs underline-offset-4 hover:underline'
+                  onClick={() => {
+                    setMode('forgot');
+                    setFailure(false);
+                  }}
+                >
+                  {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
+                  Forgot password?
+                </button>
+              </form>
+            )}
           </CardContent>
         </Card>
         <p className='font-mono text-[0.65rem] tracking-[0.18em] text-brand-300 uppercase lg:hidden'>

@@ -19,6 +19,7 @@ export const Route = createFileRoute('/_shell')({
     }
     return {
       user: {
+        id: session.user.id,
         name: session.user.name,
         email: session.user.email,
         role: session.user.role ?? null,

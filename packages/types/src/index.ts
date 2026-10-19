@@ -11,6 +11,7 @@ export * from './inclusion.js';
 export * from './media.js';
 export * from './package.js';
 export * from './print-size.js';
+export * from './reset-email.js';
 export * from './site-settings.js';
 export * from './studio-service.js';
 export * from './testimonial.js';

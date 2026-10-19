@@ -85,3 +85,22 @@ export function getSessionScopedApiClient(cookieHeader: string | null): ApiClien
   };
   return createApiClient({ baseUrl: getApiUrl(), fetch: fetchWithBearer });
 }
+
+// The internal-send transport (M7 #221, ADR-0021): Task 1's
+// /internal/reset-email endpoint is Worker-to-Worker machinery outside the
+// /api/v1 contract, so it does NOT ride @sevendays/api-client — it rides
+// the same transport rule as every other admin→api call (the service
+// binding in production, the API_URL network path in dev/vitest) plus the
+// INTERNAL_SEND_TOKEN shared secret (a Worker secret on the admin too;
+// vars/secrets populate process.env under nodejs_compat_populate_process_env).
+export function getInternalFetchDeps(): {
+  fetch: typeof fetch;
+  baseUrl: string;
+  token: string | undefined;
+} {
+  return {
+    fetch: serviceBindingFetch ?? fetch,
+    baseUrl: getApiUrl(),
+    token: process.env.INTERNAL_SEND_TOKEN,
+  };
+}

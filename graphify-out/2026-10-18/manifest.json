@@ -700,8 +700,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1792237586.42662,
-    "ast_hash": "a5e405ffd4d358dea5d4d29db5aef72f",
+    "mtime": 1792318225.0332866,
+    "ast_hash": "38d061a186be8b88d67d1eb731c72cd4",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -830,13 +830,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1792237586.4306912,
-    "ast_hash": "c4e6b1c92b40c0996169065e6827d37c",
+    "mtime": 1792318225.0332866,
+    "ast_hash": "71bd2605c257972e9399ad30bdc6dbc9",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1792237586.4306912,
-    "ast_hash": "4243de4bc9e0ab5ac02ecb3fdd0b3128",
+    "mtime": 1792318225.0373106,
+    "ast_hash": "58f6d186d95a5b63da027bef9c93d7d6",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -3525,13 +3525,13 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/cms/shared.tsx": {
-    "mtime": 1792243072.4047232,
+    "mtime": 1792318225.0332866,
     "ast_hash": "47a1f43e16e08b484e6dd32d3dac4a0a",
     "semantic_hash": ""
   },
   "apps/admin/src/components/gallery/gallery-screen.tsx": {
-    "mtime": 1792243183.5579686,
-    "ast_hash": "b6e124a4739bfa72dfd43aa3412812d6",
+    "mtime": 1792318225.0332866,
+    "ast_hash": "4912739949efdaf007862e8e78c4c134",
     "semantic_hash": ""
   },
   "apps/admin/src/components/lookups/lookups-screen.tsx": {
@@ -3565,7 +3565,7 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/batch-photo-upload.ts": {
-    "mtime": 1792241547.8799186,
+    "mtime": 1792318225.0332866,
     "ast_hash": "cae572a3a41c40f43a7a4a4e35a9bb83",
     "semantic_hash": ""
   },
@@ -3580,7 +3580,7 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/gallery-state.ts": {
-    "mtime": 1792241590.533737,
+    "mtime": 1792318225.0332866,
     "ast_hash": "fd70d1cc9ed787c640cf336963a48a4f",
     "semantic_hash": ""
   },
@@ -3805,7 +3805,7 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/batch-photo-upload.test.ts": {
-    "mtime": 1792242130.428452,
+    "mtime": 1792318225.0332866,
     "ast_hash": "755d157c21e5edcd44f77064a09b093c",
     "semantic_hash": ""
   },
@@ -3815,7 +3815,7 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/gallery-state.test.ts": {
-    "mtime": 1792241465.2228606,
+    "mtime": 1792318225.0332866,
     "ast_hash": "5dc3118f510b076780924fc53107187c",
     "semantic_hash": ""
   },
@@ -4635,7 +4635,7 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-10-17-220-upload-ui-maturation.md": {
-    "mtime": 1792242084.4526227,
+    "mtime": 1792318225.0373106,
     "ast_hash": "e5ead21e8d5ea05ef4b157cc93d956ef",
     "semantic_hash": ""
   }

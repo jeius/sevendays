@@ -7,6 +7,7 @@
 // per-request instances instead, ADR-0011). The stub URL mirrors
 // drizzle.config.ts's fallback — generation needs no database; create-admin
 // (#119) runs with a real DATABASE_URL in the environment.
+// M7 #221: reset emails are NOT wired on this CLI shape (the runtime /api/auth route injects lib/reset-email.ts's seam); nothing CLI-side requests one.
 import { createAuth } from './auth';
 
 export const auth = createAuth(
