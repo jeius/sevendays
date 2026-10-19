@@ -110,7 +110,7 @@ function LoginPage() {
         </div>
         {reset === '1' && (
           <p role='status' className='text-muted-foreground max-w-sm text-center text-sm'>
-            {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+            {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
             Password updated. Sign in with your new password.
           </p>
         )}
@@ -118,10 +118,10 @@ function LoginPage() {
           <CardHeader>
             {mode === 'forgot' ? (
               <>
-                {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+                {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
                 <h1 className='text-lg font-semibold'>Reset your password</h1>
                 <CardDescription>
-                  {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+                  {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
                   Enter your account email and we’ll send a reset link.
                 </CardDescription>
               </>
@@ -164,12 +164,12 @@ function LoginPage() {
                 </div>
                 {sent && (
                   <p role='status' className='text-muted-foreground text-sm'>
-                    {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+                    {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
                     If that account exists, a reset link is on its way.
                   </p>
                 )}
                 <Button type='submit' className='w-full' disabled={submitting}>
-                  {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+                  {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
                   Send reset link
                 </Button>
                 <button
@@ -180,7 +180,7 @@ function LoginPage() {
                     setSent(false);
                   }}
                 >
-                  {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+                  {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
                   Back to sign in
                 </button>
               </form>
@@ -227,7 +227,7 @@ function LoginPage() {
                     setFailure(false);
                   }}
                 >
-                  {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+                  {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
                   Forgot password?
                 </button>
               </form>

@@ -113,7 +113,7 @@ export function AccountTab({ user }: { user: AccountUser }) {
               {savingName ? (
                 <LoaderCircle aria-hidden='true' className='size-4 animate-spin' />
               ) : null}
-              {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+              {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
               {savingName ? 'Saving…' : 'Save name'}
             </Button>
           </div>
@@ -176,7 +176,7 @@ export function AccountTab({ user }: { user: AccountUser }) {
             {savingPassword ? (
               <LoaderCircle aria-hidden='true' className='size-4 animate-spin' />
             ) : null}
-            {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+            {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
             {savingPassword ? 'Changing…' : 'Change password'}
           </Button>
         </CardContent>
@@ -186,7 +186,7 @@ export function AccountTab({ user }: { user: AccountUser }) {
         <CardContent className='space-y-1.5'>
           <h2 className='text-sm font-semibold'>Sessions</h2>
           <p className='text-muted-foreground text-sm'>
-            {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+            {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
             Signs this account out of every session, on every device — including this one.
           </p>
           <Button
@@ -202,7 +202,7 @@ export function AccountTab({ user }: { user: AccountUser }) {
             ) : (
               <LogOut aria-hidden='true' className='size-4' />
             )}
-            {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+            {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
             {signingOut ? 'Signing out…' : 'Sign out of all sessions'}
           </Button>
         </CardContent>

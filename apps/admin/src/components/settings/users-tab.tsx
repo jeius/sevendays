@@ -177,11 +177,9 @@ export function UsersTab({ actorId }: { actorId: string }) {
     token: rawSessions.find((raw) => raw.id === session.id)?.token,
   }));
 
-  // TODO(owner-copy): the row-action labels, the sheet's description line,
-  // the client-validation lines, the success/failure toasts, and the
-  // sessions copy below are unplanned strings awaiting the owner's
-  // ratification (#134 open items); everything the brief pins verbatim is
-  // transcribed as pinned.
+  // Owner-ratified verbatim, 2026-10-19 (#221 round): the row-action labels,
+  // the sheet's description line, the client-validation lines, the
+  // success/failure toasts, and the sessions copy below.
   const [createOpen, setCreateOpen] = useState(false);
   const [createName, setCreateName] = useState('');
   const [createEmail, setCreateEmail] = useState('');

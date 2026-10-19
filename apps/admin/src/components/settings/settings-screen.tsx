@@ -10,8 +10,7 @@ import { AccountTab, type AccountUser } from '#/components/settings/account-tab'
 import { SiteTab } from '#/components/settings/site-tab';
 import { UsersTab } from '#/components/settings/users-tab';
 
-// TODO(owner-copy): the users subline is an unplanned string awaiting the
-// owner's ratification (#134 open items).
+// Owner-ratified verbatim, 2026-10-19 (#221 round): the users subline.
 const TAB_SUBLINES: Record<'account' | 'users' | 'site', string> = {
   account: 'Your account and security.',
   users: 'The studio’s staff accounts.',

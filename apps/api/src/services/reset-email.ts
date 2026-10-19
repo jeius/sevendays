@@ -44,10 +44,11 @@ export interface ResetEmail {
   html: string;
 }
 
-/** Pure: the pinned reset-email copy. The subject is exempt from escaping
- * (plain text); the body greets by display name (escaped), states the 1-hour
- * token TTL (BetterAuth's default `resetPasswordTokenExpiresIn`), links the
- * BetterAuth-built URL once, and closes with the didn't-request-this line. */
+/** Pure: the pinned reset-email copy — owner-ratified verbatim, 2026-10-19
+ * (#221 round). The subject is exempt from escaping (plain text); the body
+ * greets by display name (escaped), states the 1-hour token TTL (BetterAuth's
+ * default `resetPasswordTokenExpiresIn`), links the BetterAuth-built URL
+ * once, and closes with the didn't-request-this line. */
 export function buildResetEmail(input: ResetEmailInput): ResetEmail {
   const html = `<p>Hi ${escapeHtml(input.name)},</p>
 <p>We received a request to reset your Sevendays Admin password. This link expires in 1 hour.</p>

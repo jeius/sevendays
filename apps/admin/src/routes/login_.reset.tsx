@@ -63,7 +63,7 @@ function ResetPasswordPage() {
         <CardHeader>
           <h1 className='text-lg font-semibold'>Choose a new password</h1>
           <CardDescription>
-            {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+            {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
             At least 12 characters. Every signed-in session is signed out when the password changes.
           </CardDescription>
         </CardHeader>
@@ -71,7 +71,7 @@ function ResetPasswordPage() {
           {error || !token ? (
             <div className='space-y-3'>
               <p role='alert' className='text-destructive text-sm'>
-                {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+                {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
                 This reset link is invalid or has expired. Request a new one.
               </p>
               <Button
@@ -110,18 +110,18 @@ function ResetPasswordPage() {
               </div>
               {mismatch && (
                 <p role='alert' className='text-destructive text-sm'>
-                  {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+                  {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
                   The passwords don’t match.
                 </p>
               )}
               {failure && (
                 <p role='alert' className='text-destructive text-sm'>
-                  {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+                  {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
                   Could not reset the password — the link may have expired. Request a new one.
                 </p>
               )}
               <Button type='submit' className='w-full' disabled={submitting}>
-                {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items). */}
+                {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
                 Reset password
               </Button>
             </form>
