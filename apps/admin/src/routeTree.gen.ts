@@ -22,7 +22,7 @@ import { Route as ShellPackagesRouteImport } from './routes/_shell.packages'
 import { Route as ShellSettingsRouteImport } from './routes/_shell.settings'
 import { Route as ShellStudioServicesRouteImport } from './routes/_shell.studio-services'
 import { Route as ShellTestimonialsRouteImport } from './routes/_shell.testimonials'
-import { Route as LoginResetRouteImport } from './routes/login.reset'
+import { Route as LoginResetRouteImport } from './routes/login_.reset'
 import { Route as ShellPackagesIndexRouteImport } from './routes/_shell.packages.index'
 import { Route as ShellPackagesNewRouteImport } from './routes/_shell.packages.new'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -94,9 +94,9 @@ const ShellTestimonialsRoute = ShellTestimonialsRouteImport.update({
   getParentRoute: () => ShellRoute,
 } as any)
 const LoginResetRoute = LoginResetRouteImport.update({
-  id: '/reset',
-  path: '/reset',
-  getParentRoute: () => LoginRoute,
+  id: '/login_/reset',
+  path: '/login/reset',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ShellPackagesIndexRoute = ShellPackagesIndexRouteImport.update({
   id: '/',
@@ -128,7 +128,7 @@ const ApiAdminGalleryPhotosIdThumbRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof ShellIndexRoute
-  '/login': typeof LoginRouteWithChildren
+  '/login': typeof LoginRoute
   '/add-ons': typeof ShellAddOnsRoute
   '/appointments': typeof ShellAppointmentsRoute
   '/audit-log': typeof ShellAuditLogRoute
@@ -147,7 +147,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/gallery-photos/$id/thumb': typeof ApiAdminGalleryPhotosIdThumbRoute
 }
 export interface FileRoutesByTo {
-  '/login': typeof LoginRouteWithChildren
+  '/login': typeof LoginRoute
   '/add-ons': typeof ShellAddOnsRoute
   '/appointments': typeof ShellAppointmentsRoute
   '/audit-log': typeof ShellAuditLogRoute
@@ -168,7 +168,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_shell': typeof ShellRouteWithChildren
-  '/login': typeof LoginRouteWithChildren
+  '/login': typeof LoginRoute
   '/_shell/add-ons': typeof ShellAddOnsRoute
   '/_shell/appointments': typeof ShellAppointmentsRoute
   '/_shell/audit-log': typeof ShellAuditLogRoute
@@ -179,7 +179,7 @@ export interface FileRoutesById {
   '/_shell/settings': typeof ShellSettingsRoute
   '/_shell/studio-services': typeof ShellStudioServicesRoute
   '/_shell/testimonials': typeof ShellTestimonialsRoute
-  '/login/reset': typeof LoginResetRoute
+  '/login_/reset': typeof LoginResetRoute
   '/_shell/': typeof ShellIndexRoute
   '/_shell/packages/new': typeof ShellPackagesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -241,7 +241,7 @@ export interface FileRouteTypes {
     | '/_shell/settings'
     | '/_shell/studio-services'
     | '/_shell/testimonials'
-    | '/login/reset'
+    | '/login_/reset'
     | '/_shell/'
     | '/_shell/packages/new'
     | '/api/auth/$'
@@ -252,7 +252,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   ShellRoute: typeof ShellRouteWithChildren
-  LoginRoute: typeof LoginRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  LoginResetRoute: typeof LoginResetRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiAdminGalleryPhotosIdThumbRoute: typeof ApiAdminGalleryPhotosIdThumbRoute
 }
@@ -350,12 +351,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShellTestimonialsRouteImport
       parentRoute: typeof ShellRoute
     }
-    '/login/reset': {
-      id: '/login/reset'
-      path: '/reset'
+    '/login_/reset': {
+      id: '/login_/reset'
+      path: '/login/reset'
       fullPath: '/login/reset'
       preLoaderRoute: typeof LoginResetRouteImport
-      parentRoute: typeof LoginRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_shell/packages/': {
       id: '/_shell/packages/'
@@ -441,19 +442,10 @@ const ShellRouteChildren: ShellRouteChildren = {
 
 const ShellRouteWithChildren = ShellRoute._addFileChildren(ShellRouteChildren)
 
-interface LoginRouteChildren {
-  LoginResetRoute: typeof LoginResetRoute
-}
-
-const LoginRouteChildren: LoginRouteChildren = {
-  LoginResetRoute: LoginResetRoute,
-}
-
-const LoginRouteWithChildren = LoginRoute._addFileChildren(LoginRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   ShellRoute: ShellRouteWithChildren,
-  LoginRoute: LoginRouteWithChildren,
+  LoginRoute: LoginRoute,
+  LoginResetRoute: LoginResetRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiAdminGalleryPhotosIdThumbRoute: ApiAdminGalleryPhotosIdThumbRoute,
 }
