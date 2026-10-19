@@ -20,7 +20,7 @@ const resetSearchSchema = z.object({
   error: z.string().optional(),
 });
 
-export const Route = createFileRoute('/login/reset')({
+export const Route = createFileRoute('/login_/reset')({
   validateSearch: resetSearchSchema,
   head: () => ({ meta: [{ title: 'Reset password | Sevendays Admin' }] }),
   component: ResetPasswordPage,
