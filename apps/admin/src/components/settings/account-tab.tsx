@@ -16,6 +16,7 @@ import { authClient } from '#/lib/auth-client';
 import { roleLabel } from '#/lib/users-state';
 
 export interface AccountUser {
+  id: string;
   name: string;
   email: string;
   role: string | null;
