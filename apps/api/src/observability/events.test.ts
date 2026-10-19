@@ -103,6 +103,7 @@ describe('event classes — enumerated field schemas (spec #175)', () => {
       'level',
       'msg',
       'phase',
+      'purpose',
       'requestId',
       'time',
     ]);
@@ -126,6 +127,7 @@ describe('event classes — enumerated field schemas (spec #175)', () => {
       'level',
       'msg',
       'phase',
+      'purpose',
       'requestId',
       'time',
     ]);
@@ -148,12 +150,58 @@ describe('event classes — enumerated field schemas (spec #175)', () => {
       'level',
       'msg',
       'phase',
+      'purpose',
       'requestId',
       'time',
     ]);
     expect(line.phase).toBe('failed');
     expect(line.code).toBe('resend:internal_server_error');
     expect(line.level).toBe(50); // pino error
+  });
+
+  it('email attempt (reset): purpose rides, appointmentId absent at info', () => {
+    const lines = captureLines();
+    logEmail(createRequestLogger('req-unit-7'), { phase: 'attempt', purpose: 'reset' });
+    const [line] = parse(lines);
+    if (!line) throw new Error('expected one parsed line');
+    expect(Object.keys(line).sort()).toEqual([
+      'evt',
+      'level',
+      'msg',
+      'phase',
+      'purpose',
+      'requestId',
+      'time',
+    ]);
+    expect(line.evt).toBe('email');
+    expect(line.phase).toBe('attempt');
+    expect(line.purpose).toBe('reset');
+    expect(line.appointmentId).toBeUndefined();
+    expect(line.level).toBe(30);
+  });
+
+  it('email failed (reset): purpose + the classified code, still no free text', () => {
+    const lines = captureLines();
+    logEmail(createRequestLogger('req-unit-8'), {
+      phase: 'failed',
+      purpose: 'reset',
+      code: 'resend:validation_error',
+    });
+    const [line] = parse(lines);
+    if (!line) throw new Error('expected one parsed line');
+    expect(Object.keys(line).sort()).toEqual([
+      'code',
+      'evt',
+      'level',
+      'msg',
+      'phase',
+      'purpose',
+      'requestId',
+      'time',
+    ]);
+    expect(line.purpose).toBe('reset');
+    expect(line.code).toBe('resend:validation_error');
+    expect(line.level).toBe(50);
   });
 
   it('one request child stamps the same requestId on every event it emits', () => {
