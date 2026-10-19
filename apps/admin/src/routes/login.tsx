@@ -18,7 +18,11 @@ import { authClient } from '#/lib/auth-client';
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),
-  reset: z.string().optional(),
+  // TanStack's default search serializer JSON-round-trips values: ?reset=1 arrives as the NUMBER 1 — accept both, normalize to string (live-proof finding, #221).
+  reset: z
+    .union([z.string(), z.number()])
+    .transform((v) => String(v))
+    .optional(),
 });
 
 export const Route = createFileRoute('/login')({
