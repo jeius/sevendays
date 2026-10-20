@@ -91,7 +91,7 @@ export const EMPTY_SITE_SETTINGS: SiteSettings = {
 // sd.png monogram), home title/description from the hero (home-copy's
 // HERO_BLURB), page titles + the services sub-copy from the routes'
 // h1/sub-lines, the About story from /about's placeholder line, the four
-// kickers from home-copy's KICKERS. Fields today renders NOTHING for stay
+// kickers from the ruled one-voice section headings (#223). Fields today renders NOTHING for stay
 // null (the extras — socials, banner copy, brand contact — and the three
 // page descriptions with no today-sub-copy): their null default renders
 // exactly today's page. This object IS the fallback the chrome renders
@@ -113,7 +113,7 @@ export const SITE_SETTINGS_DEFAULTS: SiteSettings = {
   aboutTitle: 'About',
   aboutDescription: null,
   aboutStory: 'Our studio story is coming soon.',
-  kickerGallery: 'The work — stand-in portfolio',
+  kickerGallery: 'The work',
   kickerPackages: 'Featured packages',
   kickerServices: 'What we do',
   kickerTestimonials: 'Kind words',
