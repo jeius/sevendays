@@ -1430,7 +1430,13 @@ export function HomeImageLed({
   testimonials: PublicTestimonial[];
 }) {
   const selection = selectFeaturedPackages(packages);
-  const featuredHeading = selection.isFeatured ? settings.kickerPackages : selection.heading;
+  // SiteSettings keeps nullability at the type level — coalesce to the
+  // selection's own ruled heading (byte-identical to the #215 default).
+  // (Execution ruling 2026-10-20: the bare ternary typechecks dark — the
+  // kicker keys are string | null at the type level; the coalesce is
+  // runtime-neutral since FEATURED_HEADING === the kicker default.)
+  const featuredHeading =
+    selection.isFeatured ? (settings.kickerPackages ?? selection.heading) : selection.heading;
   // Round 2 owner ruling: paginated testimonials — 3 per page (a
   // pull-quote lead + side rail on every page), non-looping.
   const pages = paginateTestimonials(testimonials);
