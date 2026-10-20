@@ -18,7 +18,7 @@
 - **The states:** home's skeleton composes fresh on the ruled grammar (the prototype's `skeletons.ts` has packages/detail/services/branches/about silhouettes — all #224 surfaces; home has none there — #223 owns the system CSS + the home silhouette + the pendingComponent wiring, #224 adds the per-surface skeletons with their surfaces). `pendingComponent` shows on client navigations only (first loads are server-rendered — the M5 freshness rule; TanStack shows it past `defaultPendingMs` while loaders run — the prototype's "devtools throttling while clicking between pages" is the judging method). Whole-page empty lines: packages keeps the M5 line + gains the Back-to-home outline CTA; branches GAINS an empty state (none exists today — `branches.map` renders nothing) with the prototype's line "Our branches are being set up — check back soon." + the CTA. The `?empty=1` judging aid is **DEV-gated** (`isEmptyJudgingParam(import.meta.env.DEV, useLocation().search)` — production answers false, so the aid never ships; raw URL read because route search validation strips unknown params). About's in-page empties stay untouched (#224). Home's in-page empties: the featured collapse law stands (`packages.length > 0` gates the section, unchanged); the gallery section renders the ruled "Portfolio coming soon." line when the live read has zero photos (the shared wall's law — conservative extension, unrated); zero services collapses the services section entirely (the featured-collapse precedent, unrated); zero testimonials renders the prototype's "Client words are on their way — check back soon."
 - **Sibling fences (the tickets' own bodies; NOT here regardless of temptation):** **the catalog plates index, the D2 package detail + framed/prints/privileges spec sheet, image-backed service rows, branch cover strips + walk-in tooltips + variant-split CTAs, /share-your-story wearing the redesign, page titles/descriptions driving h1 + SEO meta, the unpriced law re-verification at those sites, the CTA-law sweep on those surfaces** — ALL #224; **/about's redesign** (mosaic portfolio wall with captions, quote wall, the settings story/title) — #224; **the per-surface skeletons for packages/detail/services/branches/about** — #224 (they echo #224 surfaces); **document `<title>`/meta consumption** — #224; **the M7 close-out box, the exit reflection scenario, visual regression** — #225; **any new token or `packages/ui` change** (ruled: none — the redesign re-weights the existing system); **any booking-surface file beyond the `booking.$id.tsx` `notFoundComponent` prop removal** (the wizard/confirmation are v2's and unchanged); **stand-in imagery or stand-in content of any kind** — the 18 StockSnap files and the stand-in seams live on the prototype branch only; main renders the live catalog as-is (the content gaps are owner-owned, recorded in the #164 resolution).
 - **The `docs/plan.md` boxes (Task 6):** the redesign box (`docs/plan.md:174` — "- [ ] Landing — the redesign build…") and the consumption box (`docs/plan.md:175` — "- [ ] Both apps — site settings consumed…") BOTH span #223+#224 — each gets a DATED NOT-TICKED annotation naming what landed and what stays #224's (the #216/#221 shared-box precedent). Nothing ticks; the milestone Verify box stays #225's.
-- **Baselines (live, run this session on main `63e2b71`):** types 18 files / 170 tests; landing 10 files / 92 tests; admin 26 files / 254 tests. After Task 1: landing **15 files / 115 tests** (+5 files — `mosaic.test.ts` +4, `home-testimonials.test.ts` +4, `site-chrome.test.ts` +9, `empty-override.test.ts` +4, `featured.test.ts` +2); types stays 18/170 (in-place literal edits only); admin stays 26/254 (the rider adds no suite — the resolution it uses is types-tested). Tasks 2–5 add no suite counts (component-side). (Executor reconciles actuals; if any gate count differs, reconcile before proceeding — do not loosen assertions.)
+- **Baselines (live, run this session on main `63e2b71`):** types 18 files / 170 tests; landing 10 files / 92 tests; admin 26 files / 254 tests. After Task 1: landing **14 files / 115 tests** (+4 new files — `mosaic.test.ts` +4, `home-testimonials.test.ts` +4, `site-chrome.test.ts` +9, `empty-override.test.ts` +4, `featured.test.ts` +2); types stays 18/170 (in-place literal edits only); admin stays 26/254 (the rider adds no suite — the resolution it uses is types-tested). Tasks 2–5 add no suite counts (component-side). (Executor reconciles actuals; if any gate count differs, reconcile before proceeding — do not loosen assertions.)
 
 ## Global Constraints
 
@@ -450,7 +450,7 @@ In `packages/types/src/site-settings.test.ts` line 120, inside the `SITE_SETTING
 
 - [ ] **Step 6: Green + gates + commit**
 
-`pnpm --filter @sevendays/types build` FIRST (the landing consumes the package through its `dist/` — the new default must be in the build before the landing suite reads it), then `pnpm --filter @sevendays/landing test -- --run` — **15 files / 115 tests** (92 + 23). `pnpm --filter @sevendays/types test -- --run` — **18 files / 170 tests** (unchanged counts; the literal edit must keep the DEFAULTS pin green). Then `pnpm --filter @sevendays/landing fix` → `pnpm --filter @sevendays/types fix` → re-run both suites → `pnpm --filter @sevendays/landing typecheck` → `pnpm --filter @sevendays/types typecheck`. Commit:
+`pnpm --filter @sevendays/types build` FIRST (the landing consumes the package through its `dist/` — the new default must be in the build before the landing suite reads it), then `pnpm --filter @sevendays/landing test -- --run` — **14 files / 115 tests** (92 + 23). `pnpm --filter @sevendays/types test -- --run` — **18 files / 170 tests** (unchanged counts; the literal edit must keep the DEFAULTS pin green). Then `pnpm --filter @sevendays/landing fix` → `pnpm --filter @sevendays/types fix` → re-run both suites → `pnpm --filter @sevendays/landing typecheck` → `pnpm --filter @sevendays/types typecheck`. Commit:
 
 ```bash
 git add packages/types/src/site-settings.ts packages/types/src/site-settings.test.ts apps/landing/src/lib/mosaic.ts apps/landing/src/lib/mosaic.test.ts apps/landing/src/lib/home-testimonials.ts apps/landing/src/lib/home-testimonials.test.ts apps/landing/src/lib/site-chrome.ts apps/landing/src/lib/site-chrome.test.ts apps/landing/src/lib/empty-override.ts apps/landing/src/lib/empty-override.test.ts apps/landing/src/lib/featured.ts apps/landing/src/lib/featured.test.ts
@@ -1132,7 +1132,7 @@ and the `SidebarHeader` block becomes:
 
 - [ ] **Step 10: Gates + commit**
 
-`pnpm --filter @sevendays/landing fix` → `test -- --run` (**15 files / 115 tests**, unchanged counts) → `typecheck` → `build`. Then `pnpm --filter @sevendays/admin fix` → `test -- --run` (**26 files / 254 tests**) → `typecheck` → `build`. Commit:
+`pnpm --filter @sevendays/landing fix` → `test -- --run` (**14 files / 115 tests**, unchanged counts) → `typecheck` → `build`. Then `pnpm --filter @sevendays/admin fix` → `test -- --run` (**26 files / 254 tests**) → `typecheck` → `build`. Commit:
 
 ```bash
 git add apps/landing/src/lib/api.functions.ts apps/landing/src/lib/queries.ts apps/landing/src/components/site-header.tsx apps/landing/src/components/site-footer.tsx apps/landing/src/components/mobile-nav.tsx apps/landing/src/components/announcement-banner.tsx apps/landing/src/components/not-found.tsx apps/landing/src/components/error-component.tsx apps/landing/src/routes/__root.tsx apps/landing/src/styles.css apps/landing/src/routes/packages/\$slug.tsx apps/landing/src/routes/booking.\$id.tsx apps/admin/src/routes/_shell.tsx apps/admin/src/components/admin-sidebar.tsx
@@ -1994,7 +1994,7 @@ Append to `apps/landing/src/styles.css` (after Task 2's `.nav-panel` block):
 
 - [ ] **Step 7: Gates + commit**
 
-`pnpm --filter @sevendays/landing fix` → `test -- --run` (**15 files / 115 tests** — `featured.test.ts` may need its strip-selection it updated if it referenced `PackageCoverCard`-era helpers; reconcile, never loosen) → `typecheck` → `build`. Commit:
+`pnpm --filter @sevendays/landing fix` → `test -- --run` (**14 files / 115 tests** — `featured.test.ts` may need its strip-selection it updated if it referenced `PackageCoverCard`-era helpers; reconcile, never loosen) → `typecheck` → `build`. Commit:
 
 ```bash
 git add apps/landing/src/components/reveal.tsx apps/landing/src/components/mosaic-photo-grid.tsx apps/landing/src/components/featured-plates.tsx apps/landing/src/components/skeletons.tsx apps/landing/src/components/home-image-led.tsx apps/landing/src/components/home-cards.tsx apps/landing/src/components/home-copy.ts apps/landing/src/routes/index.tsx apps/landing/src/styles.css
@@ -2097,7 +2097,7 @@ function BranchesPage() {
 
 - [ ] **Step 3: Verify the gate is production-dead, then gates + commit**
 
-Prove the aid never ships: `grep -rn "isEmptyJudgingParam" apps/landing/src/routes/` shows the two call sites, both feeding `import.meta.env.DEV` (the seam's own test pins the false answer). Then `pnpm --filter @sevendays/landing fix` → `test -- --run` (**15 files / 115 tests**) → `typecheck` → `build`. Commit:
+Prove the aid never ships: `grep -rn "isEmptyJudgingParam" apps/landing/src/routes/` shows the two call sites, both feeding `import.meta.env.DEV` (the seam's own test pins the false answer). Then `pnpm --filter @sevendays/landing fix` → `test -- --run` (**14 files / 115 tests**) → `typecheck` → `build`. Commit:
 
 ```bash
 git add apps/landing/src/routes/packages/index.tsx apps/landing/src/routes/branches.tsx
@@ -2155,7 +2155,7 @@ git commit -m "chore(landing): the redesign I variants round settled - copy and 
 
 - [ ] **Step 1: The full gate sweep**
 
-`pnpm --filter @sevendays/landing fix` → `test -- --run` (**15 files / 115 tests**, or the Task 5-retuned counts) → `typecheck` → `build`; `pnpm --filter @sevendays/types test -- --run` + `typecheck` (**18 files / 170 tests**); `pnpm --filter @sevendays/admin test -- --run` + `typecheck` (**26 files / 254 tests**). Reconcile any drift before proceeding — never loosen assertions.
+`pnpm --filter @sevendays/landing fix` → `test -- --run` (**14 files / 115 tests**, or the Task 5-retuned counts) → `typecheck` → `build`; `pnpm --filter @sevendays/types test -- --run` + `typecheck` (**18 files / 170 tests**); `pnpm --filter @sevendays/admin test -- --run` + `typecheck` (**26 files / 254 tests**). Reconcile any drift before proceeding — never loosen assertions.
 
 - [ ] **Step 2: `docs/plan.md` — two DATED NOT-TICKED annotations + one errata**
 
@@ -2179,7 +2179,7 @@ git commit -m "chore(landing): the redesign I variants round settled - copy and 
 
 (a) `docs/progress.md` — append the entry: the ticket, the date, what landed (chrome/home/states/consumption per the two annotations), the round's outcome (rulings applied, TODOs retired), the gate counts, the live-verification notes (throttled skeleton, bogus-URL NotFound, stopped-API Error, ?empty judging).
 
-(b) `AGENTS.md` — two edits. First, the landing suite line in *Current status of `pnpm test`* gains the seam class: extend the landing sentence with "…(+ #223's five redesign-I seams — the mosaic rhythm, testimonial pagination, the chrome settings shapers, the DEV-gated empty judging, isFeatured — 15 files / 115 tests)". Second, the site-settings paragraph's closing clause "both apps' chrome consumption rides the redesign tickets" becomes "both apps' chrome consumption is live since the redesign ticket #223 (the landing chrome + admin sidebar; page titles + the About story ride #224)".
+(b) `AGENTS.md` — two edits. First, the landing suite line in *Current status of `pnpm test`* gains the seam class: extend the landing sentence with "…(+ #223's five redesign-I seams — the mosaic rhythm, testimonial pagination, the chrome settings shapers, the DEV-gated empty judging, isFeatured — 14 files / 115 tests)". Second, the site-settings paragraph's closing clause "both apps' chrome consumption rides the redesign tickets" becomes "both apps' chrome consumption is live since the redesign ticket #223 (the landing chrome + admin sidebar; page titles + the About story ride #224)".
 
 - [ ] **Step 4: The PR**
 
