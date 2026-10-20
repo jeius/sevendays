@@ -106,3 +106,66 @@ pre code {
     transition: none;
   }
 }
+
+/* #164 Round 2 (owner ruling), built M7 #223: the services marquee — the
+   track holds the card list THREE times, so -33.3333% is one copy-width
+   (a seamless loop that stays filled on any viewport: two full copies
+   always remain behind the window, whatever the screen width). */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-33.3333%);
+  }
+}
+
+/* #164 Round 2 (owner ruling), built M7 #223: the testimonial page-change
+   reveal — a quick fade-and-rise, run per page via the keyed grid. */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* #164 Round 5 (owner ruling), built M7 #223: emphasized skeletons — a
+   brand-tinted sweep rides over the shared pulse inside .skeleton-grammar
+   layouts. */
+.skeleton-grammar [data-slot="skeleton"] {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-grammar [data-slot="skeleton"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in oklab, var(--color-brand-300) 40%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: skeletonSweep 1.4s ease-in-out infinite;
+}
+
+@keyframes skeletonSweep {
+  from {
+    background-position: 180% 0;
+  }
+  to {
+    background-position: -80% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-grammar [data-slot="skeleton"]::after {
+    animation: none;
+  }
+}
