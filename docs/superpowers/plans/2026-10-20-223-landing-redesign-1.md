@@ -2209,6 +2209,6 @@ Push the branch, open the PR against main (title: `The landing redesign I — ch
 - [ ] `grep -rn "GALLERY_STANDINS\|TESTIMONIALS_PLACEHOLDER\|KICKERS" apps/landing/src` returns nothing (the stand-ins are dead).
 - [ ] `grep -rn "notFoundComponent" apps/landing/src/routes/` returns only `__root.tsx`.
 - [ ] Both themes captured for every round surface; the dark NotFound shows the ink field.
-- [ ] Gate counts match the baselines (or the retuned reconciled numbers): types 18/170, landing 15/115, admin 26/254.
+- [ ] Gate counts match the baselines (or the retuned reconciled numbers): types 18/170, landing 14/115, admin 26/254.
 
 
