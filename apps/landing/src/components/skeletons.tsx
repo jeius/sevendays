@@ -141,3 +141,23 @@ export function BranchesSkeleton() {
     </div>
   );
 }
+
+/** About (#164 Round 5, built #224): the tab row + the mosaic wall
+ * silhouette. */
+export function AboutSkeleton() {
+  return (
+    <div className='skeleton-grammar mx-auto max-w-5xl px-6 py-16'>
+      <Skeleton className='h-9 w-32' />
+      <div className='mt-8 flex gap-2'>
+        <Skeleton className='h-8 w-20 rounded-full' />
+        <Skeleton className='h-8 w-24 rounded-full' />
+        <Skeleton className='h-8 w-16 rounded-full' />
+      </div>
+      <div className='mt-6 grid grid-flow-dense auto-rows-[9rem] grid-cols-2 gap-4 md:auto-rows-[11rem] md:grid-cols-4'>
+        {SLOTS_8.map((slot) => (
+          <Skeleton key={slot} className='h-full w-full rounded-xl' />
+        ))}
+      </div>
+    </div>
+  );
+}

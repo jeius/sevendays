@@ -5,7 +5,7 @@ import { Label } from '@sevendays/ui/components/label';
 import { Textarea } from '@sevendays/ui/components/textarea';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { cn } from 'cn';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, LoaderCircle } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { submitTestimonial } from '../lib/api.functions';
 import {
@@ -31,8 +31,8 @@ export const Route = createFileRoute('/share-your-story')({
 // spec's min bounds; the hidden honeypot rides the payload verbatim; the
 // ruled success panel replaces the form on 201. The 429 line is the
 // API's own error string (one source); anything else fails generic. The
-// submit stays today's plain disabled vocabulary — #218's pending system
-// covers this surface with the rest. Edition-independent: v1's only
+// submit wears the milestone's one pending vocabulary since #224 (disabled
+// + spinner + "Sending…" + aria-busy). Edition-independent: v1's only
 // public write surface.
 function ShareYourStoryPage() {
   const [values, setValues] = useState<TestimonialFormValues>({
@@ -163,12 +163,17 @@ function ShareYourStoryPage() {
             </p>
           ) : null}
           <div className='mt-2 flex items-center gap-3'>
+            {/* The milestone's one pending vocabulary (#218's law, reached
+                with #224): disabled in flight, the spinner in the label's
+                place, the label swap, aria-busy always. */}
             <button
               type='submit'
               disabled={!canSubmit}
+              aria-busy={sending}
               className={cn(buttonVariants(), 'self-start disabled:opacity-50')}
             >
-              Send my story
+              {sending ? <LoaderCircle className='size-4 animate-spin' aria-hidden='true' /> : null}
+              {sending ? 'Sending…' : 'Send my story'}
             </button>
             <Link
               to='/about'
