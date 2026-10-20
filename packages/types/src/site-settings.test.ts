@@ -108,14 +108,17 @@ describe('the defaults (M7 #215: unset fields fall back to today’s hardcoded c
       homeDescription:
         'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.',
       packagesTitle: 'Packages',
-      packagesDescription: null,
+      packagesDescription:
+        'From graduation portraits to family sessions — every package with its price, duration, and inclusions at a glance. Tap a package for the full details.',
       branchesTitle: 'Branches',
-      branchesDescription: null,
+      branchesDescription:
+        'Three studios, one standard of light. Walk-ins are welcome where flagged — everywhere else, call ahead or book online.',
       servicesTitle: 'Services',
       servicesDescription:
-        'Looking for add-ons? Makeup, hairstyle, and more are available with any session.',
+        'Photo recovery, printing, portraits, and framing — studio services you can book at the branches listed on each card.',
       aboutTitle: 'About',
-      aboutDescription: null,
+      aboutDescription:
+        'The studio behind the work — our story, our portfolio, and the people who sat for us.',
       aboutStory: 'Our studio story is coming soon.',
       kickerGallery: 'The work',
       kickerPackages: 'Featured packages',
@@ -158,6 +161,5 @@ describe('resolveSiteSettings (the defaults seam — both apps consume this one 
     expect(resolved.bannerBody).toBeNull();
     expect(resolved.contactEmail).toBeNull();
     expect(resolved.contactPhone).toBeNull();
-    expect(resolved.packagesDescription).toBeNull();
   });
 });
