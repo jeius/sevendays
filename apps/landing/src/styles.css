@@ -81,3 +81,28 @@ pre code {
     @apply font-sans;
   }
 }
+
+/* #164 Round 4 scope rider (owner ruling), built M7 #223: the mobile menu
+   panel animates on Base UI's native transition contract — the library
+   stamps data-open / data-closed / data-starting-style / data-ending-style
+   on the panel and keeps it mounted through the exit transition itself.
+   Closed = lifted and transparent; opening drops it in; closing lifts it
+   out. Reduced motion = instant. */
+.nav-panel {
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out;
+}
+
+.nav-panel[data-closed],
+.nav-panel[data-starting-style] {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-panel {
+    transition: none;
+  }
+}

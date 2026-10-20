@@ -1,6 +1,10 @@
 import { startSpan } from '@sentry/tanstackstart-react';
 import type { CreateAppointmentArgs } from '@sevendays/api-client';
-import type { AppointmentWithAddons, CreateTestimonialSubmissionInput } from '@sevendays/types';
+import {
+  type AppointmentWithAddons,
+  type CreateTestimonialSubmissionInput,
+  resolveSiteSettings,
+} from '@sevendays/types';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequestHeaders } from '@tanstack/react-start/server';
 import { getApiClient, getApiClientForwardingIp } from './api.server';
@@ -55,6 +59,18 @@ export const getGallery = createServerFn().handler(async () => {
 export const getTestimonials = createServerFn().handler(async () => {
   return startSpan({ name: 'GET /api/v1/testimonials' }, async () => {
     return getApiClient().testimonials.list();
+  });
+});
+
+/**
+ * The resolved site-settings read (M7 #223 — the chrome + home copy
+ * source). resolveSiteSettings applies at the boundary: consumers never
+ * see the born-empty null mix — unset fields are today's defaults (#215's
+ * one-fallback law, never per-app fallbacks).
+ */
+export const getSiteSettings = createServerFn().handler(async () => {
+  return startSpan({ name: 'GET /api/v1/site-settings' }, async () => {
+    return resolveSiteSettings(await getApiClient().siteSettings.get());
   });
 });
 
