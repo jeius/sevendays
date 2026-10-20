@@ -1,5 +1,6 @@
 import type { StudioServiceWithBranches } from '@sevendays/types';
 import { Link } from '@tanstack/react-router';
+import { CalendarPlus } from 'lucide-react';
 import { bookAriaLabel, peso } from '../lib/format';
 
 // The ruled card system (#111 Track 2, variant D build target), reduced to
@@ -53,7 +54,11 @@ export function ServiceImageCard({ service }: { service: StudioServiceWithBranch
           <h3 className='truncate text-xl font-semibold text-white'>{service.name}</h3>
           <p className='text-brand-200 mt-1 font-mono text-sm'>{peso(service.priceCents)}</p>
         </div>
-        <span className='shrink-0 rounded-md border border-white/40 bg-brand-ink/60 px-3 py-1.5 text-sm font-medium text-white transition-colors group-hover:bg-brand-ink/80'>
+        {/* The CTA law reaches the marquee chip with #224 (fenced from
+            #223): every book affordance carries CalendarPlus — size-3.5
+            fits the chip's compact register. */}
+        <span className='inline-flex shrink-0 items-center gap-1.5 rounded-md border border-white/40 bg-brand-ink/60 px-3 py-1.5 text-sm font-medium text-white transition-colors group-hover:bg-brand-ink/80'>
+          <CalendarPlus className='size-3.5' aria-hidden='true' />
           Book
         </span>
       </div>

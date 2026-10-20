@@ -13,6 +13,7 @@ import { spanFor } from '../lib/mosaic';
 const SLOTS_8 = [1, 2, 3, 4, 5, 6, 7, 8];
 const SLOTS_6 = [1, 2, 3, 4, 5, 6];
 const SLOTS_3 = [1, 2, 3];
+const SLOTS_4 = [1, 2, 3, 4];
 
 export function HomeSkeleton() {
   return (
@@ -99,6 +100,41 @@ export function PackageDetailSkeleton() {
             <Skeleton className='h-4 w-full' />
             <Skeleton className='h-4 w-4/5' />
             <Skeleton className='h-4 w-3/5' />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Services (#164 Round 5, built #224): five image-backed card silhouettes. */
+export function ServicesSkeleton() {
+  return (
+    <div className='skeleton-grammar mx-auto max-w-5xl px-6 py-16'>
+      <Skeleton className='h-9 w-36' />
+      <div className='mt-8 grid gap-6 sm:grid-cols-2'>
+        {SLOTS_4.map((slot) => (
+          <Skeleton key={slot} className='h-72 w-full rounded-xl' />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Branches (#164 Round 5, built #224): three cover-card silhouettes. */
+export function BranchesSkeleton() {
+  return (
+    <div className='skeleton-grammar mx-auto max-w-5xl px-6 py-16'>
+      <Skeleton className='h-9 w-40' />
+      <div className='mt-8 grid gap-6 sm:grid-cols-2'>
+        {SLOTS_3.map((slot) => (
+          <div key={slot} className='overflow-hidden rounded-xl border border-line-soft'>
+            <Skeleton className='aspect-[16/9] w-full rounded-none' />
+            <div className='space-y-2 p-6'>
+              <Skeleton className='h-5 w-1/2' />
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='h-10 w-40' />
+            </div>
           </div>
         ))}
       </div>
