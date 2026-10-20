@@ -1,32 +1,39 @@
+import type { SiteSettings } from '@sevendays/types';
 import { buttonVariants } from '@sevendays/ui/components/button';
 import { ThemeToggle } from '@sevendays/ui/components/theme-toggle';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
+import { CalendarPlus } from 'lucide-react';
 import { NAV_LINKS } from '../lib/nav';
 import { MobileNav } from './mobile-nav';
 
-// Site chrome — Treatment B "rebalanced" RULED 2026-09-16 (#111 owner
-// reaction on the prototype bands): links rest soft at brand-200 (13.94:1
-// on ink), sharpen to white on hover; the current page is white + medium
-// with a petrol tick; the CTA drops to deep petrol with a wide-tracked
-// label (10.90:1). The owner's logo mark leads the wordmark (the owner-supplied
-// sd.png monogram — the full lockup's wordmark is illegible at chip size).
-// Mobile panel carries the ruled Mobile panel B treatment.
-export function SiteHeader() {
+// Site chrome — the ruled pass C "Sticky ink bar" (#164 Round 1, owner
+// endorsed; built M7 #223): the ink band goes sticky and glassy — 90% ink
+// + backdrop-blur so scrolling content reads softly beneath it, the
+// white/10 hairline keeping the glass legible on bright photos. The
+// incumbent wordmark (serif name + mono kicker) carries, desktop-only
+// (md+); the brand consumes site settings (the logo chip when the studio
+// sets one, the incumbent sd.png otherwise; name/tagline from the Site
+// tab, code defaults when unset). Link treatment stays #111's ruled B
+// (brand-200 rest 13.94:1, white hover/current, petrol tick). CTA law,
+// main arm: Book now carries CalendarPlus — the v1 arm's Call-us swap is a
+// pick-time transform, never in this codebase.
+export function SiteHeader({ settings }: { settings: SiteSettings }) {
   return (
-    <header className='bg-brand-ink'>
-      <div className='relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4'>
+    <header className='sticky top-0 z-20 border-white/10 border-b bg-brand-ink/90 backdrop-blur-md'>
+      {/* py-2.5 + the 36px mark = the 56px bar home's -mt-14 hero tuck matches. */}
+      <div className='relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-2.5'>
         <Link
           to='/'
-          className='flex items-center gap-3 rounded-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
+          className='flex items-center gap-2.5 rounded-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
         >
-          <span className='relative size-10 shrink-0 overflow-hidden border-line-soft/40 flex items-center'>
-            <img src='/photos/sd.png' alt='' aria-hidden='true' />
+          <span className='flex size-9 shrink-0 items-center overflow-hidden rounded-md border-line-soft/40'>
+            <img src={settings.logoImageUrl ?? '/photos/sd.png'} alt='' aria-hidden='true' />
           </span>
           <span className='flex items-baseline gap-2.5'>
-            <span className='font-bold font-serif text-white text-xl'>Sevendays</span>
-            <span className='hidden font-mono text-[10px] text-brand-300 uppercase tracking-[0.18em] sm:inline'>
-              Photography
+            <span className='font-bold font-serif text-xl text-white'>{settings.brandName}</span>
+            <span className='hidden font-mono text-[10px] text-brand-300 uppercase tracking-[0.18em] md:inline'>
+              {settings.brandTagline}
             </span>
           </span>
         </Link>
@@ -49,13 +56,16 @@ export function SiteHeader() {
           <Link
             to='/book'
             className={cn(
-              buttonVariants(),
+              buttonVariants({ size: 'sm' }),
               'bg-brand-deep tracking-wide hover:bg-brand-primary-hover focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
             )}
           >
+            <CalendarPlus className='size-4' aria-hidden='true' />
             Book now
           </Link>
-          <ThemeToggle className='inline-flex size-10 rounded-md text-white/85 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring' />
+          {/* The toggle rides the glass bar (#217's ruled placement), at
+              size-9 so the bar keeps its 56px height. */}
+          <ThemeToggle className='inline-flex size-9 rounded-md text-white/85 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring' />
           <MobileNav links={NAV_LINKS} />
         </div>
       </div>

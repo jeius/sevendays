@@ -10,6 +10,7 @@ import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 import { AdminSidebar } from '#/components/admin-sidebar';
 import { AdminTopbar } from '#/components/admin-topbar';
 import { getSession } from '#/lib/auth.functions';
+import { siteSettingsQuery } from '#/lib/cms-queries';
 
 export const Route = createFileRoute('/_shell')({
   beforeLoad: async ({ location }) => {
@@ -25,6 +26,13 @@ export const Route = createFileRoute('/_shell')({
         role: session.user.role ?? null,
       },
     };
+  },
+  // M7 #223 (the plan.md consumption box's "admin sidebar" clause): the
+  // shell ensures the settings read so the sidebar's brand renders
+  // server-side. Guarded — a failed read renders the default wordmark and
+  // never blocks the session gate.
+  loader: async ({ context: { queryClient } }) => {
+    await queryClient.ensureQueryData(siteSettingsQuery.all()).catch(() => undefined);
   },
   component: ShellLayout,
 });

@@ -8,6 +8,7 @@ export const FEATURED_COUNT = 4;
 
 export function selectFeaturedPackages(packages: ServicePackageRead[]): {
   heading: string;
+  isFeatured: boolean;
   packages: ServicePackageRead[];
 } {
   // ADR-0020 + owner ruling 2026-10-12: unpriced packages LEAD the strip
@@ -21,10 +22,11 @@ export function selectFeaturedPackages(packages: ServicePackageRead[]): {
   };
   const featured = packages.filter((p) => p.isFeatured).sort(byPrice);
   if (featured.length > 0) {
-    return { heading: FEATURED_HEADING, packages: featured };
+    return { heading: FEATURED_HEADING, isFeatured: true, packages: featured };
   }
   return {
     heading: FALLBACK_HEADING,
+    isFeatured: false,
     packages: [...packages].sort(byPrice).slice(0, FEATURED_COUNT),
   };
 }

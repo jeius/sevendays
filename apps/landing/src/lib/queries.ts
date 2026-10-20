@@ -6,6 +6,7 @@ import {
   getGallery,
   getServicePackageBySlug,
   getServicePackages,
+  getSiteSettings,
   getStudioServices,
   getTestimonials,
 } from './api.functions';
@@ -16,6 +17,15 @@ export const branchQueries = {
     queryOptions({
       queryKey: ['branches'],
       queryFn: () => getBranches(),
+    }),
+};
+
+export const siteSettingsQueries = {
+  /** The singleton's resolved read (M7 #223) — the chrome's copy source. */
+  all: () =>
+    queryOptions({
+      queryKey: ['site-settings'],
+      queryFn: () => getSiteSettings(),
     }),
 };
 

@@ -60,6 +60,11 @@ describe('selectFeaturedPackages', () => {
     expect(result.packages).toHaveLength(5);
   });
 
+  it('isFeatured flags the featured path so home can override its heading from settings (M7 #223)', () => {
+    const flagged = selectFeaturedPackages([pkg(BASIC), pkg(C)]);
+    expect(flagged.isFeatured).toBe(true);
+  });
+
   it('fallback path: no flags → first four by price, fallback heading', () => {
     const eleven = Array.from({ length: 11 }, (_, i) =>
       pkg({ name: `P${i + 1}`, priceCents: 100000 + i * 10000 })
@@ -76,6 +81,11 @@ describe('selectFeaturedPackages', () => {
       pkg({ name: 'Alpha', priceCents: 90000 }),
     ]);
     expect(result.packages.map((p) => p.name)).toEqual(['Alpha', 'Zeta']);
+  });
+
+  it('isFeatured stays false on the fallback path (the fallback heading is code-ruled, not settings copy)', () => {
+    const fallback = selectFeaturedPackages([pkg({ name: 'P1', priceCents: 1000 })]);
+    expect(fallback.isFeatured).toBe(false);
   });
 
   it('empty catalog: an empty strip under the fallback heading (the strip collapses in JSX)', () => {

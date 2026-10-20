@@ -117,7 +117,7 @@ describe('the defaults (M7 #215: unset fields fall back to today’s hardcoded c
       aboutTitle: 'About',
       aboutDescription: null,
       aboutStory: 'Our studio story is coming soon.',
-      kickerGallery: 'The work — stand-in portfolio',
+      kickerGallery: 'The work',
       kickerPackages: 'Featured packages',
       kickerServices: 'What we do',
       kickerTestimonials: 'Kind words',
