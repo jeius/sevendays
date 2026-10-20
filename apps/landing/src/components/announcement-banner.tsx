@@ -5,8 +5,8 @@ import { bannerFor } from '../lib/site-chrome';
 // banner fields worn by the landing chrome): a slim wash strip ABOVE the
 // sticky bar, scrolling away with the page — quiet by the thesis. The gate
 // law lives in bannerFor: off or untitled renders NOTHING (never a broken
-// strip). Unrated composition (no prototype precedent — settings post-date
-// the arc); the variants round ratifies.
+// strip). Composition owner-ratified as rendered, 2026-10-20 (#223 round —
+// no prototype precedent; the weight and placement stand).
 export function AnnouncementBanner({ settings }: { settings: SiteSettings }) {
   const banner = bannerFor(settings);
   if (!banner) return null;

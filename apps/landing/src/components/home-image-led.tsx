@@ -246,7 +246,7 @@ export function HomeImageLed({
           </div>
           <div
             ref={carouselRef}
-            className='group mt-8 touch-pan-y overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_4rem,black_calc(100%_-_4rem),transparent)]'
+            className='group mt-8 touch-pan-y overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_1.5rem,black_calc(100%_-_1.5rem),transparent)] md:[mask-image:linear-gradient(to_right,transparent,black_4rem,black_calc(100%_-_4rem),transparent)]'
           >
             <div
               ref={trackRef}

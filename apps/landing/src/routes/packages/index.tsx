@@ -31,7 +31,7 @@ function PackagesPage() {
     return (
       <div className='mx-auto max-w-5xl px-6 py-12'>
         <h1 className='font-bold font-serif text-4xl text-foreground'>Packages</h1>
-        {/* TODO(owner-copy): packages empty-state line — the round ratifies. */}
+        {/* Owner-ratified as rendered, 2026-10-20 (#223 round). */}
         <p className='text-muted-foreground mt-6'>
           No packages to show right now — check back soon.
         </p>

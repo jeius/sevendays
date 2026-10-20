@@ -6,14 +6,15 @@ import { cn } from 'cn';
 // per #223 — ink + logo + a way forward). Dependency-free by contract:
 // when this renders, the API may be the thing that failed, so no fetched
 // content, no photos — ink, type, and the reload button only. The dev-only
-// error line stays (import.meta.env.DEV never ships). Copy is the
-// prototype's DRAFT — TODO(owner-copy), the round ratifies.
+// error line stays (import.meta.env.DEV never ships). Copy owner-ratified
+// as rendered, 2026-10-20 (#223 round); the CTA icon/weight stands as
+// fenced (the round's explicit ratification of the Task-2 deferred minor).
 export function ErrorComponent({ error }: { error: Error }) {
   return (
     <div className='bg-brand-ink'>
       <div className='mx-auto flex max-w-5xl flex-col items-start gap-6 px-6 py-24 md:py-32'>
         <img src='/photos/sd.png' alt='' aria-hidden='true' className='size-12 rounded-md' />
-        {/* TODO(owner-copy): headline + body — the prototype drafts, the round ratifies. */}
+        {/* Owner-ratified as rendered, 2026-10-20 (#223 round). */}
         <h1 className='max-w-2xl font-bold font-serif text-4xl text-white md:text-5xl'>
           Something went wrong.
         </h1>

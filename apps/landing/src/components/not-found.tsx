@@ -9,13 +9,14 @@ import { Phone } from 'lucide-react';
 // between header and footer; dark returns the ink field — the ruled
 // pre-light look). GLOBAL at __root (M7 #223): the two route-level
 // notFound() overrides are gone — unknown routes AND unknown/inactive
-// slugs/ids all wear this one surface. Copy is the prototype's DRAFT —
-// TODO(owner-copy), the round ratifies.
+// slugs/ids all wear this one surface. Copy owner-ratified as rendered,
+// 2026-10-20 (#223 round); the primary Back-to-home / outline call
+// affordances stand as fenced (the round's explicit ratification).
 export function NotFound() {
   return (
     <div className='min-h-full bg-white dark:bg-brand-ink'>
       <div className='mx-auto flex max-w-5xl flex-col items-start gap-6 px-6 py-24 md:py-32'>
-        {/* TODO(owner-copy): headline + body — the prototype drafts, the round ratifies. */}
+        {/* Owner-ratified as rendered, 2026-10-20 (#223 round). */}
         <h1 className='max-w-2xl font-bold font-serif text-4xl text-brand-ink md:text-5xl dark:text-foreground'>
           This page never developed.
         </h1>

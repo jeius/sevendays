@@ -25,7 +25,7 @@ function BranchesPage() {
     return (
       <div className='mx-auto max-w-5xl px-6 py-12'>
         <h1 className='font-bold font-serif text-4xl text-foreground'>Branches</h1>
-        {/* TODO(owner-copy): the no-branches line — the round ratifies. */}
+        {/* Owner-ratified as rendered, 2026-10-20 (#223 round). */}
         <p className='text-muted-foreground mt-6'>
           Our branches are being set up — check back soon.
         </p>
