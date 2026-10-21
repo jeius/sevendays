@@ -8,9 +8,12 @@ import { spanFor } from '../lib/mosaic';
 // per-element spinners, first loads server-rendered; these render as route
 // pendingComponents on client navigations. The .skeleton-grammar wrapper
 // (styles.css) rides the sweep over every skeleton inside it. Home is
-// #223's silhouette; the per-surface skeletons (#224's surfaces) join
-// their surfaces at #224.
+// #223's silhouette; the per-surface skeletons join their surfaces with
+// #224 (the catalog pair here; services/branches/about in that task).
 const SLOTS_8 = [1, 2, 3, 4, 5, 6, 7, 8];
+const SLOTS_6 = [1, 2, 3, 4, 5, 6];
+const SLOTS_3 = [1, 2, 3];
+const SLOTS_4 = [1, 2, 3, 4];
 
 export function HomeSkeleton() {
   return (
@@ -48,6 +51,112 @@ export function HomeSkeleton() {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/** The packages index (#164 Round 5, built #224): six plate silhouettes. */
+export function PackagesSkeleton() {
+  return (
+    <div className='skeleton-grammar mx-auto max-w-5xl px-6 py-16'>
+      <Skeleton className='h-9 w-44' />
+      <div className='mt-8 grid gap-6 sm:grid-cols-2'>
+        {SLOTS_6.map((slot) => (
+          <div key={slot} className='overflow-hidden rounded-xl border border-line-soft'>
+            <Skeleton className='aspect-[4/3] w-full rounded-none' />
+            <div className='space-y-2 p-5'>
+              <Skeleton className='h-5 w-2/3' />
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='h-4 w-4/5' />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** The package detail (#164 Round 5, built #224): plate half + panel half,
+ * then the spec-sheet block. */
+export function PackageDetailSkeleton() {
+  return (
+    <div className='skeleton-grammar mx-auto max-w-5xl px-6 pt-8 pb-16'>
+      <Skeleton className='h-5 w-28' />
+      <div className='mt-6 grid overflow-hidden rounded-xl border border-line-soft md:grid-cols-5'>
+        <Skeleton className='min-h-64 w-full rounded-none md:col-span-3 md:min-h-[26rem]' />
+        <div className='space-y-3 p-6 md:col-span-2 md:p-8'>
+          <Skeleton className='h-8 w-3/4' />
+          <Skeleton className='h-5 w-24' />
+          <Skeleton className='h-4 w-full' />
+          <Skeleton className='h-4 w-5/6' />
+          <Skeleton className='h-10 w-40' />
+        </div>
+      </div>
+      <div className='mt-10 grid gap-10 md:grid-cols-3 md:gap-8'>
+        {SLOTS_3.map((slot) => (
+          <div key={slot} className='space-y-2'>
+            <Skeleton className='h-4 w-24' />
+            <Skeleton className='h-4 w-full' />
+            <Skeleton className='h-4 w-4/5' />
+            <Skeleton className='h-4 w-3/5' />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Services (#164 Round 5, built #224): five image-backed card silhouettes. */
+export function ServicesSkeleton() {
+  return (
+    <div className='skeleton-grammar mx-auto max-w-5xl px-6 py-16'>
+      <Skeleton className='h-9 w-36' />
+      <div className='mt-8 grid gap-6 sm:grid-cols-2'>
+        {SLOTS_4.map((slot) => (
+          <Skeleton key={slot} className='h-72 w-full rounded-xl' />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Branches (#164 Round 5, built #224): three cover-card silhouettes. */
+export function BranchesSkeleton() {
+  return (
+    <div className='skeleton-grammar mx-auto max-w-5xl px-6 py-16'>
+      <Skeleton className='h-9 w-40' />
+      <div className='mt-8 grid gap-6 sm:grid-cols-2'>
+        {SLOTS_3.map((slot) => (
+          <div key={slot} className='overflow-hidden rounded-xl border border-line-soft'>
+            <Skeleton className='aspect-[16/9] w-full rounded-none' />
+            <div className='space-y-2 p-6'>
+              <Skeleton className='h-5 w-1/2' />
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='h-10 w-40' />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** About (#164 Round 5, built #224): the tab row + the mosaic wall
+ * silhouette. */
+export function AboutSkeleton() {
+  return (
+    <div className='skeleton-grammar mx-auto max-w-5xl px-6 py-16'>
+      <Skeleton className='h-9 w-32' />
+      <div className='mt-8 flex gap-2'>
+        <Skeleton className='h-8 w-20 rounded-full' />
+        <Skeleton className='h-8 w-24 rounded-full' />
+        <Skeleton className='h-8 w-16 rounded-full' />
+      </div>
+      <div className='mt-6 grid grid-flow-dense auto-rows-[9rem] grid-cols-2 gap-4 md:auto-rows-[11rem] md:grid-cols-4'>
+        {SLOTS_8.map((slot) => (
+          <Skeleton key={slot} className='h-full w-full rounded-xl' />
+        ))}
       </div>
     </div>
   );
