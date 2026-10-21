@@ -113,9 +113,8 @@ export const SITE_SETTINGS_DEFAULTS: SiteSettings = {
   servicesDescription:
     'Photo recovery, printing, portraits, and framing — studio services you can book at the branches listed on each card.',
   aboutTitle: 'About',
-  // TODO(owner-copy): the one unrated default this ticket introduces (the
-  // #164 rounds never composed an About sub-copy) — the #224 variants round
-  // ratifies or retunes; a retune lands with its test pin in the same commit.
+  // Ratified verbatim at the #224 variants round (2026-10-21, "all goods" —
+  // no retune); the round's evidence carries the captured drives.
   aboutDescription:
     'The studio behind the work — our story, our portfolio, and the people who sat for us.',
   aboutStory: 'Our studio story is coming soon.',
