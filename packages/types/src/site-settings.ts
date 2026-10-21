@@ -90,8 +90,8 @@ export const EMPTY_SITE_SETTINGS: SiteSettings = {
 // header/footer wordmark (the logo slot's null default IS the incumbent
 // sd.png monogram), home title/description from the hero (home-copy's
 // HERO_BLURB), the page titles + sub-copy from the ruled redesign intros
-// (#224 — the #164 Round-3/4-ratified drafts; the About sub-copy is the one
-// unrated draft, TODO(owner-copy) — the round ratifies), the About story from /about's placeholder line, the four
+// (#224 — the #164 Round-3/4-ratified drafts; the About sub-copy ratified
+// verbatim at the #224 variants round), the About story from /about's placeholder line, the four
 // kickers from the ruled one-voice section headings (#223). Fields today renders NOTHING for stay
 // null (the extras — socials, banner copy, brand contact): their null default renders
 // exactly today's page. This object IS the fallback the chrome renders
