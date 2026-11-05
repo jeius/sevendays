@@ -17,15 +17,21 @@ import { requiredEnv } from '../smoke/env';
 // apps/landing/src/routes/__root.tsx.
 const THEME_INIT = (theme: 'light' | 'dark') => `window.localStorage.setItem('theme', '${theme}');`;
 
-// The home marquee's looping track is the ONLY element whose class
-// embeds the marquee animation (apps/landing/src/components/
-// home-image-led.tsx: `md:animate-[marquee_45s_linear_infinite]` — the
-// track carries no data attribute to hook). Masking it keeps the CSS
-// loop's position out of the baseline; the config's animations:
-// 'disabled' already cancels infinite animations to initial state, so
-// the mask is belt-and-braces. The services strip collapses entirely on
-// a zero-service read, so the mask is applied only when it resolves.
-const MARQUEE_MASK = "[class*='marquee']";
+// The home services strip is masked at its STATIC outer section
+// (`data-strip='services'`, apps/landing/src/components/
+// home-image-led.tsx) — NEVER at the moving track: `animations:
+// 'disabled'` only freezes CSS motion, so a translating track's bbox —
+// and with it the mask box itself — would land differently per capture
+// (the #225 home-dark finding: ratio 0.03 around the mask edges).
+// Primary freeze is `reducedMotion: 'reduce'` (test.use below): the
+// DESKTOP CSS marquee honors it (`motion-reduce:md:animate-none`
+// removes the loop entirely); the MOBILE JS stepper still auto-steps
+// under reduce (instant steps, no transition — auto-scroll is the
+// owner's explicit ask), so the section mask stays as belt-and-braces
+// and is the real guarantee on any mobile viewport. The strip collapses
+// entirely on a zero-service read, so the mask applies only when it
+// resolves.
+const MARQUEE_SECTION_MASK = "[data-strip='services']";
 
 // The 8 redesigned public surfaces. The detail path derives its slug
 // from the LIVE packages payload at run time — never a hardcoded slug
@@ -44,6 +50,13 @@ const SURFACES = [
 ] as const;
 
 test.describe('the redesigned landing — visual baselines', () => {
+  // The primary motion freeze: emulates prefers-reduced-motion so the
+  // desktop marquee's `motion-reduce:md:animate-none` removes the CSS
+  // loop outright, the IntersectionObserver reveals render shown
+  // immediately (reveal.tsx:25), and the skeleton sweep (styles.css)
+  // sits still. Final pixels are identical to the animated end states.
+  test.use({ reducedMotion: 'reduce' });
+
   let detailPath: string;
 
   test.beforeAll(async () => {
@@ -91,9 +104,9 @@ test.describe('the redesigned landing — visual baselines', () => {
         await page.waitForTimeout(500);
         let mask: Locator[] = [];
         if (name === 'home') {
-          const marquee = page.locator(MARQUEE_MASK);
-          if ((await marquee.count()) > 0) {
-            mask = [marquee];
+          const marqueeSection = page.locator(MARQUEE_SECTION_MASK);
+          if ((await marqueeSection.count()) > 0) {
+            mask = [marqueeSection];
           }
         }
         await expect(page).toHaveScreenshot(`${name}-${theme}.png`, {
