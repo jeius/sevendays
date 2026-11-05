@@ -22,15 +22,14 @@ const THEME_INIT = (theme: 'light' | 'dark') => `window.localStorage.setItem('th
 // home-image-led.tsx) — NEVER at the moving track: `animations:
 // 'disabled'` only freezes CSS motion, so a translating track's bbox —
 // and with it the mask box itself — would land differently per capture
-// (the #225 home-dark finding: ratio 0.03 around the mask edges).
-// Primary freeze is `reducedMotion: 'reduce'` (test.use below): the
-// DESKTOP CSS marquee honors it (`motion-reduce:md:animate-none`
-// removes the loop entirely); the MOBILE JS stepper still auto-steps
-// under reduce (instant steps, no transition — auto-scroll is the
-// owner's explicit ask), so the section mask stays as belt-and-braces
-// and is the real guarantee on any mobile viewport. The strip collapses
-// entirely on a zero-service read, so the mask applies only when it
-// resolves.
+// (the #225 home-dark finding: ratio 0.03 around the mask edges). The
+// section's bbox is layout-stable, so the mask paints the whole marquee
+// area regardless of where the track sits inside it — the mask ALONE is
+// the deterministic fix. (A `reducedMotion: 'reduce'` emulation was
+// tried and reverted in fix round 2: the redesign's IntersectionObserver
+// reveals honor motion-reduce too, so every reveal-bearing surface
+// rendered differently than its baseline.) The strip collapses entirely
+// on a zero-service read, so the mask applies only when it resolves.
 const MARQUEE_SECTION_MASK = "[data-strip='services']";
 
 // The 8 redesigned public surfaces. The detail path derives its slug
@@ -50,13 +49,6 @@ const SURFACES = [
 ] as const;
 
 test.describe('the redesigned landing — visual baselines', () => {
-  // The primary motion freeze: emulates prefers-reduced-motion so the
-  // desktop marquee's `motion-reduce:md:animate-none` removes the CSS
-  // loop outright, the IntersectionObserver reveals render shown
-  // immediately (reveal.tsx:25), and the skeleton sweep (styles.css)
-  // sits still. Final pixels are identical to the animated end states.
-  test.use({ reducedMotion: 'reduce' });
-
   let detailPath: string;
 
   test.beforeAll(async () => {
