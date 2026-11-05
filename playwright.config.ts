@@ -8,6 +8,7 @@ import { defineConfig, devices } from '@playwright/test';
 // root package is not a pnpm workspace member, so turbo's `test` task
 // cannot see `test:e2e` — `pnpm check` stays browserless by construction,
 // and that is the ruling, not an accident.
+// Visual baselines: chromium-only forever (ADR-0022), teaser edition, both themes (#225).
 const baseURL = process.env.E2E_BASE_URL;
 if (!baseURL) {
   throw new Error(
@@ -24,6 +25,13 @@ export default defineConfig({
   use: {
     baseURL,
     trace: 'on-first-retry',
+  },
+  expect: {
+    toHaveScreenshot: {
+      animations: 'disabled',
+      caret: 'hide',
+      maxDiffPixelRatio: 0.01,
+    },
   },
   projects: [
     {
