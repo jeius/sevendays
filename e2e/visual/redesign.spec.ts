@@ -77,7 +77,7 @@ test.describe('the redesigned landing — visual baselines', () => {
     for (const [name, path] of SURFACES) {
       test(`${name} — ${theme}`, async ({ page }) => {
         await page.addInitScript(THEME_INIT(theme));
-        await page.goto(path ?? detailPath, { waitUntil: 'networkidle' });
+        await page.goto(path ?? detailPath, { waitUntil: 'load' });
         // The reveals are IntersectionObserver-driven and one-shot
         // (opacity-0 until seen); a fullPage capture reads beyond the
         // viewport WITHOUT scrolling, so walk the page first to fire
@@ -91,6 +91,17 @@ test.describe('the redesigned landing — visual baselines', () => {
           }
           scroller.scrollTo(0, 0);
         });
+        // Every <img> must be decoded before capture: the image-led
+        // sections (mosaic, plates, service rows) collapse while lazy
+        // images are unresolved, so the PAGE HEIGHT itself swings
+        // between captures ("expected …4318px, received …734px"). `load`
+        // + this explicit gate is the robust pair — networkidle can hang
+        // forever on beacon-heavy pages and never promised image decode.
+        await page.waitForFunction(
+          () => Array.from(document.images).every((img) => img.complete && img.naturalWidth > 0),
+          undefined,
+          { timeout: 30_000 }
+        );
         // Motion reveals settle; CSS animations are frozen by the
         // config's toHaveScreenshot block.
         await page.waitForTimeout(500);
