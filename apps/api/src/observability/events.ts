@@ -80,7 +80,7 @@ export function logMediaFailure(
     .warn('media failure');
 }
 
-/** The confirmation email's attempt + Resend outcome (no customer PII). */
+/** An email's attempt + Resend outcome (confirmation + reset; no customer PII). */
 export function logEmail(
   log: RequestLogger,
   fields: {

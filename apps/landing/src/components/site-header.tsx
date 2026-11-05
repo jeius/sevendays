@@ -21,7 +21,9 @@ import { MobileNav } from './mobile-nav';
 export function SiteHeader({ settings }: { settings: SiteSettings }) {
   return (
     <header className='sticky top-0 z-20 border-white/10 border-b bg-brand-ink/90 backdrop-blur-md'>
-      {/* py-2.5 + the 36px mark = the 56px bar home's -mt-14 hero tuck matches. */}
+      {/* py-2.5 + the 36px mark = the 56px bar (md+, where the wordmark
+          renders) home's -mt-14 hero tuck matches; below md the trigger
+          is size-10, so the bar sits at 60px. */}
       <div className='relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-2.5'>
         <Link
           to='/'

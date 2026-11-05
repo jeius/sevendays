@@ -107,7 +107,7 @@ export function PackageDetailSkeleton() {
   );
 }
 
-/** Services (#164 Round 5, built #224): five image-backed card silhouettes. */
+/** Services (#164 Round 5, built #224): four image-backed card silhouettes. */
 export function ServicesSkeleton() {
   return (
     <div className='skeleton-grammar mx-auto max-w-5xl px-6 py-16'>
