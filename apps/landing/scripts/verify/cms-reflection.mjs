@@ -285,7 +285,7 @@ async function main() {
     await go(detailUrl);
     check(
       'step5: the slug serves the uniform not-found',
-      (await text()).includes('Package not found.')
+      (await text()).includes('This page never developed.')
     );
     await go(homeUrl);
     const homeGone = await evaluate(
