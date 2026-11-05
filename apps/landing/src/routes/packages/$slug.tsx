@@ -1,12 +1,12 @@
-import { buttonVariants } from '@sevendays/ui/components/button';
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { cn } from 'cn';
+import { createFileRoute } from '@tanstack/react-router';
 import { PackageCard } from '../../components/package-card';
 import { toNotFoundError } from '../../lib/package-slug';
 import { servicePackageQueries } from '../../lib/queries';
 
 export const Route = createFileRoute('/packages/$slug')({
   loader: async ({ params, context: { queryClient } }) => {
+    // Unknown/inactive slug → the router's notFound() — the ROOT's global
+    // NotFound answers (M7 #223; the route-level override is gone).
     try {
       return await queryClient.ensureQueryData(servicePackageQueries.bySlug(params.slug));
     } catch (err) {
@@ -17,26 +17,6 @@ export const Route = createFileRoute('/packages/$slug')({
     meta: [{ title: `${loaderData?.name ?? 'Package'} | Sevendays Photography` }],
   }),
   component: PackageDetail,
-  // Unknown/inactive slug → uniform not-found (owner-ratified copy).
-  notFoundComponent: () => (
-    <div className='mx-auto max-w-5xl px-6 pt-12'>
-      <div className='flex flex-col items-center gap-4 rounded-xl border border-brand-gray-cool bg-card p-10 text-center shadow-sm'>
-        <h1 className='font-bold font-serif text-3xl text-foreground'>Package not found.</h1>
-        <p className='text-muted-text text-base'>
-          The package you are looking for does not exist or is no longer offered.
-        </p>
-        <Link
-          to='/packages'
-          className={cn(
-            buttonVariants({ variant: 'outline' }),
-            'focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
-          )}
-        >
-          Browse all packages
-        </Link>
-      </div>
-    </div>
-  ),
 });
 
 function PackageDetail() {

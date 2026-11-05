@@ -1,7 +1,7 @@
 import { startSpan } from '@sentry/tanstackstart-react';
+import { type CreateTestimonialSubmissionInput, resolveSiteSettings } from '@sevendays/types';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequestHeaders } from '@tanstack/react-start/server';
-import type { CreateTestimonialSubmissionInput } from '@sevendays/types';
 import { getApiClient, getApiClientForwardingIp } from './api.server';
 
 export const getBranches = createServerFn().handler(async () => {
@@ -58,7 +58,19 @@ export const getTestimonials = createServerFn().handler(async () => {
 });
 
 /**
- * Public testimonial submission (M7 #216) — the only public write surface.
+ * The resolved site-settings read (M7 #223 — the chrome + home copy
+ * source). resolveSiteSettings applies at the boundary: consumers never
+ * see the born-empty null mix — unset fields are today's defaults (#215's
+ * one-fallback law, never per-app fallbacks).
+ */
+export const getSiteSettings = createServerFn().handler(async () => {
+  return startSpan({ name: 'GET /api/v1/site-settings' }, async () => {
+    return resolveSiteSettings(await getApiClient().siteSettings.get());
+  });
+});
+
+/**
+ * Public testimonial submission (M7 #216) — v1's only public write surface.
  * The visitor's IP rides X-Client-IP for the API's rate limiter (see
  * api.server.ts). Rejections reject with ApiClientError — the ruled 429
  * line rides `details.error` (the client's `.message` is prefixed
