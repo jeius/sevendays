@@ -185,8 +185,7 @@ async function main() {
   }
   check(
     'book: past-slot submit renders the typed rejection card (friendly + API reason)',
-    card !== null &&
-      card.includes('already passed in the Philippines') &&
+    card?.includes('already passed in the Philippines') === true &&
       card.includes('API reason:')
   );
 
