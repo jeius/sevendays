@@ -1,5 +1,6 @@
 import type { StudioServiceWithBranches } from '@sevendays/types';
 import { Link } from '@tanstack/react-router';
+import { Phone } from 'lucide-react';
 import { peso } from '../lib/format';
 
 // The ruled card system (#111 Track 2, variant D build target), reduced to
@@ -21,18 +22,12 @@ export function serviceBackground(name: string): string {
 
 // The ruled service treatment: the photo IS the card — full-image
 // background, ink gradient for legibility, system mechanics kept (1-line
-// title, fixed height, one affordance, deep link preserved). V1 arm: the
-// affordance retargets to /services ("View") — the booking deep link is
-// the main arm's (the #147-class pick-time transform).
+// title, fixed height, one affordance, deep link preserved).
 export function ServiceImageCard({ service }: { service: StudioServiceWithBranches }) {
   return (
     <Link
-      to='/services'
-      aria-label={
-        service.priceCents === null
-          ? `View ${service.name}`
-          : `View ${service.name} (₱${(service.priceCents / 100).toFixed(0)})`
-      }
+      to='/branches'
+      aria-label={`Call us about ${service.name}`}
       className='group border-line-soft relative block h-64 overflow-hidden rounded-xl border shadow-sm focus-visible:ring-brand-focus-ring focus-visible:ring-3 focus-visible:outline-none'
     >
       <img
@@ -58,8 +53,12 @@ export function ServiceImageCard({ service }: { service: StudioServiceWithBranch
           <h3 className='truncate text-xl font-semibold text-white'>{service.name}</h3>
           <p className='text-brand-200 mt-1 font-mono text-sm'>{peso(service.priceCents)}</p>
         </div>
-        <span className='shrink-0 rounded-md border border-white/40 bg-brand-ink/60 px-3 py-1.5 text-sm font-medium text-white transition-colors group-hover:bg-brand-ink/80'>
-          View
+        {/* The CTA law reaches the marquee chip with #224 (fenced from
+            #223). V1 arm: the chip is call-forward — "Call us" carries the
+            Phone icon at the chip's compact register (size-3.5). */}
+        <span className='inline-flex shrink-0 items-center gap-1.5 rounded-md border border-white/40 bg-brand-ink/60 px-3 py-1.5 text-sm font-medium text-white transition-colors group-hover:bg-brand-ink/80'>
+          <Phone className='size-3.5' aria-hidden='true' />
+          Call us
         </span>
       </div>
     </Link>

@@ -89,11 +89,11 @@ export const EMPTY_SITE_SETTINGS: SiteSettings = {
 // owner-ratified source — swept 2026-10-13): brand + tagline from the
 // header/footer wordmark (the logo slot's null default IS the incumbent
 // sd.png monogram), home title/description from the hero (home-copy's
-// HERO_BLURB), page titles + the services sub-copy from the routes'
-// h1/sub-lines, the About story from /about's placeholder line, the four
+// HERO_BLURB), the page titles + sub-copy from the ruled redesign intros
+// (#224 — the #164 Round-3/4-ratified drafts; the About sub-copy ratified
+// verbatim at the #224 variants round), the About story from /about's placeholder line, the four
 // kickers from the ruled one-voice section headings (#223). Fields today renders NOTHING for stay
-// null (the extras — socials, banner copy, brand contact — and the three
-// page descriptions with no today-sub-copy): their null default renders
+// null (the extras — socials, banner copy, brand contact): their null default renders
 // exactly today's page. This object IS the fallback the chrome renders
 // while the row is born-empty.
 export const SITE_SETTINGS_DEFAULTS: SiteSettings = {
@@ -104,14 +104,19 @@ export const SITE_SETTINGS_DEFAULTS: SiteSettings = {
   homeDescription:
     'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.',
   packagesTitle: 'Packages',
-  packagesDescription: null,
+  packagesDescription:
+    'From graduation portraits to family sessions — every package with its price, duration, and inclusions at a glance. Tap a package for the full details.',
   branchesTitle: 'Branches',
-  branchesDescription: null,
+  branchesDescription:
+    'Three studios, one standard of light. Walk-ins are welcome where flagged — everywhere else, call ahead or book online.',
   servicesTitle: 'Services',
   servicesDescription:
-    'Looking for add-ons? Makeup, hairstyle, and more are available with any session.',
+    'Photo recovery, printing, portraits, and framing — studio services you can book at the branches listed on each card.',
   aboutTitle: 'About',
-  aboutDescription: null,
+  // Ratified verbatim at the #224 variants round (2026-10-21, "all goods" —
+  // no retune); the round's evidence carries the captured drives.
+  aboutDescription:
+    'The studio behind the work — our story, our portfolio, and the people who sat for us.',
   aboutStory: 'Our studio story is coming soon.',
   kickerGallery: 'The work',
   kickerPackages: 'Featured packages',

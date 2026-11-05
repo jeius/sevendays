@@ -1,8 +1,9 @@
-import type { ResolvedPackageInclusion, ServicePackageRead } from '@sevendays/types';
+import type { ServicePackageRead } from '@sevendays/types';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
 import { peso } from '../lib/format';
 import { CoverPanel } from './cover-panel';
+import { inclusionPhrase } from './inclusions-list';
 
 // The featured strip, OWNER-RULED D2 "light split plate" (#164 Round 2 —
 // "I think I'll go with D2"): the cover is 60% of the plate at natural
@@ -18,19 +19,6 @@ function subline(p: ServicePackageRead): string {
   const incls = p.inclusions.length;
   return [mins != null ? `${mins} min` : null, `${incls} inclusion${incls === 1 ? '' : 's'}`]
     .filter(Boolean)
-    .join(' · ');
-}
-
-/** The inclusion phrase — the InclusionsList format (the data composes the
- * line: kind/quantity/printSize/description/attires; there is no name). */
-function inclusionLine(inc: ResolvedPackageInclusion): string {
-  return [
-    inc.quantity !== null ? `×${inc.quantity}` : null,
-    inc.printSize ? inc.printSize.code : null,
-    inc.description,
-    inc.attires.length > 0 ? inc.attires.map((a) => a.name).join(', ') : null,
-  ]
-    .filter((part): part is string => part !== null)
     .join(' · ');
 }
 
@@ -98,7 +86,7 @@ export function FeaturedPlates({
                         className='text-foreground/85 flex items-center gap-2 text-sm'
                       >
                         <span className='bg-primary size-1 shrink-0 rounded-full' />
-                        <span className='min-w-0'>{inclusionLine(inc)}</span>
+                        <span className='min-w-0'>{inclusionPhrase(inc)}</span>
                       </li>
                     ))}
                     {more > 0 && (
