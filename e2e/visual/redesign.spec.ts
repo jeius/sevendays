@@ -91,6 +91,17 @@ test.describe('the redesigned landing — visual baselines', () => {
           }
           scroller.scrollTo(0, 0);
         });
+        // Break the lazy-load loop: below-fold images are loading="lazy"
+        // and only fetch when they intersect the viewport — but unloaded
+        // images collapse the page, so the sweep's steps cover less
+        // content and fewer lazy triggers fire (the gate could never
+        // settle). Forcing every image eager starts all loads regardless
+        // of viewport; a genuinely broken image still fails the gate.
+        await page.evaluate(() => {
+          document.querySelectorAll('img[loading="lazy"]').forEach((img) => {
+            img.loading = 'eager';
+          });
+        });
         // Every <img> must be decoded before capture: the image-led
         // sections (mosaic, plates, service rows) collapse while lazy
         // images are unresolved, so the PAGE HEIGHT itself swings
