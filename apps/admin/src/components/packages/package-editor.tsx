@@ -16,6 +16,10 @@
 // explicit SelectValue render resolving ANY current value's label incl.
 // deactivated); the upload becomes the presign → XHR → bind loop; create
 // mode renders NO Advanced card (the server generates the slug — AQ-6).
+//
+// The Save button's clean-form gate (M7 post-flight #242): disabled until
+// the state structurally differs from its saved baseline (the seam's
+// isEditorStateDirty); a successful edit save re-baselines.
 import {
   closestCenter,
   DndContext,
@@ -91,6 +95,7 @@ import {
   type EditorInclusion,
   editorStateFromRead,
   type InclusionFieldErrors,
+  isEditorStateDirty,
   newEditorState,
   type PackageEditorState,
   PESO_HELPER,
@@ -290,6 +295,14 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
   const [state, setState] = useState<PackageEditorState | null>(() =>
     mode === 'create' ? newEditorState() : null
   );
+  // #242: the dirty gate's baseline — the snapshot the live state compares
+  // against (structurally, via isEditorStateDirty). The hydrate sets it for
+  // edit; create's is its own initial state (the empty form is clean); a
+  // successful edit save re-sets it to what was saved. A failed save never
+  // touches it — the form stays dirty and retry is safe (#218's hold law).
+  const [savedBaseline, setSavedBaseline] = useState<PackageEditorState | null>(() =>
+    mode === 'create' ? newEditorState() : null
+  );
   const [uploadStatus, setUploadStatus] = useState<CoverUploadStatus>({ phase: 'idle' });
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<EditorDisplayErrors | null>(null);
@@ -297,6 +310,12 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
   // The bound preview's object URL — the caller's to revoke (Task 3's JSDoc
   // contract): on replace and on unmount.
   const previewUrlRef = useRef<string | null>(null);
+  // #242: the MUTATE-time state snapshot the next re-baseline adopts. React
+  // Query fires onSuccess from the latest render's options and the inputs
+  // stay editable while a save is in flight, so an onSuccess closure over
+  // `state` could adopt an unsaved mid-flight edit — the ref pins what was
+  // actually sent; a mid-flight edit keeps the form dirty until its own save.
+  const pendingBaselineRef = useRef<PackageEditorState | null>(null);
 
   const nameId = useId();
   const descriptionId = useId();
@@ -308,10 +327,14 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
   const activeId = useId();
 
   // Hydrate once from the edit read — never on refetch (a post-save
-  // invalidation must not clobber the editor's state).
+  // invalidation must not clobber the editor's state). The hydrated state
+  // is also the dirty gate's first baseline (#242) — the same instance, so
+  // row keys and frame tokens compare identity-stable.
   useEffect(() => {
     if (mode === 'edit' && packageQuery.data?.ok && state === null) {
-      setState(editorStateFromRead(packageQuery.data.data));
+      const hydrated = editorStateFromRead(packageQuery.data.data);
+      setState(hydrated);
+      setSavedBaseline(hydrated);
     }
   }, [mode, packageQuery.data, state]);
 
@@ -588,6 +611,9 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
           queryKey: adminPackageQueries.byId(result.data.id).queryKey,
         });
         toast.success('Saved.');
+        // #242: what was sent is the new baseline — the form is clean again
+        // and Save re-disables until the next edit.
+        setSavedBaseline(pendingBaselineRef.current);
         // Stay on the route.
       } else {
         handleSaveFailure(result);
@@ -616,6 +642,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
     if (mode === 'create') {
       createSave.mutate(buildCreatePayload(state, attiresQuery.data));
     } else {
+      pendingBaselineRef.current = state;
       editSave.mutate(buildUpdatePayload(state, attiresQuery.data));
     }
   }
@@ -698,6 +725,12 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
   const privileges = state.inclusions.filter((row) => row.kind === 'privilege');
   const hasDeactivatedSizes = printSizes.some((ps) => !ps.isActive);
   const uploading = uploadStatus.phase === 'presigning' || uploadStatus.phase === 'uploading';
+  // #242: the clean-form gate. savedBaseline is non-null wherever the editor
+  // renders (it is set beside the state: hydrate for edit, the initial state
+  // for create); the null guard keeps the types honest and errs ENABLED —
+  // the seam's own direction (the gate may open on a no-op save, never
+  // block a real one).
+  const dirty = savedBaseline === null || isEditorStateDirty(state, savedBaseline);
 
   const rowActions: RowActions = {
     onRemove: removeInclusion,
@@ -725,7 +758,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
           </div>
           <Button
             type='button'
-            disabled={savePending}
+            disabled={savePending || !dirty}
             aria-busy={savePending}
             onClick={saveChanges}
           >

@@ -6,6 +6,9 @@
 // identical in both. Credential failures render ONE generic line (no
 // which-field signal); the redirect round-trip consumes the gate's preserved
 // aimed URL through the open-redirect guard.
+// Both submit buttons ride the one pending vocabulary (#218's, completed by
+// the M7 post-flight #242): disabled + aria-busy + the spinner prefix + the
+// "Signing in…" / "Sending…" swap while `submitting` holds.
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@sevendays/ui/components/card';
 import { Input } from '@sevendays/ui/components/input';
@@ -14,7 +17,9 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { z } from 'zod';
+import { PendingSpinner } from '#/components/cms/shared';
 import { authClient } from '#/lib/auth-client';
+import { SENDING_LABEL, SIGNING_IN_LABEL } from '#/lib/save-contract';
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),
@@ -168,9 +173,15 @@ function LoginPage() {
                     If that account exists, a reset link is on its way.
                   </p>
                 )}
-                <Button type='submit' className='w-full' disabled={submitting}>
-                  {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
-                  Send reset link
+                <Button
+                  type='submit'
+                  className='w-full'
+                  disabled={submitting}
+                  aria-busy={submitting}
+                >
+                  {submitting ? <PendingSpinner /> : null}
+                  {/* Idle label owner-ratified verbatim, 2026-10-19 (#221 round); the busy label 2026-11-08 (#242). */}
+                  {submitting ? SENDING_LABEL : 'Send reset link'}
                 </Button>
                 <button
                   type='button'
@@ -213,8 +224,14 @@ function LoginPage() {
                     Invalid email or password.
                   </p>
                 )}
-                <Button type='submit' className='w-full' disabled={submitting}>
-                  Sign in
+                <Button
+                  type='submit'
+                  className='w-full'
+                  disabled={submitting}
+                  aria-busy={submitting}
+                >
+                  {submitting ? <PendingSpinner /> : null}
+                  {submitting ? SIGNING_IN_LABEL : 'Sign in'}
                 </Button>
                 <p className='text-center text-xs text-muted-foreground'>
                   Accounts are provisioned by the studio owner.

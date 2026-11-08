@@ -9,6 +9,8 @@ import {
   REJECTING_LABEL,
   reduceSaveContract,
   SAVING_LABEL,
+  SENDING_LABEL,
+  SIGNING_IN_LABEL,
   UPLOADING_LABEL,
 } from './save-contract.js';
 
@@ -31,6 +33,8 @@ describe('pendingVocabulary (the one pending vocabulary mapper, #218)', () => {
     ).toEqual({ disabled: true, ariaBusy: true, label: 'Deleting…' });
     expect(ACCEPTING_LABEL).toBe('Accepting…');
     expect(REJECTING_LABEL).toBe('Rejecting…');
+    expect(SIGNING_IN_LABEL).toBe('Signing in…');
+    expect(SENDING_LABEL).toBe('Sending…');
   });
 });
 
