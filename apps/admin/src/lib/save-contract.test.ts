@@ -7,6 +7,7 @@ import {
   idleSaveContract,
   pendingVocabulary,
   REJECTING_LABEL,
+  RESETTING_LABEL,
   reduceSaveContract,
   SAVING_LABEL,
   SENDING_LABEL,
@@ -35,6 +36,7 @@ describe('pendingVocabulary (the one pending vocabulary mapper, #218)', () => {
     expect(REJECTING_LABEL).toBe('Rejecting…');
     expect(SIGNING_IN_LABEL).toBe('Signing in…');
     expect(SENDING_LABEL).toBe('Sending…');
+    expect(RESETTING_LABEL).toBe('Resetting…');
   });
 });
 
