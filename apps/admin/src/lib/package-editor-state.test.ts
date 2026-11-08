@@ -8,8 +8,11 @@ import {
   buildUpdatePayload,
   conflictFieldErrors,
   durationFromInput,
+  type EditorInclusion,
   editorStateFromRead,
+  isEditorStateDirty,
   newEditorState,
+  type PackageEditorState,
   quantityFromInput,
   tokenFor,
   validateEditorState,
@@ -409,5 +412,108 @@ describe('unpriced packages (ADR-0020)', () => {
 
   it('the table flip payload carries row.priceCents verbatim — null stays null', () => {
     expect(buildRowFlipPayload({ ...read(), priceCents: null }, false).priceCents).toBeNull();
+  });
+});
+
+describe('isEditorStateDirty (the dirty-gate seam, #242)', () => {
+  it('a state equals its baseline structurally — two fromRead passes over one read are clean, not reference-equal', () => {
+    const packageRead = read();
+    expect(
+      isEditorStateDirty(editorStateFromRead(packageRead), editorStateFromRead(packageRead))
+    ).toBe(false);
+  });
+
+  it('the create-mode initial state is clean against a second newEditorState instance — the unpriced NaN encoding equals itself (Object.is)', () => {
+    expect(isEditorStateDirty(newEditorState(), newEditorState())).toBe(false);
+  });
+
+  it('every scalar flip reads dirty: name, description, durationInput, slug, isFeatured, isActive', () => {
+    const baseline = editorStateFromRead(read());
+    const flip = (patch: Partial<PackageEditorState>) =>
+      isEditorStateDirty({ ...baseline, ...patch }, baseline);
+    expect(flip({ name: 'Renamed Package' })).toBe(true);
+    expect(flip({ description: 'Rewritten description.' })).toBe(true);
+    expect(flip({ durationInput: '45' })).toBe(true);
+    expect(flip({ slug: 'renamed-package' })).toBe(true);
+    expect(flip({ isFeatured: true })).toBe(true);
+    expect(flip({ isActive: false })).toBe(true);
+  });
+
+  it('the price pair reads dirty: unchecking Priced (hasPrice false + the NaN re-entry contract) and a changed re-entered price', () => {
+    const baseline = editorStateFromRead(read());
+    expect(
+      isEditorStateDirty({ ...baseline, hasPrice: false, priceCents: Number.NaN }, baseline)
+    ).toBe(true);
+    expect(
+      isEditorStateDirty({ ...baseline, priceCents: baseline.priceCents + 100 }, baseline)
+    ).toBe(true);
+  });
+
+  it('the three-state cover encoding reads dirty: a bind (undefined → staging key) and a clear (undefined → null)', () => {
+    const baseline = editorStateFromRead(read());
+    expect(
+      isEditorStateDirty({ ...baseline, coverImageKey: 'staging/covers/new-key' }, baseline)
+    ).toBe(true);
+    expect(isEditorStateDirty({ ...baseline, coverImageKey: null }, baseline)).toBe(true);
+  });
+
+  it('composition changes read dirty: an added frame, an added print row, a removed row', () => {
+    const base = editorStateFromRead(read());
+    expect(
+      isEditorStateDirty(
+        { ...base, frames: [...base.frames, { token: crypto.randomUUID() }] },
+        base
+      )
+    ).toBe(true);
+    const print: EditorInclusion = {
+      key: crypto.randomUUID(),
+      kind: 'print',
+      quantityInput: '1',
+      printSizeId: uuid(20),
+      frameToken: null,
+      attireIds: [uuid(1)],
+      description: '',
+    };
+    expect(isEditorStateDirty({ ...base, inclusions: [...base.inclusions, print] }, base)).toBe(
+      true
+    );
+    // read() carries exactly one inclusion — removing it leaves none.
+    expect(isEditorStateDirty({ ...base, inclusions: [] }, base)).toBe(true);
+  });
+
+  it('a reordered inclusion reads dirty — array order IS position (#137)', () => {
+    const base = editorStateFromRead(read());
+    const second: EditorInclusion = {
+      key: crypto.randomUUID(),
+      kind: 'print',
+      quantityInput: '2',
+      printSizeId: uuid(20),
+      frameToken: null,
+      attireIds: [uuid(1)],
+      description: '',
+    };
+    const baseline = { ...base, inclusions: [...base.inclusions, second] };
+    expect(isEditorStateDirty(baseline, baseline)).toBe(false);
+    // Indexed element reads type `T | undefined` here (noUncheckedIndexedAccess,
+    // ruled in the #220 suite) — the reversal goes through the copied array.
+    expect(
+      isEditorStateDirty({ ...baseline, inclusions: [...baseline.inclusions].reverse() }, baseline)
+    ).toBe(true);
+  });
+
+  it('an attire uncheck+recheck (same membership, new selection order) reads dirty — the safe direction, never the reverse', () => {
+    const base = editorStateFromRead(read());
+    // read() carries exactly one inclusion — map it, never index it
+    // (noUncheckedIndexedAccess, ruled in the #220 suite).
+    const withTwo: PackageEditorState = {
+      ...base,
+      inclusions: base.inclusions.map((row) => ({ ...row, attireIds: [uuid(1), uuid(2)] })),
+    };
+    const rechecked: PackageEditorState = {
+      ...base,
+      inclusions: base.inclusions.map((row) => ({ ...row, attireIds: [uuid(2), uuid(1)] })),
+    };
+    expect(isEditorStateDirty(withTwo, withTwo)).toBe(false);
+    expect(isEditorStateDirty(rechecked, withTwo)).toBe(true);
   });
 });

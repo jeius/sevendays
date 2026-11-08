@@ -337,6 +337,65 @@ export function validateEditorState(state: PackageEditorState): EditorFieldError
 }
 
 /**
+ * `#242 seam: the dirty gate`. Structural comparison of the live state
+ * against its save baseline — the Save affordance's clean-form gate
+ * (owner ruling 2026-11-08: both modes; re-baseline on a successful edit
+ * save; a failed save never touches the baseline — retry-safe, the #218
+ * hold law). The baseline is a SNAPSHOT of the state (the hydrate for
+ * edit, newEditorState() for create, the just-saved state after a
+ * successful edit save), so row `key`s and frame tokens compare
+ * identity-stable. `priceCents` compares via Object.is so the unpriced
+ * `NaN` encoding equals itself; `coverImageKey` compares by its
+ * three-state encoding (a bind or a clear is a real change). Inclusions
+ * compare IN ARRAY ORDER — position is data (#137) — and `attireIds` in
+ * array order too: an uncheck+recheck of the same attire (same
+ * membership, new order) reads dirty, the safe direction (the builders
+ * re-pin order anyway; the gate may open on a no-op save, never block a
+ * real one).
+ */
+export function isEditorStateDirty(
+  current: PackageEditorState,
+  baseline: PackageEditorState
+): boolean {
+  if (
+    current.name !== baseline.name ||
+    current.description !== baseline.description ||
+    current.hasPrice !== baseline.hasPrice ||
+    !Object.is(current.priceCents, baseline.priceCents) ||
+    current.durationInput !== baseline.durationInput ||
+    current.isFeatured !== baseline.isFeatured ||
+    current.isActive !== baseline.isActive ||
+    current.slug !== baseline.slug ||
+    current.coverImageUrl !== baseline.coverImageUrl ||
+    current.coverImageKey !== baseline.coverImageKey ||
+    current.frames.length !== baseline.frames.length ||
+    current.frames.some((frame, index) => frame.token !== baseline.frames[index]?.token)
+  ) {
+    return true;
+  }
+  if (current.inclusions.length !== baseline.inclusions.length) {
+    return true;
+  }
+  return current.inclusions.some((row, index) => {
+    const other = baseline.inclusions[index];
+    if (other === undefined) {
+      // Unreachable — the lengths were checked equal above; noUncheckedIndexedAccess only.
+      return true;
+    }
+    return (
+      row.key !== other.key ||
+      row.kind !== other.kind ||
+      row.quantityInput !== other.quantityInput ||
+      row.printSizeId !== other.printSizeId ||
+      row.frameToken !== other.frameToken ||
+      row.description !== other.description ||
+      row.attireIds.length !== other.attireIds.length ||
+      row.attireIds.some((id, attireIndex) => id !== other.attireIds[attireIndex])
+    );
+  });
+}
+
+/**
  * `#143 seam: conflicts → field-error mapping`. Defensively narrows the
  * API's 400 `details` (the `AdminDetail` shape from #137's admin-shared.ts:
  * `Array<{ path: string[]; message: string }>`) into a flat
