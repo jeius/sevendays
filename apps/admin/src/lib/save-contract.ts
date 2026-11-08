@@ -20,6 +20,8 @@ export const REJECTING_LABEL = 'Rejecting…';
 /** The login extensions — owner-ratified verbatim, 2026-11-08 (#242 round). */
 export const SIGNING_IN_LABEL = 'Signing in…';
 export const SENDING_LABEL = 'Sending…';
+/** The /login/reset extension — owner-ratified verbatim, 2026-11-08 (the #242 deferred-minor rider). */
+export const RESETTING_LABEL = 'Resetting…';
 
 /**
  * The pending vocabulary mapper (spec § one pending vocabulary): pending =
