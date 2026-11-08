@@ -3,10 +3,11 @@
 // matrix's per-service diff. Everything here is a plain function over
 // plain data — no React, no network — so #143's lib-seam suite can pin
 // flip payloads, the matrix diff, and validation without rendering a
-// component. All three entities save as FULL-OBJECT PUTs (update schema
-// === create schema, #137): a flip carries every field with ONLY isActive
-// flipped. The add-on applies-to matrix is service-keyed in the write
-// model (#137): toggling one add-on's applicability fans out into one
+// component. Saves ride the full-object PUTs (#137): the branch save
+// carries the tri-state cover encoding (#214 — absent/null/key differ
+// from create), and a flip carries every field with ONLY isActive
+// flipped (no cover key either way). The add-on applies-to matrix is
+// service-keyed in the write model (#137): toggling one add-on's applicability fans out into one
 // full-replace PUT per AFFECTED service — the diff below is that seam.
 // M5 #141 grows this seam with the testimonial, print-size, and attire
 // blocks — same template.
@@ -386,9 +387,9 @@ export function validateBranchState(state: BranchEditorState): LightFieldErrors 
 
 /**
  * `#143 seam: studio-service validation` — name + description min-1
- * (trimmed); `priceCents` ≥ 0 integer guard (defense-in-depth — the
- * controlled input makes it near-unreachable). An all-empty result =
- * valid.
+ * (trimmed); `priceCents` ≥ 0 integer guard — the PRIMARY save-blocker
+ * for a checked-empty price (the Priced checkbox saves null; the schema
+ * re-verifies). An all-empty result = valid.
  */
 export function validateStudioServiceState(state: StudioServiceEditorState): LightFieldErrors {
   const errors: LightFieldErrors = {};
@@ -406,8 +407,9 @@ export function validateStudioServiceState(state: StudioServiceEditorState): Lig
 
 /**
  * `#143 seam: add-on validation` — name + description min-1 (trimmed);
- * `priceCents` ≥ 0 integer guard (defense-in-depth — the controlled
- * input makes it near-unreachable). An all-empty result = valid.
+ * `priceCents` ≥ 0 integer guard — the PRIMARY save-blocker for a
+ * checked-empty price (the Priced checkbox saves null; the schema
+ * re-verifies). An all-empty result = valid.
  */
 export function validateAddonState(state: AddonEditorState): LightFieldErrors {
   const errors: LightFieldErrors = {};

@@ -18,7 +18,8 @@ export function PackageExpandedContent({ row }: { row: ServicePackageRead }) {
     <div className='space-y-2.5'>
       {/* The description is the panel's primary content — foreground in
           both postures (the desktop panel's muted wrapper is overridden
-          by the explicit class; the round may restore muted). */}
+          by the explicit class; ratified foreground at the 2026-10-17
+          variants round). */}
       <p className='text-foreground text-sm leading-relaxed'>{description}</p>
       {/* (owner-reacted 2026-10-17, #219's variants round): the duration
           line's form (Clock + "60 minutes") ratified as rendered. */}

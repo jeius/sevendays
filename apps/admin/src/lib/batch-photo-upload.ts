@@ -285,8 +285,11 @@ export async function runBatchUpload(
 
     // (4) The commit — its own POST /admin/gallery-photos, the
     // verify/promote gate. An abort BEFORE it fires cancels (above); once
-    // in flight, its verdict stands. ok → `done`; 400 → `permanent` with
-    // the API message; anything else `transient`.
+    // in flight, its verdict stands for the TERMINAL outcomes: ok → `done`;
+    // 400 → `permanent` with the API message. A non-ok non-400 verdict
+    // under an armed abort settles `canceled` (the retryOrFail abort check
+    // — retry suppressed); anything else `transient`. (#225 final-review
+    // wave: the precision the #220 reviewer named.)
     deps.onStatus(item.id, { phase: 'committing' });
     try {
       const result = await deps.commit({

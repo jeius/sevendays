@@ -152,7 +152,6 @@ export function HomeImageLed({
     // The stepper owns the carousel's whole mobile behavior; the card list
     // is its only data dependency. The refs are never stale; apply/step
     // helpers close over them.
-    // biome-ignore lint/correctness/useExhaustiveDependencies: the stepper reads refs (never stale) and services.length; apply/step helpers close over refs.
   }, [services.length]);
 
   return (

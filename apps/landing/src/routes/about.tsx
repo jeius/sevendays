@@ -70,11 +70,17 @@ function AboutPage() {
         )}
         {paragraphs.length > 0 && (
           <div className='mt-4 max-w-prose space-y-3'>
-            {paragraphs.map((paragraph) => (
-              <p key={paragraph} className='text-muted-foreground leading-relaxed'>
-                {paragraph}
-              </p>
-            ))}
+            {paragraphs.map((paragraph, i) => {
+              // CMS story paragraphs can repeat verbatim; the story renders
+              // in document order and is never reordered, so the index
+              // composite is the stable key (content-only keys collide).
+              const storyKey = `${i}-${paragraph}`;
+              return (
+                <p key={storyKey} className='text-muted-foreground leading-relaxed'>
+                  {paragraph}
+                </p>
+              );
+            })}
           </div>
         )}
       </section>
