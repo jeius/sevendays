@@ -782,11 +782,11 @@ git add docs/progress.md AGENTS.md docs/superpowers/plans/2026-11-08-242-admin-p
 git commit -m "docs(post-flight): #242 lands the pending vocabularies + the dirty-state Save gate - progress, AGENTS floor + coverage note (#242)"
 ```
 
-- [ ] **Step 6: PR + squash merge**
+- [✅] **Step 6: PR + squash merge**
 
 Push `feat/242-pending-vocabularies-dirty-gate`; open the PR against main titled `Post-flight T2 — admin save/sign-in pending vocabularies + the dirty-state Save gate (#242)`; body: the four ACs each answered with its evidence pointer — (1) Site-tab Save: walkthrough state 4 (both themes) + `task-2-grep.txt`; (2) Login: walkthrough states 1–3 (both themes — incl. the forgot-mode button the owner ruled in) + `task-2-grep.txt`; (3) Package editor: walkthrough states 5–6 (incl. the structural revert-disables and the re-baseline) + `task-3-grep.txt`; (4) `pnpm check` green + the seams' suites extended (`isEditorStateDirty` +8 its, the two label pins; admin 26 files / 262 tests). Squash-merge.
 
-- [ ] **Step 7: The v1 split (per `docs/agents/v1-picks.md`)**
+- [✅] **Step 7: The v1 split (per `docs/agents/v1-picks.md`)**
 
 Run the path pass on the squash SHA:
 
@@ -805,7 +805,7 @@ git add docs/agents/v1-picks.md
 git commit -m "docs(v1-picks): #<PR> ledger row - the #242 split (admin pending vocabularies + the dirty-state Save gate)"
 ```
 
-- [ ] **Step 8: Issue closes + graphify**
+- [✅] **Step 8: Issue closes + graphify**
 
 Tick #242's four AC boxes in its body, then close it with the AC → evidence mapping:
 
