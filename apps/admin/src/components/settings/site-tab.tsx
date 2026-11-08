@@ -3,7 +3,7 @@
 // full-object save, unset fields fall back to the defaults pinned in
 // packages/types. The Save button moved from the screen header to this
 // tab's footer when the header stopped being Site-only; its shape is
-// otherwise the #215 build's.
+// the #215 build's plus #242's pending vocabulary on the footer Save.
 import type {
   MediaPresignRequest,
   MediaPresignResponse,
@@ -20,10 +20,11 @@ import { Textarea } from '@sevendays/ui/components/textarea';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'lucide-react';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { QUERY_ERROR_LINE, QueryErrorState } from '#/components/cms/shared';
+import { PendingSpinner, QUERY_ERROR_LINE, QueryErrorState } from '#/components/cms/shared';
 import { presignAdminCoverUpload, saveAdminSiteSettings } from '#/lib/admin.functions';
 import { siteSettingsQuery } from '#/lib/cms-queries';
 import { type CoverUploadStatus, uploadCover } from '#/lib/cover-upload';
+import { SAVING_LABEL } from '#/lib/save-contract';
 import {
   buildSiteSettingsSavePayload,
   fieldErrorsFromDetails,
@@ -394,8 +395,14 @@ export function SiteTab() {
       </Card>
 
       <div className='flex justify-end'>
-        <Button type='button' onClick={handleSave}>
-          Save changes
+        <Button
+          type='button'
+          disabled={save.isPending}
+          aria-busy={save.isPending}
+          onClick={handleSave}
+        >
+          {save.isPending ? <PendingSpinner /> : null}
+          {save.isPending ? SAVING_LABEL : 'Save changes'}
         </Button>
       </div>
     </div>
