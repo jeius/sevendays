@@ -4,7 +4,9 @@
 // through authClient.resetPassword — a success revokes every session
 // (revokeSessionsOnPasswordReset) and bounces to /login?reset=1. A minimal
 // standalone card on the wash canvas (both themes; the login band stays on
-// /login — this page is one purpose, one form).
+// /login — this page is one purpose, one form). The submit button rides the
+// one pending vocabulary (#218's, the #242 deferred-minor rider): disabled +
+// aria-busy + the spinner prefix + the "Resetting…" swap while submitting.
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@sevendays/ui/components/card';
 import { Input } from '@sevendays/ui/components/input';
@@ -13,7 +15,9 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { z } from 'zod';
+import { PendingSpinner } from '#/components/cms/shared';
 import { authClient } from '#/lib/auth-client';
+import { RESETTING_LABEL } from '#/lib/save-contract';
 
 const resetSearchSchema = z.object({
   token: z.string().optional(),
@@ -120,9 +124,10 @@ function ResetPasswordPage() {
                   Could not reset the password — the link may have expired. Request a new one.
                 </p>
               )}
-              <Button type='submit' className='w-full' disabled={submitting}>
-                {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
-                Reset password
+              <Button type='submit' className='w-full' disabled={submitting} aria-busy={submitting}>
+                {submitting ? <PendingSpinner /> : null}
+                {/* Idle label owner-ratified verbatim, 2026-10-19 (#221 round); the busy label 2026-11-08 (the #242 rider). */}
+                {submitting ? RESETTING_LABEL : 'Reset password'}
               </Button>
             </form>
           )}
