@@ -6,7 +6,7 @@
 
 **Architecture:** Four tasks, admin-only code (zero api / api-client / types / landing / db / ui files): (1) the lib seams, TDD — two new owner-ratified busy-label constants in `save-contract.ts` (`SIGNING_IN_LABEL`/`SENDING_LABEL`) + the pure `isEditorStateDirty` structural comparison in `package-editor-state.ts` (+8 its, +2 pinned expects; admin floor 26 files / 254 → 26 files / 262 tests); (2) the vocabulary rides — `site-tab.tsx`'s footer Save over `save.isPending`, `login.tsx`'s Sign-in and Send-reset-link buttons over `submitting` (the exact render shape `LightEntityEditor`'s footer and the package editor's Save already use); (3) the dirty gate — `package-editor.tsx` snapshots a `savedBaseline` (hydrate for edit, `newEditorState()` for create, the mutate-time state after a successful edit save via a ref that out-races react-query's latest-options closure), and the Save button disables on `savePending || !dirty`; (4) gates + docs rotation + PR + the v1 pick + issue closes + `graphify update .`.
 
-**Tech Stack:** zero new dependencies, zero manifest changes (`pnpm-lock.yaml` untouched, `pnpm install` never runs), zero migrations, zero `packages/` changes. React Query v5's `isPending` (the on-disk pattern — `createSave.isPending` in `package-editor.tsx:598`, `isPending` in `site-tab.tsx:105`). `PendingSpinner` + `SAVING_LABEL` from the installed `#/components/cms/shared` + `#/lib/save-contract` (no `packages/ui` change — #218 placed the spinner in admin's shared CMS library; the settings tab already imports from it). vitest 4.1.11 plain-node lib-seam tests on admin (no component/DOM tests — the house law). pnpm + Turborepo, `gh` CLI. TypeScript without `noUncheckedIndexedAccess` (verified in `packages/config/ts/base.json` + `apps/admin/tsconfig.json` this session) — plain array indexing is the house style.
+**Tech Stack:** zero new dependencies, zero manifest changes (`pnpm-lock.yaml` untouched, `pnpm install` never runs), zero migrations, zero `packages/` changes. React Query v5's `isPending` (the on-disk pattern — `createSave.isPending` in `package-editor.tsx:598`, `isPending` in `site-tab.tsx:105`). `PendingSpinner` + `SAVING_LABEL` from the installed `#/components/cms/shared` + `#/lib/save-contract` (no `packages/ui` change — #218 placed the spinner in admin's shared CMS library; the settings tab already imports from it). vitest 4.1.11 plain-node lib-seam tests on admin (no component/DOM tests — the house law). pnpm + Turborepo, `gh` CLI. TypeScript WITH `noUncheckedIndexedAccess` ON (`packages/config/src/typescript/base.json:10`, extended by admin via the vite variant — execution-amended 2026-11-08: the original claim here checked a nonexistent path; indexed element reads type `T | undefined`, so index-free access is the house style, per the #220 suite's recorded ruling).
 
 **Spec:** Implements ticket [#242 "Post-flight T2 — admin save/sign-in pending vocabularies + the dirty-state Save gate (#239)"](https://github.com/jeius/sevendays/issues/242) (label `ready-for-agent`), whose parent is [#239 "M7 post-flight — the demo fix batch (#1–16) + the branch-Maps feature (#225)"](https://github.com/jeius/sevendays/issues/239). The three ruled items, verbatim from #239: **(4)** "The Site tab's Save button gets the #218 pending vocabulary while saving (disabled + LoaderCircle + 'Saving…' + `aria-busy`) — it was lost in #221's relocation to the tab footer. (step 10)" · **(5)** "The login button gets the spinner while signing in — the `submitting` state disables but the visible half of the vocabulary never rode the login form. (step 11)" · **(6)** "The package editor's Save stays disabled while the form is clean (not dirty). (step 12)". The ticket's four acceptance criteria, verbatim: Site-tab Save: pending vocabulary during the save · Login: spinner + disabled during sign-in · Package editor: Save disabled until dirty; enables on change · `pnpm check` green; the seams' suites untouched or extended where they pin these affordances. Key recon facts (2026-11-08, main `7c41fb2`, tree clean — post-#240; every file below read whole or at the cited lines this session):
 
@@ -296,21 +296,15 @@ export function isEditorStateDirty(
 }
 ```
 
-(No `noUncheckedIndexedAccess` in the toolchain — plain indexing over the length-checked arrays is the house style.)
+(`noUncheckedIndexedAccess` is ON — execution-amended 2026-11-08, see the Tech Stack note: index-free reads via `?.`/`map`/`reverse()`/an unreachable-guard erring dirty=true, the #220 ruling's house pattern; runtime-identical to the indexed snippets, ruled canonical in the ledger.)
 
 - [ ] **Step 4: Run the tests to verify they pass**
-
-```bash
-pnpm --filter @sevendays/admin test -- --run package-editor-state save-contract
-```
-
-Expected: PASS — exactly two files run (`package-editor-state.test.ts`, `save-contract.test.ts`), both green, the new describe's 8 its among them. Then the whole-suite floor:
 
 ```bash
 pnpm --filter @sevendays/admin test -- --run
 ```
 
-Expected: **Test Files 26 passed (26) · Tests 262 passed (262)** (the 254 baseline + 8).
+Expected: PASS — the full admin suite runs (the positional-filter form does not filter — execution note 2026-11-08: admin's `test` script is bare `vitest run` — the full-suite floor IS the verification): **Test Files 26 passed (26) · Tests 262 passed (262)** (the 254 baseline + 8).
 
 - [ ] **Step 5: Lint, format, typecheck**
 
