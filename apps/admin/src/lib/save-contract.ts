@@ -17,6 +17,10 @@ export const DELETING_LABEL = 'Deleting…';
 export const ACCEPTING_LABEL = 'Accepting…';
 export const REJECTING_LABEL = 'Rejecting…';
 
+/** The login extensions — owner-ratified verbatim, 2026-11-08 (#242 round). */
+export const SIGNING_IN_LABEL = 'Signing in…';
+export const SENDING_LABEL = 'Sending…';
+
 /**
  * The pending vocabulary mapper (spec § one pending vocabulary): pending =
  * disabled + aria-busy + the label swap. Icon-only buttons ignore the labels
