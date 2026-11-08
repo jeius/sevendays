@@ -185,9 +185,7 @@ async function main() {
   }
   check(
     'book: past-slot submit renders the typed rejection card (friendly + API reason)',
-    card !== null &&
-      card.includes('already passed in the Philippines') &&
-      card.includes('API reason:')
+    card?.includes('already passed in the Philippines') === true && card.includes('API reason:')
   );
 
   // 14 — the rail shows branch/offering/total derived from live data

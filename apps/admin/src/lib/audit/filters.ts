@@ -94,7 +94,7 @@ export function pageWindow(
   };
 }
 
-// Filter-option and cell copy — the nine entity families and five
+// Filter-option and cell copy — the eleven entity families and seven
 // actions, human-labeled once (owner-ratifiable at the variants step).
 export const AUDIT_ENTITY_LABELS: Record<AuditEntity, string> = {
   branch: 'Branches',

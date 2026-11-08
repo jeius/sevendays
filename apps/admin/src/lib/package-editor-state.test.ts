@@ -379,7 +379,7 @@ describe('conflictFieldErrors', () => {
   });
 });
 
-describe('unpriced packages (ADR-2020)', () => {
+describe('unpriced packages (ADR-0020)', () => {
   it('an unpriced read opens unchecked with an empty entry; the update payload saves null', () => {
     const state = editorStateFromRead({ ...read(), priceCents: null });
     expect(state.hasPrice).toBe(false);
