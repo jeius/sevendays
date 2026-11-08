@@ -63,7 +63,7 @@ The ticket's whole test surface, plus the two constants Task 2 renders and the c
 
 **Not here:** any component edit (Tasks 2–3); any change to the existing five labels or their `TODO(owner-copy)` marker comment (that marker is #218's open item, not this ticket's); `pendingVocabulary` itself (the mapper is pinned and unchanged).
 
-- [ ] **Step 1: Write the failing tests**
+- [✅] **Step 1: Write the failing tests**
 
 (a) `apps/admin/src/lib/save-contract.test.ts` — the import block gains the two constants (alphabetical: `SAVING_LABEL, SENDING_LABEL, SIGNING_IN_LABEL, UPLOADING_LABEL`):
 
@@ -219,7 +219,7 @@ describe('isEditorStateDirty (the dirty-gate seam, #242)', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [✅] **Step 2: Run the tests to verify they fail**
 
 ```bash
 pnpm --filter @sevendays/admin test -- --run package-editor-state save-contract
@@ -227,7 +227,7 @@ pnpm --filter @sevendays/admin test -- --run package-editor-state save-contract
 
 Expected: FAIL — vitest transforms without typechecking, so the missing exports surface at call time, not compile time: the 8 new `isEditorStateDirty` its fail with `TypeError: isEditorStateDirty is not a function` (the two type specifiers already resolve — `EditorInclusion`/`PackageEditorState` are exported interfaces on disk, erased at transform); the extended `save-contract` it fails on `expected undefined to be 'Signing in…'`. Every pre-existing it in both files still passes. Record the failure output in `.superpowers/sdd/2026-11-08-242-pending-vocabularies-dirty-gate/task-1-red.txt`.
 
-- [ ] **Step 3: Write the minimal implementation**
+- [✅] **Step 3: Write the minimal implementation**
 
 (a) `apps/admin/src/lib/save-contract.ts` — append after `REJECTING_LABEL` (leave the existing JSDoc + five constants byte-identical):
 
@@ -298,7 +298,7 @@ export function isEditorStateDirty(
 
 (`noUncheckedIndexedAccess` is ON — execution-amended 2026-11-08, see the Tech Stack note: index-free reads via `?.`/`map`/`reverse()`/an unreachable-guard erring dirty=true, the #220 ruling's house pattern; runtime-identical to the indexed snippets, ruled canonical in the ledger.)
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [✅] **Step 4: Run the tests to verify they pass**
 
 ```bash
 pnpm --filter @sevendays/admin test -- --run
@@ -306,7 +306,7 @@ pnpm --filter @sevendays/admin test -- --run
 
 Expected: PASS — the full admin suite runs (the positional-filter form does not filter — execution note 2026-11-08: admin's `test` script is bare `vitest run` — the full-suite floor IS the verification): **Test Files 26 passed (26) · Tests 262 passed (262)** (the 254 baseline + 8).
 
-- [ ] **Step 5: Lint, format, typecheck**
+- [✅] **Step 5: Lint, format, typecheck**
 
 ```bash
 pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/admin typecheck
@@ -314,7 +314,7 @@ pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/admin typecheck
 
 Expected: both green (accept `fix`'s rewrites; re-run the suite from Step 4 if it rewrites anything).
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/admin/src/lib/save-contract.ts apps/admin/src/lib/save-contract.test.ts apps/admin/src/lib/package-editor-state.ts apps/admin/src/lib/package-editor-state.test.ts
@@ -335,11 +335,11 @@ Ticket items 4 + 5. Three existing labeled buttons adopt the house render shape 
 
 **Not here:** a Site-tab dirty gate (item 6 is the package editor's alone); the logo upload's `accept`/JPG line (#246); the Socials fields (#247); the Upload/Remove logo buttons (their `logoUploading` gate is untouched); the login copy, the anti-enumeration flow, or the `submitting` state machine — the sign-in success path still navigates without resetting `submitting` (the button holds "Signing in…" until the route unmounts — the correct posture, no flash back to "Sign in"); the pre-existing shared-`submitting` quirk across modes (a mid-flight "Forgot password?" toggle renders the other mode's button busy — state sharing predates this ticket and stays unchanged).
 
-- [ ] **Step 1: Load the UI/UX skill set**
+- [✅] **Step 1: Load the UI/UX skill set**
 
 Per AGENTS.md, load `prototype` + `ui-ux-pro-max` (plus `ui-styling` as relevant) before editing. The rendered shape is pinned below — the skills inform judgment (focus/disabled affordance, `aria-busy` semantics), not re-composition.
 
-- [ ] **Step 2: `site-tab.tsx` — the footer Save rides the vocabulary**
+- [✅] **Step 2: `site-tab.tsx` — the footer Save rides the vocabulary**
 
 (a) Replace the header comment's last two lines (5-6):
 
@@ -399,7 +399,7 @@ with:
       </div>
 ```
 
-- [ ] **Step 3: `login.tsx` — both submit buttons ride the vocabulary**
+- [✅] **Step 3: `login.tsx` — both submit buttons ride the vocabulary**
 
 (a) Append to the header comment (after line 8, `// aimed URL through the open-redirect guard.`):
 
@@ -467,7 +467,7 @@ with:
                 </Button>
 ```
 
-- [ ] **Step 4: Grep gate — every touched button carries the vocabulary**
+- [✅] **Step 4: Grep gate — every touched button carries the vocabulary**
 
 ```bash
 grep -c "aria-busy" apps/admin/src/components/settings/site-tab.tsx apps/admin/src/routes/login.tsx
@@ -476,7 +476,7 @@ grep -c "PendingSpinner" apps/admin/src/components/settings/site-tab.tsx apps/ad
 
 Expected: `aria-busy` — `site-tab.tsx:1`, `login.tsx:2` (neither file carried one before — recon grep); `PendingSpinner` — `site-tab.tsx:2` (import + render), `login.tsx:3` (import + two renders). Save the output to the evidence dir as `task-2-grep.txt`.
 
-- [ ] **Step 5: Lint, format, test, typecheck, build**
+- [✅] **Step 5: Lint, format, test, typecheck, build**
 
 ```bash
 pnpm --filter @sevendays/admin fix
@@ -487,7 +487,7 @@ pnpm --filter @sevendays/admin build
 
 Expected: all green; the suite stays at **Test Files 26 passed (26) · Tests 262 passed (262)** (no suite change in this task); the build succeeds with the login route's two new module edges.
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/admin/src/components/settings/site-tab.tsx apps/admin/src/routes/login.tsx
@@ -507,11 +507,11 @@ Ticket item 6. The editor snapshots a `savedBaseline` and disables Save on `save
 
 **Not here:** re-seeding the editor's state after save (the state/posture behavior is untouched — only the gate's baseline moves); `handleSaveFailure` and its toast/inline mapping (duplicate-name surfacing is #245's root fix); the cover buttons (they already ride `UPLOADING_LABEL`); the packages table + its row actions; any seam change (Task 1 owns the seam); the create path's navigation (create success unmounts into the edit route, which hydrates its own baseline).
 
-- [ ] **Step 1: Load the UI/UX skill set**
+- [✅] **Step 1: Load the UI/UX skill set**
 
 Per AGENTS.md, load `prototype` + `ui-ux-pro-max` (plus `ui-styling` as relevant) before editing. The gate's rendered posture is pinned below (a clean-disabled Save renders the idle label, no spinner, no `aria-busy`).
 
-- [ ] **Step 2: The header note + the seam import**
+- [✅] **Step 2: The header note + the seam import**
 
 (a) Append to the header comment (after line 18, `// mode renders NO Advanced card (the server generates the slug — AQ-6).`):
 
@@ -542,7 +542,7 @@ import {
 } from '#/lib/package-editor-state';
 ```
 
-- [ ] **Step 3: The baseline state + the mutate-time ref**
+- [✅] **Step 3: The baseline state + the mutate-time ref**
 
 (a) Insert directly after the state init (after line 292, the `useState<PackageEditorState | null>(() => mode === 'create' ? newEditorState() : null);` statement):
 
@@ -568,7 +568,7 @@ import {
   const pendingBaselineRef = useRef<PackageEditorState | null>(null);
 ```
 
-- [ ] **Step 4: The hydrate sets both**
+- [✅] **Step 4: The hydrate sets both**
 
 Replace the hydrate effect (310-316):
 
@@ -598,7 +598,7 @@ with:
   }, [mode, packageQuery.data, state]);
 ```
 
-- [ ] **Step 5: The snapshot at mutate time + the re-baseline on success**
+- [✅] **Step 5: The snapshot at mutate time + the re-baseline on success**
 
 (a) In `saveChanges`, replace the dispatch (615-620):
 
@@ -640,7 +640,7 @@ with:
         // Stay on the route.
 ```
 
-- [ ] **Step 6: The gate on the Save button**
+- [✅] **Step 6: The gate on the Save button**
 
 (a) Insert directly after `const uploading = uploadStatus.phase === 'presigning' || uploadStatus.phase === 'uploading';` (line 700 — below the early returns, where `state` is already narrowed non-null):
 
@@ -669,7 +669,7 @@ with:
 
 (Only `disabled` changes — `aria-busy`, the spinner, and the label stay `savePending`-only per the dirty-gate law.)
 
-- [ ] **Step 7: Grep gate — the seven wiring points**
+- [✅] **Step 7: Grep gate — the seven wiring points**
 
 ```bash
 grep -n "savedBaseline\|setSavedBaseline\|pendingBaselineRef\|isEditorStateDirty\|savePending || !dirty" apps/admin/src/components/packages/package-editor.tsx
@@ -677,7 +677,7 @@ grep -n "savedBaseline\|setSavedBaseline\|pendingBaselineRef\|isEditorStateDirty
 
 Expected: hits at all seven wiring points — (1) the `isEditorStateDirty` import specifier, (2) the `savedBaseline`/`setSavedBaseline` `useState`, (3) the `pendingBaselineRef` `useRef`, (4) `setSavedBaseline(hydrated)` in the effect, (5) `pendingBaselineRef.current = state;` in `saveChanges`, (6) `setSavedBaseline(pendingBaselineRef.current);` in `editSave.onSuccess`, (7) the `dirty` const + `disabled={savePending || !dirty}` (comment lines naming the seam also match — expected). Save the output as `task-3-grep.txt`. Also confirm createSave's `onSuccess` is byte-identical: `git diff -U0 apps/admin/src/components/packages/package-editor.tsx | grep -c "navigate({ to: '/packages/\$packageId/edit'"` → `0` (the create path is untouched).
 
-- [ ] **Step 8: Lint, format, test, typecheck**
+- [✅] **Step 8: Lint, format, test, typecheck**
 
 ```bash
 pnpm --filter @sevendays/admin fix
@@ -687,7 +687,7 @@ pnpm --filter @sevendays/admin typecheck
 
 Expected: all green; the suite stays at **Test Files 26 passed (26) · Tests 262 passed (262)**. No build (no new module edge — Global Constraints).
 
-- [ ] **Step 9: Commit**
+- [✅] **Step 9: Commit**
 
 ```bash
 git add apps/admin/src/components/packages/package-editor.tsx
@@ -704,7 +704,7 @@ git commit -m "feat(admin): the package editor's dirty-state Save gate (#242)"
 
 **Not here:** any code change (a defect found by Step 2 goes back to its owning task's file with its own fix commit, then this task re-runs from Step 1); `docs/plan.md` (M7 is closed and the post-flight carries no roadmap box — #239's disposition cuts tickets, not plan.md boxes; nothing in plan.md ticks or annotates for #242).
 
-- [ ] **Step 1: The full check**
+- [✅] **Step 1: The full check**
 
 ```bash
 pnpm check
@@ -712,7 +712,7 @@ pnpm check
 
 Expected: green across the repo (lint + format + typecheck + test). Floors after this ticket: admin **26 files / 262 tests**; every other suite unchanged from AGENTS.md's recorded floors (api, api-client, landing, types, db — this ticket touches none of them).
 
-- [ ] **Step 2: The live walkthrough (controller step — both themes, evidence for the PR)**
+- [✅] **Step 2: The live walkthrough (controller step — both themes, evidence for the PR)**
 
 Bring up the local stack (`pnpm --filter @sevendays/api dev` + `pnpm --filter @sevendays/admin dev`). Drive a real browser — the `browser-use:control-browser` skill, or a throwaway headed Playwright script kept OUTSIDE the repo — with an artificial ~2 s delay on the relevant requests so every busy state is observable and capturable (Playwright: `await page.route('**/api/auth/**', async (route) => { await new Promise((r) => setTimeout(r, 2000)); await route.continue(); })`, and the same for `**/_serverFn/**` POSTs). Sign-ins use the controller's dev staff account (the owner's local credentials — never written to the evidence dir, never committed). Walk, in order, capturing each numbered state to `.superpowers/sdd/2026-11-08-242-pending-vocabularies-dirty-gate/` (light first):
 
@@ -725,7 +725,7 @@ Bring up the local stack (`pnpm --filter @sevendays/api dev` + `pnpm --filter @s
 
 Then toggle dark (the admin topbar's theme toggle — the login page renders the persisted theme) and repeat 1–6. Write a short narration (`walkthrough.md`) listing each state's observed outcome. Any deviation is a defect — fix it in the owning task's file, re-run that task's gates, commit a `fix(admin): … (#242)`, and restart this task from Step 1.
 
-- [ ] **Step 3: `docs/progress.md` — the dated entry (newest first, pinned)**
+- [✅] **Step 3: `docs/progress.md` — the dated entry (newest first, pinned)**
 
 Insert as the first entry under `# Progress` (replace `2026-11-XX` with the docs commit's date — the #221 plan's dated-annotation convention):
 
@@ -733,7 +733,7 @@ Insert as the first entry under `# Progress` (replace `2026-11-XX` with the docs
 - **2026-11-XX — M7 post-flight T2, the admin pending vocabularies + the dirty-state Save gate (#242) — build complete on `feat/242-pending-vocabularies-dirty-gate`, PR pending.** The #218 pending vocabulary now covers the three surfaces the M7 demo found lacking (#239 items 4–6): the Settings Site tab's footer Save rides the full vocabulary over `save.isPending` (disabled + spinner + "Saving…" + `aria-busy` — lost in #221's relocation, now restored); the login card's two submit buttons ride it over the shared `submitting` state ("Signing in…" / "Sending…" — the two new busy labels, owner-ratified 2026-11-08, live beside the five in `save-contract.ts`); and the package editor's Save stays disabled while the form is clean — the new `isEditorStateDirty` lib seam compares the live state structurally against a snapshotted baseline (Object.is for the unpriced NaN encoding, the three-state cover, inclusions and attires in array order — a no-op attire re-toggle reads dirty, the safe direction), in both modes (create's Save starts disabled), re-baselined to the mutate-time snapshot after a successful edit save (a ref out-races React Query's latest-options onSuccess closure; a failed save never moves the baseline). Walked live on the dev stack in both themes. Admin-only — zero api/types/landing/db/ui changes; admin floor 26 files / 262 tests (+8 dirty-seam its, +2 label pins).
 ```
 
-- [ ] **Step 4: `AGENTS.md` — two pinned find/replace edits**
+- [✅] **Step 4: `AGENTS.md` — two pinned find/replace edits**
 
 (a) In *Current status of `pnpm test`*, replace the admin floor clause's head:
 
@@ -773,7 +773,7 @@ with the nonce machinery deleted, one pending vocabulary (its coverage completed
 
 (Each find string occurs exactly once in AGENTS.md — verified at plan time with `grep -c`.)
 
-- [ ] **Step 5: The docs commit**
+- [✅] **Step 5: The docs commit**
 
 Tick this plan's executed boxes (`- [✅]`), then:
 
