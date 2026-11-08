@@ -79,8 +79,13 @@ With `pnpm --filter @sevendays/admin dev` running (port 3000):
 ```sh
 curl -sS -i -X POST http://localhost:3000/api/auth/sign-in/email \
   -H 'content-type: application/json' \
+  -H 'Origin: http://localhost:3000' \
   -d '{"email":"<email>","password":"…"}'
 ```
+
+(The `Origin` header is required — BetterAuth's origin check answers
+`403 {"code":"MISSING_OR_NULL_ORIGIN"}` without it. Found live during #242's
+dev-stack verification.)
 
 → `200` with a `set-cookie: better-auth.session_token=…` header (dev; the
 cookie is `__Secure-`-prefixed in production). A wrong password returns
