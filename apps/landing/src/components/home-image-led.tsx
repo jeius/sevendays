@@ -24,7 +24,8 @@ import { MosaicPhotoGrid } from './mosaic-photo-grid';
 // through the bar) → 2 the LIVE mosaic gallery (no title-captions on home)
 // → 3 featured as D2 light split plates → 4 the full-bleed 3-copy services
 // marquee (desktop) / JS transform stepper (mobile) → 5 REAL testimonials,
-// paginated 3/page with a page-change reveal → 6 the #92 emphasis strip.
+// paginated 3/page with a page-change reveal — the page's last section
+// (the #92 emphasis strip that closed it is retired: M7 post-flight #241).
 // The copy consumes site settings end to end (hero title/blurb, eyebrow,
 // the four section headings) — defaults when unset.
 const SIDES_COUNT = 2;
@@ -377,29 +378,6 @@ export function HomeImageLed({
               Client words are on their way — check back soon.
             </p>
           )}
-        </div>
-      </section>
-
-      {/* 6 — Emphasis strip: the ratified #92 gray-light band. */}
-      <section className='border-line-soft border-t bg-brand-gray-light' data-strip='call-visit'>
-        <div className='mx-auto flex max-w-5xl flex-col items-start justify-between gap-4 px-6 py-8 md:flex-row md:items-center'>
-          <div>
-            <h2 className='font-semibold font-serif text-brand-ink text-xl dark:text-foreground'>
-              Not sure which session fits?
-            </h2>
-            <p className='text-brand-700 mt-1 text-sm dark:text-brand-400'>
-              Call or visit a branch — we will help you choose.
-            </p>
-          </div>
-          <Link
-            to='/branches'
-            className={cn(
-              buttonVariants({ variant: 'outline' }),
-              'focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
-            )}
-          >
-            Find a branch
-          </Link>
         </div>
       </section>
     </div>

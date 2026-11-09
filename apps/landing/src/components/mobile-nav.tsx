@@ -4,6 +4,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@sevendays/ui/components/collapsible';
+import { ThemeToggle } from '@sevendays/ui/components/theme-toggle';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
 import { Menu, Phone, X } from 'lucide-react';
@@ -60,6 +61,19 @@ export function MobileNav({ links }: { links: typeof NAV_LINKS }) {
             Call us
           </Link>
         </nav>
+        {/* Below md the theme toggle lives HERE, not in the bar (the M7
+            post-flight #241, owner-ruled 2026-11-09): its own hairline row
+            under the CTA, outside <nav> (a control, not navigation) — the
+            mono THEME label left, the shared toggle right on the bar's ink
+            tint. Toggling keeps the panel open. */}
+        <div className='mx-auto max-w-5xl px-6 pb-4'>
+          <div className='flex items-center justify-between border-white/10 border-t pt-3'>
+            <span className='font-mono text-brand-300 text-xs uppercase tracking-[0.16em]'>
+              Theme
+            </span>
+            <ThemeToggle className='inline-flex size-9 rounded-md text-white/85 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring' />
+          </div>
+        </div>
       </CollapsibleContent>
     </Collapsible>
   );

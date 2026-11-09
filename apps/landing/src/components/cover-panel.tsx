@@ -6,9 +6,11 @@ import { cn } from 'cn';
 // cover" stays meaningful. `className` re-boxes both branches (cn is a
 // tailwind-merge engine: the surface's classes override the defaults) —
 // list/detail keep the h-40 card box, home-featured goes edge-to-edge.
-// #97: the deep-petrol media gradient is the atmosphere's accent lane
-// (deep petrol = media gradients only) — dark stops (600→800→deep) keep
-// the white text AA on every stop.
+// The placeholder gradient runs brand ink → brand primary (petrol): the
+// M7 post-flight #241 re-grade, owner-ruled 2026-11-08 (it replaced #97's
+// muted 600→800→deep ramp). Both stops are fixed brand points, identical
+// in both themes; the lightest stop (primary) is the incumbent's, so the
+// white text keeps its AA (white on petrol 5.65:1 — tokens.css).
 export function CoverPanel({
   name,
   coverImageUrl,
@@ -31,7 +33,7 @@ export function CoverPanel({
   return (
     <div
       className={cn(
-        'flex h-40 flex-col items-center justify-center gap-1 rounded-lg bg-[linear-gradient(135deg,var(--brand-600),var(--brand-800),var(--brand-deep))]',
+        'flex h-40 flex-col items-center justify-center gap-1 rounded-lg bg-[linear-gradient(135deg,var(--brand-ink),var(--brand-primary))]',
         className
       )}
     >

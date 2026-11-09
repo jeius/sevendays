@@ -9,7 +9,7 @@ import { inclusionPhrase } from './inclusions-list';
 
 // The package detail on the ruled D2 split language (#164 Round 3): the
 // cover as a full plate half (untouched photo — the CoverPanel law renders
-// the muted placeholder when the row has no cover), a light panel carrying
+// the ink→petrol placeholder when the row has no cover), a light panel carrying
 // name, peso, duration, description, and THE one primary affordance —
 // the v1 arm's solid-primary "Call us" + Phone (the CTA law; main's
 // booking CTA is the pick-time transform away, never in this codebase).
