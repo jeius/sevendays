@@ -610,7 +610,7 @@ Pure main-only close-out. Every path in the PR is a v1-absent path, so the pick 
 
 **Not here:** any v1 work (pure SKIP); `AGENTS.md` (no floor or ruling changes — the detail-first ruling lives in the glossary + the brief, both already recorded); filing any new ticket (none needed — #256 IS the fenced follow-up).
 
-- [ ] **Step 1: The progress entry**
+- [✅] **Step 1: The progress entry**
 
 Append to `docs/progress.md`'s dated section (beside the 2026-11-09 #254 entry), filling bracketed values from the actual runs:
 
