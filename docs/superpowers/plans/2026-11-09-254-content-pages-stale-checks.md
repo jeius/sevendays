@@ -528,7 +528,7 @@ The consolidated verification task (the #241 pattern): the local stack re-proves
 
 **Not here:** `booking-wizard.mjs` / `cms-reflection.mjs` runs (fenced — additive lib change, nothing to prove); the e2e/visual suite (ADR-0022).
 
-- [✅] **Step 1: Both scenarios, final local proof**
+- [✅] **Step 1: content-pages, final local proof**
 
 ```bash
 node apps/landing/scripts/verify/content-pages.mjs | tee .superpowers/sdd/2026-11-09-254-content-pages-stale-checks/final-content-pages.txt
