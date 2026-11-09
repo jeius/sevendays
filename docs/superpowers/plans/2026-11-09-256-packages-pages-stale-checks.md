@@ -557,7 +557,7 @@ The consolidated verification task (the #254 pattern): the local stack re-proves
 
 **Not here:** `content-pages.mjs` / `booking-wizard.mjs` / `cms-reflection.mjs` runs (fenced — this ticket changed nothing they consume); the e2e/visual suite (ADR-0022).
 
-- [ ] **Step 1: packages-pages, final local proof**
+- [✅] **Step 1: packages-pages, final local proof**
 
 ```bash
 node apps/landing/scripts/verify/packages-pages.mjs | tee .superpowers/sdd/2026-11-09-256-packages-pages-stale-checks/final-packages-pages.txt
@@ -565,7 +565,7 @@ node apps/landing/scripts/verify/packages-pages.mjs | tee .superpowers/sdd/2026-
 
 Expected: `17/17 checks passed` (exit 0).
 
-- [ ] **Step 2: The deployed-teaser re-check (report-only)**
+- [✅] **Step 2: The deployed-teaser re-check (report-only)**
 
 The pages didn't change in this ticket — the teaser serves them already — so this validates the REWRITTEN checks against the teaser's live state (its catalog may carry unpriced rows and saved covers, exercising the ADR-0020 sort and both cover arms; its serialization exercises the parsed-param checks). From the repo root, against the GitHub `teaser` environment's hosts (the #241-pinned values):
 
@@ -577,7 +577,7 @@ node apps/landing/scripts/verify/packages-pages.mjs | tee .superpowers/sdd/2026-
 
 Expected: `17/17` — but ANY failure here is a FINDING, not a blocker: record the failing check names + detail lines verbatim for the PR body (that environment truth is exactly what the parsed-param hardening was ruled for; the local run remains the gate). If the teaser is unreachable (network), record that instead.
 
-- [ ] **Step 3: The repo gates**
+- [✅] **Step 3: The repo gates**
 
 ```bash
 pnpm check
@@ -585,7 +585,7 @@ pnpm check
 
 Expected: green across the repo — the landing suite at its floor (16 files / 123 tests), lint/format/typecheck clean for the touched workspace (the `.mjs` edits are Biome-canonical and outside tsc's scope). If any gate count differs from the floors, reconcile before proceeding (never loosen).
 
-- [ ] **Step 4: Stack down + graphify**
+- [✅] **Step 4: Stack down + graphify**
 
 Stop the three long-running processes (the chrome by `pkill -f cdp-verify-256`; the two dev servers by their own control), then:
 
