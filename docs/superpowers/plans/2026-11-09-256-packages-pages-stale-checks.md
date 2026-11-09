@@ -216,7 +216,7 @@ The owner's detail-first ruling becomes the assertion. Three FAILs flip: the str
 
 **Not here:** the strip-collapses check and the hero/CTA/heading checks (byte-stable, already passing); the index page (Task 3); the detail page (Task 4).
 
-- [ ] **Step 1: The strip count over plate links**
+- [✅] **Step 1: The strip count over plate links**
 
 Replace:
 
@@ -240,7 +240,7 @@ with:
 
 (The `check('home: strip shows the expected featured cards', …)` below it is byte-stable — the mechanism changed, the contract did not.)
 
-- [ ] **Step 2: The detail-first deep-link check**
+- [✅] **Step 2: The detail-first deep-link check**
 
 Replace:
 
@@ -279,7 +279,7 @@ with:
   );
 ```
 
-- [ ] **Step 3: The strip cover observe over plates**
+- [✅] **Step 3: The strip cover observe over plates**
 
 Replace:
 
@@ -305,7 +305,7 @@ with:
 
 (The rest of the observe body — `hasImg` / `hasPlaceholder` — and the `check('home: strip cards carry the cover rule (img ⇔ cover)', …)` below it are byte-stable: the CoverPanel law is intact, only the container changed.)
 
-- [ ] **Step 4: Syntax + format + the flip gate**
+- [✅] **Step 4: Syntax + format + the flip gate**
 
 ```bash
 node --check apps/landing/scripts/verify/packages-pages.mjs
@@ -315,7 +315,7 @@ node apps/landing/scripts/verify/packages-pages.mjs | tee .superpowers/sdd/2026-
 
 Expected: **`11/17`** — `PASS home: strip shows the expected featured cards — expected 4, got 4` (or the live strip length, matching itself), `PASS home: strip plates are detail-first (no /book?package=; /packages/<slug> links) — slugs: […]` (the four featured slugs), `PASS home: strip cards carry the cover rule (img ⇔ cover)`. The remaining six FAILs are exactly the index/detail/not-found checks (their pre-rewrite names).
 
-- [ ] **Step 5: Commit**
+- [✅] **Step 5: Commit**
 
 ```bash
 git add apps/landing/scripts/verify/packages-pages.mjs
