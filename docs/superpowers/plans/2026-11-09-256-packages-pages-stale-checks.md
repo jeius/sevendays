@@ -335,7 +335,7 @@ Three FAILs flip: the index count (plate links document-wide — the nav's exact
 
 **Not here:** the empty-state ⇔ check (byte-stable, already passing); the detail page (Task 4); any seed/catalog mutation (read-only harness).
 
-- [ ] **Step 1: The index count over plate links**
+- [✅] **Step 1: The index count over plate links**
 
 Replace:
 
@@ -352,7 +352,7 @@ with:
   const listCards = await evaluate(`document.querySelectorAll("a[href^='/packages/']").length`);
 ```
 
-- [ ] **Step 2: The full-details check, priced-safe**
+- [✅] **Step 2: The full-details check, priced-safe**
 
 Replace:
 
@@ -380,7 +380,7 @@ with:
   );
 ```
 
-- [ ] **Step 3: The list cover observe over plates**
+- [✅] **Step 3: The list cover observe over plates**
 
 Replace:
 
@@ -405,7 +405,7 @@ with:
 
 (The observe's `loading`/`objectCover` clauses and the `check('/packages: list cards carry the cover rule (lazy img ⇔ cover)', …)` are byte-stable — CoverPanel still renders `loading='lazy'` + `object-cover`.)
 
-- [ ] **Step 4: Syntax + format + the flip gate**
+- [✅] **Step 4: Syntax + format + the flip gate**
 
 ```bash
 node --check apps/landing/scripts/verify/packages-pages.mjs
@@ -415,7 +415,7 @@ node apps/landing/scripts/verify/packages-pages.mjs | tee .superpowers/sdd/2026-
 
 Expected: **`14/17`** — `PASS /packages: every active package renders` (count = the live active count, matching itself), `PASS /packages: full details (cheapest price + every name visible)`, `PASS /packages: list cards carry the cover rule (lazy img ⇔ cover)`. The remaining three FAILs are exactly `:slug renders` / `detail cover rule` / `unknown-slug not-found` (pre-rewrite names).
 
-- [ ] **Step 5: Commit**
+- [✅] **Step 5: Commit**
 
 ```bash
 git add apps/landing/scripts/verify/packages-pages.mjs
