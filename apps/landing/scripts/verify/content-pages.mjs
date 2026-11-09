@@ -19,16 +19,18 @@ const peso = (cents) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
 
 async function main() {
-  const [servicesRes, branchesRes, galleryRes, testimonialsRes] = await Promise.all([
+  const [servicesRes, branchesRes, galleryRes, testimonialsRes, settingsRes] = await Promise.all([
     fetch(`${API}/api/v1/studio-services`),
     fetch(`${API}/api/v1/branches`),
     fetch(`${API}/api/v1/gallery`),
     fetch(`${API}/api/v1/testimonials`),
+    fetch(`${API}/api/v1/site-settings`),
   ]);
   const services = await servicesRes.json();
   const branches = await branchesRes.json();
   const gallery = await galleryRes.json();
   const testimonials = await testimonialsRes.json();
+  const settings = await settingsRes.json();
   if (!gallery || !Array.isArray(gallery.categories) || !Array.isArray(gallery.photos)) {
     throw new Error('seed drift: gallery read is not the assembled {categories, photos} payload');
   }
@@ -41,11 +43,14 @@ async function main() {
   if (!Array.isArray(branches) || branches.length === 0) {
     throw new Error('seed drift: no branches from the live API');
   }
+  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+    throw new Error('seed drift: site-settings read is not the singleton object');
+  }
   const chipNamesFor = (s) =>
     branches.filter((b) => s.bookableBranchIds.includes(b.id)).map((b) => b.name);
 
   const page = await connect();
-  const { go, text, evaluate, wait, close } = page;
+  const { go, text, evaluate, wait, bookParamValues, close } = page;
 
   // Home: strips + blurb
   await go(`${LANDING}/`);
@@ -75,22 +80,29 @@ async function main() {
     `document.querySelectorAll("[data-strip='gallery'] figure").length`
   );
   check('home: gallery wall renders (variant D stand-in strip)', galleryFigures >= 6);
-  const teaserLinks = await evaluate(
-    `[...document.querySelectorAll('a[href^="/book?service="]')].map(a => a.getAttribute('href'))`
-  );
+  // #254: the deep-link assertion matches the PARSED service param, never
+  // the exact href string — the router's search serialization is not the
+  // contract (environment-sensitive on the deployed teaser).
+  const teaserServiceIds = await bookParamValues('service');
   check(
     'home: teaser items deep-link /book?service=<id>',
-    services.every((s) => teaserLinks.includes(`/book?service=${s.id}`))
+    services.every((s) => teaserServiceIds.includes(s.id))
   );
   const viewAll = await evaluate(
     `[...document.querySelectorAll('a')].some(a => a.textContent.trim() === 'View all services' && a.getAttribute('href') === '/services')`
   );
   check('home: strip-end View all services links /services', viewAll === true);
+  // #254 (owner-ruled 2026-11-09): the hero blurb follows the live wire —
+  // the saved homeDescription wins (a teaser site-copy save no longer
+  // fails the check); the ratified default (#111 resolution; ruled edit
+  // #101) governs only while the field is null (defaults never ride the
+  // wire — #215).
+  const expectedBlurb =
+    settings.homeDescription ??
+    'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.';
   check(
-    'home: ratified hero blurb visible (#111 resolution; ruled edit #101)',
-    home.includes(
-      'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.'
-    )
+    'home: hero blurb renders the live settings (ratified default ⇔ null)',
+    home.includes(expectedBlurb)
   );
 
   // /services: the offerings with bookability
@@ -122,18 +134,21 @@ async function main() {
       return chipNamesFor(s).every((n) => svcArticles[i].includes(n));
     })
   );
+  // #254 (owner-ruled 2026-11-09): the cross-reference left with the #164
+  // Round-3 ruled services rewrite — the check inverts to guard the
+  // ruling's absence, the literal byte-kept (the #241 strip-retirement
+  // pattern).
   check(
-    '/services: one-line add-on cross-reference visible',
-    servicesText.includes(
+    '/services: add-on cross-reference stays retired (#164 Round 3)',
+    !servicesText.includes(
       'Looking for add-ons? Makeup, hairstyle, and more are available with any session.'
     )
   );
-  const svcLinks = await evaluate(
-    `[...document.querySelectorAll('a[href^="/book?service="]')].map(a => a.getAttribute('href'))`
-  );
+  // #254: same param-parsed form as the home teaser check.
+  const svcServiceIds = await bookParamValues('service');
   check(
     '/services: cards deep-link /book?service=<id>',
-    services.every((s) => svcLinks.includes(`/book?service=${s.id}`))
+    services.every((s) => svcServiceIds.includes(s.id))
   );
 
   // /branches: address, phone, badge, deep link
@@ -155,21 +170,49 @@ async function main() {
       return t.includes(branches[i].address) && t.includes(branches[i].phone);
     })
   );
+  // #254 (owner-ruled 2026-11-09): the text badge recomposed into the
+  // icon WalkInIndicator (#223 Round 4) — the state text lives in the
+  // trigger's aria-label pair, never in textContent. The check asserts the
+  // label per branch, re-derived from the live payload, and keeps the
+  // both-states requirement (the seed carries both flags).
+  const walkInLabels = await evaluate(`
+    (() => {
+      const articles = [...document.querySelectorAll('article')];
+      const branches = ${JSON.stringify(branches)};
+      return branches.map((b) => {
+        const a = articles.find((el) => el.querySelector('h3')?.textContent === b.name);
+        const indicator = a?.querySelector(
+          "button[aria-label='Walk-ins welcome'], button[aria-label='By appointment']"
+        );
+        return indicator ? indicator.getAttribute('aria-label') : null;
+      });
+    })()
+  `);
   check(
-    '/branches: walk-in badges show both states (live seed has both)',
-    branchArticles.some(
-      (t, i) => t !== null && branches[i].acceptsWalkIns && t.includes('Walk-ins welcome')
+    '/branches: walk-in indicators carry the aria-label state (live seed has both)',
+    walkInLabels.every(
+      (label, i) => label === (branches[i].acceptsWalkIns ? 'Walk-ins welcome' : 'By appointment')
     ) &&
-      branchArticles.some(
-        (t, i) => t !== null && !branches[i].acceptsWalkIns && t.includes('No walk-ins')
-      )
+      branches.some((b) => b.acceptsWalkIns) &&
+      branches.some((b) => !b.acceptsWalkIns),
+    `labels: ${JSON.stringify(walkInLabels)}`
   );
-  const branchLinks = await evaluate(
-    `[...document.querySelectorAll('a')].filter(a => a.textContent.trim() === 'Book at this branch').map(a => a.getAttribute('href'))`
-  );
+  // #254: param-parsed form, text-anchored — the CTA's copy stays part of
+  // the assertion; the href string does not.
+  const branchLinkIds = await evaluate(`
+    (() => {
+      const ids = [];
+      for (const a of document.querySelectorAll('a')) {
+        if (a.textContent.trim() !== 'Book at this branch') continue;
+        const url = new URL(a.getAttribute('href'), location.origin);
+        if (url.pathname === '/book') ids.push(url.searchParams.get('branch'));
+      }
+      return ids;
+    })()
+  `);
   check(
     '/branches: Book at this branch deep-links /book?branch=<id>',
-    branches.every((b) => branchLinks.includes(`/book?branch=${b.id}`))
+    branches.every((b) => branchLinkIds.includes(b.id))
   );
 
   // /about — Ruled edit (M5 ticket #142): the two placeholder checks rewrite
@@ -256,12 +299,16 @@ async function main() {
       'armed — single-category or empty payload cannot demo filtering'
     );
   }
+  // #254 (owner-ruled 2026-11-09): the attribution renders uppercase mono
+  // and text() is innerText (CSS text-transform applied) — the person
+  // matches case-insensitively over the unchanged seam; the ⇔ rule stays.
+  const aboutLower = about.toLowerCase();
   check(
     '/about: testimonials render the payload (coming-soon ⇔ zero)',
     testimonials.length === 0
       ? about.includes('What clients say is coming soon.')
-      : testimonials.every((t) => about.includes(t.person)) &&
-          !about.includes('What clients say is coming soon.')
+      : !aboutLower.includes('what clients say is coming soon.') &&
+          testimonials.every((t) => aboutLower.includes(t.person.toLowerCase()))
   );
 
   close();
