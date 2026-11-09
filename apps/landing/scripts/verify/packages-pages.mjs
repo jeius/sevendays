@@ -145,6 +145,25 @@ async function main() {
     listCards === packages.length,
     `expected ${packages.length}, got ${listCards}`
   );
+  // #256 (owner-ruled 2026-11-09): the detail-first ruling asserted on the
+  // index too — zero /book?package= hrefs on /packages, and every index
+  // plate's parsed href is the package's /packages/<slug> path (final
+  // whole-branch review finding: the home arm alone left the index
+  // unasserted).
+  const indexBookPackageIds = await bookParamValues('package');
+  const indexPlateSlugs = await evaluate(`(() => {
+    const slugs = [];
+    for (const a of document.querySelectorAll("a[href^='/packages/']")) {
+      const url = new URL(a.getAttribute('href'), location.origin);
+      slugs.push(url.pathname.split('/packages/')[1] ?? null);
+    }
+    return slugs;
+  })()`);
+  check(
+    '/packages: index plates are detail-first (no /book?package=; /packages/<slug> links)',
+    indexBookPackageIds.length === 0 && packages.every((p) => indexPlateSlugs.includes(p.slug)),
+    `slugs: ${JSON.stringify(indexPlateSlugs)}`
+  );
   // #256: the plates carry name + peso (priced) + description — the
   // index carries no inclusions wording since #164 Round 3. Cheapest
   // derives over PRICED rows only (ADR-0020: unpriced rows render no
