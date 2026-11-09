@@ -170,14 +170,32 @@ async function main() {
       return t.includes(branches[i].address) && t.includes(branches[i].phone);
     })
   );
+  // #254 (owner-ruled 2026-11-09): the text badge recomposed into the
+  // icon WalkInIndicator (#223 Round 4) — the state text lives in the
+  // trigger's aria-label pair, never in textContent. The check asserts the
+  // label per branch, re-derived from the live payload, and keeps the
+  // both-states requirement (the seed carries both flags).
+  const walkInLabels = await evaluate(`
+    (() => {
+      const articles = [...document.querySelectorAll('article')];
+      const branches = ${JSON.stringify(branches)};
+      return branches.map((b) => {
+        const a = articles.find((el) => el.querySelector('h3')?.textContent === b.name);
+        const indicator = a?.querySelector(
+          "button[aria-label='Walk-ins welcome'], button[aria-label='By appointment']"
+        );
+        return indicator ? indicator.getAttribute('aria-label') : null;
+      });
+    })()
+  `);
   check(
-    '/branches: walk-in badges show both states (live seed has both)',
-    branchArticles.some(
-      (t, i) => t !== null && branches[i].acceptsWalkIns && t.includes('Walk-ins welcome')
+    '/branches: walk-in indicators carry the aria-label state (live seed has both)',
+    walkInLabels.every(
+      (label, i) => label === (branches[i].acceptsWalkIns ? 'Walk-ins welcome' : 'By appointment')
     ) &&
-      branchArticles.some(
-        (t, i) => t !== null && !branches[i].acceptsWalkIns && t.includes('No walk-ins')
-      )
+      branches.some((b) => b.acceptsWalkIns) &&
+      branches.some((b) => !b.acceptsWalkIns),
+    `labels: ${JSON.stringify(walkInLabels)}`
   );
   // #254: param-parsed form, text-anchored — the CTA's copy stays part of
   // the assertion; the href string does not.
