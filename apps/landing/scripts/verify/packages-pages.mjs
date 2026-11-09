@@ -197,14 +197,20 @@ async function main() {
   // placeholder present ⇔ no coverImageUrl; an img (alt = name, lazy,
   // object-cover) ⇔ coverImageUrl present. The old clause assumed null
   // covers forever; this form survives real content.
+  // #256: the detail hero dropped its <article> wrapper — the cover img
+  // is the page's only alt=<name> image (the spec sheet renders none).
   const detailCover = await evaluate(
-    `[...document.querySelectorAll('article img')].some(i => i.getAttribute('alt') === ${JSON.stringify(basic.name)})`
+    `[...document.querySelectorAll('img')].some(i => i.getAttribute('alt') === ${JSON.stringify(basic.name)})`
   );
+  // #256: the detail's spec-sheet heading is "What's included" since
+  // the #164 Round-3 rewrite; peso null-guarded (the unpriced law — an
+  // unpriced probe package renders no price line).
+  const basicPrice = peso(basic.priceCents);
   check(
     '/packages/:slug renders by slug (name, price, inclusions)',
     detail.includes(basic.name) &&
-      detail.includes(peso(basic.priceCents)) &&
-      detail.includes('Inclusions')
+      (basicPrice === null || detail.includes(basicPrice)) &&
+      detail.includes("What's included")
   );
   check(
     'detail: cover rule (placeholder ⇔ no cover)',
@@ -212,17 +218,22 @@ async function main() {
       ? detailCover === true && !detail.includes('Cover photo coming soon')
       : detailCover === false && detail.includes('Cover photo coming soon')
   );
-  const detailLink = await evaluate(
-    `[...document.querySelectorAll('a[href^="/book?package="]')].map(a => a.getAttribute('href'))[0] ?? null`
-  );
-  check('detail: deep link targets the uuid', detailLink === `/book?package=${basic.id}`);
+  // #254/#256: the deferred re-form — the deep-link assertion matches
+  // the PARSED package param, never the exact href string (the router's
+  // search serialization is not the contract). The detail CTA is the
+  // page's sole /book?package= carrier.
+  const detailPackageIds = await bookParamValues('package');
+  check('detail: deep link targets the uuid', detailPackageIds.includes(basic.id));
 
   // Unknown slug: uniform not-found
   await go(`${LANDING}/packages/not-a-real-slug`);
   const missing = await text();
+  // #256 (#223): unknown slugs wear the site-wide uniform NotFound —
+  // the route-level notFound overrides are gone (M7 #223). Owner-ratified
+  // copy, byte-kept literal.
   check(
-    'unknown slug: uniform not-found (owner copy + browse link)',
-    missing.includes('Package not found.') && missing.includes('Browse all packages')
+    'unknown slug: uniform not-found (#223 global copy + back-to-home)',
+    missing.includes('This page never developed.') && missing.includes('Back to home')
   );
   check('unknown slug: not an error boundary', !missing.includes('Error'));
 
