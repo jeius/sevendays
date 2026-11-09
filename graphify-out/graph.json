@@ -3555,8 +3555,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_fontsize_sm",
-      "community": 170,
-      "community_name": "radius",
+      "community": 667,
+      "community_name": "sm",
       "norm_label": "sm"
     },
     {
@@ -3566,8 +3566,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_sm_value",
-      "community": 170,
-      "community_name": "radius",
+      "community": 667,
+      "community_name": "sm",
       "norm_label": "$value"
     },
     {
@@ -3577,8 +3577,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_sm_type",
-      "community": 170,
-      "community_name": "radius",
+      "community": 667,
+      "community_name": "sm",
       "norm_label": "$type"
     },
     {
@@ -3830,8 +3830,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_radius_sm",
-      "community": 170,
-      "community_name": "radius",
+      "community": 667,
+      "community_name": "sm",
       "norm_label": "sm"
     },
     {
@@ -3874,8 +3874,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_radius_md",
-      "community": 667,
-      "community_name": "md",
+      "community": 170,
+      "community_name": "radius",
       "norm_label": "md"
     },
     {
@@ -3885,8 +3885,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_md_value",
-      "community": 667,
-      "community_name": "md",
+      "community": 170,
+      "community_name": "radius",
       "norm_label": "$value"
     },
     {
@@ -3896,8 +3896,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_md_type",
-      "community": 667,
-      "community_name": "md",
+      "community": 170,
+      "community_name": "radius",
       "norm_label": "$type"
     },
     {
@@ -3984,8 +3984,8 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_shadow_sm",
-      "community": 170,
-      "community_name": "radius",
+      "community": 667,
+      "community_name": "sm",
       "norm_label": "sm"
     },
     {
@@ -4006,8 +4006,8 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_shadow_md",
-      "community": 667,
-      "community_name": "md",
+      "community": 170,
+      "community_name": "radius",
       "norm_label": "md"
     },
     {
@@ -4193,8 +4193,8 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_foreground",
-      "community": 669,
-      "community_name": "foreground",
+      "community": 134,
+      "community_name": "color",
       "norm_label": "foreground"
     },
     {
@@ -4204,8 +4204,8 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_foreground_value",
-      "community": 669,
-      "community_name": "foreground",
+      "community": 134,
+      "community_name": "color",
       "norm_label": "$value"
     },
     {
@@ -4215,8 +4215,8 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_foreground_type",
-      "community": 669,
-      "community_name": "foreground",
+      "community": 134,
+      "community_name": "color",
       "norm_label": "$type"
     },
     {
@@ -4226,8 +4226,8 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_primary",
-      "community": 671,
-      "community_name": "primary",
+      "community": 134,
+      "community_name": "color",
       "norm_label": "primary"
     },
     {
@@ -4237,8 +4237,8 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_primary_value",
-      "community": 671,
-      "community_name": "primary",
+      "community": 134,
+      "community_name": "color",
       "norm_label": "$value"
     },
     {
@@ -4248,8 +4248,8 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_primary_type",
-      "community": 671,
-      "community_name": "primary",
+      "community": 134,
+      "community_name": "color",
       "norm_label": "$type"
     },
     {
@@ -4259,8 +4259,8 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_primary_hover",
-      "community": 673,
-      "community_name": "primary-hover",
+      "community": 134,
+      "community_name": "color",
       "norm_label": "primary-hover"
     },
     {
@@ -4270,8 +4270,8 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_primary_hover_value",
-      "community": 673,
-      "community_name": "primary-hover",
+      "community": 134,
+      "community_name": "color",
       "norm_label": "$value"
     },
     {
@@ -4281,8 +4281,8 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_primary_hover_type",
-      "community": 673,
-      "community_name": "primary-hover",
+      "community": 134,
+      "community_name": "color",
       "norm_label": "$type"
     },
     {
@@ -4292,8 +4292,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_primary_foreground",
-      "community": 134,
-      "community_name": "color",
+      "community": 671,
+      "community_name": "primary-foreground",
       "norm_label": "primary-foreground"
     },
     {
@@ -4303,8 +4303,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_primary_foreground_value",
-      "community": 134,
-      "community_name": "color",
+      "community": 671,
+      "community_name": "primary-foreground",
       "norm_label": "$value"
     },
     {
@@ -4314,8 +4314,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_primary_foreground_type",
-      "community": 134,
-      "community_name": "color",
+      "community": 671,
+      "community_name": "primary-foreground",
       "norm_label": "$type"
     },
     {
@@ -4358,8 +4358,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_secondary_foreground",
-      "community": 134,
-      "community_name": "color",
+      "community": 673,
+      "community_name": "secondary-foreground",
       "norm_label": "secondary-foreground"
     },
     {
@@ -4369,8 +4369,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_secondary_foreground_value",
-      "community": 134,
-      "community_name": "color",
+      "community": 673,
+      "community_name": "secondary-foreground",
       "norm_label": "$value"
     },
     {
@@ -4380,8 +4380,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_secondary_foreground_type",
-      "community": 134,
-      "community_name": "color",
+      "community": 673,
+      "community_name": "secondary-foreground",
       "norm_label": "$type"
     },
     {
@@ -4391,8 +4391,8 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_muted",
-      "community": 134,
-      "community_name": "color",
+      "community": 670,
+      "community_name": "muted",
       "norm_label": "muted"
     },
     {
@@ -4402,8 +4402,8 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_muted_value",
-      "community": 134,
-      "community_name": "color",
+      "community": 670,
+      "community_name": "muted",
       "norm_label": "$value"
     },
     {
@@ -4413,8 +4413,8 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_muted_type",
-      "community": 134,
-      "community_name": "color",
+      "community": 670,
+      "community_name": "muted",
       "norm_label": "$type"
     },
     {
@@ -4424,8 +4424,8 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_muted_foreground",
-      "community": 670,
-      "community_name": "muted-foreground",
+      "community": 134,
+      "community_name": "color",
       "norm_label": "muted-foreground"
     },
     {
@@ -4435,8 +4435,8 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_muted_foreground_value",
-      "community": 670,
-      "community_name": "muted-foreground",
+      "community": 134,
+      "community_name": "color",
       "norm_label": "$value"
     },
     {
@@ -4446,8 +4446,8 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_muted_foreground_type",
-      "community": 670,
-      "community_name": "muted-foreground",
+      "community": 134,
+      "community_name": "color",
       "norm_label": "$type"
     },
     {
@@ -4490,8 +4490,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_destructive_foreground",
-      "community": 134,
-      "community_name": "color",
+      "community": 669,
+      "community_name": "destructive-foreground",
       "norm_label": "destructive-foreground"
     },
     {
@@ -4501,8 +4501,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_destructive_foreground_value",
-      "community": 134,
-      "community_name": "color",
+      "community": 669,
+      "community_name": "destructive-foreground",
       "norm_label": "$value"
     },
     {
@@ -4512,8 +4512,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_destructive_foreground_type",
-      "community": 134,
-      "community_name": "color",
+      "community": 669,
+      "community_name": "destructive-foreground",
       "norm_label": "$type"
     },
     {
@@ -4523,8 +4523,8 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_color_border",
-      "community": 464,
-      "community_name": "card",
+      "community": 575,
+      "community_name": "$type",
       "norm_label": "border"
     },
     {
@@ -4534,8 +4534,8 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_border_value",
-      "community": 464,
-      "community_name": "card",
+      "community": 575,
+      "community_name": "$type",
       "norm_label": "$value"
     },
     {
@@ -4545,8 +4545,8 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_border_type",
-      "community": 464,
-      "community_name": "card",
+      "community": 575,
+      "community_name": "$type",
       "norm_label": "$type"
     },
     {
@@ -4941,8 +4941,8 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_input_border",
-      "community": 464,
-      "community_name": "card",
+      "community": 575,
+      "community_name": "$type",
       "norm_label": "border"
     },
     {
@@ -5040,8 +5040,8 @@
       "source_location": "L125",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_card_border",
-      "community": 464,
-      "community_name": "card",
+      "community": 575,
+      "community_name": "$type",
       "norm_label": "border"
     },
     {
@@ -6313,8 +6313,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_shadcn_add",
-      "community": 680,
-      "community_name": "test_shadcn_add.py",
+      "community": 227,
+      "community_name": ".add_components",
       "norm_label": "shadcn_add.py"
     },
     {
@@ -7015,8 +7015,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add",
-      "community": 680,
-      "community_name": "test_shadcn_add.py",
+      "community": 227,
+      "community_name": ".add_components",
       "norm_label": "test_shadcn_add.py"
     },
     {
@@ -7063,8 +7063,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_init_default_project_root",
-      "community": 213,
-      "community_name": "TestShadcnInstaller",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": ".test_init_default_project_root()"
     },
     {
@@ -7075,8 +7075,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_init_custom_project_root",
-      "community": 213,
-      "community_name": "TestShadcnInstaller",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": ".test_init_custom_project_root()"
     },
     {
@@ -7087,8 +7087,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_init_dry_run",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 688,
+      "community_name": ".test_init_dry_run",
       "norm_label": ".test_init_dry_run()"
     },
     {
@@ -7099,8 +7099,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_check_shadcn_config_exists",
-      "community": 687,
-      "community_name": ".test_check_shadcn_config_exists",
+      "community": 213,
+      "community_name": "TestShadcnInstaller",
       "norm_label": ".test_check_shadcn_config_exists()"
     },
     {
@@ -7123,8 +7123,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_get_installed_components_empty",
-      "community": 688,
-      "community_name": ".test_get_installed_components_empty",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": ".test_get_installed_components_empty()"
     },
     {
@@ -7135,8 +7135,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_get_installed_components_with_files",
-      "community": 689,
-      "community_name": ".test_get_installed_components_with_files",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": ".test_get_installed_components_with_files()"
     },
     {
@@ -7147,8 +7147,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_get_installed_components_no_config",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 213,
+      "community_name": "TestShadcnInstaller",
       "norm_label": ".test_get_installed_components_no_config()"
     },
     {
@@ -7171,8 +7171,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_add_components_no_config",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 680,
+      "community_name": ".test_add_components_no_config",
       "norm_label": ".test_add_components_no_config()"
     },
     {
@@ -7302,8 +7302,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_list_installed_no_config",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 687,
+      "community_name": ".test_list_installed_no_config",
       "norm_label": ".test_list_installed_no_config()"
     },
     {
@@ -7337,8 +7337,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_1",
-      "community": 680,
-      "community_name": "test_shadcn_add.py",
+      "community": 227,
+      "community_name": ".add_components",
       "norm_label": "tests for shadcn_add.py"
     },
     {
@@ -7370,8 +7370,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_45",
-      "community": 213,
-      "community_name": "TestShadcnInstaller",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": "test initialization with default project root."
     },
     {
@@ -7381,8 +7381,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_51",
-      "community": 213,
-      "community_name": "TestShadcnInstaller",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": "test initialization with custom project root."
     },
     {
@@ -7392,8 +7392,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_56",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 688,
+      "community_name": ".test_init_dry_run",
       "norm_label": "test initialization with dry run mode."
     },
     {
@@ -7403,8 +7403,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_61",
-      "community": 687,
-      "community_name": ".test_check_shadcn_config_exists",
+      "community": 213,
+      "community_name": "TestShadcnInstaller",
       "norm_label": "test checking for existing shadcn config."
     },
     {
@@ -7425,8 +7425,8 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_71",
-      "community": 688,
-      "community_name": ".test_get_installed_components_empty",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": "test getting installed components when none exist."
     },
     {
@@ -7436,8 +7436,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_77",
-      "community": 689,
-      "community_name": ".test_get_installed_components_with_files",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": "test getting installed components when files exist."
     },
     {
@@ -7447,8 +7447,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_90",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 213,
+      "community_name": "TestShadcnInstaller",
       "norm_label": "test getting installed components without config."
     },
     {
@@ -7469,8 +7469,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_104",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 680,
+      "community_name": ".test_add_components_no_config",
       "norm_label": "test adding components without shadcn config."
     },
     {
@@ -7579,8 +7579,8 @@
       "source_location": "L240",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_240",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 687,
+      "community_name": ".test_list_installed_no_config",
       "norm_label": "test listing installed components without config."
     },
     {
@@ -13704,8 +13704,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_dnd_kit_core",
-      "community": 9,
-      "community_name": "dependencies",
+      "community": 689,
+      "community_name": "@dnd-kit/core",
       "norm_label": "@dnd-kit/core"
     },
     {
@@ -13715,8 +13715,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "dnd_kit_core",
-      "community": 9,
-      "community_name": "dependencies",
+      "community": 689,
+      "community_name": "@dnd-kit/core",
       "norm_label": "@dnd-kit/core"
     },
     {
@@ -14078,8 +14078,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_tanstack_react_router_devtools",
-      "community": 693,
-      "community_name": "@tanstack/react-router-devtools",
+      "community": 9,
+      "community_name": "dependencies",
       "norm_label": "@tanstack/react-router-devtools"
     },
     {
@@ -14089,8 +14089,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "apps_admin_package_json_tanstack_react_router_devtools",
-      "community": 693,
-      "community_name": "@tanstack/react-router-devtools",
+      "community": 9,
+      "community_name": "dependencies",
       "norm_label": "@tanstack/react-router-devtools"
     },
     {
@@ -26059,8 +26059,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_api_src_routes_service_packages",
-      "community": 531,
-      "community_name": "services/appointments.ts",
+      "community": 513,
+      "community_name": "v1.ts",
       "norm_label": "api/src/routes/service-packages.ts"
     },
     {
@@ -26081,8 +26081,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "apps_api_src_routes_service_packages_ts_docref_adr_0006",
-      "community": 531,
-      "community_name": "services/appointments.ts",
+      "community": 513,
+      "community_name": "v1.ts",
       "norm_label": "adr-0006"
     },
     {
@@ -28883,8 +28883,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages",
-      "community": 531,
-      "community_name": "services/appointments.ts",
+      "community": 513,
+      "community_name": "v1.ts",
       "norm_label": "services/service-packages.ts"
     },
     {
@@ -28896,8 +28896,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_junctionrow",
-      "community": 531,
-      "community_name": "services/appointments.ts",
+      "community": 513,
+      "community_name": "v1.ts",
       "norm_label": "junctionrow"
     },
     {
@@ -28909,8 +28909,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_mediaenv",
-      "community": 531,
-      "community_name": "services/appointments.ts",
+      "community": 513,
+      "community_name": "v1.ts",
       "norm_label": "mediaenv"
     },
     {
@@ -28921,8 +28921,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_assemblepackageread",
-      "community": 531,
-      "community_name": "services/appointments.ts",
+      "community": 513,
+      "community_name": "v1.ts",
       "norm_label": "assemblepackageread()"
     },
     {
@@ -28933,8 +28933,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_topublicread",
-      "community": 531,
-      "community_name": "services/appointments.ts",
+      "community": 513,
+      "community_name": "v1.ts",
       "norm_label": "topublicread()"
     },
     {
@@ -28945,8 +28945,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_fetchpubliccomposition",
-      "community": 531,
-      "community_name": "services/appointments.ts",
+      "community": 513,
+      "community_name": "v1.ts",
       "norm_label": "fetchpubliccomposition()"
     },
     {
@@ -28957,8 +28957,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_listactivepackageswithinclusions",
-      "community": 531,
-      "community_name": "services/appointments.ts",
+      "community": 513,
+      "community_name": "v1.ts",
       "norm_label": "listactivepackageswithinclusions()"
     },
     {
@@ -28969,8 +28969,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_getactivepackagewithinclusionsbyslug",
-      "community": 531,
-      "community_name": "services/appointments.ts",
+      "community": 513,
+      "community_name": "v1.ts",
       "norm_label": "getactivepackagewithinclusionsbyslug()"
     },
     {
@@ -28980,8 +28980,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_ts_docref_adr_0019",
-      "community": 531,
-      "community_name": "services/appointments.ts",
+      "community": 513,
+      "community_name": "v1.ts",
       "norm_label": "adr-0019"
     },
     {
@@ -105148,8 +105148,8 @@
       "source_file": "docs/adr/0004-betterauth-shared-tables-token-verification.md",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 195,
-      "community_name": "Roadmap - Milestone Plan (M0-M6)",
+      "community": 180,
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "adr-0004: api verifies betterauth sessions via shared tables, not cookies",
       "id": "docs_adr_0004_betterauth_shared_tables_token_verification_adr_0004_api_verifies_betterauth_sessions_via_shared_tables_not_cookies"
     },
@@ -105159,8 +105159,8 @@
       "source_file": "docs/adr/0004-betterauth-shared-tables-token-verification.md",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 195,
-      "community_name": "Roadmap - Milestone Plan (M0-M6)",
+      "community": 180,
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "context",
       "id": "docs_adr_0004_betterauth_shared_tables_token_verification_context"
     },
@@ -105170,8 +105170,8 @@
       "source_file": "docs/adr/0004-betterauth-shared-tables-token-verification.md",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 195,
-      "community_name": "Roadmap - Milestone Plan (M0-M6)",
+      "community": 180,
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "decision",
       "id": "docs_adr_0004_betterauth_shared_tables_token_verification_decision"
     },
@@ -105181,8 +105181,8 @@
       "source_file": "docs/adr/0004-betterauth-shared-tables-token-verification.md",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 195,
-      "community_name": "Roadmap - Milestone Plan (M0-M6)",
+      "community": 180,
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "alternatives considered",
       "id": "docs_adr_0004_betterauth_shared_tables_token_verification_alternatives_considered"
     },
@@ -105192,8 +105192,8 @@
       "source_file": "docs/adr/0004-betterauth-shared-tables-token-verification.md",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 195,
-      "community_name": "Roadmap - Milestone Plan (M0-M6)",
+      "community": 180,
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "consequences",
       "id": "docs_adr_0004_betterauth_shared_tables_token_verification_consequences"
     },
@@ -105204,7 +105204,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "adr-0005: hourly slot grid with per-slot capacity for booking availability",
       "id": "docs_adr_0005_hourly_slot_grid_capacity_adr_0005_hourly_slot_grid_with_per_slot_capacity_for_booking_availability"
     },
@@ -105215,7 +105215,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "context",
       "id": "docs_adr_0005_hourly_slot_grid_capacity_context"
     },
@@ -105226,7 +105226,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "decision",
       "id": "docs_adr_0005_hourly_slot_grid_capacity_decision"
     },
@@ -105237,7 +105237,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "alternatives considered",
       "id": "docs_adr_0005_hourly_slot_grid_capacity_alternatives_considered"
     },
@@ -105248,7 +105248,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "consequences",
       "id": "docs_adr_0005_hourly_slot_grid_capacity_consequences"
     },
@@ -105951,8 +105951,8 @@
       "source_file": "docs/plan.md",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 575,
-      "community_name": "Roadmap",
+      "community": 195,
+      "community_name": "Roadmap - Milestone Plan (M0-M6)",
       "norm_label": "roadmap",
       "id": "docs_plan_roadmap"
     },
@@ -105962,8 +105962,8 @@
       "source_file": "docs/plan.md",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 575,
-      "community_name": "Roadmap",
+      "community": 195,
+      "community_name": "Roadmap - Milestone Plan (M0-M6)",
       "norm_label": "milestone 0 \u2014 baseline (complete \u2014 exit criteria verified 2026-08-30)",
       "id": "docs_plan_milestone_0_baseline_complete_exit_criteria_verified_2026_08_30"
     },
@@ -105973,8 +105973,8 @@
       "source_file": "docs/plan.md",
       "source_location": "L23",
       "_origin": "ast",
-      "community": 575,
-      "community_name": "Roadmap",
+      "community": 195,
+      "community_name": "Roadmap - Milestone Plan (M0-M6)",
       "norm_label": "milestone 1 \u2014 real data layer",
       "id": "docs_plan_milestone_1_real_data_layer"
     },
@@ -105984,8 +105984,8 @@
       "source_file": "docs/plan.md",
       "source_location": "L48",
       "_origin": "ast",
-      "community": 575,
-      "community_name": "Roadmap",
+      "community": 195,
+      "community_name": "Roadmap - Milestone Plan (M0-M6)",
       "norm_label": "milestone 2 \u2014 public booking flow",
       "id": "docs_plan_milestone_2_public_booking_flow"
     },
@@ -105995,8 +105995,8 @@
       "source_file": "docs/plan.md",
       "source_location": "L72",
       "_origin": "ast",
-      "community": 575,
-      "community_name": "Roadmap",
+      "community": 195,
+      "community_name": "Roadmap - Milestone Plan (M0-M6)",
       "norm_label": "milestone 3 \u2014 booking availability",
       "id": "docs_plan_milestone_3_booking_availability"
     },
@@ -106006,8 +106006,8 @@
       "source_file": "docs/plan.md",
       "source_location": "L86",
       "_origin": "ast",
-      "community": 575,
-      "community_name": "Roadmap",
+      "community": 195,
+      "community_name": "Roadmap - Milestone Plan (M0-M6)",
       "norm_label": "milestone 4 \u2014 admin auth + dashboard",
       "id": "docs_plan_milestone_4_admin_auth_dashboard"
     },
@@ -106028,8 +106028,8 @@
       "source_file": "docs/plan.md",
       "source_location": "L108",
       "_origin": "ast",
-      "community": 575,
-      "community_name": "Roadmap",
+      "community": 195,
+      "community_name": "Roadmap - Milestone Plan (M0-M6)",
       "norm_label": "milestone 6 \u2014 production hardening",
       "id": "docs_plan_milestone_6_production_hardening"
     },
@@ -106039,8 +106039,8 @@
       "source_file": "docs/plan.md",
       "source_location": "L122",
       "_origin": "ast",
-      "community": 575,
-      "community_name": "Roadmap",
+      "community": 195,
+      "community_name": "Roadmap - Milestone Plan (M0-M6)",
       "norm_label": "explicitly deferred (post-v1, see prd \"out of scope\")",
       "id": "docs_plan_explicitly_deferred_post_v1_see_prd_out_of_scope"
     },
@@ -108935,7 +108935,7 @@
       "author": null,
       "contributor": null,
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "product requirements - sevendays",
       "_origin": "semantic",
       "id": "docs_prd_doc"
@@ -108967,7 +108967,7 @@
       "contributor": null,
       "rationale": "Booking is a guest flow in v1 - no customer account required - so friction stays low (per user story 'book without creating an account').",
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "guest booking flow",
       "_origin": "semantic",
       "id": "docs_prd_guest_booking_flow"
@@ -108983,7 +108983,7 @@
       "contributor": null,
       "rationale": "Public marketing site with booking as the primary conversion action; shows packages, services, the 3 branches and their walk-in flags, credibility content.",
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "landing site (apps/landing)",
       "_origin": "semantic",
       "id": "docs_prd_landing_site"
@@ -109015,7 +109015,7 @@
       "contributor": null,
       "rationale": "Confirmation email via Resend on successful booking gives the customer a record of the appointment (v1 uses email only, no SMS).",
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "booking confirmation email",
       "_origin": "semantic",
       "id": "docs_prd_booking_confirmation_email"
@@ -109031,7 +109031,7 @@
       "contributor": null,
       "rationale": "Admin must edit packages and branch info shown on landing without a code deploy; images for package covers stored in Cloudflare R2.",
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "admin cms (packages, branches, image upload)",
       "_origin": "semantic",
       "id": "docs_prd_admin_cms"
@@ -109046,8 +109046,8 @@
       "author": null,
       "contributor": null,
       "rationale": "Walk-in queue/tracking, staff scheduling, per-branch roles, customer accounts, and SMS are deferred; the admin data model must not actively block them later.",
-      "community": 195,
-      "community_name": "Roadmap - Milestone Plan (M0-M6)",
+      "community": 180,
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "out-of-scope v1 features",
       "_origin": "semantic",
       "id": "docs_prd_out_of_scope_deferred"
@@ -109266,8 +109266,8 @@
       "author": null,
       "contributor": null,
       "rationale": "apps/api is a separate Worker on a different domain from apps/admin. Rather than cross-domain cookies (fiddly on Workers, buys nothing when staff are the only authenticated actor), BetterAuth writes sessions into shared tables in packages/db and apps/api verifies the incoming session token directly against those tables with expiry checked - one indexed DB lookup per mutating request.",
-      "community": 195,
-      "community_name": "Roadmap - Milestone Plan (M0-M6)",
+      "community": 206,
+      "community_name": "ADR-0010: URL path versioning",
       "norm_label": "shared session tables token verification",
       "_origin": "semantic",
       "id": "docs_adr_0004_betterauth_shared_tables_token_verification_shared_session_tables"
@@ -109282,7 +109282,7 @@
       "author": null,
       "contributor": null,
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "adr-0005: hourly slot grid with per-slot capacity",
       "_origin": "semantic",
       "id": "docs_adr_0005_hourly_slot_grid_capacity_doc"
@@ -109298,7 +109298,7 @@
       "contributor": null,
       "rationale": "PRD's booking flow had no availability concept, so two customers could book the same branch at the same time, or book at 3am. Duration-aware scheduling is what studios eventually want but needs overlap math, a calendar UI, and far more schema; capacity-per-fixed-slot solves both stress scenarios with one small table. Package duration is ignored - every booking occupies exactly one slot.",
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "hourly slot grid with per-slot capacity",
       "_origin": "semantic",
       "id": "docs_adr_0005_hourly_slot_grid_capacity_hourly_slot_grid"
@@ -109423,8 +109423,8 @@
       "author": null,
       "contributor": null,
       "rationale": "M1's bug class was wrong column names - a Drizzle query against a mistyped column compiles fine and only fails at the database, so a mocked query builder cannot catch it. The composed app (all routes, real db handles) is exercised over its HTTP seam against compose postgres:17 locally (matching live Supabase's major version) and a CI service container; migrations applied programmatically in vitest global setup; test files serial with truncateAll between.",
-      "community": 269,
-      "community_name": "ADR-0008: Integration tests against real Postgres",
+      "community": 0,
+      "community_name": "Sevendays Service Catalog",
       "norm_label": "real-postgres integration tests",
       "_origin": "semantic",
       "id": "docs_adr_0008_integration_tests_vs_real_postgres_real_postgres_tests"
@@ -109691,7 +109691,7 @@
       "author": null,
       "contributor": null,
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "system architecture",
       "_origin": "semantic",
       "id": "docs_architecture_doc"
@@ -109707,7 +109707,7 @@
       "contributor": null,
       "rationale": "Landing and admin have very different audiences, auth requirements, and caching/CDN needs - splitting decouples the public site's deploys/uptime/cache from admin changes. apps/api is the single source of truth for data access; every database touch goes through apps/api + packages/db.",
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "three separate worker deployments",
       "_origin": "semantic",
       "id": "docs_architecture_three_separate_deployments"
@@ -109723,7 +109723,7 @@
       "contributor": null,
       "rationale": "Uploads flow through apps/api (which holds the R2 binding); Postgres references object keys, not full URLs, so the key-to-servable-URL resolution strategy stays flexible - the resolution decision must be recorded as an ADR when made.",
       "community": 180,
-      "community_name": "Product Requirements - Sevendays",
+      "community_name": "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies",
       "norm_label": "r2 object-key storage",
       "_origin": "semantic",
       "id": "docs_architecture_r2_object_key_storage"
@@ -109847,8 +109847,8 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 195,
-      "community_name": "Roadmap - Milestone Plan (M0-M6)",
+      "community": 0,
+      "community_name": "Sevendays Service Catalog",
       "norm_label": "milestone 0: baseline",
       "_origin": "semantic",
       "id": "docs_plan_milestone_0_baseline"
@@ -109862,8 +109862,8 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 195,
-      "community_name": "Roadmap - Milestone Plan (M0-M6)",
+      "community": 0,
+      "community_name": "Sevendays Service Catalog",
       "norm_label": "milestone 1: real data layer",
       "_origin": "semantic",
       "id": "docs_plan_milestone_1_data_layer"
@@ -109878,8 +109878,8 @@
       "author": null,
       "contributor": null,
       "rationale": "Deliberately minimal on validation - reject past dates/times, nothing more - real availability logic is Milestone 3.",
-      "community": 195,
-      "community_name": "Roadmap - Milestone Plan (M0-M6)",
+      "community": 206,
+      "community_name": "ADR-0010: URL path versioning",
       "norm_label": "milestone 2: public booking flow",
       "_origin": "semantic",
       "id": "docs_plan_milestone_2_booking"
@@ -182973,7 +182973,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/landing/scripts/verify/packages-pages.mjs",
-      "source_location": "L156",
+      "source_location": "L175",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_landing_scripts_verify_packages_pages_main",
@@ -269843,5 +269843,5 @@
       "source_file": "docs/superpowers/plans/2026-08-31-m1.3-provision-migrate-seed.md"
     }
   ],
-  "built_at_commit": "6694e6791b2e9c563c08b14e1a1f76beb0553125"
+  "built_at_commit": "805e73ab19fefd8cbd2b6a04488b6428bd50a056"
 }

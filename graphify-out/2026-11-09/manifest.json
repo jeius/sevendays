@@ -2590,8 +2590,8 @@
     "semantic_hash": ""
   },
   "apps/landing/scripts/verify/packages-pages.mjs": {
-    "mtime": 1794206461.6854775,
-    "ast_hash": "08b6c13aa1d5d2939f65a9ce7552157f",
+    "mtime": 1794208218.7712882,
+    "ast_hash": "366576f0a8df86a697be2fc05eb1af94",
     "semantic_hash": ""
   },
   "apps/landing/src/components/booking/rejection-card.tsx": {
@@ -4945,8 +4945,8 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-09-256-packages-pages-stale-checks.md": {
-    "mtime": 1794206049.815631,
-    "ast_hash": "8afd8bcad316389d9b8bad3e402dcfa4",
+    "mtime": 1794208914.8034563,
+    "ast_hash": "7f0e55e0e44a0dcdbc66464de20be3fb",
     "semantic_hash": ""
   }
 }

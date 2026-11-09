@@ -3181,8 +3181,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_1",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 678,
+      "community_name": "1",
       "norm_label": "1"
     },
     {
@@ -3192,8 +3192,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_1_value",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 678,
+      "community_name": "1",
       "norm_label": "$value"
     },
     {
@@ -3203,8 +3203,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_1_type",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 678,
+      "community_name": "1",
       "norm_label": "$type"
     },
     {
@@ -3214,8 +3214,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_2",
-      "community": 688,
-      "community_name": "2",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "2"
     },
     {
@@ -3225,8 +3225,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_2_value",
-      "community": 688,
-      "community_name": "2",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "$value"
     },
     {
@@ -3236,8 +3236,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_2_type",
-      "community": 688,
-      "community_name": "2",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "$type"
     },
     {
@@ -3247,8 +3247,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_3",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 679,
+      "community_name": "3",
       "norm_label": "3"
     },
     {
@@ -3258,8 +3258,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_3_value",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 679,
+      "community_name": "3",
       "norm_label": "$value"
     },
     {
@@ -3269,8 +3269,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_3_type",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 679,
+      "community_name": "3",
       "norm_label": "$type"
     },
     {
@@ -3346,8 +3346,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_6",
-      "community": 689,
-      "community_name": "6",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "6"
     },
     {
@@ -3357,8 +3357,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_6_value",
-      "community": 689,
-      "community_name": "6",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "$value"
     },
     {
@@ -3368,8 +3368,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_6_type",
-      "community": 689,
-      "community_name": "6",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "$type"
     },
     {
@@ -3445,8 +3445,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_12",
-      "community": 687,
-      "community_name": "12",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "12"
     },
     {
@@ -3456,8 +3456,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_12_value",
-      "community": 687,
-      "community_name": "12",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "$value"
     },
     {
@@ -3467,8 +3467,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_12_type",
-      "community": 687,
-      "community_name": "12",
+      "community": 123,
+      "community_name": "spacing",
       "norm_label": "$type"
     },
     {
@@ -3478,8 +3478,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_spacing_16",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 665,
+      "community_name": "16",
       "norm_label": "16"
     },
     {
@@ -3489,8 +3489,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_16_value",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 665,
+      "community_name": "16",
       "norm_label": "$value"
     },
     {
@@ -3500,8 +3500,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_16_type",
-      "community": 123,
-      "community_name": "spacing",
+      "community": 665,
+      "community_name": "16",
       "norm_label": "$type"
     },
     {
@@ -3555,8 +3555,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_fontsize_sm",
-      "community": 665,
-      "community_name": "sm",
+      "community": 170,
+      "community_name": "radius",
       "norm_label": "sm"
     },
     {
@@ -3566,8 +3566,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_sm_value",
-      "community": 665,
-      "community_name": "sm",
+      "community": 170,
+      "community_name": "radius",
       "norm_label": "$value"
     },
     {
@@ -3577,8 +3577,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_sm_type",
-      "community": 665,
-      "community_name": "sm",
+      "community": 170,
+      "community_name": "radius",
       "norm_label": "$type"
     },
     {
@@ -3621,8 +3621,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_fontsize_lg",
-      "community": 170,
-      "community_name": "radius",
+      "community": 639,
+      "community_name": "lg",
       "norm_label": "lg"
     },
     {
@@ -3632,8 +3632,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_lg_value",
-      "community": 170,
-      "community_name": "radius",
+      "community": 639,
+      "community_name": "lg",
       "norm_label": "$value"
     },
     {
@@ -3643,8 +3643,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_lg_type",
-      "community": 170,
-      "community_name": "radius",
+      "community": 639,
+      "community_name": "lg",
       "norm_label": "$type"
     },
     {
@@ -3830,8 +3830,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_radius_sm",
-      "community": 665,
-      "community_name": "sm",
+      "community": 170,
+      "community_name": "radius",
       "norm_label": "sm"
     },
     {
@@ -3907,8 +3907,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_radius_lg",
-      "community": 170,
-      "community_name": "radius",
+      "community": 639,
+      "community_name": "lg",
       "norm_label": "lg"
     },
     {
@@ -3984,8 +3984,8 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_shadow_sm",
-      "community": 665,
-      "community_name": "sm",
+      "community": 170,
+      "community_name": "radius",
       "norm_label": "sm"
     },
     {
@@ -4017,8 +4017,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "agents_skills_design_system_templates_design_tokens_starter_shadow_lg",
-      "community": 170,
-      "community_name": "radius",
+      "community": 639,
+      "community_name": "lg",
       "norm_label": "lg"
     },
     {
@@ -6313,8 +6313,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_shadcn_add",
-      "community": 227,
-      "community_name": ".add_components",
+      "community": 680,
+      "community_name": "test_shadcn_add.py",
       "norm_label": "shadcn_add.py"
     },
     {
@@ -6711,8 +6711,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_tailwindconfiggenerator_generate_config_string",
-      "community": 242,
-      "community_name": "main",
+      "community": 302,
+      "community_name": ".generate_config_string",
       "norm_label": ".generate_config_string()"
     },
     {
@@ -6724,7 +6724,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_tailwindconfiggenerator_generate_typescript",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "._generate_typescript()"
     },
     {
@@ -6736,7 +6736,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_tailwindconfiggenerator_generate_javascript",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "._generate_javascript()"
     },
     {
@@ -6748,7 +6748,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_tailwindconfiggenerator_format_plugins",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "._format_plugins()"
     },
     {
@@ -6760,7 +6760,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_tailwindconfiggenerator_indent_json",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "._indent_json()"
     },
     {
@@ -6771,8 +6771,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_tailwindconfiggenerator_write_config",
-      "community": 242,
-      "community_name": "main",
+      "community": 302,
+      "community_name": ".generate_config_string",
       "norm_label": ".write_config()"
     },
     {
@@ -6938,8 +6938,8 @@
       "source_location": "L192",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_rationale_192",
-      "community": 242,
-      "community_name": "main",
+      "community": 302,
+      "community_name": ".generate_config_string",
       "norm_label": "generate configuration file content. returns: configuration file as string"
     },
     {
@@ -6950,7 +6950,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_rationale_203",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "generate typescript configuration."
     },
     {
@@ -6961,7 +6961,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_rationale_224",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "generate javascript configuration."
     },
     {
@@ -6972,7 +6972,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_rationale_239",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "format plugins array for config. validates each plugin name against a strict..."
     },
     {
@@ -6983,7 +6983,7 @@
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_rationale_260",
       "community": 302,
-      "community_name": "._generate_javascript",
+      "community_name": ".generate_config_string",
       "norm_label": "add indentation to json string."
     },
     {
@@ -6993,8 +6993,8 @@
       "source_location": "L268",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tailwind_config_gen_rationale_268",
-      "community": 242,
-      "community_name": "main",
+      "community": 302,
+      "community_name": ".generate_config_string",
       "norm_label": "write configuration to file. returns: tuple of (success, message)"
     },
     {
@@ -7015,8 +7015,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add",
-      "community": 227,
-      "community_name": ".add_components",
+      "community": 680,
+      "community_name": "test_shadcn_add.py",
       "norm_label": "test_shadcn_add.py"
     },
     {
@@ -7063,8 +7063,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_init_default_project_root",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 213,
+      "community_name": "TestShadcnInstaller",
       "norm_label": ".test_init_default_project_root()"
     },
     {
@@ -7075,8 +7075,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_init_custom_project_root",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 213,
+      "community_name": "TestShadcnInstaller",
       "norm_label": ".test_init_custom_project_root()"
     },
     {
@@ -7087,8 +7087,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_init_dry_run",
-      "community": 680,
-      "community_name": ".test_init_dry_run",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": ".test_init_dry_run()"
     },
     {
@@ -7099,8 +7099,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_check_shadcn_config_exists",
-      "community": 213,
-      "community_name": "TestShadcnInstaller",
+      "community": 687,
+      "community_name": ".test_check_shadcn_config_exists",
       "norm_label": ".test_check_shadcn_config_exists()"
     },
     {
@@ -7123,8 +7123,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_get_installed_components_empty",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 688,
+      "community_name": ".test_get_installed_components_empty",
       "norm_label": ".test_get_installed_components_empty()"
     },
     {
@@ -7135,8 +7135,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_get_installed_components_with_files",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 689,
+      "community_name": ".test_get_installed_components_with_files",
       "norm_label": ".test_get_installed_components_with_files()"
     },
     {
@@ -7147,8 +7147,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_get_installed_components_no_config",
-      "community": 213,
-      "community_name": "TestShadcnInstaller",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": ".test_get_installed_components_no_config()"
     },
     {
@@ -7171,8 +7171,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_add_components_no_config",
-      "community": 678,
-      "community_name": ".test_add_components_no_config",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": ".test_add_components_no_config()"
     },
     {
@@ -7302,8 +7302,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_testshadcninstaller_test_list_installed_no_config",
-      "community": 679,
-      "community_name": ".test_list_installed_no_config",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": ".test_list_installed_no_config()"
     },
     {
@@ -7337,8 +7337,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_1",
-      "community": 227,
-      "community_name": ".add_components",
+      "community": 680,
+      "community_name": "test_shadcn_add.py",
       "norm_label": "tests for shadcn_add.py"
     },
     {
@@ -7370,8 +7370,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_45",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 213,
+      "community_name": "TestShadcnInstaller",
       "norm_label": "test initialization with default project root."
     },
     {
@@ -7381,8 +7381,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_51",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 213,
+      "community_name": "TestShadcnInstaller",
       "norm_label": "test initialization with custom project root."
     },
     {
@@ -7392,8 +7392,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_56",
-      "community": 680,
-      "community_name": ".test_init_dry_run",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": "test initialization with dry run mode."
     },
     {
@@ -7403,8 +7403,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_61",
-      "community": 213,
-      "community_name": "TestShadcnInstaller",
+      "community": 687,
+      "community_name": ".test_check_shadcn_config_exists",
       "norm_label": "test checking for existing shadcn config."
     },
     {
@@ -7425,8 +7425,8 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_71",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 688,
+      "community_name": ".test_get_installed_components_empty",
       "norm_label": "test getting installed components when none exist."
     },
     {
@@ -7436,8 +7436,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_77",
-      "community": 266,
-      "community_name": "ShadcnInstaller",
+      "community": 689,
+      "community_name": ".test_get_installed_components_with_files",
       "norm_label": "test getting installed components when files exist."
     },
     {
@@ -7447,8 +7447,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_90",
-      "community": 213,
-      "community_name": "TestShadcnInstaller",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": "test getting installed components without config."
     },
     {
@@ -7469,8 +7469,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_104",
-      "community": 678,
-      "community_name": ".test_add_components_no_config",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": "test adding components without shadcn config."
     },
     {
@@ -7579,8 +7579,8 @@
       "source_location": "L240",
       "_origin": "ast",
       "id": "agents_skills_ui_styling_scripts_tests_test_shadcn_add_rationale_240",
-      "community": 679,
-      "community_name": ".test_list_installed_no_config",
+      "community": 266,
+      "community_name": "ShadcnInstaller",
       "norm_label": "test listing installed components without config."
     },
     {
@@ -13704,8 +13704,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_dnd_kit_core",
-      "community": 639,
-      "community_name": "@dnd-kit/core",
+      "community": 9,
+      "community_name": "dependencies",
       "norm_label": "@dnd-kit/core"
     },
     {
@@ -13715,8 +13715,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "dnd_kit_core",
-      "community": 639,
-      "community_name": "@dnd-kit/core",
+      "community": 9,
+      "community_name": "dependencies",
       "norm_label": "@dnd-kit/core"
     },
     {
@@ -14166,8 +14166,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "apps_admin_package_dependencies_class_variance_authority",
-      "community": 9,
-      "community_name": "dependencies",
+      "community": 694,
+      "community_name": "class-variance-authority",
       "norm_label": "class-variance-authority"
     },
     {
@@ -14177,8 +14177,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "apps_admin_package_json_class_variance_authority",
-      "community": 9,
-      "community_name": "dependencies",
+      "community": 694,
+      "community_name": "class-variance-authority",
       "norm_label": "class-variance-authority"
     },
     {
@@ -26059,8 +26059,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_api_src_routes_service_packages",
-      "community": 513,
-      "community_name": "v1.ts",
+      "community": 531,
+      "community_name": "services/appointments.ts",
       "norm_label": "api/src/routes/service-packages.ts"
     },
     {
@@ -26081,8 +26081,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "apps_api_src_routes_service_packages_ts_docref_adr_0006",
-      "community": 513,
-      "community_name": "v1.ts",
+      "community": 531,
+      "community_name": "services/appointments.ts",
       "norm_label": "adr-0006"
     },
     {
@@ -28883,8 +28883,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages",
-      "community": 513,
-      "community_name": "v1.ts",
+      "community": 531,
+      "community_name": "services/appointments.ts",
       "norm_label": "services/service-packages.ts"
     },
     {
@@ -28896,8 +28896,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_junctionrow",
-      "community": 513,
-      "community_name": "v1.ts",
+      "community": 531,
+      "community_name": "services/appointments.ts",
       "norm_label": "junctionrow"
     },
     {
@@ -28909,8 +28909,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_mediaenv",
-      "community": 513,
-      "community_name": "v1.ts",
+      "community": 531,
+      "community_name": "services/appointments.ts",
       "norm_label": "mediaenv"
     },
     {
@@ -28921,8 +28921,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_assemblepackageread",
-      "community": 513,
-      "community_name": "v1.ts",
+      "community": 531,
+      "community_name": "services/appointments.ts",
       "norm_label": "assemblepackageread()"
     },
     {
@@ -28933,8 +28933,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_topublicread",
-      "community": 513,
-      "community_name": "v1.ts",
+      "community": 531,
+      "community_name": "services/appointments.ts",
       "norm_label": "topublicread()"
     },
     {
@@ -28945,8 +28945,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_fetchpubliccomposition",
-      "community": 513,
-      "community_name": "v1.ts",
+      "community": 531,
+      "community_name": "services/appointments.ts",
       "norm_label": "fetchpubliccomposition()"
     },
     {
@@ -28957,8 +28957,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_listactivepackageswithinclusions",
-      "community": 513,
-      "community_name": "v1.ts",
+      "community": 531,
+      "community_name": "services/appointments.ts",
       "norm_label": "listactivepackageswithinclusions()"
     },
     {
@@ -28969,8 +28969,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_getactivepackagewithinclusionsbyslug",
-      "community": 513,
-      "community_name": "v1.ts",
+      "community": 531,
+      "community_name": "services/appointments.ts",
       "norm_label": "getactivepackagewithinclusionsbyslug()"
     },
     {
@@ -28980,8 +28980,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "apps_api_src_services_service_packages_ts_docref_adr_0019",
-      "community": 513,
-      "community_name": "v1.ts",
+      "community": 531,
+      "community_name": "services/appointments.ts",
       "norm_label": "adr-0019"
     },
     {
@@ -31957,8 +31957,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "apps_landing_package_dependencies_fontsource_variable_figtree",
-      "community": 694,
-      "community_name": "@fontsource-variable/figtree",
+      "community": 10,
+      "community_name": "dependencies",
       "norm_label": "@fontsource-variable/figtree"
     },
     {
@@ -31968,8 +31968,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "apps_landing_package_json_fontsource_variable_figtree",
-      "community": 694,
-      "community_name": "@fontsource-variable/figtree",
+      "community": 10,
+      "community_name": "dependencies",
       "norm_label": "@fontsource-variable/figtree"
     },
     {
@@ -32045,8 +32045,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "apps_landing_package_dependencies_sentry_tanstackstart_react",
-      "community": 10,
-      "community_name": "dependencies",
+      "community": 695,
+      "community_name": "@sentry/tanstackstart-react",
       "norm_label": "@sentry/tanstackstart-react"
     },
     {
@@ -32056,8 +32056,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "apps_landing_package_json_sentry_tanstackstart_react",
-      "community": 10,
-      "community_name": "dependencies",
+      "community": 695,
+      "community_name": "@sentry/tanstackstart-react",
       "norm_label": "@sentry/tanstackstart-react"
     },
     {
@@ -182973,7 +182973,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/landing/scripts/verify/packages-pages.mjs",
-      "source_location": "L129",
+      "source_location": "L156",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_landing_scripts_verify_packages_pages_main",
@@ -269843,5 +269843,5 @@
       "source_file": "docs/superpowers/plans/2026-08-31-m1.3-provision-migrate-seed.md"
     }
   ],
-  "built_at_commit": "31152eb8b70cc21f348d6743d3f58a21eddc07d1"
+  "built_at_commit": "6694e6791b2e9c563c08b14e1a1f76beb0553125"
 }
