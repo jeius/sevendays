@@ -54,7 +54,7 @@ docs/progress.md  docs/agents/v1-picks.md  graphify-out/   # T5/T6 (main-only)
 
 **Not here:** `graphify-out/cache/last_query_stamp` (pre-existing dirt — never staged); any script edit (Task 1 starts those).
 
-- [ ] **Step 1: Branch and commit**
+- [✅] **Step 1: Branch and commit**
 
 ```bash
 git checkout -b chore/256-packages-pages-stale-checks
@@ -77,7 +77,7 @@ The script's two RE-DERIVED helpers mirror their landing lib counterparts again 
 
 **Not here:** any assertion rewrite (Tasks 2–4); any `lib.mjs` edit (fenced); the strip count/cover observes (Task 2 owns them).
 
-- [ ] **Step 1: Bring up the stack + the baseline gate**
+- [✅] **Step 1: Bring up the stack + the baseline gate**
 
 Three terminals, all long-running (they stay up through Task 5):
 
@@ -96,7 +96,7 @@ node apps/landing/scripts/verify/packages-pages.mjs | tee .superpowers/sdd/2026-
 
 Expected (the baseline gate — anything else, STOP and reconcile): exit 1 with exactly the nine FAIL lines named in the Spec (verbatim cross-check: `.superpowers/sdd/2026-11-09-254-content-pages-stale-checks/baseline-packages-pages.txt`), the eight PASS lines (including `PASS home: strip ordered price-ascending` — its OLD name), and `8/17 checks passed`. That exit 1 is the EXPECTED baseline, not a failure.
 
-- [ ] **Step 2: The destructure**
+- [✅] **Step 2: The destructure**
 
 Replace:
 
@@ -112,7 +112,7 @@ with:
   const { go, text, evaluate, bookParamValues, close } = page;
 ```
 
-- [ ] **Step 3: `selectFeatured` synced to the ADR-0020 law**
+- [✅] **Step 3: `selectFeatured` synced to the ADR-0020 law**
 
 Replace:
 
@@ -146,7 +146,7 @@ function selectFeatured(packages) {
 }
 ```
 
-- [ ] **Step 4: `peso` null-guarded**
+- [✅] **Step 4: `peso` null-guarded**
 
 Replace:
 
@@ -166,7 +166,7 @@ const peso = (cents) =>
     : new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
 ```
 
-- [ ] **Step 5: The strip-ordered check renamed to the law**
+- [✅] **Step 5: The strip-ordered check renamed to the law**
 
 Replace:
 
@@ -186,7 +186,7 @@ with:
   );
 ```
 
-- [ ] **Step 6: Syntax + format + the no-flip gate**
+- [✅] **Step 6: Syntax + format + the no-flip gate**
 
 ```bash
 node --check apps/landing/scripts/verify/packages-pages.mjs
@@ -196,7 +196,7 @@ node apps/landing/scripts/verify/packages-pages.mjs | tee .superpowers/sdd/2026-
 
 Expected: clean `node --check`; `fix` rewrites nothing; STILL `8/17` with the SAME nine FAILs and eight PASSes — but `PASS home: strip ordered unpriced-first, then price-ascending (ADR-0020)` replaces the old-name line (the only name change).
 
-- [ ] **Step 7: Commit**
+- [✅] **Step 7: Commit**
 
 ```bash
 git add apps/landing/scripts/verify/packages-pages.mjs
