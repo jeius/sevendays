@@ -55,11 +55,15 @@ export function SiteHeader({ settings }: { settings: SiteSettings }) {
               </Link>
             ))}
           </nav>
+          {/* The bar's CTA rides md+ only (the M7 post-flight #241 variants
+              round, owner-ruled 2026-11-09): below md the MobileNav panel
+              carries the same CTA, so the Menu trigger keeps its gutter on
+              narrow phones. */}
           <Link
             to='/book'
             className={cn(
               buttonVariants({ size: 'sm' }),
-              'bg-brand-deep tracking-wide hover:bg-brand-primary-hover focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
+              'hidden bg-brand-deep tracking-wide hover:bg-brand-primary-hover focus-visible:ring-3 focus-visible:ring-brand-focus-ring md:inline-flex'
             )}
           >
             <CalendarPlus className='size-4' aria-hidden='true' />
