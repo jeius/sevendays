@@ -136,25 +136,35 @@ async function main() {
   // /packages: every active package, full details
   await go(`${LANDING}/packages`);
   const listText = await text();
-  const listCards = await evaluate(`document.querySelectorAll('article').length`);
+  // #256: the index plates are whole-card Links (no <article> since
+  // #164) — counted by the /packages/ link prefix; the nav's
+  // exact-/packages link never matches the trailing-slash prefix.
+  const listCards = await evaluate(`document.querySelectorAll("a[href^='/packages/']").length`);
   check(
     '/packages: every active package renders',
     listCards === packages.length,
     `expected ${packages.length}, got ${listCards}`
   );
-  const cheapest = Math.min(...packages.map((p) => p.priceCents));
+  // #256: the plates carry name + peso (priced) + description — the
+  // index carries no inclusions wording since #164 Round 3. Cheapest
+  // derives over PRICED rows only (ADR-0020: unpriced rows render no
+  // price — Math.min over nulls coerces to a phantom ₱0.00).
+  const priced = packages.filter((p) => p.priceCents != null);
+  const cheapest = Math.min(...priced.map((p) => p.priceCents));
   check(
-    '/packages: full details (cheapest price + inclusions visible)',
-    listText.includes(peso(cheapest)) && listText.includes('Inclusions')
+    '/packages: full details (cheapest price + every name visible)',
+    (priced.length === 0 || listText.includes(peso(cheapest))) &&
+      packages.every((p) => listText.includes(p.name))
   );
 
   // Ruled edit (M5 ticket #142): list-card cover rule (lazy img ⇔ cover,
   // placeholder ⇔ none) + the empty-state ⇔ rule.
+  // #256: same lazy-img ⇔ cover rule, observed over the Link plates.
   const listObserved = await evaluate(`(() => {
-    const articles = [...document.querySelectorAll('article')];
+    const plates = [...document.querySelectorAll("a[href^='/packages/']")];
     const names = ${JSON.stringify(packages.map((p) => p.name))};
     return names.map((n) => {
-      const a = articles.find((el) => el.querySelector('h3')?.textContent === n);
+      const a = plates.find((el) => el.querySelector('h3')?.textContent === n);
       if (!a) return null;
       const img = [...a.querySelectorAll('img')].find((i) => i.getAttribute('alt') === n);
       if (!img) return 'placeholder';
