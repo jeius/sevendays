@@ -2580,13 +2580,13 @@
     "semantic_hash": ""
   },
   "apps/landing/scripts/verify/content-pages.mjs": {
-    "mtime": 1794191818.298247,
-    "ast_hash": "84aac129bb9b7d9428b813e117898316",
+    "mtime": 1794200833.0388887,
+    "ast_hash": "180aa0508da227dfa3fb76b547c0a948",
     "semantic_hash": ""
   },
   "apps/landing/scripts/verify/lib.mjs": {
-    "mtime": 1788969315.7299054,
-    "ast_hash": "0dec34df44181b810ab16c0dfa01a5d5",
+    "mtime": 1794199107.6970596,
+    "ast_hash": "912ccba68e056fcc71419a1f6fee7083",
     "semantic_hash": ""
   },
   "apps/landing/scripts/verify/packages-pages.mjs": {
@@ -4937,6 +4937,11 @@
   "docs/superpowers/plans/2026-11-09-241-landing-polish.md": {
     "mtime": 1794191818.3026469,
     "ast_hash": "a1067c8ca5043ed39153aa68b07c78ec",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-09-254-content-pages-stale-checks.md": {
+    "mtime": 1794198972.0966048,
+    "ast_hash": "b9a5e644329ed0d76fff42fb962e3597",
     "semantic_hash": ""
   }
 }
