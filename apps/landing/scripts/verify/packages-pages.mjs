@@ -15,14 +15,28 @@ function check(name, ok, detail = '') {
 }
 
 function selectFeatured(packages) {
-  const byPrice = (a, b) => a.priceCents - b.priceCents || a.name.localeCompare(b.name);
+  // #256: synced to src/lib/featured.ts's law (ADR-0020 + owner ruling
+  // 2026-10-12 — the mirror contract this header carries): unpriced
+  // packages LEAD the strip (name-ordered within the group), priced
+  // follow ascending (name tiebreak) — inquiry-priced reads as the
+  // headliner, not the tail.
+  const byPrice = (a, b) => {
+    if (a.priceCents === null && b.priceCents === null) return a.name.localeCompare(b.name);
+    if (a.priceCents === null) return -1;
+    if (b.priceCents === null) return 1;
+    return a.priceCents - b.priceCents || a.name.localeCompare(b.name);
+  };
   const featured = packages.filter((p) => p.isFeatured).sort(byPrice);
   if (featured.length > 0) return featured;
   return [...packages].sort(byPrice).slice(0, 4);
 }
 
+// #256: mirrors src/lib/format.ts — null is the unpriced state and
+// returns null (the old form would format null/100 as ₱0.00).
 const peso = (cents) =>
-  new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
+  cents === null
+    ? null
+    : new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
 
 async function main() {
   const res = await fetch(`${API}/api/v1/service-packages`);
@@ -32,7 +46,7 @@ async function main() {
   if (!basic) throw new Error('seed drift: basic-package missing from the live API');
 
   const page = await connect();
-  const { go, text, evaluate, close } = page;
+  const { go, text, evaluate, bookParamValues, close } = page;
 
   // Home: hero, CTA, featured strip
   await go(`${LANDING}/`);
@@ -55,7 +69,7 @@ async function main() {
   );
   const positions = strip.map((p) => home.indexOf(p.name));
   check(
-    'home: strip ordered price-ascending',
+    'home: strip ordered unpriced-first, then price-ascending (ADR-0020)',
     positions.every((pos, i) => pos >= 0 && (i === 0 || positions[i - 1] < pos))
   );
   const stripLinks = await evaluate(
