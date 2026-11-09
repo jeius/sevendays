@@ -725,8 +725,8 @@
     "semantic_hash": ""
   },
   "apps/landing/CONTEXT.md": {
-    "mtime": 1791775729.4877508,
-    "ast_hash": "1419201b8b2487d8a90f5ebbb2283fd7",
+    "mtime": 1794205217.2627752,
+    "ast_hash": "b0efe767b7ac2ecd344c1528427eba2a",
     "semantic_hash": ""
   },
   "apps/landing/README.md": {
@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794191818.3026469,
-    "ast_hash": "2831515069f5fc675548f696411010df",
+    "mtime": 1794202253.414409,
+    "ast_hash": "06f83984b524bc0b6c899208572f6bc8",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2580,18 +2580,18 @@
     "semantic_hash": ""
   },
   "apps/landing/scripts/verify/content-pages.mjs": {
-    "mtime": 1794191818.298247,
-    "ast_hash": "84aac129bb9b7d9428b813e117898316",
+    "mtime": 1794202253.414409,
+    "ast_hash": "180aa0508da227dfa3fb76b547c0a948",
     "semantic_hash": ""
   },
   "apps/landing/scripts/verify/lib.mjs": {
-    "mtime": 1788969315.7299054,
-    "ast_hash": "0dec34df44181b810ab16c0dfa01a5d5",
+    "mtime": 1794202253.414409,
+    "ast_hash": "912ccba68e056fcc71419a1f6fee7083",
     "semantic_hash": ""
   },
   "apps/landing/scripts/verify/packages-pages.mjs": {
-    "mtime": 1790626031.663335,
-    "ast_hash": "4dfd3405aede10dcdee77e165840e614",
+    "mtime": 1794206461.6854775,
+    "ast_hash": "08b6c13aa1d5d2939f65a9ce7552157f",
     "semantic_hash": ""
   },
   "apps/landing/src/components/booking/rejection-card.tsx": {
@@ -2865,8 +2865,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794194384.8502479,
-    "ast_hash": "e8e0c7527e3455702241d70ac8fab9bb",
+    "mtime": 1794202278.9774256,
+    "ast_hash": "c843c18c1298787ba20625e52840178d",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -4937,6 +4937,16 @@
   "docs/superpowers/plans/2026-11-09-241-landing-polish.md": {
     "mtime": 1794191818.3026469,
     "ast_hash": "a1067c8ca5043ed39153aa68b07c78ec",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-09-254-content-pages-stale-checks.md": {
+    "mtime": 1794202253.418809,
+    "ast_hash": "239d2081ad94c4966cf03994518836c1",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-09-256-packages-pages-stale-checks.md": {
+    "mtime": 1794206049.815631,
+    "ast_hash": "8afd8bcad316389d9b8bad3e402dcfa4",
     "semantic_hash": ""
   }
 }
