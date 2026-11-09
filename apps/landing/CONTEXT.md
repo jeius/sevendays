@@ -35,3 +35,7 @@ _Avoid_: sold out (that is a Slot-capacity state, not a package state)
 **Unpriced**:
 A catalog item whose price is deliberately unset (null) — it stays fully bookable, and nothing renders where its price would be: no placeholder, no inquire line, no CTA change. A booking with any Unpriced part shows no total. Set from the CMS by unchecking Priced.
 _Avoid_: free (that is a ₱0 price), inquire-only
+
+**Detail-first (packages)**:
+Every package surface outside the Booking flow — the home featured plates and the /packages index — links to the package's detail page, never directly into the Booking flow; the detail page's "Book this package" CTA is the only carrier of the package param into `/book`. Contrast Studio Services, whose cards deep-link `/book` directly. Owner-ruled detail-first 2026-11-09 (#256 triage), confirming the #164 showcase rulings.
+_Avoid_: package deep-link (ambiguous — reserve "deep-link" talk for the services' direct-book pattern)
