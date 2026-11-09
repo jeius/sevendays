@@ -14,7 +14,7 @@ import { CoverPanel } from './cover-panel';
 
 // The branch card (/branches) on the ruled language (#164 Round 4): the
 // #214 cover as a 16:9 strip atop the card (the CoverPanel law — null
-// renders today's muted placeholder), the walk-in badge as an icon tooltip
+// renders the ink→petrol placeholder), the walk-in badge as an icon tooltip
 // beside the name, the phone as a mono tel: link, CTAs under a hairline.
 //
 // The variant-split CTAs (OWNER-RULED): MAIN = the icon-only outline call

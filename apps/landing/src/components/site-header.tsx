@@ -65,9 +65,10 @@ export function SiteHeader({ settings }: { settings: SiteSettings }) {
             <CalendarPlus className='size-4' aria-hidden='true' />
             Book now
           </Link>
-          {/* The toggle rides the glass bar (#217's ruled placement), at
-              size-9 so the bar keeps its 56px height. */}
-          <ThemeToggle className='inline-flex size-9 rounded-md text-white/85 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring' />
+          {/* The toggle rides the glass bar at md+ (#217's ruled placement),
+              at size-9 so the bar keeps its 56px height; below md it lives
+              inside the MobileNav panel (the M7 post-flight #241). */}
+          <ThemeToggle className='hidden size-9 rounded-md text-white/85 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring md:inline-flex' />
           <MobileNav links={NAV_LINKS} />
         </div>
       </div>

@@ -14,7 +14,8 @@ import {
 
 // Home wears the ruled #164 composition (built M7 #223): hero under the
 // glass bar → the live mosaic gallery → D2 featured plates → the services
-// marquee → REAL paginated testimonials → the emphasis strip. The loader
+// marquee → REAL paginated testimonials (the closing emphasis strip
+// retired by the M7 post-flight, #241). The loader
 // ensures all four reads + the chrome's settings (the root loader already
 // ensures settings; this leg adds the never-throwing catch + the
 // loaderData return home's head reads).
