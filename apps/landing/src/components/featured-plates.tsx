@@ -7,7 +7,7 @@ import { inclusionPhrase } from './inclusions-list';
 
 // The featured strip, OWNER-RULED D2 "light split plate" (#164 Round 2 —
 // "I think I'll go with D2"): the cover is 60% of the plate at natural
-// quality (no overlay touches it — the CoverPanel law renders the muted
+// quality (no overlay touches it — the CoverPanel law renders the ink→petrol
 // placeholder when a row has no cover), the light panel carries serif
 // name, mono peso (nothing when unpriced — the #163 law), a subline, and
 // dotted inclusion lines; short PRIMARY ticks separate the plates. The

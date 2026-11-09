@@ -54,16 +54,22 @@ async function main() {
     'home: services teaser strip renders the live services',
     services.every((s) => home.includes(s.name))
   );
-  // Ruled edit (#101, this ticket's one script exception): the #111
-  // variant D composition drops the branches body strip — footer +
-  // emphasis carry branches (both asserted here); walk-in badges stay
-  // fully covered by the /branches check below.
+  // Ruled edit (#241, the M7 post-flight — #239 item 1): the home emphasis
+  // strip is retired on both editions, so the chrome alone carries branches
+  // (the header nav + the footer — both counted here) and the strip's
+  // absence is asserted; walk-in badges stay fully covered by the /branches
+  // check below.
   const homeBranchLinks = await evaluate(
     `[...document.querySelectorAll("a[href='/branches']")].length`
   );
+  const homeCallVisitStrips = await evaluate(
+    `document.querySelectorAll("[data-strip='call-visit']").length`
+  );
   check(
-    'home: branches carried by footer + emphasis strip (variant D)',
-    homeBranchLinks >= 2 && home.includes('Call or visit a branch')
+    'home: branches carried by the chrome; the emphasis strip retired (#241)',
+    homeBranchLinks >= 2 &&
+      homeCallVisitStrips === 0 &&
+      !home.includes('Not sure which session fits?')
   );
   const galleryFigures = await evaluate(
     `document.querySelectorAll("[data-strip='gallery'] figure").length`
