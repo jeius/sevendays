@@ -19,16 +19,18 @@ const peso = (cents) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
 
 async function main() {
-  const [servicesRes, branchesRes, galleryRes, testimonialsRes] = await Promise.all([
+  const [servicesRes, branchesRes, galleryRes, testimonialsRes, settingsRes] = await Promise.all([
     fetch(`${API}/api/v1/studio-services`),
     fetch(`${API}/api/v1/branches`),
     fetch(`${API}/api/v1/gallery`),
     fetch(`${API}/api/v1/testimonials`),
+    fetch(`${API}/api/v1/site-settings`),
   ]);
   const services = await servicesRes.json();
   const branches = await branchesRes.json();
   const gallery = await galleryRes.json();
   const testimonials = await testimonialsRes.json();
+  const settings = await settingsRes.json();
   if (!gallery || !Array.isArray(gallery.categories) || !Array.isArray(gallery.photos)) {
     throw new Error('seed drift: gallery read is not the assembled {categories, photos} payload');
   }
@@ -40,6 +42,9 @@ async function main() {
   }
   if (!Array.isArray(branches) || branches.length === 0) {
     throw new Error('seed drift: no branches from the live API');
+  }
+  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+    throw new Error('seed drift: site-settings read is not the singleton object');
   }
   const chipNamesFor = (s) =>
     branches.filter((b) => s.bookableBranchIds.includes(b.id)).map((b) => b.name);
@@ -87,11 +92,17 @@ async function main() {
     `[...document.querySelectorAll('a')].some(a => a.textContent.trim() === 'View all services' && a.getAttribute('href') === '/services')`
   );
   check('home: strip-end View all services links /services', viewAll === true);
+  // #254 (owner-ruled 2026-11-09): the hero blurb follows the live wire —
+  // the saved homeDescription wins (a teaser site-copy save no longer
+  // fails the check); the ratified default (#111 resolution; ruled edit
+  // #101) governs only while the field is null (defaults never ride the
+  // wire — #215).
+  const expectedBlurb =
+    settings.homeDescription ??
+    'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.';
   check(
-    'home: ratified hero blurb visible (#111 resolution; ruled edit #101)',
-    home.includes(
-      'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.'
-    )
+    'home: hero blurb renders the live settings (ratified default ⇔ null)',
+    home.includes(expectedBlurb)
   );
 
   // /services: the offerings with bookability
