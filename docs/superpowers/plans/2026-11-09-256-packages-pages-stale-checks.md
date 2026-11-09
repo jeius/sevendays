@@ -618,7 +618,7 @@ Append to `docs/progress.md`'s dated section (beside the 2026-11-09 #254 entry),
 - **2026-11-XX — the packages-pages #223-stale checks rewritten (#256) — harness-only, zero landing src.** The nine checks that went stale with the #223/#224 redesign (fenced out of #254 at execution) now assert the current contracts (owner-ruled 2026-11-09, detail-first confirmed in the triage brief): the strip/index plates counted and observed as whole-card Links (`a[href^='/packages/']` — no `<article>` since #164); the detail-first ruling asserted BOTH ways (zero `/book?package=` hrefs on home//packages via `bookParamValues`, every plate's parsed href the `/packages/<slug>` path); the cover ⇔ rules unchanged over the new containers (the CoverPanel placeholder literal byte-kept by design); the full-details checks priced-safe (cheapest over priced rows only — ADR-0020 — + every name on the index, "What's included" on the detail); the unknown-slug check on the #223 uniform NotFound copy; and the deferred #254 re-form landed (the detail CTA param-parsed, never an exact href). The re-derived `selectFeatured` synced to `src/lib/featured.ts`'s unpriced-first law and `peso` null-guarded per `src/lib/format.ts` (the header's mirror contract — both silent drifts masked by the all-priced catalog). packages-pages 8/17 → **17/17**; teaser re-check <result>; landing floor unchanged (16 files / 123 tests). The detail-first ruling joined the landing glossary (CONTEXT.md, "Detail-first (packages)").
 ```
 
-- [ ] **Step 2: The PR**
+- [✅] **Step 2: The PR**
 
 ```bash
 git push -u origin chore/256-packages-pages-stale-checks
@@ -635,7 +635,7 @@ EOF
 
 Squash-merge to main. Record the merge's main sha + PR number.
 
-- [ ] **Step 3: The v1 ledger row (SKIP, appended on main)**
+- [✅] **Step 3: The v1 ledger row (SKIP, appended on main)**
 
 On main, append one row to `docs/agents/v1-picks.md`'s ledger, filling bracketed values:
 
@@ -645,13 +645,13 @@ On main, append one row to `docs/agents/v1-picks.md`'s ledger, filling bracketed
 
 Commit as `docs(v1-picks): the #256 skip row (#256)` (the `4b2f7cb` pattern) and push to main.
 
-- [ ] **Step 4: Close the issue**
+- [✅] **Step 4: Close the issue**
 
 ```bash
 gh issue close 256 --comment "Landed in #<PR> (main \`<main-sha>\`; pure v1 SKIP — every path main-only, the ledger row records it). AC1 packages-pages 17/17 local, exit 0 (task4/final evidence). AC2 no exact \`/book?package=\` href matching — the detail CTA is param-parsed via \`bookParamValues\`, the plate links path-parsed. AC3 detail-first asserted both ways: zero /book?package= hrefs on home and /packages, every plate parses to /packages/<slug>. AC4 the three cover ⇔ observes pass over the plate containers with the placeholder literal intact on the null arm. AC5 unknown slug asserts 'This page never developed.' + 'Back to home'; the not-an-error-boundary check still passes. AC6 the diff touches only packages-pages.mjs — zero landing src, zero lib changes. AC7 pnpm check green; progress.md updated. Plus the brief's mirror-contract mandate: selectFeatured synced to the ADR-0020 unpriced-first law, peso null-guarded. The detail-first ruling is recorded in the landing glossary (CONTEXT.md) and the 2026-11-09 triage brief."
 ```
 
-- [ ] **Step 5: Final sweep**
+- [✅] **Step 5: Final sweep**
 
 Confirm: working tree clean (evidence stays gitignored under `.superpowers/`; the graphify stamp committed with the graph update); the branch deleted after merge; this plan file's boxes ticked `- [✅]` throughout.
 
