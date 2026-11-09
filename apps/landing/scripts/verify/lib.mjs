@@ -68,6 +68,22 @@ export async function connect() {
     await wait(1500);
   }
   const text = () => evaluate('document.body.innerText');
+  // The /book deep-link seam (#254): a link's deep-link target is its
+  // PARSED query param, never an exact href string — exact matching
+  // couples the check to the router's search serialization (environment-
+  // sensitive on the deployed teaser). Pathname-filtered so /booking/<id>
+  // links never qualify; only links carrying the param are collected.
+  const bookParamValues = (param) =>
+    evaluate(`(() => {
+      const values = new Set();
+      for (const a of document.querySelectorAll('a[href*="/book"]')) {
+        const url = new URL(a.getAttribute('href'), location.origin);
+        if (url.pathname !== '/book') continue;
+        const value = url.searchParams.get(${JSON.stringify(param)});
+        if (value) values.add(value);
+      }
+      return [...values];
+    })()`);
   const close = () => ws.close();
-  return { send, evaluate, wait, go, text, close };
+  return { send, evaluate, wait, go, text, bookParamValues, close };
 }

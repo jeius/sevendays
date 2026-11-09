@@ -45,7 +45,7 @@ async function main() {
     branches.filter((b) => s.bookableBranchIds.includes(b.id)).map((b) => b.name);
 
   const page = await connect();
-  const { go, text, evaluate, wait, close } = page;
+  const { go, text, evaluate, wait, bookParamValues, close } = page;
 
   // Home: strips + blurb
   await go(`${LANDING}/`);
@@ -75,12 +75,13 @@ async function main() {
     `document.querySelectorAll("[data-strip='gallery'] figure").length`
   );
   check('home: gallery wall renders (variant D stand-in strip)', galleryFigures >= 6);
-  const teaserLinks = await evaluate(
-    `[...document.querySelectorAll('a[href^="/book?service="]')].map(a => a.getAttribute('href'))`
-  );
+  // #254: the deep-link assertion matches the PARSED service param, never
+  // the exact href string — the router's search serialization is not the
+  // contract (environment-sensitive on the deployed teaser).
+  const teaserServiceIds = await bookParamValues('service');
   check(
     'home: teaser items deep-link /book?service=<id>',
-    services.every((s) => teaserLinks.includes(`/book?service=${s.id}`))
+    services.every((s) => teaserServiceIds.includes(s.id))
   );
   const viewAll = await evaluate(
     `[...document.querySelectorAll('a')].some(a => a.textContent.trim() === 'View all services' && a.getAttribute('href') === '/services')`
@@ -128,12 +129,11 @@ async function main() {
       'Looking for add-ons? Makeup, hairstyle, and more are available with any session.'
     )
   );
-  const svcLinks = await evaluate(
-    `[...document.querySelectorAll('a[href^="/book?service="]')].map(a => a.getAttribute('href'))`
-  );
+  // #254: same param-parsed form as the home teaser check.
+  const svcServiceIds = await bookParamValues('service');
   check(
     '/services: cards deep-link /book?service=<id>',
-    services.every((s) => svcLinks.includes(`/book?service=${s.id}`))
+    services.every((s) => svcServiceIds.includes(s.id))
   );
 
   // /branches: address, phone, badge, deep link
@@ -164,12 +164,22 @@ async function main() {
         (t, i) => t !== null && !branches[i].acceptsWalkIns && t.includes('No walk-ins')
       )
   );
-  const branchLinks = await evaluate(
-    `[...document.querySelectorAll('a')].filter(a => a.textContent.trim() === 'Book at this branch').map(a => a.getAttribute('href'))`
-  );
+  // #254: param-parsed form, text-anchored — the CTA's copy stays part of
+  // the assertion; the href string does not.
+  const branchLinkIds = await evaluate(`
+    (() => {
+      const ids = [];
+      for (const a of document.querySelectorAll('a')) {
+        if (a.textContent.trim() !== 'Book at this branch') continue;
+        const url = new URL(a.getAttribute('href'), location.origin);
+        if (url.pathname === '/book') ids.push(url.searchParams.get('branch'));
+      }
+      return ids;
+    })()
+  `);
   check(
     '/branches: Book at this branch deep-links /book?branch=<id>',
-    branches.every((b) => branchLinks.includes(`/book?branch=${b.id}`))
+    branches.every((b) => branchLinkIds.includes(b.id))
   );
 
   // /about — Ruled edit (M5 ticket #142): the two placeholder checks rewrite
