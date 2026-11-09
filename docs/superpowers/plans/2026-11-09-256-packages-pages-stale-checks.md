@@ -435,7 +435,7 @@ The last three FAILs flip, and #254's deferred param-parsed detail deep-link lan
 
 **Not here:** the not-an-error-boundary check (byte-stable, already passing); the detail cover check's ⇔ clauses (byte-stable — only the evaluate selector changes); the teaser (Task 5).
 
-- [ ] **Step 1: The :slug renders check — wording + null-guarded peso**
+- [✅] **Step 1: The :slug renders check — wording + null-guarded peso**
 
 Replace:
 
@@ -465,7 +465,7 @@ with:
 
 (The check NAME stays byte-stable — name, price, and the inclusions section are all still what it asserts.)
 
-- [ ] **Step 2: The detail cover observe — page-wide alt match**
+- [✅] **Step 2: The detail cover observe — page-wide alt match**
 
 Replace:
 
@@ -485,7 +485,7 @@ with:
   );
 ```
 
-- [ ] **Step 3: The deferred param-parsed deep-link re-form**
+- [✅] **Step 3: The deferred param-parsed deep-link re-form**
 
 Replace:
 
@@ -507,7 +507,7 @@ with:
   check('detail: deep link targets the uuid', detailPackageIds.includes(basic.id));
 ```
 
-- [ ] **Step 4: The uniform not-found**
+- [✅] **Step 4: The uniform not-found**
 
 Replace:
 
@@ -530,7 +530,7 @@ with:
   );
 ```
 
-- [ ] **Step 5: Syntax + format + the full-green gate**
+- [✅] **Step 5: Syntax + format + the full-green gate**
 
 ```bash
 node --check apps/landing/scripts/verify/packages-pages.mjs
@@ -540,7 +540,7 @@ node apps/landing/scripts/verify/packages-pages.mjs | tee .superpowers/sdd/2026-
 
 Expected: **`17/17 checks passed`, exit 0** — the ticket's local end state. `PASS /packages/:slug renders by slug (name, price, inclusions)`, `PASS detail: cover rule (placeholder ⇔ no cover)`, `PASS detail: deep link targets the uuid` (via the parsed param), `PASS unknown slug: uniform not-found (#223 global copy + back-to-home)`, `PASS unknown slug: not an error boundary`.
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/landing/scripts/verify/packages-pages.mjs
