@@ -74,11 +74,11 @@ One ruling, one revert unit. The home strip's `/branches` affordance dies with t
 
 **Not here:** the services closing strip (fenced); `content-pages.mjs` (Task 2); any test file (the landing suite pins none of these surfaces); any token (both stops exist); any e2e file.
 
-- [ ] **Step 1: Load the UI/UX skill set**
+- [✅] **Step 1: Load the UI/UX skill set**
 
 Per AGENTS.md, load `prototype` + `ui-ux-pro-max` (plus `ui-styling` as relevant) before editing. The rendered shapes are pinned below — the skills inform judgment (disclosure semantics, focus order in the panel), not re-composition.
 
-- [ ] **Step 2: The strip removal — `home-image-led.tsx`**
+- [✅] **Step 2: The strip removal — `home-image-led.tsx`**
 
 (a) Replace the slot-map comment's last line (line 27):
 
@@ -104,7 +104,7 @@ with:
 
 (The deleted block, for identification: the `{/* 6 — Emphasis strip: the ratified #92 gray-light band. */}` comment, the whole `<section … data-strip='call-visit'>…</section>`, and the blank line above the comment — the testimonials section's closing `</section>` now precedes `</div>` directly. `buttonVariants` and `cn` KEEP their imports — the hero and testimonial dots still use them.)
 
-- [ ] **Step 3: The gradient — `cover-panel.tsx`**
+- [✅] **Step 3: The gradient — `cover-panel.tsx`**
 
 (a) Replace the comment (lines 9-11):
 
@@ -136,7 +136,7 @@ with:
         'flex h-40 flex-col items-center justify-center gap-1 rounded-lg bg-[linear-gradient(135deg,var(--brand-ink),var(--brand-primary))]',
 ```
 
-- [ ] **Step 4: The three law-comment rewords — `featured-plates.tsx`, `package-detail.tsx`, `branch-card.tsx`**
+- [✅] **Step 4: The three law-comment rewords — `featured-plates.tsx`, `package-detail.tsx`, `branch-card.tsx`**
 
 (a) `featured-plates.tsx` line 10 — replace:
 
@@ -174,7 +174,7 @@ with:
 // renders the ink→petrol placeholder), the walk-in badge as an icon tooltip
 ```
 
-- [ ] **Step 5: The bar toggle goes md+ only — `site-header.tsx`**
+- [✅] **Step 5: The bar toggle goes md+ only — `site-header.tsx`**
 
 Replace lines 68-70 (the comment + the toggle):
 
@@ -195,7 +195,7 @@ with:
 
 (The leading `inline-flex` drops — tailwind-merge keeps `hidden` over the Button's base `inline-flex`; probed. The classes otherwise keep their on-disk order, `md:inline-flex` appended.)
 
-- [ ] **Step 6: The panel's toggle row — `mobile-nav.tsx`**
+- [✅] **Step 6: The panel's toggle row — `mobile-nav.tsx`**
 
 (a) The import — insert after the `collapsible` import block (after line 6, `} from '@sevendays/ui/components/collapsible';`):
 
@@ -232,7 +232,7 @@ with:
       </CollapsibleContent>
 ```
 
-- [ ] **Step 7: The composition note — `index.tsx`**
+- [✅] **Step 7: The composition note — `index.tsx`**
 
 Replace (lines 16-17):
 
@@ -249,7 +249,7 @@ with:
 // retired by the M7 post-flight, #241). The loader
 ```
 
-- [ ] **Step 8: Grep gate — the sweep**
+- [✅] **Step 8: Grep gate — the sweep**
 
 ```bash
 grep -rc "Not sure which session fits" apps/landing/src | awk -F: '{s+=$2} END{print "strip copy:", s}'
@@ -263,7 +263,7 @@ grep -rc "muted placeholder\|today's muted\|renders the muted$" apps/landing/src
 
 Expected: `strip copy: 0` · `data-strip='call-visit'` → exactly ONE hit, `apps/landing/src/routes/services.tsx` (the fence holds) · `old gradient: 0` · `new gradient: 1` · `md:inline-flex` → 1 · `<ThemeToggle` in mobile-nav → 1 · `muted-placeholder phrases: 0`. Save the output to `.superpowers/sdd/2026-11-09-241-landing-polish/task-1-grep.txt`. Any deviation: stop, reconcile.
 
-- [ ] **Step 9: Lint, format, test, typecheck, build**
+- [✅] **Step 9: Lint, format, test, typecheck, build**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -274,7 +274,7 @@ pnpm --filter @sevendays/landing build
 
 Expected: `fix` rewrites NOTHING (every pinned edit is format-canonical — probed at plan time; if it rewrites, the edits drifted — reconcile). Tests: `Test Files 16 passed (16) · Tests 123 passed (123)`. Typecheck + build green (`mobile-nav.tsx`'s module graph gains the `theme-toggle` edge — the build proves it bundles).
 
-- [ ] **Step 10: Commit**
+- [✅] **Step 10: Commit**
 
 ```bash
 git add apps/landing/src/components/home-image-led.tsx apps/landing/src/components/cover-panel.tsx apps/landing/src/components/featured-plates.tsx apps/landing/src/components/package-detail.tsx apps/landing/src/components/branch-card.tsx apps/landing/src/components/site-header.tsx apps/landing/src/components/mobile-nav.tsx apps/landing/src/routes/index.tsx
@@ -292,7 +292,7 @@ One assertion in the CDP script is coupled to the strip. The file also carries t
 
 **Not here:** the three #223-stale checks (add-ons cross-reference, teaser deep-links, hero blurb — a NEW ticket owns them; never "fix" an unruled check inside this ticket); any other check in the file; the script's runner contract (CDP :9222, LANDING/API env — untouched).
 
-- [ ] **Step 1: Rewrite the check**
+- [✅] **Step 1: Rewrite the check**
 
 Replace:
 
@@ -334,7 +334,7 @@ with:
 
 (The counter ALWAYS queries the selector — the strip's absence must be an assertion, never an assumption. Biome-clean over this file — probed at plan time.)
 
-- [ ] **Step 2: Syntax + biome**
+- [✅] **Step 2: Syntax + biome**
 
 ```bash
 node --check apps/landing/scripts/verify/content-pages.mjs
@@ -343,7 +343,7 @@ pnpm --filter @sevendays/landing fix
 
 Expected: both clean, `fix` rewrites nothing.
 
-- [ ] **Step 3: Commit**
+- [✅] **Step 3: Commit**
 
 ```bash
 git add apps/landing/scripts/verify/content-pages.mjs
@@ -365,7 +365,7 @@ The owner-ruled gate. A dry-run-proven capture script walks the stack read-only 
 
 **Not here:** re-litigating the rulings themselves (the round judges the BUILD's fidelity + the genuinely new composition — the menu row); any catalog mutation (never toggle a cover or a flag to stage a state — the surfaces inventory already renders every placeholder live); the teaser (the round walks the LOCAL stack; baselines are Task 4's).
 
-- [ ] **Step 1: Write the capture script**
+- [✅] **Step 1: Write the capture script**
 
 Write `.superpowers/sdd/2026-11-09-241-landing-polish/capture.mjs` with EXACTLY this content (dry-run-proven against the live teaser this session — every BEFORE assertion passed, 16 frames + the sheet rendered):
 
@@ -608,7 +608,7 @@ if (failures.length > 0) {
 }
 ```
 
-- [ ] **Step 2: Capture BEFORE (current main) on the local stack**
+- [✅] **Step 2: Capture BEFORE (current main) on the local stack**
 
 Start the stack in one shell (`pnpm --filter @sevendays/api dev` + `pnpm --filter @sevendays/landing dev` — the landing serves :3000). From the repo root:
 
@@ -618,7 +618,7 @@ node .superpowers/sdd/2026-11-09-241-landing-polish/capture.mjs before | tee .su
 
 Expected: every assertion PASSes with `[before]` (the strip renders exactly once, every placeholder wears the OLD three-stop ramp, the bar toggle is visible with the panel carrying none). Keep the stack running.
 
-- [ ] **Step 3: Capture AFTER (the branch)**
+- [✅] **Step 3: Capture AFTER (the branch)**
 
 With the Task 1+2 commits checked out (the dev server hot-reloads), same shell:
 
@@ -628,15 +628,15 @@ node .superpowers/sdd/2026-11-09-241-landing-polish/capture.mjs after | tee .sup
 
 Expected: every assertion PASSes with `[after]` — `home: the emphasis strip — 0 on the page`; every surface `every placeholder wears the ruled ink→primary gradient`; `desktop: exactly one visible toggle, in the bar`; `mobile, menu closed: the bar toggle is hidden`; `mobile, menu open: one visible toggle, inside the panel` + the THEME label + `flips the theme and the panel stays open`. 18 AFTER frames + the contact sheet (`index.html` — before | after side by side, light first).
 
-- [ ] **Step 4: The owner reacts — BLOCKING (light first, both themes)**
+- [✅] **Step 4: The owner reacts — BLOCKING (light first, both themes)**
 
 Present the contact sheet + both txt logs to the owner. The round judges: the strip's absence on home (the testimonials section now closes the page); the ink→petrol placeholder on all four surfaces; the menu's THEME row (label register, hairline, placement) + the emptied mobile bar; the desktop bar unchanged. Record the rulings verbatim in `.superpowers/sdd/2026-11-09-241-landing-polish/rulings.md`, dated. **Nothing merges until the owner reacts** (the standing wait-for-the-owner rule — the ticket's fourth AC).
 
-- [ ] **Step 5: Apply any retunes (or skip)**
+- [✅] **Step 5: Apply any retunes (or skip)**
 
 If the owner rules a retune (copy, tint, spacing): edit the owning Task 1 file, re-run Step 3 (the assertions that named the retuned bit update in the same commit — the script and the code never disagree), re-run `pnpm --filter @sevendays/landing fix && pnpm --filter @sevendays/landing test -- --run && pnpm --filter @sevendays/landing typecheck`, commit `chore(landing): the #241 variants round settled — <the ruling> (#241)`. If the owner accepts as-built: no commit — the rulings.md note IS the record.
 
-- [ ] **Step 6: Clean up the planning dry-run scratch**
+- [✅] **Step 6: Clean up the planning dry-run scratch**
 
 ```bash
 rm -rf .superpowers/sdd/_241-dryrun
@@ -713,7 +713,7 @@ Runs BEFORE the Task 4 Steps 2-4 cycle completes around it: Steps 1-6 finish the
 
 **Not here:** any code change (a defect found below goes back to its owning task's file with its own fix commit, then this task re-runs from Step 1); `docs/plan.md` (M7 is closed; the post-flight carries no roadmap box — #239's disposition cuts tickets, not plan.md boxes); the three #223-stale `content-pages.mjs` checks (a new ticket — file it in Step 9).
 
-- [ ] **Step 1: The full check**
+- [✅] **Step 1: The full check**
 
 ```bash
 pnpm check && pnpm build
@@ -721,11 +721,11 @@ pnpm check && pnpm build
 
 Expected: green across the repo (lint + format + typecheck + test, then the 7-workspace build). Floors: landing 16 files / 123 tests; every other suite at AGENTS.md's recorded floors (this ticket touches none of them).
 
-- [ ] **Step 2: The live walkthrough (controller step — the local stack, both themes)**
+- [✅] **Step 2: The live walkthrough (controller step — the local stack, both themes)**
 
 With the stack up (Task 3's shells), walk and capture to `.superpowers/sdd/2026-11-09-241-landing-polish/walkthrough/`: (1) home — the testimonials section closes the page, no `call-visit` band, footer reached directly; (2) `/packages` + one coverless detail + `/branches` — the ink→petrol gradient on every placeholder, light AND dark; (3) 390px — bar holds logo + CTA + menu only; the open panel's THEME row toggles the theme, panel stays open; (4) 1280px — the bar's toggle works, the panel trigger is gone; (5) `/services` — the closing strip STILL renders (the fence). Then run the CDP script — `chromium --remote-debugging-port=9222` against the dev landing, then `node apps/landing/scripts/verify/content-pages.mjs` (the harness's contract: `CDP_HTTP` at `http://127.0.0.1:9222`, `LANDING_VERIFY_URL` defaulting to `http://localhost:3000`): expect the rewritten home check PASSING and exactly the three pinned pre-existing failures (`home: teaser items deep-link /book?service=`, `home: ratified hero blurb visible`, `/services: one-line add-on cross-reference visible`) — anything else failing is this ticket's regression. Write `walkthrough.md` narrating each state.
 
-- [ ] **Step 3: `docs/progress.md` — the dated entry (newest first, pinned)**
+- [✅] **Step 3: `docs/progress.md` — the dated entry (newest first, pinned)**
 
 Insert as the first entry under `# Progress` (replace `2026-11-XX` with the docs commit's date):
 
@@ -733,7 +733,7 @@ Insert as the first entry under `# Progress` (replace `2026-11-XX` with the docs
 - **2026-11-XX — M7 post-flight T1, the landing polish (#241) — build complete, variants round owner-reacted, baselines regenerated two-step.** The three step-1 demo rulings (#239 items 1-3) landed on both editions: the home emphasis strip retired entirely (no component existed to retire — both instances were inline; the services closing strip stays, fenced); the CoverPanel placeholder re-graded brand ink → brand primary on every surface (featured plates, packages index, detail, branch strips — the initials + caption unchanged, AA held); and the theme toggle moved inside the MobileNav panel below md (the hairline THEME row under the CTA; the desktop bar keeps it at md+). The owner-reacted variants round ran over a dry-run-proven capture script (18 before/after frames, both themes, both viewports, DOM assertions per ruling); the 16 visual baselines regenerated two-step per the owner's 2026-11-09 ruling — the pre-merge regen absorbed the pre-existing teaser content drift (the 2026-11-08 nightly had failed all 16), the post-merge zero-diff isolates exactly the three rulings. `content-pages.mjs`'s home check carries the retirement (its three #223-stale checks pinned, fenced to a new ticket). Landing-only code + main-only script/e2e/docs; zero test change (landing floor 16 files / 123 tests).
 ```
 
-- [ ] **Step 4: `AGENTS.md` — two pinned find/replace edits**
+- [✅] **Step 4: `AGENTS.md` — two pinned find/replace edits**
 
 (a) In the Engineering Rules status paragraph (the dark-mode sentence), replace:
 
@@ -761,7 +761,7 @@ the CoverPanel rule (img on coverImageUrl, the initials placeholder on null — 
 
 (Each find string occurs exactly once in main's AGENTS.md — counted this session. These are the two edits the Task 5b v1 resolution partially drops.)
 
-- [ ] **Step 5: The docs commit**
+- [✅] **Step 5: The docs commit**
 
 Tick this plan's executed boxes (`- [✅]`), then:
 
