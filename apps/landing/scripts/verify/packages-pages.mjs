@@ -59,8 +59,12 @@ async function main() {
   check('home: featured heading (live catalog has flags)', home.includes('Featured packages'));
   // Ticket 06 added services/branches strips to home; count cards inside the
   // featured strip's section only (data-strip='featured').
+  // #256: the #164/#223 strip plates are whole-card Links into the
+  // detail page — no <article> since. Count the plates by their
+  // /packages/ link prefix inside the featured section (the trailing
+  // slash keeps the nav's exact-/packages link out).
   const homeCards = await evaluate(
-    `document.querySelector("section[data-strip='featured']")?.querySelectorAll('article').length ?? 0`
+    `document.querySelector("section[data-strip='featured']")?.querySelectorAll("a[href^='/packages/']").length ?? 0`
   );
   check(
     'home: strip shows the expected featured cards',
@@ -72,12 +76,25 @@ async function main() {
     'home: strip ordered unpriced-first, then price-ascending (ADR-0020)',
     positions.every((pos, i) => pos >= 0 && (i === 0 || positions[i - 1] < pos))
   );
-  const stripLinks = await evaluate(
-    `[...document.querySelectorAll('a[href^="/book?package="]')].map(a => a.getAttribute('href'))`
-  );
+  // #256 (owner-ruled 2026-11-09): packages are DETAIL-FIRST — strip
+  // plates link the package detail page, never /book directly (contrast
+  // the services cards' direct-book deep-links). Asserted both ways:
+  // zero /book package params on home, and every plate's parsed href is
+  // the package's /packages/<slug> path.
+  const stripBookPackageIds = await bookParamValues('package');
+  const stripPlateSlugs = await evaluate(`(() => {
+    const section = document.querySelector("section[data-strip='featured']");
+    const slugs = [];
+    for (const a of section?.querySelectorAll("a[href^='/packages/']") ?? []) {
+      const url = new URL(a.getAttribute('href'), location.origin);
+      slugs.push(url.pathname.split('/packages/')[1] ?? null);
+    }
+    return slugs;
+  })()`);
   check(
-    'home: strip cards deep-link /book?package=<id>',
-    strip.every((p) => stripLinks.includes(`/book?package=${p.id}`))
+    'home: strip plates are detail-first (no /book?package=; /packages/<slug> links)',
+    stripBookPackageIds.length === 0 && strip.every((p) => stripPlateSlugs.includes(p.slug)),
+    `slugs: ${JSON.stringify(stripPlateSlugs)}`
   );
 
   // Ruled edit (M5 ticket #142): the empty-state + cover rules, re-derived
@@ -90,11 +107,13 @@ async function main() {
     'home: featured strip collapses ⇔ zero active packages',
     featuredStrip === packages.length > 0
   );
+  // #256: same cover ⇔ rule, observed over the Link plates (the h3 and
+  // the CoverPanel ride inside the plate Link).
   const stripObserved = await evaluate(`(() => {
-    const articles = [...document.querySelectorAll("section[data-strip='featured'] article")];
+    const plates = [...document.querySelectorAll("section[data-strip='featured'] a[href^='/packages/']")];
     const names = ${JSON.stringify(strip.map((p) => p.name))};
     return names.map((n) => {
-      const a = articles.find((el) => el.querySelector('h3')?.textContent === n);
+      const a = plates.find((el) => el.querySelector('h3')?.textContent === n);
       if (!a) return null;
       return {
         hasImg: [...a.querySelectorAll('img')].some((i) => i.getAttribute('alt') === n),
