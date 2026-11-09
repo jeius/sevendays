@@ -299,12 +299,16 @@ async function main() {
       'armed — single-category or empty payload cannot demo filtering'
     );
   }
+  // #254 (owner-ruled 2026-11-09): the attribution renders uppercase mono
+  // and text() is innerText (CSS text-transform applied) — the person
+  // matches case-insensitively over the unchanged seam; the ⇔ rule stays.
+  const aboutLower = about.toLowerCase();
   check(
     '/about: testimonials render the payload (coming-soon ⇔ zero)',
     testimonials.length === 0
       ? about.includes('What clients say is coming soon.')
-      : testimonials.every((t) => about.includes(t.person)) &&
-          !about.includes('What clients say is coming soon.')
+      : !aboutLower.includes('what clients say is coming soon.') &&
+          testimonials.every((t) => aboutLower.includes(t.person.toLowerCase()))
   );
 
   close();
