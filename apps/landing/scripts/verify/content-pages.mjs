@@ -134,9 +134,13 @@ async function main() {
       return chipNamesFor(s).every((n) => svcArticles[i].includes(n));
     })
   );
+  // #254 (owner-ruled 2026-11-09): the cross-reference left with the #164
+  // Round-3 ruled services rewrite — the check inverts to guard the
+  // ruling's absence, the literal byte-kept (the #241 strip-retirement
+  // pattern).
   check(
-    '/services: one-line add-on cross-reference visible',
-    servicesText.includes(
+    '/services: add-on cross-reference stays retired (#164 Round 3)',
+    !servicesText.includes(
       'Looking for add-ons? Makeup, hairstyle, and more are available with any session.'
     )
   );
