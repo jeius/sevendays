@@ -343,8 +343,8 @@ git commit -m "feat(admin): the db connection rides the HYPERDRIVE binding with 
 
 ### Task 8: records
 
-- [ ] **Step 1: ADR-0024** (`docs/adr/0024-hyperdrive-db-connection-path.md`) — Status Accepted 2026-11-10; Context = the incident + the measured CPU figures; Decision sentences pinned: Hyperdrive fronts Supavisor; caching disabled for read-your-writes; the per-request client stays (ADR-0011's workerd law); origin = the 6543 transaction pooler (reasoning: keeps `prepare: false`, shares the 60-connection budget — reasoning, not vendor-doc-confirmed); DATABASE_URL stays the CI-synced fallback. Consequences: the free-tier command budget; Hyperdrive is the dial path on both editions (v1 at pick); Supavisor's degraded connect path is bypassed, not explained.
-- [ ] **Step 2:** amendment lines on ADR-0007 and ADR-0011 ("Hyperdrive adopted in front of the pooler — see ADR-0024"; ADR-0011's "revisit Hyperdrive" consequence is discharged by ADR-0024).
+- [✅] **Step 1: ADR-0024** (`docs/adr/0024-hyperdrive-db-connection-path.md`) — Status Accepted 2026-11-10; Context = the incident + the measured CPU figures; Decision sentences pinned: Hyperdrive fronts Supavisor; caching disabled for read-your-writes; the per-request client stays (ADR-0011's workerd law); origin = the 6543 transaction pooler (reasoning: keeps `prepare: false`, shares the 60-connection budget — reasoning, not vendor-doc-confirmed); DATABASE_URL stays the CI-synced fallback. Consequences: the free-tier command budget; Hyperdrive is the dial path on both editions (v1 at pick); Supavisor's degraded connect path is bypassed, not explained.
+- [✅] **Step 2:** amendment lines on ADR-0007 and ADR-0011 ("Hyperdrive adopted in front of the pooler — see ADR-0024"; ADR-0011's "revisit Hyperdrive" consequence is discharged by ADR-0024).
 - [ ] **Step 3:** `docs/tech-stack.md` Data Layer + Secrets Checklist rows (DATABASE_URL = fallback/dev; HYPERDRIVE = the deployed dial path); `docs/progress.md` entry (newest first); AGENTS.md status clause (the db bullet names the Hyperdrive path); the v1-picks ledger row (one row per PR law); `graphify update .` + commit.
 
 ## Rollback
