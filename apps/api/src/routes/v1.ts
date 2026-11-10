@@ -14,12 +14,14 @@ import { testimonials } from './testimonials.js';
 
 // Acquisition middleware (candidate D): runs for every /api/v1 request,
 // creates the per-request db handle and stores it in context. A missing
-// DATABASE_URL throws here and is caught by the root onError as the uniform
-// 500 JSON — the acquisition-inside-the-try ruling, now structural instead
-// of a per-route comment. MUST be registered before the route mounts so it
-// composes with every handler.
+// database source — neither the HYPERDRIVE binding nor the DATABASE_URL
+// fallback (ADR-0024) — throws here and is caught by the root onError as the
+// uniform 500 JSON — the acquisition-inside-the-try ruling, now structural
+// instead of a per-route comment. MUST be registered before the route mounts
+// so it composes with every handler.
 export const acquireDb = async (c: import('hono').Context<ApiEnv>, next: () => Promise<void>) => {
-  c.set('db', createApiDb(parseEnv(c.env).DATABASE_URL));
+  const env = parseEnv(c.env);
+  c.set('db', createApiDb(env.HYPERDRIVE?.connectionString ?? env.DATABASE_URL));
   await next();
 };
 

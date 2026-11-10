@@ -18,23 +18,29 @@ export type ApiEnv = {
 };
 
 /**
- * The API's db handle (ADR-0007): the pooled DATABASE_URL — Workers cannot
- * open raw TCP; prepare:false is required under transaction pooling.
+ * The API's db handle (ADR-0007 + ADR-0024): the connection string is the
+ * HYPERDRIVE binding's when present — Hyperdrive fronts the Supavisor
+ * transaction pooler, so the dial is a local handoff instead of a full TLS
+ * handshake per request (the free-plan CPU cliff, 2026-11-09) — else the
+ * pooled DATABASE_URL fallback (dev, vitest, break-glass). prepare:false is
+ * required under transaction pooling either way.
  * Created fresh per request: workerd scopes I/O objects to the request that
  * created them, so a client memoized per isolate throws "Cannot perform I/O
- * on behalf of a different request" on every later call. Under Supavisor
- * transaction pooling (ADR-0007) per-request connections are the documented
- * pattern; request-scoped sockets are reclaimed when the request context
- * ends. Revisit with Hyperdrive only if volume demands it.
+ * on behalf of a different request" on every later call. Hyperdrive changes
+ * what the dial COSTS, not this law — the client is still per-request
+ * (ADR-0011); request-scoped sockets are reclaimed when the request context
+ * ends.
  *
  * Called once per request by the acquisition middleware (routes/v1.ts);
- * a missing URL throws here and propagates to the root onError as the
- * uniform 500 (never the framework's plain-text default).
+ * a missing source — neither binding nor URL — throws here and propagates
+ * to the root onError as the uniform 500 (never the framework's plain-text
+ * default). The schema keeps both sources optional, so this throw is the
+ * live owner of the both-absent failure.
  */
-export function createApiDb(connectionString: string): Database {
+export function createApiDb(connectionString: string | undefined): Database {
   if (!connectionString) {
     throw new TypeError(
-      'DATABASE_URL is not set — the Worker needs the pooled connection secret per ADR-0007.'
+      'No database source — set the HYPERDRIVE binding (production, ADR-0024) or DATABASE_URL (fallback, ADR-0007). Neither is present.'
     );
   }
   return createDbClient(connectionString);
