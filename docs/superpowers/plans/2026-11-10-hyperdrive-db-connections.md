@@ -323,8 +323,8 @@ git commit -m "feat(admin): the db connection rides the HYPERDRIVE binding with 
 
 ### Task 5: local gates
 
-- [ ] `pnpm check && pnpm build` green — exact test counts from the run output recorded in the evidence dir (never from this plan's arithmetic).
-- [ ] `pnpm --filter @sevendays/api dev` boots (check 5). If it demands a local connection string: set the wrangler-documented mechanism locally (never committed), and pin the recipe in `.dev.vars.example`'s DATABASE_URL comment block:
+- [✅] `pnpm check && pnpm build` green — exact test counts from the run output recorded in the evidence dir (never from this plan's arithmetic).
+- [✅] `pnpm --filter @sevendays/api dev` boots (check 5). If it demands a local connection string: set the wrangler-documented mechanism locally (never committed), and pin the recipe in `.dev.vars.example`'s DATABASE_URL comment block:
 
 ```text
 # With the HYPERDRIVE binding in wrangler.toml, wrangler dev may want a local

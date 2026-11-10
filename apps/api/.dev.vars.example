@@ -1,5 +1,11 @@
 # Local wrangler secrets — copy to .dev.vars (gitignored) and fill in.
 # Pooled Supabase connection (Supavisor, port 6543) — see docs/adr/0007-database-connection-topology.md
+# ADR-0024: in `wrangler dev` the HYPERDRIVE binding is preferred by the
+# acquisition middleware, and wrangler demands a LOCAL Postgres to emulate it —
+# export CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE pointing at
+# your local test Postgres (the compose db; this machine maps it to 5433 — see
+# the TEST_DATABASE_URL note below). DATABASE_URL stays the fallback path and
+# is what vitest exercises.
 DATABASE_URL=
 
 # Resend API key (resend.com/api-keys) — confirmation-email sender (issue #47).
