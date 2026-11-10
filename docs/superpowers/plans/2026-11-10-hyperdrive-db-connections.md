@@ -244,7 +244,7 @@ git commit -m "feat(api): the db connection rides the HYPERDRIVE binding with th
   "hyperdrive": [{ "binding": "HYPERDRIVE", "id": "ce6e772397454dbd9806219b83585f4a" }],
 ```
 
-- [ ] **Step 2: api.server.ts** — declare the capture beside `serviceBindingFetch`:
+- [✅] **Step 2: api.server.ts** — declare the capture beside `serviceBindingFetch`:
 
 ```ts
 // ADR-0024: the HYPERDRIVE binding's connection string, captured with the
@@ -281,9 +281,9 @@ export function resolveDbUrl(): string | undefined {
 
 Update the stale importer note in the header comment (the auth route already imports this file; so do auth.functions, users.functions, audit.functions, metrics.functions for `resolveDbUrl`).
 
-- [ ] **Step 3: the 15 call sites** (grep gate: `grep -rn 'createAuth(' apps/admin/src` = 17 matches — 1 definition + 1 CLI entry stay): bare `createAuth()` → `createAuth(resolveDbUrl() ?? undefined)` in auth.functions.ts ×2 (16, 23), users.functions.ts ×9 (75, 95, 125, 144, 180, 195, 214, 233, 252), audit.functions.ts:31, metrics.functions.ts:23; the auth route's two (24, 26) become `createAuth(resolveDbUrl() ?? undefined, makeSendResetPassword(getInternalFetchDeps()))`. Each site adds the `resolveDbUrl` import alongside the existing `createAuth` import (`from '../lib/api.server'`-pathed per file's aliasing — follow each file's existing `#/lib/...` or relative convention).
-- [ ] **Step 4:** audit's `readDbUrl()` body becomes `return resolveDbUrl() ?? null;`; the two metrics handlers read `readMetricsEnv({ ...process.env, DATABASE_URL: resolveDbUrl() })`.
-- [ ] **Step 5: new `src/lib/db-url.server.test.ts`** (lib-seam style, plain Node):
+- [✅] **Step 3: the 15 call sites** (grep gate: `grep -rn 'createAuth(' apps/admin/src` = 17 matches — 1 definition + 1 CLI entry stay): bare `createAuth()` → `createAuth(resolveDbUrl() ?? undefined)` in auth.functions.ts ×2 (16, 23), users.functions.ts ×9 (75, 95, 125, 144, 180, 195, 214, 233, 252), audit.functions.ts:31, metrics.functions.ts:23; the auth route's two (24, 26) become `createAuth(resolveDbUrl() ?? undefined, makeSendResetPassword(getInternalFetchDeps()))`. Each site adds the `resolveDbUrl` import alongside the existing `createAuth` import (`from '../lib/api.server'`-pathed per file's aliasing — follow each file's existing `#/lib/...` or relative convention).
+- [✅] **Step 4:** audit's `readDbUrl()` body becomes `return resolveDbUrl() ?? null;`; the two metrics handlers read `readMetricsEnv({ ...process.env, DATABASE_URL: resolveDbUrl() })`.
+- [✅] **Step 5: new `src/lib/db-url.server.test.ts`** (lib-seam style, plain Node):
 
 ```ts
 import { afterEach, describe, expect, it } from 'vitest';
