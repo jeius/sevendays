@@ -18,7 +18,7 @@ The API memoized its postgres.js client per isolate (`services/db.ts`, "safe to 
 ## Consequences
 
 - No cross-request I/O scoping failures.
-- Connection setup cost per request is acceptable at current volume — revisit Hyperdrive if API request volume (not just booking volume) demands it. **Discharged 2026-11-10:** Hyperdrive adopted in front of the pooler — see ADR-0024 (the trigger was the free-plan CPU cap, not request volume); the dial rides the `HYPERDRIVE` binding and this ADR's per-request law is unchanged.
+- Connection setup cost per request is acceptable at current volume — revisit Hyperdrive if API request volume (not just booking volume) demands it.
 - Documented in `docs/progress.md` Known Gaps.
 - **Relocated into the acquisition middleware (candidate D, 2026-09-04):** the
   per-request `createApiDb` call now lives in one `v1.use('*')` middleware

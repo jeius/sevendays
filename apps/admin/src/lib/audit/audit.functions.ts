@@ -15,7 +15,6 @@ import { createDbClient, runAuditActors, runAuditLogPage } from '@sevendays/db';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequestHeaders } from '@tanstack/react-start/server';
 
-import { resolveDbUrl } from '../api.server';
 import { createAuth } from '../auth';
 import { AUDIT_PAGE_SIZE, auditDateWindow, auditLogSearchSchema, pageWindow } from './filters';
 
@@ -24,11 +23,12 @@ export type AuditResult<T> =
   | { ok: false; reason: 'not-configured' | 'unavailable' };
 
 function readDbUrl(): string | null {
-  return resolveDbUrl() ?? null;
+  const value = process.env.DATABASE_URL;
+  return typeof value === 'string' && value.trim() !== '' ? value.trim() : null;
 }
 
 async function requireAuditSession(): Promise<void> {
-  const session = await createAuth(resolveDbUrl() ?? undefined).api.getSession({
+  const session = await createAuth().api.getSession({
     headers: getRequestHeaders(),
   });
   if (!session || session.user.role !== 'admin') {

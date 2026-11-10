@@ -5,10 +5,6 @@
   "compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
   "main": "@tanstack/react-start/server-entry",
   "services": [{ "binding": "API", "service": "sevendays-api" }],
-  // ADR-0024: Hyperdrive fronts Supavisor (same origin as DATABASE_URL;
-  // caching disabled — read-your-writes). DATABASE_URL stays the fallback.
-  // Local boot: `vite dev`/`vite preview` need CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE (see .env.example).
-  "hyperdrive": [{ "binding": "HYPERDRIVE", "id": "ce6e772397454dbd9806219b83585f4a" }],
   // The metrics seam's failure detail lands on console.error (#186) —
   // Workers Logs retains it (3-day, free tier; wrangler tail is live).
   "observability": { "enabled": true }

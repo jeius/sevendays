@@ -2,16 +2,11 @@ import { z } from 'zod';
 
 // The Worker's runtime env, Zod-parsed once per request (the binding object is
 // per-request under workerd) — a missing or malformed var fails loudly here
-// instead of surfacing as a mid-request failure. The db connection rides the
-// HYPERDRIVE binding when present (ADR-0024: Hyperdrive fronts Supavisor so
-// the per-request dial stops costing a full TLS handshake — the free-plan CPU
-// cliff, 2026-11-09 incident); DATABASE_URL stays as the pooled-connection
-// fallback (ADR-0007) for vitest, the admin's vite dev, and break-glass
-// rollback — the api's local dev boots on the emulated binding (the Hyperdrive
-// local-connection var; see .dev.vars.example). The
-// email pair (issue #47) has no fallback by design — the API_URL posture: a
-// deploy without either var fails every /api/v1 request (acquireDb parses the
-// full schema) rather than silently dropping confirmation emails.
+// instead of surfacing as a mid-request failure. DATABASE_URL is the pooled
+// Supabase connection (ADR-0007). The email pair (issue #47) has no fallback
+// by design — the API_URL posture: a deploy without either var fails every
+// /api/v1 request (acquireDb parses the full schema) rather than silently
+// dropping confirmation emails.
 //
 // Two OPTIONAL keys, each with a loud owner (fail-everything would be wrong):
 // - BETTER_AUTH_SECRET (M4 ticket 04): the auth middleware owns the missing-
@@ -45,16 +40,7 @@ import { z } from 'zod';
 // RATE_LIMITER (M7 #216) is the rate-limit binding — same required-binding
 // posture, `wrangler dev` simulates it locally.
 export const envSchema = z.object({
-  DATABASE_URL: z.url().optional(),
-  HYPERDRIVE: z
-    .custom<Hyperdrive>(
-      (v) =>
-        v !== null &&
-        typeof v === 'object' &&
-        typeof (v as { connectionString?: unknown }).connectionString === 'string' &&
-        (v as { connectionString: string }).connectionString.trim() !== ''
-    )
-    .optional(),
+  DATABASE_URL: z.url(),
   RESEND_API_KEY: z.string().min(1),
   LANDING_ORIGIN: z.url(),
   BETTER_AUTH_SECRET: z.string().min(1).optional(),

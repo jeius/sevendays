@@ -8,20 +8,19 @@ import { startSpan } from '@sentry/tanstackstart-react';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequestHeaders } from '@tanstack/react-start/server';
 
-import { resolveDbUrl } from './api.server';
 import { createAuth } from './auth';
 
 export const getSession = createServerFn({ method: 'GET' }).handler(async () => {
   return startSpan({ name: 'auth getSession' }, async () => {
     const headers = getRequestHeaders();
-    return createAuth(resolveDbUrl() ?? undefined).api.getSession({ headers });
+    return createAuth().api.getSession({ headers });
   });
 });
 
 export const ensureSession = createServerFn({ method: 'GET' }).handler(async () => {
   return startSpan({ name: 'auth ensureSession' }, async () => {
     const headers = getRequestHeaders();
-    const session = await createAuth(resolveDbUrl() ?? undefined).api.getSession({ headers });
+    const session = await createAuth().api.getSession({ headers });
     if (!session) {
       throw new Error('Unauthorized');
     }
