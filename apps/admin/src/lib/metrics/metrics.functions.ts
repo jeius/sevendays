@@ -12,6 +12,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { getRequestHeaders } from '@tanstack/react-start/server';
 import { z } from 'zod';
 
+import { resolveDbUrl } from '../api.server';
 import { createAuth } from '../auth';
 import { fetchWorkerMetrics, metricsWindowSchema } from './cf';
 import { collectContentCensus, collectDbProbes } from './db';
@@ -20,7 +21,7 @@ import { fetchTrafficMetrics } from './posthog';
 import { fetchStorageMetrics } from './r2';
 
 async function requireMetricsSession(): Promise<void> {
-  const session = await createAuth().api.getSession({
+  const session = await createAuth(resolveDbUrl() ?? undefined).api.getSession({
     headers: getRequestHeaders(),
   });
   if (!session) {
@@ -40,7 +41,9 @@ export const fetchMetricsWorkers = createServerFn({ method: 'GET' })
 export const fetchMetricsDbProbes = createServerFn({ method: 'GET' }).handler(async () => {
   return startSpan({ name: 'metrics db-probes' }, async () => {
     await requireMetricsSession();
-    const env = readMetricsEnv();
+    // ADR-0024: the db URL rides the HYPERDRIVE binding when present, else
+    // process.env — fed through the unchanged readMetricsEnv seam.
+    const env = readMetricsEnv({ ...process.env, DATABASE_URL: resolveDbUrl() });
     if (env.dbUrl === null) {
       return { ok: false as const, reason: 'not-configured' as const };
     }
@@ -52,7 +55,8 @@ export const fetchMetricsDbProbes = createServerFn({ method: 'GET' }).handler(as
 export const fetchMetricsContent = createServerFn({ method: 'GET' }).handler(async () => {
   return startSpan({ name: 'metrics content' }, async () => {
     await requireMetricsSession();
-    const env = readMetricsEnv();
+    // ADR-0024: same source as the db-probes handler above.
+    const env = readMetricsEnv({ ...process.env, DATABASE_URL: resolveDbUrl() });
     if (env.dbUrl === null) {
       return { ok: false as const, reason: 'not-configured' as const };
     }
