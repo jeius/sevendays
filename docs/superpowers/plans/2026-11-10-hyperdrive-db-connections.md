@@ -132,7 +132,7 @@ export const acquireDb = async (c: import('hono').Context<ApiEnv>, next: () => P
 
 Docstring rewritten: per-request client unchanged (workerd I/O scoping); the dial moved to Hyperdrive; the previously-unreachable TypeError path is now live (pinned by Task 3's test).
 
-- [ ] **Step 5:** gates may fail only in the ways Task 3 fixes — commit after Task 3's suite is green (single commit for Tasks 2+3).
+- [✅] **Step 5:** gates may fail only in the ways Task 3 fixes — commit after Task 3's suite is green (single commit for Tasks 2+3).
 
 ### Task 3: API tests
 
@@ -223,7 +223,7 @@ The empty / non-string / malformed DATABASE_URL tests stay (still throw /DATABAS
   });
 ```
 
-- [ ] **Step 3:** full api suite green; floor = the previous run's counts + 4 net (three replaces/additions in env.test.ts net +2, error-seam +2 — exact totals recorded from the run output, never from this plan's arithmetic). Commit Tasks 2+3:
+- [✅] **Step 3:** full api suite green; floor = the previous run's counts + 4 net (three replaces/additions in env.test.ts net +2, error-seam +2 — exact totals recorded from the run output, never from this plan's arithmetic). Commit Tasks 2+3:
 
 ```bash
 git add apps/api
