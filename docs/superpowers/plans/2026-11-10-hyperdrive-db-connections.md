@@ -71,7 +71,7 @@ docs/agents/v1-picks.md  graphify-out/            # T8
 
 **Not here:** any test file (Task 3); `packages/db` (client untouched); CI (the DATABASE_URL sync steps stay as the fallback).
 
-^- [✅] **Step 1: wrangler.toml** — after the `[images]` block:
+- [✅] **Step 1: wrangler.toml** — after the `[images]` block:
 
 ```toml
 # The DB connection path (ADR-0024): Hyperdrive fronts the Supavisor
@@ -86,7 +86,7 @@ binding = "HYPERDRIVE"
 id = "ce6e772397454dbd9806219b83585f4a"
 ```
 
-^- [✅] **Step 2: env.ts** — replace `  DATABASE_URL: z.url(),` with:
+- [✅] **Step 2: env.ts** — replace `  DATABASE_URL: z.url(),` with:
 
 ```ts
   DATABASE_URL: z.url().optional(),
@@ -114,7 +114,7 @@ If `Hyperdrive` is not ambient (R2Bucket et al. are), the pinned fallback is `im
 // full schema) rather than silently dropping confirmation emails.
 ```
 
-^- [✅] **Step 3: v1.ts** — replace the `acquireDb` body (comment's first sentence updated to name the two sources; the uniform-500 law unchanged):
+- [✅] **Step 3: v1.ts** — replace the `acquireDb` body (comment's first sentence updated to name the two sources; the uniform-500 law unchanged):
 
 ```ts
 export const acquireDb = async (c: import('hono').Context<ApiEnv>, next: () => Promise<void>) => {
@@ -124,7 +124,7 @@ export const acquireDb = async (c: import('hono').Context<ApiEnv>, next: () => P
 };
 ```
 
-^- [✅] **Step 4: services/db.ts** — widen the signature to `connectionString: string | undefined`; replace the throw message with:
+- [✅] **Step 4: services/db.ts** — widen the signature to `connectionString: string | undefined`; replace the throw message with:
 
 ```ts
     'No database source — set the HYPERDRIVE binding (production, ADR-0024) or DATABASE_URL (fallback, ADR-0007). Neither is present.'
@@ -140,7 +140,7 @@ Docstring rewritten: per-request client unchanged (workerd I/O scoping); the dia
 
 **Not here:** `test/helpers/env.ts` stays UNCHANGED — every existing suite keeps the fallback path, so the dead-port overrides in error-seam (:55), application-log (:99), sentry-capture (:24, :38) keep meaning what they say.
 
-^- [✅] **Step 1: env.test.ts** — replace the `'rejects a missing DATABASE_URL'` test (lines 59–61) with:
+- [✅] **Step 1: env.test.ts** — replace the `'rejects a missing DATABASE_URL'` test (lines 59–61) with:
 
 ```ts
   it('parses without DATABASE_URL when HYPERDRIVE carries the connection (ADR-0024)', () => {
@@ -190,7 +190,7 @@ The empty / non-string / malformed DATABASE_URL tests stay (still throw /DATABAS
   });
 ```
 
-^- [✅] **Step 2: error-seam.test.ts** — append to the uniform-500 describe:
+- [✅] **Step 2: error-seam.test.ts** — append to the uniform-500 describe:
 
 ```ts
   it('prefers the HYPERDRIVE binding over DATABASE_URL (ADR-0024)', async () => {
@@ -236,7 +236,7 @@ git commit -m "feat(api): the db connection rides the HYPERDRIVE binding with th
 
 **Not here:** `auth.ts` + `auth.config.ts` untouched (config purity — the BetterAuth CLI loads them via jiti outside any bundler); `readMetricsEnv`'s signature and its four test files untouched.
 
-^- [✅] **Step 1: wrangler.jsonc** — add beside `services`:
+- [✅] **Step 1: wrangler.jsonc** — add beside `services`:
 
 ```jsonc
   // ADR-0024: Hyperdrive fronts Supavisor (same origin as DATABASE_URL;

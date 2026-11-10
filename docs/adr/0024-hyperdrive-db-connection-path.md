@@ -14,7 +14,7 @@ On 2026-11-09 the free-plan CPU limit was killing the API Worker mid-request —
 - **Query caching is disabled** on the config — read-your-writes: a CMS save must reach the next page load.
 - **The per-request client stays.** ADR-0011's workerd I/O-scoping law is unchanged — only the dial moved: the API's `createApiDb` (and the admin's server functions, through `resolveDbUrl`) still build a fresh client per request, now fed the binding's connection string.
 - **Origin = the transaction pooler (port 6543), the same URL the `DATABASE_URL` secret holds** — it keeps `prepare: false` and shares the 60-connection budget. This is reasoning, not vendor-doc-confirmed.
-- **`DATABASE_URL` stays the CI-synced fallback.** Code prefers the binding and falls back to the URL, so local dev, vitest, and break-glass rollback (revert the PR, redeploy) keep working untouched; `DATABASE_MIGRATE_URL` (ADR-0007) is unaffected.
+- **`DATABASE_URL` stays the CI-synced fallback** for vitest, the admin's vite dev (the binding capture is DEV-gated off there), and break-glass rollback (revert the PR, redeploy) — not the api's local dev: `wrangler dev` emulates the binding and boots on the Hyperdrive local-connection var (the recipe in `apps/api/.dev.vars.example`). `DATABASE_MIGRATE_URL` (ADR-0007) is unaffected.
 
 ## Consequences
 

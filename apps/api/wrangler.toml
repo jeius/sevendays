@@ -24,8 +24,9 @@ binding = "IMAGES"
 # dial is a local handoff instead of a full TLS handshake — the free-plan
 # 10ms CPU cliff (2026-11-09 incident). Query caching is DISABLED on this
 # config (read-your-writes: a CMS save must reach the next page load).
-# DATABASE_URL stays synced by CI as the code-level fallback (dev, vitest,
-# break-glass rollback).
+# DATABASE_URL stays synced by CI as the code-level fallback (vitest, the
+# admin's vite dev, break-glass rollback — `wrangler dev` boots on the
+# emulated binding via CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE).
 [[hyperdrive]]
 binding = "HYPERDRIVE"
 id = "ce6e772397454dbd9806219b83585f4a"
@@ -50,8 +51,10 @@ simple = { limit = 5, period = 60 }
 enabled = true
 
 # Secrets (set via `wrangler secret put <NAME>`, never committed):
-#   DATABASE_URL              (ADR-0024 fallback — dev, vitest, break-glass;
-#                              the deployed dial rides the HYPERDRIVE binding)
+#   DATABASE_URL              (ADR-0024 fallback — vitest, admin vite dev,
+#                              break-glass; the deployed dial rides the
+#                              HYPERDRIVE binding; `wrangler dev` boots on the
+#                              Hyperdrive local-connection var)
 #   BETTER_AUTH_SECRET
 #   RESEND_API_KEY
 #   SENTRY_DSN   (M6 #184 — live; CI-synced from the GitHub environment, skip-notice when unset)

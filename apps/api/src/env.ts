@@ -6,7 +6,9 @@ import { z } from 'zod';
 // HYPERDRIVE binding when present (ADR-0024: Hyperdrive fronts Supavisor so
 // the per-request dial stops costing a full TLS handshake — the free-plan CPU
 // cliff, 2026-11-09 incident); DATABASE_URL stays as the pooled-connection
-// fallback (ADR-0007) for local dev, vitest, and break-glass rollback. The
+// fallback (ADR-0007) for vitest, the admin's vite dev, and break-glass
+// rollback — the api's local dev boots on the emulated binding (the Hyperdrive
+// local-connection var; see .dev.vars.example). The
 // email pair (issue #47) has no fallback by design — the API_URL posture: a
 // deploy without either var fails every /api/v1 request (acquireDb parses the
 // full schema) rather than silently dropping confirmation emails.

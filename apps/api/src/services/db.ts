@@ -22,8 +22,10 @@ export type ApiEnv = {
  * HYPERDRIVE binding's when present — Hyperdrive fronts the Supavisor
  * transaction pooler, so the dial is a local handoff instead of a full TLS
  * handshake per request (the free-plan CPU cliff, 2026-11-09) — else the
- * pooled DATABASE_URL fallback (dev, vitest, break-glass). prepare:false is
- * required under transaction pooling either way.
+ * pooled DATABASE_URL fallback (vitest, the admin's vite dev, break-glass
+ * rollback — the api's local dev boots on the emulated binding's Hyperdrive
+ * local-connection var). prepare:false is required under transaction pooling
+ * either way.
  * Created fresh per request: workerd scopes I/O objects to the request that
  * created them, so a client memoized per isolate throws "Cannot perform I/O
  * on behalf of a different request" on every later call. Hyperdrive changes

@@ -23,7 +23,7 @@
 
 - **PostgreSQL** — via Supabase (or another Postgres-compatible free tier — Neon is a reasonable alternative). (Supabase project provisioned; M1.3 applied migration 0000 and seeded the catalog).
 - **Drizzle ORM** (^0.45) — schema and query builder, lives in `packages/db`. Schema is written; migrations 0000–0004 are applied to the live database and the catalog is seeded (0002–0004 are the M2 studio-services/appointments wave) — see docs/progress.md.
-- **Cloudflare Hyperdrive** — the deployed DB dial path for both Workers (ADR-0024, 2026-11-10): the `HYPERDRIVE` binding fronts the Supabase transaction pooler (origin = the same port-6543 URL `DATABASE_URL` holds; query caching disabled — read-your-writes), so the per-request postgres dial stops paying a full TLS handshake (the free-plan 10 ms CPU cliff, 2026-11-09). `DATABASE_URL` stays the CI-synced fallback for local dev, vitest, and rollback.
+- **Cloudflare Hyperdrive** — the deployed DB dial path for both Workers (ADR-0024, 2026-11-10): the `HYPERDRIVE` binding fronts the Supabase transaction pooler (origin = the same port-6543 URL `DATABASE_URL` holds; query caching disabled — read-your-writes), so the per-request postgres dial stops paying a full TLS handshake (the free-plan 10 ms CPU cliff, 2026-11-09). `DATABASE_URL` stays the CI-synced fallback for vitest, the admin's vite dev, and rollback (the api's local dev boots on the emulated binding's Hyperdrive local-connection var).
 
 ### Provisioning Postgres (done 2026-08-31 — record of how it was done)
 
@@ -71,7 +71,7 @@ Deploys are branch-keyed GitHub Actions (`.github/workflows/ci.yml`), gated on C
 
 | Secret | Used by | Set via |
 |---|---|---|
-| `DATABASE_URL` | `apps/api` Worker runtime, local `wrangler dev` — the fallback/dev path (ADR-0024; the deployed dial rides `HYPERDRIVE`) | `wrangler secret put` / local `.dev.vars` |
+| `DATABASE_URL` | `apps/api` Worker runtime — the fallback path (ADR-0024; the deployed dial rides `HYPERDRIVE`): vitest, the admin's vite dev, break-glass rollback; the api's local `wrangler dev` boots on the Hyperdrive local-connection var | `wrangler secret put` / local `.dev.vars` |
 | `HYPERDRIVE` (binding, not a secret) | the deployed DB dial path, both Workers (ADR-0024) | `[[hyperdrive]]` in `apps/api/wrangler.toml` + `apps/admin/wrangler.jsonc` |
 | `DATABASE_MIGRATE_URL` | drizzle-kit + seed/verify scripts (`packages/db`) | local `packages/db/.env` (gitignored) |
 | `BETTER_AUTH_SECRET` | `apps/api`, `apps/admin` | `wrangler secret put` |
