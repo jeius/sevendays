@@ -12,6 +12,7 @@ import { startSpan } from '@sentry/tanstackstart-react';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequestHeaders } from '@tanstack/react-start/server';
 import { z } from 'zod';
+import { resolveDbUrl } from './api.server';
 import { createAuth } from './auth';
 import { type AdminUserSummary, banRefusal, deleteRefusal } from './users-guards';
 
@@ -72,7 +73,7 @@ async function listSummaries(
 
 export const fetchAdminUsers = createServerFn({ method: 'GET' }).handler(async () => {
   return startSpan({ name: 'auth admin listUsers' }, async () => {
-    const auth = createAuth();
+    const auth = createAuth(resolveDbUrl() ?? undefined);
     return listSummaries(auth, getRequestHeaders());
   });
 });
@@ -92,7 +93,7 @@ export const createAdminUser = createServerFn({
   .handler(async ({ data }): Promise<UsersActionResult<AdminUserSummary>> => {
     return startSpan({ name: 'auth admin createUser' }, async () => {
       try {
-        const result = await createAuth().api.createUser({
+        const result = await createAuth(resolveDbUrl() ?? undefined).api.createUser({
           headers: getRequestHeaders(),
           // ADR-0018's 'staff' rides the plugin's runtime schema (routes.mjs
           // createUserBodySchema: role: z.union([z.string(), ...]) — any
@@ -122,7 +123,7 @@ export const resetAdminUserPassword = createServerFn({
   .handler(async ({ data }): Promise<UsersActionResult<{ userId: string }>> => {
     return startSpan({ name: 'auth admin setUserPassword' }, async () => {
       try {
-        await createAuth().api.setUserPassword({
+        await createAuth(resolveDbUrl() ?? undefined).api.setUserPassword({
           headers: getRequestHeaders(),
           body: { userId: data.userId, newPassword: data.newPassword },
         });
@@ -141,7 +142,7 @@ export const banAdminUser = createServerFn({
   .handler(async ({ data }): Promise<UsersActionResult<AdminUserSummary>> => {
     return startSpan({ name: 'auth admin banUser' }, async () => {
       try {
-        const auth = createAuth();
+        const auth = createAuth(resolveDbUrl() ?? undefined);
         const headers = getRequestHeaders();
         // The actor is the signed-in caller — the self-guard reads the
         // session, never the target row.
@@ -177,7 +178,7 @@ export const unbanAdminUser = createServerFn({
   .handler(async ({ data }): Promise<UsersActionResult<AdminUserSummary>> => {
     return startSpan({ name: 'auth admin unbanUser' }, async () => {
       try {
-        const result = await createAuth().api.unbanUser({
+        const result = await createAuth(resolveDbUrl() ?? undefined).api.unbanUser({
           headers: getRequestHeaders(),
           body: { userId: data.userId },
         });
@@ -192,7 +193,7 @@ export const fetchAdminUserSessions = createServerFn({ method: 'GET' })
   .validator(z.object({ userId: z.string().min(1) }))
   .handler(async ({ data }) => {
     return startSpan({ name: 'auth admin listUserSessions' }, async () => {
-      const result = await createAuth().api.listUserSessions({
+      const result = await createAuth(resolveDbUrl() ?? undefined).api.listUserSessions({
         headers: getRequestHeaders(),
         body: { userId: data.userId },
       });
@@ -211,7 +212,7 @@ export const revokeAdminUserSession = createServerFn({
   .handler(async ({ data }): Promise<UsersActionResult<{ sessionToken: string }>> => {
     return startSpan({ name: 'auth admin revokeUserSession' }, async () => {
       try {
-        await createAuth().api.revokeUserSession({
+        await createAuth(resolveDbUrl() ?? undefined).api.revokeUserSession({
           headers: getRequestHeaders(),
           body: { sessionToken: data.sessionToken },
         });
@@ -230,7 +231,7 @@ export const revokeAdminUserSessions = createServerFn({
   .handler(async ({ data }): Promise<UsersActionResult<{ userId: string }>> => {
     return startSpan({ name: 'auth admin revokeUserSessions' }, async () => {
       try {
-        await createAuth().api.revokeUserSessions({
+        await createAuth(resolveDbUrl() ?? undefined).api.revokeUserSessions({
           headers: getRequestHeaders(),
           body: { userId: data.userId },
         });
@@ -249,7 +250,7 @@ export const removeAdminUser = createServerFn({
   .handler(async ({ data }): Promise<UsersActionResult<{ userId: string }>> => {
     return startSpan({ name: 'auth admin removeUser' }, async () => {
       try {
-        const auth = createAuth();
+        const auth = createAuth(resolveDbUrl() ?? undefined);
         const headers = getRequestHeaders();
         const session = await auth.api.getSession({ headers });
         if (!session) {

@@ -56,8 +56,32 @@ describe('parseEnv', () => {
     ).toThrow(/LANDING_ORIGIN/i);
   });
 
-  it('rejects a missing DATABASE_URL', () => {
-    expect(() => parseEnv({})).toThrow(/DATABASE_URL/);
+  it('parses without DATABASE_URL when HYPERDRIVE carries the connection (ADR-0024)', () => {
+    const env = parseEnv({
+      HYPERDRIVE: { connectionString: 'postgres://u:p@host:5432/db' },
+      RESEND_API_KEY: 're_test_placeholder',
+      LANDING_ORIGIN: 'http://localhost:3000',
+      CLOUDFLARE_ACCOUNT_ID: '0123456789abcdef0123456789abcdef',
+      MEDIA_PUBLIC_BASE_URL: 'https://pub-test.r2.dev',
+      MEDIA_BUCKET: {},
+      IMAGES: {},
+      RATE_LIMITER: {},
+    });
+    expect(env.DATABASE_URL).toBeUndefined();
+  });
+
+  it('parses with neither db source present (the acquisition throw owns the loud failure)', () => {
+    const env = parseEnv({
+      RESEND_API_KEY: 're_test_placeholder',
+      LANDING_ORIGIN: 'http://localhost:3000',
+      CLOUDFLARE_ACCOUNT_ID: '0123456789abcdef0123456789abcdef',
+      MEDIA_PUBLIC_BASE_URL: 'https://pub-test.r2.dev',
+      MEDIA_BUCKET: {},
+      IMAGES: {},
+      RATE_LIMITER: {},
+    });
+    expect(env.DATABASE_URL).toBeUndefined();
+    expect(env.HYPERDRIVE).toBeUndefined();
   });
 
   it('rejects an empty DATABASE_URL', () => {
@@ -118,6 +142,20 @@ describe('parseEnv — media keys (M5 #136)', () => {
     expect(env.MEDIA_PUBLIC_BASE_URL).toBe('https://pub-test.r2.dev');
     expect(env.R2_S3_ACCESS_KEY_ID).toBeUndefined();
     expect(env.R2_S3_SECRET_ACCESS_KEY).toBeUndefined();
+  });
+
+  it('parses a HYPERDRIVE binding stub (the connectionString shape, ADR-0024)', () => {
+    const env = parseEnv({
+      DATABASE_URL: 'postgres://u:p@host:5432/db',
+      RESEND_API_KEY: 're_test_placeholder',
+      LANDING_ORIGIN: 'http://localhost:3000',
+      ...mediaVars(),
+      MEDIA_BUCKET: {},
+      IMAGES: {},
+      RATE_LIMITER: {},
+      HYPERDRIVE: { connectionString: 'postgres://u:p@host:5432/db' },
+    });
+    expect(env.HYPERDRIVE).toEqual({ connectionString: 'postgres://u:p@host:5432/db' });
   });
 
   it('rejects a missing MEDIA_BUCKET binding (required — deploys with wrangler.toml once the bucket exists)', () => {

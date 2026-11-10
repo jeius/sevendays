@@ -3,7 +3,10 @@ import { type ApiClient, createApiClient } from '@sevendays/api-client';
 // Server-only (ADR-0006): the API base URL and the client embedding it must
 // never reach a client bundle. The server functions in api.functions.ts are
 // the only permitted importers of this module, alongside the gallery thumb
-// proxy route (`routes/api/admin/gallery-photos/$id.thumb.ts`).
+// proxy route (`routes/api/admin/gallery-photos/$id.thumb.ts`), the auth
+// route's reset-email forward ($.ts), and — since ADR-0024 — every
+// DB-touching server fn (auth.functions, users.functions, audit.functions,
+// metrics.functions) for `resolveDbUrl`.
 export function getApiUrl(): string {
   const url = process.env.API_URL;
   if (typeof url !== 'string' || url.trim() === '') {
@@ -12,6 +15,15 @@ export function getApiUrl(): string {
     );
   }
   return url;
+}
+
+// The db connection (ADR-0024): Hyperdrive fronts Supavisor — the same
+// free-plan CPU cliff the API hit (2026-11-09). Dev and vitest keep the
+// process.env path (the same DEV gate as the service binding above).
+export function resolveDbUrl(): string | undefined {
+  const fromEnv = process.env.DATABASE_URL;
+  const trimmed = typeof fromEnv === 'string' ? fromEnv.trim() : '';
+  return hyperdriveConnectionString ?? (trimmed !== '' ? trimmed : undefined);
 }
 
 // Deployed routing (ADR-0016): Cloudflare rejects Worker→Worker subrequests
@@ -25,6 +37,11 @@ export function getApiUrl(): string {
 // statically, and the binding's fetch rides the client's custom-fetch seam
 // (CreateApiClientOptions.fetch — the toLoopbackFetch precedent).
 let serviceBindingFetch: typeof fetch | undefined;
+// ADR-0024: the HYPERDRIVE binding's connection string, captured with the
+// same gate + plain-Node fallback as the service binding above. Plain data,
+// so module-scope capture is safe (ADR-0011 still binds the postgres CLIENT
+// per request — only the dial moved).
+let hyperdriveConnectionString: string | undefined;
 if (!import.meta.env?.DEV) {
   try {
     const cf = (await import(/* @vite-ignore */ 'cloudflare' + ':workers')) as {
@@ -32,6 +49,13 @@ if (!import.meta.env?.DEV) {
     };
     const binding = cf.env.API as { fetch: typeof fetch } | undefined;
     if (binding) serviceBindingFetch = binding.fetch.bind(binding);
+    const hyperdrive = cf.env.HYPERDRIVE as { connectionString?: unknown } | undefined;
+    if (
+      typeof hyperdrive?.connectionString === 'string' &&
+      hyperdrive.connectionString.trim() !== ''
+    ) {
+      hyperdriveConnectionString = hyperdrive.connectionString;
+    }
   } catch {
     // Not on Workers — keep the API_URL network path.
   }
