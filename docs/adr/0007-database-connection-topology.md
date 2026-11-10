@@ -1,6 +1,6 @@
 # Database connection topology
 
-**Amended:** 2026-11-10 — Hyperdrive adopted in front of the pooler — see ADR-0024. The deployed `apps/api` Worker (and the admin's DB-touching server functions) dial the same port-6543 transaction-pooler origin through the `HYPERDRIVE` binding (query caching disabled), with `DATABASE_URL` staying the CI-synced fallback for dev/vitest/rollback; `prepare: false` remains the hard requirement either way.
+**Amended:** 2026-11-10 — Hyperdrive adopted in front of the pooler — see ADR-0024. The deployed `apps/api` Worker (and the admin's DB-touching server functions) dial the same port-6543 transaction-pooler origin through the `HYPERDRIVE` binding (query caching disabled), with `DATABASE_URL` staying the CI-synced fallback for vitest, the admin's vite dev, and break-glass rollback — the api's local `wrangler dev` no longer reaches it (it boots on the emulated binding's Hyperdrive local-connection var; recipe in `apps/api/.dev.vars.example`); `prepare: false` remains the hard requirement either way.
 
 **Amended:** 2026-09-02 — explicit transactions verified live over the transaction-mode pooler (Seam 3 probe of the intake-deepening spec, issue #13): manual BEGIN/ROLLBACK and postgres.js `sql.begin` rollback + commit legs all PASS on the port-6543 URL the deployed Worker uses. The appointment-intake write (and M3's later capacity check-then-insert) may run one module-internal transaction per request. `prepare: false` remains the hard requirement.
 
