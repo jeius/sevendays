@@ -1,3 +1,4 @@
+import { type Database, servicePackages } from '@sevendays/db';
 import type { MiddlewareHandler } from 'hono';
 import type { ApiEnv } from './db.js';
 
@@ -132,4 +133,64 @@ export const publicReadCache: MiddlewareHandler<ApiEnv> = async (c, next) => {
   if (c.res.status === 200) {
     await store.put(c.req.path, c.res);
   }
+};
+
+// The eviction contract (ADR-0025): every COMMITTED admin mutation request
+// (non-GET, 2xx/3xx — the audit row's gate, M6 #185) evicts the public
+// reads its entity feeds. The package family spans three admin segments:
+// the public package read EMBEDS print sizes and attires (the trim rules),
+// so a print-size or attire mutation changes package responses too — all
+// three sweep the list key + every current slug's detail key. Renamed-away
+// or deleted slugs' stale entries are unenumerable (the Cache API has no
+// list) — they age out via TTL (≤60 s, ADR-0025's documented bound).
+export type CachedPublicRead =
+  | 'branches'
+  | 'service-packages'
+  | 'gallery'
+  | 'testimonials'
+  | 'site-settings';
+
+const ADMIN_MUTATION_READS: Record<string, CachedPublicRead[]> = {
+  branches: ['branches'],
+  'print-sizes': ['service-packages'],
+  attires: ['service-packages'],
+  'service-packages': ['service-packages'],
+  'gallery-categories': ['gallery'],
+  'gallery-photos': ['gallery'],
+  testimonials: ['testimonials'],
+  'testimonial-submissions': ['testimonials'],
+  'site-settings': ['site-settings'],
+  // media (presign mints URLs; binds happen inside entity saves),
+  // addon-services + studio-services (no cached read embeds them): absent.
+};
+
+export async function evictCachedReads(db: Database, reads: CachedPublicRead[]): Promise<void> {
+  try {
+    const store = getReadCacheStore();
+    if (!store) return;
+    const paths: string[] = [];
+    for (const read of reads) {
+      if (read === 'service-packages') {
+        paths.push('/api/v1/service-packages');
+        const rows = await db.select({ slug: servicePackages.slug }).from(servicePackages);
+        paths.push(...rows.map((row) => `/api/v1/service-packages/${row.slug}`));
+      } else {
+        paths.push(`/api/v1/${read}`);
+      }
+    }
+    await store.evict(...paths);
+  } catch {
+    // Best-effort (ADR-0025): the TTL backstop covers what this misses.
+  }
+}
+
+export const adminEvictPublicReads: MiddlewareHandler<ApiEnv> = async (c, next) => {
+  await next();
+  if (c.req.method === 'GET' || c.req.method === 'HEAD') return;
+  const status = c.res.status;
+  if (status < 200 || status >= 400) return;
+  const segment = c.req.path.split('/')[4];
+  const reads = segment ? ADMIN_MUTATION_READS[segment] : undefined;
+  if (!reads) return;
+  await evictCachedReads(c.get('db'), reads);
 };

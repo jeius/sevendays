@@ -14,6 +14,7 @@ import {
   setReadCacheStore,
   toStoredResponse,
 } from '../src/services/read-cache.js';
+import { signUpSession } from './helpers/auth.js';
 import { createTestDb } from './helpers/db.js';
 import { testEnv } from './helpers/env.js';
 import { loadFixtures, loadGalleryFixtures } from './helpers/fixtures.js';
@@ -23,12 +24,13 @@ const url = process.env.TEST_DATABASE_URL as string;
 const db = createTestDb(url);
 const store = fakeStore(); // shared by this and Task 4's describe
 
+const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
+
 // NOTE (import staging): imports land as their describes do — noUnusedLocals
-// is a gate. Task 3's are in (`app`, `eq` (drizzle-orm), `galleryPhotos`
-// (@sevendays/db), `testEnv`, `loadFixtures`, `loadGalleryFixtures`, and the
-// shared `store` const above); Task 4 still adds `signUpSession` and the
-// `bearer` const below.
-// const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
+// is a gate. All staged imports are in (`app`, `eq` (drizzle-orm),
+// `galleryPhotos` (@sevendays/db), `signUpSession` (./helpers/auth.js), the
+// `bearer` const, `testEnv`, `loadFixtures`, `loadGalleryFixtures`, and the
+// shared `store` const above).
 
 // The in-memory fake (the r2-stub posture): put snapshots status/headers/body,
 // match returns a FRESH Response per call (bodies are single-use).
@@ -174,5 +176,150 @@ describe('publicReadCache (the read path)', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as Record<string, unknown>;
     expect(Object.keys(body).length).toBeGreaterThan(0); // code-defaulted singleton
+  });
+});
+
+describe('adminEvictPublicReads (the write path)', () => {
+  beforeEach(() => {
+    // Shared-store hygiene (the Task 3 pattern): exact-match keys() asserts
+    // need a clean Map regardless of who populated it last.
+    store.evict(...store.keys());
+  });
+
+  it('a committed gallery-category rename evicts the gallery read (read-your-writes)', async () => {
+    setReadCacheStore(store);
+    const gallery = await loadGalleryFixtures(db);
+    const { token } = await signUpSession(url, 'evict-gallery@test.local');
+    expect((await app.request('/api/v1/gallery', undefined, testEnv(url))).status).toBe(200);
+    expect(store.keys()).toEqual(['/api/v1/gallery']);
+
+    const current = (await (
+      await app.request(
+        `/api/v1/admin/gallery-categories/${gallery.categoryA}`,
+        { headers: bearer(token) },
+        testEnv(url)
+      )
+    ).json()) as { name: string; isActive: boolean };
+    const put = await app.request(
+      `/api/v1/admin/gallery-categories/${gallery.categoryA}`,
+      {
+        method: 'PUT',
+        headers: { ...bearer(token), 'content-type': 'application/json' },
+        body: JSON.stringify({ name: 'Renamed Weddings', isActive: current.isActive }),
+      },
+      testEnv(url)
+    );
+    expect(put.status).toBe(200);
+    expect(store.keys()).toEqual([]);
+    const after = (await (
+      await app.request('/api/v1/gallery', undefined, testEnv(url))
+    ).json()) as { categories: { name: string }[] };
+    expect(after.categories[0].name).toBe('Renamed Weddings');
+  });
+
+  it('a failed mutation evicts nothing (only committed writes count)', async () => {
+    setReadCacheStore(store);
+    const gallery = await loadGalleryFixtures(db);
+    const { token } = await signUpSession(url, 'evict-fail@test.local');
+    expect((await app.request('/api/v1/gallery', undefined, testEnv(url))).status).toBe(200);
+    const put = await app.request(
+      `/api/v1/admin/gallery-categories/${gallery.categoryA}`,
+      {
+        method: 'PUT',
+        headers: { ...bearer(token), 'content-type': 'application/json' },
+        body: JSON.stringify({ name: 123, isActive: true }), // wrong type → validatedJson 400
+      },
+      testEnv(url)
+    );
+    expect(put.status).toBe(400);
+    expect(store.keys()).toEqual(['/api/v1/gallery']);
+  });
+
+  it('a print-size deactivation sweeps the package list AND every detail key (the trim-rule embedding)', async () => {
+    setReadCacheStore(store);
+    const fixtures = await loadFixtures(db);
+    const { token } = await signUpSession(url, 'evict-sweep@test.local');
+    for (const path of [
+      '/api/v1/service-packages',
+      '/api/v1/service-packages/combined-package',
+      '/api/v1/service-packages/simple-package',
+    ]) {
+      expect((await app.request(path, undefined, testEnv(url))).status).toBe(200);
+    }
+    expect(store.keys().sort()).toEqual(
+      [
+        '/api/v1/service-packages',
+        '/api/v1/service-packages/combined-package',
+        '/api/v1/service-packages/simple-package',
+      ].sort()
+    );
+
+    const size = (await (
+      await app.request(
+        `/api/v1/admin/print-sizes/${fixtures.printSize2R}`,
+        { headers: bearer(token) },
+        testEnv(url)
+      )
+    ).json()) as { code: string; description: string | null; isActive: boolean };
+    const put = await app.request(
+      `/api/v1/admin/print-sizes/${fixtures.printSize2R}`,
+      {
+        method: 'PUT',
+        headers: { ...bearer(token), 'content-type': 'application/json' },
+        body: JSON.stringify({ ...size, isActive: false }),
+      },
+      testEnv(url)
+    );
+    expect(put.status).toBe(200);
+    expect(store.keys()).toEqual([]);
+  });
+
+  it('a committed branch rename evicts the branches read; a testimonial create evicts the testimonials read', async () => {
+    setReadCacheStore(store);
+    const fixtures = await loadFixtures(db);
+    const { token } = await signUpSession(url, 'evict-rest@test.local');
+    expect((await app.request('/api/v1/branches', undefined, testEnv(url))).status).toBe(200);
+    expect((await app.request('/api/v1/testimonials', undefined, testEnv(url))).status).toBe(200);
+
+    const branch = (await (
+      await app.request(
+        `/api/v1/admin/branches/${fixtures.branchA}`,
+        { headers: bearer(token) },
+        testEnv(url)
+      )
+    ).json()) as { address: string; phone: string; acceptsWalkIns: boolean; isActive: boolean };
+    const branchPut = await app.request(
+      `/api/v1/admin/branches/${fixtures.branchA}`,
+      {
+        method: 'PUT',
+        headers: { ...bearer(token), 'content-type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Renamed Main',
+          address: branch.address,
+          phone: branch.phone,
+          acceptsWalkIns: branch.acceptsWalkIns,
+          isActive: branch.isActive,
+        }),
+      },
+      testEnv(url)
+    );
+    expect(branchPut.status).toBe(200);
+    expect(store.keys()).toEqual(['/api/v1/testimonials']); // branches gone, testimonials kept
+
+    const testimonialPost = await app.request(
+      '/api/v1/admin/testimonials',
+      {
+        method: 'POST',
+        headers: { ...bearer(token), 'content-type': 'application/json' },
+        body: JSON.stringify({
+          quote: 'The cache evicts when we publish.',
+          person: 'Test Person',
+          isActive: true,
+        }),
+      },
+      testEnv(url)
+    );
+    expect(testimonialPost.status).toBe(201);
+    expect(store.keys()).toEqual([]);
   });
 });
