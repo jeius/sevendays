@@ -1,4 +1,4 @@
-import { expect, type Locator, test } from '@playwright/test';
+import { expect, type Locator, type Page, test } from '@playwright/test';
 
 import { requiredEnv } from '../smoke/env';
 
@@ -47,6 +47,117 @@ const SURFACES = [
   ['share-your-story', '/share-your-story'],
   ['not-found', '/__m7_visual_not_found__'],
 ] as const;
+
+// The data-present sentinels (#259): per-surface predicates over the
+// data-bearing DOM, evaluated in the page AFTER the images gate and
+// BEFORE the decode gate. The images gate is vacuous on a page whose
+// data never arrived — no images to wait for — so the Class B flake
+// (an about captured at 734px against its 2238px baseline, a not-found
+// at the bare 720px shell) sailed through to a capture. Each predicate
+// returns null when its surface's data is present or names the missing
+// seam when it is not; a missing seam fails loudly with the page-state
+// dump below — never a skip, never a retry (the beforeAll empty-catalog
+// law's sibling: a data-less capture is a red run, and under
+// --update-snapshots a silently-written empty baseline is a false green
+// forever). The functions are deliberately self-contained: Playwright
+// serializes the function SOURCE into the page, so closures over module
+// bindings would throw at run time. Selectors are the repo's own
+// conventions (the #256 packages-pages harness counts plates as
+// a[href^='/packages/']; nav links are exactly '/packages', so the
+// trailing-slash prefix never matches chrome).
+const SENTINELS: Record<(typeof SURFACES)[number][0], () => string | null> = {
+  home: () => {
+    if (!document.querySelector("[data-strip='featured']")) {
+      return "the featured plates strip is absent ([data-strip='featured']) — the packages read never rendered";
+    }
+    return document.querySelector("[data-strip='gallery'] figure")
+      ? null
+      : "the gallery mosaic rendered no photo figures ([data-strip='gallery'] figure) — the gallery read never rendered";
+  },
+  'packages-index': () =>
+    document.querySelector("a[href^='/packages/']")
+      ? null
+      : "the plates grid rendered no detail-linked plate (a[href^='/packages/']) — the packages read never rendered",
+  'package-detail': () => {
+    if (!document.querySelector("a[href^='/book?package=']")) {
+      return "the book CTA is absent (a[href^='/book?package=']) — the package read never rendered";
+    }
+    return Array.from(document.querySelectorAll('h2')).some((h) =>
+      h.textContent?.includes("What's included")
+    )
+      ? null
+      : "the inclusions section is absent (the What's included h2) — the detail rendered without its spec sheet";
+  },
+  services: () =>
+    document.querySelector("a[href^='/book?service=']")
+      ? null
+      : "the services grid rendered no service row (a[href^='/book?service=']) — the services read never rendered",
+  branches: () =>
+    document.querySelector("a[href^='/book?branch=']")
+      ? null
+      : "the branch strip rendered no branch card (a[href^='/book?branch=']) — the branches read never rendered",
+  about: () => {
+    if (!document.querySelector('[data-portfolio-grid]')) {
+      return 'the portfolio grid is absent ([data-portfolio-grid]) — the gallery read never rendered';
+    }
+    if (!document.querySelector('[data-gallery-tabs]')) {
+      return 'the gallery tab row is absent ([data-gallery-tabs]) — the gallery read never rendered';
+    }
+    return document.querySelector('figure blockquote')
+      ? null
+      : 'the kind-words wall rendered no quote (figure blockquote) — the testimonials read never rendered';
+  },
+  'share-your-story': () =>
+    document.querySelector('#story-quote') && document.querySelector('#story-person')
+      ? null
+      : 'the form chrome is absent (#story-quote / #story-person) — the route rendered without its form',
+  'not-found': () => {
+    const h1 = document.querySelector('h1');
+    if (!h1?.textContent?.includes('This page never developed.')) {
+      return 'the ruled field copy is absent (the "This page never developed." h1)';
+    }
+    return document.querySelector('header')
+      ? null
+      : 'the site chrome is absent (header) — the shell rendered without the header';
+  },
+};
+
+// The sentinel failure message: the surface, the missing seam, and a
+// compact page-state dump — enough to identify the render path on the
+// next occurrence (the ruled empty-state copy vs the "Something went
+// wrong." error boundary vs a partial HTML stream vs the Cloudflare
+// throttle page, whose evidence-pinned body marker 'error code: 1102'
+// (#255's incident) gets its own attribution line so nightly logs name
+// platform throttling instead of masking it as a data race).
+async function sentinelFailureMessage(
+  name: string,
+  missingSeam: string,
+  page: Page
+): Promise<string> {
+  const state = await page.evaluate(() => {
+    const images = Array.from(document.images);
+    const bodyText = document.body?.innerText ?? '';
+    return {
+      title: document.title,
+      readyState: document.readyState,
+      scrollHeight: (document.scrollingElement ?? document.documentElement).scrollHeight,
+      completeImages: images.filter((img) => img.complete && img.naturalWidth > 0).length,
+      totalImages: images.length,
+      bodyHead: bodyText.replace(/\s+/g, ' ').trim().slice(0, 200),
+      cf1102: /error code: 1102/i.test(bodyText),
+    };
+  });
+  return (
+    `#259 data-present sentinel: ${name} — ${missingSeam}. ` +
+    `Page state: title=${JSON.stringify(state.title)} readyState=${state.readyState} ` +
+    `scrollHeight=${state.scrollHeight}px ` +
+    `images=${state.completeImages}/${state.totalImages} complete ` +
+    `body-head=${JSON.stringify(state.bodyHead)}` +
+    (state.cf1102
+      ? ' — Cloudflare Error 1102 marker present: worker resource-limit throttling, not a data race'
+      : '')
+  );
+}
 
 test.describe('the redesigned landing — visual baselines', () => {
   let detailPath: string;
@@ -100,6 +211,18 @@ test.describe('the redesigned landing — visual baselines', () => {
           undefined,
           { timeout: 30_000 }
         );
+        // The data-present sentinel (#259) sits between the images gate
+        // and the decode gate: the images gate passes vacuously when the
+        // data never arrived (no images to wait for), so each surface
+        // asserts its data-bearing DOM here and fails loudly with the
+        // page-state dump instead of capturing — before any measurement
+        // (the dump's scrollHeight then reads the standard-viewport
+        // height, which is exactly the Class B signature: a shell-height
+        // page where the baseline expects content height).
+        const missingSeam = await page.evaluate(SENTINELS[name]);
+        if (missingSeam !== null) {
+          throw new Error(await sentinelFailureMessage(name, missingSeam, page));
+        }
         // The decode gate (#255): `complete && naturalWidth > 0` proves
         // the bytes arrived, not that Chromium rasterized the frame —
         // #241's about-light flake captured blank photos whose images
