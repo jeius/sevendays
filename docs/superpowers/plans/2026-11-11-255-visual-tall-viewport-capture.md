@@ -58,7 +58,7 @@ The brief's key interface, first and standalone: every Reveal wrapper carries a 
 
 **Not here:** any change to the transition, delays, IntersectionObserver, or reduced-motion path (the hooks are observability only); any other component (the wait targets Reveal wrappers alone — the brief's "every reveal wrapper on the page" is exactly this component's instances); #259's sentinels.
 
-- [ ] **Step 1: The two edits**
+- [✅] **Step 1: The two edits**
 
 (a) Replace the file's leading comment block:
 
@@ -102,7 +102,7 @@ with:
       style={{ transitionDelay: `${delay}ms` }}
 ```
 
-- [ ] **Step 2: The landing gates**
+- [✅] **Step 2: The landing gates**
 
 ```bash
 pnpm --filter @sevendays/landing fix
@@ -112,7 +112,7 @@ pnpm --filter @sevendays/landing test
 
 Expected: `fix` rewrites NOTHING (probed this session on the spiked file); typecheck green; the suite reports its floor — 16 files / 123 tests. Any other count: reconcile before proceeding (never loosen).
 
-- [ ] **Step 3: Commit**
+- [✅] **Step 3: Commit**
 
 ```bash
 git add apps/landing/src/components/reveal.tsx
@@ -132,7 +132,7 @@ The ticket's core. The scroll walk retires (everything intersects at page height
 
 **Not here:** `playwright.config.ts` (byte-identical — the expect block, retries, workers all stay); the marquee mask logic (only its position in the flow moves — it stays immediately before the capture); #259's sentinels (a data-less page has no reveals and no images — the reveal wait passes vacuously BY DESIGN until #259 lands).
 
-- [ ] **Step 1: The pre-change baseline gate (stack is the deployed teaser)**
+- [✅] **Step 1: The pre-change baseline gate (stack is the deployed teaser)**
 
 ```bash
 mkdir -p .superpowers/sdd/2026-11-11-255-visual-tall-viewport-capture
@@ -144,7 +144,7 @@ pnpm exec playwright test e2e/visual \
 
 Expected: **16 passed** (the #253 zero-diff state; #263 changed no served pixels — the catalog reads are content-identical through the cache). Diagnose any failure by the flake-signature law: a **Class A** instance (equal heights, blank-band diff) is the ticket's own premise — record it and re-run (≤3 attempts, each recorded as `baseline-pre-change-flake-N.txt`); a **Class B** instance (height ≪ baseline) is #259's — record as #259 evidence and re-run; genuine content drift (dims changed on specific surfaces with no blank-band signature) — record and proceed (Task 5's regen absorbs drift by law). If no clean 16/16 in 3 attempts, PROCEED anyway — the flake is the premise — with every instance recorded.
 
-- [ ] **Step 2: The whole-file replace**
+- [✅] **Step 2: The whole-file replace**
 
 Overwrite `e2e/visual/redesign.spec.ts` with EXACTLY this content (the session-verified artifact):
 
@@ -332,7 +332,7 @@ test.describe('the redesigned landing — visual baselines', () => {
 });
 ```
 
-- [ ] **Step 3: The three e2e gates**
+- [✅] **Step 3: The three e2e gates**
 
 ```bash
 pnpm exec biome check e2e/visual/redesign.spec.ts
@@ -342,7 +342,7 @@ E2E_BASE_URL=http://127.0.0.1:9 pnpm exec playwright test --list e2e/visual
 
 Expected: Biome "Checked 1 file … No fixes applied"; tsc prints EXACTLY the 2 pre-existing errors (`e2e/smoke/env.ts(11,17) TS2591` + `e2e/visual/redesign.spec.ts(89,17) TS2339` — anything more is a regression: STOP); the list ends "Total: 16 tests in 1 file".
 
-- [ ] **Step 4: The pre-deploy smoke (report-only — the teaser does NOT serve the hook yet)**
+- [✅] **Step 4: The pre-deploy smoke (report-only — the teaser does NOT serve the hook yet)**
 
 One compare under the new chain against the OLD baselines + the OLD deployed bundle. The reveal wait passes vacuously (no `data-reveal` in the served HTML yet — expected); the resize/assertion/decode/settle all exercise for real. Pixel diffs vs the committed baselines are EXPECTED (the raster path changed) — this run proves the chain mechanics, not the baselines:
 
@@ -355,7 +355,7 @@ pnpm exec playwright test e2e/visual \
 
 Expected: EITHER 16 passed (path-invariant pixels) OR pixel-diff failures — both are valid evidence; record which surfaces differed and their ratios. STOP conditions (chain bugs, not evidence): any failure whose error is the curated `#255 tall-viewport law: the page grew…` message, any `#255 decode gate:` rejection, or a **Class A** signature (equal heights + blank-band diff — the beyond-viewport path is gone by construction, so its flake cannot legitimately recur here). A **Class B** failure (height ≪ baseline) is #259's — record as its evidence and re-run once for a clean mechanics proof.
 
-- [ ] **Step 5: Commit**
+- [✅] **Step 5: Commit**
 
 ```bash
 git add e2e/visual/redesign.spec.ts
@@ -373,7 +373,7 @@ AC1's documentation half: the e2e README is the canonical mechanics doc (the bri
 
 **Not here:** the ADR (ADR-0022's fences are unchanged — no ADR edit); the README's other sections (Running, Taxonomy, the rulings list); the regen command block (byte-identical).
 
-- [ ] **Step 1: The bullet rewrite**
+- [✅] **Step 1: The bullet rewrite**
 
 Replace the bullet that begins `- **Motion is deterministic**` and ends `…then the settle.` (one paragraph, the § Visual regression mechanics list's third bullet) with:
 
@@ -381,7 +381,7 @@ Replace the bullet that begins `- **Motion is deterministic**` and ends `…then
 - **Motion is deterministic** — the config's `expect.toHaveScreenshot` block (`animations: 'disabled'`, `caret: 'hide'`, `maxDiffPixelRatio: 0.01`) freezes CSS motion only; the services marquee's JS transform loop is NOT CSS-freezable, so the home capture masks the marquee's STATIC outer section (`[data-strip='services']` — its bbox is layout-stable, so the mask covers the marquee area wherever the JS track sits inside it; masking the moving track itself would move the mask box per capture, the #225 home-dark flake). Every capture follows the **tall-viewport law (#255)** ordering: goto with `waitUntil: 'load'` (networkidle can hang on beacon-heavy pages) → lazy images forced eager (below-fold `loading="lazy"` images start loading regardless of viewport, BEFORE the page height is measured) → the images gate (`document.images` all `complete && naturalWidth > 0`, 30s — the image-led sections collapse while images are unresolved, so page height itself swings without it) → the decode gate (`img.decode()` on every image — `complete` proves the bytes arrived, not that Chromium rasterized the frame; #241's about-light flake captured blank-but-complete photos) → **resize the viewport to the measured page height** (width unchanged; measured after the images gate because unresolved images swing it) → the post-resize assertion (the re-measured scroll height must not exceed the viewport — viewport-height-dependent content fails loudly with a curated message rather than capturing; the root app shell is the only `min-h-screen` consumer, so the shell stretch is a no-op at content height) → the reveal-complete wait (`[data-reveal]:not([data-shown])` reaches zero — the shared `Reveal` wrapper's inert hooks, fired by intersection now that everything is in-viewport; `animations: 'disabled'` fast-forwards any transition still running at capture) → a ≥1s settle (the worst-case reveal tail ≈ 270ms column delay + 700ms transition) → the capture. At page height the capture is an in-viewport raster — the beyond-viewport fullPage path that intermittently dropped mid-page bands (#255's Class A flake: blank plate rows, blank portfolio tiles, page height reserved) is gone by construction, and the old scroll walk retired with it (everything intersects at page height; eager-forcing starts the loads the walk used to trigger).
 ```
 
-- [ ] **Step 2: The eyeball + commit**
+- [✅] **Step 2: The eyeball + commit**
 
 Read the section in full and confirm the bullet sits beside its two siblings (both themes / the detail slug) with the regen command block below unchanged. Then:
 
@@ -400,7 +400,7 @@ The landing/e2e code lands on main so the teaser serves the hook — Task 5's re
 
 **Not here:** any baseline regen (Task 5, on its own branch per the #241 law); the v1 pick (Task 7 — merge-time triage); `pnpm build` (not an AC here — zero runtime behavior change; CI's own build job is the deploy's lock).
 
-- [ ] **Step 1: The repo gates**
+- [✅] **Step 1: The repo gates**
 
 ```bash
 pnpm check
@@ -408,7 +408,7 @@ pnpm check
 
 Expected: green — the landing suite at its floor (16 files / 123 tests), lint/format/typecheck clean for the touched workspace; the api/api-client/admin floors untouched. Any count drift: reconcile before proceeding (never loosen).
 
-- [ ] **Step 2: The PR**
+- [✅] **Step 2: The PR**
 
 ```bash
 git push -u origin fix/255-tall-viewport-captures
@@ -425,7 +425,7 @@ EOF
 
 Squash-merge to main. Record the PR number + the merge sha (Task 7 cherry-picks it).
 
-- [ ] **Step 3: The redeploy watch + the live-hook probe**
+- [✅] **Step 3: The redeploy watch + the live-hook probe**
 
 ```bash
 gh run list --branch main --limit 1 --json databaseId --jq '.[0].databaseId'
@@ -454,7 +454,7 @@ The baselines are born under the new capture path, against the deployed teaser s
 
 **Not here:** the code (already on main — the branch carries ONLY baseline PNGs); `git checkout <sha> -- <baseline>` (NEVER — a baseline is born only from a real capture; `git show` into the EVIDENCE dir is the allowed comparison form); the 10-run gate (Task 6); v1 baselines (none exist).
 
-- [ ] **Step 1: The branch + the pre-regen compare**
+- [✅] **Step 1: The branch + the pre-regen compare**
 
 ```bash
 git switch main && git pull --ff-only origin main
@@ -467,7 +467,7 @@ pnpm exec playwright test e2e/visual \
 
 Expected: EITHER 16 passed (the committed baselines already hold within the 1% ratio under the new path — the regen then only rewrites byte-differing surfaces) OR pixel-diff failures on some surfaces (the raster path changed; the regen absorbs). Same STOP classes as Task 2 Step 4 (curated errors; Class A under the new chain); Class B → record as #259 evidence, re-run once for a clean mechanics record.
 
-- [ ] **Step 2: The regen**
+- [✅] **Step 2: The regen**
 
 ```bash
 E2E_BASE_URL=https://sevendays-landing.pahamajulius.workers.dev \
@@ -479,7 +479,7 @@ git status --short e2e/ | tee .superpowers/sdd/2026-11-11-255-visual-tall-viewpo
 
 Expected: the run reports 16 passed; the changed list names the byte-differing baselines (plausibly all 16 — an in-viewport raster need not be byte-identical to a beyond-viewport one — and plausibly fewer; an unchanged PNG stays byte-identical, which is itself evidence of path-invariance). **The zero-write edge:** if the changed list is EMPTY (compare was 16/16 and every PNG was byte-identical), there is nothing to commit — record that outcome in `regen.txt`'s margin, SKIP Steps 3–6's commit/PR (there is no visual PR; Task 6 runs its loop on main and Task 7 records no visual row; Task 8's close comment states the byte-identical outcome with the compare evidence). The `--update-snapshots=changed` flag is load-bearing: never bare `--update-snapshots` here.
 
-- [ ] **Step 3: The dims check**
+- [✅] **Step 3: The dims check**
 
 For every changed baseline (run from the repo root; `<name>` = e.g. `home-light-chromium-linux.png`):
 
@@ -495,7 +495,7 @@ cat .superpowers/sdd/2026-11-11-255-visual-tall-viewport-capture/dims-check.txt
 
 Expected: every OLD/NEW pair reads `PNG image data, 1280 x <H>` with the SAME `<H>` per surface (the post-resize assertion already guarantees the height is content-driven; a baseline whose height changed means the capture path moved layout — STOP and reconcile before committing; never commit a height-changed baseline without an owner ruling).
 
-- [ ] **Step 4: The eyeball (the README law — every changed PNG)**
+- [✅] **Step 4: The eyeball (the README law — every changed PNG)**
 
 For each changed baseline, open BOTH images (the evidence-dir `old-<name>.png` copy and the new `e2e/visual/redesign.spec.ts-snapshots/<name>` file) with the Read tool and compare them. Append one verdict line per PNG to `eyeball-checklist.md`:
 
@@ -505,7 +505,7 @@ For each changed baseline, open BOTH images (the evidence-dir `old-<name>.png` c
 
 A blank band, an empty section, a missing photo/plate row, or any content regression: **STOP — discard that capture** (restore nothing; report on the issue with the pair as evidence — the #253 discarded-write precedent). A section that differs ONLY in sub-pixel rasterization (antialiasing shifts within text/photo areas) is the expected "modulo the capture path" class: accept it.
 
-- [ ] **Step 5: The zero-diff compare**
+- [✅] **Step 5: The zero-diff compare**
 
 ```bash
 E2E_BASE_URL=https://sevendays-landing.pahamajulius.workers.dev \
@@ -516,7 +516,7 @@ pnpm exec playwright test e2e/visual \
 
 Expected: **16 passed**, zero diffs. A Class B instance → #259 evidence, re-run; anything else: STOP.
 
-- [ ] **Step 6: Commit + push + the visual PR**
+- [✅] **Step 6: Commit + push + the visual PR**
 
 ```bash
 git add e2e/visual/redesign.spec.ts-snapshots
@@ -539,7 +539,7 @@ AC3: ≥10 consecutive full-suite compare runs green against the teaser (16/16 e
 
 **Not here:** parallelization of the loop (sequential is the point); any spec/baseline edit mid-gate (a red run is diagnosed, never patched around); #259's sentinels (Class B is handled by the carve-out below, recorded, not fixed).
 
-- [ ] **Step 1: The loop (run as a BACKGROUND task — `run_in_background: true`)**
+- [✅] **Step 1: The loop (run as a BACKGROUND task — `run_in_background: true`)**
 
 > **Amendment (owner-ruled 2026-11-11 at execution):** the loop runs with a ~60s sleep BETWEEN runs. The pinned back-to-back shape collapsed the free-tier teaser landing worker into persistent CF Error 1102 ("Worker exceeded resource limits") at runs 06–20 of the first two loops — ~20 full suites ≈ 1500 sequential SSR page loads in ~35 min tipped the worker's CPU budget, twice, the second time NOT self-recovering at rest (full incident record in the SDD ledger). The gapped shape keeps AC3's substance — 10 CONSECUTIVE green full-suite runs, 16/16 each — while shedding the sustained-load pressure that induced the outage. The Class B carve-out below is unchanged.
 
@@ -563,14 +563,14 @@ echo "GREEN RUNS: $ok/10" >> "$S/stability-summary.txt"
 
 The loop ALWAYS writes all ten run logs then the summary — a red run does not abort the loop; you diagnose from the logs.
 
-- [ ] **Step 2: The verdict**
+- [✅] **Step 2: The verdict**
 
 Read `stability-summary.txt`. **`GREEN RUNS: 10/10`** → AC3 met; proceed to Step 3. **A red run:** open its log and diagnose by the flake-signature law —
   - **Class B** (its log shows a received height ≪ expected): append `run N: Class B — recorded for #259, counter restarted` to the summary, then re-run Step 1 as a fresh loop sized to top the consecutive count back up to 10 (e.g. one Class B at run 7 leaves runs 8–10 as 3 consecutive green — one more 7-run loop completes 10; a Class B at run 1 restarts from zero with a full 10-run loop). Class B is #259's fenced flake — it never counts as this ticket's failure, but each instance is evidence: post it to #259 (`gh issue comment 259 --body "Class B recurrence under #255's gate: <test names + dims from the log>"`) at Task 8.
   - **Class A or a curated error** (equal heights + blank-band diff, or a `#255 tall-viewport law` / `#255 decode gate` message): the fix itself failed — STOP: comment the evidence on #255 and report back; do not merge the visual PR.
   - **Genuine drift** (specific surfaces, changed dims, populated content — a CMS edit mid-gate): the baselines are advisory; re-run Task 5's regen+eyeball for the drifted surfaces on `visual/255`, push to the open PR, restart the 10-run count.
 
-- [ ] **Step 3: Merge the visual PR + the on-main zero-diff**
+- [✅] **Step 3: Merge the visual PR + the on-main zero-diff**
 
 ```bash
 gh pr merge <visual-PR> --squash
@@ -593,7 +593,7 @@ The runbook loop (`docs/agents/v1-picks.md`) for both PRs, one row per PR. Pre-c
 
 **Not here:** the visual PR as a pick (baselines are teaser-only forever — no v1 baselines exist); any v1-authored content; the ledger rows' commit (Task 8 lands them on main).
 
-- [ ] **Step 1: The path pass (main workspace)**
+- [✅] **Step 1: The path pass (main workspace)**
 
 ```bash
 node scripts/v1-triage.mjs <code-PR-merge-sha>
@@ -601,7 +601,7 @@ node scripts/v1-triage.mjs <code-PR-merge-sha>
 
 Expected verdict: **SPLIT** — v1-paths: `apps/landing/src/components/reveal.tsx`; MAIN-ONLY: `e2e/visual/redesign.spec.ts`, `e2e/README.md`, `docs/superpowers/plans/2026-11-11-255-visual-tall-viewport-capture.md`. Then the content pass: `git show <code-PR-merge-sha> -- apps/landing/src/components/reveal.tsx` — the hunk is two inert attributes + a comment; nothing trips the booking/edition/deployment rules. Any different verdict: STOP and reconcile against the runbook before executing.
 
-- [ ] **Step 2: Execute the SPLIT (the runbook's recipe, verbatim)**
+- [✅] **Step 2: Execute the SPLIT (the runbook's recipe, verbatim)**
 
 ```bash
 cd ~/Projects/sevendays-v1-seed
@@ -619,7 +619,7 @@ EOF
 
 (The blank line after the `%B` line is load-bearing — the runbook's note.) The pick should apply CLEAN (v1's reveal.tsx is byte-identical to main's pre-change copy — probed at plan time); any conflict there: STOP and reconcile against the runbook's conflict policy.
 
-- [ ] **Step 3: The locks**
+- [✅] **Step 3: The locks**
 
 ```bash
 cd ~/Projects/sevendays-v1-seed
@@ -646,7 +646,7 @@ Pure main-only close-out. The docs commit pushes directly to main (the `cda981b`
 
 **Not here:** `AGENTS.md` (no floor or ruling changes); reopening #259 (its evidence posts as comments only); any ADR.
 
-- [ ] **Step 1: The progress entry**
+- [✅] **Step 1: The progress entry**
 
 Append to `docs/progress.md` in "Notes for Future Sessions", directly after the #256 entry, filling bracketed values from the actual runs:
 
@@ -654,7 +654,7 @@ Append to `docs/progress.md` in "Notes for Future Sessions", directly after the 
 - **2026-11-XX — the e2e visual capture determinism fixed (#255) — the tall-viewport law.** The visual suite's captures became deterministic (the Class A flake — blank mid-page bands at identical page height, #241's about-light original plus three triage instances — is gone by construction): after the images gate the viewport resizes to the measured page height (width unchanged; the root app shell is the only min-h-screen consumer, probed) with a loud post-resize assertion, a decode gate (`img.decode()` — the blank-but-complete-photo class) and a reveal-complete wait over the shared Reveal wrapper's new inert `data-reveal`/`data-shown` hooks join the chain, the settle doubled to 1s (worst-case reveal 270+700ms), and the scroll walk retired (everything intersects at page height). The e2e README's mechanics bullet carries the ruled ordering; the 16 baselines re-captured on intent on `visual/255` (<N> rewritten, every OLD/NEW dims pair equal, all changed eyeballed content-identical modulo the capture path, zero-diff 16/16); the stability gate <10/10 consecutive green full-suite runs — <Class B instances, if any, recorded to #259 with the counter restarted each time>; landing floor unchanged (16 files / 123 tests — the hooks are inert). Class B (pages capturing without their data) stays fenced to #259.
 ```
 
-- [ ] **Step 2: The two ledger rows**
+- [✅] **Step 2: The two ledger rows**
 
 Append both rows to `docs/agents/v1-picks.md`'s ledger tail (the visual row only if its PR exists — the zero-write edge records the code row alone and says so), then push:
 
@@ -670,7 +670,7 @@ git commit -m "docs(v1-picks): the #255 rows — the code SPLIT + the visual SKI
 git push origin main
 ```
 
-- [ ] **Step 3: The #259 evidence (only if Class B instances were recorded)**
+- [✅] **Step 3: The #259 evidence (only if Class B instances were recorded)**
 
 For each Class B instance caught by the gates (Tasks 2/5/6), post it where the split's triage will find it:
 
@@ -680,13 +680,13 @@ gh issue comment 259 --body "Class B recurrence observed under #255's gates (202
 
 Skip this step entirely if no Class B instance occurred.
 
-- [ ] **Step 4: Close the issue**
+- [✅] **Step 4: Close the issue**
 
 ```bash
 gh issue close 255 --comment "Landed in #<code-PR> (main \`<main-sha>\`, v1 split \`<v1-sha>\`; the baselines in #<visual-PR or the zero-write note>). AC1 the settle chain is load → eager-forcing → images gate → decode gate → resize to measured page height → post-resize assertion → reveal-complete wait → settle ≥1s → capture, the walk retired, documented in e2e/README.md's mechanics bullet. AC2 all 16 baselines regenerated in one PR on intent and eyeballed complete per the README law (dims-check.txt: every OLD/NEW pair equal; eyeball-checklist.md: content-identical modulo the capture path, no blank bands, no empty sections). AC3 the stability gate: <10/10 or the Class-B-adjusted verdict> consecutive full-suite green runs against the teaser, 16/16 each (stability-summary.txt + the ten run logs). AC4 pnpm check green; the landing floor held (16 files / 123 tests — the hooks are inert). AC5 both ledger rows recorded (the code SPLIT + the visual SKIP). Class B stays fenced to #259 — <its evidence comments, if any, linked here>."
 ```
 
-- [ ] **Step 5: Graphify + the final sweep**
+- [✅] **Step 5: Graphify + the final sweep**
 
 ```bash
 graphify update .
