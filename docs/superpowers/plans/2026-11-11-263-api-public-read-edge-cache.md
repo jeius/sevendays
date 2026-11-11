@@ -891,7 +891,7 @@ git commit -m "docs(api): ADR-0025 + the #263 rotation (#263)"
 - Consumes: the merged-to-be branch from Tasks 1–5.
 - Produces: the deployed cache, the measured battery evidence, the PR, the v1-picks ledger row, the closed issue.
 
-- [ ] **Step 1: Deploy the api**
+- [✅] **Step 1: Deploy the api**
 
 ```bash
 pnpm --filter @sevendays/api deploy
@@ -899,7 +899,7 @@ pnpm --filter @sevendays/api deploy
 
 Expected: clean deploy (no config change — `caches.default` needs no binding). Note the deployed URL: the workers.dev route for `sevendays-api` (from the deploy output).
 
-- [ ] **Step 2: Run the CPU battery under `wrangler tail`**
+- [✅] **Step 2: Run the CPU battery under `wrangler tail`**
 
 In one shell (background, output to a gitignored path — `.scratch/` is gitignored):
 
@@ -930,7 +930,7 @@ jq -r '.outcome' .scratch/263-tail.jsonl | sort | uniq -c
 
 Expected: every outcome `ok` (zero kills/canceled); cpuTime bimodal — the first request per key near the historic ~10 ms (the dial), the 29 cache-hit requests in the ≈1–2 ms class. Any cache-hit request ≥5 ms or any non-ok outcome: investigate before proceeding (a likely bypass — check the path landed on the allowlist).
 
-- [ ] **Step 3: Read-your-writes spot-check (owner-assist if no admin session at hand)**
+- [✅] **Step 3: Read-your-writes spot-check (owner-assist if no admin session at hand)**
 
 Through the admin (or a session-tokened PUT against any admin entity, e.g. rename a gallery category back), verify the public read reflects the change on the NEXT request (not after 60 s), then revert. If executed without admin credentials, hand this step to the owner with the exact expectation.
 
