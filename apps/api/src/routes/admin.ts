@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { requireSession } from '../services/auth.js';
 import type { ApiEnv } from '../services/db.js';
+import { adminEvictPublicReads } from '../services/read-cache.js';
 import { adminAddonServices } from './admin-addon-services.js';
 import { adminAttires } from './admin-attires.js';
 import { adminBranches } from './admin-branches.js';
@@ -23,6 +24,7 @@ import { galleryPhotos } from './gallery-photos.js';
 // the subtree from AppType.
 export const admin = new Hono<ApiEnv>()
   .use('*', requireSession)
+  .use('*', adminEvictPublicReads)
   .route('/media', adminMedia)
   .route('/branches', adminBranches)
   .route('/print-sizes', adminPrintSizes)
