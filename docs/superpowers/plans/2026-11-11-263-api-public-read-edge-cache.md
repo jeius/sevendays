@@ -434,6 +434,9 @@ describe('publicReadCache (the read path)', () => {
     expect(await second.text()).toBe(await first.text());
     expect(second.headers.get('content-type')).toBe(first.headers.get('content-type'));
     expect(second.headers.get('cache-control')).toBeNull();
+    // The hit re-stamps x-request-id with its OWN request's id (Task 2
+    // review, minor #1) — consecutive responses never share one.
+    expect(second.headers.get('x-request-id')).not.toBe(first.headers.get('x-request-id'));
   });
 
   it('caches package details by slug, never 404s', async () => {
@@ -497,7 +500,16 @@ export const publicReadCache: MiddlewareHandler<ApiEnv> = async (c, next) => {
   const store = getReadCacheStore();
   if (!store) return next();
   const hit = await store.match(c.req.path);
-  if (hit) return responseFromCacheHit(hit);
+  if (hit) {
+    // A stored body replays the populating request's x-request-id; re-stamp
+    // with THIS request's id (requestLogging minted it at the root, before
+    // this middleware) so the echoed header always correlates to the request
+    // that actually served — the hit then deviates from a fresh miss in
+    // nothing (Task 2 review, minor #1).
+    const res = responseFromCacheHit(hit);
+    res.headers.set('x-request-id', c.get('requestId'));
+    return res;
+  }
   await next();
   if (c.res.status === 200) {
     await store.put(c.req.path, c.res);
