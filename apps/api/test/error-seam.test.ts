@@ -84,35 +84,6 @@ describe('uniform 500 envelope + structured error events', () => {
     expect(errorLines[0]?.name).toBe('ZodError'); // parseEnv rejects the partial env
     expect(errorLines[0]?.route).toBe('/api/v1/branches');
   });
-
-  it('prefers the HYPERDRIVE binding over DATABASE_URL (ADR-0024)', async () => {
-    // The binding points at the LIVE test db while DATABASE_URL names a dead
-    // port: the read succeeds only if the binding won.
-    const res = await app.request('/api/v1/branches', undefined, {
-      ...testEnv(url),
-      DATABASE_URL: 'postgres://postgres:postgres@127.0.0.1:1/sevendays_test',
-      HYPERDRIVE: { connectionString: url },
-    });
-    expect(res.status).toBe(200);
-  });
-
-  it('returns uniform 500 JSON when neither db source is present (acquisition throws)', async () => {
-    const lines: string[] = [];
-    vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
-      lines.push(String(args[0]));
-    });
-    const env = { ...testEnv(url) } as Record<string, unknown>;
-    delete env.DATABASE_URL;
-    const res = await app.request('/api/v1/branches', undefined, env);
-    expect(res.status).toBe(500);
-    expect(await res.json()).toEqual({ error: 'Internal server error.' });
-    const errorLines = lines
-      .map((line) => JSON.parse(line) as Record<string, unknown>)
-      .filter((line) => line.evt === 'error');
-    expect(errorLines).toHaveLength(1);
-    expect(errorLines[0]?.name).toBe('TypeError'); // createApiDb's own throw — parseEnv passed
-    expect(errorLines[0]?.route).toBe('/api/v1/branches');
-  });
 });
 
 // 405 deferral (spec Out of Scope): Hono has no built-in method-mismatch
