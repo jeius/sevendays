@@ -58,12 +58,12 @@ docs/superpowers/plans/2026-11-11-263-api-public-read-edge-cache.md  # this file
 - Consumes: nothing new.
 - Produces: the recorded api-suite baseline count later tasks gate against.
 
-- [ ] **Step 1: Record the baseline floor**
+- [✅] **Step 1: Record the baseline floor**
 
 Run: `TEST_DATABASE_URL=<local-5433-url> pnpm --filter @sevendays/api test`
 Expected: **437 passed + 3 skipped** (the issue's floor at `ee5167b`). Record the actual count if it differs — that recorded number is the floor for every later gate. *(Recorded 2026-11-11: the live floor is 433 passed + 3 skipped — see Global Constraints.)* If tests fail outright, STOP: the environment is wrong (check `TEST_DATABASE_URL` points at 5433), never the suite.
 
-- [ ] **Step 2: Turn trace sampling off + rewrite its comment**
+- [✅] **Step 2: Turn trace sampling off + rewrite its comment**
 
 In `apps/api/src/worker.ts`, replace the config literal:
 
@@ -93,12 +93,12 @@ with
 
 (Both find-blocks match exactly once — verify before replacing; STOP and reconcile if not.)
 
-- [ ] **Step 3: Verify the Sentry seam suite holds (the seam's contract is untouched)**
+- [✅] **Step 3: Verify the Sentry seam suite holds (the seam's contract is untouched)**
 
 Run: `pnpm --filter @sevendays/api test test/sentry-capture.test.ts`
 Expected: PASS, unchanged count (4 tests — capture routing is SDK-free and unaffected by sampling config).
 
-- [ ] **Step 4: Lint + typecheck + commit**
+- [✅] **Step 4: Lint + typecheck + commit**
 
 ```bash
 pnpm --filter @sevendays/api fix
@@ -128,7 +128,7 @@ Expected: `fix` rewrites nothing beyond the two edits; typecheck clean.
   - `export function responseFromCacheHit(hit: Response): Response` — fresh Response over the hit's body/status/headers with `cache-control` deleted.
   - `export function isCachedReadPath(path: string): boolean` — true for the five list paths exactly or any `/api/v1/service-packages/<slug>` continuation.
 
-- [ ] **Step 1: Write the failing unit tests**
+- [✅] **Step 1: Write the failing unit tests**
 
 Create `apps/api/test/read-cache.test.ts` with the harness header and the first describe block (the integration describes are appended by Tasks 3–4 — do not write them yet):
 
@@ -249,12 +249,12 @@ describe('the read-cache seam (unit)', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [✅] **Step 2: Run the tests to verify they fail**
 
 Run: `pnpm --filter @sevendays/api test test/read-cache.test.ts`
 Expected: FAIL — `Cannot find module '../src/services/read-cache.js'` (or the equivalent resolution error).
 
-- [ ] **Step 3: Write the seam module**
+- [✅] **Step 3: Write the seam module**
 
 Create `apps/api/src/services/read-cache.ts`:
 
@@ -368,12 +368,12 @@ export function resetReadCacheStore(): void {
 
 (The two middleware exports and the eviction map join this file in Tasks 3–4 — the module compiles without them.)
 
-- [ ] **Step 4: Run the unit tests to verify they pass**
+- [✅] **Step 4: Run the unit tests to verify they pass**
 
 Run: `pnpm --filter @sevendays/api test test/read-cache.test.ts`
 Expected: PASS — 5 tests (the unit describe).
 
-- [ ] **Step 5: Lint + typecheck + commit**
+- [✅] **Step 5: Lint + typecheck + commit**
 
 ```bash
 pnpm --filter @sevendays/api fix
@@ -392,7 +392,7 @@ git commit -m "feat(api): the public-read cache seam — store, keys, TTL helper
 - Consumes: Task 2's `getReadCacheStore`, `isCachedReadPath`, `responseFromCacheHit`.
 - Produces: `export const publicReadCache: MiddlewareHandler<ApiEnv>` — GET + allowlisted path + store present → `match`; hit → return the projection (the handler and `acquireDb` never run); miss → `next()`, then `put` the final response iff status is 200. Query strings and every other path bypass untouched.
 
-- [ ] **Step 1: Write the failing integration tests**
+- [✅] **Step 1: Write the failing integration tests**
 
 First extend the test file's header (per the staging note in Task 2's header) — add these imports (Biome-organized: `drizzle-orm` and `@sevendays/db` above `vitest`, the helpers after the seam import) and the shared store:
 
@@ -479,12 +479,12 @@ describe('publicReadCache (the read path)', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify they fail**
+- [✅] **Step 2: Run to verify they fail**
 
 Run: `pnpm --filter @sevendays/api test test/read-cache.test.ts`
 Expected: the populate test and the hit test FAIL (no middleware is mounted — the miss never populates the store, so the `keys()` assertions see an empty Map). The bypass test's `keys() === []` and the no-store pass-through test both pass trivially pre-middleware (nothing populates a clean store) — their value is guarding those contracts after. The Task 2 unit block still passes.
 
-- [ ] **Step 3: Add the middleware and mount it**
+- [✅] **Step 3: Add the middleware and mount it**
 
 Append to `apps/api/src/services/read-cache.ts`:
 
@@ -541,17 +541,17 @@ and the acquisition middleware's comment extended — append ONE new comment lin
 // without constructing the client at all.
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [✅] **Step 4: Run the tests to verify they pass**
 
 Run: `pnpm --filter @sevendays/api test test/read-cache.test.ts`
 Expected: PASS — 9 tests (5 unit + 4 read-path).
 
-- [ ] **Step 5: Run the FULL api suite — the floor must hold by construction**
+- [✅] **Step 5: Run the FULL api suite — the floor must hold by construction**
 
 Run: `TEST_DATABASE_URL=<local-5433-url> pnpm --filter @sevendays/api test`
 Expected: baseline + 9 passed, 3 skipped, zero failures — every other suite file runs with the null store and unchanged behavior. Any failure here is a bypass bug in the middleware (a surface that should not have been cached, or a mutated response) — fix it before committing.
 
-- [ ] **Step 6: Lint + typecheck + commit**
+- [✅] **Step 6: Lint + typecheck + commit**
 
 ```bash
 pnpm --filter @sevendays/api fix
@@ -574,7 +574,7 @@ git commit -m "feat(api): read-through cache on the five public reads (#263)"
   - `async function evictCachedReads(db: Database, reads: CachedPublicRead[]): Promise<void>` — best-effort, never throws; for `service-packages` evicts the list key + `/api/v1/service-packages/<slug>` for EVERY current slug (active and deactivated — a deactivated slug's cached 200 must go so the uniform 404 takes over).
   - `export const adminEvictPublicReads: MiddlewareHandler<ApiEnv>` — after `next()`: skip GET/HEAD, skip non-2xx/3xx (only committed mutations evict — the audit row's gate, M6 #185), map the segment, evict.
 
-- [ ] **Step 1: Write the failing integration tests**
+- [✅] **Step 1: Write the failing integration tests**
 
 First extend the header once more (per the staging note): add the auth import and the bearer const —
 
@@ -731,12 +731,12 @@ describe('adminEvictPublicReads (the write path)', () => {
 
 (That is 4 integration tests here + 4 in Task 3 + 5 unit = **13** — the Global Constraints' pinned count.)
 
-- [ ] **Step 2: Run to verify they fail**
+- [✅] **Step 2: Run to verify they fail**
 
 Run: `pnpm --filter @sevendays/api test test/read-cache.test.ts`
 Expected: the three eviction tests FAIL — without the middleware nothing evicts, so `store.keys()` still holds the cached paths after the committed mutations. The failed-mutation test passes trivially pre-implementation (nothing evicts on a 400 with or without the middleware — its value is guarding the only-committed-writes contract after). Unit + read-path blocks still pass.
 
-- [ ] **Step 3: Add the map, sweep, and middleware; mount**
+- [✅] **Step 3: Add the map, sweep, and middleware; mount**
 
 Append to `apps/api/src/services/read-cache.ts` (add `import { servicePackages, type Database } from '@sevendays/db';` — merging into the existing import block per Biome's organizing):
 
@@ -816,17 +816,17 @@ with the import added alphabetically:
 import { adminEvictPublicReads } from '../services/read-cache.js';
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [✅] **Step 4: Run the tests to verify they pass**
 
 Run: `pnpm --filter @sevendays/api test test/read-cache.test.ts`
 Expected: PASS — 13 tests (5 unit + 4 read-path + 4 eviction).
 
-- [ ] **Step 5: Run the FULL api suite — the floor holds**
+- [✅] **Step 5: Run the FULL api suite — the floor holds**
 
 Run: `TEST_DATABASE_URL=<local-5433-url> pnpm --filter @sevendays/api test`
 Expected: baseline + 13 passed, 3 skipped, zero failures (every admin suite runs with the null store — `evictCachedReads` returns immediately, no sweep query).
 
-- [ ] **Step 6: Lint + typecheck + commit**
+- [✅] **Step 6: Lint + typecheck + commit**
 
 ```bash
 pnpm --filter @sevendays/api fix
@@ -845,7 +845,7 @@ git commit -m "feat(api): admin-mutation eviction of the public read cache (#263
 - Consumes: everything Tasks 1–4 landed.
 - Produces: the ADR future sessions cite; the docs rotation AGENTS.md mandates.
 
-- [ ] **Step 1: Write ADR-0025** (follow `docs/adr/0023-*.md`'s section shape — Status/Context/Decision/Alternatives Considered/Consequences; Date: 2026-11-11; title: "ADR-0025: Read-through edge cache on the API's public catalog reads"). The rulings, verbatim from this plan — the ADR's prose expands around them but invents nothing new:
+- [✅] **Step 1: Write ADR-0025** (follow `docs/adr/0023-*.md`'s section shape — Status/Context/Decision/Alternatives Considered/Consequences; Date: 2026-11-11; title: "ADR-0025: Read-through edge cache on the API's public catalog reads"). The rulings, verbatim from this plan — the ADR's prose expands around them but invents nothing new:
 
   - **Context:** the measured CPU facts (fresh connect 7.3–12.4 ms vs the 10 ms free-plan cap; warm 0.3–0.8 ms; live median at the cap; the Supavisor degradation episodes + the 2026-11-09 P0), the Hyperdrive failure + revert (#260/#261/#262 — ADR-0024 burned), and the owner's free-plan-until-handover ruling (2026-11-11).
   - **Decision:** a read-through cache at the API's service layer over the five public reads, ABOVE ADR-0011's per-request client (they compose). Storage = the Workers Cache API (free, no daily caps, per-colo) under the synthetic key origin `https://read-cache.sevendays.internal`; stored copies carry `Cache-Control: public, max-age=60` (TTL = the correctness backstop; 60 s = the top of the owner's 30–60 s range — fewest dials); served responses carry no cache directives (miss and hit are byte-identical on the wire). Only GET, only the five allowlisted surfaces, only query-string-free requests, only 200s. The seam is injectable and null under plain Node/vitest (the capture.ts posture).
@@ -853,13 +853,13 @@ git commit -m "feat(api): admin-mutation eviction of the public read cache (#263
   - **Alternatives:** Hyperdrive (blocked on the CF platform episode — composes later UNDER this cache when it re-lands), KV (1 k writes/day free cap — eviction traffic would breach it), a Durable Object connection broker (building private Hyperdrive), PostgREST/supabase-js reads (ADR-0007/0009 one-data-path law), caching in the frontends (each frontend duplicates; the API is the one choke point).
   - **Consequences:** cache-hit requests make no DB dial (CPU to the ~1 ms class; degradation episodes stop being user-visible on the public site); the studio-services/addon-services public reads stay uncached by the brief's five-surface fence (a one-line-per-surface follow-up); ADR-0011's client is untouched.
 
-- [ ] **Step 2: Rotate `docs/progress.md`** — append a dated bullet to the "What Exists" api section (after the Analytics Dashboard bullet, the 2026-11-09 pattern):
+- [✅] **Step 2: Rotate `docs/progress.md`** — append a dated bullet to the "What Exists" api section (after the Analytics Dashboard bullet, the 2026-11-09 pattern):
 
 ```markdown
 - The api's **public-read edge cache** is live (2026-11-11, #263 — ADR-0025): the five public catalog reads (branches, service-packages list + detail, gallery, testimonials, site-settings) serve read-through from the Workers Cache API (60 s TTL backstop, per-colo), committed admin mutations evict their entity's entries on commit (the package family sweeps every slug detail — package reads embed print-sizes/attires), cache I/O is best-effort and never fails a request, and the seam is null under plain Node so every vitest suite runs uncached unchanged (+13 seam tests, `test/read-cache.test.ts`). The api's Sentry moved to errors-only the same day (trace sampling off — the 10 ms-cap CPU margin). Hyperdrive stays blocked on the CF platform episode (#260); when it re-lands it composes UNDER this cache.
 ```
 
-- [ ] **Step 3: Amend `AGENTS.md`** — two surgical edits: (a) in the Engineering Rules paragraph, insert ONE sentence into the long "DB is provisioned" paragraph, directly after the sentence ending "a deploy without `SENTRY_DSN` serves everything with captures no-op." and before "The Audit Log's write side is live (M6 #185)":
+- [✅] **Step 3: Amend `AGENTS.md`** — two surgical edits: (a) in the Engineering Rules paragraph, insert ONE sentence into the long "DB is provisioned" paragraph, directly after the sentence ending "a deploy without `SENTRY_DSN` serves everything with captures no-op." and before "The Audit Log's write side is live (M6 #185)":
 
 ```markdown
 The api's public catalog reads are edge-cached since #263 (ADR-0025 — read-through over the Workers Cache API, 60 s TTL backstop, committed admin mutations evict; the null-store default keeps every vitest suite uncached), and its Sentry is errors-only (traces off, the CPU-cap margin).
@@ -867,7 +867,7 @@ The api's public catalog reads are edge-cached since #263 (ADR-0025 — read-thr
 
   (b) in "Current status of `pnpm test`", extend the api floor line's enumeration (the parenthetical after "the two email-purpose event pins") with: ` + #263's thirteen read-cache seam pins` and update the count `433 passed + 3 skipped` → the Task-1-baseline-plus-13 figure actually recorded at the Task 5 gate (use the number the full run prints — do not estimate).
 
-- [ ] **Step 4: The full repo gates**
+- [✅] **Step 4: The full repo gates**
 
 ```bash
 pnpm check
@@ -876,7 +876,7 @@ pnpm build
 
 Expected: `pnpm check` green — api at baseline + 13, admin 26 files / 262, landing 16 files / 123, api-client 45 (floors from AGENTS.md; the api count is the only one that moves, +13). `pnpm build` green. If any floor moved unexpectedly, reconcile before committing — never loosen.
 
-- [ ] **Step 5: Commit**
+- [✅] **Step 5: Commit**
 
 ```bash
 git add docs/adr/0025-api-public-read-edge-cache.md docs/progress.md AGENTS.md
