@@ -415,6 +415,9 @@ describe('publicReadCache (the read path)', () => {
   let gallery: Awaited<ReturnType<typeof loadGalleryFixtures>>;
 
   beforeEach(async () => {
+    // Shared-store hygiene: the module-level Map persists across tests and
+    // the exact-match keys() assertions below need a clean one per test.
+    store.evict(...store.keys());
     setReadCacheStore(store);
     gallery = await loadGalleryFixtures(db);
   });
@@ -479,7 +482,7 @@ describe('publicReadCache (the read path)', () => {
 - [ ] **Step 2: Run to verify they fail**
 
 Run: `pnpm --filter @sevendays/api test test/read-cache.test.ts`
-Expected: the three cache-behavior tests FAIL — no middleware is mounted, so `store.keys()` stays `[]` on the miss-population assertion. The no-store pass-through test passes trivially (it asserts the default posture, which is exactly what exists pre-middleware — its value is guarding the contract after). The Task 2 unit block still passes.
+Expected: the populate test and the hit test FAIL (no middleware is mounted — the miss never populates the store, so the `keys()` assertions see an empty Map). The bypass test's `keys() === []` and the no-store pass-through test both pass trivially pre-middleware (nothing populates a clean store) — their value is guarding those contracts after. The Task 2 unit block still passes.
 
 - [ ] **Step 3: Add the middleware and mount it**
 
@@ -585,6 +588,12 @@ Then append the describe:
 
 ```ts
 describe('adminEvictPublicReads (the write path)', () => {
+  beforeEach(() => {
+    // Shared-store hygiene (the Task 3 pattern): exact-match keys() asserts
+    // need a clean Map regardless of who populated it last.
+    store.evict(...store.keys());
+  });
+
   it('a committed gallery-category rename evicts the gallery read (read-your-writes)', async () => {
     setReadCacheStore(store);
     const gallery = await loadGalleryFixtures(db);
