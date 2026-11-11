@@ -541,6 +541,8 @@ AC3: ≥10 consecutive full-suite compare runs green against the teaser (16/16 e
 
 - [ ] **Step 1: The loop (run as a BACKGROUND task — `run_in_background: true`)**
 
+> **Amendment (owner-ruled 2026-11-11 at execution):** the loop runs with a ~60s sleep BETWEEN runs. The pinned back-to-back shape collapsed the free-tier teaser landing worker into persistent CF Error 1102 ("Worker exceeded resource limits") at runs 06–20 of the first two loops — ~20 full suites ≈ 1500 sequential SSR page loads in ~35 min tipped the worker's CPU budget, twice, the second time NOT self-recovering at rest (full incident record in the SDD ledger). The gapped shape keeps AC3's substance — 10 CONSECUTIVE green full-suite runs, 16/16 each — while shedding the sustained-load pressure that induced the outage. The Class B carve-out below is unchanged.
+
 ```bash
 cd /home/jeius/Projects/sevendays
 S=.superpowers/sdd/2026-11-11-255-visual-tall-viewport-capture
