@@ -78,33 +78,20 @@ test.describe('the redesigned landing — visual baselines', () => {
       test(`${name} — ${theme}`, async ({ page }) => {
         await page.addInitScript(THEME_INIT(theme));
         await page.goto(path ?? detailPath, { waitUntil: 'load' });
-        // The reveals are IntersectionObserver-driven and one-shot
-        // (opacity-0 until seen); a fullPage capture reads beyond the
-        // viewport WITHOUT scrolling, so walk the page first to fire
-        // every reveal, then return to the top.
-        await page.evaluate(async () => {
-          const step = 600;
-          const scroller = document.scrollingElement ?? document.body;
-          for (let y = 0; y < scroller.scrollHeight; y += step) {
-            scroller.scrollTo(0, y);
-            await new Promise((resolve) => setTimeout(resolve, 100));
-          }
-          scroller.scrollTo(0, 0);
-        });
         // Break the lazy-load loop: below-fold images are loading="lazy"
-        // and only fetch when they intersect the viewport — but unloaded
-        // images collapse the page, so the sweep's steps cover less
-        // content and fewer lazy triggers fire (the gate could never
-        // settle). Forcing every image eager starts all loads regardless
-        // of viewport; a genuinely broken image still fails the gate.
+        // and only fetch when they intersect the viewport. Forcing every
+        // image eager starts all loads regardless of viewport — the
+        // page-height resize below would trigger them anyway, but eager
+        // starts the loads BEFORE the page height is measured; a
+        // genuinely broken image still fails the images gate below.
         await page.evaluate(() => {
           document.querySelectorAll('img[loading="lazy"]').forEach((img) => {
             img.loading = 'eager';
           });
         });
-        // Every <img> must be decoded before capture: the image-led
-        // sections (mosaic, plates, service rows) collapse while lazy
-        // images are unresolved, so the PAGE HEIGHT itself swings
+        // Every <img> must be loaded before anything measures the page:
+        // the image-led sections (mosaic, plates, service rows) collapse
+        // while images are unresolved, so the PAGE HEIGHT itself swings
         // between captures ("expected …4318px, received …734px"). `load`
         // + this explicit gate is the robust pair — networkidle can hang
         // forever on beacon-heavy pages and never promised image decode.
@@ -113,9 +100,70 @@ test.describe('the redesigned landing — visual baselines', () => {
           undefined,
           { timeout: 30_000 }
         );
-        // Motion reveals settle; CSS animations are frozen by the
-        // config's toHaveScreenshot block.
-        await page.waitForTimeout(500);
+        // The decode gate (#255): `complete && naturalWidth > 0` proves
+        // the bytes arrived, not that Chromium rasterized the frame —
+        // #241's about-light flake captured blank photos whose images
+        // were complete. decode() resolves only when the frame is ready
+        // to paint; the images gate above already failed broken images,
+        // so a rejection here is a capture-stopping anomaly.
+        await page.evaluate(() =>
+          Promise.all(
+            Array.from(document.images, (img) =>
+              img.decode().catch((reason: unknown) => {
+                throw new Error(`#255 decode gate: ${img.currentSrc} — ${String(reason)}`);
+              })
+            )
+          )
+        );
+        // The tall-viewport law (#255): capture at a page-height viewport
+        // so no reveal or raster race survives — the beyond-viewport
+        // fullPage rasterization path (the #255 Class A flake: blank
+        // mid-page bands, blank portfolio tiles) is gone by construction.
+        // The height is measured AFTER the images gate (unresolved images
+        // swing it); the width is unchanged. The root app shell is the
+        // only min-h-screen consumer (probed at plan time), so the shell
+        // stretch is a no-op at content height — layout, footer position,
+        // and every fixed-height section are preserved.
+        const pageHeight = await page.evaluate(
+          () => (document.scrollingElement ?? document.documentElement).scrollHeight
+        );
+        const viewport = page.viewportSize();
+        if (!viewport) {
+          throw new Error(
+            '#255: no viewport size before the tall-viewport resize — harness anomaly'
+          );
+        }
+        await page.setViewportSize({ width: viewport.width, height: pageHeight });
+        // Let the resize's reflow settle before re-measuring.
+        await page.evaluate(
+          () =>
+            new Promise<void>((resolve) =>
+              requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+            )
+        );
+        const settledHeight = await page.evaluate(
+          () => (document.scrollingElement ?? document.documentElement).scrollHeight
+        );
+        if (settledHeight > pageHeight) {
+          throw new Error(
+            `#255 tall-viewport law: the page grew with the taller viewport (${settledHeight}px > ${pageHeight}px) — viewport-height-dependent content; investigate before capturing`
+          );
+        }
+        // Everything is in-viewport at page height: reveals fire on
+        // intersection and lazy loading is moot. The reveal-complete wait
+        // targets the shared Reveal wrapper's data-reveal/data-shown hooks
+        // (apps/landing/src/components/reveal.tsx) and covers every
+        // reveal wrapper on the page; the config's animations:'disabled'
+        // fast-forwards any transition still running at capture —
+        // belt and braces under the tall viewport.
+        await page.waitForFunction(
+          () => document.querySelectorAll('[data-reveal]:not([data-shown])').length === 0,
+          undefined,
+          { timeout: 10_000 }
+        );
+        // The settle covers the worst-case reveal tail end to end
+        // (≈270ms column delay + 700ms transition).
+        await page.waitForTimeout(1000);
         let mask: Locator[] = [];
         if (name === 'home') {
           const marqueeSection = page.locator(MARQUEE_SECTION_MASK);
