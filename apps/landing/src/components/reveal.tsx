@@ -6,6 +6,10 @@ import { useEffect, useRef, useState } from 'react';
 // `delay`; prefers-reduced-motion shows immediately. Lives in its own
 // module so the home mosaic and the (#224) catalog index share the one
 // motion grammar.
+// The e2e visual seam (#255): every wrapper carries `data-reveal`, and
+// `data-shown` flips with the state — inert DOM hooks (zero pixel
+// impact) that the visual spec's reveal-complete wait targets under the
+// tall-viewport capture law (e2e/README.md).
 export function Reveal({
   children,
   delay = 0,
@@ -42,6 +46,8 @@ export function Reveal({
   return (
     <div
       ref={ref}
+      data-reveal=''
+      data-shown={shown ? 'true' : undefined}
       style={{ transitionDelay: `${delay}ms` }}
       className={cn(
         'transition-all duration-700 ease-out motion-reduce:transition-none',
