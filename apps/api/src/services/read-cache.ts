@@ -103,3 +103,33 @@ export function setReadCacheStore(store: PublicReadStore | null): void {
 export function resetReadCacheStore(): void {
   override = null;
 }
+
+// The read-through middleware (ADR-0025): mounted FIRST on the v1 chain, so
+// a hit returns before acquireDb even constructs the per-request client.
+// GET-only, allowlisted, query-string-free, 200-only storage — everything
+// else passes through untouched (appointments/admin/auth never reach a store
+// call). The stored copy is written by the default store's put (TTL header
+// rewrite inside); the served response is returned exactly as the handler
+// produced it.
+export const publicReadCache: MiddlewareHandler<ApiEnv> = async (c, next) => {
+  if (c.req.method !== 'GET' || !isCachedReadPath(c.req.path) || c.req.url.includes('?')) {
+    return next();
+  }
+  const store = getReadCacheStore();
+  if (!store) return next();
+  const hit = await store.match(c.req.path);
+  if (hit) {
+    // A stored body replays the populating request's x-request-id; re-stamp
+    // with THIS request's id (requestLogging minted it at the root, before
+    // this middleware) so the echoed header always correlates to the request
+    // that actually served — the hit then deviates from a fresh miss in
+    // nothing (Task 2 review, minor #1).
+    const res = responseFromCacheHit(hit);
+    res.headers.set('x-request-id', c.get('requestId'));
+    return res;
+  }
+  await next();
+  if (c.res.status === 200) {
+    await store.put(c.req.path, c.res);
+  }
+};
