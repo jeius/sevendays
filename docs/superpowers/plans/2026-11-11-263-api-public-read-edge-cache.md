@@ -794,7 +794,9 @@ export const adminEvictPublicReads: MiddlewareHandler<ApiEnv> = async (c, next) 
   const status = c.res.status;
   if (status < 200 || status >= 400) return;
   const segment = c.req.path.split('/')[4];
-  const reads = ADMIN_MUTATION_READS[segment];
+  // noUncheckedIndexedAccess: split()[4] is string | undefined and an absent
+  // segment is never a map key — guarded indexing (TS2538 without it).
+  const reads = segment ? ADMIN_MUTATION_READS[segment] : undefined;
   if (!reads) return;
   await evictCachedReads(c.get('db'), reads);
 };
