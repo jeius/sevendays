@@ -54,7 +54,7 @@ The ticket's core. A `SENTINELS` record keyed by surface name holds one self-con
 
 **Not here:** any landing/package source change (the predicates assert existing DOM — adding `data-*` hooks would violate AC5's spec-side-only reading); any change to the chain downstream of the sentinel block (decode gate onward, byte-identical); `playwright.config.ts`; any sentinel on surfaces beyond the brief's eight; retry/skip logic (a red run is a red run).
 
-- [ ] **Step 1: The whole-file replace**
+- [✅] **Step 1: The whole-file replace**
 
 Overwrite `e2e/visual/redesign.spec.ts` with EXACTLY this content (the session-verified artifact):
 
@@ -365,7 +365,7 @@ test.describe('the redesigned landing — visual baselines', () => {
 });
 ```
 
-- [ ] **Step 2: The three e2e gates**
+- [✅] **Step 2: The three e2e gates**
 
 ```bash
 pnpm exec biome check e2e/visual/redesign.spec.ts
@@ -375,7 +375,7 @@ E2E_BASE_URL=http://127.0.0.1:9 pnpm exec playwright test --list e2e/visual
 
 Expected: Biome "Checked 1 file … No fixes applied" with zero diagnostics; tsc prints EXACTLY the 2 pre-existing errors (`e2e/smoke/env.ts(11,17): error TS2591` + `e2e/visual/redesign.spec.ts(200,17): error TS2339` — the img.loading line; anything more is a regression: STOP); the list ends "Total: 16 tests in 1 file".
 
-- [ ] **Step 3: The live compare — the false-positive proof (stack is the deployed teaser)**
+- [✅] **Step 3: The live compare — the false-positive proof (stack is the deployed teaser)**
 
 ```bash
 mkdir -p .superpowers/sdd/2026-11-11-259-data-present-sentinels
@@ -392,7 +392,7 @@ Expected: **16 passed** — the sentinels are pixel-free (they assert and return
   - **A pixel diff with populated content on both sides** — genuine drift: record; do NOT regenerate (the zero-baseline law); surface to the owner at the PR.
   If no clean 16/16 in 3 attempts: PROCEED (static gates green + the artifact pre-verified + Task 4's gate re-proves) with every instance recorded.
 
-- [ ] **Step 4: Commit**
+- [✅] **Step 4: Commit**
 
 ```bash
 git status --short e2e/visual/redesign.spec.ts-snapshots/   # must be EMPTY (the zero-baseline law)
@@ -414,7 +414,7 @@ The brief's AC3: "The loud-fail path is demonstrated without a live flake: local
 
 **Not here:** any other sentinel (one surface proves the path — the machinery is shared by all eight); a commit (the mis-point never lands); a mis-point that would pass silently (the nonexistent marker guarantees the failure).
 
-- [ ] **Step 1: The mis-point**
+- [✅] **Step 1: The mis-point**
 
 In `e2e/visual/redesign.spec.ts`, inside `SENTINELS['not-found']`, replace (exactly once):
 
@@ -428,7 +428,7 @@ with:
     if (!h1?.textContent?.includes('This page was never here.')) {
 ```
 
-- [ ] **Step 2: Run the not-found pair, capture the curated failure**
+- [✅] **Step 2: Run the not-found pair, capture the curated failure**
 
 ```bash
 E2E_BASE_URL=https://sevendays-landing.pahamajulius.workers.dev \
@@ -445,7 +445,7 @@ Expected: **2 failed** (`not-found — light`, `not-found — dark`), each faili
 
 The `Page state` values are live-read (the h1 marker check is what failed; the rest of the page is healthy — `scrollHeight=836px` is the not-found baseline height at the standard viewport, `title` is the root head title, `images` counts the chrome's logo). NO Cloudflare attribution line (the healthy teaser). If either test PASSES, the mis-point did not take (wrong surface edited — the `-g` filter matched nothing edited): STOP, re-check the edit. A `beforeAll` timeout instead = edge degradation (Task 1 Step 3's carve-out; wait ≥15 min, rerun).
 
-- [ ] **Step 3: Revert + confirm clean**
+- [✅] **Step 3: Revert + confirm clean**
 
 ```bash
 git restore e2e/visual/redesign.spec.ts
@@ -468,7 +468,7 @@ AC6: "The e2e README's visual-mechanics section documents the sentinel law." Two
 
 **Not here:** the README's other sections (Running, Taxonomy, the rulings list, the regen command block — byte-identical); any ADR (ADR-0022's fences unchanged); the deferred regen-command-form fix from #255's final review (fenced there, stays fenced).
 
-- [ ] **Step 1: Insert the sentinel bullet**
+- [✅] **Step 1: Insert the sentinel bullet**
 
 In `e2e/README.md`, replace (exactly once):
 
@@ -485,7 +485,7 @@ An empty catalog is a red run with a named message, never a skip.
 - **Motion is deterministic**
 ```
 
-- [ ] **Step 2: Amend the Motion bullet's ordering chain**
+- [✅] **Step 2: Amend the Motion bullet's ordering chain**
 
 In `e2e/README.md`, replace (exactly once):
 
@@ -499,7 +499,7 @@ with:
 so page height itself swings without it) → the data-present sentinels (#259 — each surface's data-bearing DOM asserted in-page per the bullet above; a data-less page has no images to wait for, so the images gate is vacuous without them) → the decode gate
 ```
 
-- [ ] **Step 3: The eyeball + commit**
+- [✅] **Step 3: The eyeball + commit**
 
 Read § Visual regression in full and confirm: the sentinel bullet sits third in the mechanics list (after Both themes / the detail slug, before Motion), the Motion chain now reads `… → the images gate (…) → the data-present sentinels (#259 — …) → the decode gate (…) →`, and the regen command block below the list is unchanged. Then:
 
@@ -520,7 +520,7 @@ AC4: "≥5 consecutive full-suite compare runs green against the teaser (16/16 e
 
 **Not here:** parallelization (sequential is the point); any spec/baseline edit mid-gate (a red run is diagnosed, never patched around); reruns into a degraded edge (the degraded-edge law); a larger run count (five is the brief's AC; #255's 10-run gate already proved the chain — this gate proves the sentinels false-positive-free over sustained load).
 
-- [ ] **Step 1: The repo gates**
+- [✅] **Step 1: The repo gates**
 
 ```bash
 pnpm check
@@ -528,7 +528,7 @@ pnpm check
 
 Expected: green — nothing in the pnpm workspace changed (e2e/ + docs only), so every suite holds its AGENTS.md floor by construction; the run is recorded as the PR gate. Any failure: reconcile before proceeding (never loosen).
 
-- [ ] **Step 2: The gapped loop (run as a BACKGROUND task — `run_in_background: true`)**
+- [✅] **Step 2: The gapped loop (run as a BACKGROUND task — `run_in_background: true`)**
 
 ```bash
 cd /home/jeius/Projects/sevendays
@@ -551,7 +551,7 @@ echo "GREEN RUNS: $ok/5" >> "$S/gate-summary.txt"
 
 The loop ALWAYS writes all five run logs then the summary — a red run does not abort the loop; you diagnose from the logs.
 
-- [ ] **Step 3: The verdict — the diagnosis table**
+- [✅] **Step 3: The verdict — the diagnosis table**
 
 Read `gate-summary.txt`. **`GREEN RUNS: 5/5`** → AC4 met; proceed to Task 5. **A red run:** open its log and match it against the table — every row names the action; the count is CONSECUTIVE green, so any red restarts it:
 
@@ -572,7 +572,7 @@ One PR carries the plan file + Tasks 1–3's commits. The body quotes the mis-po
 
 **Not here:** a second PR (no baseline changes exist, so no visual PR — the zero-write shape is this ticket's ONLY shape); direct pushes to main (the docs commit lands in Task 7, after the merge, per the `9648847` pattern).
 
-- [ ] **Step 1: The PR**
+- [✅] **Step 1: The PR**
 
 ```bash
 git push -u origin fix/259-data-present-sentinels
@@ -602,7 +602,7 @@ The runbook loop (`docs/agents/v1-picks.md`) for the one PR. Pre-classified at p
 
 **Not here:** any cherry-pick/commit in `~/Projects/sevendays-v1-seed`; v1 baselines (none exist — teaser-only forever); the ledger row's commit (Task 7 lands it on main).
 
-- [ ] **Step 1: The path pass**
+- [✅] **Step 1: The path pass**
 
 ```bash
 node scripts/v1-triage.mjs <merge-sha>
@@ -622,7 +622,7 @@ Pure main-only close-out. The docs commit pushes directly to main (the `9648847`
 
 **Not here:** `AGENTS.md` (no floor or ruling changes); any ADR; reopening the fenced owner question (the empty-state UX ruling stays fenced — noted in the close comment, ruled separately); #260.
 
-- [ ] **Step 1: The progress entry**
+- [✅] **Step 1: The progress entry**
 
 Append to `docs/progress.md` in "Notes for Future Sessions", directly after the #255 entry, filling bracketed values from the actual runs:
 
@@ -630,7 +630,7 @@ Append to `docs/progress.md` in "Notes for Future Sessions", directly after the 
 - **2026-11-XX — the e2e visual data-present sentinels landed (#259).** The visual suite can no longer capture a page whose data never arrived: between the images gate and the decode gate every one of the 16 tests asserts its surface's data-bearing DOM from a per-surface SENTINELS map (the featured strip + mosaic figures on home, the detail-linked plates on the packages index, the book CTA + inclusions h2 on the detail, the service rows, the branch cards, the portfolio grid + tab row + kind-words quotes on about, the form fields on share-your-story, the ruled h1 + header chrome on the not-found) — the images gate is vacuous without images, the exact hole the Class B flake slipped through (an about at 734px vs its 2238px baseline; a not-found at the 720px shell). A missing seam fails loudly with the surface, the seam, and a page-state dump (title, readyState, scrollHeight, image counts, the body innerText head), with a Cloudflare `error code: 1102` body match appending the platform-throttling attribution line (the #255-incident imposter named on sight). Never a skip, never a retry; zero baseline changes (assertion-only, upstream of every capture mechanic — compare 16/16 green vs the committed baselines); the loud-fail path proven by the mis-point demo (one sentinel pointed at a nonexistent seam, 2 curated failures recorded, reverted — AC3); the stability gate <N>/5 consecutive green full-suite runs under the owner-ruled ~60s-gap shape (<any red instances + their table rows>). The e2e README's mechanics section carries the sentinel law and the amended ordering chain. Spec-side only — zero apps/packages changes. The empty-state UX owner question (retry vs skeleton vs graceful) stays fenced; the reliability investigation (why fetches intermittently fail) stays out of scope — the sentinel makes the next occurrence visible and attributable, not absent.
 ```
 
-- [ ] **Step 2: The ledger row**
+- [✅] **Step 2: The ledger row**
 
 Append to `docs/agents/v1-picks.md`'s ledger tail, then push:
 
@@ -645,13 +645,13 @@ git commit -m "docs(v1-picks): the #259 skip row + the progress entry (#259)"
 git push origin main
 ```
 
-- [ ] **Step 3: Close the issue (the AC walk)**
+- [✅] **Step 3: Close the issue (the AC walk)**
 
 ```bash
 gh issue close 259 --comment "Landed in #<PR> (main \`<main-sha>\`; pure SKIP — all paths main-only, the ledger row recorded). AC1 all 16 tests (8 surfaces × 2 themes) assert their data-present seam before capture via the shared SENTINELS map — the failure message names the surface and the missing seam. AC2 the failure output carries the page-state dump (title, readyState, scrollHeight, complete/total image counts, body innerText head) — plus the CF-1102 attribution line the recurrence comment asked for (\`error code: 1102\` → worker resource-limit throttling, not a data race). AC3 the loud-fail path demonstrated by the mis-point demo (one sentinel pointed at a nonexistent seam, both not-found tests failing with the curated message, reverted) — quoted verbatim in the PR body. AC4 the stability gate: <N>/5 consecutive green full-suite runs, 16/16 each, under the owner-ruled ~60s-gap shape (gate-summary.txt; <any red instances recorded>). AC5 zero baseline changes — assertion-only and upstream of every capture mechanic; the snapshots dir untouched; compare 16/16 green vs the committed baselines. AC6 the e2e README's visual-mechanics section documents the sentinel law (the new bullet) and the amended ordering chain. Fenced and untouched: the empty-state UX question (ruled separately) and the reliability investigation — the sentinel makes the next occurrence visible and attributable, not absent."
 ```
 
-- [ ] **Step 4: Graphify + the final sweep**
+- [✅] **Step 4: Graphify + the final sweep**
 
 ```bash
 graphify update .
