@@ -236,7 +236,12 @@ describe('the read-cache seam (unit)', () => {
     expect(served.headers.get('cache-control')).toBeNull();
     expect(await served.text()).toBe('{"ok":true}');
     // The hit projection strips the storage directive — byte-identical wire.
-    const hit = responseFromCacheHit(stored);
+    // Bodies are single-use: stored.text() above consumed `stored`, and a
+    // cache hit ALWAYS carries a fresh body (match() never returns a read
+    // stream) — so the hit seats on a fresh stored copy, mirroring production.
+    const hit = responseFromCacheHit(
+      toStoredResponse(Response.json({ ok: true }, { status: 200 }))
+    );
     expect(hit.headers.get('cache-control')).toBeNull();
     expect(hit.headers.get('content-type')).toBe('application/json');
     expect(await hit.text()).toBe('{"ok":true}');
