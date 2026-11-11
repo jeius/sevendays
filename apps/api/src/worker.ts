@@ -3,7 +3,9 @@
 // are untouched); this file is the wrangler main and the ONLY
 // @sentry/cloudflare import in the api: withSentry initializes per request
 // (env bindings are per-request under workerd) and auto-instruments the
-// request path (traces at 100% — v1 traffic is far under any cap), while the
+// request path (errors-only since #263 — trace sampling is OFF: every traced
+// request cost CPU against the free plan's 10 ms cap, the same margin the
+// public-read cache buys back; revisit only with a paid plan), while the
 // explicit capture seam (observability/capture.ts) owns WHAT is captured:
 // every 5xx + the curated 503 + email-send failures, never 4xx. A missing
 // SENTRY_DSN leaves Sentry disabled (the no-op-without-DSN posture both
@@ -22,7 +24,7 @@ export default withSentry<Env>((env) => {
     release: env.SENTRY_RELEASE,
     environment: env.ENVIRONMENT ?? 'dev',
     sampleRate: 1,
-    tracesSampleRate: 1,
+    tracesSampleRate: 0,
     sendDefaultPii: false,
     initialScope: { tags: { app: 'api' } },
     // The SDK's withSentry auto-instruments Hono's error handler at this
