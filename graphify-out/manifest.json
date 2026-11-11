@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794379294.1657279,
-    "ast_hash": "5b118e7a6b42bec9e23ef7ee8c99cabd",
+    "mtime": 1794401145.332234,
+    "ast_hash": "25ccdece040fed780f521ad318c19ef6",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2865,8 +2865,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794380697.5761921,
-    "ast_hash": "073ff096da08d4b7509ea9960e849b92",
+    "mtime": 1794401161.9930937,
+    "ast_hash": "3dd0f69c488a7d2e534e6e709cbbd111",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -3985,8 +3985,8 @@
     "semantic_hash": ""
   },
   "e2e/README.md": {
-    "mtime": 1794137617.2471619,
-    "ast_hash": "a695629379a3f292d061b225323ab121",
+    "mtime": 1794386878.8576014,
+    "ast_hash": "39dfa6ed09129c9198ad3eeae551ba37",
     "semantic_hash": ""
   },
   "apps/admin/src/instrument.ts": {
@@ -4790,8 +4790,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/reveal.tsx": {
-    "mtime": 1792492748.1819127,
-    "ast_hash": "a18f2366ac38674cab3eae7dcd072ce0",
+    "mtime": 1794386878.8576014,
+    "ast_hash": "7935fda740b8af116a58782a1e0beabf",
     "semantic_hash": ""
   },
   "apps/landing/src/components/skeletons.tsx": {
@@ -4840,8 +4840,8 @@
     "semantic_hash": ""
   },
   "e2e/visual/redesign.spec.ts": {
-    "mtime": 1794224656.3773477,
-    "ast_hash": "41bdba01ab3df5c0dd7180afb0767a50",
+    "mtime": 1794386878.8576014,
+    "ast_hash": "001a3667f2e36195491ee777016b6f65",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-05-225-m7-closeout.md": {
@@ -4967,6 +4967,11 @@
   "docs/superpowers/plans/2026-11-11-263-api-public-read-edge-cache.md": {
     "mtime": 1794379294.1657279,
     "ast_hash": "ff5a69c91a4a05e12dfe2448440c8ba3",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-11-255-visual-tall-viewport-capture.md": {
+    "mtime": 1794401174.2011483,
+    "ast_hash": "7a998bb4dab4e47f9f55408afe6949be",
     "semantic_hash": ""
   }
 }
