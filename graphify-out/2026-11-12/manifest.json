@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794401145.332234,
-    "ast_hash": "25ccdece040fed780f521ad318c19ef6",
+    "mtime": 1794435582.4380572,
+    "ast_hash": "1e04c338a700dcef3f68fc603f0ca8aa",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2865,8 +2865,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794401161.9930937,
-    "ast_hash": "3dd0f69c488a7d2e534e6e709cbbd111",
+    "mtime": 1794435600.8089252,
+    "ast_hash": "696998936627afd4bb8adabeb56002b0",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -3985,8 +3985,8 @@
     "semantic_hash": ""
   },
   "e2e/README.md": {
-    "mtime": 1794386878.8576014,
-    "ast_hash": "39dfa6ed09129c9198ad3eeae551ba37",
+    "mtime": 1794435543.893396,
+    "ast_hash": "2182d932308edd99dcc8e1f1a3f455df",
     "semantic_hash": ""
   },
   "apps/admin/src/instrument.ts": {
@@ -4840,8 +4840,8 @@
     "semantic_hash": ""
   },
   "e2e/visual/redesign.spec.ts": {
-    "mtime": 1794386878.8576014,
-    "ast_hash": "001a3667f2e36195491ee777016b6f65",
+    "mtime": 1794435543.893396,
+    "ast_hash": "9a760db6458f0c6e4f320fc8204ecde5",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-05-225-m7-closeout.md": {
@@ -4972,6 +4972,11 @@
   "docs/superpowers/plans/2026-11-11-255-visual-tall-viewport-capture.md": {
     "mtime": 1794401174.2011483,
     "ast_hash": "7a998bb4dab4e47f9f55408afe6949be",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-11-259-visual-data-present-sentinels.md": {
+    "mtime": 1794435543.893396,
+    "ast_hash": "9c2dfdfbc6c89070c39cfb5d6742e2a4",
     "semantic_hash": ""
   }
 }
