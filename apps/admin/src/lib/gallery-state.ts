@@ -171,6 +171,19 @@ export function titleFromFileName(name: string): string {
 }
 
 /**
+ * `#243 seam: the card display law`. The gallery grid's card label — the
+ * #214 caption law on the management wall: the caption leads when
+ * present, the title remains the fallback, and a photo carrying neither
+ * still gets the terminal 'Untitled photo' line (a management card
+ * always labels — unlike the public walls, which render no caption line
+ * at all when the photo carries none). Display-only: the wire field
+ * stays `title` everywhere.
+ */
+export function photoCardLabel(photo: GalleryPhoto): string {
+  return photo.caption ?? photo.title ?? 'Untitled photo';
+}
+
+/**
  * `#143 seam` — the category order PUT body. Array order IS the payload
  * order (TOTAL full-replace, #137).
  */
