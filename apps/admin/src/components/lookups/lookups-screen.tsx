@@ -359,11 +359,12 @@ export function LookupsScreen() {
           toast.success('Saved.');
           return true;
         }
+        // #245: details is the unwrapped inner array — map what maps, toast
+        // when nothing did (the package editor's handleSaveFailure law).
         const codeConflict = conflictFieldErrors(result.details).code;
         if (codeConflict) {
           setSizeErrors({ code: codeConflict });
-        }
-        if (!result.details) {
+        } else {
           toast.error(result.message);
         }
         return false;
@@ -390,11 +391,11 @@ export function LookupsScreen() {
         toast.success('Saved.');
         return true;
       }
+      // #245: mapped-or-toast (see the size arm above).
       const nameConflict = conflictFieldErrors(result.details).name;
       if (nameConflict) {
         setAttireErrors({ name: nameConflict });
-      }
-      if (!result.details) {
+      } else {
         toast.error(result.message);
       }
       return false;

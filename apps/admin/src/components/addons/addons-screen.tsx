@@ -435,11 +435,11 @@ export function AddonsScreen() {
         );
         return false;
       }
+      // #245: mapped-or-toast (see package-editor's handleSaveFailure).
       const nameConflict = conflictFieldErrors(outcome.result.details).name;
       if (nameConflict) {
         setFieldErrors({ name: nameConflict });
-      }
-      if (!outcome.result.details) {
+      } else {
         toast.error(outcome.result.message);
       }
       return false;

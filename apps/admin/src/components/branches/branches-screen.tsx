@@ -260,11 +260,12 @@ export function BranchesScreen() {
         toast.success('Saved.');
         return true;
       }
+      // #245: mapped-or-toast — a 400 that maps shows its field error, any
+      // other failure toasts.
       const nameConflict = conflictFieldErrors(result.details).name;
       if (nameConflict) {
         setFieldErrors({ name: nameConflict });
-      }
-      if (!result.details) {
+      } else {
         toast.error(result.message);
       }
       return false;

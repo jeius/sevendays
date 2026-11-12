@@ -54,6 +54,7 @@ import { getRequestHeaders } from '@tanstack/react-start/server';
 import { z } from 'zod';
 import { runAdminAction } from './admin.functions.server';
 import { getSessionScopedApiClient } from './api.server';
+import { envelopeDetails } from './api-envelope';
 
 // Mutations-as-results (the #139 plan ruling): a write server fn resolves to
 // this union instead of throwing, so the API's 400 field details cross the
@@ -168,7 +169,7 @@ export const presignAdminCoverUpload = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -194,7 +195,7 @@ export const saveAdminPackageCreate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -224,7 +225,7 @@ export const saveAdminPackageUpdate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -250,7 +251,7 @@ export const saveAdminBranchCreate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -280,7 +281,7 @@ export const saveAdminBranchUpdate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -307,7 +308,7 @@ export const saveAdminSiteSettings = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -333,7 +334,7 @@ export const saveAdminStudioServiceCreate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -363,7 +364,7 @@ export const saveAdminStudioServiceUpdate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -389,7 +390,7 @@ export const saveAdminAddonCreate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -419,7 +420,7 @@ export const saveAdminAddonUpdate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -452,7 +453,7 @@ export const saveAdminStudioServiceBranchMatrix = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -485,7 +486,7 @@ export const saveAdminStudioServiceAddonMatrix = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -512,7 +513,7 @@ export const saveAdminGalleryCategoryCreate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -543,7 +544,7 @@ export const saveAdminGalleryCategoryUpdate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -570,7 +571,7 @@ export const saveAdminGalleryCategoryOrder = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -597,7 +598,7 @@ export const saveAdminGalleryPhotoCreate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -628,7 +629,7 @@ export const saveAdminGalleryPhotoUpdate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -655,7 +656,7 @@ export const saveAdminGalleryPhotoOrder = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -682,7 +683,7 @@ export const saveAdminTestimonialCreate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -713,7 +714,7 @@ export const saveAdminTestimonialUpdate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -740,7 +741,7 @@ export const saveAdminTestimonialOrder = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -767,7 +768,7 @@ export const saveAdminPrintSizeCreate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -798,7 +799,7 @@ export const saveAdminPrintSizeUpdate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -825,7 +826,7 @@ export const saveAdminAttireCreate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
@@ -856,7 +857,7 @@ export const saveAdminAttireUpdate = createServerFn({
             ok: false,
             status: error.status,
             message: error.message,
-            details: error.details,
+            details: envelopeDetails(error.details),
           };
         }
         throw error; // not an API failure (serialization, session loss) — loud
