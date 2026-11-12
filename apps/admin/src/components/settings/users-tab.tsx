@@ -71,7 +71,13 @@ import {
   unbanAdminUser,
 } from '#/lib/users.functions';
 import { banRefusal, deleteRefusal } from '#/lib/users-guards';
-import { type AdminUserRow, shapeSessionRows, shapeUserRows } from '#/lib/users-state';
+import {
+  type AdminUserRow,
+  activeSessionRows,
+  paginateSessions,
+  shapeSessionRows,
+  shapeUserRows,
+} from '#/lib/users-state';
 
 const TEMP_PASSWORD_MIN = 12; // matches emailAndPassword.minPasswordLength
 
@@ -162,6 +168,10 @@ export function UsersTab({ actorId }: { actorId: string }) {
   // per-session Revoke needs `session.token` (revokes go by token), while
   // the render reads the shaped rows the token was stripped from.
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  // #244: the sessions page resets whenever a different row expands (or the
+  // same one collapses) — paginateSessions' clamp covers a revoke shrinking
+  // the list mid-page.
+  const [sessionPage, setSessionPage] = useState(1);
   const sessionsQuery = useQuery({
     queryKey: ['admin', 'users', expandedId, 'sessions'],
     queryFn: () => fetchAdminUserSessions({ data: { userId: expandedId ?? '' } }),
@@ -171,8 +181,13 @@ export function UsersTab({ actorId }: { actorId: string }) {
   // carries no index signature, so the spread satisfies shapeSessionRows'
   // `& Record<string, unknown>` param (shallow copy, Date references kept).
   const rawSessions = (sessionsQuery.data ?? []).map((session) => ({ ...session }));
-  const sessionRows = shapeSessionRows(rawSessions);
-  const sessionItems = sessionRows.map((session) => ({
+  // #244: the expanded view lists ACTIVE sessions only — expired rows are
+  // dropped before anything shapes them for render.
+  const activeRows = activeSessionRows(shapeSessionRows(rawSessions), new Date());
+  const sessionsPage = paginateSessions(activeRows, sessionPage);
+  // Token re-attachment for the revoke mutation arg only (#221 law: revokes go
+  // by token; the render reads these rows, the token never renders).
+  const sessionItems = sessionsPage.rows.map((session) => ({
     ...session,
     token: rawSessions.find((raw) => raw.id === session.id)?.token,
   }));
@@ -349,6 +364,11 @@ export function UsersTab({ actorId }: { actorId: string }) {
     setDeleteTarget(row);
   }
 
+  function toggleExpanded(userId: string) {
+    setExpandedId(expandedId === userId ? null : userId);
+    setSessionPage(1);
+  }
+
   if (isError) {
     return (
       <div className='space-y-4'>
@@ -411,7 +431,23 @@ export function UsersTab({ actorId }: { actorId: string }) {
                   const rowBanBlockers = banRefusal(actorId, row, rows);
                   return (
                     <Fragment key={row.id}>
-                      <ExpandRow expanded={expanded}>
+                      <ExpandRow
+                        expanded={expanded}
+                        className={`cursor-pointer transition-colors ${
+                          expanded
+                            ? // #244: full-opacity accent + a petrol start rail — bg-muted/50 is
+                              // invisible on the dark card (#23262a over #1f2226). The rail is
+                              // --primary (the fixed brand point, legible both themes).
+                              'bg-accent/70 shadow-[inset_2px_0_0_0_var(--primary)] hover:bg-accent/70 dark:bg-accent dark:hover:bg-accent'
+                            : ''
+                        }`}
+                        onClick={(event) => {
+                          if ((event.target as HTMLElement).closest('button') !== null) {
+                            return; // chevron + row actions keep their own behavior
+                          }
+                          toggleExpanded(row.id);
+                        }}
+                      >
                         <TableCell>
                           <div className='flex items-center gap-1'>
                             <Button
@@ -421,7 +457,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
                               aria-expanded={expanded}
                               aria-label={expanded ? 'Collapse row' : 'Expand row'}
                               className={`transition-transform ${expanded ? 'rotate-180' : ''}`}
-                              onClick={() => setExpandedId(expanded ? null : row.id)}
+                              onClick={() => toggleExpanded(row.id)}
                             >
                               <ChevronDown aria-hidden='true' />
                             </Button>
@@ -520,7 +556,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
                                   Retry
                                 </Button>
                               </div>
-                            ) : sessionItems.length === 0 ? (
+                            ) : activeRows.length === 0 ? (
                               <p className='text-muted-foreground text-xs'>No active sessions.</p>
                             ) : (
                               <ul className='space-y-1.5'>
@@ -568,6 +604,35 @@ export function UsersTab({ actorId }: { actorId: string }) {
                                 })}
                               </ul>
                             )}
+                            {sessionsPage.pageCount > 1 ? (
+                              <div className='flex items-center justify-between gap-2 pt-1'>
+                                <span className='text-muted-foreground text-xs'>
+                                  {sessionsPage.rangeLabel}
+                                </span>
+                                <div className='flex items-center gap-1'>
+                                  <Button
+                                    variant='outline'
+                                    size='sm'
+                                    type='button'
+                                    disabled={sessionsBusy || sessionsPage.page <= 1}
+                                    onClick={() => setSessionPage(sessionsPage.page - 1)}
+                                  >
+                                    Previous
+                                  </Button>
+                                  <Button
+                                    variant='outline'
+                                    size='sm'
+                                    type='button'
+                                    disabled={
+                                      sessionsBusy || sessionsPage.page >= sessionsPage.pageCount
+                                    }
+                                    onClick={() => setSessionPage(sessionsPage.page + 1)}
+                                  >
+                                    Next
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : null}
                           </div>
                         ) : null}
                       </ExpandPanel>
