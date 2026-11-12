@@ -40,7 +40,7 @@
 
 Semantics: `activeSessionRows` keeps rows with `expiresAt > now` (strict — a session expiring this instant is gone). `paginateSessions` clamps `page` into `[1, pageCount]` (a stale high page after a revoke falls back to the last page; `page < 1` clamps to 1; an empty list yields `page: 1, pageCount: 1, rows: [], total: 0`), slices newest-first by `createdAt` descending (newest session first — the most recently signed-in device leads), and formats `rangeLabel` as `` `${start}–${end} of ${total}` `` (en dash, 1-based, e.g. `1–5 of 12`; an empty list yields `0 of 0`).
 
-- [ ] **Step 1: Write the failing tests**
+- [✅] **Step 1: Write the failing tests**
 
 Append to `apps/admin/src/lib/users-state.test.ts` (keep the existing file header comment and imports; add `activeSessionRows` and `paginateSessions` to the import list from `./users-state`):
 
@@ -107,12 +107,12 @@ describe('paginateSessions (#244)', () => {
 
 `AdminSessionRow` must also be added to the type-only import at the top of the test file (it is already exported from `./users-state`).
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [✅] **Step 2: Run the tests to verify they fail**
 
 Run: `pnpm --filter @sevendays/admin test -- src/lib/users-state.test.ts`
 Expected: FAIL — `activeSessionRows` and `paginateSessions` are not exported (import errors / undefined is not a function).
 
-- [ ] **Step 3: Implement the seams**
+- [✅] **Step 3: Implement the seams**
 
 Append to `apps/admin/src/lib/users-state.ts` (below `shapeSessionRows`):
 
@@ -160,12 +160,12 @@ export function paginateSessions(sessions: readonly AdminSessionRow[], page: num
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [✅] **Step 4: Run the tests to verify they pass**
 
 Run: `pnpm --filter @sevendays/admin test -- src/lib/users-state.test.ts`
 Expected: PASS — 10 tests in this file (4 existing + 6 new).
 
-- [ ] **Step 5: Commit**
+- [✅] **Step 5: Commit**
 
 ```bash
 git add apps/admin/src/lib/users-state.ts apps/admin/src/lib/users-state.test.ts
@@ -182,7 +182,7 @@ git commit -m "feat(admin): users sessions seams - active-only filter + paginato
 - Produces: none (leaf UI task; no later task depends on new exports).
 - Not here: no `packages/ui` change (the dark tokens are #164-ruled; local `dark:` classes follow the tab's existing status-palette precedent), no API/server-fn change, no new dependency.
 
-- [ ] **Step 1: Wire the seams into the sessions query path**
+- [✅] **Step 1: Wire the seams into the sessions query path**
 
 In `UsersTab`, replace the current shaping block (lines ~173–178):
 
@@ -213,7 +213,7 @@ const sessionItems = sessionsPage.rows.map((session) => ({
 
 Add to the import from `#/lib/users-state` (line ~74): `activeSessionRows`, `paginateSessions`. `shapeSessionRows` stays imported (still used above).
 
-- [ ] **Step 2: Add the page state beside the expansion state**
+- [✅] **Step 2: Add the page state beside the expansion state**
 
 Below `const [expandedId, setExpandedId] = useState<string | null>(null);` (line ~164) add:
 
@@ -233,7 +233,7 @@ function toggleExpanded(userId: string) {
 }
 ```
 
-- [ ] **Step 3: Whole-row toggle + the expanded accent**
+- [✅] **Step 3: Whole-row toggle + the expanded accent**
 
 On the `ExpandRow` (line ~414), route the click through the handler with interactive elements excluded, and add the accent. The chevron button keeps its own `onClick` (a button click is excluded from the row handler, so no double-toggle) and switches to the same handler for the page reset:
 
@@ -259,7 +259,7 @@ On the `ExpandRow` (line ~414), route the click through the handler with interac
 
 and the chevron button's `onClick` (line ~424) becomes `onClick={() => toggleExpanded(row.id)}`.
 
-- [ ] **Step 4: Paginate the list + the pager footer**
+- [✅] **Step 4: Paginate the list + the pager footer**
 
 The empty-state check switches from `sessionItems.length === 0` to the active count (`activeRows.length === 0` — an all-expired list is empty, not page 1 of zero), and the `<ul>` maps `sessionItems` unchanged (it is now the current page). Below the `</ul>` (after line ~569), inside the same `space-y-3` div, add the pager — hidden entirely on a single page:
 
@@ -293,12 +293,12 @@ The empty-state check switches from `sessionItems.length === 0` to the active co
 
 (The `Previous`/`Next`/range-label copy is plan-ratified; the owner reacts in the PR review round.)
 
-- [ ] **Step 5: Typecheck + lint the app**
+- [✅] **Step 5: Typecheck + lint the app**
 
 Run: `pnpm --filter @sevendays/admin typecheck && pnpm --filter @sevendays/admin lint`
 Expected: both green (biome may demand template-literal formatting — run `pnpm --filter @sevendays/admin lint -- --write` if it flags the className template, then re-run lint).
 
-- [ ] **Step 6: Verify live on the dev stack, both themes**
+- [✅] **Step 6: Verify live on the dev stack, both themes**
 
 Run: `pnpm --filter @sevendays/admin dev` and sign in as the owner at the Settings → Users tab. Verify each acceptance criterion:
 1. Expired sessions never render — hard to fabricate live; the seam test in Task 1 is the proof (skip live).
@@ -306,12 +306,12 @@ Run: `pnpm --filter @sevendays/admin dev` and sign in as the owner at the Settin
 3. Row click toggles; clicking Reset/Ban/Delete/chevron does not toggle.
 4. The expanded accent (wash + petrol start rail) is clearly visible on dark AND unobtrusive on light — toggle the theme in the topbar.
 
-- [ ] **Step 7: Run the admin suite**
+- [✅] **Step 7: Run the admin suite**
 
 Run: `pnpm --filter @sevendays/admin test`
 Expected: PASS — 26 files / 271 tests (Task 1's 6 new included; the users-row seam suite pins the display vocabulary, not the sessions list, so no existing pin breaks).
 
-- [ ] **Step 8: Commit**
+- [✅] **Step 8: Commit**
 
 ```bash
 git add apps/admin/src/components/settings/users-tab.tsx
@@ -326,28 +326,28 @@ git commit -m "feat(admin): users sessions display - active-only, paginated, who
 
 **Interfaces:** Consumes Tasks 1–2 landed on the branch. Produces: none.
 
-- [ ] **Step 1: The whole-repo gate**
+- [✅] **Step 1: The whole-repo gate**
 
 Run: `pnpm check`
 Expected: green — lint + format + typecheck + test across all packages. Floors: admin 26 files / 271 tests; api, api-client, landing, db unchanged (nothing outside `apps/admin` was touched).
 
-- [ ] **Step 2: Update `docs/progress.md`**
+- [✅] **Step 2: Update `docs/progress.md`**
 
 Add one entry at the top of the entry list (match the file's date-prefixed house style), stating: #244 landed on the branch — the Users tab's expanded sessions row now lists active sessions only (`activeSessionRows`), paginates at 5/page newest-first (`paginateSessions` + the Previous/Next pager), toggles from the whole row (button clicks excluded), and carries the expanded accent `bg-accent/70 dark:bg-accent` + the `--primary` inset start rail (the dark `bg-muted/50` invisibility root-caused to #23262a over #1f2226); admin floor 26 files / 271 tests (+6 in `users-state.test.ts`). Update the standing admin floor figure wherever `docs/progress.md` (and `apps/admin/AGENTS.md`, if it restates it) carries it.
 
-- [ ] **Step 3: Refresh the knowledge graph**
+- [✅] **Step 3: Refresh the knowledge graph**
 
 Run: `graphify update .`
 Expected: completes clean; dirty `graphify-out/` files are expected and get committed alongside.
 
-- [ ] **Step 4: Commit**
+- [✅] **Step 4: Commit**
 
 ```bash
 git add docs/progress.md apps/admin/AGENTS.md graphify-out/
 git commit -m "docs: #244 progress entry + admin floor 271; graph refresh"
 ```
 
-- [ ] **Step 5: PR + triage**
+- [✅] **Step 5: PR + triage**
 
 Open the PR to `main` (one PR for the branch; the three commits ride together). After squash-merge, run the v1-picks triage per `docs/agents/v1-picks.md` and write the ledger row — expected PICK (admin-only, the Users tab already rides v1 per #221). Close #244 and tick its acceptance boxes on the issue.
 
