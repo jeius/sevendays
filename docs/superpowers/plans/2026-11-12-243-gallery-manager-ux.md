@@ -55,7 +55,7 @@ The ticket's whole test surface, plus the function Task 2's card renders. Pure l
 
 **Not here:** any component edit (Task 2); any change to the existing seams or their JSDoc (`titleFromFileName` and neighbors stay byte-identical); the public walls' caption law (the landing's `MosaicPhotoGrid` is untouched — the admin chain keeps its fallbacks by the ticket's AC); the empty-state or sheet copy (Task 2).
 
-- [ ] **Step 1: Write the failing tests**
+- [✅] **Step 1: Write the failing tests**
 
 (a) `apps/admin/src/lib/gallery-state.test.ts` — the value import from `./gallery-state` (lines 3–15) gains one specifier. Biome's case-insensitive order puts `photoCardLabel` between `isFileDrag` and `photoStateFromRead`:
 
@@ -100,15 +100,15 @@ describe('photoCardLabel (the card display law, #243 — the #214 caption law on
 
 (The `photo()` helper defaults are `title: \`Photo ${n}\`` and `caption: null`, so the second it exercises the title fallback through the real schema, and the third overrides both to null — the terminal line.)
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [✅] **Step 2: Run the tests to verify they fail**
 
 ```bash
 pnpm --filter @sevendays/admin test -- --run
 ```
 
-Expected: FAIL — vitest transforms without typechecking, so the missing export surfaces at call time, not compile time (the #242 precedent): the 3 new `photoCardLabel` its fail with `TypeError: photoCardLabel is not a function`; every pre-existing it still passes — **Test Files 26 passed (26) · Tests 3 failed | 259 passed (262)**. (If the module graph instead refuses the missing specifier at load, the file-level failure names the same cause — same defect, proceed.) Record the failure output in `.superpowers/sdd/2026-11-12-243-gallery-manager-ux/task-1-red.txt`.
+Expected: FAIL — vitest transforms without typechecking, so the missing export surfaces at call time, not compile time (the #242 precedent): the 3 new `photoCardLabel` its fail with `TypeError: photoCardLabel is not a function`; every pre-existing it still passes — **Test Files 26 passed (26) · Tests 3 failed | 262 passed (265)**. (Execution amendment 2026-11-12, SDD-ruled: this step's original text said `259 passed (262)` — a plan-arithmetic error; the true math is the 262 baseline + 3 new = 265, and the red run correctly showed `3 failed | 262 passed (265)`.) (If the module graph instead refuses the missing specifier at load, the file-level failure names the same cause — same defect, proceed.) Record the failure output in `.superpowers/sdd/2026-11-12-243-gallery-manager-ux/task-1-red.txt`.
 
-- [ ] **Step 3: Write the minimal implementation**
+- [✅] **Step 3: Write the minimal implementation**
 
 `apps/admin/src/lib/gallery-state.ts` — insert directly after `titleFromFileName`'s closing brace (line 171) and before the `buildCategoryOrderPayload` JSDoc (line 173), keeping everything around it byte-identical:
 
@@ -129,7 +129,7 @@ export function photoCardLabel(photo: GalleryPhoto): string {
 
 (`GalleryPhoto` is already in the file's type-import block — `buildPhotoOrderPayload` at line 187 takes `GalleryPhoto[]`.)
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [✅] **Step 4: Run the tests to verify they pass**
 
 ```bash
 pnpm --filter @sevendays/admin test -- --run
@@ -137,7 +137,7 @@ pnpm --filter @sevendays/admin test -- --run
 
 Expected: PASS — **Test Files 26 passed (26) · Tests 265 passed (265)** (the 262 baseline + 3).
 
-- [ ] **Step 5: Lint, format, typecheck**
+- [✅] **Step 5: Lint, format, typecheck**
 
 ```bash
 pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/admin typecheck
@@ -145,7 +145,7 @@ pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/admin typecheck
 
 Expected: both green (accept `fix`'s rewrites; re-run the suite from Step 4 if it rewrites anything).
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/admin/src/lib/gallery-state.ts apps/admin/src/lib/gallery-state.test.ts
@@ -165,11 +165,11 @@ All three ticket items land in the one screen file. The card label renders throu
 
 **Not here:** the all-photos empty state (line 1427's `'No photos yet.'` + Upload photos action + its `TODO(owner-copy)` marker stay — only the category state was ruled); the sheet header (line 1492) and the deactivate/delete dialogs (lines 1577, 1609) — they render the title VALUE as the entity name and already speak name vocabulary; the card `<img alt>` (line 224 — title-derived alt is not display vocabulary); the batch tray (recon answered the ticket's sweep: NO Title vocabulary exists in the tray — its copy is statuses over file names; nothing to rename, no tray edit); the wire field `title` / `titleId` / the editor-state key / `titleFromFileName`; #244's dark accent + Users-tab set, #245's duplicate-save surfacing, #246's PNG acceptance, #247's Socials icons, #248's Maps — every one a sibling ticket.
 
-- [ ] **Step 1: Load the UI/UX skill set**
+- [✅] **Step 1: Load the UI/UX skill set**
 
 Per AGENTS.md, load `prototype` + `ui-ux-pro-max` (plus `ui-styling` as relevant) before editing. The rendered shapes are pinned below — the skills inform judgment (muted-line hierarchy in the empty state, placeholder-vs-value posture), not re-composition.
 
-- [ ] **Step 2: The header comment + the seam import**
+- [✅] **Step 2: The header comment + the seam import**
 
 (a) Append to the header comment, directly after line 14 (`// (AR-1); raw photoUrl never reaches the UI.`):
 
@@ -188,7 +188,7 @@ Per AGENTS.md, load `prototype` + `ui-ux-pro-max` (plus `ui-styling` as relevant
   type PhotoEditorState,
 ```
 
-- [ ] **Step 3: The card label renders through the seam**
+- [✅] **Step 3: The card label renders through the seam**
 
 Replace line 300:
 
@@ -202,7 +202,7 @@ with:
         <p className='truncate text-sm font-medium'>{photoCardLabel(photo)}</p>
 ```
 
-- [ ] **Step 4: The empty category instructs**
+- [✅] **Step 4: The empty category instructs**
 
 Replace lines 1433–1436:
 
@@ -230,7 +230,7 @@ with:
 
 (The `TODO(owner-copy)` marker on the ALL-photos state at line 1426 stays — that string was not ruled here. `EmptyState` renders children in its `mt-4` slot, `apps/admin/src/components/cms/shared.tsx:193-200`.)
 
-- [ ] **Step 5: The sheet's Title vocabulary becomes Name**
+- [✅] **Step 5: The sheet's Title vocabulary becomes Name**
 
 (a) Replace the description (line 1493):
 
@@ -273,7 +273,7 @@ with:
 
 (`titleId` and the `editorState.title` key stay — the vocabulary law: display only.)
 
-- [ ] **Step 6: Grep gates — the three refinements present, the Title vocabulary gone**
+- [✅] **Step 6: Grep gates — the three refinements present, the Title vocabulary gone**
 
 ```bash
 grep -n 'photoCardLabel' apps/admin/src/components/gallery/gallery-screen.tsx
@@ -285,7 +285,7 @@ grep -c "No photos in this category yet." apps/admin/src/components/gallery/gall
 
 Expected: `photoCardLabel` — **3 hits** (header comment + import specifier + the card-label render); the Title-vocabulary alternation — **0**; the instruction — **1**; the placeholder — **1**; the kept label — **1**. (Remaining `title` spellings in the file are prop names, the `titleId` key, and `photo.title` VALUE reads — the vocabulary law, not display strings.) Save the output to the evidence dir as `task-2-grep.txt`.
 
-- [ ] **Step 7: Lint, format, test, typecheck**
+- [✅] **Step 7: Lint, format, test, typecheck**
 
 ```bash
 pnpm --filter @sevendays/admin fix
@@ -295,7 +295,7 @@ pnpm --filter @sevendays/admin typecheck
 
 Expected: all green; the suite stays at **Test Files 26 passed (26) · Tests 265 passed (265)** (no suite change in this task). No build — no new module edge (Global Constraints).
 
-- [ ] **Step 8: Commit**
+- [✅] **Step 8: Commit**
 
 ```bash
 git add apps/admin/src/components/gallery/gallery-screen.tsx
@@ -312,7 +312,7 @@ git commit -m "feat(admin): the gallery manager's three refinements - empty-cate
 
 **Not here:** any code change (a defect found by Step 2 goes back to its owning task's file with its own fix commit, then this task re-runs from Step 1); `docs/plan.md` (M7 is closed and the post-flight carries no roadmap box — #239's disposition cuts tickets, not plan.md boxes; the #242 precedent); visual-baseline regen (no admin baseline exists — the 16 committed baselines are landing-only, untouched); any landing/api/types file (zero blast radius outside admin).
 
-- [ ] **Step 1: The full check**
+- [✅] **Step 1: The full check**
 
 ```bash
 pnpm check
@@ -320,7 +320,7 @@ pnpm check
 
 Expected: green across the repo (lint + format + typecheck + test). Floors after this ticket: admin **26 files / 265 tests**; every other suite unchanged from AGENTS.md's recorded floors (api, api-client, landing, types, db — this ticket touches none of them).
 
-- [ ] **Step 2: The live walkthrough (controller step — both themes, evidence for the PR)**
+- [✅] **Step 2: The live walkthrough (controller step — both themes, evidence for the PR)**
 
 Bring up the local stack (`pnpm --filter @sevendays/api dev` + `pnpm --filter @sevendays/admin dev`); sign in with the controller's dev staff account (the owner's local credentials — never written to the evidence dir, never committed). The gallery tables were CMS-born-empty — **if the grid is empty, first upload 2–3 JPGs via the header's `Upload photos` button**; `apps/landing/public/photos/` carries the placeholder corpus (e.g. `gallery-04-family.jpg`, `cover-event.jpg`) and doubles as state 3's drag corpus. Drive a real browser — the `browser-use:control-browser` skill, or a throwaway headed Playwright script kept OUTSIDE the repo. Walk, in order, capturing each numbered state (screenshots + a short `walkthrough.md` narration) to `.superpowers/sdd/2026-11-12-243-gallery-manager-ux/` (light first):
 
@@ -331,7 +331,7 @@ Bring up the local stack (`pnpm --filter @sevendays/api dev` + `pnpm --filter @s
 
 Then toggle dark (the admin topbar's theme toggle) and repeat 1–4 (the instruction line and the caption cards render from the same semantic tokens). Any deviation is a defect — fix it in the owning task's file, re-run that task's gates, commit a `fix(admin): … (#243)`, and restart this task from Step 1.
 
-- [ ] **Step 3: `docs/progress.md` — the dated entry (newest first, pinned)**
+- [✅] **Step 3: `docs/progress.md` — the dated entry (newest first, pinned)**
 
 Insert as the first entry under `# Progress` (replace `2026-11-XX` with the docs commit's date — the #242 plan's dated-annotation convention):
 
@@ -339,7 +339,7 @@ Insert as the first entry under `# Progress` (replace `2026-11-XX` with the docs
 - **2026-11-XX — M7 post-flight T3, the gallery manager UX refinements (#243) — build complete on `feat/243-gallery-manager-ux`, PR pending.** The gallery manager's three demo findings landed (#239 items 8–10): the empty-category state now instructs — the label stays ("No photos in this category yet.") with "Drag photos into the grid to add them." joined below (owner-picked 2026-11-12 from previewed renderings; the #220 drop zone covers the empty state, so the instruction is truthful); the grid cards label by the #214 caption law on the management wall — the new `photoCardLabel` seam (caption leads, title the fallback, terminal "Untitled photo") replaces the bare title line; and the edit sheet's Title vocabulary is Name (field label + the description line + the new "Photo name" placeholder — the wire field stays `title`, zero API/types changes; the tray sweep found no Title vocabulary on disk). Walked live on the dev stack in both themes. Admin-only — zero api/api-client/types/landing/db/ui changes; admin floor 26 files / 265 tests (+3 caption-law its).
 ```
 
-- [ ] **Step 4: `AGENTS.md` — two pinned find/replace edits**
+- [✅] **Step 4: `AGENTS.md` — two pinned find/replace edits**
 
 (a) In *Current status of `pnpm test`*, replace (verified this session: exactly one occurrence):
 
@@ -365,7 +365,7 @@ with:
 + #242's dirty-gate seam — isEditorStateDirty's structural law — and the Signing in…/Sending… label pins; + #243's three caption-law card-label pins)
 ```
 
-- [ ] **Step 5: The docs commit**
+- [✅] **Step 5: The docs commit**
 
 Tick this plan's executed boxes (`- [✅]`), then:
 
@@ -374,11 +374,11 @@ git add docs/progress.md AGENTS.md docs/superpowers/plans/2026-11-12-243-gallery
 git commit -m "docs(post-flight): #243 lands the gallery manager UX refinements - progress, AGENTS floor + seam note (#243)"
 ```
 
-- [ ] **Step 6: PR + squash merge**
+- [✅] **Step 6: PR + squash merge**
 
 Push `feat/243-gallery-manager-ux`; open the PR against main titled `Post-flight T3 — gallery manager UX: empty-category instruction, grid captions, Title→Name (#243)`; body: the four ACs each answered with its evidence pointer — (1) empty category: walkthrough state 3 (label + instruction, both themes) + `task-2-grep.txt`; (2) caption cards: the `photoCardLabel` seam (+3 its — caption leads / title fallback / the Untitled-photo terminal) + walkthrough states 1–2; (3) sheet + tray say Name: walkthrough state 4 (label, description, the `Photo name` placeholder) + the tray sweep documented in the plan's recon (no Title vocabulary existed — nothing to rename); (4) `pnpm check` green, admin 26 files / 265 tests. Squash-merge.
 
-- [ ] **Step 7: The v1 split (per `docs/agents/v1-picks.md`)**
+- [✅] **Step 7: The v1 split (per `docs/agents/v1-picks.md`)**
 
 Run the path pass on the squash SHA:
 
@@ -397,7 +397,7 @@ git add docs/agents/v1-picks.md
 git commit -m "docs(v1-picks): #<PR> ledger row - the #243 split (gallery manager UX)"
 ```
 
-- [ ] **Step 8: Issue closes + graphify**
+- [✅] **Step 8: Issue closes + graphify**
 
 Tick #243's four AC boxes in its body, then close it with the AC → evidence mapping:
 
