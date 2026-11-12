@@ -8,6 +8,7 @@ import {
   buildPhotoPayload,
   buildTestimonialOrderPayload,
   isFileDrag,
+  photoCardLabel,
   photoStateFromRead,
   reorderIds,
   reorderVisiblePhotos,
@@ -147,5 +148,21 @@ describe('batchItemsFromFiles + isFileDrag (M7 #220 — the shared enqueue + the
     expect(isFileDrag(['Files', 'text/uri-list'])).toBe(true);
     expect(isFileDrag(['text/plain'])).toBe(false);
     expect(isFileDrag([])).toBe(false);
+  });
+});
+
+describe('photoCardLabel (the card display law, #243 — the #214 caption law on the management wall)', () => {
+  it('caption leads when present', () => {
+    expect(photoCardLabel(photo(1, { caption: 'The kiss, golden hour' }))).toBe(
+      'The kiss, golden hour'
+    );
+  });
+
+  it('title remains the fallback where no caption exists', () => {
+    expect(photoCardLabel(photo(2))).toBe('Photo 2');
+  });
+
+  it('both null → the terminal Untitled photo line (a management card always labels)', () => {
+    expect(photoCardLabel(photo(3, { title: null, caption: null }))).toBe('Untitled photo');
   });
 });
