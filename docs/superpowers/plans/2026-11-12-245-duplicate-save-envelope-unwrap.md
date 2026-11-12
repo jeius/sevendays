@@ -45,6 +45,7 @@ Create `apps/admin/src/lib/api-envelope.test.ts`:
 // consumers (conflictFieldErrors, fieldErrorsFromDetails, blockerLines) want
 // the INNER details array. These tests pin the unwrapped shape the server fns
 // must carry across the RPC boundary.
+import { describe, expect, it } from 'vitest';
 import { conflictFieldErrors } from './package-editor-state';
 import { envelopeDetails } from './api-envelope';
 
