@@ -700,8 +700,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1794379294.1613476,
-    "ast_hash": "0990ac9db75474a471e08b69a7427fde",
+    "mtime": 1794449485.0487518,
+    "ast_hash": "e9223b7d6ce03262e450cd7cc6dfce34",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794435582.4380572,
-    "ast_hash": "1e04c338a700dcef3f68fc603f0ca8aa",
+    "mtime": 1794449485.0487518,
+    "ast_hash": "4b0bf18d647a19d01b5111e60e0d37fa",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2865,8 +2865,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794435600.8089252,
-    "ast_hash": "696998936627afd4bb8adabeb56002b0",
+    "mtime": 1794450002.9553459,
+    "ast_hash": "e4a24ceb6eb3b8aba0f4b99946b29937",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -3525,8 +3525,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/gallery/gallery-screen.tsx": {
-    "mtime": 1792318225.0332866,
-    "ast_hash": "4912739949efdaf007862e8e78c4c134",
+    "mtime": 1794449485.0487518,
+    "ast_hash": "589c352dc2d28091d371647e2a913cad",
     "semantic_hash": ""
   },
   "apps/admin/src/components/lookups/lookups-screen.tsx": {
@@ -3575,8 +3575,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/gallery-state.ts": {
-    "mtime": 1792318225.0332866,
-    "ast_hash": "fd70d1cc9ed787c640cf336963a48a4f",
+    "mtime": 1794449485.0487518,
+    "ast_hash": "53c453b6a4283b1059491b23e5ad3152",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/light-entity-state.ts": {
@@ -3810,8 +3810,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/gallery-state.test.ts": {
-    "mtime": 1792318225.0332866,
-    "ast_hash": "5dc3118f510b076780924fc53107187c",
+    "mtime": 1794449485.0487518,
+    "ast_hash": "b8104a38cb523ac4f177bfeaafa8c3b7",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/light-entity-state.test.ts": {
@@ -4975,8 +4975,13 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-11-259-visual-data-present-sentinels.md": {
-    "mtime": 1794435543.893396,
-    "ast_hash": "9c2dfdfbc6c89070c39cfb5d6742e2a4",
+    "mtime": 1794435670.5189917,
+    "ast_hash": "498d355e0fa727dfe1040f4499c83080",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-12-243-gallery-manager-ux.md": {
+    "mtime": 1794449485.0531518,
+    "ast_hash": "6cf610cd9d94ecd85556db987e64d572",
     "semantic_hash": ""
   }
 }
