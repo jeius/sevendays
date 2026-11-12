@@ -12,6 +12,10 @@
 // (Pointer-8px / Touch-300ms / keyboard — AR-7) and the order PUT fires on
 // drop with snapshot restore (AR-9). Thumbs ride the Task 5 gated proxy
 // (AR-1); raw photoUrl never reaches the UI.
+// The M7 post-flight #243 refinements: the cards label by the #214
+// caption law (photoCardLabel — caption leads, title the fallback), the
+// empty-category state instructs (drag to add, below the label), and the
+// editor's Title vocabulary is Name (placeholder included).
 import {
   closestCenter,
   DndContext,
@@ -106,6 +110,7 @@ import {
   buildPhotoPayload,
   isFileDrag,
   type PhotoEditorState,
+  photoCardLabel,
   photoStateFromRead,
   reorderIds,
   reorderVisiblePhotos,
@@ -297,7 +302,7 @@ function SortablePhotoCard({
         </div>
       </div>
       <CardContent className='space-y-2 p-3'>
-        <p className='truncate text-sm font-medium'>{photo.title ?? 'Untitled photo'}</p>
+        <p className='truncate text-sm font-medium'>{photoCardLabel(photo)}</p>
         {photo.categoryId ? (
           <Badge variant='outline'>{categoryName}</Badge>
         ) : (
@@ -1431,8 +1436,14 @@ export function GalleryScreen() {
                   </Button>
                 </EmptyState>
               ) : (
-                // TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items)
-                <EmptyState line='No photos in this category yet.' />
+                // Owner-ratified 2026-11-12 (#243 round): the label stays,
+                // the drag instruction joins below it — the drop zone covers
+                // this empty state (#220), so the instruction is truthful.
+                <EmptyState line='No photos in this category yet.'>
+                  <p className='text-muted-foreground text-sm'>
+                    Drag photos into the grid to add them.
+                  </p>
+                </EmptyState>
               )
             ) : (
               <DndContext
@@ -1490,7 +1501,7 @@ export function GalleryScreen() {
       {editing ? (
         <LightEntityEditor
           title={editing.row.title ?? 'Untitled photo'}
-          description='Title, caption, category, and the active flag.'
+          description='Name, caption, category, and the active flag.'
           open={editorOpen}
           onOpenChange={(next) => {
             if (!next) {
@@ -1509,9 +1520,10 @@ export function GalleryScreen() {
             />
           </div>
           <Field>
-            <FieldLabel htmlFor={titleId}>Title</FieldLabel>
+            <FieldLabel htmlFor={titleId}>Name</FieldLabel>
             <Input
               id={titleId}
+              placeholder='Photo name'
               value={editorState.title}
               onChange={(e) => setEditorState({ ...editorState, title: e.target.value })}
             />
