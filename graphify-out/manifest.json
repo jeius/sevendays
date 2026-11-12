@@ -700,8 +700,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1794463936.3965952,
-    "ast_hash": "8091fdfd86278800a9b4d5007cfa484d",
+    "mtime": 1794470906.5771127,
+    "ast_hash": "70b4dbf7abef7099c08a1bfdf5d09e4c",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794463932.2042308,
-    "ast_hash": "3b68cdb48f486adffb67d100b740ca4a",
+    "mtime": 1794470882.9302082,
+    "ast_hash": "120ea24a567e281c59a82e6080f449ff",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2865,8 +2865,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794450002.9553459,
-    "ast_hash": "e4a24ceb6eb3b8aba0f4b99946b29937",
+    "mtime": 1794467158.084016,
+    "ast_hash": "390eea1fabf21cabb17cec1f86347a09",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -3500,13 +3500,13 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/addons/addons-screen.tsx": {
-    "mtime": 1792237586.42662,
-    "ast_hash": "750feeef05751d39aa235284e9066e8c",
+    "mtime": 1794470303.1260386,
+    "ast_hash": "22755db75fdb69a1936694fc79eb281d",
     "semantic_hash": ""
   },
   "apps/admin/src/components/branches/branches-screen.tsx": {
-    "mtime": 1792164735.513643,
-    "ast_hash": "a0ec4578f44564d7726734c83d2eabf6",
+    "mtime": 1794470303.054772,
+    "ast_hash": "204d845a9360fc71a11c7044baa39926",
     "semantic_hash": ""
   },
   "apps/admin/src/components/cms/bulk-bar.tsx": {
@@ -3530,8 +3530,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/lookups/lookups-screen.tsx": {
-    "mtime": 1792164735.5178037,
-    "ast_hash": "05f57c1fb2a56c29224bf6c0b5946570",
+    "mtime": 1794470303.0230978,
+    "ast_hash": "88cc549d02032926a2334520c1be5b1c",
     "semantic_hash": ""
   },
   "apps/admin/src/components/packages/package-editor.tsx": {
@@ -3545,8 +3545,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/studio-services/studio-services-screen.tsx": {
-    "mtime": 1792237586.42662,
-    "ast_hash": "a4340b6dee3d33d04526a0c1e31af121",
+    "mtime": 1794470303.0904052,
+    "ast_hash": "9535e11ce285172e2cce9f0ef18b78d3",
     "semantic_hash": ""
   },
   "apps/admin/src/components/testimonials/testimonials-screen.tsx": {
@@ -3555,8 +3555,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/admin.functions.ts": {
-    "mtime": 1792164735.5178037,
-    "ast_hash": "dabb61ed602a900e7b8265f02a9fcb3f",
+    "mtime": 1794469598.8545823,
+    "ast_hash": "224c2b338fb3b505cea96ba1cf158948",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/batch-photo-upload.ts": {
@@ -4560,8 +4560,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/admin.functions.server.ts": {
-    "mtime": 1792164735.5178037,
-    "ast_hash": "35ba46e3d032d512d6b31aee1019eb70",
+    "mtime": 1794469579.5949361,
+    "ast_hash": "9530afbea962a813c9cd99e4a8a5ca54",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/save-contract.test.ts": {
@@ -4665,12 +4665,12 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/users-state.test.ts": {
-    "mtime": 1794462017.0588217,
+    "mtime": 1794466770.1158574,
     "ast_hash": "c76d9a5d3e49329f73d1c78b4e26f5c0",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/users-state.ts": {
-    "mtime": 1794462017.0588217,
+    "mtime": 1794466770.1158574,
     "ast_hash": "02abf468dc252ec4d46eb9ab7ef63542",
     "semantic_hash": ""
   },
@@ -4710,7 +4710,7 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/settings/users-tab.tsx": {
-    "mtime": 1794462601.396804,
+    "mtime": 1794466770.1158574,
     "ast_hash": "3502a0b6df7f29d753c910179291ecf0",
     "semantic_hash": ""
   },
@@ -4985,8 +4985,23 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-12-244-users-sessions-display.md": {
-    "mtime": 1794462124.2399075,
-    "ast_hash": "4c301d628ed992670c753fb3461a290c",
+    "mtime": 1794466770.1158574,
+    "ast_hash": "6b059c352e7121df8f1e88fe169a8943",
+    "semantic_hash": ""
+  },
+  "apps/admin/src/lib/api-envelope.test.ts": {
+    "mtime": 1794469165.1140983,
+    "ast_hash": "350af6c3e1d63c6951d582a1f948003b",
+    "semantic_hash": ""
+  },
+  "apps/admin/src/lib/api-envelope.ts": {
+    "mtime": 1794469007.273285,
+    "ast_hash": "9bb9a2c61235dc4b366bdd31e745b445",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-12-245-duplicate-save-envelope-unwrap.md": {
+    "mtime": 1794469143.4284606,
+    "ast_hash": "426699a35474094c5e839d013fbf2f13",
     "semantic_hash": ""
   }
 }
