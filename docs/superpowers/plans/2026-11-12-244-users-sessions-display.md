@@ -147,7 +147,16 @@ export function paginateSessions(sessions: readonly AdminSessionRow[], page: num
   const rows = ordered.slice((clamped - 1) * SESSIONS_PAGE_SIZE, clamped * SESSIONS_PAGE_SIZE);
   const start = total === 0 ? 0 : (clamped - 1) * SESSIONS_PAGE_SIZE + 1;
   const end = total === 0 ? 0 : (clamped - 1) * SESSIONS_PAGE_SIZE + rows.length;
-  return { rows, page: clamped, pageCount, total, rangeLabel: `${start}–${end} of ${total}` };
+  return {
+    rows,
+    page: clamped,
+    pageCount,
+    total,
+    // Controller amendment (2026-11-12, Task 1 execution): the pinned test and
+    // semantics require "0 of 0" for an empty list — the original single-line
+    // return produced "0–0 of 0". Landed code is canonical.
+    rangeLabel: total === 0 ? '0 of 0' : `${start}–${end} of ${total}`,
+  };
 }
 ```
 
