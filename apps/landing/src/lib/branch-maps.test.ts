@@ -11,6 +11,8 @@ function branch(coords: { latitude: number | null; longitude: number | null }): 
     acceptsWalkIns: false,
     isActive: true,
     coverImageUrl: null,
+    googleMapsUrl: null,
+    appleMapsUrl: null,
     latitude: coords.latitude,
     longitude: coords.longitude,
     createdAt: new Date('2026-01-01T00:00:00Z'),

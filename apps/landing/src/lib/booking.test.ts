@@ -44,6 +44,8 @@ function branch(id: string): BranchRead {
     acceptsWalkIns: false,
     latitude: null,
     longitude: null,
+    googleMapsUrl: null,
+    appleMapsUrl: null,
     coverImageUrl: 'https://pub-test.r2.dev/covers/branch-a.jpg',
     isActive: true,
     createdAt: new Date('2026-01-01T00:00:00Z'),

@@ -22,6 +22,8 @@ const branch = branchReadSchema.parse({
   isActive: true,
   latitude: null,
   longitude: null,
+  googleMapsUrl: null,
+  appleMapsUrl: null,
   coverImageUrl: null,
   createdAt: STAMP,
   updatedAt: STAMP,
@@ -70,6 +72,8 @@ describe('studio-service state', () => {
       isActive: true,
       latitude: null,
       longitude: null,
+      googleMapsUrl: null,
+      appleMapsUrl: null,
     });
     const flip = light.buildBranchFlipPayload(branch, false);
     expect(flip).toEqual({
@@ -80,6 +84,8 @@ describe('studio-service state', () => {
       isActive: false,
       latitude: null,
       longitude: null,
+      googleMapsUrl: null,
+      appleMapsUrl: null,
     });
     // The cover is deliberately ABSENT from a flip — the absence is what
     // makes a flip never re-verify or clobber media (the tri-state law).

@@ -184,6 +184,10 @@ export function buildBranchCreatePayload(state: BranchEditorState): CreateBranch
     longitude: parseCoordinate(state.longitude),
     acceptsWalkIns: state.acceptsWalkIns,
     isActive: state.isActive,
+    // #273: the editor state has no maps-link fields yet — null until the
+    // editor grows them (born-null columns, nothing to preserve).
+    googleMapsUrl: null,
+    appleMapsUrl: null,
     ...(typeof state.coverImageKey === 'string' ? { coverImageKey: state.coverImageKey } : {}),
   };
 }
@@ -203,6 +207,10 @@ export function buildBranchUpdatePayload(state: BranchEditorState): UpdateBranch
     longitude: parseCoordinate(state.longitude),
     acceptsWalkIns: state.acceptsWalkIns,
     isActive: state.isActive,
+    // #273: the editor state has no maps-link fields yet — null until the
+    // editor grows them (born-null columns, nothing to preserve).
+    googleMapsUrl: null,
+    appleMapsUrl: null,
     ...(state.coverImageKey !== undefined ? { coverImageKey: state.coverImageKey } : {}),
   };
 }
@@ -222,6 +230,10 @@ export function buildBranchFlipPayload(row: BranchRead, isActive: boolean): Upda
     latitude: row.latitude,
     longitude: row.longitude,
     acceptsWalkIns: row.acceptsWalkIns,
+    // #273: the links are row data — a flip re-sends them untouched (ONLY
+    // isActive flips; null here would clobber existing links).
+    googleMapsUrl: row.googleMapsUrl,
+    appleMapsUrl: row.appleMapsUrl,
     isActive,
   };
 }

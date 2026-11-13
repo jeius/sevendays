@@ -11,6 +11,8 @@ function branch(name: string): BranchRead {
     acceptsWalkIns: false,
     latitude: null,
     longitude: null,
+    googleMapsUrl: null,
+    appleMapsUrl: null,
     coverImageUrl: null,
     isActive: true,
     createdAt: new Date('2026-01-01T00:00:00Z'),
