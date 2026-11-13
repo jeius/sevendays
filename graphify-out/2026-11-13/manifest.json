@@ -10,8 +10,8 @@
     "semantic_hash": "58d7babaea94f37ca911b84be639ad5a"
   },
   "apps/admin/biome.json": {
-    "mtime": 1791334300.8274677,
-    "ast_hash": "9559a5b7976cb63a22cec33220860c4c",
+    "mtime": 1794541011.69619,
+    "ast_hash": "b20afec1af930ee31b13f3c8cfd3f79a",
     "semantic_hash": ""
   },
   "apps/admin/components.json": {
@@ -40,8 +40,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/routes/__root.tsx": {
-    "mtime": 1792052774.8786912,
-    "ast_hash": "465aa902ef2af2da6ef724f66b173b60",
+    "mtime": 1794541011.7046936,
+    "ast_hash": "b77478a98229b30adc056dc6427cbf95",
     "semantic_hash": ""
   },
   "apps/admin/tsconfig.json": {
@@ -215,8 +215,8 @@
     "semantic_hash": "58d7babaea94f37ca911b84be639ad5a"
   },
   "apps/landing/biome.json": {
-    "mtime": 1791260199.7980144,
-    "ast_hash": "332347f197bf37ec2ffe698d4b00f52d",
+    "mtime": 1794541011.7046936,
+    "ast_hash": "e4fd406802fc160b6abe9658e5901a61",
     "semantic_hash": ""
   },
   "apps/landing/components.json": {
@@ -245,8 +245,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/routes/__root.tsx": {
-    "mtime": 1792492748.186131,
-    "ast_hash": "325241ad8c39bf8801c282f9e0921b09",
+    "mtime": 1794541011.708945,
+    "ast_hash": "1fed8b8c47c9d22bf6fe5111318e3d23",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/index.tsx": {
@@ -385,8 +385,8 @@
     "semantic_hash": "beadb76ef595ed4eded5f13a615cae7f"
   },
   "packages/db/migrations/meta/_journal.json": {
-    "mtime": 1791979489.5196497,
-    "ast_hash": "243393f4b60419587ce2057b6f7f5de5",
+    "mtime": 1794568372.8239973,
+    "ast_hash": "dd4a29a567ca66beb45e0a1887a5607a",
     "semantic_hash": ""
   },
   "packages/db/package.json": {
@@ -485,8 +485,8 @@
     "semantic_hash": ""
   },
   "packages/db/src/schema/branches.ts": {
-    "mtime": 1791869095.408282,
-    "ast_hash": "103fc85b5270c6cb45cfa37d13e41c21",
+    "mtime": 1794568372.8239973,
+    "ast_hash": "077cb5b854d50e2ac2f84fae14d457c7",
     "semantic_hash": ""
   },
   "packages/db/src/schema/frames.ts": {
@@ -605,8 +605,8 @@
     "semantic_hash": ""
   },
   "packages/types/src/branch.ts": {
-    "mtime": 1791869095.408282,
-    "ast_hash": "a3058d6415e848654c7eef970f838b48",
+    "mtime": 1794568372.8239973,
+    "ast_hash": "3db2ff73855f68a72428873c5097b5e2",
     "semantic_hash": ""
   },
   "packages/types/src/frames.test.ts": {
@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794533851.0298815,
-    "ast_hash": "21a6b79c5acb8f2054151b778a28444d",
+    "mtime": 1794568372.8199456,
+    "ast_hash": "de313a3be8bc584e65b219666a55c2c4",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -1350,8 +1350,8 @@
     "semantic_hash": ""
   },
   "packages/api-client/test/mock-api.ts": {
-    "mtime": 1791979489.5155618,
-    "ast_hash": "afbd29986bd7393016d4368e678d7eb0",
+    "mtime": 1794568372.8239973,
+    "ast_hash": "418abc1e56fd533eea0d460b48188f8f",
     "semantic_hash": ""
   },
   "packages/api-client/test/typing.test.ts": {
@@ -2605,8 +2605,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/branch-card.tsx": {
-    "mtime": 1794191818.298247,
-    "ast_hash": "aab9ed529c55a437f596658056737a0b",
+    "mtime": 1794568372.815894,
+    "ast_hash": "e3db52346c8ea980a2b61f36aaec608f",
     "semantic_hash": ""
   },
   "apps/landing/src/components/branch-strip-item.tsx": {
@@ -2650,8 +2650,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/lib/bookable-branches.test.ts": {
-    "mtime": 1791869095.403882,
-    "ast_hash": "1381c3e39ff7e166a3a1a8f1e039e17e",
+    "mtime": 1794568372.815894,
+    "ast_hash": "bab4d9d18cd03abdb09cafbd66c00438",
     "semantic_hash": ""
   },
   "apps/landing/src/lib/bookable-branches.ts": {
@@ -2660,8 +2660,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/lib/booking-read.test.ts": {
-    "mtime": 1791869095.403882,
-    "ast_hash": "792b9f766bd8429308feb8eae4280c1d",
+    "mtime": 1794568372.815894,
+    "ast_hash": "5f71c7f24b06440a414d3eebacf2d905",
     "semantic_hash": ""
   },
   "apps/landing/src/lib/booking-read.ts": {
@@ -2670,8 +2670,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/lib/booking.test.ts": {
-    "mtime": 1791869095.403882,
-    "ast_hash": "243eede68b764964dac2161e0c3c5304",
+    "mtime": 1794568372.8199456,
+    "ast_hash": "b5a10c7d3f83d1084ad18d36b033247b",
     "semantic_hash": ""
   },
   "apps/landing/src/lib/booking.ts": {
@@ -2865,8 +2865,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794523578.7320824,
-    "ast_hash": "b40fcb485b18575ced09e40c1af9124d",
+    "mtime": 1794569059.285133,
+    "ast_hash": "29f3b9b7be3770321f8fb65bb3d7d6e4",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -2925,8 +2925,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/site-footer.tsx": {
-    "mtime": 1792492748.1819127,
-    "ast_hash": "1cc0054ef91a899a4a9a54b4301fbfdb",
+    "mtime": 1794541011.708945,
+    "ast_hash": "af921628b057c4aad5b731a9b8c678cd",
     "semantic_hash": ""
   },
   "apps/landing/src/lib/nav.ts": {
@@ -3355,8 +3355,8 @@
     "semantic_hash": ""
   },
   "apps/api/test/cms-schema-contracts.test.ts": {
-    "mtime": 1791869095.399482,
-    "ast_hash": "97a6c350a02248f2791fe21de519bc77",
+    "mtime": 1794568372.815894,
+    "ast_hash": "6f3b1e8ab8a64da5ed75a915c419ec66",
     "semantic_hash": ""
   },
   "packages/db/migrations/0006_dry_kid_colt.sql": {
@@ -3505,8 +3505,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/branches/branches-screen.tsx": {
-    "mtime": 1794533851.0212147,
-    "ast_hash": "a0f145a236e5645a2665cfeb908adf4d",
+    "mtime": 1794568372.811842,
+    "ast_hash": "639b72321d5f9a373df7590581322277",
     "semantic_hash": ""
   },
   "apps/admin/src/components/cms/bulk-bar.tsx": {
@@ -3580,8 +3580,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/light-entity-state.ts": {
-    "mtime": 1794137617.2392113,
-    "ast_hash": "5ca970fe682053a73e65ffe9da759291",
+    "mtime": 1794568372.815894,
+    "ast_hash": "dbb1bc86f94630842a2f7f7187b36601",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/package-editor-state.ts": {
@@ -3675,8 +3675,8 @@
     "semantic_hash": ""
   },
   "apps/api/src/services/admin-entities.ts": {
-    "mtime": 1791869095.399482,
-    "ast_hash": "680f19fce4311a8e2630bfd142a38afa",
+    "mtime": 1794568372.815894,
+    "ast_hash": "b11088db8605a8c0afd796041082cf18",
     "semantic_hash": ""
   },
   "apps/api/src/services/admin-gallery.ts": {
@@ -3710,8 +3710,8 @@
     "semantic_hash": ""
   },
   "apps/api/test/admin-entities.test.ts": {
-    "mtime": 1791869095.399482,
-    "ast_hash": "9b74580a5346db9b86441fb864c8aa63",
+    "mtime": 1794568372.815894,
+    "ast_hash": "11a9ba6cae9a5b076a6db1ad9b200c93",
     "semantic_hash": ""
   },
   "apps/api/test/admin-gallery.test.ts": {
@@ -3815,8 +3815,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/light-entity-state.test.ts": {
-    "mtime": 1791869095.399482,
-    "ast_hash": "a4e061ece50de384b04ee68daddf633c",
+    "mtime": 1794568372.811842,
+    "ast_hash": "6ddae0a7d9f0f3b4c5f06a5ea72e16a2",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/package-editor-state.test.ts": {
@@ -4435,8 +4435,8 @@
     "semantic_hash": ""
   },
   "packages/types/src/branch.test.ts": {
-    "mtime": 1791869095.408282,
-    "ast_hash": "4f7b286d046e867cb9fc419ef27b443a",
+    "mtime": 1794568372.8239973,
+    "ast_hash": "086a6860accaeecca81cb3e4dd60be62",
     "semantic_hash": ""
   },
   "packages/types/src/site-settings.test.ts": {
@@ -4640,8 +4640,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/settings/site-tab.tsx": {
-    "mtime": 1794533851.0255482,
-    "ast_hash": "b9db963e1c78204ee35485b959127443",
+    "mtime": 1794541011.7046936,
+    "ast_hash": "68c77faf453675c3546b852b42a6b5d4",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/reset-email.test.ts": {
@@ -5007,6 +5007,131 @@
   "docs/superpowers/plans/2026-11-13-246-site-logo-png.md": {
     "mtime": 1794533851.0342147,
     "ast_hash": "274c21cbc69e7fce9f0aa2044a87e656",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-13-247-social-icons-favicons.md": {
+    "mtime": 1794541011.708945,
+    "ast_hash": "fb4c3b92547a382eb8d2e6901d22ed22",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/apple-touch-icon.png": {
+    "mtime": 1794541011.7004418,
+    "ast_hash": "616968e90ec934acc5bd22ea35e183c4",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/brand/facebook.svg": {
+    "mtime": 1794541011.7004418,
+    "ast_hash": "e4e9a2173656a39df687e7c0dd6335db",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/brand/gmail.svg": {
+    "mtime": 1794541011.7004418,
+    "ast_hash": "febead9156934b31f071a1e4664d9122",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/brand/instagram.svg": {
+    "mtime": 1794541011.7004418,
+    "ast_hash": "8e8d554c282bd215a21fa0bcf813f097",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/brand/tiktok.svg": {
+    "mtime": 1794541011.7004418,
+    "ast_hash": "068c4facb7efd7696d001f47ace6aae5",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/favicon-64.png": {
+    "mtime": 1794541011.7004418,
+    "ast_hash": "4d82f9448c91e039bd612c4aacf7c4f8",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/favicon.svg": {
+    "mtime": 1794541011.7004418,
+    "ast_hash": "eb12ecae65d711b4a80a1a77717f60a4",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/apple-touch-icon.png": {
+    "mtime": 1794541011.7046936,
+    "ast_hash": "616968e90ec934acc5bd22ea35e183c4",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/brand/facebook.svg": {
+    "mtime": 1794541011.7046936,
+    "ast_hash": "e4e9a2173656a39df687e7c0dd6335db",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/brand/gmail.svg": {
+    "mtime": 1794541011.7046936,
+    "ast_hash": "febead9156934b31f071a1e4664d9122",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/brand/instagram.svg": {
+    "mtime": 1794541011.7046936,
+    "ast_hash": "8e8d554c282bd215a21fa0bcf813f097",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/brand/tiktok.svg": {
+    "mtime": 1794541011.7046936,
+    "ast_hash": "068c4facb7efd7696d001f47ace6aae5",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/favicon-64.png": {
+    "mtime": 1794541011.7046936,
+    "ast_hash": "4d82f9448c91e039bd612c4aacf7c4f8",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/favicon.svg": {
+    "mtime": 1794541011.7046936,
+    "ast_hash": "eb12ecae65d711b4a80a1a77717f60a4",
+    "semantic_hash": ""
+  },
+  "packages/db/migrations/0013_mean_misty_knight.sql": {
+    "mtime": 1794558170.6252403,
+    "ast_hash": "4cf63e695140f283ca05391407834750",
+    "semantic_hash": ""
+  },
+  "packages/db/migrations/meta/0013_snapshot.json": {
+    "mtime": 1794558170.6252403,
+    "ast_hash": "c745bfacc413bf2721c1565613b68ab8",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-13-248-branch-maps-button.md": {
+    "mtime": 1794558170.6252403,
+    "ast_hash": "da5c0f5c7d191a1eb48447fb5c9bd36b",
+    "semantic_hash": ""
+  },
+  "apps/landing/src/lib/branch-maps.test.ts": {
+    "mtime": 1794568372.8199456,
+    "ast_hash": "adfe5d6937db9bab2aa2bb77925d10f3",
+    "semantic_hash": ""
+  },
+  "apps/landing/src/lib/branch-maps.ts": {
+    "mtime": 1794568372.8199456,
+    "ast_hash": "ece172971b6519efb71493f9255851c5",
+    "semantic_hash": ""
+  },
+  "packages/db/migrations/0014_last_wendell_vaughn.sql": {
+    "mtime": 1794568372.8239973,
+    "ast_hash": "eae8e126058d16c56aa8e341cc1e08be",
+    "semantic_hash": ""
+  },
+  "packages/db/migrations/meta/0014_snapshot.json": {
+    "mtime": 1794568372.8239973,
+    "ast_hash": "360ee5da1b853e9ba45b797d9ebdfa96",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-13-273-branch-maps-links.md": {
+    "mtime": 1794568372.8239973,
+    "ast_hash": "729e94be387f02466ebad81c8b731ed4",
+    "semantic_hash": ""
+  },
+  "packages/ui/src/components/brand-icons.tsx": {
+    "mtime": 1794575301.1716988,
+    "ast_hash": "5a6d640e5be2008d4f0cd7ac0c8df552",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-13-275-footer-socials-copyright-row.md": {
+    "mtime": 1794574843.9480517,
+    "ast_hash": "e0a375900af8bbad5bcf1e451098d7be",
     "semantic_hash": ""
   }
 }
