@@ -20,10 +20,16 @@ const branch = branchReadSchema.parse({
   phone: '+63 900 000 0001',
   acceptsWalkIns: true,
   isActive: true,
+  latitude: null,
+  longitude: null,
   coverImageUrl: null,
   createdAt: STAMP,
   updatedAt: STAMP,
 });
+
+// The null-coordinates read's editor state — latitude/longitude are the
+// raw input strings ('' = clear to null), the #248 encoding.
+const branchState = light.branchStateFromRead(branch);
 
 const service = studioServiceWithBranchesSchema.parse({
   id: uuid(2),
@@ -50,6 +56,8 @@ describe('studio-service state', () => {
       name: 'Main Studio',
       address: '12 Sample St.',
       phone: '+63 900 000 0001',
+      latitude: '',
+      longitude: '',
       acceptsWalkIns: true,
       isActive: true,
       coverImageUrl: null,
@@ -60,6 +68,8 @@ describe('studio-service state', () => {
       phone: '+63 900 000 0001',
       acceptsWalkIns: true,
       isActive: true,
+      latitude: null,
+      longitude: null,
     });
     const flip = light.buildBranchFlipPayload(branch, false);
     expect(flip).toEqual({
@@ -68,6 +78,8 @@ describe('studio-service state', () => {
       phone: '+63 900 000 0001',
       acceptsWalkIns: true,
       isActive: false,
+      latitude: null,
+      longitude: null,
     });
     // The cover is deliberately ABSENT from a flip — the absence is what
     // makes a flip never re-verify or clobber media (the tri-state law).
@@ -102,6 +114,76 @@ describe('studio-service state', () => {
     const state = light.branchStateFromRead(covered);
     expect(state.coverImageUrl).toBe('https://pub-test.r2.dev/covers/aaaa.jpg');
     expect(state.coverImageKey).toBeUndefined();
+  });
+
+  // #248: the manual coordinate fields — state strings, the payload parse,
+  // the validator's bounds/dp/pair rules, and the flip's untouched re-send.
+  it('#248: state round-trips stored coordinates as strings', () => {
+    const state = light.branchStateFromRead({ ...branch, latitude: 14.16598, longitude: 121.2485 });
+    expect(state.latitude).toBe('14.16598');
+    expect(state.longitude).toBe('121.2485');
+  });
+
+  it('#248: null coordinates round-trip as empty strings', () => {
+    const state = light.branchStateFromRead({ ...branch, latitude: null, longitude: null });
+    expect(state.latitude).toBe('');
+    expect(state.longitude).toBe('');
+  });
+
+  it('#248: the update payload parses a valid pair to numbers', () => {
+    const payload = light.buildBranchUpdatePayload({
+      ...branchState,
+      latitude: '14.16598',
+      longitude: '121.2485',
+    });
+    expect(payload.latitude).toBe(14.16598);
+    expect(payload.longitude).toBe(121.2485);
+  });
+
+  it('#248: empty inputs save the null pair (clear)', () => {
+    const payload = light.buildBranchUpdatePayload({ ...branchState, latitude: '', longitude: '' });
+    expect(payload.latitude).toBeNull();
+    expect(payload.longitude).toBeNull();
+  });
+
+  it('#248: validation rejects an out-of-bounds latitude', () => {
+    const errors = light.validateBranchState({ ...branchState, latitude: '91', longitude: '0' });
+    expect(errors.latitude).toBeDefined();
+  });
+
+  it('#248: validation rejects more than 6 decimal places', () => {
+    const errors = light.validateBranchState({
+      ...branchState,
+      latitude: '14.1659812',
+      longitude: '0',
+    });
+    expect(errors.latitude).toBeDefined();
+  });
+
+  it('#248: validation rejects exactly one of the pair', () => {
+    const bothEmpty = light.validateBranchState({ ...branchState, latitude: '', longitude: '' });
+    expect(bothEmpty.latitude).toBeUndefined();
+    const oneOnly = light.validateBranchState({ ...branchState, latitude: '14.1', longitude: '' });
+    expect(oneOnly.latitude).toBeDefined();
+    expect(oneOnly.longitude).toBeUndefined();
+  });
+
+  it('#248: validation rejects a non-numeric entry', () => {
+    const errors = light.validateBranchState({
+      ...branchState,
+      latitude: 'not a number',
+      longitude: '0',
+    });
+    expect(errors.latitude).toBeDefined();
+  });
+
+  it('#248: the flip payload re-sends the stored coordinates untouched', () => {
+    const payload = light.buildBranchFlipPayload(
+      { ...branch, latitude: 7.0864, longitude: 125.591 },
+      false
+    );
+    expect(payload.latitude).toBe(7.0864);
+    expect(payload.longitude).toBe(125.591);
   });
 
   it('studio-service payload round-trip and flip', () => {
