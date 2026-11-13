@@ -144,6 +144,8 @@ export function buildBranchCreatePayload(state: BranchEditorState): CreateBranch
     phone: state.phone,
     acceptsWalkIns: state.acceptsWalkIns,
     isActive: state.isActive,
+    latitude: null,
+    longitude: null,
     ...(typeof state.coverImageKey === 'string' ? { coverImageKey: state.coverImageKey } : {}),
   };
 }
@@ -161,6 +163,8 @@ export function buildBranchUpdatePayload(state: BranchEditorState): UpdateBranch
     phone: state.phone,
     acceptsWalkIns: state.acceptsWalkIns,
     isActive: state.isActive,
+    latitude: null,
+    longitude: null,
     ...(state.coverImageKey !== undefined ? { coverImageKey: state.coverImageKey } : {}),
   };
 }
@@ -179,6 +183,8 @@ export function buildBranchFlipPayload(row: BranchRead, isActive: boolean): Upda
     phone: row.phone,
     acceptsWalkIns: row.acceptsWalkIns,
     isActive,
+    latitude: null,
+    longitude: null,
   };
 }
 

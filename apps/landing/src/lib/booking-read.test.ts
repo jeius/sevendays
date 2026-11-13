@@ -69,6 +69,8 @@ function branch(id: string, name: string): BranchRead {
     address: 'test address',
     phone: '+63 900 000 000',
     acceptsWalkIns: false,
+    latitude: null,
+    longitude: null,
     coverImageUrl: null,
     isActive: true,
     createdAt: new Date('2026-01-01T00:00:00Z'),
