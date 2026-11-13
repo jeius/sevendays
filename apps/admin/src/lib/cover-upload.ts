@@ -25,13 +25,14 @@ export type CoverUploadStatus =
  *
  * 1. Client pre-checks BEFORE any network call — type must be allowed for
  *    the purpose (site-logo: JPG or PNG, #246; else image/jpeg), size
- *    ≤ 10 MiB. The commit re-verifies server-side
+ *    ≤ 10 MiB. The commit re-verifies server-side (#136's contract); the
+ *    client check is courtesy, never trusted.
  * 2. `presigning` → the injected `presign` fn (the component wires the
- *    admin server fn in) with `{ purpose, contentType: 'image/jpeg' }`
+ *    admin server fn in) with `{ purpose, contentType: <the purpose's allowed type> }`
  *    (the caller's purpose — 'package-cover' by default, 'branch-cover'
  *    from the branch editor since M7 #214).
  * 3. `uploading` — XHR PUT (fetch has no upload progress — the spec's XHR
- *    ruling) with `Content-Type: image/jpeg`; progress events map to
+ *    ruling) with `Content-Type: the file's type`; progress events map to
  *    `{ sent, total }`; a non-2xx response fails with the status code.
  * 4. `bound` with `stagingKey` (the presigned `key` — it rides the NEXT
  *    atomic package save, whose commit is the real verify/promote gate)
