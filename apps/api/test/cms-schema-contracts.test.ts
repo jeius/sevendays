@@ -64,6 +64,10 @@ describe('create→read round-trips (the canonical fixtures, all nine entities)'
       // M7 #214: the row shape gained the nullable cover key — the canonical
       // fixture completes it by hand (born-null is the default state).
       coverImageKey: null,
+      // M7 #248: the row shape gained the nullable coordinate pair — the
+      // fixture completes both by hand (rows always carry both keys).
+      latitude: null,
+      longitude: null,
       createdAt: DATE,
       updatedAt: DATE,
     });

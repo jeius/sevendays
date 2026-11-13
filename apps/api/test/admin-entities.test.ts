@@ -342,6 +342,89 @@ describe('branches admin CRUD', () => {
     };
     expect(body.details[0]?.path).toEqual(['coverImageKey']);
   });
+
+  it('PUT with a coordinate pair persists both; the read carries them (#248)', async () => {
+    const { token } = await signUpSession(url, 'admin-branches-coords@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/branches/${ids.branchA}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Test Branch A',
+          address: '1 Test St',
+          phone: '+63 900 000 001',
+          acceptsWalkIns: false,
+          isActive: true,
+          latitude: 14.16598,
+          longitude: 121.2485,
+        }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { latitude: number | null; longitude: number | null };
+    expect(body.latitude).toBe(14.16598);
+    expect(body.longitude).toBe(121.2485);
+  });
+
+  it('PUT with only one coordinate answers the pair-rule 400 (#248)', async () => {
+    const { token } = await signUpSession(url, 'admin-branches-pair@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/branches/${ids.branchA}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Test Branch A',
+          address: '1 Test St',
+          phone: '+63 900 000 001',
+          acceptsWalkIns: false,
+          isActive: true,
+          latitude: 14.16598,
+        }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(400);
+    // validatedJson's uniform envelope (Q4): the schema's refinement message
+    // rides in details; error stays the generic payload line.
+    const body = (await res.json()) as {
+      error: string;
+      details: { path: string[]; message: string }[];
+    };
+    expect(body.error).toBe('Invalid request payload.');
+    expect(body.details).toEqual([
+      { path: ['latitude'], message: 'Branch coordinates must be set together.' },
+    ]);
+  });
+
+  it('the public branches read carries stored coordinates (#248)', async () => {
+    const { token } = await signUpSession(url, 'admin-branches-public@sevendays.test');
+    const put = await app.request(
+      `/api/v1/admin/branches/${ids.branchA}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Test Branch A',
+          address: '1 Test St',
+          phone: '+63 900 000 001',
+          acceptsWalkIns: false,
+          isActive: true,
+          latitude: 7.0864,
+          longitude: 125.591,
+        }),
+      },
+      testEnv(url)
+    );
+    expect(put.status).toBe(200);
+    const res = await app.request('/api/v1/branches', {}, testEnv(url));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { name: string; latitude: number | null }[];
+    const a = body.find((b) => b.name === 'Test Branch A');
+    expect(a?.latitude).toBe(7.0864);
+  });
 });
 
 describe('print sizes admin CRUD', () => {

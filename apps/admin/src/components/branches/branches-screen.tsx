@@ -181,6 +181,8 @@ export function BranchesScreen() {
   const nameId = useId();
   const addressId = useId();
   const phoneId = useId();
+  const latitudeId = useId();
+  const longitudeId = useId();
   const walkInsId = useId();
   const activeId = useId();
 
@@ -243,7 +245,7 @@ export function BranchesScreen() {
       return false;
     }
     const errors = validateBranchState(editorState);
-    if (errors.name || errors.address || errors.phone) {
+    if (errors.name || errors.address || errors.phone || errors.latitude || errors.longitude) {
       setFieldErrors(errors);
       toast.error('Fix the highlighted fields.');
       return false;
@@ -614,7 +616,7 @@ export function BranchesScreen() {
       {editing ? (
         <LightEntityEditor
           title={editing.mode === 'create' ? 'New branch' : editing.row.name}
-          description='Name, address, phone, and the walk-in flag.'
+          description='Name, address, phone, the walk-in flag, and optional map coordinates.'
           open={editorOpen}
           onOpenChange={(next) => {
             if (!next) {
@@ -658,6 +660,36 @@ export function BranchesScreen() {
               <p className='text-destructive text-xs'>{fieldErrors.phone}</p>
             ) : null}
           </Field>
+          <div className='grid grid-cols-2 gap-4'>
+            <Field>
+              <FieldLabel htmlFor={latitudeId}>Latitude</FieldLabel>
+              <Input
+                id={latitudeId}
+                type='text'
+                inputMode='decimal'
+                placeholder='14.16598'
+                value={editorState.latitude}
+                onChange={(e) => setEditorState({ ...editorState, latitude: e.target.value })}
+              />
+              {fieldErrors.latitude ? (
+                <p className='text-destructive text-xs'>{fieldErrors.latitude}</p>
+              ) : null}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor={longitudeId}>Longitude</FieldLabel>
+              <Input
+                id={longitudeId}
+                type='text'
+                inputMode='decimal'
+                placeholder='121.2485'
+                value={editorState.longitude}
+                onChange={(e) => setEditorState({ ...editorState, longitude: e.target.value })}
+              />
+              {fieldErrors.longitude ? (
+                <p className='text-destructive text-xs'>{fieldErrors.longitude}</p>
+              ) : null}
+            </Field>
+          </div>
           <div className='flex flex-wrap gap-6'>
             <label htmlFor={walkInsId} className='flex items-center gap-2 text-sm font-medium'>
               <Checkbox

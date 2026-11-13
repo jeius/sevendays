@@ -136,7 +136,14 @@ export async function createAdminBranch(
     db.transaction(async (tx) => {
       const [row] = await tx
         .insert(branches)
-        .values({ ...input, coverImageKey: cover.finalKey ?? null })
+        .values({
+          ...input,
+          // #248: the validated input already carries the pair — spelled out
+          // so the persistence is explicit at the write site.
+          latitude: input.latitude,
+          longitude: input.longitude,
+          coverImageKey: cover.finalKey ?? null,
+        })
         .returning();
       if (!row) throw new Error('insert branches: no row returned');
       await writeAuditRow(tx, audit, {
@@ -188,6 +195,10 @@ export async function updateAdminBranch(
           address: input.address,
           phone: input.phone,
           acceptsWalkIns: input.acceptsWalkIns,
+          // #248: both-or-neither is the schema's job (the pair refinement);
+          // the write stores whatever the validated pair is — null clears.
+          latitude: input.latitude,
+          longitude: input.longitude,
           isActive: input.isActive,
           coverImageKey: storedCover,
           updatedAt: new Date(),
