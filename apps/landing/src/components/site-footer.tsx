@@ -1,4 +1,10 @@
 import type { BranchRead, SiteSettings } from '@sevendays/types';
+import {
+  FacebookIcon,
+  GmailIcon,
+  InstagramIcon,
+  TiktokIcon,
+} from '@sevendays/ui/components/brand-icons';
 import { buttonVariants } from '@sevendays/ui/components/button';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
@@ -16,6 +22,15 @@ import { footerContactFor, socialLinksFor } from '../lib/site-chrome';
 // pre/post v1-scrub (M3 ruling).
 const LINK_ON_INK =
   'font-mono text-brand-300 text-xs uppercase tracking-[0.14em] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring';
+
+// T9 (#275): the footer's brand glyphs — the socialLinksFor key resolves to
+// its shared currentColor component (the gmail glyph is addressed directly
+// at its anchor below).
+const SOCIAL_ICONS = {
+  instagram: InstagramIcon,
+  facebook: FacebookIcon,
+  tiktok: TiktokIcon,
+} as const;
 
 export function SiteFooter({
   settings,
@@ -87,30 +102,35 @@ export function SiteFooter({
             ))}
           </div>
         )}
-        {(socials.length > 0 || contact !== null) && (
-          <div className='mt-6 border-white/20 border-t pt-5'>
+        {/* T9 (#275): the socials band dissolved — the cluster rides the copyright
+            row (© left, cluster right from sm+; stacked left-aligned below sm).
+            The icons are currentColor glyphs now: brand-300 at rest, white on
+            hover — the on-ink link vocabulary. */}
+        <div className='mt-6 flex flex-col gap-2 border-white/20 border-t pt-4 sm:flex-row sm:items-center sm:justify-between'>
+          <p className='text-white/70 text-xs'>
+            © 2026 {settings.brandName} {settings.brandTagline}
+          </p>
+          {socials.length > 0 || contact !== null ? (
             <div className='flex flex-wrap items-center gap-x-6 gap-y-2'>
-              {socials.map((social) => (
-                <a
-                  key={social.key}
-                  href={social.href}
-                  className='inline-flex items-center gap-1.5 rounded-sm transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
-                >
-                  <img
-                    src={`/brand/${social.key}.svg`}
-                    alt=''
-                    aria-hidden='true'
-                    className='size-4'
-                  />
-                  <span className='sr-only'>{social.label}</span>
-                </a>
-              ))}
+              {socials.map((social) => {
+                const SocialIcon = SOCIAL_ICONS[social.key];
+                return (
+                  <a
+                    key={social.key}
+                    href={social.href}
+                    className='inline-flex items-center gap-1.5 rounded-sm text-brand-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
+                  >
+                    <SocialIcon className='size-4' />
+                    <span className='sr-only'>{social.label}</span>
+                  </a>
+                );
+              })}
               {contact?.email ? (
                 <a
                   href={`mailto:${contact.email}`}
-                  className='inline-flex items-center gap-1.5 rounded-sm transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
+                  className='inline-flex items-center gap-1.5 rounded-sm text-brand-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
                 >
-                  <img src='/brand/gmail.svg' alt='' aria-hidden='true' className='size-4' />
+                  <GmailIcon className='size-4' />
                   <span className='sr-only'>{contact.email}</span>
                 </a>
               ) : null}
@@ -120,12 +140,7 @@ export function SiteFooter({
                 </a>
               ) : null}
             </div>
-          </div>
-        )}
-        <div className='mt-6 border-white/20 border-t pt-4'>
-          <p className='text-white/70 text-xs'>
-            © 2026 {settings.brandName} {settings.brandTagline}
-          </p>
+          ) : null}
         </div>
       </div>
     </footer>
