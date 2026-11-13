@@ -11,6 +11,7 @@
 // full-replace PUT per AFFECTED service — the diff below is that seam.
 // M5 #141 grows this seam with the testimonial, print-size, and attire
 // blocks — same template.
+
 import type {
   AddonService,
   Attire,
@@ -28,6 +29,7 @@ import type {
   UpdateStudioServiceInput,
   UpdateTestimonialInput,
 } from '@sevendays/types';
+import { atMostSixDp } from '@sevendays/types';
 
 /**
  * The branch editor's whole state. `#143 seam: the branch state shape`.
@@ -41,6 +43,11 @@ export interface BranchEditorState {
   name: string;
   address: string;
   phone: string;
+  // #248: raw coordinate inputs — '' = clear to null. Parsed to numbers in
+  // the payload builders; validated with the same bounds/dp/pair rules the
+  // wire schema enforces (packages/types).
+  latitude: string;
+  longitude: string;
   acceptsWalkIns: boolean;
   isActive: boolean;
   coverImageUrl: string | null;
@@ -90,6 +97,8 @@ export type LightFieldErrors = {
   name?: string;
   address?: string;
   phone?: string;
+  latitude?: string;
+  longitude?: string;
   quote?: string;
   person?: string;
   code?: string;
@@ -108,6 +117,8 @@ export function branchStateFromRead(row: BranchRead): BranchEditorState {
     name: row.name,
     address: row.address,
     phone: row.phone,
+    latitude: row.latitude === null ? '' : String(row.latitude),
+    longitude: row.longitude === null ? '' : String(row.longitude),
     acceptsWalkIns: row.acceptsWalkIns,
     isActive: row.isActive,
     coverImageUrl: row.coverImageUrl,
@@ -124,11 +135,38 @@ export function newBranchState(): BranchEditorState {
     name: '',
     address: '',
     phone: '',
+    latitude: '',
+    longitude: '',
     acceptsWalkIns: false,
     isActive: true,
     coverImageUrl: null,
     coverImageKey: undefined,
   };
+}
+
+// #248: input-string → number|null. Returns null for '' (the clear
+// encoding); NaN never reaches a payload — validateBranchState gates the
+// save first.
+function parseCoordinate(input: string): number | null {
+  return input.trim() === '' ? null : Number(input);
+}
+
+function validateCoordinate(input: string, bound: number, label: string): string | undefined {
+  const trimmed = input.trim();
+  if (trimmed === '') {
+    return undefined;
+  }
+  const value = Number(trimmed);
+  if (Number.isNaN(value)) {
+    return `${label} must be a number.`;
+  }
+  if (!atMostSixDp(value)) {
+    return `${label} allows at most 6 decimal places.`;
+  }
+  if (value < -bound || value > bound) {
+    return `${label} is out of range.`;
+  }
+  return undefined;
 }
 
 /**
@@ -142,10 +180,10 @@ export function buildBranchCreatePayload(state: BranchEditorState): CreateBranch
     name: state.name,
     address: state.address,
     phone: state.phone,
+    latitude: parseCoordinate(state.latitude),
+    longitude: parseCoordinate(state.longitude),
     acceptsWalkIns: state.acceptsWalkIns,
     isActive: state.isActive,
-    latitude: null,
-    longitude: null,
     ...(typeof state.coverImageKey === 'string' ? { coverImageKey: state.coverImageKey } : {}),
   };
 }
@@ -161,10 +199,10 @@ export function buildBranchUpdatePayload(state: BranchEditorState): UpdateBranch
     name: state.name,
     address: state.address,
     phone: state.phone,
+    latitude: parseCoordinate(state.latitude),
+    longitude: parseCoordinate(state.longitude),
     acceptsWalkIns: state.acceptsWalkIns,
     isActive: state.isActive,
-    latitude: null,
-    longitude: null,
     ...(state.coverImageKey !== undefined ? { coverImageKey: state.coverImageKey } : {}),
   };
 }
@@ -181,10 +219,10 @@ export function buildBranchFlipPayload(row: BranchRead, isActive: boolean): Upda
     name: row.name,
     address: row.address,
     phone: row.phone,
+    latitude: row.latitude,
+    longitude: row.longitude,
     acceptsWalkIns: row.acceptsWalkIns,
     isActive,
-    latitude: null,
-    longitude: null,
   };
 }
 
@@ -387,6 +425,22 @@ export function validateBranchState(state: BranchEditorState): LightFieldErrors 
   }
   if (state.phone.trim().length < 1) {
     errors.phone = 'Phone is required.';
+  }
+  // #248: the pair rule is client-side too — both empty or both valid.
+  const latitudeError = validateCoordinate(state.latitude, 90, 'Latitude');
+  const longitudeError = validateCoordinate(state.longitude, 180, 'Longitude');
+  if (latitudeError) {
+    errors.latitude = latitudeError;
+  }
+  if (longitudeError) {
+    errors.longitude = longitudeError;
+  }
+  if (!errors.latitude && !errors.longitude) {
+    const lat = state.latitude.trim() !== '';
+    const lng = state.longitude.trim() !== '';
+    if (lat !== lng) {
+      errors.latitude = 'Set both latitude and longitude, or neither.';
+    }
   }
   return errors;
 }
