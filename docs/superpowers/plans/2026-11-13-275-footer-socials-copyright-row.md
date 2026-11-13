@@ -11,7 +11,7 @@
 - Branch `feat/275-footer-socials-copyright-row` off current main; commit style `type(scope): … (#275)`. Never commit secrets. Tick boxes `- [✅]` (GitHub issues / docs, never plain `[x]`).
 - Every find/replace below must match exactly once at execution time; a ≠1 match means the file drifted — stop and reconcile.
 - **Monochrome law:** every glyph renders `fill='currentColor'` — no baked hex, no multicolor official brand marks. The component's `aria-hidden='true'` default stays (the anchors' `sr-only` spans are the accessible names, as today).
-- Gates per touched workspace: `pnpm --filter @sevendays/ui fix && pnpm --filter @sevendays/ui typecheck` (ui has no test script); `pnpm --filter @sevendays/{landing,admin} fix && pnpm --filter @sevendays/{landing,admin} test -- --run && pnpm --filter @sevendays/{landing,admin} typecheck`; final `pnpm check` green with every floor unchanged — **landing 16 files / 123 tests, admin 27 files / 279 tests** (this plan adds no tests and breaks none: the spec's testing decision is no-new-seams, and the rendering changes sit below every seam's test line).
+- Gates per touched workspace: `pnpm --filter @sevendays/ui fix && pnpm --filter @sevendays/ui typecheck` (ui has no test script); `pnpm --filter @sevendays/{landing,admin} fix && pnpm --filter @sevendays/{landing,admin} test -- --run && pnpm --filter @sevendays/{landing,admin} typecheck`; final `pnpm check` green with every floor unchanged — **landing 17 files / 134 tests, admin 27 files / 279 tests** (amended at execution, Task 2: the AGENTS.md 16/123 landing literal is stale on main — controller-verified 17 test files on BOTH main and branch, zero test files in the branch diff; the real gate is same-test-tree-as-base, all green; this plan adds no tests and breaks none: the spec's testing decision is no-new-seams, and the rendering changes sit below every seam's test line).
 - If biome rewrites a long class-string ordering, accept `fix`'s rewrite; do not hand-reorder beyond it.
 - **Deletion list (Task 4) is exhaustive:** `apps/{landing,admin}/public/brand/{instagram,facebook,tiktok,gmail}.svg` — 8 files, nothing else. The favicon set (`favicon.svg`, `favicon-64.png`, `apple-touch-icon.png` at each app's `public/` root) and the `!public/**/*.svg` biome exclusion in both apps **stay** (`favicon.svg` is still an owner asset that biome must not touch).
 - The ADR-0022 visual re-baseline is **post-deploy owner-gated work (Task 6), never part of `pnpm check`** — commit-green and smoke-green stay separate verdicts.
@@ -215,7 +215,7 @@
 
   What changed, so the reviewer can check each ruling: the section's `mt-6 … pt-5` rhythm is gone (the row keeps the copyright section's `mt-6 … pt-4` verbatim); the gate moved inside the always-rendered row (no socials + no contact → `©` alone, left-aligned — `justify-between` with one child); both icon anchors gained `text-brand-300` (hover/focus classes unchanged from #247's treatment); the phone anchor and `LINK_ON_INK` are byte-identical; `sr-only` accessible names unchanged.
 
-- [ ] **Step 3: gates** — `pnpm --filter @sevendays/landing fix && pnpm --filter @sevendays/landing test -- --run && pnpm --filter @sevendays/landing typecheck`. Floors unchanged (16 files / 123 tests — the rendering change sits below every seam's test line).
+- [ ] **Step 3: gates** — `pnpm --filter @sevendays/landing fix && pnpm --filter @sevendays/landing test -- --run && pnpm --filter @sevendays/landing typecheck`. Floors unchanged (17 files / 134 tests as amended in Global Constraints — the rendering change sits below every seam's test line).
 
 - [ ] **Step 4: commit** — `git add apps/landing/src/components/site-footer.tsx && git commit -m "feat(landing): footer socials join the copyright row, icons readable on ink (#275)"`
 
@@ -312,7 +312,7 @@
   ls apps/landing/public apps/admin/public   # favicon.svg, favicon-64.png, apple-touch-icon.png, photos/… — all still present
   ```
 
-- [ ] **Step 3: the full gate** — `pnpm check` green end to end (first full-workspace run of the branch — every floor unchanged: landing 16/123, admin 27/279, api/api-client at their AGENTS.md floors, untouched).
+- [ ] **Step 3: the full gate** — `pnpm check` green end to end (first full-workspace run of the branch — every floor unchanged: landing 17/134 (amended — see Global Constraints), admin 27/279, api/api-client at their AGENTS.md floors, untouched).
 
 - [ ] **Step 4: commit** — `git commit -m "chore(assets): delete the black brand SVGs — superseded by the shared currentColor icon module (#275)"` (the `git rm` already staged the deletions).
 
