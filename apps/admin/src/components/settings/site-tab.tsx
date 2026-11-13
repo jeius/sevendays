@@ -84,15 +84,26 @@ const KICKER_FIELDS: { key: TextKeys; label: string }[] = [
   { key: 'kickerTestimonials', label: 'Testimonials kicker' },
 ];
 
-const SOCIAL_FIELDS: { key: TextKeys; label: string }[] = [
-  { key: 'socialInstagram', label: 'Instagram URL' },
-  { key: 'socialFacebook', label: 'Facebook URL' },
-  { key: 'socialTiktok', label: 'TikTok URL' },
+const ICON_FIELDS: { key: TextKeys; label: string; icon: string; placeholder?: string }[] = [
+  {
+    key: 'socialInstagram',
+    label: 'Instagram URL',
+    icon: '/brand/instagram.svg',
+    placeholder: 'https://…',
+  },
+  {
+    key: 'socialFacebook',
+    label: 'Facebook URL',
+    icon: '/brand/facebook.svg',
+    placeholder: 'https://…',
+  },
+  { key: 'socialTiktok', label: 'TikTok URL', icon: '/brand/tiktok.svg', placeholder: 'https://…' },
+  { key: 'contactEmail', label: 'Studio email', icon: '/brand/gmail.svg' },
 ];
 
 // The compact row (the ruled variant C): the label right-aligned in a
 // 10rem column, the control filling the rest — no per-field hints.
-function Row({ label, children }: { label: string; children: ReactNode }) {
+function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
     <div className='grid grid-cols-[10rem_1fr] items-center gap-x-3 gap-y-1'>
       <span className='text-muted-foreground text-right text-xs'>{label}</span>
@@ -215,6 +226,29 @@ export function SiteTab() {
   // returns, so `editorState`'s non-null narrowing holds inside them.
   const textField = (key: TextKeys, label: string, placeholder?: string) => (
     <Row key={key} label={label}>
+      <Input
+        aria-label={label}
+        className='h-8 text-sm'
+        value={editorState[key]}
+        placeholder={placeholder}
+        onChange={(e) => setField(key, e.target.value)}
+      />
+      {fieldErrors[key] ? (
+        <p className='col-start-2 text-destructive text-xs'>{fieldErrors[key]}</p>
+      ) : null}
+    </Row>
+  );
+
+  const iconTextField = (key: TextKeys, label: string, icon: string, placeholder?: string) => (
+    <Row
+      key={key}
+      label={
+        <span className='inline-flex items-center gap-1.5'>
+          <img src={icon} alt='' aria-hidden='true' className='size-3.5' />
+          {label}
+        </span>
+      }
+    >
       <Input
         aria-label={label}
         className='h-8 text-sm'
@@ -382,14 +416,18 @@ export function SiteTab() {
           </Row>
           {textField('bannerTitle', 'Banner title')}
           {textField('bannerBody', 'Banner text')}
-          {SOCIAL_FIELDS.map((field) => textField(field.key, field.label, 'https://…'))}
+          {ICON_FIELDS.filter((f) => f.key !== 'contactEmail').map((field) =>
+            iconTextField(field.key, field.label, field.icon, field.placeholder)
+          )}
         </CardContent>
       </Card>
 
       <Card>
         <CardContent className='space-y-1.5'>
           <h2 className='text-sm font-semibold'>Contact</h2>
-          {textField('contactEmail', 'Studio email')}
+          {ICON_FIELDS.filter((f) => f.key === 'contactEmail').map((field) =>
+            iconTextField(field.key, field.label, field.icon, field.placeholder)
+          )}
           {textField('contactPhone', 'Studio phone')}
         </CardContent>
       </Card>
