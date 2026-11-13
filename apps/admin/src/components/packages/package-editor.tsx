@@ -959,7 +959,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
               {uploadStatus.phase === 'failed' ? (
                 <p className='text-destructive text-xs'>Upload failed: {uploadStatus.message}</p>
               ) : null}
-              <p className='text-muted-foreground text-xs'>JPG only, up to 50 MiB.</p>
+              <p className='text-muted-foreground text-xs'>JPG only, up to 10 MiB.</p>
             </CardContent>
           </Card>
 
