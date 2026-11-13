@@ -20,6 +20,8 @@ const longitudeSchema = z
   .min(-180, 'Longitude must be between -180 and 180.')
   .max(180, 'Longitude must be between -180 and 180.');
 
+const mapsLinkSchema = z.url().refine((v) => v.startsWith('https://'), 'Must be an https URL.');
+
 export const branchSchema = z.object({
   id: z.uuid(),
   name: z.string().min(1),
@@ -38,6 +40,10 @@ export const branchSchema = z.object({
   // schemas; rows always carry both keys post-migration.
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
+  // Pasted Maps links (M7 #273): the button's source — coordinates (#248)
+  // are set aside, dormant (kept in-tree for possible future revival).
+  googleMapsUrl: mapsLinkSchema.nullable(),
+  appleMapsUrl: mapsLinkSchema.nullable(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
@@ -78,6 +84,9 @@ const branchWriteBase = branchSchema
     // that omits coordinates clears them; the admin always sends both).
     latitude: latitudeSchema.nullable().default(null),
     longitude: longitudeSchema.nullable().default(null),
+    // #273: independently optional — no pair rule. Omitted = null.
+    googleMapsUrl: mapsLinkSchema.nullable().default(null),
+    appleMapsUrl: mapsLinkSchema.nullable().default(null),
   });
 
 // Both-or-neither (#248, owner-ruled): a branch pin needs the full pair.

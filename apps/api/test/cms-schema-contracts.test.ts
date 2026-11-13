@@ -68,6 +68,10 @@ describe('create→read round-trips (the canonical fixtures, all nine entities)'
       // fixture completes both by hand (rows always carry both keys).
       latitude: null,
       longitude: null,
+      // M7 #273: the row shape gained the nullable maps links — the fixture
+      // completes both by hand (rows always carry both keys).
+      googleMapsUrl: null,
+      appleMapsUrl: null,
       createdAt: DATE,
       updatedAt: DATE,
     });

@@ -142,6 +142,8 @@ export async function createAdminBranch(
           // so the persistence is explicit at the write site.
           latitude: input.latitude,
           longitude: input.longitude,
+          googleMapsUrl: input.googleMapsUrl,
+          appleMapsUrl: input.appleMapsUrl,
           coverImageKey: cover.finalKey ?? null,
         })
         .returning();
@@ -199,6 +201,8 @@ export async function updateAdminBranch(
           // the write stores whatever the validated pair is — null clears.
           latitude: input.latitude,
           longitude: input.longitude,
+          googleMapsUrl: input.googleMapsUrl,
+          appleMapsUrl: input.appleMapsUrl,
           isActive: input.isActive,
           coverImageKey: storedCover,
           updatedAt: new Date(),
