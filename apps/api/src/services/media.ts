@@ -65,7 +65,7 @@ export type CommitUploadResult =
 
 /**
  * Mint a presigned PUT for one file (POST /api/v1/admin/media/presign,
- * session-gated). The key is server-assigned (`tmp/<uuid>.jpg` — the client
+ * session-gated). The key is server-assigned (`tmp/<uuid>.jpg`, or `.png` for the site-logo purpose — the client
  * never supplies key text); the Content-Type is signed into the URL so a PUT
  * with a different type fails the signature. allHeaders is LOAD-BEARING:
  * aws4fetch's UNSIGNABLE_HEADERS set contains content-type, so signQuery
