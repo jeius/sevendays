@@ -91,13 +91,27 @@ export function SiteFooter({
           <div className='mt-6 border-white/20 border-t pt-5'>
             <div className='flex flex-wrap items-center gap-x-6 gap-y-2'>
               {socials.map((social) => (
-                <a key={social.key} href={social.href} className={LINK_ON_INK}>
-                  {social.label}
+                <a
+                  key={social.key}
+                  href={social.href}
+                  className='inline-flex items-center gap-1.5 rounded-sm transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
+                >
+                  <img
+                    src={`/brand/${social.key}.svg`}
+                    alt=''
+                    aria-hidden='true'
+                    className='size-4'
+                  />
+                  <span className='sr-only'>{social.label}</span>
                 </a>
               ))}
               {contact?.email ? (
-                <a href={`mailto:${contact.email}`} className={LINK_ON_INK}>
-                  {contact.email}
+                <a
+                  href={`mailto:${contact.email}`}
+                  className='inline-flex items-center gap-1.5 rounded-sm transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
+                >
+                  <img src='/brand/gmail.svg' alt='' aria-hidden='true' className='size-4' />
+                  <span className='sr-only'>{contact.email}</span>
                 </a>
               ) : null}
               {contact?.phone ? (

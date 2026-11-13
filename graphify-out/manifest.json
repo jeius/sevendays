@@ -10,8 +10,8 @@
     "semantic_hash": "58d7babaea94f37ca911b84be639ad5a"
   },
   "apps/admin/biome.json": {
-    "mtime": 1791334300.8274677,
-    "ast_hash": "9559a5b7976cb63a22cec33220860c4c",
+    "mtime": 1794537706.0722566,
+    "ast_hash": "b20afec1af930ee31b13f3c8cfd3f79a",
     "semantic_hash": ""
   },
   "apps/admin/components.json": {
@@ -40,8 +40,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/routes/__root.tsx": {
-    "mtime": 1792052774.8786912,
-    "ast_hash": "465aa902ef2af2da6ef724f66b173b60",
+    "mtime": 1794538136.087251,
+    "ast_hash": "b77478a98229b30adc056dc6427cbf95",
     "semantic_hash": ""
   },
   "apps/admin/tsconfig.json": {
@@ -215,8 +215,8 @@
     "semantic_hash": "58d7babaea94f37ca911b84be639ad5a"
   },
   "apps/landing/biome.json": {
-    "mtime": 1791260199.7980144,
-    "ast_hash": "332347f197bf37ec2ffe698d4b00f52d",
+    "mtime": 1794537706.0419998,
+    "ast_hash": "e4fd406802fc160b6abe9658e5901a61",
     "semantic_hash": ""
   },
   "apps/landing/components.json": {
@@ -245,8 +245,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/routes/__root.tsx": {
-    "mtime": 1792492748.186131,
-    "ast_hash": "325241ad8c39bf8801c282f9e0921b09",
+    "mtime": 1794537503.2462747,
+    "ast_hash": "1fed8b8c47c9d22bf6fe5111318e3d23",
     "semantic_hash": ""
   },
   "apps/landing/src/routes/index.tsx": {
@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794533851.0298815,
-    "ast_hash": "21a6b79c5acb8f2054151b778a28444d",
+    "mtime": 1794539484.4542494,
+    "ast_hash": "271bc017392df917bb78e324d2b38c69",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2865,8 +2865,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794523578.7320824,
-    "ast_hash": "b40fcb485b18575ced09e40c1af9124d",
+    "mtime": 1794534704.9800096,
+    "ast_hash": "9e3286d628fffbafaffa68936e669712",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -2925,8 +2925,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/site-footer.tsx": {
-    "mtime": 1792492748.1819127,
-    "ast_hash": "1cc0054ef91a899a4a9a54b4301fbfdb",
+    "mtime": 1794537503.2462747,
+    "ast_hash": "af921628b057c4aad5b731a9b8c678cd",
     "semantic_hash": ""
   },
   "apps/landing/src/lib/nav.ts": {
@@ -4640,8 +4640,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/settings/site-tab.tsx": {
-    "mtime": 1794533851.0255482,
-    "ast_hash": "b9db963e1c78204ee35485b959127443",
+    "mtime": 1794538143.4560244,
+    "ast_hash": "68c77faf453675c3546b852b42a6b5d4",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/reset-email.test.ts": {
@@ -5007,6 +5007,81 @@
   "docs/superpowers/plans/2026-11-13-246-site-logo-png.md": {
     "mtime": 1794533851.0342147,
     "ast_hash": "274c21cbc69e7fce9f0aa2044a87e656",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-13-247-social-icons-favicons.md": {
+    "mtime": 1794537137.1698456,
+    "ast_hash": "fb4c3b92547a382eb8d2e6901d22ed22",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/apple-touch-icon.png": {
+    "mtime": 1794536769.7989867,
+    "ast_hash": "616968e90ec934acc5bd22ea35e183c4",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/brand/facebook.svg": {
+    "mtime": 1794536769.7989867,
+    "ast_hash": "e4e9a2173656a39df687e7c0dd6335db",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/brand/gmail.svg": {
+    "mtime": 1794536769.8029869,
+    "ast_hash": "febead9156934b31f071a1e4664d9122",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/brand/instagram.svg": {
+    "mtime": 1794536769.8029869,
+    "ast_hash": "8e8d554c282bd215a21fa0bcf813f097",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/brand/tiktok.svg": {
+    "mtime": 1794536769.8029869,
+    "ast_hash": "068c4facb7efd7696d001f47ace6aae5",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/favicon-64.png": {
+    "mtime": 1794536769.8029869,
+    "ast_hash": "4d82f9448c91e039bd612c4aacf7c4f8",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/favicon.svg": {
+    "mtime": 1794536769.8029869,
+    "ast_hash": "eb12ecae65d711b4a80a1a77717f60a4",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/apple-touch-icon.png": {
+    "mtime": 1794536676.3844862,
+    "ast_hash": "616968e90ec934acc5bd22ea35e183c4",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/brand/facebook.svg": {
+    "mtime": 1794527014.6073618,
+    "ast_hash": "e4e9a2173656a39df687e7c0dd6335db",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/brand/gmail.svg": {
+    "mtime": 1794527042.108237,
+    "ast_hash": "febead9156934b31f071a1e4664d9122",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/brand/instagram.svg": {
+    "mtime": 1794531510.1949751,
+    "ast_hash": "8e8d554c282bd215a21fa0bcf813f097",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/brand/tiktok.svg": {
+    "mtime": 1794531487.0597389,
+    "ast_hash": "068c4facb7efd7696d001f47ace6aae5",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/favicon-64.png": {
+    "mtime": 1779421609.007064,
+    "ast_hash": "4d82f9448c91e039bd612c4aacf7c4f8",
+    "semantic_hash": ""
+  },
+  "apps/landing/public/favicon.svg": {
+    "mtime": 1779421609.5577183,
+    "ast_hash": "eb12ecae65d711b4a80a1a77717f60a4",
     "semantic_hash": ""
   }
 }
