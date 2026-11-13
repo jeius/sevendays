@@ -22,6 +22,8 @@ const row = {
   coverImageKey: COVER_KEY,
   latitude: null,
   longitude: null,
+  googleMapsUrl: null,
+  appleMapsUrl: null,
   createdAt: DATE,
   updatedAt: DATE,
 };
@@ -35,6 +37,8 @@ const read = {
   isActive: row.isActive,
   latitude: null,
   longitude: null,
+  googleMapsUrl: null,
+  appleMapsUrl: null,
   createdAt: DATE,
   updatedAt: DATE,
   coverImageUrl: COVER_URL,
@@ -187,5 +191,46 @@ describe('branch coordinates (#248)', () => {
     expect(
       updateBranchSchema.safeParse({ ...fullUpdate, latitude: null, longitude: null }).success
     ).toBe(true);
+  });
+});
+
+describe('branch maps links (#273)', () => {
+  const bareCreate = { name: 'New Branch', address: '1 St', phone: '+63 900 000 000' };
+
+  it('branchSchema accepts null links on the row', () => {
+    const { success } = branchSchema.safeParse({ ...row, googleMapsUrl: null, appleMapsUrl: null });
+    expect(success).toBe(true);
+  });
+
+  it('createBranchSchema defaults omitted links to null', () => {
+    const parsed = createBranchSchema.parse(bareCreate);
+    expect(parsed.googleMapsUrl).toBeNull();
+    expect(parsed.appleMapsUrl).toBeNull();
+  });
+
+  it('createBranchSchema accepts an https link and rejects http', () => {
+    expect(
+      createBranchSchema.safeParse({ ...bareCreate, googleMapsUrl: 'https://maps.app.goo.gl/x' })
+        .success
+    ).toBe(true);
+    expect(
+      createBranchSchema.safeParse({ ...bareCreate, googleMapsUrl: 'http://maps.app.goo.gl/x' })
+        .success
+    ).toBe(false);
+  });
+
+  it('createBranchSchema rejects a non-URL string', () => {
+    expect(createBranchSchema.safeParse({ ...bareCreate, appleMapsUrl: 'not a url' }).success).toBe(
+      false
+    );
+  });
+
+  it('each link is independently optional — one set, other null', () => {
+    const parsed = createBranchSchema.parse({
+      ...bareCreate,
+      appleMapsUrl: 'https://maps.apple.com/?q=studio',
+    });
+    expect(parsed.appleMapsUrl).toBe('https://maps.apple.com/?q=studio');
+    expect(parsed.googleMapsUrl).toBeNull();
   });
 });

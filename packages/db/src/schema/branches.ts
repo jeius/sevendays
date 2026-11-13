@@ -34,6 +34,13 @@ export const branches = pgTable(
     // carries numbers and drizzle's numeric maps to string.
     latitude: doublePrecision('latitude'),
     longitude: doublePrecision('longitude'),
+    // Pasted Maps links (M7 #273, the owner's v2 of #248): the branch's
+    // Google/Apple Maps share URLs, entered manually in the admin — the
+    // button's source of truth (stored coordinates are SET ASIDE, dormant;
+    // see the #273 progress bullet). Any https URL passes; each is
+    // independently optional.
+    googleMapsUrl: text('google_maps_url'),
+    appleMapsUrl: text('apple_maps_url'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     // Natural key: the seed upserts branches by name (re-runnable, ids stable).
