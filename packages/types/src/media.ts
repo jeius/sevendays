@@ -8,9 +8,10 @@ import { z } from 'zod';
 // carry a size condition, so the commit-time HEAD is the real gate.
 // #246: content types are per-purpose — the brand logo accepts PNG (the
 // owner ruling of 2026-11-13); every other purpose stays JPG-only (#170).
-// The presign request schema below is a union: it validates the
-// (purpose, contentType) PAIR, not the enum cross-product — a site-logo
-// presign may carry either type, the rest only image/jpeg.
+// The presign request schema below validates the (purpose, contentType)
+// PAIR, not the enum cross-product — a site-logo presign may carry either
+// type, the rest only image/jpeg; failures ride at ['contentType'] so the
+// route's validator 400 keeps field-level details.
 export const MEDIA_CONTENT_TYPES = ['image/jpeg'] as const;
 export const SITE_LOGO_CONTENT_TYPES = ['image/jpeg', 'image/png'] as const;
 
