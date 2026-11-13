@@ -181,8 +181,8 @@ export function BranchesScreen() {
   const nameId = useId();
   const addressId = useId();
   const phoneId = useId();
-  const latitudeId = useId();
-  const longitudeId = useId();
+  const googleMapsId = useId();
+  const appleMapsId = useId();
   const walkInsId = useId();
   const activeId = useId();
 
@@ -245,7 +245,15 @@ export function BranchesScreen() {
       return false;
     }
     const errors = validateBranchState(editorState);
-    if (errors.name || errors.address || errors.phone || errors.latitude || errors.longitude) {
+    if (
+      errors.name ||
+      errors.address ||
+      errors.phone ||
+      errors.latitude ||
+      errors.longitude ||
+      errors.googleMapsUrl ||
+      errors.appleMapsUrl
+    ) {
       setFieldErrors(errors);
       toast.error('Fix the highlighted fields.');
       return false;
@@ -616,7 +624,7 @@ export function BranchesScreen() {
       {editing ? (
         <LightEntityEditor
           title={editing.mode === 'create' ? 'New branch' : editing.row.name}
-          description='Name, address, phone, the walk-in flag, and optional map coordinates.'
+          description='Name, address, phone, the walk-in flag, and optional map links.'
           open={editorOpen}
           onOpenChange={(next) => {
             if (!next) {
@@ -660,33 +668,31 @@ export function BranchesScreen() {
               <p className='text-destructive text-xs'>{fieldErrors.phone}</p>
             ) : null}
           </Field>
-          <div className='grid grid-cols-2 gap-4'>
+          <div className='space-y-4'>
             <Field>
-              <FieldLabel htmlFor={latitudeId}>Latitude</FieldLabel>
+              <FieldLabel htmlFor={googleMapsId}>Google Maps URL</FieldLabel>
               <Input
-                id={latitudeId}
-                type='text'
-                inputMode='decimal'
-                placeholder='14.16598'
-                value={editorState.latitude}
-                onChange={(e) => setEditorState({ ...editorState, latitude: e.target.value })}
+                id={googleMapsId}
+                type='url'
+                placeholder='https://maps.app.goo.gl/…'
+                value={editorState.googleMapsUrl}
+                onChange={(e) => setEditorState({ ...editorState, googleMapsUrl: e.target.value })}
               />
-              {fieldErrors.latitude ? (
-                <p className='text-destructive text-xs'>{fieldErrors.latitude}</p>
+              {fieldErrors.googleMapsUrl ? (
+                <p className='text-destructive text-xs'>{fieldErrors.googleMapsUrl}</p>
               ) : null}
             </Field>
             <Field>
-              <FieldLabel htmlFor={longitudeId}>Longitude</FieldLabel>
+              <FieldLabel htmlFor={appleMapsId}>Apple Maps URL</FieldLabel>
               <Input
-                id={longitudeId}
-                type='text'
-                inputMode='decimal'
-                placeholder='121.2485'
-                value={editorState.longitude}
-                onChange={(e) => setEditorState({ ...editorState, longitude: e.target.value })}
+                id={appleMapsId}
+                type='url'
+                placeholder='https://maps.apple.com/…'
+                value={editorState.appleMapsUrl}
+                onChange={(e) => setEditorState({ ...editorState, appleMapsUrl: e.target.value })}
               />
-              {fieldErrors.longitude ? (
-                <p className='text-destructive text-xs'>{fieldErrors.longitude}</p>
+              {fieldErrors.appleMapsUrl ? (
+                <p className='text-destructive text-xs'>{fieldErrors.appleMapsUrl}</p>
               ) : null}
             </Field>
           </div>

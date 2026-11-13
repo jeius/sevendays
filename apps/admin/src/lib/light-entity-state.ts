@@ -48,6 +48,10 @@ export interface BranchEditorState {
   // wire schema enforces (packages/types).
   latitude: string;
   longitude: string;
+  // #273: pasted Maps share links ('' = clear). The lat/lng inputs are
+  // hidden (#248 set aside) but their state/payload code stays dormant.
+  googleMapsUrl: string;
+  appleMapsUrl: string;
   acceptsWalkIns: boolean;
   isActive: boolean;
   coverImageUrl: string | null;
@@ -99,6 +103,8 @@ export type LightFieldErrors = {
   phone?: string;
   latitude?: string;
   longitude?: string;
+  googleMapsUrl?: string;
+  appleMapsUrl?: string;
   quote?: string;
   person?: string;
   code?: string;
@@ -119,6 +125,8 @@ export function branchStateFromRead(row: BranchRead): BranchEditorState {
     phone: row.phone,
     latitude: row.latitude === null ? '' : String(row.latitude),
     longitude: row.longitude === null ? '' : String(row.longitude),
+    googleMapsUrl: row.googleMapsUrl ?? '',
+    appleMapsUrl: row.appleMapsUrl ?? '',
     acceptsWalkIns: row.acceptsWalkIns,
     isActive: row.isActive,
     coverImageUrl: row.coverImageUrl,
@@ -137,6 +145,8 @@ export function newBranchState(): BranchEditorState {
     phone: '',
     latitude: '',
     longitude: '',
+    googleMapsUrl: '',
+    appleMapsUrl: '',
     acceptsWalkIns: false,
     isActive: true,
     coverImageUrl: null,
@@ -169,6 +179,23 @@ function validateCoordinate(input: string, bound: number, label: string): string
   return undefined;
 }
 
+// #273: any https URL — transport check only (no host allowlist, owner-ruled).
+function validateMapsLink(input: string, label: string): string | undefined {
+  const trimmed = input.trim();
+  if (trimmed === '') {
+    return undefined;
+  }
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== 'https:') {
+      return `${label} must be an https URL.`;
+    }
+    return undefined;
+  } catch {
+    return `${label} must be a valid URL.`;
+  }
+}
+
 /**
  * `#143 seam: branch state → create payload` (M7 #214 split, the
  * package seam's law). The five fields explicit — the schema's defaults
@@ -184,10 +211,9 @@ export function buildBranchCreatePayload(state: BranchEditorState): CreateBranch
     longitude: parseCoordinate(state.longitude),
     acceptsWalkIns: state.acceptsWalkIns,
     isActive: state.isActive,
-    // #273: the editor state has no maps-link fields yet — null until the
-    // editor grows them (born-null columns, nothing to preserve).
-    googleMapsUrl: null,
-    appleMapsUrl: null,
+    // #273: trim-empty saves null (the clear encoding); else the trimmed link.
+    googleMapsUrl: state.googleMapsUrl.trim() === '' ? null : state.googleMapsUrl.trim(),
+    appleMapsUrl: state.appleMapsUrl.trim() === '' ? null : state.appleMapsUrl.trim(),
     ...(typeof state.coverImageKey === 'string' ? { coverImageKey: state.coverImageKey } : {}),
   };
 }
@@ -207,10 +233,9 @@ export function buildBranchUpdatePayload(state: BranchEditorState): UpdateBranch
     longitude: parseCoordinate(state.longitude),
     acceptsWalkIns: state.acceptsWalkIns,
     isActive: state.isActive,
-    // #273: the editor state has no maps-link fields yet — null until the
-    // editor grows them (born-null columns, nothing to preserve).
-    googleMapsUrl: null,
-    appleMapsUrl: null,
+    // #273: trim-empty saves null (the clear encoding); else the trimmed link.
+    googleMapsUrl: state.googleMapsUrl.trim() === '' ? null : state.googleMapsUrl.trim(),
+    appleMapsUrl: state.appleMapsUrl.trim() === '' ? null : state.appleMapsUrl.trim(),
     ...(state.coverImageKey !== undefined ? { coverImageKey: state.coverImageKey } : {}),
   };
 }
@@ -453,6 +478,15 @@ export function validateBranchState(state: BranchEditorState): LightFieldErrors 
     if (lat !== lng) {
       errors.latitude = 'Set both latitude and longitude, or neither.';
     }
+  }
+  // #273: the maps links mirror the wire's URL shape (https transport only).
+  const googleMapsUrlError = validateMapsLink(state.googleMapsUrl, 'Google Maps URL');
+  const appleMapsUrlError = validateMapsLink(state.appleMapsUrl, 'Apple Maps URL');
+  if (googleMapsUrlError) {
+    errors.googleMapsUrl = googleMapsUrlError;
+  }
+  if (appleMapsUrlError) {
+    errors.appleMapsUrl = appleMapsUrlError;
   }
   return errors;
 }

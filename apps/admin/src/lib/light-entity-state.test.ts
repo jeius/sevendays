@@ -60,6 +60,8 @@ describe('studio-service state', () => {
       phone: '+63 900 000 0001',
       latitude: '',
       longitude: '',
+      googleMapsUrl: '',
+      appleMapsUrl: '',
       acceptsWalkIns: true,
       isActive: true,
       coverImageUrl: null,
@@ -190,6 +192,96 @@ describe('studio-service state', () => {
     );
     expect(payload.latitude).toBe(7.0864);
     expect(payload.longitude).toBe(125.591);
+  });
+
+  // #273: the Maps link fields — state strings ('' = clear to null), the
+  // https-transport validation mirror (no host allowlist), and the flip's
+  // untouched re-send. The #248 coordinate pins above stay green: the
+  // lat/lng state/payload code is dormant, not removed.
+  it('#273: state round-trips stored maps links as strings', () => {
+    const state = light.branchStateFromRead({
+      ...branch,
+      googleMapsUrl: 'https://maps.app.goo.gl/main',
+      appleMapsUrl: 'https://maps.apple.com/?q=main',
+    });
+    expect(state.googleMapsUrl).toBe('https://maps.app.goo.gl/main');
+    expect(state.appleMapsUrl).toBe('https://maps.apple.com/?q=main');
+  });
+
+  it('#273: null links round-trip as empty strings (the clear encoding)', () => {
+    const state = light.branchStateFromRead({ ...branch, googleMapsUrl: null, appleMapsUrl: null });
+    expect(state.googleMapsUrl).toBe('');
+    expect(state.appleMapsUrl).toBe('');
+  });
+
+  it('#273: the create payload parses https links to strings; empty inputs save null (clear)', () => {
+    const linked = light.buildBranchCreatePayload({
+      ...branchState,
+      googleMapsUrl: 'https://maps.app.goo.gl/new',
+      appleMapsUrl: 'https://maps.apple.com/?q=new',
+    });
+    expect(linked.googleMapsUrl).toBe('https://maps.app.goo.gl/new');
+    expect(linked.appleMapsUrl).toBe('https://maps.apple.com/?q=new');
+    const cleared = light.buildBranchCreatePayload({
+      ...branchState,
+      googleMapsUrl: '',
+      appleMapsUrl: '',
+    });
+    expect(cleared.googleMapsUrl).toBeNull();
+    expect(cleared.appleMapsUrl).toBeNull();
+  });
+
+  it('#273: the update payload parses https links to strings; empty inputs save null (clear)', () => {
+    const linked = light.buildBranchUpdatePayload({
+      ...branchState,
+      googleMapsUrl: 'https://maps.app.goo.gl/edited',
+      appleMapsUrl: 'https://maps.apple.com/?q=edited',
+    });
+    expect(linked.googleMapsUrl).toBe('https://maps.app.goo.gl/edited');
+    expect(linked.appleMapsUrl).toBe('https://maps.apple.com/?q=edited');
+    const cleared = light.buildBranchUpdatePayload({
+      ...branchState,
+      googleMapsUrl: '',
+      appleMapsUrl: '',
+    });
+    expect(cleared.googleMapsUrl).toBeNull();
+    expect(cleared.appleMapsUrl).toBeNull();
+  });
+
+  it('#273: validation rejects an http:// link — https transport only, no host allowlist', () => {
+    const errors = light.validateBranchState({
+      ...branchState,
+      googleMapsUrl: 'http://maps.app.goo.gl/x',
+    });
+    expect(errors.googleMapsUrl).toBe('Google Maps URL must be an https URL.');
+  });
+
+  it('#273: validation rejects a non-URL entry with an inline error', () => {
+    const errors = light.validateBranchState({ ...branchState, appleMapsUrl: 'not a url' });
+    expect(errors.appleMapsUrl).toBe('Apple Maps URL must be a valid URL.');
+  });
+
+  it('#273: an empty link is valid (clear)', () => {
+    const errors = light.validateBranchState({
+      ...branchState,
+      googleMapsUrl: '',
+      appleMapsUrl: '',
+    });
+    expect(errors.googleMapsUrl).toBeUndefined();
+    expect(errors.appleMapsUrl).toBeUndefined();
+  });
+
+  it('#273: the flip payload re-sends the stored links untouched (null stays null)', () => {
+    const payload = light.buildBranchFlipPayload(
+      {
+        ...branch,
+        googleMapsUrl: 'https://maps.app.goo.gl/main',
+        appleMapsUrl: null,
+      },
+      false
+    );
+    expect(payload.googleMapsUrl).toBe('https://maps.app.goo.gl/main');
+    expect(payload.appleMapsUrl).toBeNull();
   });
 
   it('studio-service payload round-trip and flip', () => {
