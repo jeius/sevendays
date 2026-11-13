@@ -399,6 +399,60 @@ describe('branches admin CRUD', () => {
     ]);
   });
 
+  it('PUT with both links persists them; the read carries them (#273)', async () => {
+    const { token } = await signUpSession(url, 'admin-branches-links@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/branches/${ids.branchA}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Test Branch A',
+          address: '1 Test St',
+          phone: '+63 900 000 001',
+          acceptsWalkIns: false,
+          isActive: true,
+          latitude: null,
+          longitude: null,
+          googleMapsUrl: 'https://maps.app.goo.gl/abc',
+          appleMapsUrl: 'https://maps.apple.com/?q=sevendays',
+        }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      googleMapsUrl: string | null;
+      appleMapsUrl: string | null;
+    };
+    expect(body.googleMapsUrl).toBe('https://maps.app.goo.gl/abc');
+    expect(body.appleMapsUrl).toBe('https://maps.apple.com/?q=sevendays');
+  });
+
+  it('PUT with an http link answers the 400 envelope (#273)', async () => {
+    const { token } = await signUpSession(url, 'admin-branches-links-400@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/branches/${ids.branchA}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Test Branch A',
+          address: '1 Test St',
+          phone: '+63 900 000 001',
+          acceptsWalkIns: false,
+          isActive: true,
+          googleMapsUrl: 'http://maps.app.goo.gl/abc',
+        }),
+      },
+      testEnv(url)
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string; details: { path: string[] }[] };
+    expect(body.error).toBe('Invalid request payload.');
+    expect(body.details.some((d) => d.path.includes('googleMapsUrl'))).toBe(true);
+  });
+
   it('the public branches read carries stored coordinates (#248)', async () => {
     const { token } = await signUpSession(url, 'admin-branches-public@sevendays.test');
     const put = await app.request(
