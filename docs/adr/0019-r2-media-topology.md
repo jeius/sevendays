@@ -37,6 +37,6 @@ M5's CMS makes the studio's photographs first-class: package cover photos and a 
   cap across all four purposes — the commit-time HEAD check and the admin
   client pre-check read the same exported constant
   (`MEDIA_UPLOAD_CAP_BYTES`, packages/types). The site-logo purpose
-  additionally accepts `image/png` end to end (presign union, staging-key
+  additionally accepts `image/png` end to end (presign pair-check schema, staging-key
   regex, commit gate, `.png` final keys under `brand/`); package-cover,
   branch-cover, and gallery-photo remain JPG-only per the #170 ruling.
