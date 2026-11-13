@@ -1,7 +1,7 @@
 import type { Database } from '@sevendays/db';
 import { galleryPhotos } from '@sevendays/db';
 import type { MediaPurpose } from '@sevendays/types';
-import { mediaStagingKeySchema } from '@sevendays/types';
+import { MEDIA_UPLOAD_CAP_BYTES, mediaStagingKeySchema } from '@sevendays/types';
 import { AwsClient } from 'aws4fetch';
 import { eq } from 'drizzle-orm';
 import type { Env } from '../env.js';
@@ -16,11 +16,15 @@ import type { Env } from '../env.js';
 
 export const MEDIA_BUCKET_NAME = 'sevendays-media';
 export const PRESIGN_EXPIRY_SECONDS = 900; // 15 min — one file PUT, minted per file on demand
-export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // the ADR-0019 cap (verified at commit; presign cannot carry a size condition)
+// #246: the single owner-ruled cap (10 MiB, 2026-11-13 — was 50 MiB). The
+// constant lives in @sevendays/types so the admin courtesy pre-check reads
+// the same number; the commit-time HEAD is still the real gate (presign
+// cannot carry a size condition).
+export const MAX_UPLOAD_BYTES = MEDIA_UPLOAD_CAP_BYTES;
 export const THUMBNAIL_WIDTH_PX = 400; // the research-pinned admin-grid width
 export const MAX_THUMBNAIL_INPUT_BYTES = 20 * 1024 * 1024; // the Images binding's documented input limit
 
-const EXTENSIONS = { 'image/jpeg': 'jpg' } as const;
+const EXTENSIONS = { 'image/jpeg': 'jpg', 'image/png': 'png' } as const;
 
 const FINAL_PREFIXES: Record<MediaPurpose, string> = {
   'package-cover': 'covers',
@@ -70,7 +74,7 @@ export type CommitUploadResult =
  */
 export async function presignUpload(
   env: Pick<Env, 'R2_S3_ACCESS_KEY_ID' | 'R2_S3_SECRET_ACCESS_KEY' | 'CLOUDFLARE_ACCOUNT_ID'>,
-  input: { purpose: MediaPurpose; contentType: 'image/jpeg' }
+  input: { purpose: MediaPurpose; contentType: 'image/jpeg' | 'image/png' }
 ): Promise<{ key: string; uploadUrl: string }> {
   const accessKeyId = env.R2_S3_ACCESS_KEY_ID;
   const secretAccessKey = env.R2_S3_SECRET_ACCESS_KEY;
@@ -94,7 +98,8 @@ export async function presignUpload(
 
 /**
  * The commit contract (trust-but-verify, closed): HEAD-verify the staging
- * object → enforce the caps (50 MiB, image/jpeg — the presigned PUT carried
+ * object → enforce the caps (10 MiB, image/jpeg — PNG for the site-logo
+ * purpose only, #246 — the presigned PUT carried
  * no size condition, so this is the real gate) → promote to the immutable
  * final key via the binding (no S3 credentials involved) → delete the
  * staging key → hand the final key back for the caller to persist (#137).
@@ -114,7 +119,10 @@ export async function commitUpload(
       reason: 'foreign_key',
       message: 'Invalid staging key.',
       details: [
-        { path: ['key'], message: 'must be a tmp/<uuid>.jpg staging key minted by presign' },
+        {
+          path: ['key'],
+          message: 'must be a tmp/<uuid>.jpg or tmp/<uuid>.png staging key minted by presign',
+        },
       ],
     };
   }
@@ -131,11 +139,15 @@ export async function commitUpload(
   if (obj.size > MAX_UPLOAD_BYTES) {
     violations.push({
       path: ['key'],
-      message: `upload exceeds the 50 MiB cap (${obj.size} bytes)`,
+      message: `upload exceeds the 10 MiB cap (${obj.size} bytes)`,
     });
   }
+  // #246: allowed types are per-purpose — site-logo accepts PNG (owner
+  // ruling 2026-11-13); every other purpose stays JPG-only (#170).
+  const allowedTypes: readonly string[] =
+    input.purpose === 'site-logo' ? ['image/jpeg', 'image/png'] : ['image/jpeg'];
   const contentType = obj.httpMetadata?.contentType ?? '';
-  if (contentType !== 'image/jpeg') {
+  if (!allowedTypes.includes(contentType)) {
     violations.push({
       path: ['contentType'],
       message: `stored content type ${contentType || '(none)'} is not allowed`,
@@ -162,7 +174,7 @@ export async function commitUpload(
       details: [{ path: ['key'], message: 'no object at the staging key' }],
     };
   }
-  const finalKey = `${FINAL_PREFIXES[input.purpose]}/${crypto.randomUUID()}.jpg`;
+  const finalKey = `${FINAL_PREFIXES[input.purpose]}/${crypto.randomUUID()}.${EXTENSIONS[contentType as 'image/jpeg' | 'image/png']}`;
   await bucket.put(finalKey, src.body, {
     httpMetadata: { contentType, cacheControl: IMMUTABLE_CACHE_CONTROL },
   });

@@ -255,7 +255,7 @@ describe('admin_mutation events (M6 #183 — one per committed CMS write)', () =
     expect(body.details).toEqual([
       {
         path: ['coverImageKey'],
-        message: 'must be a tmp/<uuid>.jpg staging key minted by presign',
+        message: 'must be a tmp/<uuid>.jpg or tmp/<uuid>.png staging key minted by presign',
       },
     ]);
   });
