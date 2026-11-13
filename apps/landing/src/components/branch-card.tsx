@@ -9,8 +9,8 @@ import {
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
 import { CalendarClock, CalendarPlus, Footprints, MapPin, Phone } from 'lucide-react';
-import { useState } from 'react';
-import { mapsUrlFor } from '../lib/branch-maps';
+import { useEffect, useState } from 'react';
+import { isAppleUserAgent, mapsHrefFor } from '../lib/branch-maps';
 import { CoverPanel } from './cover-panel';
 
 // The branch card (/branches) on the ruled language (#164 Round 4): the
@@ -26,7 +26,11 @@ import { CoverPanel } from './cover-panel';
 // book words on the page — is a pick-time transform on the v1 branch,
 // never a runtime branch in this codebase (the #97 convention).
 export function BranchCard({ branch }: { branch: BranchRead }) {
-  const mapsUrl = mapsUrlFor(branch);
+  const [isApple, setIsApple] = useState(false);
+  useEffect(() => {
+    setIsApple(isAppleUserAgent(navigator.userAgent));
+  }, []);
+  const mapsHref = mapsHrefFor(branch, isApple);
   return (
     <article className='group flex flex-col overflow-hidden rounded-xl border border-line-soft bg-card shadow-sm'>
       <div className='relative aspect-[16/9]'>
@@ -85,13 +89,13 @@ export function BranchCard({ branch }: { branch: BranchRead }) {
             <CalendarPlus className='size-4' aria-hidden='true' />
             Book at this branch
           </Link>
-          {/* #248 (OWNER-RULED): the Maps pin opens a new tab at the stored
-              coordinates — rendered only when the row carries the full pair
-              (the mapsUrlFor gate); cards without coordinates render
-              nothing extra. */}
-          {mapsUrl ? (
+          {/* #273 (OWNER-RULED): Open in Maps opens the pasted link in a
+              new tab — Apple devices prefer the Apple link when set, else
+              the Google link; cards without links render nothing. The
+              device flag is effect-driven (SSR renders the Google base). */}
+          {mapsHref ? (
             <a
-              href={mapsUrl}
+              href={mapsHref}
               target='_blank'
               rel='noopener noreferrer'
               className={cn(
@@ -100,7 +104,7 @@ export function BranchCard({ branch }: { branch: BranchRead }) {
               )}
             >
               <MapPin className='size-4' aria-hidden='true' />
-              Google Maps
+              Open in Maps
             </a>
           ) : null}
         </div>
