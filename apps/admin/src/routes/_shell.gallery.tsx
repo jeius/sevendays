@@ -50,7 +50,7 @@ function GalleryPage() {
                 it renders in every screen state, the empty states
                 included (the route always mounts the header above the
                 screen). */}
-            <p className='text-muted-foreground text-xs'>JPG files up to 50 MiB.</p>
+            <p className='text-muted-foreground text-xs'>JPG files up to 10 MiB.</p>
           </>
         }
       />

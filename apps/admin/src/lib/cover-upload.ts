@@ -4,7 +4,9 @@
 // the staging key rides the NEXT atomic package save, whose commit is the
 // real verify/promote gate (#136/#137). Framework-free on purpose: #143's
 // lib-seam suite drives this loop with a fake presign + a stubbed XHR.
+
 import type { MediaPresignRequest, MediaPresignResponse, MediaPurpose } from '@sevendays/types';
+import { MEDIA_UPLOAD_CAP_BYTES } from '@sevendays/types';
 
 /**
  * The upload status machine the caller renders. `#143 seam: the cover
@@ -21,15 +23,16 @@ export type CoverUploadStatus =
 /**
  * `#143 seam: the presign → upload → bind loop`. The full path, in order:
  *
- * 1. Client pre-checks BEFORE any network call — type must be
- *    `image/jpeg`, size ≤ 50 MiB. The commit re-verifies server-side
- *    (#136's contract); the client check is courtesy, never trusted.
+ * 1. Client pre-checks BEFORE any network call — type must be allowed for
+ *    the purpose (site-logo: JPG or PNG, #246; else image/jpeg), size
+ *    ≤ 10 MiB. The commit re-verifies server-side (#136's contract); the
+ *    client check is courtesy, never trusted.
  * 2. `presigning` → the injected `presign` fn (the component wires the
- *    admin server fn in) with `{ purpose, contentType: 'image/jpeg' }`
+ *    admin server fn in) with `{ purpose, contentType: <the purpose's allowed type> }`
  *    (the caller's purpose — 'package-cover' by default, 'branch-cover'
  *    from the branch editor since M7 #214).
  * 3. `uploading` — XHR PUT (fetch has no upload progress — the spec's XHR
- *    ruling) with `Content-Type: image/jpeg`; progress events map to
+ *    ruling) with `Content-Type: the file's type`; progress events map to
  *    `{ sent, total }`; a non-2xx response fails with the status code.
  * 4. `bound` with `stagingKey` (the presigned `key` — it rides the NEXT
  *    atomic package save, whose commit is the real verify/promote gate)
@@ -50,13 +53,22 @@ export async function uploadCover(
   purpose: MediaPurpose = 'package-cover'
 ): Promise<void> {
   // (1) Courtesy pre-checks, before any network call. The commit is the
-  // real gate — these are never trusted server-side (#136).
-  if (file.type !== 'image/jpeg') {
-    onStatus({ phase: 'failed', message: 'Only JPG files are supported.' });
+  // real gate — these are never trusted server-side (#136). #246: allowed
+  // types are per-purpose — the site-logo purpose also accepts PNG (owner
+  // ruling 2026-11-13); every other purpose stays JPG-only (#170).
+  const allowedTypes = purpose === 'site-logo' ? ['image/jpeg', 'image/png'] : ['image/jpeg'];
+  if (!allowedTypes.includes(file.type)) {
+    onStatus({
+      phase: 'failed',
+      message:
+        purpose === 'site-logo'
+          ? 'Only JPG or PNG files are supported.'
+          : 'Only JPG files are supported.',
+    });
     return;
   }
-  if (file.size > 50 * 1024 * 1024) {
-    onStatus({ phase: 'failed', message: 'That file is over the 50 MiB cap.' });
+  if (file.size > MEDIA_UPLOAD_CAP_BYTES) {
+    onStatus({ phase: 'failed', message: 'That file is over the 10 MiB cap.' });
     return;
   }
 
@@ -66,7 +78,11 @@ export async function uploadCover(
   let stagingKey: string;
   let uploadUrl: string;
   try {
-    const presigned = await presign({ purpose, contentType: 'image/jpeg' });
+    const presignRequest: MediaPresignRequest =
+      purpose === 'site-logo'
+        ? { purpose, contentType: file.type as 'image/jpeg' | 'image/png' }
+        : { purpose, contentType: 'image/jpeg' };
+    const presigned = await presign(presignRequest);
     stagingKey = presigned.key;
     uploadUrl = presigned.uploadUrl;
   } catch (error) {
@@ -82,7 +98,7 @@ export async function uploadCover(
   await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', uploadUrl);
-    xhr.setRequestHeader('Content-Type', 'image/jpeg');
+    xhr.setRequestHeader('Content-Type', file.type);
     xhr.upload.onprogress = (event) => {
       onStatus({ phase: 'uploading', sent: event.loaded, total: event.total });
     };

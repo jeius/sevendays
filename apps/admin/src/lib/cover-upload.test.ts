@@ -1,3 +1,4 @@
+import { MEDIA_UPLOAD_CAP_BYTES } from '@sevendays/types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { type CoverUploadStatus, uploadCover } from './cover-upload';
 
@@ -13,6 +14,7 @@ class FakeXhr {
   status = 200;
   method = '';
   url = '';
+  headers: string[][] = [];
   constructor() {
     FakeXhr.last = this;
   }
@@ -20,7 +22,9 @@ class FakeXhr {
     this.method = method;
     this.url = url;
   }
-  setRequestHeader() {}
+  setRequestHeader(k: string, v: string) {
+    this.headers.push([k, v]);
+  }
   send() {}
 }
 
@@ -68,9 +72,11 @@ describe('uploadCover', () => {
   it('rejects an over-cap file before any network call', async () => {
     const presign = vi.fn();
     const seen: CoverUploadStatus[] = [];
-    const big = new File([new ArrayBuffer(50 * 1024 * 1024 + 1)], 'a.jpg', { type: 'image/jpeg' });
+    const big = new File([new ArrayBuffer(MEDIA_UPLOAD_CAP_BYTES + 1)], 'a.jpg', {
+      type: 'image/jpeg',
+    });
     await uploadCover(big, presign as never, (s) => seen.push(s));
-    expect(seen).toEqual([{ phase: 'failed', message: 'That file is over the 50 MiB cap.' }]);
+    expect(seen).toEqual([{ phase: 'failed', message: 'That file is over the 10 MiB cap.' }]);
     expect(presign).not.toHaveBeenCalled();
   });
 
@@ -114,6 +120,49 @@ describe('uploadCover', () => {
       purpose: 'branch-cover',
       contentType: 'image/jpeg',
     });
+  });
+
+  it('#246: a PNG passes the pre-check for the site-logo purpose and presigns image/png', async () => {
+    const presign = vi.fn(() => Promise.resolve({ key: 'tmp/k.png', uploadUrl: 'https://r2/put' }));
+    const seen: CoverUploadStatus[] = [];
+    const promise = uploadCover(
+      new File(['bytes'], 'a.png', { type: 'image/png' }),
+      presign,
+      (s) => seen.push(s),
+      'site-logo'
+    );
+    await vi.waitFor(() => expect(FakeXhr.last).toBeDefined());
+    FakeXhr.last?.onload?.();
+    await expect(promise).resolves.toBeUndefined();
+    expect(presign).toHaveBeenCalledWith({ purpose: 'site-logo', contentType: 'image/png' });
+    expect(FakeXhr.last?.headers).toContainEqual(['Content-Type', 'image/png']);
+    expect(seen.at(-1)).toMatchObject({ phase: 'bound' });
+  });
+
+  it('#246: a PNG still fails the pre-check for a JPG-only purpose (package-cover)', async () => {
+    const presign = vi.fn();
+    const seen: CoverUploadStatus[] = [];
+    await uploadCover(
+      new File(['b'], 'a.png', { type: 'image/png' }),
+      presign as never,
+      (s) => seen.push(s),
+      'package-cover'
+    );
+    expect(seen).toEqual([{ phase: 'failed', message: 'Only JPG files are supported.' }]);
+    expect(presign).not.toHaveBeenCalled();
+  });
+
+  it('#246: the site-logo purpose rejects a GIF with the JPG-or-PNG message', async () => {
+    const presign = vi.fn();
+    const seen: CoverUploadStatus[] = [];
+    await uploadCover(
+      new File(['b'], 'a.gif', { type: 'image/gif' }),
+      presign as never,
+      (s) => seen.push(s),
+      'site-logo'
+    );
+    expect(seen).toEqual([{ phase: 'failed', message: 'Only JPG or PNG files are supported.' }]);
+    expect(presign).not.toHaveBeenCalled();
   });
 
   it('a non-2xx PUT emits failed with the status and RESOLVES (the HTTP story is the machine’s)', async () => {

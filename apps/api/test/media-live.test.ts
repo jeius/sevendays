@@ -158,7 +158,7 @@ liveDescribe('live media round-trip (REAL bucket — controller/owner only)', ()
     expect(result.reason).toBe('not_found');
   });
 
-  it('an object over the 50 MiB cap is deleted from the bucket and answered 400-shaped', {
+  it('an object over the 10 MiB cap is deleted from the bucket and answered 400-shaped', {
     timeout: 180_000,
   }, async () => {
     const bucket = liveBucket();

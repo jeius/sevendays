@@ -274,7 +274,7 @@ export function SiteTab() {
               <input
                 ref={fileInputRef}
                 type='file'
-                accept='image/jpeg'
+                accept='image/jpeg,image/png'
                 className='hidden'
                 onChange={(e) => {
                   const file = e.target.files?.[0];
@@ -319,7 +319,7 @@ export function SiteTab() {
           {logoStatus.phase === 'failed' ? (
             <p className='text-destructive text-xs'>Upload failed: {logoStatus.message}</p>
           ) : null}
-          <p className='text-muted-foreground text-xs'>JPG only, up to 50 MiB.</p>
+          <p className='text-muted-foreground text-xs'>JPG or PNG, up to 10 MiB.</p>
         </CardContent>
       </Card>
 

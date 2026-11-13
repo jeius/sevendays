@@ -38,7 +38,7 @@ describe('mediaPresignRequestSchema', () => {
     expect(parsed.purpose).toBe('site-logo');
   });
 
-  it('rejects a non-jpeg contentType (the M5 cap: image/jpeg only)', () => {
+  it('rejects a non-jpeg contentType for a JPG-only purpose (the #170 cap: gallery stays JPG-only)', () => {
     expect(
       mediaPresignRequestSchema.safeParse({ purpose: 'gallery-photo', contentType: 'image/png' })
         .success
@@ -52,6 +52,28 @@ describe('mediaPresignRequestSchema', () => {
       sizeBytes: 42,
     });
     expect(Object.keys(parsed).sort()).toEqual(['contentType', 'purpose']);
+  });
+
+  it('#246: site-logo parses with image/png', () => {
+    expect(
+      mediaPresignRequestSchema.safeParse({ purpose: 'site-logo', contentType: 'image/png' })
+        .success
+    ).toBe(true);
+  });
+
+  it('#246: site-logo still parses with image/jpeg', () => {
+    expect(
+      mediaPresignRequestSchema.safeParse({ purpose: 'site-logo', contentType: 'image/jpeg' })
+        .success
+    ).toBe(true);
+  });
+
+  it('#246: the parsed site-logo output carries exactly purpose + contentType (png)', () => {
+    const parsed = mediaPresignRequestSchema.parse({
+      purpose: 'site-logo',
+      contentType: 'image/png',
+    });
+    expect(parsed).toEqual({ purpose: 'site-logo', contentType: 'image/png' });
   });
 });
 
@@ -92,5 +114,17 @@ describe('mediaStagingKeySchema', () => {
       mediaStagingKeySchema.safeParse('tmp/00000000-0000-4000-8000-000000000000.txt').success
     ).toBe(false);
     expect(mediaStagingKeySchema.safeParse('tmp/short.jpg').success).toBe(false);
+  });
+
+  it('#246: accepts a tmp/<uuid>.png staging key (the site-logo purpose)', () => {
+    expect(
+      mediaStagingKeySchema.safeParse('tmp/00000000-0000-4000-8000-000000000000.png').success
+    ).toBe(true);
+  });
+
+  it('#246: still rejects an uppercase .PNG staging key', () => {
+    expect(
+      mediaStagingKeySchema.safeParse('tmp/00000000-0000-4000-8000-000000000000.PNG').success
+    ).toBe(false);
   });
 });
