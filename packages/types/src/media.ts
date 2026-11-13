@@ -21,9 +21,6 @@ export type MediaContentType = (typeof SITE_LOGO_CONTENT_TYPES)[number];
 // pre-check read ONE number — they cannot drift.
 export const MEDIA_UPLOAD_CAP_BYTES = 10 * 1024 * 1024;
 
-// The purposes that stay JPG-only after #246 widened site-logo.
-const JPG_ONLY_PURPOSES = ['package-cover', 'branch-cover', 'gallery-photo'] as const;
-
 // 'branch-cover' joined with M7 #214; 'site-logo' with M7 #215: the brand
 // logo rides the same presign/commit pipeline under its own purpose (the
 // brand/ prefix — a logo is not a cover).
@@ -36,16 +33,27 @@ export const mediaPurposeSchema = z.enum([
 
 export type MediaPurpose = z.infer<typeof mediaPurposeSchema>;
 
-export const mediaPresignRequestSchema = z.union([
-  z.object({
-    purpose: z.literal('site-logo'),
+export const mediaPresignRequestSchema = z
+  .object({
+    purpose: mediaPurposeSchema,
     contentType: z.enum(SITE_LOGO_CONTENT_TYPES),
-  }),
-  z.object({
-    purpose: z.enum(JPG_ONLY_PURPOSES),
-    contentType: z.enum(MEDIA_CONTENT_TYPES),
-  }),
-]);
+  })
+  .superRefine((val, ctx) => {
+    // #246: the (purpose, contentType) PAIR is the rule — site-logo accepts
+    // PNG (owner ruling 2026-11-13); every other purpose stays JPG-only
+    // (#170). The custom issue rides at ['contentType'] so the route's
+    // validator 400 keeps field-level details (the union shape lost them —
+    // union failures carry path []).
+    const allowed: readonly MediaContentType[] =
+      val.purpose === 'site-logo' ? SITE_LOGO_CONTENT_TYPES : MEDIA_CONTENT_TYPES;
+    if (!allowed.includes(val.contentType)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['contentType'],
+        message: `contentType '${val.contentType}' is not allowed for purpose '${val.purpose}' (allowed: ${allowed.join(', ')})`,
+      });
+    }
+  });
 
 export type MediaPresignRequest = z.infer<typeof mediaPresignRequestSchema>;
 
