@@ -10,6 +10,12 @@ import type {
   SaveSiteSettingsInput,
 } from '@sevendays/types';
 import { SITE_SETTINGS_DEFAULTS } from '@sevendays/types';
+import {
+  FacebookIcon,
+  GmailIcon,
+  InstagramIcon,
+  TiktokIcon,
+} from '@sevendays/ui/components/brand-icons';
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent } from '@sevendays/ui/components/card';
 import { Checkbox } from '@sevendays/ui/components/checkbox';
@@ -19,7 +25,14 @@ import { toast } from '@sevendays/ui/components/sonner';
 import { Textarea } from '@sevendays/ui/components/textarea';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'lucide-react';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import {
+  type ComponentType,
+  type ReactNode,
+  type SVGProps,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { PendingSpinner, QUERY_ERROR_LINE, QueryErrorState } from '#/components/cms/shared';
 import { presignAdminCoverUpload, saveAdminSiteSettings } from '#/lib/admin.functions';
 import { siteSettingsQuery } from '#/lib/cms-queries';
@@ -84,21 +97,16 @@ const KICKER_FIELDS: { key: TextKeys; label: string }[] = [
   { key: 'kickerTestimonials', label: 'Testimonials kicker' },
 ];
 
-const ICON_FIELDS: { key: TextKeys; label: string; icon: string; placeholder?: string }[] = [
-  {
-    key: 'socialInstagram',
-    label: 'Instagram URL',
-    icon: '/brand/instagram.svg',
-    placeholder: 'https://…',
-  },
-  {
-    key: 'socialFacebook',
-    label: 'Facebook URL',
-    icon: '/brand/facebook.svg',
-    placeholder: 'https://…',
-  },
-  { key: 'socialTiktok', label: 'TikTok URL', icon: '/brand/tiktok.svg', placeholder: 'https://…' },
-  { key: 'contactEmail', label: 'Studio email', icon: '/brand/gmail.svg' },
+const ICON_FIELDS: {
+  key: TextKeys;
+  label: string;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+  placeholder?: string;
+}[] = [
+  { key: 'socialInstagram', label: 'Instagram URL', icon: InstagramIcon, placeholder: 'https://…' },
+  { key: 'socialFacebook', label: 'Facebook URL', icon: FacebookIcon, placeholder: 'https://…' },
+  { key: 'socialTiktok', label: 'TikTok URL', icon: TiktokIcon, placeholder: 'https://…' },
+  { key: 'contactEmail', label: 'Studio email', icon: GmailIcon },
 ];
 
 // The compact row (the ruled variant C): the label right-aligned in a
@@ -239,12 +247,17 @@ export function SiteTab() {
     </Row>
   );
 
-  const iconTextField = (key: TextKeys, label: string, icon: string, placeholder?: string) => (
+  const iconTextField = (
+    key: TextKeys,
+    label: string,
+    Icon: ComponentType<SVGProps<SVGSVGElement>>,
+    placeholder?: string
+  ) => (
     <Row
       key={key}
       label={
         <span className='inline-flex items-center gap-1.5'>
-          <img src={icon} alt='' aria-hidden='true' className='size-3.5' />
+          <Icon className='size-3.5' />
           {label}
         </span>
       }
