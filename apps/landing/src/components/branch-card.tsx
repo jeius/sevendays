@@ -8,8 +8,9 @@ import {
 } from '@sevendays/ui/components/tooltip';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
-import { CalendarClock, CalendarPlus, Footprints, Phone } from 'lucide-react';
+import { CalendarClock, CalendarPlus, Footprints, MapPin, Phone } from 'lucide-react';
 import { useState } from 'react';
+import { mapsUrlFor } from '../lib/branch-maps';
 import { CoverPanel } from './cover-panel';
 
 // The branch card (/branches) on the ruled language (#164 Round 4): the
@@ -25,6 +26,7 @@ import { CoverPanel } from './cover-panel';
 // book words on the page — is a pick-time transform on the v1 branch,
 // never a runtime branch in this codebase (the #97 convention).
 export function BranchCard({ branch }: { branch: BranchRead }) {
+  const mapsUrl = mapsUrlFor(branch);
   return (
     <article className='group flex flex-col overflow-hidden rounded-xl border border-line-soft bg-card shadow-sm'>
       <div className='relative aspect-[16/9]'>
@@ -83,6 +85,24 @@ export function BranchCard({ branch }: { branch: BranchRead }) {
             <CalendarPlus className='size-4' aria-hidden='true' />
             Book at this branch
           </Link>
+          {/* #248 (OWNER-RULED): the Maps pin opens a new tab at the stored
+              coordinates — rendered only when the row carries the full pair
+              (the mapsUrlFor gate); cards without coordinates render
+              nothing extra. */}
+          {mapsUrl ? (
+            <a
+              href={mapsUrl}
+              target='_blank'
+              rel='noopener noreferrer'
+              className={cn(
+                buttonVariants({ variant: 'outline' }),
+                'focus-visible:ring-3 focus-visible:ring-brand-focus-ring'
+              )}
+            >
+              <MapPin className='size-4' aria-hidden='true' />
+              Google Maps
+            </a>
+          ) : null}
         </div>
       </div>
     </article>
