@@ -15,12 +15,14 @@
 // no new network call starts after the abort, and a commit already in
 // flight completes with its verdict standing. The tray/guard predicates
 // below are the one vocabulary both the tray UI and the leaving guard read.
+
 import type {
   CreateGalleryPhotoInput,
   GalleryPhoto,
   MediaPresignRequest,
   MediaPresignResponse,
 } from '@sevendays/types';
+import { MEDIA_UPLOAD_CAP_BYTES } from '@sevendays/types';
 
 /** The spec's "~4 parallel", pinned as the one named constant. */
 export const BATCH_CONCURRENCY = 4;
@@ -109,8 +111,8 @@ export async function preCheckFile(file: File): Promise<string | null> {
   if (file.type !== 'image/jpeg') {
     return 'Only JPG files are supported.';
   }
-  if (file.size > 50 * 1024 * 1024) {
-    return 'That file is over the 50 MiB cap.';
+  if (file.size > MEDIA_UPLOAD_CAP_BYTES) {
+    return 'That file is over the 10 MiB cap.';
   }
   return null;
 }

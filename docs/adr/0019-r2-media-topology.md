@@ -30,3 +30,13 @@ M5's CMS makes the studio's photographs first-class: package cover photos and a 
 - Expired presigns 403 without CORS headers (an opaque browser error) — mitigated by minting per file on demand, never hoarding URLs.
 - M6 inherits three obligations: same-account zone+bucket placement (or a bucket copy), the var flip, and disabling r2.dev once the domain is live.
 - Bucket-level config (CORS, lifecycle, domain, cache rules) is edition-shared by construction — one deliberate change serves both editions.
+
+## Amendments
+
+- **2026-11-13 (#246):** the upload cap is 10 MiB (was 50 MiB), one global
+  cap across all four purposes — the commit-time HEAD check and the admin
+  client pre-check read the same exported constant
+  (`MEDIA_UPLOAD_CAP_BYTES`, packages/types). The site-logo purpose
+  additionally accepts `image/png` end to end (presign pair-check schema, staging-key
+  regex, commit gate, `.png` final keys under `brand/`); package-cover,
+  branch-cover, and gallery-photo remain JPG-only per the #170 ruling.

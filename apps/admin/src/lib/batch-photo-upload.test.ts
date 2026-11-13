@@ -1,3 +1,4 @@
+import { MEDIA_UPLOAD_CAP_BYTES } from '@sevendays/types';
 import { describe, expect, it, vi } from 'vitest';
 import {
   type BatchItem,
@@ -48,9 +49,9 @@ describe('preCheckFile', () => {
     );
     expect(
       await preCheckFile(
-        new File([new ArrayBuffer(50 * 1024 * 1024 + 1)], 'a.jpg', { type: 'image/jpeg' })
+        new File([new ArrayBuffer(MEDIA_UPLOAD_CAP_BYTES + 1)], 'a.jpg', { type: 'image/jpeg' })
       )
-    ).toBe('That file is over the 50 MiB cap.');
+    ).toBe('That file is over the 10 MiB cap.');
     expect(await preCheckFile(new File(['b'], 'a.jpg', { type: 'image/jpeg' }))).toBeNull();
   });
 });

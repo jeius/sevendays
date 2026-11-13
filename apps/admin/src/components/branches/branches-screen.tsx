@@ -754,7 +754,7 @@ export function BranchesScreen() {
             {coverStatus.phase === 'failed' ? (
               <p className='text-destructive text-xs'>Upload failed: {coverStatus.message}</p>
             ) : null}
-            <p className='text-muted-foreground text-xs'>JPG only, up to 50 MiB.</p>
+            <p className='text-muted-foreground text-xs'>JPG only, up to 10 MiB.</p>
           </div>
         </LightEntityEditor>
       ) : null}

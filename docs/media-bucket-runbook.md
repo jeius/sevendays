@@ -128,7 +128,7 @@ check` never needs — never touches — the bucket. It proves, live:
   promotes to the immutable final key, deletes the staging key;
 - a PUT with a swapped Content-Type fails the signature (403
   `SignatureDoesNotMatch` — Content-Type is signed in);
-- an object over the 50 MiB cap is deleted from the bucket and answered
+- an object over the 10 MiB cap is deleted from the bucket and answered
   400-shaped with field details.
 
 ## § Fresh bucket at ship (docs/ship-provisioning-runbook.md A4 + B1–B4)

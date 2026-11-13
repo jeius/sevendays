@@ -163,6 +163,22 @@ describe('POST /api/v1/admin/media/presign', () => {
     expect(upload.searchParams.get('X-Amz-SignedHeaders')).toBe('content-type;host');
   });
 
+  it('#246: mints a PNG presign for the site-logo purpose (200, key ends .png)', async () => {
+    const { token } = await signUpSession(url, 'presign-png@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/media/presign',
+      {
+        method: 'POST',
+        body: JSON.stringify({ purpose: 'site-logo', contentType: 'image/png' }),
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+      },
+      withCreds()
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { key: string; uploadUrl: string };
+    expect(body.key).toMatch(/^tmp\/[0-9a-f-]+\.png$/);
+  });
+
   it('fails presign with the curated 503 + the presign media_failure and error events when the S3-token pair is absent (leak-safe detail, #155)', async () => {
     const lines: string[] = [];
     vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {

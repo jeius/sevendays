@@ -122,10 +122,16 @@ describe('presignUpload', () => {
       presignUpload(env, { purpose: 'gallery-photo', contentType: 'image/jpeg' })
     ).rejects.toBeInstanceOf(MissingR2CredentialsError);
   });
+
+  it('#246: presigns a PNG for the site-logo purpose (key ends .png)', async () => {
+    const result = await presignUpload(CREDS, { purpose: 'site-logo', contentType: 'image/png' });
+    expect(result.key).toMatch(/^tmp\/[0-9a-f-]+\.png$/);
+  });
 });
 
 describe('commitUpload', () => {
   const STAGING_KEY = 'tmp/00000000-0000-4000-8000-000000000000.jpg';
+  const STAGING_KEY_PNG = 'tmp/00000000-0000-4000-8000-000000000000.png';
 
   it('promotes: get → put at the immutable final key (covers/) → delete staging → hands back the final key', async () => {
     const stub = stubBucket({ [STAGING_KEY]: { size: 1024, contentType: 'image/jpeg' } });
@@ -193,7 +199,10 @@ describe('commitUpload', () => {
     expect(result.reason).toBe('foreign_key');
     expect(result.message).toBe('Invalid staging key.');
     expect(result.details).toEqual([
-      { path: ['key'], message: 'must be a tmp/<uuid>.jpg staging key minted by presign' },
+      {
+        path: ['key'],
+        message: 'must be a tmp/<uuid>.jpg or tmp/<uuid>.png staging key minted by presign',
+      },
     ]);
     expect(stub.deleteCalls).toEqual([]);
   });
@@ -210,7 +219,7 @@ describe('commitUpload', () => {
     expect(stub.deleteCalls).toEqual([]);
   });
 
-  it('deletes an over-cap object and answers cap_violation with the key field detail (the 50 MiB cap)', async () => {
+  it('deletes an over-cap object and answers cap_violation with the key field detail (the 10 MiB cap, #246)', async () => {
     const stub = stubBucket({
       [STAGING_KEY]: { size: MAX_UPLOAD_BYTES + 1, contentType: 'image/jpeg' },
     });
@@ -221,12 +230,12 @@ describe('commitUpload', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.reason).toBe('cap_violation');
-    expect(result.details).toEqual([{ path: ['key'], message: expect.stringContaining('50 MiB') }]);
+    expect(result.details).toEqual([{ path: ['key'], message: expect.stringContaining('10 MiB') }]);
     expect(stub.deleteCalls).toEqual([STAGING_KEY]);
     expect(stub.putCalls).toEqual([]);
   });
 
-  it('deletes a wrong-content-type object and answers cap_violation with the contentType field detail', async () => {
+  it('deletes a wrong-content-type object and answers cap_violation with the contentType field detail (a JPG-only purpose, #246)', async () => {
     const stub = stubBucket({ [STAGING_KEY]: { size: 1024, contentType: 'image/png' } });
     const result = await commitUpload(stub.bucket, {
       stagingKey: STAGING_KEY,
@@ -240,6 +249,68 @@ describe('commitUpload', () => {
     ]);
     expect(stub.deleteCalls).toEqual([STAGING_KEY]);
     expect(stub.putCalls).toEqual([]);
+  });
+
+  it('#246: a PNG commits under the site-logo purpose and lands a .png final key', async () => {
+    const stub = stubBucket({ [STAGING_KEY_PNG]: { size: 1024, contentType: 'image/png' } });
+    const result = await commitUpload(stub.bucket, {
+      stagingKey: STAGING_KEY_PNG,
+      purpose: 'site-logo',
+    });
+    if (!result.ok) throw new Error(`expected ok, got ${result.reason}`);
+    expect(result.finalKey).toMatch(
+      /^brand\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.png$/
+    );
+    expect(stub.putCalls).toHaveLength(1);
+    const putCall = stub.putCalls[0];
+    if (!putCall) throw new Error('expected exactly one put call');
+    expect(putCall.options).toEqual({
+      httpMetadata: {
+        contentType: 'image/png',
+        cacheControl: 'public, max-age=31536000, immutable',
+      },
+    });
+    expect(stub.deleteCalls).toEqual([STAGING_KEY_PNG]);
+  });
+
+  it('#246: a JPEG still commits under the site-logo purpose (jpg final key)', async () => {
+    const stub = stubBucket({ [STAGING_KEY]: { size: 1024, contentType: 'image/jpeg' } });
+    const result = await commitUpload(stub.bucket, {
+      stagingKey: STAGING_KEY,
+      purpose: 'site-logo',
+    });
+    if (!result.ok) throw new Error(`expected ok, got ${result.reason}`);
+    expect(result.finalKey).toMatch(/^brand\/.*\.jpg$/);
+  });
+
+  it('#246: a PNG under a JPG-only purpose is a cap_violation and is deleted (gallery stays #170)', async () => {
+    const stub = stubBucket({ [STAGING_KEY_PNG]: { size: 1024, contentType: 'image/png' } });
+    const result = await commitUpload(stub.bucket, {
+      stagingKey: STAGING_KEY_PNG,
+      purpose: 'gallery-photo',
+    });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.reason).toBe('cap_violation');
+    expect(result.details).toEqual([
+      { path: ['contentType'], message: 'stored content type image/png is not allowed' },
+    ]);
+    expect(stub.deleteCalls).toEqual([STAGING_KEY_PNG]);
+    expect(stub.putCalls).toEqual([]);
+  });
+
+  it('#246: a tmp/<uuid>.png staging key passes the schema (not_found, not foreign_key)', async () => {
+    // An absent object under a VALID png staging key answers not_found —
+    // proving the key passed mediaStagingKeySchema, not the foreign-key gate.
+    const stub = stubBucket({});
+    const result = await commitUpload(stub.bucket, {
+      stagingKey: STAGING_KEY_PNG,
+      purpose: 'site-logo',
+    });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.reason).toBe('not_found');
+    expect(stub.deleteCalls).toEqual([]);
   });
 
   it('an object stored with NO contentType fails the caps check as (none) and is deleted', async () => {
