@@ -11,7 +11,7 @@
 - Branch `feat/275-footer-socials-copyright-row` off current main; commit style `type(scope): … (#275)`. Never commit secrets. Tick boxes `- [✅]` (GitHub issues / docs, never plain `[x]`).
 - Every find/replace below must match exactly once at execution time; a ≠1 match means the file drifted — stop and reconcile.
 - **Monochrome law:** every glyph renders `fill='currentColor'` — no baked hex, no multicolor official brand marks. The component's `aria-hidden='true'` default stays (the anchors' `sr-only` spans are the accessible names, as today).
-- Gates per touched workspace: `pnpm --filter @sevendays/ui fix && pnpm --filter @sevendays/ui typecheck` (ui has no test script); `pnpm --filter @sevendays/{landing,admin} fix && pnpm --filter @sevendays/{landing,admin} test -- --run && pnpm --filter @sevendays/{landing,admin} typecheck`; final `pnpm check` green with every floor unchanged — **landing 17 files / 134 tests, admin 27 files / 279 tests** (amended at execution, Task 2: the AGENTS.md 16/123 landing literal is stale on main — controller-verified 17 test files on BOTH main and branch, zero test files in the branch diff; the real gate is same-test-tree-as-base, all green; this plan adds no tests and breaks none: the spec's testing decision is no-new-seams, and the rendering changes sit below every seam's test line).
+- Gates per touched workspace: `pnpm --filter @sevendays/ui fix && pnpm --filter @sevendays/ui typecheck` (ui has no test script); `pnpm --filter @sevendays/{landing,admin} fix && pnpm --filter @sevendays/{landing,admin} test -- --run && pnpm --filter @sevendays/{landing,admin} typecheck`; final `pnpm check` green with every floor unchanged — **landing 17 files / 134 tests, admin 27 files / 296 tests** (amended at execution, Task 2: the AGENTS.md 16/123 landing literal is stale on main — controller-verified 17 test files on BOTH main and branch, zero test files in the branch diff; the real gate is same-test-tree-as-base, all green; Task 3 amendment: the AGENTS.md admin 279 literal is likewise stale on main — controller-verified 27 test files on BOTH main and branch (296 tests observed), zero admin test files in the branch diff; this plan adds no tests and breaks none: the spec's testing decision is no-new-seams, and the rendering changes sit below every seam's test line).
 - If biome rewrites a long class-string ordering, accept `fix`'s rewrite; do not hand-reorder beyond it.
 - **Deletion list (Task 4) is exhaustive:** `apps/{landing,admin}/public/brand/{instagram,facebook,tiktok,gmail}.svg` — 8 files, nothing else. The favicon set (`favicon.svg`, `favicon-64.png`, `apple-touch-icon.png` at each app's `public/` root) and the `!public/**/*.svg` biome exclusion in both apps **stay** (`favicon.svg` is still an owner asset that biome must not touch).
 - The ADR-0022 visual re-baseline is **post-deploy owner-gated work (Task 6), never part of `pnpm check`** — commit-green and smoke-green stay separate verdicts.
@@ -286,7 +286,7 @@
 
   Nothing else in `iconTextField` moves — `aria-label` stays the plain label string (the icon is decorative), the `Row`/grid/`Input` wiring is untouched. The two render sites (`ICON_FIELDS.filter(...).map((field) => iconTextField(field.key, field.label, field.icon, field.placeholder))`) need NO edit — `field.icon` is now a component and flows through as-is; typecheck proves it. The icons inherit the label's foreground (`currentColor`, no text class on the glyph) — identical in light, visible in dark: the fix this task exists for.
 
-- [ ] **Step 4: gates** — `pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/admin test -- --run && pnpm --filter @sevendays/admin typecheck`. Floors unchanged (27 files / 279 tests — no seam sees the icon swap; nothing pins `ICON_FIELDS`).
+- [ ] **Step 4: gates** — `pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/admin test -- --run && pnpm --filter @sevendays/admin typecheck`. Floors unchanged (27 files / 296 tests as amended — no seam sees the icon swap; nothing pins `ICON_FIELDS`).
 
 - [ ] **Step 5: commit** — `git add apps/admin/src/components/settings/site-tab.tsx && git commit -m "feat(admin): Site tab icon rows adopt the shared brand icons — dark-theme visible (#275)"`
 
@@ -312,7 +312,7 @@
   ls apps/landing/public apps/admin/public   # favicon.svg, favicon-64.png, apple-touch-icon.png, photos/… — all still present
   ```
 
-- [ ] **Step 3: the full gate** — `pnpm check` green end to end (first full-workspace run of the branch — every floor unchanged: landing 17/134 (amended — see Global Constraints), admin 27/279, api/api-client at their AGENTS.md floors, untouched).
+- [ ] **Step 3: the full gate** — `pnpm check` green end to end (first full-workspace run of the branch — every floor unchanged: landing 17/134 (amended — see Global Constraints), admin 27/296 (amended), api/api-client at their AGENTS.md floors, untouched).
 
 - [ ] **Step 4: commit** — `git commit -m "chore(assets): delete the black brand SVGs — superseded by the shared currentColor icon module (#275)"` (the `git rm` already staged the deletions).
 
