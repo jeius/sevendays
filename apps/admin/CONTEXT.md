@@ -19,3 +19,11 @@ _Avoid_: member, account (for the person), customer
 **Session**:
 A signed-in Staff User's server-side state — the row BetterAuth writes at sign-in and the API verifies from the forwarded bearer token on gated routes (ADR-0004). Ends at sign-out or expiry (~7 days).
 _Avoid_: login (as a noun for the state), JWT, cookie (the API never sees cookies)
+
+**Warm Navigation**:
+Moving to an admin screen whose data the client already holds: the screen renders that data immediately, with a background refresh following. The latency contract's target case — warm navigation must feel instant. The bound: what's shown is at most the staleness bound (5 minutes) behind, and a staff member's own saves always invalidate immediately.
+_Avoid_: cached visit, prefetch (a mechanism that warms, not the state)
+
+**Cold Navigation**:
+Moving to an admin screen with nothing held — the first visit in a session. The one case where skeletons and loading indicators are acceptable; the latency work shrinks this wait but never promises to eliminate it.
+_Avoid_: slow path (unwarmed, not necessarily slow)
