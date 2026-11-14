@@ -4,6 +4,13 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { bearer } from 'better-auth/plugins';
 import { parseEnv } from '../env.js';
 import type { ApiEnv } from './db.js';
+import {
+  getSessionCacheStore,
+  presentedBearerToken,
+  sessionCacheKey,
+  sessionFromCacheEntry,
+  toSessionCacheEntry,
+} from './session-cache.js';
 
 // ADR-0004 made concrete (M4 ticket 04): the API answers "who is calling"
 // by verifying the bearer token against the SAME tables the admin auth
@@ -39,7 +46,11 @@ export function authenticationRequired(c: import('hono').Context) {
  * through the verification instance and sets the session into context, or
  * returns the uniform 401 envelope. The instance is constructed per request
  * over the per-request db handle acquireDb already placed in context
- * (ADR-0011 — the drizzle adapter captures the db it is given). A missing
+ * (ADR-0011 — the drizzle adapter captures the db it is given). ADR-0027: a
+ * cache hit (the token-hash session cache, services/session-cache.ts) serves
+ * the verified identity and skips the instance entirely; only a miss
+ * constructs it — 401 outcomes are never cached, and every cache failure
+ * degrades to this verification path. A missing
  * BETTER_AUTH_SECRET throws loudly (the createAuth posture): a deploy that
  * cannot verify anyone fails the gated route with the uniform 500, never a
  * silent allow.
@@ -54,10 +65,33 @@ export const requireSession = async (
       'BETTER_AUTH_SECRET is not set — the API cannot verify sessions. Set the Worker secret (ADR-0004, shared with the admin). No fallback by design.'
     );
   }
+  // ADR-0027: consult the token-hash session cache BEFORE any
+  // verification work — a hit serves the verified identity with zero
+  // DB I/O and never constructs the per-request auth instance. A miss
+  // verifies exactly as before and back-fills on success; 401
+  // outcomes are never cached (the put sits below the null check).
+  const store = getSessionCacheStore();
+  const presented = presentedBearerToken(c.req.header('authorization'));
+  if (store && presented) {
+    const key = await sessionCacheKey(BETTER_AUTH_SECRET, presented);
+    const hit = await store.match(key);
+    const cached = hit ? await sessionFromCacheEntry(hit) : null;
+    if (cached) {
+      c.set('session', cached);
+      await next();
+      return;
+    }
+  }
   const auth = createVerificationAuth({ database: c.get('db'), secret: BETTER_AUTH_SECRET });
   const session = await auth.api.getSession({ headers: c.req.raw.headers });
   if (!session) {
     return authenticationRequired(c);
+  }
+  if (store && presented) {
+    await store.put(
+      await sessionCacheKey(BETTER_AUTH_SECRET, presented),
+      toSessionCacheEntry(session)
+    );
   }
   c.set('session', session);
   await next();
