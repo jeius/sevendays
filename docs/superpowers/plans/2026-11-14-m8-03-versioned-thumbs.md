@@ -143,6 +143,8 @@ describe('the proxy cache-control law (M8 #287 — supersedes the #136 no-cache 
 Create `apps/admin/src/lib/gallery-thumbs.ts` with this exact content:
 
 ```ts
+import type { GalleryPhoto } from '@sevendays/types';
+
 // The gallery thumbnails' serving seam (M8 #287): ONE place builds the
 // versioned thumb URL and owns the proxy's cache-control law, so the grid
 // card, the editor preview, and the $id.thumb proxy route can never drift.
