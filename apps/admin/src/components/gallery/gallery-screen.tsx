@@ -115,6 +115,7 @@ import {
   reorderIds,
   reorderVisiblePhotos,
 } from '#/lib/gallery-state';
+import { thumbUrl } from '#/lib/gallery-thumbs';
 import { blockerLines } from '#/lib/save-contract';
 import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
@@ -222,13 +223,18 @@ function SortablePhotoCard({
     >
       {/* The Task 5 thumb proxy (AR-1): the browser <img> cannot hold the
           Bearer session, so the gated by-id route is reached through the
-          admin server-route proxy — never the raw photoUrl. */}
+          admin server-route proxy — never the raw photoUrl. M8 #287: the
+          URL is the versioned builder's (?v=<updatedAt epoch ms>) so a
+          warm grid serves from the browser cache with zero requests, and
+          a replace's bumped timestamp changes the URL — structural
+          invalidation, no eviction machinery. */}
       <div className='bg-muted relative aspect-[4/3]'>
         <img
-          src={`/api/admin/gallery-photos/${photo.id}/thumb`}
+          src={thumbUrl(photo)}
           alt={photo.title ?? 'Gallery photo'}
           className='absolute inset-0 h-full w-full object-cover'
           loading='lazy'
+          decoding='async'
         />
         {/* GL3: the position chip is display-only. */}
         <span className='bg-background/90 absolute top-2 left-2 rounded-md px-1.5 py-0.5 font-mono text-xs tabular-nums'>
@@ -1511,12 +1517,14 @@ export function GalleryScreen() {
           }}
           onSave={handleEditorSave}
         >
-          {/* Thumb preview — the same gated proxy (AR-1). */}
+          {/* Thumb preview — the same gated proxy (AR-1), the same versioned
+              builder (#287). */}
           <div className='bg-muted relative aspect-[4/3] w-28 overflow-hidden rounded-md'>
             <img
-              src={`/api/admin/gallery-photos/${editing.row.id}/thumb`}
+              src={thumbUrl(editing.row)}
               alt={editing.row.title ?? 'Gallery photo'}
               className='absolute inset-0 h-full w-full object-cover'
+              decoding='async'
             />
           </div>
           <Field>
