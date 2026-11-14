@@ -428,4 +428,4 @@ disable confirmation; #192's close-out (plan.md's M6 boxes, progress.md).
   ship against Workers Logs' free tier (spec § Further Notes).
 - **Staff provisioning beyond `smoke-staff`** — docs/staff-provisioning.md
   owns the owner account and every staff create/reset.
-- **Handover mechanics + post-handover cadence** — M8.
+- **Handover mechanics + post-handover cadence** — M9 (renumbered 2026-11-14 when Admin-CMS Latency seated as M8).
