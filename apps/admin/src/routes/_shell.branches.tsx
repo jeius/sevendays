@@ -5,9 +5,15 @@
 // under the pinned head title.
 import { createFileRoute } from '@tanstack/react-router';
 import { BranchesScreen } from '#/components/branches/branches-screen';
+import { cmsRoutePriming, primeCmsQueries } from '#/lib/cms-queries';
 
 export const Route = createFileRoute('/_shell/branches')({
   head: () => ({ meta: [{ title: 'Branches | Sevendays Admin' }] }),
+  // M8 #288: hover-intent priming — fire-and-forget, never blocks
+  // (the cms-queries seam carries the law).
+  loader: ({ context: { queryClient } }) => {
+    primeCmsQueries(cmsRoutePriming.branches(queryClient));
+  },
   component: BranchesPage,
 });
 
