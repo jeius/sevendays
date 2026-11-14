@@ -68,7 +68,24 @@ export function createAuth(
       admin(), // role vocabulary + the createUser/create-admin provisioning path
       tanstackStartCookies(), // MUST be last (cookie-setting through TanStack Start)
     ],
-    session: { expiresIn: 60 * 60 * 24 * 7, updateAge: 60 * 60 * 24 }, // 7 days, refresh daily — spec-pinned
+    session: {
+      expiresIn: 60 * 60 * 24 * 7,
+      updateAge: 60 * 60 * 24, // 7 days, refresh daily — spec-pinned
+      // M8 #286 (ADR-0027): the owner-ruled 60-second session cookie
+      // cache — getSession (the shell gate + every gated server fn)
+      // serves from the HMAC-signed session_data cookie with zero DB
+      // I/O inside the window; the signature is verified before any
+      // serve, so a forged/absent cookie degrades to the DB path. The
+      // library's 300 s default is deliberately overridden to the
+      // ruled bound; revocation is TTL-only (a revoked session may
+      // pass for ≤60 s — the signing-out browser itself is immediate,
+      // cookies cleared). The known failure mode — the cookie adapter
+      // silently not setting the cookie — degrades to today's
+      // per-navigation DB read (performance-only); verified
+      // operationally on #286 (the cookie lands from sign-in). The
+      // pin test beside this file locks the shape.
+      cookieCache: { enabled: true, maxAge: 60 },
+    },
     rateLimit: { enabled: true, storage: 'database' }, // memory is per-isolate on Workers — ineffective
   });
 }
