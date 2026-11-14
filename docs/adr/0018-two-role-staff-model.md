@@ -16,6 +16,8 @@ The roadmap adds dashboard user management — the owner creates staff in the ad
 3. **Power boundary.** The admin-plugin surface is owner-only, enforced by the plugin's own role gate. The M5.5 users page calls it server-side over the per-request instance (ADR-0011) behind a role gate; every other admin surface stays session-gated (the M4 shell gate) and is shared by all staff.
 4. **Interim rule (effective now, until M5.5 ships).** Provision anyone other than the owner with a trailing `--role staff` on `create-staff` — spike-verified 2026-09-24: the trailing flag overrides the script's hardcoded `--role admin`, and the CLI accepts the arbitrary string (created a `role=staff` row, verified in the database, then deleted it).
 
+5. **_(Status note, 2026-11-14.)_** The M5.5-shaped surface this ADR awaited shipped 2026-10-19 (#221): the owner-only Users tab enforces the power boundary in the UI (ADR-0018's role gate — `role === 'admin'` server-side and in the nav), and staff-side forgot-password covers routine resets. The `create-staff` CLI remains the bootstrap/break-glass provisioning path — its `--role admin` default and the interim trailing `--role staff` rule stand for that path — until #222 demotes it formally.
+
 ## Alternatives Considered
 
 - **One role (everyone `admin`)** — rejected: least-privilege violated by default; the first hire gains user management, impersonation, and session revocation with zero code changes.
