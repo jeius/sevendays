@@ -8,9 +8,15 @@ import { Button } from '@sevendays/ui/components/button';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { PageHeader } from '#/components/cms/shared';
 import { PackagesTable } from '#/components/packages/packages-table';
+import { cmsRoutePriming, primeCmsQueries } from '#/lib/cms-queries';
 
 export const Route = createFileRoute('/_shell/packages/')({
   head: () => ({ meta: [{ title: 'Packages | Sevendays Admin' }] }),
+  // M8 #288: hover-intent priming — fire-and-forget, never blocks
+  // (the cms-queries seam carries the law).
+  loader: ({ context: { queryClient } }) => {
+    primeCmsQueries(cmsRoutePriming.packagesIndex(queryClient));
+  },
   component: PackagesPage,
 });
 

@@ -8,9 +8,15 @@ import { createFileRoute } from '@tanstack/react-router';
 import { ImagePlus } from 'lucide-react';
 import { PageHeader } from '#/components/cms/shared';
 import { GalleryScreen } from '#/components/gallery/gallery-screen';
+import { cmsRoutePriming, primeCmsQueries } from '#/lib/cms-queries';
 
 export const Route = createFileRoute('/_shell/gallery')({
   head: () => ({ meta: [{ title: 'Gallery | Sevendays Admin' }] }),
+  // M8 #288: hover-intent priming — the photos + categories reads
+  // (fire-and-forget, never blocks).
+  loader: ({ context: { queryClient } }) => {
+    primeCmsQueries(cmsRoutePriming.gallery(queryClient));
+  },
   component: GalleryPage,
 });
 

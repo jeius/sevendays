@@ -5,9 +5,15 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { PageHeader } from '#/components/cms/shared';
 import { LookupsScreen } from '#/components/lookups/lookups-screen';
+import { cmsRoutePriming, primeCmsQueries } from '#/lib/cms-queries';
 
 export const Route = createFileRoute('/_shell/lookups')({
   head: () => ({ meta: [{ title: 'Lookups | Sevendays Admin' }] }),
+  // M8 #288: hover-intent priming — both lookup lists
+  // (fire-and-forget, never blocks).
+  loader: ({ context: { queryClient } }) => {
+    primeCmsQueries(cmsRoutePriming.lookups(queryClient));
+  },
   component: LookupsPage,
 });
 
