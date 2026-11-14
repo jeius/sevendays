@@ -10,7 +10,7 @@ Sevendays is a photography studio with 3 branches. The company previously only a
 ## Users
 
 - **Customers** — browse packages/services, pick a branch, book an appointment. No account required for v1 (booking is a guest flow).
-- **Admin/staff** — log in to the admin dashboard to manage appointments and edit site content. No distinction between roles in v1 (see "Future" below).
+- **Admin/staff** — log in to the admin dashboard to manage appointments and edit site content. No distinction between roles in v1 (see "Future" below). _(Annotated 2026-11-14: ADR-0018, 2026-09-24, later split staff into owner + staff — user management is owner-only (the Users tab, M7 #221), content surfaces stay all-staff; the original line stands as the pre-M4 record.)_
 
 ## V1 Scope (must-have)
 
@@ -54,7 +54,7 @@ These are **not** built in v1, but the admin data model and permissions should n
 
 - Walk-in queue/tracking per branch (distinct from scheduled appointments).
 - Staff/photographer-level scheduling (assigning a specific photographer to a booking).
-- Per-branch admin roles (today: any authenticated admin can see/edit everything).
+- Per-branch admin roles (today: any authenticated admin can see/edit everything). _(Annotated 2026-11-14: superseded in part by ADR-0018's owner/staff split — "any authenticated admin" is the pre-M4 record; per-branch roles remain future.)_
 - Customer accounts / booking history / rescheduling by the customer themselves.
 - SMS notifications (only email via Resend in v1).
 
