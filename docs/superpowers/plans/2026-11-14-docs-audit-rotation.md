@@ -207,7 +207,7 @@ Six edits, each pinned old→new, each matching exactly once.
   NEW: - **PostHog** — the landing provider captures pageviews + web vitals (M6 #187, feeding the admin Analytics Dashboard's Traffic half via HogQL); the admin's provider stays off by ruling. Booking-funnel events remain v2 payload.
   ```
 
-- [ ] **Step 7: verify** — `grep -n "Not yet wired\|0000–0004\|commented out until\|needs its own Sentry\|scaffolded" docs/tech-stack.md` returns zero hits. **Do NOT touch the `## Email` section** (the Resend booking-confirmation paragraph is booking-cluster prose; the booking-token guard in Global Constraints checks it).
+- [ ] **Step 7: verify** — `grep -n "Not yet wired\|0000–0004\|commented out until\|needs its own Sentry\|scaffolded" docs/tech-stack.md` returns zero hits **for the five stale usages; one legitimate survivor stays**: the TanStack Start bullet's "Scaffolded with the official `@tanstack/cli create` tool" (current-accurate prose, not a stale status claim — ruled 2026-11-14 when the executor's run flagged it). **Do NOT touch the `## Email` section** (the Resend booking-confirmation paragraph is booking-cluster prose; the booking-token guard in Global Constraints checks it).
 
 ---
 
