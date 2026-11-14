@@ -234,6 +234,11 @@
 
 ### Task 5: the before/after access-log comparison (HITL — the owner walks, the agent drives the tail)
 
+> **Execution corrections (2026-11-14, found at run time on #285 — these override the steps below; #289's exit-gate re-run MUST use the corrected form):**
+> 1. `wrangler tail` in wrangler 4.127.1 **rejects `--name`** (`Unknown argument`, probed) — run the capture bare from `apps/api`, where the config supplies the name: `cd apps/api && timeout 600 pnpm exec wrangler tail --format json > <capture>` (no `--filter` wrapper needed either; run from the package dir).
+> 2. The tail stream arrives **pretty-printed multi-line JSON, not JSONL** — parse it with a brace-split parser (track depth, collect top-level `{…}` objects; #280's method), not line-by-line `json.loads`.
+> 3. `logs[].message` is a **LIST of strings** (one console call per element), not a scalar — iterate the list; each element is a pino JSON string (`"evt":"access"` rides inside one of them).
+
 **Files:** none on disk (scratch under `/tmp/m8-after-walk/`; evidence lands on #285).
 
 - [ ] **Step 1: schedule the walk with the owner** — send this ask and wait (never assume while the owner may be AFK):
