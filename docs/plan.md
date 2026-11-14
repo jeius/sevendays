@@ -6,7 +6,7 @@ Phased so each milestone ends in something demoable and independently verifiable
 
 Delivery is versioned. **v1 is the free handover**: a booking-free artifact — landing site + admin auth + CMS + the v1 production slice — handed over whole (repo + accounts) exactly once, after the polish milestones land; post-handover work is paid-only. **v2 is the complete booking system**, delivered as new work after agreement and payment: the M2 booking build (complete on main) re-lands on the client's repo as a fresh change-set, together with the appointments dashboard, availability, and booking-specific hardening. Full ruling record: `docs/specs/2026-09-11-delivery-versions-spec.md` (GitHub issue #76); artifact mechanism: ADR-0015.
 
-- **v1 sequence:** v1 artifact seed (next section) → Milestone 3 (UI/UX design system) → Milestone 4 (admin auth) → Milestone 5 (CMS) → Milestone 6 (v1 production slice) → Milestone 7 (Experience & CMS Maturation) → Milestone 8 (Handover). _(Amended 2026-10-02 when Experience & CMS Maturation seated as M7; Handover shifted to M8 — one bounded renumber.)_
+- **v1 sequence:** v1 artifact seed (next section) → Milestone 3 (UI/UX design system) → Milestone 4 (admin auth) → Milestone 5 (CMS) → Milestone 6 (v1 production slice) → Milestone 7 (Experience & CMS Maturation) → Milestone 8 (Admin-CMS Latency) → Milestone 9 (Handover). _(Amended 2026-10-02 when Experience & CMS Maturation seated as M7; Handover shifted to M8 — one bounded renumber. Amended again 2026-11-14 when Admin-CMS Latency seated as M8 per its spec, #284; Handover shifted to M9 — the third bounded renumber.)_
 - **v2:** uncommissioned — its content is collected under "v2 — The Complete Booking System" below; charted when v2 is commissioned. The offer that commissions it is the money-free offer sheet (spec § The v2 Offer Sheet).
 
 ## Milestone 0 — Baseline (complete — exit criteria verified 2026-08-30)
@@ -180,9 +180,21 @@ Written 2026-10-02 at charter per its spec (`docs/specs/2026-10-02-m7-experience
 
 **Exit criteria:** the redesigned landing is owner-accepted on both editions in both themes with photography leading every surface; the CMS meets its interaction system (pending states, guarded deletion, submissions moderation, the retired-row filter); Settings, unpriced items, and the public testimonial form work end to end on both editions; the reset email delivers from the verified domain.
 
-## Milestone 8 — Handover (v1 → the client)
+## Milestone 8 — Admin-CMS Latency (v1-track)
 
-_(Renumbered from Milestone 7 on 2026-10-02 when Experience & CMS Maturation seated as M7 — one bounded renumber; the redesign's owner acceptance is the last gate before this milestone.)_
+Seated 2026-11-14 per its spec (`docs/specs/2026-11-14-m8-admin-cms-latency-spec.md`, GitHub issue #284) — the output of the admin-CMS latency wayfinder map (#279, closed with tickets #280–#284): the baseline walk measured every admin read at 2.5–5.0 s wall with cpuTime of only 14–39 ms (~99% I/O wait), warm refetches as slow as cold, and the owner ratified the Warm/Cold Navigation contract plus four levers. Handover renumbered M8 → M9 — the third bounded renumber; the delivery-versions rule holds that v1 hands over only once the polish milestones land, and the ratified exit gate is the polish bar the admin hands over at. Execution tickets #285–#289 (native blocking: #285/#286/#287/#288 all start immediately in any order; #289 behind all four).
+
+- [ ] Region placement of the api worker — the SIN region hint, CI-deployed, live-verified via `cf-placement` + a before/after access-log comparison against the #280 baseline; ADR-0026 (#285)
+- [ ] Session-verify amortization, both halves — admin cookieCache at the ruled 60 s + the api's token-hash read-through cache (the read-cache seam, null store under vitest); the ≤60 s revocation bound ruled; ADR-0027 (#286)
+- [ ] Versioned immutable gallery thumbnails — `?v=<updatedAt>` URLs, private/immutable proxy headers, structural re-upload invalidation; the #136 no-cache ruling superseded (#287)
+- [ ] The client Warm/Cold contract — 5-minute staleness on the shared CMS query factories + loader-time intent priming; own-mutation invalidation preserved (#288)
+- [ ] Exit gate: re-run the #280 baseline walk — per-route cold medians against the ratified target (cold median ≤ 1 s; warm zero-wait; warm grid zero requests); the milestone-close ritual (#289)
+
+**Exit criteria:** the exit-gate walk meets the ratified target on the production admin — cold median ≤ 1 s per admin read, Warm Navigation at zero network wait, the warm gallery grid at zero thumbnail requests; all four lever tickets verified on a deployed environment.
+
+## Milestone 9 — Handover (v1 → the client)
+
+_(Renumbered from Milestone 7 on 2026-10-02 when Experience & CMS Maturation seated as M7, and from Milestone 8 again on 2026-11-14 when Admin-CMS Latency seated as M8 per its spec (#284) — the third bounded renumber; the latency exit gate joins the redesign's owner acceptance as the last gates before this milestone.)_
 
 The full handover: repo + accounts, exactly once, after polish (#62 ruling 3). Model: **inherit-in-place** on the ship-time-dedicated accounts — the client is invited into what already runs; nothing rebuilds. The client's entire duty is clickable; the owner operates v1 for its life. Drafted from the delivery-versions spec § Handover Mechanics + § The Artifact Mechanism (ADR-0015).
 
