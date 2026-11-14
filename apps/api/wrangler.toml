@@ -5,6 +5,15 @@ main = "src/worker.ts"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
+# M8 #285 (ADR-0026): region placement — the api worker executes in the DB's
+# metro (Supabase ap-southeast-1, Singapore) instead of the visitor's colo.
+# Region mode (targeted), NOT smart mode: smart only considers colos the
+# worker has already run at (MNL/CEB + the CI-runner colos — SIN is not among
+# them, and admin-only volume would starve its analyzer). The frontends stay
+# at the edge; the service-binding hop forwards to this worker (ADR-0016).
+[placement]
+region = "aws:ap-southeast-1"
+
 # Media pipeline (ADR-0019, M5 ticket 02): the sevendays-media bucket and the
 # Images binding. The bucket itself is provisioned once (controller/owner —
 # docs/media-bucket-runbook.md); a missing bucket fails `wrangler deploy`.
