@@ -1,5 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { session as sessionTable } from '@sevendays/db';
+import { eq } from 'drizzle-orm';
+import { Hono } from 'hono';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { acquireDb } from '../src/routes/v1.js';
 import type { SessionData } from '../src/services/auth.js';
+import { requireSession } from '../src/services/auth.js';
+import type { ApiEnv } from '../src/services/db.js';
 import {
   getSessionCacheStore,
   presentedBearerToken,
@@ -11,7 +17,10 @@ import {
   setSessionCacheStore,
   toSessionCacheEntry,
 } from '../src/services/session-cache.js';
-import { TEST_AUTH_SECRET } from './helpers/env.js';
+import { signOutSession, signUpSession } from './helpers/auth.js';
+import { createTestDb } from './helpers/db.js';
+import { TEST_AUTH_SECRET, testEnv } from './helpers/env.js';
+import { truncateAll } from './helpers/truncate.js';
 
 // NOTE (import staging): the header carries ONLY what the unit block uses —
 // (kept honest by Biome's noUnusedVariables, not a tsconfig gate). Task 3's integration describe adds its imports as
@@ -68,6 +77,18 @@ function sessionFixture(overrides?: { expiresAt?: Date }) {
     },
   } as SessionData;
 }
+
+// The scratch app (the require-session.test.ts posture): acquireDb +
+// requireSession + a probe route — the gate is route-independent; the
+// file stays free of booking-path strings (the v1-pick note above).
+const scratch = new Hono<ApiEnv>()
+  .use('*', acquireDb)
+  .get('/protected', requireSession, (c) => c.json({ userId: c.get('session')?.user.id ?? null }));
+
+const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
+
+const url = process.env.TEST_DATABASE_URL as string;
+const db = createTestDb(url);
 
 const presented = 'presented.token.value';
 
@@ -128,5 +149,95 @@ describe('the session-cache seam (unit)', () => {
     expect(presentedBearerToken(undefined)).toBeNull();
     expect(presentedBearerToken('Basic dXNlcjpwYXNz')).toBeNull();
     expect(presentedBearerToken('Bearer')).toBeNull();
+  });
+});
+
+describe('requireSession with the session cache (scratch app, real Postgres)', () => {
+  let store: ReturnType<typeof fakeStore>;
+
+  beforeEach(async () => {
+    await truncateAll(db);
+    store = fakeStore();
+    setSessionCacheStore(store);
+  });
+
+  afterEach(() => {
+    resetSessionCacheStore();
+  });
+
+  it('a miss verifies through BetterAuth and back-fills the store', async () => {
+    const { token, userId } = await signUpSession(url, 'cache-miss@sevendays.test');
+    expect(store.keys()).toEqual([]);
+    const res = await scratch.request('/protected', { headers: bearer(token) }, testEnv(url));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ userId });
+    expect(store.keys()).toEqual([await sessionCacheKey(TEST_AUTH_SECRET, token)]);
+  });
+
+  it('a hit serves without the database — even a revoked row passes within the TTL (the ruled pin)', async () => {
+    const { token, userId } = await signUpSession(url, 'cache-hit@sevendays.test');
+    expect(
+      (await scratch.request('/protected', { headers: bearer(token) }, testEnv(url))).status
+    ).toBe(200);
+    expect(store.keys()).toHaveLength(1);
+    await signOutSession(url, token); // the row is deleted — a fresh verification would 401
+    const res = await scratch.request('/protected', { headers: bearer(token) }, testEnv(url));
+    expect(res.status).toBe(200); // the cached hit answers — the ruled ≤60 s trade, deliberate
+    expect((await res.json()) as { userId?: string }).toEqual({ userId });
+    expect(store.keys()).toHaveLength(1); // no second verification — the hit never re-verified
+  });
+
+  it('401 outcomes never cache — garbage tokens leave the store empty', async () => {
+    const res = await scratch.request(
+      '/protected',
+      { headers: bearer('not-a-real-token') },
+      testEnv(url)
+    );
+    expect(res.status).toBe(401);
+    expect(store.keys()).toEqual([]);
+  });
+
+  it('the 401 envelope is byte-identical with the cache in the path', async () => {
+    const { token } = await signUpSession(url, 'cache-envelope@sevendays.test');
+    await signOutSession(url, token); // revoked BEFORE any request — verification runs, caches nothing
+    const res = await scratch.request('/protected', { headers: bearer(token) }, testEnv(url));
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: 'Authentication required.' });
+    expect(store.keys()).toEqual([]);
+  });
+
+  it('the expiry guard rejects a stale entry — a hit is never more permissive than verification', async () => {
+    const { token } = await signUpSession(url, 'cache-stale@sevendays.test');
+    const key = await sessionCacheKey(TEST_AUTH_SECRET, token);
+    // Seed an entry whose embedded expiresAt is already past (hand-built:
+    // the gate's own back-fill only ever writes verified, unexpired sessions).
+    await store.put(
+      key,
+      new Response(JSON.stringify(sessionFixture({ expiresAt: new Date(Date.now() - 1000) })), {
+        headers: { 'cache-control': `public, max-age=${SESSION_CACHE_TTL_SECONDS}` },
+      })
+    );
+    // The row is expired too (the require-session.test.ts method: expires_at
+    // moved to the past; the stored row carries the BARE token) — a fresh
+    // verification would also 401.
+    await db
+      .update(sessionTable)
+      .set({ expiresAt: new Date(Date.now() - 60 * 60 * 1000) })
+      .where(eq(sessionTable.token, token.split('.')[0] ?? ''));
+    const res = await scratch.request('/protected', { headers: bearer(token) }, testEnv(url));
+    expect(res.status).toBe(401);
+    expect(store.keys()).toEqual([key]); // the stale entry was never served, and no fresh entry overwrote it (401s never cache)
+  });
+
+  it('with no store (the Node/vitest default), the gate stays uncached — revocation is immediate', async () => {
+    resetSessionCacheStore();
+    const { token } = await signUpSession(url, 'cache-null@sevendays.test');
+    expect(
+      (await scratch.request('/protected', { headers: bearer(token) }, testEnv(url))).status
+    ).toBe(200);
+    await signOutSession(url, token);
+    expect(
+      (await scratch.request('/protected', { headers: bearer(token) }, testEnv(url))).status
+    ).toBe(401);
   });
 });
