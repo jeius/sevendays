@@ -7,6 +7,8 @@ password-reset path. There is no email flow — resets are owner-operated by
 design (the #75 handover model: the owner operates v1's machinery for its
 life).
 
+> **Annotated 2026-11-14:** the self-serve forgot-password flow and the owner-only Users tab went live 2026-10-19 (#221) — routine user creation and password resets no longer require this CLI. This runbook remains the accurate record for the bootstrap/break-glass path it now is (first owner, lockout recovery, owner-side resets); its formal demotion to bootstrap + break-glass rides #222 (owner-ruled hold, 2026-11-05).
+
 ## Creating a staff user
 
 Prerequisites (the dev machine already has these; a fresh clone needs all):

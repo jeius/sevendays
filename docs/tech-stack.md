@@ -17,12 +17,12 @@
 
 - **Hono** — HTTP router/framework, deployed as a Cloudflare Worker (`wrangler.toml`).
 - **Zod v4** (^4.5.1) — request validation via `@hono/zod-validator`, using shared schemas from `packages/types`.
-- **Loglayer + Pino** — structured logging. *Not yet wired in* — the API currently uses Hono's built-in `logger()` middleware as a placeholder. Swap this in when logging requirements firm up.
+- **Loglayer + Pino** — structured logging, **live since M6 (#183)**: five PII-free event classes into Workers Logs (3-day retention), a per-request `requestId` echoed as `X-Request-Id`; `wrangler tail` is the live viewer.
 
 ## Data Layer
 
 - **PostgreSQL** — via Supabase (or another Postgres-compatible free tier — Neon is a reasonable alternative). (Supabase project provisioned; M1.3 applied migration 0000 and seeded the catalog).
-- **Drizzle ORM** (^0.45) — schema and query builder, lives in `packages/db`. Schema is written; migrations 0000–0004 are applied to the live database and the catalog is seeded (0002–0004 are the M2 wave: studio services, applicability junctions, and the generalized offering model) — see docs/progress.md.
+- **Drizzle ORM** (^0.45) — schema and query builder, lives in `packages/db`. Migrations 0000–0014 are applied to the live database; the catalog is seeded and CMS-owned since M5 (the seed is bootstrap/dev-only — `packages/db/README.md`).
 
 ### Provisioning Postgres (done 2026-08-31 — record of how it was done)
 
@@ -41,16 +41,16 @@ Deploys are branch-keyed GitHub Actions (`.github/workflows/ci.yml`), gated on C
 
 ## Auth
 
-- **BetterAuth 1.7.5** (`better-auth@^1.7.5`, integrated 2026-09-23 — Milestone 4) — `apps/admin` is the auth server: email+password staff login at `/login` with self-serve sign-up disabled; users are provisioned and reset by the owner CLI (`pnpm --filter @sevendays/admin create-staff`); routes mount at `/api/auth/*` with per-request instances over `@sevendays/db` (ADR-0011). `apps/api` runs a verification-only instance (the `bearer` plugin) over the same tables — `requireSession` verifies `Authorization: Bearer` tokens and returns the uniform 401 envelope (ADR-0004); one `BETTER_AUTH_SECRET` is shared across both apps' Workers. The auth tables (user/session/account/verification + rate limit) live in `packages/db/src/schema/auth.ts`, migration 0005.
+- **BetterAuth 1.7.5** (`better-auth@^1.7.5`, integrated 2026-09-23 — Milestone 4) — `apps/admin` is the auth server: email+password staff login at `/login` with self-serve sign-up disabled; users are provisioned through the owner-only Users tab (M7 #221) and password resets are self-serve (forgot-password over the API service binding per ADR-0021); the owner CLI (`pnpm --filter @sevendays/admin create-staff`, runbook `docs/staff-provisioning.md`) remains the bootstrap/break-glass path until #222's demotion; routes mount at `/api/auth/*` with per-request instances over `@sevendays/db` (ADR-0011). `apps/api` runs a verification-only instance (the `bearer` plugin) over the same tables — `requireSession` verifies `Authorization: Bearer` tokens and returns the uniform 401 envelope (ADR-0004); one `BETTER_AUTH_SECRET` is shared across both apps' Workers. The auth tables (user/session/account/verification + rate limit) live in `packages/db/src/schema/auth.ts`, migration 0005.
 
 ## Storage
 
-- **Cloudflare R2** — object storage for portfolio and package images, referenced via a Workers binding in `apps/api/wrangler.toml` (commented out until the bucket is created: `wrangler r2 bucket create sevendays-media`).
+- **Cloudflare R2** — object storage, live: the `sevendays-media` bucket is provisioned and `apps/api/wrangler.toml` carries the `MEDIA_BUCKET` + `IMAGES` bindings (M5; ADR-0019 — presigned direct upload, verify/promote commit, keys in the DB, URLs resolved at read time). Runbook: `docs/media-bucket-runbook.md`.
 
 ## Observability
 
-- **Sentry** — error monitoring, scaffolded into `apps/landing` and `apps/admin` via the TanStack CLI add-on. `apps/api` needs its own Sentry Workers SDK setup separately.
-- **PostHog** — product analytics, scaffolded into `apps/landing` and `apps/admin` via the TanStack CLI add-on.
+- **Sentry** — live on all three apps under one "sevendays" project (M6 #184): the api via `@sentry/cloudflare` (`withSentry` at `src/worker.ts`), the frontends errors-only via `src/instrument.ts`; errors-only everywhere since #263 (`release` = the deployed git SHA via CI).
+- **PostHog** — the landing provider captures pageviews + web vitals (M6 #187, feeding the admin Analytics Dashboard's Traffic half via HogQL); the admin's provider stays off by ruling.
 
 ## Validation
 

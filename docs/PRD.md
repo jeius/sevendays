@@ -10,7 +10,7 @@ Sevendays is a photography studio with 3 branches. The company previously only a
 ## Users
 
 - **Customers** — browse packages/services and find their nearest branch (phone or walk-in). No accounts on the public site.
-- **Admin/staff** — log in to the admin dashboard to edit site content. No distinction between roles today (see "Future" below).
+- **Admin/staff** — log in to the admin dashboard to edit site content. No distinction between roles today (see "Future" below). _(Annotated 2026-11-14: ADR-0018, 2026-09-24, later split staff into owner + staff — user management is owner-only (the Users tab, M7 #221), content surfaces stay all-staff; the original line stands as the pre-M4 record.)_
 
 ## V1 Scope (must-have)
 
@@ -46,7 +46,7 @@ These are **not** built in v1, but the admin data model and permissions should n
 
 - Walk-in queue/tracking per branch.
 - Staff/photographer-level scheduling (assigning a specific photographer to a shoot).
-- Per-branch admin roles (today: any authenticated admin can see/edit everything).
+- Per-branch admin roles (today: any authenticated admin can see/edit everything). _(Annotated 2026-11-14: superseded in part by ADR-0018's owner/staff split — "any authenticated admin" is the pre-M4 record; per-branch roles remain future.)_
 - Customer accounts.
 - SMS notifications.
 
