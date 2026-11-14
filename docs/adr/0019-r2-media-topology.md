@@ -40,3 +40,18 @@ M5's CMS makes the studio's photographs first-class: package cover photos and a 
   additionally accepts `image/png` end to end (presign pair-check schema, staging-key
   regex, commit gate, `.png` final keys under `brand/`); package-cover,
   branch-cover, and gallery-photo remain JPG-only per the #170 ruling.
+- **2026-11-14 (#287, M8):** the #136-era no-cache posture on the admin
+  thumbnail proxy is superseded — the proxy answers 2xx with
+  `Cache-Control: private, max-age=31536000, immutable` and `no-store` on
+  every error arm, and the admin grid + editor preview request thumbs
+  through versioned URLs (`?v=<updatedAt epoch ms>`, built by
+  `apps/admin/src/lib/gallery-thumbs.ts` — the field already rides the
+  admin wire). Caching is BROWSER-ONLY: `private` keeps session-gated
+  thumbs out of every shared cache, and this response never touches the
+  Workers Cache API (the ADR-0025/#286 public-container rule governs
+  Cache API puts — a different mechanism). Invalidation stays structural
+  per this ADR's replace flow: fresh key + timestamp bump in one
+  transaction, the old object deleted post-commit, so an old URL can
+  never be re-derived and 404s at origin. A metadata-only save also
+  bumps the timestamp — one thumb refetch per edit is the designed
+  trade (timestamp versioning, not content hashing).
