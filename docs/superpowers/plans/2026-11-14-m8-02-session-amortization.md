@@ -62,7 +62,7 @@
 - `export const SESSION_CACHE_TTL_SECONDS = 60` — the owner-ruled bound.
 - `export const SESSION_CACHE_KEY_ORIGIN = 'https://session-cache.sevendays.internal'` — the synthetic origin the default store builds its Request URLs on (the read-cache posture).
 - `export async function sessionCacheKey(secret: string, presentedToken: string): Promise<string>` — `sha256(sha256(secret) + ':' + presented)` hex; async via `crypto.subtle`.
-- `export function toSessionCacheEntry(session: SessionData): Response` — the JSON container with `cache-control: private, max-age=60` (private: per-user data; the TTL directive is what the Cache API honors at put).
+- `export function toSessionCacheEntry(session: SessionData): Response` — the JSON container with `cache-control: public, max-age=60` (PUBLIC, not private: the Cache API is a shared cache and a `private` directive makes the entry unstashable — put throws, the best-effort catch swallows, nothing ever caches; per-user isolation comes from the token-hash key, and the container is Worker-internal colo storage never served to a client).
 - `export async function sessionFromCacheEntry(entry: Response): Promise<SessionData | null>` — the hit projection: parse, expiry guard, Date revival; null on anything off; never throws.
 - `export function presentedBearerToken(header: string | undefined): string | null` — the cache-key input, extracted exactly once per request.
 - `export function getSessionCacheStore(): SessionCacheStore | null` / `setSessionCacheStore(store)` / `resetSessionCacheStore()` — the registry posture (override wins; default is `caches.default` under workerd, null under plain Node/vitest).
@@ -88,7 +88,7 @@ import {
 import { TEST_AUTH_SECRET } from './helpers/env.js';
 
 // NOTE (import staging): the header carries ONLY what the unit block uses —
-// noUnusedLocals is a gate. Task 3's integration describe adds its imports as
+// (kept honest by Biome's noUnusedVariables, not a tsconfig gate). Task 3's integration describe adds its imports as
 // it lands (db, helpers, the scratch app). Deliberately free of booking-path
 // strings so the v1 pick carries this file (the audit-token discipline,
 // require-session.test.ts's note).
@@ -176,9 +176,9 @@ describe('the session-cache seam (unit)', () => {
     expect(SESSION_CACHE_TTL_SECONDS).toBe(60);
   });
 
-  it('toSessionCacheEntry stores a JSON container with the private 60 s directive', async () => {
+  it('toSessionCacheEntry stores a JSON container with the public 60 s directive', async () => {
     const entry = toSessionCacheEntry(sessionFixture());
-    expect(entry.headers.get('cache-control')).toBe(`private, max-age=${SESSION_CACHE_TTL_SECONDS}`);
+    expect(entry.headers.get('cache-control')).toBe(`public, max-age=${SESSION_CACHE_TTL_SECONDS}`);
     const parsed = (await entry.json()) as { session: { id: string }; user: { id: string } };
     expect(parsed.session.id).toBe('sess-1');
     expect(parsed.user.id).toBe('user-1');
@@ -253,11 +253,16 @@ export const SESSION_CACHE_TTL_SECONDS = 60;
 export const SESSION_CACHE_KEY_ORIGIN = 'https://session-cache.sevendays.internal';
 
 // The stored container: the verified session as JSON under a storage
-// freshness directive the Cache API honors at put() (private — per-user
-// data; the TTL is the revocation bound).
+// freshness directive the Cache API honors at put() — PUBLIC, because the
+// Cache API is a shared cache and a `private` directive makes the entry
+// unstashable (put throws 413, the best-effort catch swallows, nothing
+// ever caches). Per-user isolation comes from the token-hash key, not the
+// directive: the container is Worker-internal colo storage and is never
+// served to a client — the hit path parses the body server-side. The TTL
+// is the revocation bound.
 export function toSessionCacheEntry(session: SessionData): Response {
   return new Response(JSON.stringify(session), {
-    headers: { 'cache-control': `private, max-age=${SESSION_CACHE_TTL_SECONDS}` },
+    headers: { 'cache-control': `public, max-age=${SESSION_CACHE_TTL_SECONDS}` },
   });
 }
 
@@ -503,7 +508,7 @@ describe('requireSession with the session cache (scratch app, real Postgres)', (
     await store.put(
       key,
       new Response(JSON.stringify(sessionFixture({ expiresAt: new Date(Date.now() - 1000) })), {
-        headers: { 'cache-control': `private, max-age=${SESSION_CACHE_TTL_SECONDS}` },
+        headers: { 'cache-control': `public, max-age=${SESSION_CACHE_TTL_SECONDS}` },
       })
     );
     // The row is expired too (the require-session.test.ts method: expires_at
@@ -772,7 +777,7 @@ The M8 spec (`docs/specs/2026-11-14-m8-admin-cms-latency-spec.md`, ratified 2026
 
    The library's 300 s default is deliberately overridden to the ruled bound (better-auth 1.7.5: `options.session?.cookieCache?.maxAge || 300`; docs: [Session caching](https://www.better-auth.com/docs/concepts/session-management#session-caching)). The cache rides the compact strategy (the 1.7.5 default): the `better-auth.session_data` cookie is an HMAC-SHA256-signed payload over the shared secret, written by the sign-in flow (`setSessionCookie` → `setCookieCache`), and `decodeCookieCache` verifies the signature before any serve — a forged or absent cookie is indistinguishable and degrades to the DB path. Inside the window, `getSession` — the shell gate's check and every gated server fn — answers from the cookie with zero database I/O. The known failure mode (the cookie adapter silently not setting `session_data`) degrades to today's per-navigation DB read — performance-only, never correctness — and is verified operationally: **the cookie must be observed landing from the sign-in flow on a deployed environment** (evidence on #286; the config pin test locks the shape in the suite).
 
-2. **API half — the token-hash session cache beside the read cache (ADR-0025)** (`apps/api/src/services/session-cache.ts`, consulted by `requireSession` before any verification work): a read-through cache over the Workers Cache API — free, per-colo, TTL-evicted — keyed **SHA-256 over a secret fingerprint (itself a SHA-256 of the shared `BETTER_AUTH_SECRET`) plus the presented bearer value**. Neither the secret nor the token ever appears in a key or a log; the inner digest is fixed-length hex, so the outer hash has no length-extension surface. A **hit re-checks the cached session's `expiresAt` before serving** — a hit is never more permissive than a fresh verification; a **miss verifies exactly as today** (the bearer plugin strips/verifies the signature, then the session read — ADR-0004 unchanged) and **back-fills on success**; **401 outcomes are never cached**. The stored container is the verified `{ session, user }` as JSON under `cache-control: private, max-age=60` (the TTL directive is the Cache API's storage bound and the revocation bound in one). The Date columns the adapter returns are revived on hit, so the cached identity satisfies the same `SessionData` shape a fresh verification produces — the gate's consumers (audit actor snapshots, access-log actorId) read ids/emails only. The store **clones the read-cache seam** (ADR-0025): an injectable registry whose default is `caches.default` under workerd and **null under plain Node/vitest** — every existing suite runs uncached with the null store, the floors hold by construction — with one deliberate difference: **no `evict`**. Cache I/O is best-effort throughout; a cache failure degrades to uncached verification and never fails a request. A hit also skips constructing the per-request verification instance entirely (the per-request db client `acquireDb` placed earlier composes — its client connects lazily, so the hit still costs zero DB I/O).
+2. **API half — the token-hash session cache beside the read cache (ADR-0025)** (`apps/api/src/services/session-cache.ts`, consulted by `requireSession` before any verification work): a read-through cache over the Workers Cache API — free, per-colo, TTL-evicted — keyed **SHA-256 over a secret fingerprint (itself a SHA-256 of the shared `BETTER_AUTH_SECRET`) plus the presented bearer value**. Neither the secret nor the token ever appears in a key or a log; the inner digest is fixed-length hex, so the outer hash has no length-extension surface. A **hit re-checks the cached session's `expiresAt` before serving** — a hit is never more permissive than a fresh verification; a **miss verifies exactly as today** (the bearer plugin strips/verifies the signature, then the session read — ADR-0004 unchanged) and **back-fills on success**; **401 outcomes are never cached**. The stored container is the verified `{ session, user }` as JSON under `cache-control: public, max-age=60` — public, not private, because the Cache API is a shared cache and a `private` directive makes the entry unstashable (put throws, the best-effort catch swallows, nothing ever caches); per-user isolation comes from the token-hash key, and the container is Worker-internal colo storage never served to a client (the hit path parses the body server-side). The TTL is both the Cache API's storage bound and the revocation bound; the container carries the verified identity's own row fields — the presented signed value itself never enters storage. The Date columns the adapter returns are revived on hit, so the cached identity satisfies the same `SessionData` shape a fresh verification produces — the gate's consumers (audit actor snapshots, access-log actorId) read ids/emails only. The store **clones the read-cache seam** (ADR-0025): an injectable registry whose default is `caches.default` under workerd and **null under plain Node/vitest** — every existing suite runs uncached with the null store, the floors hold by construction — with one deliberate difference: **no `evict`**. Cache I/O is best-effort throughout; a cache failure degrades to uncached verification and never fails a request. A hit also skips constructing the per-request verification instance entirely (the per-request db client `acquireDb` placed earlier composes — its client connects lazily, so the hit still costs zero DB I/O).
 
 3. **Revocation is TTL-only by design (owner-ruled):** every revocation path — sign-out, ban, user removal, session revoke, password reset (`revokeSessionsOnPasswordReset` is already on) — deletes the session row on the admin's auth server; none executes inside the api, so **no cross-app eviction hook exists**. Bound: a revoked or expired session may pass either gate for **≤60 s per colo**; with the api SIN-placed (#285, ADR-0026) the api's cache warms in a single colo, so the api bound is simply ≤60 s. The signing-out browser itself is immediate (cookies cleared — sign-out is a browser-local act on the admin). The **revoked-row-passes-within-TTL contract is pinned deliberately** in `apps/api/test/session-cache.test.ts` so the trade is visible in the suite, not folklore. A `BETTER_AUTH_SECRET` rotation changes every key; old entries age out via the TTL — no migration. This **discharges the M4 spec's "measure before adding machinery" deferral** against the #280 baseline.
 
