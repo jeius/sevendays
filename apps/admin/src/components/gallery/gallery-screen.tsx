@@ -574,7 +574,7 @@ function UploadTray({
  * transforms from real rects). One create affordance at the end.
  *
  * The mobile posture (owner-ruled 2026-11-15, #294 round 2 — no horizontal
- * scrolling): below lg the card is a collapsible disclosure, EXPANDED by
+ * scrolling): below md (<768px) the card is a collapsible disclosure, EXPANDED by
  * default — a summary row (Categories · the current filter + a chevron)
  * collapses/reopens the same vertical list the desktop rail renders;
  * picking a filter collapses it, and management actions
@@ -736,9 +736,10 @@ function CategoryRail({
       {/* The card must STRETCH below lg (#294): a fit-content width here let
           the nowrap entries + the mobile-visible mini-actions push the card
           past the viewport — the page overflowed instead of the list
-          scrolling. Below lg the card is the collapsed disclosure (owner
-          ruling 2026-11-15 — no horizontal scrolling); above lg the fixed
-          lg:w-[220px] column governs, no disclosure. */}
+          scrolling. Below md (<768px) the card is the collapsible disclosure
+          (expanded by default — owner ruling 2026-11-15: no horizontal
+          scrolling); the 768–1023 band renders the plain full-width vertical
+          rail; above lg the fixed lg:w-[220px] column governs, no disclosure. */}
       {isMobile ? (
         <Collapsible open={railOpen} onOpenChange={setRailOpen}>
           <CollapsibleTrigger
