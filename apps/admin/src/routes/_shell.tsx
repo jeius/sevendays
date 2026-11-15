@@ -28,11 +28,19 @@ export const Route = createFileRoute('/_shell')({
     };
   },
   // M7 #223 (the plan.md consumption box's "admin sidebar" clause): the
-  // shell ensures the settings read so the sidebar's brand renders
+  // shell primes the settings read so the sidebar's brand renders
   // server-side. Guarded — a failed read renders the default wordmark and
-  // never blocks the session gate.
+  // never blocks the session gate. M8 #289: ensureQueryData is removed in
+  // the next major of @tanstack/react-query 5.102.8, and its own JSDoc
+  // names query({ ...options, staleTime: 'static' }) as the replacement.
+  // 'static' reproduces the old posture (dist-proven, the #288 spike):
+  // missing cache → awaited fetch; present cache → serve it, zero
+  // requests — invalidated or not (the old ensureQueryData served it
+  // too: behavior-neutral).
   loader: async ({ context: { queryClient } }) => {
-    await queryClient.ensureQueryData(siteSettingsQuery.all()).catch(() => undefined);
+    await queryClient
+      .query({ ...siteSettingsQuery.all(), staleTime: 'static' })
+      .catch(() => undefined);
   },
   component: ShellLayout,
 });
