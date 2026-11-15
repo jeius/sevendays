@@ -700,8 +700,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1794651324.0215864,
-    "ast_hash": "2b2bd1ae45ef64da741b027590c0c386",
+    "mtime": 1794715580.5808256,
+    "ast_hash": "e8f56f8a44fb38ab35794e608f30293a",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -830,13 +830,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1794651324.0523865,
-    "ast_hash": "dc487ea5d597406034a5cc13b8564b6f",
+    "mtime": 1794715580.5808256,
+    "ast_hash": "f53e51c8563ab9cca4d73ee73e4aaed1",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794697164.7675834,
-    "ast_hash": "4d2513d74db42e2f646fa2259ae3c654",
+    "mtime": 1794715580.5851958,
+    "ast_hash": "5869c3cedd40deb9c71cc5fa3951578a",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2865,8 +2865,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794665211.937441,
-    "ast_hash": "39fada71292696208b76a3ba3ec1f749",
+    "mtime": 1794699506.9635696,
+    "ast_hash": "702e183206127243ce0d3c3eb72db525",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -2995,8 +2995,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/routes/_shell.tsx": {
-    "mtime": 1792492748.1776943,
-    "ast_hash": "e7f0f87c2ecaf7899966b5d3a4eea5ce",
+    "mtime": 1794715580.5808256,
+    "ast_hash": "95308820fef414a7c8cc81bce51d0463",
     "semantic_hash": ""
   },
   "packages/ui/src/components/alert-dialog.tsx": {
@@ -5162,6 +5162,16 @@
   "docs/superpowers/plans/2026-11-15-m8-04-client-contract.md": {
     "mtime": 1794697164.7675834,
     "ast_hash": "0cf221e8b9660e96d0b543dc80981b01",
+    "semantic_hash": ""
+  },
+  "docs/adr/0024-hyperdrive-connection-caching.md": {
+    "mtime": 1794715580.5808256,
+    "ast_hash": "e6544e6d6b117fa9a4e21ccf7c8e45f1",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-15-m8-05-exit-gate.md": {
+    "mtime": 1794715580.5851958,
+    "ast_hash": "d3d3d4fadf8ba64853c283377afe9c8f",
     "semantic_hash": ""
   }
 }
