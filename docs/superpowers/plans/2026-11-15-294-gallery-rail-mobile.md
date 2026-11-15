@@ -66,7 +66,7 @@ The triage verdict was static (code-path analysis); this task proves it live bef
 - Consumes: the local dev stack posture (Global Constraints), `docs/staff-provisioning.md`'s local sign-in path.
 - Produces: the running stack + a signed-in session + 4 gallery categories, reused by Task 4's "after" walk; the pre-fix capture + the numeric overflow reading that Task 4's evidence comment quotes.
 
-- [ ] **Step 1: start the stack (both processes, the test-DB override on each)**
+- [ ] **Step 1: start the stack (the proven isolation channels)**
 
   ```bash
   # Terminal A — the local API (wrangler dev, :8787) over the env-scoped dev-vars
@@ -258,7 +258,7 @@ The stack, session, and categories from Task 2 are still live (same dev process 
 
   ## Known Gaps / Not Yet Done
   NEW:  deferred to #289's closeout). Admin-local only — the api is untouched.
-  - The admin **Gallery rail renders properly below `lg`** (2026-11-15, #294): the category/filter rail Card drops its `self-start` alignment — the only such usage in the admin app, masked above `lg` by the fixed 220px column — so below `lg` the card stretches to its container and the composition of record's horizontal scroll strip engages (the ported #141 posture): the `whitespace-nowrap` entries + the mobile-always-visible mini-actions can no longer push the card past the viewport, the strip's `overflow-x-auto` scrolls instead of the page, and the pending skeleton and loaded rail agree at every breakpoint. Verified by the rendered walk (375px / 900px / 1280px, both themes, before+after readings) + the owner's mobile confirm on the deployed teaser admin. Admin-local, one class token — no API, schema, package, or test changes.
+  - The admin **Gallery rail renders properly below `lg`** (2026-11-15, #294): the category/filter rail Card drops its `self-start` alignment — the only such usage in the admin app, masked above `lg` by the fixed 220px column — so below `lg` the card stretches to its container and the composition of record's horizontal scroll strip engages (the ported #141 posture): the `whitespace-nowrap` entries + the mobile-always-visible mini-actions can no longer push the card past the viewport, the strip's `overflow-x-auto` scrolls instead of the page, and the pending skeleton and loaded rail share the same full-width posture (observed agreeing at 375px and 1280px; structurally identical everywhere — the byte-identical class strings). Verified by the rendered walk: the before readings showed the escape (375px: page 1308px vs viewport 375px, rail card 1284px in a 327px column — light and dark) and the after readings came back green at 375px (both themes), 900px, and 1280px (byte-identical to the before baseline). Admin-local, one class token — no API, schema, package, or test changes. The closing check is the owner's mobile confirm on the deployed teaser admin (the HITL close).
 
   ## Known Gaps / Not Yet Done
   ```
