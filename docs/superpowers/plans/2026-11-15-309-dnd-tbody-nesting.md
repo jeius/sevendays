@@ -24,7 +24,7 @@
   - Anchor uniqueness for the edit: exactly one `TooltipProvider` pair (:542/:636), exactly one `@max-[700px]:hidden` Table (:543), and the only `DndContext` preceded by `<TableBody>` is the desktop one — the mobile one is preceded by a `<div`. Every edit below is content-anchored; a ≠1 match means drift — stop and reconcile.
   - Scope (grep `DndContext apps/admin/src`): three consumer files — testimonials-screen (the only table-based sortable; this plan), gallery-screen (rail + grid, div-based), package-editor (three list contexts, div-based). None of the latter five need or get changes.
   - The probe harness (`scripts/probe-cold-hydration.mjs`, the #307-preserved census tool, main `5a6e048`): walks CMS routes as fresh document loads, counts **race-class** hydration messages per route and the **DOM-nesting class** (`/cannot be a child of/`) separately; `PROBE_ROUTES` scopes the walk (comma list, default the eight parameterless CMS routes); `PROBE_BASE_URL` defaults `http://localhost:3000`; headless needs `ADMIN_EMAIL`/`ADMIN_PASSWORD` (supplied at invocation, never committed); it signs in through the real form (the #306 guard) and asserts the `[data-shell-main]` shell. Arms compare **boots** — the script's own header pins: restart the stack between arms.
-- **Local dev stack posture (the #294/#306-proven channels, reused verbatim):** the plan runs **fully isolated on the compose test DB** (`sevendays-test-db-5433`, migrations applied). **api** — `wrangler dev -e walk` over a gitignored `apps/api/.dev.vars.walk` (a `sed` copy of `.dev.vars` with `DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test`; deleted after — wrangler dev secrets outrank shell env AND `--var`). **admin** — a temporary, checksum-verified swap of the `DATABASE_URL` + `API_URL` lines in `apps/admin/.env.local` (`API_URL=http://localhost:8787`; the CF vite plugin resolves the worker's `process.env` from `.env.local`, shadowing shell env) — record `sha256sum apps/admin/.env.local` before, restore byte-for-byte after, verify the sha. **The local api (:8787) joins the stack.** **:3000 is serial-only** — the landing app is never started (it also pins :3000); both admin dev processes pin ws :9229. Isolation proof before any probe: `GET :8787/api/v1/testimonials` answers **200 JSON** — the row count is irrelevant to this fix (the Accessibility subtree renders post-mount with or without rows; that is the dnd-kit source's unconditional markup).
+- **Local dev stack posture (the #294/#306-proven channels, reused verbatim):** the plan runs **fully isolated on the compose test DB** (`sevendays-test-db-5433`, migrations applied). **api** — `wrangler dev -e walk` over a gitignored `apps/api/.dev.vars.walk` (a `sed` copy of `.dev.vars` with `DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test`; deleted after — wrangler dev secrets outrank shell env AND `--var`). **admin** — a temporary, checksum-verified swap of the `DATABASE_URL` + `API_URL` lines in `apps/admin/.env.local` (`API_URL=http://localhost:8787`; the CF vite plugin resolves the worker's `process.env` from `.env.local`, shadowing shell env) — record `sha256sum apps/admin/.env.local` before, restore byte-for-byte after, verify the sha. **The local api (:8787) joins the stack.** **:3000 is serial-only** — the landing app is never started (it also pins :3000); both admin dev processes pin ws :9229. Isolation proof before any probe: `GET :8787/api/v1/testimonials` answers **200 JSON** — and the table must be **POPULATED**. With zero rows the screen renders the ruled `<EmptyState>` (`testimonials-screen.tsx:530-534`) and the whole Table subtree (with the `TableBody`-nested `DndContext`) never mounts — no warning can fire. (AMENDMENT 1, controller-ruled at execution 2026-11-15: the plan originally claimed the row count irrelevant — falsified live when the first BEFORE arm read 0 nesting messages on an empty table; Task 2 Step 1b seeds one throwaway row through the supported path. The census run that caught the warning operated on a populated table.)
 - **Staff account (test DB 5433):** try the prior walks' accounts (`gallery-walk@local.test` from #294, `login-probe@local.test` from #306) — their interactive passwords were known only to those sessions, so if neither signs in, create a fresh throwaway per the documented path (the password is prompted interactively and never rides a flag): `TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test pnpm --filter @sevendays/admin create-staff --email dnd-walk@local.test --name 'Dnd Walk'`. Throwaway dev-DB rows only — nothing touches deployed environments.
 - **Zero visual delta law:** `DndContext` renders no wrapper element; the only DOM change permitted by this plan is the two hidden divs' parent (from `<tbody>` to the context's new position inside the Card body). The rendered pixels must not change; the probe's screenshot-free walk plus the e2e visual suite's continued landing-side green are the backstops.
 - **Deploy through CI only.** The push to main fires the `Deploy teaser (main)` run — both legs (`Deploy admin (sevendays-admin)`, `Deploy api (sevendays-api)`) must go green. **Never run any local bare `wrangler deploy`** (the #263/#264 lesson — it wipes the CI-passed `--var`s; the only restore is `gh run rerun <merge-run-id>`).
@@ -80,6 +80,33 @@ The BEFORE arm is the harness's sanity gate: if the probe cannot see the nesting
   ```
 
   Wait for both readiness lines. Isolation proof: `GET :8787/api/v1/testimonials` answers 200 JSON. Sign in once interactively (or via the probe's form fill) to confirm the staff account works; record which account in `evidence.md`.
+
+- [ ] **Step 1b: seed one throwaway testimonial (AMENDMENT 1 — the table must be populated)**
+
+  The staff account first (the #306-ledgered non-interactive adaptation, AFTER the swap so it lands on 5433):
+
+  ```bash
+  pnpm --filter @sevendays/admin create-staff --email dnd-walk@local.test --name 'Dnd Walk' --password '<chosen throwaway>' --yes
+  ```
+
+  Then the seed through the supported path — sign in via the documented probe, POST through the session-gated admin API (create shape: `{ quote, person, isActive? }`; position is owned by the order PUT, not create):
+
+  ```bash
+  # sign in (Origin header required — the #242 lesson):
+  curl -s -o /dev/null -w "sign-in → %{http_code}\n" -c <workspace>/cookies.txt \
+    -H "Content-Type: application/json" -H "Origin: http://localhost:3000" \
+    -d '{"email":"dnd-walk@local.test","password":"<chosen throwaway>"}' \
+    http://localhost:3000/api/auth/sign-in/email
+  # seed one testimonial (full-object POST):
+  curl -s -o /dev/null -w "seed POST → %{http_code}\n" -b <workspace>/cookies.txt \
+    -H "Content-Type: application/json" \
+    -d '{"quote":"The gallery rail overflow fix (#294) shipped clean — our mobile bookings went up the same week.","person":"Dnd Walk Probe","isActive":true}' \
+    http://localhost:8787/api/v1/admin/testimonials
+  # verify the public read serves it (active-only):
+  curl -s http://localhost:8787/api/v1/testimonials
+  ```
+
+  Expected: sign-in 200, seed POST 201, the public read returns the row. Throwaway test-DB data only; never hand-written SQL.
 
 - [ ] **Step 2: run the BEFORE arm, scoped to the defect route**
 
@@ -210,7 +237,7 @@ Arms compare boots (the probe's own header): **restart the whole stack** — kil
 
 - [ ] **Step 1: restart the stack fresh and re-isolate**
 
-  Same commands as Task 2 Step 1. Isolation proof again: `GET :8787/api/v1/testimonials` answers 200 JSON.
+  Same commands as Task 2 Step 1 (the Step 1b seed row persists on 5433 — the table stays populated for both arms). Isolation proof again: `GET :8787/api/v1/testimonials` answers 200 JSON **with the seed row present**.
 
 - [ ] **Step 2: run the AFTER arm — the full 8-route walk (the census shape)**
 
