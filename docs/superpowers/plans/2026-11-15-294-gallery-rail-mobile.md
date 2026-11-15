@@ -16,7 +16,7 @@
 - Gates: `TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test pnpm check` green **35/35** with the floors **byte-identical** — this plan adds no tests (the admin no-DOM-tests house rule fences a class-law pin; there is nothing pure for a lib-seam test to assert): **admin 30 files / 310**; **api 34 files (33 passed + 1 skipped) / 471 passed + 3 skipped**; **types 18 files / 188**; **db 4 files (2 + 2 skipped) / 22 passed + 8 skipped**; **api-client 5 files / 45**; **landing 17 files / 134**. A moved floor means drift: stop and reconcile against the test tree, never pad. (Fresh clone: `pnpm build:packages` + `pnpm --filter @sevendays/api build` first — this plan changes no route, so `AppType` is untouched.)
 - **The code change is exactly one class token** (plus its pinned comment). The executor must not "improve" adjacent markup: the entries' `w-full`, the strip's `overflow-x-auto`, `railEntryClass`, the mini-action visibility law, the drag sensors, and the pending-skeleton card all stay byte-identical. The only sanctioned second edit is Task 4's pinned contingency, and it triggers on a hard criterion failure only.
 - **Deploy through CI only.** The push to main fires `Deploy admin (sevendays-admin)` in the `Deploy teaser (main)` run — **that leg is the one this ticket's change rides**; the `Deploy api (sevendays-api)` leg also fires and must go green (unchanged code). **Never run any local bare `wrangler deploy`** — the #263/#264 lesson (it wipes the CI-passed `--var`s; the only restore is `gh run rerun <merge-run-id>`).
-- **Local dev stack posture:** `pnpm --filter @sevendays/admin dev` serves the admin on :3000 (`.env.local` via dotenv — already configured on this dev machine). The landing app is NEVER started alongside it (both pin :3000, and the ws debugger pins :9229 — serial only). The admin's server fns read over `packages/db` (ADR-0023), so the local `DATABASE_URL` is the only backend the walk needs — no api process.
+- **Local dev stack posture (amended at execution — see the ledger ruling):** the walk runs **fully isolated on the compose test DB** (`sevendays-test-db-5433`, migrations applied, born-empty): `apps/admin/.env.local`'s `DATABASE_URL` points at the **live shared Supabase pooler**, so BOTH dev processes start with a process-env override — `DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test` (dotenv never overrides an existing process env; the local test credential is the repo's published compose/test URL, not a secret). The admin's CMS reads ride the **API RPC client** (`getSessionScopedApiClient(...).admin.galleryCategories.list()` — server-to-server with the forwarded session cookie), so the walk needs the **local API too**: the api dev (wrangler, :8787) and the admin dev (`:3000`, additionally `API_URL=http://localhost:8787`) both carry the override; the admin's BetterAuth instance and the api's `requireSession` then share the same 5433 auth tables (ADR-0004) and sign-in works end-to-end with zero production contact. The landing app is NEVER started (it also pins :3000 — serial only).
 - **Gallery content is CMS-born-empty** — the dev seed provisions no gallery categories. The walk's categories are created **through the admin UI at desktop width first** (the pre-fix rail is broken at mobile widths; creating content there before the fix would fight the very bug under test). The category names are throwaway dev-DB rows, not catalog data; the exact strings to type are pinned in Task 2.
 - **Live-probed pins (2026-11-15 @ `a31b7fc` — current `main` HEAD; read from the installed sources, not memory):**
   - `self-start` appears **exactly once** in `apps/admin/src` — the rail Card (`gallery-screen.tsx`, inside `CategoryRail`). The rail's pending-skeleton Card reads `shrink-0 rounded-lg lg:w-[220px]` **without** `self-start` — the skeleton already stretches full-width below `lg`, which is why loading and loaded postures visibly disagree today.
@@ -66,13 +66,16 @@ The triage verdict was static (code-path analysis); this task proves it live bef
 - Consumes: the local dev stack posture (Global Constraints), `docs/staff-provisioning.md`'s local sign-in path.
 - Produces: the running stack + a signed-in session + 4 gallery categories, reused by Task 4's "after" walk; the pre-fix capture + the numeric overflow reading that Task 4's evidence comment quotes.
 
-- [ ] **Step 1: start the stack**
+- [ ] **Step 1: start the stack (both processes, the test-DB override on each)**
 
   ```bash
-  pnpm --filter @sevendays/admin dev
+  # Terminal A — the local API (wrangler dev, :8787):
+  DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test pnpm --filter @sevendays/api dev
+  # Terminal B — the admin (:3000, pointed at the local API):
+  DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test API_URL=http://localhost:8787 pnpm --filter @sevendays/admin dev
   ```
 
-  Run it in the background and wait for the :3000 readiness line. Nothing else may be listening on :3000 (kill the landing first if it is — serial-only posture).
+  Run both in the background; wait for the wrangler readiness line and the vite :3000 readiness line. Nothing else may be listening on :3000 (kill the landing first if it is — serial-only posture). Isolation proof before proceeding: `GET http://localhost:8787/api/v1/testimonials` (or any public CMS read) must return the **empty** payload — the local DB is born-empty; production content would mean the override did not take, and the walk must not proceed.
 
 - [ ] **Step 2: sign in**
 
@@ -82,7 +85,7 @@ The triage verdict was static (code-path analysis); this task proves it live bef
   printf '%s\n' '<local-12+-char-password>' | pnpm --filter @sevendays/admin create-staff --email gallery-walk@local.test --name 'Gallery Walk'
   ```
 
-  then sign in as that account. This row is dev-DB-local and disposable; it never touches deployed environments.
+  then sign in as that account. This row is dev-DB-local and disposable; it never touches deployed environments. The create command carries the same test-DB override (`DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test` prefixed to the `pnpm` call) — it must land on 5433, never on the live pooler `.env.local` names.
 
 - [ ] **Step 3: create the walk's categories (at desktop width, pre-fix)**
 
@@ -364,7 +367,7 @@ The stack, session, and categories from Task 2 are still live (same dev process 
 
 ## Self-review notes for the executor
 
-- **Pin inventory (all read/probed 2026-11-15 @ `a31b7fc`):** the `self-start` uniqueness grep (1 occurrence in `apps/admin/src`); the skeleton Card's token-less twin; the base Card's `overflow-hidden`; `useIsMobile` = 768px vs the strip switch `lg` = 1024px (the <1024px window, worst <768px); the token's landing commit `1213e74` (#141); the visual suite's landing-only surface list; the admin suite's 22 lib-seam files / no DOM; the check floors (admin 30 files / 310, api 34 files / 471+3sk, types 18/188, db 4 files / 22+8sk, api-client 5/45, landing 17/134); the local stack posture (:3000 admin via `.env.local`, serial-only, no api process needed); the `create-staff` interactive-password path (`docs/staff-provisioning.md`).
+- **Pin inventory (all read/probed 2026-11-15 @ `a31b7fc`):** the `self-start` uniqueness grep (1 occurrence in `apps/admin/src`); the skeleton Card's token-less twin; the base Card's `overflow-hidden`; `useIsMobile` = 768px vs the strip switch `lg` = 1024px (the <1024px window, worst <768px); the token's landing commit `1213e74` (#141); the visual suite's landing-only surface list; the admin suite's 22 lib-seam files / no DOM; the check floors (admin 30 files / 310, api 34 files / 471+3sk, types 18/188, db 4 files / 22+8sk, api-client 5/45, landing 17/134); the local stack posture (amended at execution: BOTH the api dev on :8787 and the admin dev on :3000 run with the 5433 test-DB `DATABASE_URL` override + the admin's `API_URL=http://localhost:8787` — the admin's CMS reads ride the API RPC client, and `.env.local`'s own DATABASE_URL points at the live pooler, so the override is load-bearing); the `create-staff` interactive-password path (`docs/staff-provisioning.md`).
 - **No spike needed** — this plan makes no library type-inference claim; the one behavioral claim (fit-content + nowrap + always-visible mini-actions exceed a 375px viewport) is proven live by Task 2's repro BEFORE any edit. The pinned contingency's `lg+`-stretch claim (flex-col children stretch without `w-full`) is standard flexbox, verified visually by Task 4 Step 2's 1280px baseline comparison should the contingency ever fire.
 - **Test-count arithmetic: nothing moves.** The admin floor is 30 files / 310 before and after — the plan adds no test (the no-DOM-tests house rule fences a class-law pin; there is no pure seam). If any floor moves, stop and reconcile — never pad.
 - **If line numbers shifted** (an intervening commit): every OLD string here is content-anchored, not line-anchored — they still apply; a ≠1 match means drift, stop and reconcile.
