@@ -710,8 +710,8 @@
     "semantic_hash": "044b5c7e6e392444eb6e3bf59ad68633"
   },
   "apps/admin/CONTEXT.md": {
-    "mtime": 1794725278.819345,
-    "ast_hash": "dcbb461919a2b0b414a5d99c40548e3f",
+    "mtime": 1794749451.681276,
+    "ast_hash": "026e5377f8df899c2f8cb7cf95eb0334",
     "semantic_hash": ""
   },
   "apps/admin/README.md": {
@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794734153.3800929,
-    "ast_hash": "4b7e92f9367d9c2fc692d9fe509da47b",
+    "mtime": 1794779689.8671243,
+    "ast_hash": "4da42ae88736af30cad06276c3ffa11a",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2865,8 +2865,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794725570.226584,
-    "ast_hash": "7177e105589b93a6bab5628cefb7e910",
+    "mtime": 1794734909.2340074,
+    "ast_hash": "7ce8223f45ddb81e36787b7b819163fd",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -3550,8 +3550,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/testimonials/testimonials-screen.tsx": {
-    "mtime": 1792164735.5178037,
-    "ast_hash": "521dc6e05dee378900013c667d8813a4",
+    "mtime": 1794779689.8671243,
+    "ast_hash": "f8c4d9121cd99ef6065f654c42caf256",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/admin.functions.ts": {
@@ -5182,6 +5182,21 @@
   "docs/superpowers/plans/2026-11-15-306-dev-login-submit.md": {
     "mtime": 1794734153.3840928,
     "ast_hash": "efe61e9eaa60225cfdb50587d8c96058",
+    "semantic_hash": ""
+  },
+  "scripts/probe-cold-hydration.mjs": {
+    "mtime": 1794743056.336633,
+    "ast_hash": "5bc3493281ccd35afeb9f98611614037",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-15-307-cold-load-hydration-mismatch.md": {
+    "mtime": 1794743707.973385,
+    "ast_hash": "1fdb578b13ee93eef4cb7e724e2a14e5",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-15-309-dnd-tbody-nesting.md": {
+    "mtime": 1794779689.8671243,
+    "ast_hash": "29a4fa8c06248293b00bc1f68eff232b",
     "semantic_hash": ""
   }
 }
