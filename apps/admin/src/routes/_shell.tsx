@@ -35,7 +35,8 @@ export const Route = createFileRoute('/_shell')({
   // names query({ ...options, staleTime: 'static' }) as the replacement.
   // 'static' reproduces the old posture (dist-proven, the #288 spike):
   // missing cache → awaited fetch; present cache → serve it, zero
-  // requests; invalidated (own-mutation) → refetch.
+  // requests — invalidated or not (the old ensureQueryData served it
+  // too: behavior-neutral).
   loader: async ({ context: { queryClient } }) => {
     await queryClient
       .query({ ...siteSettingsQuery.all(), staleTime: 'static' })
