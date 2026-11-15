@@ -44,6 +44,11 @@ import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent } from '@sevendays/ui/components/card';
 import { Checkbox } from '@sevendays/ui/components/checkbox';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@sevendays/ui/components/collapsible';
 import { Field, FieldLabel } from '@sevendays/ui/components/field';
 import { Input } from '@sevendays/ui/components/input';
 import { Progress } from '@sevendays/ui/components/progress';
@@ -64,6 +69,7 @@ import { useBlocker } from '@tanstack/react-router';
 import { cn } from 'cn';
 import {
   Check,
+  ChevronDown,
   ImagePlus,
   Images,
   Plus,
@@ -564,9 +570,15 @@ function UploadTray({
 /**
  * The category rail — the inline panel (AR-4). `All photos` is FIXED FIRST
  * and sits OUTSIDE the sortable ids; the categories drag-reorder under the
- * same sensors as the grid (the mobile horizontal strip drags with them
- * too — rectSortingStrategy computes the transforms from real rects, so
- * both orientations work). One create affordance at the end.
+ * same sensors as the grid (vertical drag; rectSortingStrategy computes the
+ * transforms from real rects). One create affordance at the end.
+ *
+ * The mobile posture (owner-ruled 2026-11-15, #294 round 2 — no horizontal
+ * scrolling): below lg the card is a collapsible disclosure, EXPANDED by
+ * default — a summary row (Categories · the current filter + a chevron)
+ * collapses/reopens the same vertical list the desktop rail renders;
+ * picking a filter collapses it, and management actions
+ * (create/rename/flips/delete) never do.
  */
 function CategoryRail({
   categories,
@@ -611,6 +623,15 @@ function CategoryRail({
   onCategoryDelete: (categoryId: string) => void;
   onDragEnd: (event: DragEndEvent) => void;
 }) {
+  // The mobile disclosure state: expanded by default below lg (owner tweak,
+  // 2026-11-15 render round). Picking a filter collapses; management actions
+  // never do (see the doc comment).
+  const [railOpen, setRailOpen] = useState(true);
+  const railFilterName =
+    filter === 'all'
+      ? 'All photos'
+      : (categories.find((c) => c.id === filter)?.name ?? 'All photos');
+
   function countIn(categoryId: string): number {
     return photos.filter((p) => p.categoryId === categoryId).length;
   }
@@ -618,94 +639,131 @@ function CategoryRail({
     renamingCategoryId !== null
       ? (categories.find((c) => c.id === renamingCategoryId) ?? null)
       : null;
-  return (
-    <Card className='shrink-0 rounded-lg lg:w-[220px]'>
-      {/* Horizontal scroll strip on narrow widths, vertical rail on lg+.
-          The card must STRETCH below lg (#294): a fit-content width here
-          let the nowrap entries + the mobile-visible mini-actions push
-          the card past the viewport — the page overflowed instead of the
-          strip scrolling. Above lg the fixed lg:w-[220px] column governs. */}
-      <CardContent className='flex gap-1 overflow-x-auto p-2 lg:flex-col lg:overflow-x-visible'>
-        <button
-          type='button'
-          onClick={() => onFilterChange('all')}
-          aria-current={filter === 'all' ? 'true' : undefined}
-          className={railEntryClass(filter === 'all')}
-        >
-          <Images className='size-4 shrink-0' aria-hidden='true' />
-          <span className='min-w-0 flex-1 truncate text-left'>All photos</span>
-          <span className='text-muted-foreground font-normal'>({photos.length})</span>
-        </button>
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-          <SortableContext items={categories.map((c) => c.id)} strategy={rectSortingStrategy}>
-            {categories.map((category) => (
-              <SortableCategoryEntry
-                key={category.id}
-                category={category}
-                count={countIn(category.id)}
-                selected={filter === category.id}
-                isMobile={isMobile}
-                renaming={renamingCategory?.id === category.id}
-                categoryDraft={categoryDraft}
-                onSelect={() => onFilterChange(category.id)}
-                onStartRename={() => onStartRename(category.id)}
-                onCommitRename={onCommitRename}
-                onCancelRename={onCancelRename}
-                onDraftChange={onDraftChange}
-                onDeactivate={() => onCategoryDeactivate(category)}
-                onReactivate={() => onCategoryReactivate(category)}
-                onCategoryDelete={onCategoryDelete}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
-        {creatingCategory ? (
-          <div className='flex w-full shrink-0 items-center gap-1'>
-            <Input
-              value={categoryDraft}
-              placeholder='Category name'
-              aria-label='Category name'
-              className='h-8 min-w-32 flex-1'
-              autoFocus
-              onChange={(e) => onDraftChange(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  onCommitCreate();
-                }
-              }}
+
+  const selectFilter = (next: string) => {
+    onFilterChange(next);
+    setRailOpen(false);
+  };
+
+  // The one list both postures render: the disclosure below lg, the plain
+  // vertical CardContent at lg+.
+  const railList = (
+    <>
+      <button
+        type='button'
+        onClick={() => selectFilter('all')}
+        aria-current={filter === 'all' ? 'true' : undefined}
+        className={railEntryClass(filter === 'all')}
+      >
+        <Images className='size-4 shrink-0' aria-hidden='true' />
+        <span className='min-w-0 flex-1 truncate text-left'>All photos</span>
+        <span className='text-muted-foreground font-normal'>({photos.length})</span>
+      </button>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <SortableContext items={categories.map((c) => c.id)} strategy={rectSortingStrategy}>
+          {categories.map((category) => (
+            <SortableCategoryEntry
+              key={category.id}
+              category={category}
+              count={countIn(category.id)}
+              selected={filter === category.id}
+              isMobile={isMobile}
+              renaming={renamingCategory?.id === category.id}
+              categoryDraft={categoryDraft}
+              onSelect={() => selectFilter(category.id)}
+              onStartRename={() => onStartRename(category.id)}
+              onCommitRename={onCommitRename}
+              onCancelRename={onCancelRename}
+              onDraftChange={onDraftChange}
+              onDeactivate={() => onCategoryDeactivate(category)}
+              onReactivate={() => onCategoryReactivate(category)}
+              onCategoryDelete={onCategoryDelete}
             />
-            <Button
-              variant='ghost'
-              size='icon-sm'
-              type='button'
-              aria-label='Create category'
-              onClick={onCommitCreate}
-            >
-              <Check aria-hidden='true' />
-            </Button>
-            <Button
-              variant='ghost'
-              size='icon-sm'
-              type='button'
-              aria-label='Cancel new category'
-              onClick={onCancelCreate}
-            >
-              <X aria-hidden='true' />
-            </Button>
-          </div>
-        ) : (
+          ))}
+        </SortableContext>
+      </DndContext>
+      {creatingCategory ? (
+        <div className='flex w-full shrink-0 items-center gap-1'>
+          <Input
+            value={categoryDraft}
+            placeholder='Category name'
+            aria-label='Category name'
+            className='h-8 min-w-32 flex-1'
+            autoFocus
+            onChange={(e) => onDraftChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                onCommitCreate();
+              }
+            }}
+          />
           <Button
             variant='ghost'
-            size='sm'
+            size='icon-sm'
             type='button'
-            className='shrink-0 justify-start text-muted-foreground'
-            onClick={onStartCreate}
+            aria-label='Create category'
+            onClick={onCommitCreate}
           >
-            <Plus aria-hidden='true' />
-            New category
+            <Check aria-hidden='true' />
           </Button>
-        )}
-      </CardContent>
+          <Button
+            variant='ghost'
+            size='icon-sm'
+            type='button'
+            aria-label='Cancel new category'
+            onClick={onCancelCreate}
+          >
+            <X aria-hidden='true' />
+          </Button>
+        </div>
+      ) : (
+        <Button
+          variant='ghost'
+          size='sm'
+          type='button'
+          className='shrink-0 justify-start text-muted-foreground'
+          onClick={onStartCreate}
+        >
+          <Plus aria-hidden='true' />
+          New category
+        </Button>
+      )}
+    </>
+  );
+
+  return (
+    <Card className='shrink-0 rounded-lg lg:w-[220px]'>
+      {/* The card must STRETCH below lg (#294): a fit-content width here let
+          the nowrap entries + the mobile-visible mini-actions push the card
+          past the viewport — the page overflowed instead of the list
+          scrolling. Below lg the card is the collapsed disclosure (owner
+          ruling 2026-11-15 — no horizontal scrolling); above lg the fixed
+          lg:w-[220px] column governs, no disclosure. */}
+      {isMobile ? (
+        <Collapsible open={railOpen} onOpenChange={setRailOpen}>
+          <CollapsibleTrigger
+            className='flex w-full items-center gap-2 rounded-md px-2 py-2 text-left'
+            aria-label={`Categories — current filter: ${railFilterName}`}
+          >
+            <span className='text-muted-foreground text-xs font-medium tracking-wide uppercase'>
+              Categories
+            </span>
+            <span className='min-w-0 flex-1 truncate text-sm font-medium'>{railFilterName}</span>
+            <ChevronDown
+              aria-hidden='true'
+              className={cn(
+                'text-muted-foreground size-4 shrink-0 transition-transform',
+                railOpen && 'rotate-180'
+              )}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className='flex flex-col gap-1 p-2 pt-0'>{railList}</CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      ) : (
+        <CardContent className='flex flex-col gap-1 p-2'>{railList}</CardContent>
+      )}
     </Card>
   );
 }
