@@ -540,23 +540,33 @@ export function TestimonialsScreen() {
                 (A3). The TODO(token-ruling) radius step-down is flagged at
                 its ruling site in the pattern library, not re-declared. */}
               <TooltipProvider>
-                <Table className='@max-[700px]:hidden'>
-                  <TableHeader>
-                    <TableRow>
-                      {/* Drag-handle column (round-3 ruling) — no header label. */}
-                      <TableHead className='w-10' />
-                      <TableHead>Person</TableHead>
-                      {/* T2: the Actions header renders empty — the icons carry
+                {/* #309: DndContext wraps the <Table>, not the <tbody> children —
+                    dnd-kit's Accessibility subtree (the display:none DndDescribedBy
+                    instructions div and the live-region div) renders inline at the
+                    context's React position post-mount (it renders null until
+                    mounted, and no portal container is set). Inside <TableBody>
+                    that landed two <div>s as <tbody> children: an invalid content
+                    model React dev flags as a hydration-class warning. Context
+                    flows through the React tree regardless of DOM position — the
+                    rows' useSortable wiring is unchanged. The mobile stacked
+                    DndContext below already wraps divs, so it stays. */}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={onDragEnd}
+                >
+                  <Table className='@max-[700px]:hidden'>
+                    <TableHeader>
+                      <TableRow>
+                        {/* Drag-handle column (round-3 ruling) — no header label. */}
+                        <TableHead className='w-10' />
+                        <TableHead>Person</TableHead>
+                        {/* T2: the Actions header renders empty — the icons carry
                       their own labels. */}
-                      <TableHead className='text-right' />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <DndContext
-                      sensors={sensors}
-                      collisionDetection={closestCenter}
-                      onDragEnd={onDragEnd}
-                    >
+                        <TableHead className='text-right' />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       <SortableContext
                         items={rows.map((row) => row.id)}
                         strategy={verticalListSortingStrategy}
@@ -630,9 +640,9 @@ export function TestimonialsScreen() {
                           );
                         })}
                       </SortableContext>
-                    </DndContext>
-                  </TableBody>
-                </Table>
+                    </TableBody>
+                  </Table>
+                </DndContext>
               </TooltipProvider>
 
               {/* Stacked posture (below 700px container width): the two-line
