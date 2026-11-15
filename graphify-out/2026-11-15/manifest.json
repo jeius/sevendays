@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794715580.5851958,
-    "ast_hash": "5869c3cedd40deb9c71cc5fa3951578a",
+    "mtime": 1794724330.71925,
+    "ast_hash": "7852a1632748ff35c4f1f191224fc83d",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2865,8 +2865,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794699506.9635696,
-    "ast_hash": "702e183206127243ce0d3c3eb72db525",
+    "mtime": 1794716353.4543192,
+    "ast_hash": "77e1e3c1c0a4507ca41aa11839cc2d68",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -3525,8 +3525,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/gallery/gallery-screen.tsx": {
-    "mtime": 1794663696.0730698,
-    "ast_hash": "7121ec554957fbb4232d5ff7f9ea9c13",
+    "mtime": 1794724330.71485,
+    "ast_hash": "3bfd02764e8eb7504edcebe0567fed30",
     "semantic_hash": ""
   },
   "apps/admin/src/components/lookups/lookups-screen.tsx": {
@@ -5172,6 +5172,11 @@
   "docs/superpowers/plans/2026-11-15-m8-05-exit-gate.md": {
     "mtime": 1794715580.5851958,
     "ast_hash": "d3d3d4fadf8ba64853c283377afe9c8f",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-15-294-gallery-rail-mobile.md": {
+    "mtime": 1794719932.1454606,
+    "ast_hash": "ad5603ca085bcea48e47450c6ccb719c",
     "semantic_hash": ""
   }
 }
