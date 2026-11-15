@@ -619,8 +619,12 @@ function CategoryRail({
       ? (categories.find((c) => c.id === renamingCategoryId) ?? null)
       : null;
   return (
-    <Card className='shrink-0 self-start rounded-lg lg:w-[220px]'>
-      {/* Horizontal scroll strip on narrow widths, vertical rail on lg+. */}
+    <Card className='shrink-0 rounded-lg lg:w-[220px]'>
+      {/* Horizontal scroll strip on narrow widths, vertical rail on lg+.
+          The card must STRETCH below lg (#294): a fit-content width here
+          let the nowrap entries + the mobile-visible mini-actions push
+          the card past the viewport — the page overflowed instead of the
+          strip scrolling. Above lg the fixed lg:w-[220px] column governs. */}
       <CardContent className='flex gap-1 overflow-x-auto p-2 lg:flex-col lg:overflow-x-visible'>
         <button
           type='button'
