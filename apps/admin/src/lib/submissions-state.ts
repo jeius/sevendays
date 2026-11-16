@@ -12,6 +12,7 @@ import {
   TESTIMONIAL_QUOTE_MIN,
   type TestimonialSubmission,
 } from '@sevendays/types';
+import { z } from 'zod';
 
 export type SubmissionSegment = 'pending' | 'accepted' | 'rejected' | 'all';
 
@@ -82,4 +83,24 @@ export function submittedOn(row: TestimonialSubmission): string {
     month: 'short',
     day: 'numeric',
   });
+}
+
+// The screen's two-tab deep link (M9 #314): the Notification panel's
+// `Open Submissions` footer lands on the queue — a tolerant optional
+// param on the testimonials route (the audit-log precedent), absent =
+// the published list, exactly the pre-#314 default. #218's "local
+// state, no routes" ruling is amended in spirit only: still one screen,
+// no new route — the tab became the URL-driven segment so a link can
+// aim at it.
+export type TestimonialsTab = 'testimonials' | 'submissions';
+
+export const testimonialsSearchSchema = z.object({
+  tab: z.enum(['testimonials', 'submissions']).optional().catch(undefined),
+});
+
+export type TestimonialsSearch = z.infer<typeof testimonialsSearchSchema>;
+
+/** Absent (or garbage, dropped by the catch) → the published list — the pre-#314 default, unchanged. */
+export function initialTab(search: TestimonialsSearch): TestimonialsTab {
+  return search.tab === 'submissions' ? 'submissions' : 'testimonials';
 }

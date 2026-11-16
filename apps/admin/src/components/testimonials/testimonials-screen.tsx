@@ -50,6 +50,7 @@ import {
 import { Textarea } from '@sevendays/ui/components/textarea';
 import { TooltipProvider } from '@sevendays/ui/components/tooltip';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { GripVertical, SquarePen } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Fragment, useId, useState } from 'react';
@@ -90,6 +91,7 @@ import {
 } from '#/lib/light-entity-state';
 import { blockerLines } from '#/lib/save-contract';
 import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
+import { initialTab, type TestimonialsSearch, type TestimonialsTab } from '#/lib/submissions-state';
 
 /** The editor's mode switch: create (from `New testimonial`) or edit (a row snapshot). */
 type EditingTarget = { mode: 'create' } | { mode: 'edit'; row: Testimonial };
@@ -209,7 +211,7 @@ function SortableStackRow({
   );
 }
 
-export function TestimonialsScreen() {
+export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
   const {
     data: testimonials,
     isPending,
@@ -220,9 +222,16 @@ export function TestimonialsScreen() {
   // T3: controlled disclosure — one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // The screen's two tabs (#218): the published list and the moderation
-  // queue — local state, no routes (the queue is a stop on an existing
-  // screen, not a new place to remember).
-  const [tab, setTab] = useState<'testimonials' | 'submissions'>('testimonials');
+  // queue — the queue is a stop on an existing screen, not a new place to
+  // remember. M9 #314 amends the mechanism, not the ruling: the tab is
+  // URL-driven (the audit-log precedent) so the Notification's `Open
+  // Submissions` footer can aim at the queue; absent param = the published
+  // list, exactly the pre-#314 default.
+  const navigate = useNavigate();
+  const tab = initialTab(search);
+  const setTab = (next: TestimonialsTab) => {
+    void navigate({ to: '/testimonials', search: next === 'testimonials' ? {} : { tab: next } });
+  };
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
   // The toolbar segment (#218): default All per visit, never persisted; the
