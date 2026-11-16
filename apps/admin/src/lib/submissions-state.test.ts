@@ -3,8 +3,10 @@ import {
   acceptEditStateFromSubmission,
   buildAcceptPayload,
   filterSubmissions,
+  initialTab,
   SUBMISSION_SEGMENTS,
   submittedOn,
+  testimonialsSearchSchema,
   validateAcceptEdit,
 } from './submissions-state.js';
 
@@ -83,5 +85,21 @@ describe('submittedOn (the queue’s UTC date line)', () => {
     expect(submittedOn({ ...base, createdAt: new Date('2026-01-02T23:59:00.000Z') })).toBe(
       'Jan 2, 2026'
     );
+  });
+});
+
+describe('the tab deep-link param (M9 #314)', () => {
+  it('absent stays absent, submissions kept, any other value dropped — tolerant, the audit-log posture', () => {
+    expect(testimonialsSearchSchema.parse({})).toEqual({});
+    expect(testimonialsSearchSchema.parse({ tab: 'submissions' })).toEqual({
+      tab: 'submissions',
+    });
+    expect(testimonialsSearchSchema.parse({ tab: 'nope' })).toEqual({});
+  });
+
+  it('initialTab: absent (or dropped) → testimonials — the pre-#314 default; submissions → submissions', () => {
+    expect(initialTab({})).toBe('testimonials');
+    expect(initialTab(testimonialsSearchSchema.parse({ tab: 'nope' }))).toBe('testimonials');
+    expect(initialTab({ tab: 'submissions' })).toBe('submissions');
   });
 });
