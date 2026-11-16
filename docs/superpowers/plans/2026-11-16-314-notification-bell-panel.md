@@ -76,7 +76,7 @@ The ticket's whole test surface, plus every pure value Tasks 3–4 consume. No c
 
 **Not here:** any component or route edit (Tasks 2–4); the search engine/seams (#315); any change to the existing `submissions-state.ts` members (segments, filters, accept-edit machinery, `submittedOn` — byte-identical); the `9+` cap anywhere but the badge (the name/tooltip carry n uncapped); new busy labels (the two constants are reused).
 
-- [ ] **Step 1: Write the failing tests**
+- [✅] **Step 1: Write the failing tests**
 
 (a) New file `apps/admin/src/lib/notification-state.test.ts` — the whole file:
 
@@ -232,7 +232,7 @@ describe('the tab deep-link param (M9 #314)', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [✅] **Step 2: Run the tests to verify they fail**
 
 ```bash
 pnpm --filter @sevendays/admin test -- --run notification-state submissions-state
@@ -240,7 +240,7 @@ pnpm --filter @sevendays/admin test -- --run notification-state submissions-stat
 
 Expected: FAIL — the new `notification-state.test.ts` fails at collection (`Failed to resolve import "./notification-state.js"` — the module does not exist yet, so none of its 13 its run); the two new `submissions-state.test.ts` its run and fail with `TypeError: testimonialsSearchSchema is not a function` / `initialTab is not a function` (vitest transforms without typechecking, so missing exports surface at call time). Every pre-existing it in both matched files still passes. Record the output in `.superpowers/sdd/2026-11-16-314-notification-bell-panel/task-1-red.txt`.
 
-- [ ] **Step 3: Write the minimal implementation**
+- [✅] **Step 3: Write the minimal implementation**
 
 (a) New file `apps/admin/src/lib/notification-state.ts` — the whole file:
 
@@ -412,7 +412,7 @@ export function initialTab(search: TestimonialsSearch): TestimonialsTab {
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [✅] **Step 4: Run the tests to verify they pass**
 
 ```bash
 pnpm --filter @sevendays/admin test -- --run
@@ -420,7 +420,7 @@ pnpm --filter @sevendays/admin test -- --run
 
 Expected: PASS — the full admin suite runs (admin's `test` script is bare `vitest run`, so the full-suite floor IS the verification): **Test Files 31 passed (31) · Tests 325 passed (325)** (the 310 baseline + 13 + 2).
 
-- [ ] **Step 5: Lint, format, typecheck**
+- [✅] **Step 5: Lint, format, typecheck**
 
 ```bash
 pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/admin typecheck
@@ -428,7 +428,7 @@ pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/admin typecheck
 
 Expected: both green (accept `fix`'s rewrites — import order especially; re-run the suite from Step 4 if it rewrote anything).
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/admin/src/lib/notification-state.ts apps/admin/src/lib/notification-state.test.ts apps/admin/src/lib/submissions-state.ts apps/admin/src/lib/submissions-state.test.ts
@@ -448,11 +448,11 @@ The spec's one production-file touch ("one defaulted prop ports into `GuardedCon
 
 **Not here:** any behavior change to the existing 20+ `GuardedConfirm`/`DeleteGuardDialog`/`DeactivateConfirm` call sites (they pass no `confirmVariant` → the default preserves them byte-identically — the grep gate proves it); the delete dialog, deactivate confirm, or any other shared member; the amber string re-typed anywhere (Task 4 reads the const); `notification.tsx` (Task 4).
 
-- [ ] **Step 1: Load the UI/UX skill set**
+- [✅] **Step 1: Load the UI/UX skill set**
 
 Per AGENTS.md, load `prototype` + `ui-ux-pro-max` (plus `design-system` as relevant) before editing. The rendered diff is pinned below verbatim — the skills inform judgment (the variant polarity's visual weight), not re-composition.
 
-- [ ] **Step 2: Export `SUBMISSION_STATUS_META`**
+- [✅] **Step 2: Export `SUBMISSION_STATUS_META`**
 
 In `apps/admin/src/components/cms/shared.tsx`, replace (line 161):
 
@@ -469,7 +469,7 @@ export const SUBMISSION_STATUS_META: Record<
 
 (The const body, the three statuses, and `SubmissionStatusBadge` are untouched.)
 
-- [ ] **Step 3: The `confirmVariant` port (the prototype diff, verbatim)**
+- [✅] **Step 3: The `confirmVariant` port (the prototype diff, verbatim)**
 
 (a) In `GuardedConfirm`'s destructure (line 576-583), replace:
 
@@ -533,7 +533,7 @@ with:
                   disabled={pending}
 ```
 
-- [ ] **Step 4: Grep gates — the port is additive and nothing else touches `confirmVariant`**
+- [✅] **Step 4: Grep gates — the port is additive and nothing else touches `confirmVariant`**
 
 ```bash
 grep -c "confirmVariant" apps/admin/src/components/cms/shared.tsx
@@ -543,7 +543,7 @@ grep -c "export const SUBMISSION_STATUS_META" apps/admin/src/components/cms/shar
 
 Expected: `3` (the destructure default, the prop-type line, the `variant=` application — comments name it in prose only); **empty** (no `.tsx` call site passes the prop yet — Task 4's `notification.tsx` becomes the first, which IS the byte-identical proof for every existing call site); `1`. Save the output as `.superpowers/sdd/2026-11-16-314-notification-bell-panel/task-2-grep.txt`.
 
-- [ ] **Step 5: Lint, format, test, typecheck**
+- [✅] **Step 5: Lint, format, test, typecheck**
 
 ```bash
 pnpm --filter @sevendays/admin fix
@@ -553,7 +553,7 @@ pnpm --filter @sevendays/admin typecheck
 
 Expected: all green; the suite stays at **Test Files 31 passed (31) · Tests 325 passed (325)** (no suite change in this task). No build — no route module graph gains an import (the export is consumed first in Task 4).
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/admin/src/components/cms/shared.tsx
@@ -575,11 +575,11 @@ The footer link's landing mechanism (AC: "lands on the Submissions tab"), built 
 
 **Not here:** the footer link itself (Task 4 — this task lands the target it aims at); any change to the screen's lists, editor, DnD, segments, or the `SubmissionsTab` (only the tab switch mechanism changes); `?focus=` (#316's param, never referenced here); the route's loader/head/gating (byte-identical); the sidebar's Testimonials link (it aims at the bare route — absent param = the published list, unchanged).
 
-- [ ] **Step 1: Load the UI/UX skill set**
+- [✅] **Step 1: Load the UI/UX skill set**
 
 Per AGENTS.md, load `prototype` + `ui-ux-pro-max` before editing. The behavior is pinned: the tab renders exactly as before, its switcher now writes the URL.
 
-- [ ] **Step 2: The route — `validateSearch` + the passing wrapper**
+- [✅] **Step 2: The route — `validateSearch` + the passing wrapper**
 
 In `apps/admin/src/routes/_shell.testimonials.tsx`:
 
@@ -631,7 +631,7 @@ function TestimonialsPage() {
 }
 ```
 
-- [ ] **Step 3: The screen — the URL-driven tab**
+- [✅] **Step 3: The screen — the URL-driven tab**
 
 In `apps/admin/src/components/testimonials/testimonials-screen.tsx`:
 
@@ -686,7 +686,7 @@ import { initialTab, type TestimonialsSearch, type TestimonialsTab } from '#/lib
 
 (The `SegmentedControl` call at line 492-500 is byte-identical — `value={tab} onChange={setTab}` now reads the derived tab and writes the URL. The `PageHeader` actions branch at 481 already branches on `tab` — unchanged.)
 
-- [ ] **Step 4: Regenerate the route tree**
+- [✅] **Step 4: Regenerate the route tree**
 
 ```bash
 pnpm --filter @sevendays/admin generate-routes
@@ -694,7 +694,7 @@ pnpm --filter @sevendays/admin generate-routes
 
 Expected: `routeTree.gen.ts` regenerates with the testimonials route's search schema registered (the file is committed; the regen rides this task's commit). If the generator reports no change, verify `git status apps/admin/src/routeTree.gen.ts` — the validateSearch addition MUST be reflected (an unchanged gen file means the route edit didn't save).
 
-- [ ] **Step 5: Grep gate — the wiring is complete and `useState` no longer holds the tab**
+- [✅] **Step 5: Grep gate — the wiring is complete and `useState` no longer holds the tab**
 
 ```bash
 grep -n "initialTab\|validateSearch\|useNavigate" apps/admin/src/components/testimonials/testimonials-screen.tsx apps/admin/src/routes/_shell.testimonials.tsx
@@ -703,7 +703,7 @@ grep -c "useState<'testimonials' | 'submissions'>" apps/admin/src/components/tes
 
 Expected: the first grep shows `validateSearch` + the wrapper's `Route.useSearch()` in the route, `useNavigate` + `initialTab(search)` + the `setTab` navigate in the screen; the second is `0`. Save as `task-3-grep.txt`.
 
-- [ ] **Step 6: Lint, format, test, typecheck, build**
+- [✅] **Step 6: Lint, format, test, typecheck, build**
 
 ```bash
 pnpm --filter @sevendays/admin fix
@@ -714,7 +714,7 @@ pnpm --filter @sevendays/admin build
 
 Expected: all green; the suite stays at **Test Files 31 passed (31) · Tests 325 passed (325)**; the build succeeds with the route graph's new zod edge (the #218 execution ruling — a route's module graph gained an import).
 
-- [ ] **Step 7: Commit**
+- [✅] **Step 7: Commit**
 
 ```bash
 git add apps/admin/src/routes/_shell.testimonials.tsx apps/admin/src/components/testimonials/testimonials-screen.tsx apps/admin/src/routeTree.gen.ts
@@ -735,11 +735,11 @@ The composition: Variant C ported from `prototype/bell-panel-variants` (`variant
 
 **Not here:** the search Input (inert, #315's); any change to the Submissions tab (its own contracts are untouched by D3); dismiss/mark-read/polling (ADR-0028's absences — `refetchInterval` never appears); a shell-loader prime (rejected at plan time — see the recon note); the `ml-auto` moving anywhere but the trigger's Button (the topbar's right-cluster layout is unchanged); edits to `packages/ui` (the popover/tooltip/button primitives are consumed as installed).
 
-- [ ] **Step 1: Load the UI/UX skill set**
+- [✅] **Step 1: Load the UI/UX skill set**
 
 Per AGENTS.md and the ticket's Execution notes: `prototype` + `ui-ux-pro-max`, plus `notification-design`, `design-system`, `tanstack-query-best-practices`, and `dark-mode-design`. The render is pinned below — the skills inform judgment (focus order through the panel, the amber chip's dark leg, the query wiring), not re-composition.
 
-- [ ] **Step 2: New file `apps/admin/src/components/notification.tsx`** — the whole file:
+- [✅] **Step 2: New file `apps/admin/src/components/notification.tsx`** — the whole file:
 
 ```tsx
 // The Notification (M9 #314, ADR-0028): the admin chrome's derived view
@@ -1082,7 +1082,7 @@ export function Notification() {
 }
 ```
 
-- [ ] **Step 3: The topbar mount**
+- [✅] **Step 3: The topbar mount**
 
 Replace `apps/admin/src/components/admin-topbar.tsx` whole:
 
@@ -1119,7 +1119,7 @@ export function AdminTopbar() {
 
 (The old inert `Button`/`Bell` imports die with the button; the Notification's trigger carries `relative ml-auto` internally — the right-cluster layout is byte-identical.)
 
-- [ ] **Step 4: Grep gates — the AC laws are present in the render**
+- [✅] **Step 4: Grep gates — the AC laws are present in the render**
 
 ```bash
 grep -c "aria-busy" apps/admin/src/components/notification.tsx
@@ -1131,7 +1131,7 @@ grep -c "confirmVariant" apps/admin/src/components/notification.tsx
 
 Expected: `2` (the two row action buttons — the dialog's `aria-busy` rides GuardedConfirm's own contract in `shared.tsx`); **`0`** (the polling fence holds — a nonzero count is a re-ruling, stop and report; dismiss/mark-read have no code form to grep for, which IS the absence proof — they appear only as the header comment's named absences and as no lib export); `1` (the badge chip's read — the import line carries the bare `SUBMISSION_STATUS_META` specifier); the three copy lines each hit exactly once; `1` (the dialog's `confirmVariant` — the FIRST `.tsx` call site passing it, making Task 2's byte-identical proof concrete). Save as `task-4-grep.txt`.
 
-- [ ] **Step 5: Lint, format, test, typecheck, build**
+- [✅] **Step 5: Lint, format, test, typecheck, build**
 
 ```bash
 pnpm --filter @sevendays/admin fix
@@ -1142,7 +1142,7 @@ pnpm --filter @sevendays/admin build
 
 Expected: all green; the suite stays at **Test Files 31 passed (31) · Tests 325 passed (325)**; the build succeeds with `notification.tsx` entering every route's graph via the topbar.
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/admin/src/components/notification.tsx apps/admin/src/components/admin-topbar.tsx
@@ -1159,7 +1159,7 @@ git commit -m "feat(admin): the Notification - the derived bell + panel live in 
 
 **Not here:** any code change (a defect found by Step 2 or Step 3 goes back to its owning task's file with its own `fix(admin): … (#314)` commit, then this task re-runs from Step 1); the Search tickets' M9 roadmap boxes (#315/#316 own theirs — never tick them here); `docs/plan.md` beyond the one checkbox; the exit-gate walkthrough (#317's live-stack ceremony — Task 5's walkthrough is this ticket's own verification, not the milestone's).
 
-- [ ] **Step 1: The full check + the soft-ceiling gate**
+- [✅] **Step 1: The full check + the soft-ceiling gate**
 
 ```bash
 pnpm check
@@ -1168,7 +1168,7 @@ git diff --stat main...HEAD -- apps/api apps/landing packages/ pnpm-lock.yaml
 
 Expected: `pnpm check` green across the repo; the diff-stat **empty** (D11 proven — zero api/landing/packages/manifest changes). Floors after this ticket: admin **31 files / 325 tests**; every other suite unchanged from AGENTS.md's recorded floors.
 
-- [ ] **Step 2: The owner's as-built variants reaction (BLOCKING — the #94 amendment)**
+- [✅] **Step 2: The owner's as-built variants reaction (BLOCKING — the #94 amendment)**
 
 The #94 amendment's round for this ticket: the as-built production render, both themes, light judged first. Mechanics: bring up the dev stack (`pnpm --filter @sevendays/api dev` + `pnpm --filter @sevendays/admin dev` — serial note: never admin + landing together, both pin `:3000`); seed two throwaway submissions via the public POST (curl to the local api — no landing needed):
 
@@ -1183,7 +1183,7 @@ curl -X POST http://localhost:8787/api/v1/testimonial-submissions \
 
 Then capture with a throwaway HEADLESS Playwright script kept OUTSIDE the repo (scripted sign-in with the controller's dev staff account — the owner's local credentials, never written to the evidence dir, never committed): the eight states, light first — (1) the bell with the amber `2` badge, (2) the trigger tooltip `{n} pending submissions`, (3) the open panel (workbar + two dense rows), (4) the accept dialog, (5) the reject dialog, (6) the empty state (`No pending submissions.` + footer), (7) the error arm is optional to stage (stop the api, open the panel — capture only if trivial); then the dark counterparts of 1-6 via the topbar's theme toggle. Post the captures to #314 (`gh issue comment 314`) with the question: **the as-built Notification in both themes — accept as-rendered, or findings?** Then **BLOCK on the owner's answer** (the wait-for-owner rule — never assume while the owner may be AFK). Disposition per the house pattern: accept → proceed; findings → fix-batch commits on this branch (or follow-up issues if ruled out of scope), re-capture, re-ask. Record the verdict in `.superpowers/sdd/2026-11-16-314-notification-bell-panel/variants-verdict.md`.
 
-- [ ] **Step 3: The live walkthrough (the headed go-gate, evidence for the PR)**
+- [✅] **Step 3: The live walkthrough (the headed go-gate, evidence for the PR)**
 
 **Announce first, wait for the owner's "go" before firing any headed-browser login** (the #310 census rule — the timer flow ends "ready — say go", never auto-fires). With the go: drive a HEADED browser over the dev stack (the same seed from Step 2 still pending). Walk, in order, capturing each numbered state to the evidence dir (light first, then dark via the topbar toggle):
 
@@ -1198,7 +1198,7 @@ Then capture with a throwaway HEADLESS Playwright script kept OUTSIDE the repo (
 
 Then dark theme: repeat 1-6 (the amber badge's dark leg, the primary accept confirm, the panel surfaces — the #217 law). Write `walkthrough.md` narrating each state's observed outcome. Any deviation is a defect — fix it in the owning task's file, re-run that task's gates, commit `fix(admin): … (#314)`, and restart this task from Step 1.
 
-- [ ] **Step 4: `docs/progress.md` — the dated entry (newest first, pinned)**
+- [✅] **Step 4: `docs/progress.md` — the dated entry (newest first, pinned)**
 
 Insert as the first entry under `# Progress` (replace `2026-11-XX` with the docs commit's date):
 
@@ -1206,7 +1206,7 @@ Insert as the first entry under `# Progress` (replace `2026-11-XX` with the docs
 - **2026-11-XX — M9 ticket 1, the Notification (#314) — build complete on `feat/314-notification`, PR pending.** The admin topbar's inert bell is live as the Notification (ADR-0028: a derived view over the pending-submissions queue): the badge is the pending count — an amber chip on the exported `SUBMISSION_STATUS_META.pending` family, capped `9+`, hidden at 0, the count riding the trigger's accessible name uncapped (`Notifications, {n} pending submissions`, the visual badge aria-hidden, the tooltip at n > 0 only); the panel is #304's ruled Variant C (400px popover, workbar header + count, divide-y dense rows with letters-only initials avatars, 2-line quote, person · submittedOn meta, icon-only ✓/✗ with hover hints through one hoisted TooltipProvider, the `Open Submissions` footer in every state) with the house's pending/error postures (skeleton rows on first load; `QueryErrorState` on a failed read — never a faked empty line); both actions confirm-guarded — the accept dialog is D5's ratified copy with its confirm in the PRIMARY fill via `GuardedConfirm`'s new `confirmVariant` prop (default `'destructive'`, every existing call site byte-identical), the reject dialog is the tab's verbatim — reusing the tab's pending-guarded mutation contracts over the unchanged shared `['admin', 'testimonial-submissions']` key (mounted at topbar scope = shell scope: badge and tab update together by construction; refetch on panel-open; no polling — ADR-0028's absences hold); the footer deep-links `?tab=submissions`, a new tolerant search param on the testimonials route (the audit-log precedent) with the screen's tab now URL-driven. Owner-reacted as-rendered both themes. Admin-only, zero new dependencies — zero api/types/landing/db/ui changes (the D11 soft ceiling proven by the diff); admin floor 31 files / 325 tests (+13 notification-seam its, +2 tab-param its).
 ```
 
-- [ ] **Step 5: `AGENTS.md` + `docs/plan.md` — the pinned edits**
+- [✅] **Step 5: `AGENTS.md` + `docs/plan.md` — the pinned edits**
 
 (a) In *Current status of `pnpm test`*, replace the admin floor head (occurs once — verified at plan time):
 
@@ -1258,7 +1258,7 @@ with:
 
 (The two Global Search boxes and the Verify box stay unticked — they are #315/#316/#317's deliverables; #314 never ticks them.)
 
-- [ ] **Step 6: The docs commit**
+- [✅] **Step 6: The docs commit**
 
 Tick this plan's executed boxes (`- [✅]`), then:
 
@@ -1267,11 +1267,11 @@ git add docs/progress.md AGENTS.md docs/plan.md docs/superpowers/plans/2026-11-1
 git commit -m "docs(m9): #314 lands the Notification - progress, AGENTS floor, the M9 roadmap tick (#314)"
 ```
 
-- [ ] **Step 7: PR + squash merge**
+- [✅] **Step 7: PR + squash merge**
 
 Push `feat/314-notification`; open the PR against main titled `M9: the Notification — bell badge, pending panel, confirm-guarded accept/reject (#314)`; body: the fourteen ACs each answered with its evidence pointer — the badge/aria laws (walkthrough states 1-2 + `task-4-grep.txt`), Variant C panel (state 3 + the variants-verdict), refetch-on-open + empty + footer (states 3, 6, 7), `confirmVariant` (Task 2's grep gate + the byte-identical proof), the D5/tab dialogs (state 4-5), the mutation law (states 4-5), the pending vocabulary (states 4-5 with the delay trick), the absences (`task-4-grep.txt`'s zero count), the shared key (state 4's badge+tab update), the lib-seam suite (+15 its, floor 31/325), the owner reaction (Step 2's verdict), the soft ceiling (Step 1's empty diff-stat), `pnpm check` green + docs updated + the v1-pick triage (Step 8). Squash-merge.
 
-- [ ] **Step 8: The v1 pick (per `docs/agents/v1-picks.md`)**
+- [✅] **Step 8: The v1 pick (per `docs/agents/v1-picks.md`)**
 
 Run the path pass on the squash SHA:
 
@@ -1290,7 +1290,7 @@ git add docs/agents/v1-picks.md
 git commit -m "docs(v1-picks): #<PR> ledger row - the #314 Notification pick"
 ```
 
-- [ ] **Step 9: Issue closes + graphify**
+- [✅] **Step 9: Issue closes + graphify**
 
 Tick #314's fourteen AC boxes in its body, then close it with the AC → evidence mapping:
 
