@@ -1,14 +1,14 @@
 // Admin-local Tier 2 (spec #94): the sticky top bar — sidebar collapse
-// trigger, search, notifications (#59 variant A). Search is present but
-// inert: nothing to search until M5's catalog + M4's auth land; the IA is
-// the deliverable, the wiring is theirs.
+// trigger, search, notifications (#59 variant A). The bell is live since
+// M9 #314: the Notification, a derived view over the pending-submissions
+// queue (ADR-0028). Search stays present but inert — Global Search is
+// #315's ticket, not this one's; the IA is unchanged.
 
-import { Button } from '@sevendays/ui/components/button';
 import { Input } from '@sevendays/ui/components/input';
 import { Separator } from '@sevendays/ui/components/separator';
 import { SidebarTrigger } from '@sevendays/ui/components/sidebar';
 import { ThemeToggle } from '@sevendays/ui/components/theme-toggle';
-import { Bell } from 'lucide-react';
+import { Notification } from '#/components/notification';
 
 export function AdminTopbar() {
   return (
@@ -21,9 +21,7 @@ export function AdminTopbar() {
         aria-label='Search'
         className='hidden w-56 sm:block'
       />
-      <Button variant='ghost' size='icon' aria-label='Notifications' className='ml-auto'>
-        <Bell aria-hidden='true' />
-      </Button>
+      <Notification />
       <ThemeToggle />
     </header>
   );
