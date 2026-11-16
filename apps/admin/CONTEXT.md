@@ -12,6 +12,14 @@ _Avoid_: settings, config
 The catalog action of hiding a Service Package from the landing site. Deliberately not "delete" — the package stays in the data model.
 _Avoid_: delete, remove, archive
 
+**Notification**:
+The top bar's derived view of pending work — the badge counts pending Testimonial Submissions and the panel lists those submissions themselves. No Notification row exists anywhere: the count is shared by all staff, and an item clears only by moderation.
+_Avoid_: inbox, alert, message
+
+**Global Search**:
+The top bar's inline search over the four CMS entities (packages, branches, testimonials, gallery) — the top-bar Input is the typing surface (⌘K/Ctrl+K focuses it) and results drop from it; client-side over the same cached lists the screens read, so a result can never disagree with the screen it lands on. A result lands on its entity's list screen with the row highlighted; it never opens an editor.
+_Avoid_: command palette (the losing anatomy), omnibar, quick find
+
 **Staff User**:
 A studio employee who signs in to the admin site with an email and password provisioned by the owner (`create-staff`, `docs/staff-provisioning.md`) — there is no self-serve sign-up. Carries a role (ADR-0018): the owner holds `admin` — the only role BetterAuth's user-management endpoints answer to — staff hold `staff`.
 _Avoid_: member, account (for the person), customer
