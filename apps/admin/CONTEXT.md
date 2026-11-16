@@ -36,6 +36,14 @@ _Avoid_: dashboard, home, overview
 The owner-only screen presenting the CMS's durable who/what/when record (the Audit Log table, owned by the API's context) as a filterable, newest-first table. Person-level by nature — it names who acted — so it never joins the all-staff Analytics Dashboard.
 _Avoid_: activity feed, change history, changelog
 
+**Notification**:
+The top bar's derived view of pending work — the badge counts pending Testimonial Submissions and the panel lists those submissions themselves. No Notification row exists anywhere: the count is shared by all staff, and an item clears only by moderation.
+_Avoid_: inbox, alert, message
+
+**Global Search**:
+The top bar's inline search over the four CMS entities (packages, branches, testimonials, gallery) — the top-bar Input is the typing surface (⌘K/Ctrl+K focuses it) and results drop from it; client-side over the same cached lists the screens read, so a result can never disagree with the screen it lands on. A result lands on its entity's list screen with the row highlighted; it never opens an editor.
+_Avoid_: command palette (the losing anatomy), omnibar, quick find
+
 **Staff User**:
 A studio employee who signs in to the admin site with an email and password — there is no self-serve sign-up; the owner provisions users (Users Page; the CLI runbook is the bootstrap/break-glass path). Carries a role (ADR-0018): the owner holds `admin` — the only role BetterAuth's user-management endpoints answer to — staff hold `staff`.
 _Avoid_: member, account (for the person), customer
