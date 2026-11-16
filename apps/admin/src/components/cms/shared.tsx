@@ -158,7 +158,8 @@ export function StatusBadge({ isActive }: { isActive: boolean }) {
 // badge discipline (outline Badge + hue family, audit-log-screen.tsx:57)
 // on the three moderation states.
 // Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families — never promote into packages/ui.
-const SUBMISSION_STATUS_META: Record<
+/** Exported for the Notification's badge (M9 #314): the amber pending family rides the one source — no drift. */
+export const SUBMISSION_STATUS_META: Record<
   TestimonialSubmissionStatus,
   { label: string; className: string }
 > = {
@@ -576,6 +577,7 @@ export function GuardedConfirm({
   confirmLabel,
   cancelLabel = 'Cancel',
   busyLabel,
+  confirmVariant = 'destructive',
   pending,
   blockers,
   open,
@@ -588,6 +590,13 @@ export function GuardedConfirm({
   /** The stay-side label — 'Cancel' everywhere except the leaving-mid-upload guard (#220), where 'Stay' reads as the answer. */
   cancelLabel?: string;
   busyLabel: string;
+  /**
+   * The confirm button's pair — 'destructive' everywhere except the
+   * accept-publishes guard, which takes 'default' (the primary fill):
+   * owner-ruled at the #304 prototype reaction, 2026-11-16. Every existing
+   * call site is unchanged (destructive stays the default).
+   */
+  confirmVariant?: 'default' | 'destructive';
   pending: boolean;
   blockers: string[];
   open: boolean;
@@ -662,7 +671,7 @@ export function GuardedConfirm({
               <AlertDialogFooter>
                 <AlertDialogCancel disabled={pending}>{cancelLabel}</AlertDialogCancel>
                 <AlertDialogAction
-                  variant='destructive'
+                  variant={confirmVariant}
                   disabled={pending}
                   aria-busy={pending}
                   onClick={onConfirm}
