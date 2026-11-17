@@ -792,8 +792,8 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
     refetch: refetchPhotos,
   } = useQuery(adminGalleryQueries.photos());
   // M9 #316: the ?focus= landing — scroll + highlight the matched card
-  // (data-row-id on the grid card below), once photos have arrived.
-  useFocusLanding(focus, photos !== undefined);
+  // (data-row-id on the grid card below), once BOTH reads have arrived.
+  useFocusLanding(focus, photos !== undefined && categories !== undefined);
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   // 'all' = the All photos rail entry; otherwise a category id.
