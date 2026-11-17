@@ -1,0 +1,257 @@
+// The Global Search dropdown (M9 #315, glossary — never "command palette" /
+// "omnibar" / "quick find"): the topbar Input IS the typing surface; results
+// drop from it in a non-modal anchored popover, the page visible around them
+// — searching never blanks the working context. The engine is the hand-wired
+// lib seam (#/lib/global-search, D7: fuse.js, identity > body — cmdk's
+// built-in filter CANNOT serve this posture, it only filters items driven by
+// its own Command.Input inside its tree, and this posture types into the
+// topbar, outside it); cmdk runs here as the headless listbox core
+// (shouldFilter={false}) for keyboard roving + selection only. The index
+// builds over useQueries on the five unchanged #288 factories at topbar
+// (= shell) scope: same keys as the screens, full arrays with deactivated
+// rows included, freshness inherited from the seam's own contracts — zero
+// new fetch machinery. useDeferredValue keeps typing responsive; selection
+// navigates via the seam's ?focus= href (the landing — scroll + highlight —
+// is #316's). Below sm the Input stays hidden by the house law; the narrow
+// form (magnifier + sheet) is #316's, not this ticket's. Posture + anatomy
+// ported from prototype/search-ux-variants variant B (#303's ruled pick) —
+// values and rulings, never the branch. The kbd chip's GLYPH is
+// platform-picked (⌘K on Apple, Ctrl K elsewhere — owner-ruled 2026-11-17);
+// the shortcut BINDING never sniffs: ⌘K and Ctrl+K, one rule (D6).
+import { Input } from '@sevendays/ui/components/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@sevendays/ui/components/popover';
+import { useQueries } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { Command } from 'cmdk';
+import type { LucideIcon } from 'lucide-react';
+import { ImageIcon, MapPin, Package, Quote } from 'lucide-react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  adminBranchQueries,
+  adminGalleryQueries,
+  adminPackageQueries,
+  adminTestimonialQueries,
+} from '#/lib/cms-queries';
+import {
+  buildSearchIndex,
+  runSearch,
+  SEARCH_COPY,
+  type SearchHit,
+  searchDropdownState,
+} from '#/lib/global-search';
+
+/** The roving/selection keys forwarded into the cmdk tree by the bridge below. */
+const ROVING_KEYS = new Set(['ArrowDown', 'ArrowUp', 'Home', 'End', 'Enter']);
+
+const GROUP_ICONS: Record<SearchHit['group'], LucideIcon> = {
+  packages: Package,
+  branches: MapPin,
+  testimonials: Quote,
+  gallery: ImageIcon,
+};
+
+const KBD_CHIP =
+  'pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 inline-flex h-5 min-w-5 items-center justify-center rounded border bg-muted px-1 font-mono text-[10px] font-medium text-muted-foreground';
+
+const GROUP_CLASS =
+  '[&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium';
+
+export function GlobalSearch() {
+  // The index source (D8): the #288 factories, UNCHANGED — useQueries reads
+  // the five cached lists at topbar scope so a result can never disagree
+  // with the screen it lands on; deactivated rows ride the same arrays the
+  // lists render.
+  const [packages, branches, testimonials, photos, categories] = useQueries({
+    queries: [
+      adminPackageQueries.all(),
+      adminBranchQueries.all(),
+      adminTestimonialQueries.all(),
+      adminGalleryQueries.photos(),
+      adminGalleryQueries.categories(),
+    ],
+  });
+
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  // Typing stays responsive: the Input tracks `query` immediately, the
+  // deferred copy drives the (memoized) fuse pass (D7).
+  const deferredQuery = useDeferredValue(query);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const commandRef = useRef<HTMLDivElement | null>(null);
+  const navigate = useNavigate();
+
+  const index = useMemo(
+    () =>
+      buildSearchIndex({
+        packages: packages.data ?? [],
+        branches: branches.data ?? [],
+        testimonials: testimonials.data ?? [],
+        photos: photos.data ?? [],
+        categories: categories.data ?? [],
+      }),
+    [packages.data, branches.data, testimonials.data, photos.data, categories.data]
+  );
+  const groups = useMemo(() => runSearch(index, deferredQuery), [index, deferredQuery]);
+  const state = searchDropdownState(deferredQuery, groups);
+
+  // The chip's GLYPH alone is platform-picked (owner-ruled 2026-11-17);
+  // mounted-gated so SSR markup and the first client render agree — no
+  // hydration mismatch, the chip fills after mount.
+  const [kbdGlyph, setKbdGlyph] = useState('');
+  useEffect(() => {
+    setKbdGlyph(/mac|iphone|ipad|ipod/i.test(navigator.platform) ? '⌘K' : 'Ctrl K');
+  }, []);
+
+  // ⌘K and Ctrl+K, ONE rule — no platform sniffing on the binding (D6):
+  // both focus the Input and open the dropdown.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        inputRef.current?.focus();
+        setOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  // The keyboard bridge: focus lives in the topbar Input, OUTSIDE the cmdk
+  // tree (cmdk 1.1.1 handles keys via onKeyDown on its root div — dist-
+  // verified), so the roving/selection keys are re-dispatched onto the
+  // Command root, where cmdk's own roving + selection take over. Escape
+  // closes deterministically — in this posture focus never enters the
+  // content, so the popover's own Escape arm cannot be relied on.
+  const onTypingKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setOpen(false);
+      return;
+    }
+    if (ROVING_KEYS.has(event.key)) {
+      event.preventDefault();
+      commandRef.current?.dispatchEvent(
+        new KeyboardEvent('keydown', { key: event.key, bubbles: true })
+      );
+    }
+  };
+
+  // Selection lands on the entity's list screen via the seam's ?focus= href
+  // (the landing — scroll + highlight — is #316's). The query persists:
+  // reopening resumes where the eye was; nothing is cleared.
+  const land = (hit: SearchHit) => {
+    setOpen(false);
+    void navigate({ href: hit.focusUrl });
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      {/* The trigger is a passive anchor div wrapping the Input (Base UI has
+          no Popover.Anchor part): the Input's clicks stop propagation so the
+          typing surface never toggle-closes its own dropdown; focus and
+          typing open it. Below sm the Input stays hidden (the house law) —
+          the narrow form is #316's. */}
+      <PopoverTrigger render={<div className='flex min-w-0 items-center gap-1' />}>
+        <div className='relative hidden min-w-0 sm:block'>
+          <Input
+            ref={inputRef}
+            type='search'
+            value={query}
+            onClick={(event) => event.stopPropagation()}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setOpen(true);
+            }}
+            onFocus={() => setOpen(true)}
+            onKeyDown={onTypingKeyDown}
+            placeholder='Search…'
+            aria-label='Search'
+            className='w-56 pr-10'
+          />
+          <kbd className={KBD_CHIP}>{kbdGlyph}</kbd>
+        </div>
+      </PopoverTrigger>
+      <PopoverContent
+        align='start'
+        sideOffset={8}
+        className='w-[min(24rem,calc(100vw-1.5rem))] gap-0 p-0'
+      >
+        {/* cmdk as the headless listbox core ONLY (D7): shouldFilter={false}
+            — matching is the lib seam's; roving + selection are cmdk's. */}
+        <Command ref={commandRef} shouldFilter={false} className='flex flex-col'>
+          <Command.List className='max-h-[320px] overflow-y-auto p-2'>
+            {state === 'hint' ? (
+              <div className='px-4 py-10 text-center'>
+                <p className='text-muted-foreground text-sm'>{SEARCH_COPY.hint}</p>
+              </div>
+            ) : state === 'empty' ? (
+              <div className='px-4 py-10 text-center'>
+                <p className='text-muted-foreground text-sm'>
+                  {SEARCH_COPY.noResults(deferredQuery)}
+                </p>
+              </div>
+            ) : (
+              groups.map((group) => (
+                <Command.Group key={group.key} heading={group.label} className={GROUP_CLASS}>
+                  {group.hits.map((hit) => (
+                    <SearchResultItem key={hit.id} hit={hit} onSelect={land} />
+                  ))}
+                  {group.overflow > 0 ? (
+                    // An indicator, never a selectable item (D9).
+                    <div className='text-muted-foreground px-2 py-1.5 text-xs'>
+                      {SEARCH_COPY.overflow(group.overflow, group.label)}
+                    </div>
+                  ) : null}
+                </Command.Group>
+              ))
+            )}
+          </Command.List>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function SearchResultItem({
+  hit,
+  onSelect,
+}: {
+  hit: SearchHit;
+  onSelect: (hit: SearchHit) => void;
+}) {
+  const Icon = GROUP_ICONS[hit.group];
+  return (
+    <Command.Item
+      value={hit.id}
+      onSelect={() => onSelect(hit)}
+      className='data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-2 text-sm'
+    >
+      <Icon aria-hidden='true' className='text-muted-foreground size-4 shrink-0' />
+      <span className='min-w-0 flex-1'>
+        <span className='flex items-baseline gap-1.5'>
+          <span className='truncate'>{hit.primary}</span>
+          {hit.deactivated ? (
+            <span className='text-muted-foreground shrink-0 text-xs'>
+              {SEARCH_COPY.deactivated}
+            </span>
+          ) : null}
+        </span>
+        {hit.secondary !== '' ? (
+          <span className='text-muted-foreground block truncate text-xs'>{hit.secondary}</span>
+        ) : null}
+      </span>
+      {hit.price !== '' ? (
+        <span className='text-muted-foreground shrink-0 text-xs tabular-nums'>{hit.price}</span>
+      ) : null}
+      {hit.group === 'gallery' && hit.thumbUrl !== null ? (
+        // The muted thumb slot — the #287 versioned thumb renders into it
+        // (D9). alt='': decorative, the identity line names the row.
+        <img
+          src={hit.thumbUrl}
+          alt=''
+          className='bg-muted size-7 shrink-0 rounded border object-cover'
+        />
+      ) : null}
+    </Command.Item>
+  );
+}
