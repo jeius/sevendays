@@ -50,6 +50,7 @@ import {
   StatusBadge,
   StatusSegmented,
 } from '#/components/cms/shared';
+import { useFocusLanding } from '#/components/use-focus-landing';
 import {
   presignAdminCoverUpload,
   removeAdminBranch,
@@ -59,6 +60,7 @@ import {
 import { bulkConfirmName } from '#/lib/bulk-counts';
 import { adminBranchQueries } from '#/lib/cms-queries';
 import { type CoverUploadStatus, uploadCover } from '#/lib/cover-upload';
+import { FOCUS_ROW_CLASS } from '#/lib/focus-landing';
 import type { BranchEditorState, LightFieldErrors } from '#/lib/light-entity-state';
 import {
   branchStateFromRead,
@@ -94,8 +96,11 @@ interface FlipInput {
 /** The pending posture's fixed four rows — stable keys, never reordered. */
 const PENDING_ROW_KEYS = ['row-1', 'row-2', 'row-3', 'row-4'];
 
-export function BranchesScreen() {
+export function BranchesScreen({ focus }: { focus: string | undefined }) {
   const { data: branches, isPending, isError, refetch } = useQuery(adminBranchQueries.all());
+  // M9 #316: the ?focus= landing — scroll + highlight the matched row
+  // (data-row-id below on both postures), once data has arrived.
+  useFocusLanding(focus, branches !== undefined);
   const queryClient = useQueryClient();
   // T3: controlled disclosure — one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -494,7 +499,8 @@ export function BranchesScreen() {
                           toggle. */}
                         <ExpandRow
                           expanded={expanded}
-                          className='group'
+                          className={`group ${FOCUS_ROW_CLASS}`}
+                          data-row-id={row.id}
                           onClick={() => toggleExpanded(row.id)}
                         >
                           <BulkSelectCell
@@ -574,7 +580,11 @@ export function BranchesScreen() {
               {rows.map((row) => {
                 const expanded = expandedId === row.id;
                 return (
-                  <div key={row.id} className='border-border border-b py-2 last:border-b-0'>
+                  <div
+                    key={row.id}
+                    data-row-id={row.id}
+                    className={`border-border border-b py-2 last:border-b-0 ${FOCUS_ROW_CLASS}`}
+                  >
                     <button
                       type='button'
                       aria-expanded={expanded}
