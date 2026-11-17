@@ -73,6 +73,7 @@ import {
   StatusSegmented,
 } from '#/components/cms/shared';
 import { SubmissionsTab } from '#/components/testimonials/submissions-tab';
+import { useFocusLanding } from '#/components/use-focus-landing';
 import {
   removeAdminTestimonial,
   saveAdminTestimonialCreate,
@@ -80,6 +81,7 @@ import {
   saveAdminTestimonialUpdate,
 } from '#/lib/admin.functions';
 import { adminTestimonialQueries } from '#/lib/cms-queries';
+import { FOCUS_ROW_CLASS } from '#/lib/focus-landing';
 import { buildTestimonialOrderPayload, reorderVisiblePhotos } from '#/lib/gallery-state';
 import type { LightFieldErrors, TestimonialEditorState } from '#/lib/light-entity-state';
 import {
@@ -141,7 +143,8 @@ function SortableTestimonialRow({
       ref={setNodeRef}
       expanded={expanded}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={isDragging ? 'group relative z-10 bg-card shadow-sm' : 'group'}
+      data-row-id={id}
+      className={`${isDragging ? 'group relative z-10 bg-card shadow-sm' : 'group'} ${FOCUS_ROW_CLASS}`}
       onClick={onClick}
     >
       {/* The grip is the ONLY drag activator. Cell-level stopPropagation
@@ -189,9 +192,10 @@ function SortableStackRow({
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
+      data-row-id={id}
       className={`border-border border-b py-2 last:border-b-0 ${
         isDragging ? 'relative z-10 bg-card shadow-sm' : ''
-      }`}
+      } ${FOCUS_ROW_CLASS}`}
     >
       <div className='flex items-start gap-2'>
         <button
@@ -218,6 +222,9 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
     isError,
     refetch,
   } = useQuery(adminTestimonialQueries.all());
+  // M9 #316: the ?focus= landing — scroll + highlight the matched row on
+  // the published tab (a focus-only URL defaults there by the #314 law).
+  useFocusLanding(search.focus, testimonials !== undefined);
   const queryClient = useQueryClient();
   // T3: controlled disclosure — one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);

@@ -2,16 +2,21 @@
 // point. The route mounts the pinned PageHeader + GalleryScreen — its
 // `Upload photos` action is a label wired by htmlFor to the hidden file
 // input that lives INSIDE the screen, so this file holds no logic beyond
-// the render (the tray state is the screen's).
+// the render (the tray state is the screen's). M9 #316: the ?focus= deep
+// link — a Global Search result lands here with the matched card scrolled
+// into view + highlighted (tolerant by construction: absent/garbage drops,
+// an unknown id no-ops).
 import { Button } from '@sevendays/ui/components/button';
 import { createFileRoute } from '@tanstack/react-router';
 import { ImagePlus } from 'lucide-react';
 import { PageHeader } from '#/components/cms/shared';
 import { GalleryScreen } from '#/components/gallery/gallery-screen';
 import { cmsRoutePriming, primeCmsQueries } from '#/lib/cms-queries';
+import { focusSearchSchema } from '#/lib/focus-landing';
 
 export const Route = createFileRoute('/_shell/gallery')({
   head: () => ({ meta: [{ title: 'Gallery | Sevendays Admin' }] }),
+  validateSearch: focusSearchSchema,
   // M8 #288: hover-intent priming — the photos + categories reads
   // (fire-and-forget, never blocks).
   loader: ({ context: { queryClient } }) => {
@@ -21,6 +26,7 @@ export const Route = createFileRoute('/_shell/gallery')({
 });
 
 function GalleryPage() {
+  const { focus } = Route.useSearch();
   return (
     <>
       <PageHeader
@@ -60,7 +66,7 @@ function GalleryPage() {
           </>
         }
       />
-      <GalleryScreen />
+      <GalleryScreen focus={focus} />
     </>
   );
 }
