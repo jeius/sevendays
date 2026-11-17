@@ -78,7 +78,7 @@ The landing's whole test surface plus every pure value Task 2 consumes. No compo
 
 **Not here:** any component, hook, or route edit (Task 2); the sheet or magnifier (Task 3); any change to `global-search.ts` (#315's emit seam stays byte-identical — `focusUrlFor` already produces exactly what this seam parses); any timing/DOM behavior (the hook is Task 2); new busy labels or toasts (nothing here is async-visible).
 
-- [ ] **Step 1: Write the failing tests**
+- [✅] **Step 1: Write the failing tests**
 
 New file `apps/admin/src/lib/focus-landing.test.ts` — the whole file:
 
@@ -136,7 +136,7 @@ describe('the pinned constants (the plan-time rulings, 2026-11-17)', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [✅] **Step 2: Run the tests to verify they fail**
 
 ```bash
 pnpm --filter @sevendays/admin test -- --run focus-landing
@@ -144,7 +144,7 @@ pnpm --filter @sevendays/admin test -- --run focus-landing
 
 Expected: FAIL — the file fails at collection (`Failed to resolve import "./focus-landing.js"` — the module does not exist yet, so none of its 8 its run). Record the output in `.superpowers/sdd/2026-11-17-316-narrow-form-focus-landing/task-1-red.txt`.
 
-- [ ] **Step 3: Write the minimal implementation**
+- [✅] **Step 3: Write the minimal implementation**
 
 New file `apps/admin/src/lib/focus-landing.ts` — the whole file:
 
@@ -215,7 +215,7 @@ And add the import beside the existing `zod` import (top of file, after the `@se
 import { focusSearchParam } from './focus-landing';
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [✅] **Step 4: Run the tests to verify they pass**
 
 ```bash
 pnpm --filter @sevendays/admin test -- --run
@@ -223,7 +223,7 @@ pnpm --filter @sevendays/admin test -- --run
 
 Expected: PASS — the full admin suite runs (admin's `test` script is bare `vitest run`, so the full-suite floor IS the verification): **Test Files 33 passed (33) · Tests 352 passed (352)** (the 344 baseline + the 8 new its; the two existing tab-param pins in the suite still pass — the extended schema only adds an optional field).
 
-- [ ] **Step 5: Lint, format, typecheck**
+- [✅] **Step 5: Lint, format, typecheck**
 
 ```bash
 pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/admin typecheck
@@ -231,7 +231,7 @@ pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/admin typecheck
 
 Expected: both green (accept `fix`'s rewrites — import order especially; re-run the suite from Step 4 if it rewrote anything).
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/admin/src/lib/focus-landing.ts apps/admin/src/lib/focus-landing.test.ts apps/admin/src/lib/submissions-state.ts
@@ -253,7 +253,7 @@ The uniform mechanism goes live: the three single-param routes register `focusSe
 
 **Not here:** the sheet or magnifier (Task 3); any change to `focusUrlFor`/`global-search.ts` (the emit side is #315's, byte-identical); any editor auto-open (by construction — nothing here navigates to `/packages/$packageId/edit` or opens a Sheet); segment or category-filter coercion on landing (the tolerant no-op is the ruled posture — the `'all'` defaults already render deactivated rows); any new query key, prefetch, or fetch machinery (the index law); `id=` on rows (the dual-posture duplicate law — `data-row-id` only); any highlight state threaded through the dnd wrappers (the hook is imperative).
 
-- [ ] **Step 1: New file `apps/admin/src/components/use-focus-landing.ts`** — the whole file:
+- [✅] **Step 1: New file `apps/admin/src/components/use-focus-landing.ts`** — the whole file:
 
 ```ts
 // The ?focus= landing hook (M9 #316, D10's honoring half): scrolls the
@@ -309,7 +309,7 @@ export function useFocusLanding(focus: string | undefined, ready: boolean): void
 }
 ```
 
-- [ ] **Step 2: The three routes (whole-file replaces)**
+- [✅] **Step 2: The three routes (whole-file replaces)**
 
 `apps/admin/src/routes/_shell.packages.index.tsx` — the whole file:
 
@@ -466,7 +466,7 @@ function GalleryPage() {
 }
 ```
 
-- [ ] **Step 3: The four screens (pinned find/replace pairs)**
+- [✅] **Step 3: The four screens (pinned find/replace pairs)**
 
 Every pair below occurs exactly once in its file at the anchored site (verified at plan time; match the on-disk indentation — anchors were read at main `4765021`).
 
@@ -661,7 +661,7 @@ becomes:
 
 (iv) The imports — the same two lines as packages (v).
 
-- [ ] **Step 4: Grep gates — the landing law is present, the fences hold**
+- [✅] **Step 4: Grep gates — the landing law is present, the fences hold**
 
 ```bash
 grep -c "validateSearch" apps/admin/src/routes/_shell.packages.index.tsx apps/admin/src/routes/_shell.branches.tsx apps/admin/src/routes/_shell.gallery.tsx apps/admin/src/routes/_shell.testimonials.tsx
@@ -674,7 +674,7 @@ grep -rn "packages/\$packageId/edit\|/packages/new" apps/admin/src/components/us
 
 Expected: validateSearch → `1` in each of the four route files (testimonials' is #314's, unchanged); data-row-id → packages `3`, branches `3`, testimonials `2`, gallery `2` (each screen's stamped ELEMENTS — packages/branches/testimonials two postures, gallery one card — PLUS one comment literal in the packages/branches/gallery hook-call comments; testimonials' hook comment names no attribute); FOCUS_ROW_CLASS → packages `3`, branches `3`, testimonials `3`, gallery `2` (the import line + one per stamped element); useFocusLanding → `2` in each screen (the import + the call); scrollIntoView → `1`; the last grep → **no output** (the landing never names an editor route — the no-auto-open law, mechanically). Save as `.superpowers/sdd/2026-11-17-316-narrow-form-focus-landing/task-2-grep.txt`.
 
-- [ ] **Step 5: Lint, format, test, typecheck, build**
+- [✅] **Step 5: Lint, format, test, typecheck, build**
 
 ```bash
 pnpm --filter @sevendays/admin fix
@@ -685,7 +685,7 @@ pnpm --filter @sevendays/admin build
 
 Expected: all green; the suite stays at **Test Files 33 passed (33) · Tests 352 passed (352)** (no suite change in this task — the landing is component-side, walked live in Task 4); the build succeeds with the new imports in the four routes' graphs (the #218 execution ruling). The existing typed-search call sites (the Notification's `Link search={{ tab: 'submissions' }}`, the screen's `navigate({ to: '/testimonials', search: … })`, the sidebar's plain `to=` links) compile unchanged — the all-optional `focus` field accepts every existing literal (the recon note's assignability argument, now proven by this typecheck).
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/admin/src/components/use-focus-landing.ts apps/admin/src/routes/_shell.packages.index.tsx apps/admin/src/routes/_shell.branches.tsx apps/admin/src/routes/_shell.gallery.tsx apps/admin/src/components/packages/packages-table.tsx apps/admin/src/components/branches/branches-screen.tsx apps/admin/src/components/testimonials/testimonials-screen.tsx apps/admin/src/components/gallery/gallery-screen.tsx
@@ -705,11 +705,11 @@ The D6 narrow half: the results body extracts into a shared `GlobalSearchResults
 
 **Not here:** any change to `#/lib/global-search.ts` (the emit side, the weights, `SEARCH_COPY` — #315 byte-identical); any new dependency or `packages/ui` edit (the Sheet primitive is consumed as installed); any `?focus=`/landing change (Task 2's); a second ⌘K binding or any platform sniffing on the binding (ONE rule — only the surface picks, by viewport); cmdk's built-in filter (`shouldFilter={false}` on both trees — the engine law); a kbd chip in the sheet (the chip belongs to the topbar Input's posture; the prototype's sheet row carries none); browse-all (the sidebar navigates); clearing the query on selection (it persists, both postures sharing one state); the Notification or any other topbar member.
 
-- [ ] **Step 1: Load the UI/UX skill set**
+- [✅] **Step 1: Load the UI/UX skill set**
 
 Per AGENTS.md and the ticket's Execution notes: `prototype` + `ui-ux-pro-max`, plus `tanstack-router-best-practices` and `design-system`. The render is pinned below — the skills inform judgment (the sheet's elevation + overlay read in both themes, the input row's proportions, the highlight's contrast in dark), not re-composition.
 
-- [ ] **Step 2: Replace `apps/admin/src/components/global-search.tsx` whole** — the new file:
+- [✅] **Step 2: Replace `apps/admin/src/components/global-search.tsx` whole** — the new file:
 
 ```tsx
 // The Global Search dropdown + its narrow form (M9 #315/#316, glossary —
@@ -1091,7 +1091,7 @@ function SearchResultItem({
 }
 ```
 
-- [ ] **Step 3: Grep gates — the posture laws are present, the fences hold**
+- [✅] **Step 3: Grep gates — the posture laws are present, the fences hold**
 
 ```bash
 grep -c "sm:hidden" apps/admin/src/components/global-search.tsx
@@ -1109,7 +1109,7 @@ grep -c "adminPackageQueries.all()\|adminBranchQueries.all()\|adminTestimonialQu
 
 Expected: `1` (the magnifier's class — the ONE literal; a second means something else crept below sm); `2` (the sheet's input + the header comment's mechanism mention); `1` (the surface picker — the binding itself stays the single `(event.metaKey || event.ctrlKey)` rule); `1` (the top sheet); `2` (the width law on both surfaces); `4` (both Command roots + two comment mentions — the header's "on BOTH trees" and the popover content's own core comment); `1` (the dropdown's bridge — exactly one, the sheet needs none); `1` (the sheet input's autofocus); **`0`** (no palette machinery, no polling, no prefetch — a nonzero count is a re-ruling, stop and report); the copy greps show every customer-visible string routed through `SEARCH_COPY` (hint, noResults, overflow, deactivated — four distinct member accesses); `5` (the five unchanged #288 factories — the index law). Save as `.superpowers/sdd/2026-11-17-316-narrow-form-focus-landing/task-3-grep.txt`.
 
-- [ ] **Step 4: Lint, format, test, typecheck, build**
+- [✅] **Step 4: Lint, format, test, typecheck, build**
 
 ```bash
 pnpm --filter @sevendays/admin fix
@@ -1120,7 +1120,7 @@ pnpm --filter @sevendays/admin build
 
 Expected: all green; the suite stays at **Test Files 33 passed (33) · Tests 352 passed (352)** (no suite change — the sheet is component-side, owner-reacted + walked in Task 4); the build succeeds (the topbar graph already rides every route; the Sheet primitive join is the only graph change).
 
-- [ ] **Step 5: Commit**
+- [✅] **Step 5: Commit**
 
 ```bash
 git add apps/admin/src/components/global-search.tsx
@@ -1137,7 +1137,7 @@ git commit -m "feat(admin): the below-sm magnifier + top sheet - the narrow form
 
 **Not here:** any code change (a defect found by Step 2 or Step 3 goes back to its owning task's file with its own `fix(admin): … (#316)` commit, then this task re-runs from Step 1); #317's M9 roadmap box (the Verify box stays unticked — the exit-gate walkthrough + milestone closure are #317's ceremony; Task 4's walkthrough is THIS ticket's verification); `docs/plan.md` beyond the one checkbox; any mutation of dev-DB data (the admin `.env.local` DB is the LIVE pooler — this ticket's verification is read-only: navigation + search).
 
-- [ ] **Step 1: The full check + the soft-ceiling gates**
+- [✅] **Step 1: The full check + the soft-ceiling gates**
 
 ```bash
 pnpm check
@@ -1147,11 +1147,11 @@ git diff main...HEAD -- apps/admin/package.json
 
 Expected: `pnpm check` green across the repo; the first diff-stat **empty** (D11 proven — zero api/landing/packages/lockfile changes); the package.json diff **empty** (zero new dependencies — the strictest soft ceiling yet). Floors after this ticket: admin **33 files / 352 tests**; every other suite unchanged from AGENTS.md's recorded floors.
 
-- [ ] **Step 2: The owner's as-built variants reaction (BLOCKING — the #94 amendment + the three plan-time rulings)**
+- [✅] **Step 2: The owner's as-built variants reaction (BLOCKING — the #94 amendment + the three plan-time rulings)**
 
 The #94 amendment's round for this ticket: the as-built production render, both themes, light judged first — **the sheet is the reacted surface** (the ticket's AC names it), and the highlight lands in the same captures (it is #316's other new visual). Mechanics: bring up the dev stack (`pnpm --filter @sevendays/api dev` + `pnpm --filter @sevendays/admin dev` — serial note: never admin + landing together, both pin `:3000`); capture with a throwaway HEADLESS Playwright script kept OUTSIDE the repo (scripted sign-in with the controller's dev staff account — the owner's local credentials, never written to the evidence dir, never committed), emulating a **375×812 viewport** (below sm — the magnifier shows, the topbar Input hides). The states, light first, then the dark counterparts via a scripted `.dark` class toggle (the ThemeProvider's storage key — same as #315's round): (1) the topbar below sm with the magnifier visible + the Input gone; (2) the sheet OPEN from a magnifier click — the autofocused input (the capture's activeElement), the zero-query hint line, the centered width law, the overlay's dim; (3) a cross-group query's results in the sheet — the four fixed headers, item anatomy (icons, snippets, peso, thumbs); (4) a landing capture — Enter on a result, then the landed list screen mid-highlight (the tint visible on the matched row; screenshot within the 1.6 s window — a 1.2 s scripted delay after navigation) and the same screen after 2.5 s (the tint gone — the fade). Post the captures to #316 (`gh issue comment 316`) with the question: **the as-built narrow sheet + the focus landing in both themes — accept as-rendered, or findings?** — PLUS the three plan-time rulings surfaced for explicit confirm (they were pinned on the recommended options when the plan-time clarify round went unanswered): (a) the highlight = a primary tint fading after ~1.6 s, (b) `?focus=` persists in the URL (the `?tab=` law), (c) the sheet's input reuses `Search…` / `Search`. Then **BLOCK on the owner's answer** (the wait-for-owner rule — never assume while the owner may be AFK). Disposition per the house pattern: accept → proceed; findings → fix-batch commits on this branch (or follow-up issues if ruled out of scope), re-capture, re-ask; **a ruling overturned rewrites its pinned constant/law in the owning task's file** (e.g. `FOCUS_HIGHLIGHT_MS`, the persist law) as a `fix(admin): …` commit — the plan's pinned values bow to the owner, never the reverse. Record the verdict in `.superpowers/sdd/2026-11-17-316-narrow-form-focus-landing/variants-verdict.md`.
 
-- [ ] **Step 3: The live walkthrough (the headed go-gate, evidence for the PR)**
+- [✅] **Step 3: The live walkthrough (the headed go-gate, evidence for the PR)**
 
 **Announce first, wait for the owner's "go" before firing any headed-browser login** (the #310 census rule — the timer flow ends "ready — say go", never auto-fires). With the go: drive a HEADED browser over the dev stack (read-only — no data mutations; the whole walk is navigation + search + URL edits). Walk, in order, capturing each numbered state to the evidence dir:
 
@@ -1168,7 +1168,7 @@ The #94 amendment's round for this ticket: the as-built production render, both 
 
 Then dark theme: repeat 1, 2, 6, 7 (the tint's dark read, the sheet's dark elevation + overlay, the roving accent). Write `walkthrough.md` narrating each state's observed outcome. Any deviation is a defect — fix it in the owning task's file, re-run that task's gates, commit `fix(admin): … (#316)`, and restart this task from Step 1.
 
-- [ ] **Step 4: `docs/progress.md` — the dated entry (newest first, pinned)**
+- [✅] **Step 4: `docs/progress.md` — the dated entry (newest first, pinned)**
 
 Insert as the first entry under `# Progress` (replace `2026-11-XX` with the docs commit's date):
 
@@ -1176,7 +1176,7 @@ Insert as the first entry under `# Progress` (replace `2026-11-XX` with the docs
 - **2026-11-XX — M9 ticket 3, Search everywhere (#316) — build complete on `feat/316-narrow-form-focus-landing`, PR pending.** Global Search reaches the narrow viewport and lands results where the eye looks. Below `sm`, where the topbar Input is hidden by the house law, a magnifier-icon button (the prototype's verbatim ghost icon, `aria-label='Search'`) opens the same results as a **top sheet with its own input inside** (D6): the shared `GlobalSearchResults` body (extracted from the dropdown, the prototype's ruled-contract shape) renders both surfaces over one query state and the five unchanged #288 factories; the sheet's `Command.Input` lives INSIDE its cmdk tree, so roving/Enter are cmdk-native — no bridge (the structural mirror of #315's outside-typing finding) — Escape closes through the Sheet's Base UI dialog; `shouldFilter={false}` on both trees (the engine law); the same width law `w-[min(24rem,calc(100vw-1.5rem))]`, centered on the top side via `inset-x-0` + `mx-auto`; the ⌘K/Ctrl+K binding stays ONE rule with only its surface posture-picked by `matchMedia('(min-width: 640px)')` — dropdown + Input at sm+, sheet below. The **`?focus=` deep-link law** (D10) is honored by all four lists through one uniform mechanism: a tolerant uuid-shaped param (`focusSearchParam = z.uuid().optional().catch(undefined)`, the audit-log posture) registered on the packages/branches/gallery routes and joined to #314's `testimonialsSearchSchema`; the `useFocusLanding` hook scrolls the visible `[data-row-id]` row (the dual-posture law — desktop table + mobile stack both stamped, `offsetParent` picks the visible one) to viewport center and stamps `data-focused` for the ruled 1.6 s (a primary tint `bg-primary/10` + `ring-primary/30` fading on the rows' own transition-colors; the param persists per the `?tab=` law — the three plan-time rulings, pinned on the recommended options when the clarify round went unanswered and re-confirmed at the variants round). Editors never auto-open (by construction — the landing names list routes only); without the param the four screens behave exactly as before (the hook early-returns, the class paints nothing unattributed). Zero new dependencies — zero api/types/landing/db/ui/manifest changes (the D11 soft ceiling proven by the diff); admin floor 33 files / 352 tests (+8 focus-landing seam its: the param-read tolerance, the `?tab=` interplay, the pinned constants).
 ```
 
-- [ ] **Step 5: `AGENTS.md` + `docs/plan.md` — the pinned edits**
+- [✅] **Step 5: `AGENTS.md` + `docs/plan.md` — the pinned edits**
 
 (a) In *Current status of `pnpm test`*, replace the admin floor head (occurs once — verified at plan time):
 
@@ -1228,7 +1228,7 @@ with the same line ticked:
 
 (The Verify box stays unticked — it is #317's deliverable; #316 never ticks it.)
 
-- [ ] **Step 6: The docs commit**
+- [✅] **Step 6: The docs commit**
 
 Tick this plan's executed boxes (`- [✅]`), then:
 
@@ -1237,11 +1237,11 @@ git add docs/progress.md AGENTS.md docs/plan.md docs/superpowers/plans/2026-11-1
 git commit -m "docs(m9): #316 lands the narrow form + the focus landing - progress, AGENTS floor, the M9 roadmap tick (#316)"
 ```
 
-- [ ] **Step 7: PR + squash merge**
+- [✅] **Step 7: PR + squash merge**
 
 Push `feat/316-narrow-form-focus-landing`; open the PR against main titled `M9: Search everywhere — the below-sm top sheet + the ?focus= landing on the four lists (#316)`; body: the nine ACs each answered with its evidence pointer — the below-sm sheet (walkthrough states 6-9 + the sheet's pinned classes incl. the width law), the uniform `?focus=` mechanism on all four lists (states 1-2 + Task 2's grep gates + the four stamped row sites), never auto-opens (state 1 + the owning-task grep's empty editor-route result), theme-awareness (Step 2's both-theme captures + the dark repeats), without-the-param unchanged (state 3 + the hook's early-return law), the lib-seam suite (+8 its, floor 33/352), the owner-reacted sheet variants (Step 2's verdict incl. the three rulings re-confirmed), the soft ceiling (Step 1's empty diffs — zero manifest changes), `pnpm check` green + docs updated + the v1-pick triaged (Step 8). Squash-merge.
 
-- [ ] **Step 8: The v1 pick (per `docs/agents/v1-picks.md`)**
+- [✅] **Step 8: The v1 pick (per `docs/agents/v1-picks.md`)**
 
 Run the path pass on the squash SHA:
 
@@ -1260,7 +1260,7 @@ git add docs/agents/v1-picks.md
 git commit -m "docs(v1-picks): #<PR> ledger row - the #316 narrow form + focus landing pick"
 ```
 
-- [ ] **Step 9: Issue closes + graphify**
+- [✅] **Step 9: Issue closes + graphify**
 
 Tick #316's nine AC boxes in its body, then close it with the AC → evidence mapping (mind the jq case law — lowercase `.body`, and verify the intermediate file before the edit):
 
