@@ -13,6 +13,7 @@ import {
   type TestimonialSubmission,
 } from '@sevendays/types';
 import { z } from 'zod';
+import { focusSearchParam } from './focus-landing';
 
 export type SubmissionSegment = 'pending' | 'accepted' | 'rejected' | 'all';
 
@@ -91,11 +92,14 @@ export function submittedOn(row: TestimonialSubmission): string {
 // the published list, exactly the pre-#314 default. #218's "local
 // state, no routes" ruling is amended in spirit only: still one screen,
 // no new route — the tab became the URL-driven segment so a link can
-// aim at it.
+// aim at it. M9 #316: the ?focus= landing param joins the same schema
+// (the Global Search deep link's fourth surface — a focus-only visit
+// still defaults to the published list, where the focused row lives).
 export type TestimonialsTab = 'testimonials' | 'submissions';
 
 export const testimonialsSearchSchema = z.object({
   tab: z.enum(['testimonials', 'submissions']).optional().catch(undefined),
+  focus: focusSearchParam,
 });
 
 export type TestimonialsSearch = z.infer<typeof testimonialsSearchSchema>;
