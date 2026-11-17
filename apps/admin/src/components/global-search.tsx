@@ -250,7 +250,7 @@ export function GlobalSearch() {
         <SheetContent
           side='top'
           showCloseButton={false}
-          className='mx-auto w-[min(24rem,calc(100vw-1.5rem))] gap-0 p-0'
+          className='mx-auto w-[min(24rem,calc(100vw-1.5rem))] gap-0 rounded-b-3xl p-0'
         >
           <SheetTitle className='sr-only'>Search</SheetTitle>
           <Command shouldFilter={false} className='flex flex-col'>
