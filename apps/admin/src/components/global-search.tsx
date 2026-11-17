@@ -12,8 +12,10 @@
 // body — cmdk's built-in filter CANNOT serve the dropdown posture, it only
 // filters items driven by its own Command.Input inside its tree, and the
 // dropdown types into the topbar, outside it); cmdk runs here as the
-// headless listbox core (shouldFilter={false} on BOTH trees) for keyboard
-// roving + selection only. The index builds over useQueries on the five
+// headless listbox core (shouldFilter={false} on BOTH trees) — the sheet's
+// keyboard roving + selection are cmdk's own; the dropdown's roving is
+// component-owned (cmdk 1.1.1's selection store never initializes in the
+// outside-input posture under React 19). The index builds over useQueries on the five
 // unchanged #288 factories at topbar (= shell) scope: same keys as the
 // screens, full arrays with deactivated rows included, freshness inherited
 // from the seam's own contracts — zero new fetch machinery. useDeferredValue
@@ -49,9 +51,6 @@ import {
   type SearchHit,
   searchDropdownState,
 } from '#/lib/global-search';
-
-/** The roving/selection keys forwarded into the cmdk tree by the bridge below. */
-const ROVING_KEYS = new Set(['ArrowDown', 'ArrowUp', 'Home', 'End', 'Enter']);
 
 /** The Tailwind sm breakpoint (640px) — the ⌘K rule's surface picker. */
 const SM_QUERY = '(min-width: 640px)';
@@ -93,7 +92,6 @@ export function GlobalSearch() {
   // deferred copy drives the (memoized) fuse pass (D7).
   const deferredQuery = useDeferredValue(query);
   const inputRef = useRef<HTMLInputElement>(null);
-  const commandRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
 
   const index = useMemo(
@@ -109,6 +107,19 @@ export function GlobalSearch() {
   );
   const groups = useMemo(() => runSearch(index, deferredQuery), [index, deferredQuery]);
   const state = searchDropdownState(deferredQuery, groups);
+
+  // The DROPDOWN's roving is COMPONENT-OWNED (fix round 3, #316 — cmdk
+  // 1.1.1's selection store never initializes in this outside-input posture
+  // under React 19, so `data-selected` painted on no item and the
+  // re-dispatched keys moved nothing): this index roves over the flattened
+  // visible hits via the keyboard bridge below. Reset to the first hit
+  // whenever the result set changes identity (the deferred query or the
+  // index rebuilt).
+  const [rovingIndex, setRovingIndex] = useState(0);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the reset is keyed to `groups` IDENTITY (the deferred query or the index rebuilt) — a deliberate reset-on-change effect; nothing in the body needs to read it
+  useEffect(() => {
+    setRovingIndex(0);
+  }, [groups]);
 
   // The chip's GLYPH alone is platform-picked (owner-ruled 2026-11-17);
   // mounted-gated so SSR markup and the first client render agree — no
@@ -139,24 +150,43 @@ export function GlobalSearch() {
   }, []);
 
   // The keyboard bridge (the DROPDOWN's — the sheet needs none, its input
-  // lives inside its own cmdk tree): focus lives in the topbar Input,
-  // OUTSIDE the popover's cmdk tree (cmdk 1.1.1 handles keys via onKeyDown
-  // on its root div — dist-verified), so the roving/selection keys are
-  // re-dispatched onto the Command root, where cmdk's own roving +
-  // selection take over. Escape closes deterministically — in this posture
-  // focus never enters the content, so the popover's own Escape arm cannot
-  // be relied on.
+  // lives inside its own cmdk tree and keeps cmdk's native roving +
+  // selection): focus lives in the topbar Input, OUTSIDE the popover's
+  // cmdk tree, so the roving keys move `rovingIndex` over the flattened
+  // visible hits and Enter lands the row it points at. The overflow tail
+  // is an indicator, never a hit — it is not part of the roving space.
+  // Escape closes deterministically — in this posture focus never enters
+  // the content, so the popover's own Escape arm cannot be relied on.
   const onTypingKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Escape') {
       event.preventDefault();
       setOpen(false);
       return;
     }
-    if (ROVING_KEYS.has(event.key)) {
-      event.preventDefault();
-      commandRef.current?.dispatchEvent(
-        new KeyboardEvent('keydown', { key: event.key, bubbles: true })
-      );
+    const flat = groups.flatMap((group) => group.hits);
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        setRovingIndex((index) => Math.min(index + 1, flat.length - 1));
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        setRovingIndex((index) => Math.max(index - 1, 0));
+        break;
+      case 'Home':
+        event.preventDefault();
+        setRovingIndex(0);
+        break;
+      case 'End':
+        event.preventDefault();
+        setRovingIndex(Math.max(flat.length - 1, 0));
+        break;
+      case 'Enter': {
+        event.preventDefault();
+        const hit = flat[rovingIndex];
+        if (hit) land(hit);
+        break;
+      }
     }
   };
 
@@ -227,13 +257,15 @@ export function GlobalSearch() {
           className='w-[min(24rem,calc(100vw-1.5rem))] gap-0 p-0'
         >
           {/* cmdk as the headless listbox core ONLY (D7): shouldFilter={false}
-              — matching is the lib seam's; roving + selection are cmdk's. */}
-          <Command ref={commandRef} shouldFilter={false} className='flex flex-col'>
+              — matching is the lib seam's; the dropdown's roving is the
+              component-owned rovingIndex above, painted via data-roving. */}
+          <Command shouldFilter={false} className='flex flex-col'>
             <GlobalSearchResults
               groups={groups}
               state={state}
               deferredQuery={deferredQuery}
               onSelect={land}
+              rovingIndex={rovingIndex}
             />
           </Command>
         </PopoverContent>
@@ -295,12 +327,24 @@ function GlobalSearchResults({
   state,
   deferredQuery,
   onSelect,
+  rovingIndex,
 }: {
   groups: SearchGroup[];
   state: SearchDropdownState;
   deferredQuery: string;
   onSelect: (hit: SearchHit) => void;
+  /** The DROPDOWN's component-owned roving cursor; absent in the sheet
+   * posture, which keeps cmdk's native data-selected painting untouched. */
+  rovingIndex?: number;
 }) {
+  // The flat index each item occupies across the groups (the dropdown's
+  // roving space): the overflow tail contributes nothing — it is not a hit.
+  const groupEntries: Array<{ group: SearchGroup; start: number }> = [];
+  let running = 0;
+  for (const group of groups) {
+    groupEntries.push({ group, start: running });
+    running += group.hits.length;
+  }
   return (
     <Command.List className='max-h-[320px] overflow-y-auto p-2'>
       {state === 'hint' ? (
@@ -312,10 +356,15 @@ function GlobalSearchResults({
           <p className='text-muted-foreground text-sm'>{SEARCH_COPY.noResults(deferredQuery)}</p>
         </div>
       ) : (
-        groups.map((group) => (
+        groupEntries.map(({ group, start }) => (
           <Command.Group key={group.key} heading={group.label} className={GROUP_CLASS}>
-            {group.hits.map((hit) => (
-              <SearchResultItem key={hit.id} hit={hit} onSelect={onSelect} />
+            {group.hits.map((hit, hitIndex) => (
+              <SearchResultItem
+                key={hit.id}
+                hit={hit}
+                onSelect={onSelect}
+                roving={rovingIndex === start + hitIndex ? true : undefined}
+              />
             ))}
             {group.overflow > 0 ? (
               // An indicator, never a selectable item (D9).
@@ -333,16 +382,21 @@ function GlobalSearchResults({
 function SearchResultItem({
   hit,
   onSelect,
+  roving,
 }: {
   hit: SearchHit;
   onSelect: (hit: SearchHit) => void;
+  /** The dropdown's component-owned roving highlight (fix round 3, #316) —
+   * the same visuals keyed on data-roving instead of cmdk's data-selected. */
+  roving?: boolean;
 }) {
   const Icon = GROUP_ICONS[hit.group];
   return (
     <Command.Item
       value={hit.id}
       onSelect={() => onSelect(hit)}
-      className='data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground data-[selected=true]:ring-1 data-[selected=true]:ring-ring flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-2 text-sm'
+      data-roving={roving || undefined}
+      className='data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground data-[selected=true]:ring-1 data-[selected=true]:ring-ring data-[roving=true]:bg-accent data-[roving=true]:text-accent-foreground data-[roving=true]:ring-1 data-[roving=true]:ring-ring flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-2 text-sm'
     >
       <Icon aria-hidden='true' className='text-muted-foreground size-4 shrink-0' />
       <span className='min-w-0 flex-1'>
