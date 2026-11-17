@@ -43,8 +43,10 @@ import {
   StatusSegmented,
 } from '#/components/cms/shared';
 import { PackageExpandedContent } from '#/components/packages/package-expanded-content';
+import { useFocusLanding } from '#/components/use-focus-landing';
 import { removeAdminPackage, saveAdminPackageUpdate } from '#/lib/admin.functions';
 import { adminPackageQueries } from '#/lib/cms-queries';
+import { FOCUS_ROW_CLASS } from '#/lib/focus-landing';
 import { buildRowFlipPayload } from '#/lib/package-editor-state';
 import { peso } from '#/lib/peso';
 import { blockerLines } from '#/lib/save-contract';
@@ -59,8 +61,11 @@ interface FlipInput {
 /** The pending posture's fixed four rows — stable keys, never reordered. */
 const PENDING_ROW_KEYS = ['row-1', 'row-2', 'row-3', 'row-4'];
 
-export function PackagesTable() {
+export function PackagesTable({ focus }: { focus: string | undefined }) {
   const { data: packages, isPending, isError, refetch } = useQuery(adminPackageQueries.all());
+  // M9 #316: the ?focus= landing — scroll + highlight the matched row
+  // (data-row-id below on both postures), once data has arrived.
+  useFocusLanding(focus, packages !== undefined);
   const queryClient = useQueryClient();
   // T3: controlled disclosure — one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -231,7 +236,8 @@ export function PackagesTable() {
                         the chevron stays the keyboard/AT toggle. */}
                       <ExpandRow
                         expanded={expanded}
-                        className='group'
+                        className={`group ${FOCUS_ROW_CLASS}`}
+                        data-row-id={row.id}
                         onClick={() => toggleExpanded(row.id)}
                       >
                         <TableCell className='cursor-pointer'>
@@ -319,7 +325,11 @@ export function PackagesTable() {
             {rows.map((row) => {
               const expanded = expandedId === row.id;
               return (
-                <div key={row.id} className='border-border border-b py-2 last:border-b-0'>
+                <div
+                  key={row.id}
+                  data-row-id={row.id}
+                  className={`border-border border-b py-2 last:border-b-0 ${FOCUS_ROW_CLASS}`}
+                >
                   <button
                     type='button'
                     aria-expanded={expanded}

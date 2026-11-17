@@ -90,6 +90,7 @@ import {
   QueryErrorState,
   StatusSegmented,
 } from '#/components/cms/shared';
+import { useFocusLanding } from '#/components/use-focus-landing';
 import {
   presignAdminCoverUpload,
   removeAdminGalleryCategory,
@@ -109,6 +110,7 @@ import {
   trayIsVisible,
 } from '#/lib/batch-photo-upload';
 import { adminGalleryQueries } from '#/lib/cms-queries';
+import { FOCUS_ROW_CLASS } from '#/lib/focus-landing';
 import {
   batchItemsFromFiles,
   buildCategoryOrderPayload,
@@ -220,9 +222,10 @@ function SortablePhotoCard({
     <Card
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
+      data-row-id={photo.id}
       className={`group/card animate-in fade-in slide-in-from-bottom-2 relative cursor-grab gap-0 overflow-hidden rounded-lg py-0 duration-300 active:cursor-grabbing ${
         isDragging ? 'z-10 bg-card shadow-sm' : ''
-      } ${photo.isActive ? '' : 'opacity-60'}`}
+      } ${photo.isActive ? '' : 'opacity-60'} ${FOCUS_ROW_CLASS}`}
       {...attributes}
       {...listeners}
       onClick={() => onToggleSelect(photo.id)}
@@ -775,7 +778,7 @@ function CategoryRail({
  * the PageHeader and this component (its `Upload photos` label opens THIS
  * file's hidden input by id).
  */
-export function GalleryScreen() {
+export function GalleryScreen({ focus }: { focus: string | undefined }) {
   const {
     data: categories,
     isPending: categoriesPending,
@@ -788,6 +791,9 @@ export function GalleryScreen() {
     isError: photosError,
     refetch: refetchPhotos,
   } = useQuery(adminGalleryQueries.photos());
+  // M9 #316: the ?focus= landing — scroll + highlight the matched card
+  // (data-row-id on the grid card below), once photos have arrived.
+  useFocusLanding(focus, photos !== undefined);
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   // 'all' = the All photos rail entry; otherwise a category id.
