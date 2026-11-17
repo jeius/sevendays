@@ -149,9 +149,14 @@ export function GlobalSearch() {
       {/* The trigger is a passive anchor div wrapping the Input (Base UI has
           no Popover.Anchor part): the Input's clicks stop propagation so the
           typing surface never toggle-closes its own dropdown; focus and
-          typing open it. Below sm the Input stays hidden (the house law) —
-          the narrow form is #316's. */}
-      <PopoverTrigger render={<div className='flex min-w-0 items-center gap-1' />}>
+          typing open it. nativeButton={false} — the anchor is a div, not a
+          button (Base UI's own remedy for the non-button render prop).
+          Below sm the Input stays hidden (the house law) — the narrow form
+          is #316's. */}
+      <PopoverTrigger
+        nativeButton={false}
+        render={<div className='flex min-w-0 items-center gap-1' />}
+      >
         <div className='relative hidden min-w-0 sm:block'>
           <Input
             ref={inputRef}
