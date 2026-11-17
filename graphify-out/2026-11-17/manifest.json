@@ -20,7 +20,7 @@
     "semantic_hash": ""
   },
   "apps/admin/package.json": {
-    "mtime": 1791937884.2303512,
+    "mtime": 1794807205.9054396,
     "ast_hash": "594c6c4533b66bafb3a35271f23cf14d",
     "semantic_hash": ""
   },
@@ -30,7 +30,7 @@
     "semantic_hash": "a648f14485559c8d15a9668bf875f35d"
   },
   "apps/admin/src/routeTree.gen.ts": {
-    "mtime": 1794725278.823745,
+    "mtime": 1794867651.0019376,
     "ast_hash": "433dfc10a0d263519f2d96f7ec33fcd9",
     "semantic_hash": ""
   },
@@ -680,8 +680,8 @@
     "semantic_hash": ""
   },
   "skills-lock.json": {
-    "mtime": 1794725280.3901448,
-    "ast_hash": "ac2a568cea3f273ccbf16ed20e13f71c",
+    "mtime": 1794807512.103558,
+    "ast_hash": "292cb914a55aaa1fdf844929ceaa28ae",
     "semantic_hash": ""
   },
   "turbo.json": {
@@ -700,8 +700,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1794725278.819345,
-    "ast_hash": "e8f56f8a44fb38ab35794e608f30293a",
+    "mtime": 1794872579.8907561,
+    "ast_hash": "fbff35d4f29ca73de8bbe1cb30174657",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -710,8 +710,8 @@
     "semantic_hash": "044b5c7e6e392444eb6e3bf59ad68633"
   },
   "apps/admin/CONTEXT.md": {
-    "mtime": 1794749451.681276,
-    "ast_hash": "026e5377f8df899c2f8cb7cf95eb0334",
+    "mtime": 1794807512.103558,
+    "ast_hash": "f3235b972abddc1edc3321bdfc0bb6b5",
     "semantic_hash": ""
   },
   "apps/admin/README.md": {
@@ -830,13 +830,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1794725278.8545449,
-    "ast_hash": "f53e51c8563ab9cca4d73ee73e4aaed1",
+    "mtime": 1794872579.8950758,
+    "ast_hash": "7a6cd44b8b7ed86c855932937347c084",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794779689.8671243,
-    "ast_hash": "4da42ae88736af30cad06276c3ffa11a",
+    "mtime": 1794872579.8993955,
+    "ast_hash": "f54ac5881345679972ddf51dbec25fb5",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -1614,104 +1614,99 @@
     "ast_hash": "3fe45d2a466a04f85a42a7e9e497a5bf",
     "semantic_hash": ""
   },
-  ".agents/skills/hono/SKILL.md": {
-    "mtime": 1794725278.770945,
-    "ast_hash": "9c48c7c4b03d50c29950c3cc9daddb5f",
-    "semantic_hash": ""
-  },
   ".agents/skills/organization-best-practices/SKILL.md": {
     "mtime": 1794725278.770945,
     "ast_hash": "c375f455742c2f5dfdf12642da67de93",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/GENERATION.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "b4fe88a6e0c3fe4c2cafa6c85d3542b7",
+    "mtime": 1794807512.094758,
+    "ast_hash": "ee86bec1bb2e22272e3d762e77ea58a2",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/SKILL.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "b37580282c27d7125755dd06a0629b05",
+    "mtime": 1794807512.094758,
+    "ast_hash": "257b270e6821dca70fe1861ba6b3719f",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/best-practices-ci.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "d66ac3144136455d25f11c40397a9d7d",
+    "mtime": 1794807512.094758,
+    "ast_hash": "6d965e92b8c4deab5812f69a25429008",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/best-practices-migration.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "406212245f52a7eba353c36dd5907686",
+    "mtime": 1794807512.094758,
+    "ast_hash": "c8fadce44a83947d72182eb6fa4fc443",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/best-practices-performance.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "72919cb87bf500e9b163a1882a5e97bf",
+    "mtime": 1794807512.094758,
+    "ast_hash": "30ec5b15057937a0063695bc1987bae5",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/core-cli.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "9b45824f4e5592dcc8c8e9da90d96093",
+    "mtime": 1794807512.094758,
+    "ast_hash": "1ed2bf5ca36ded180cfcc3889e85ac80",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/core-config.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "be3a00253d682249af6757e39a6987fa",
+    "mtime": 1794807512.094758,
+    "ast_hash": "7e116165fa7c9775ac6e08d55e2c6202",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/core-store.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "74ebe008ff226084206fbd8e582db5a0",
+    "mtime": 1794807512.094758,
+    "ast_hash": "3edd90e2355ab475d268b145d470db60",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/core-workspaces.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "76653b0892bd3413d10f7af87686363f",
+    "mtime": 1794807512.094758,
+    "ast_hash": "ba13f92cce1cdb4ea7fcceada679a130",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/features-aliases.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "d90a54c5d8fc4c5925fd0f71fd478f69",
+    "mtime": 1794807512.094758,
+    "ast_hash": "f8a87b9630775eeed1daf7bd1ca3ebc3",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/features-catalogs.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "e1317e6810c89c176f59805512e11671",
+    "mtime": 1794807512.094758,
+    "ast_hash": "86c8c6bf9c4b7a7c7363db89c97f50b7",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/features-config-dependencies.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "48d3746b40d4948401309da9c754818c",
+    "mtime": 1794807512.094758,
+    "ast_hash": "a2043ed5aad13f56c23c6e98e7748b15",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/features-global-virtual-store.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "7de10bfe264ebdedea8cb2bd1529809c",
+    "mtime": 1794807512.094758,
+    "ast_hash": "79de158d42ff9f823b679e73f7791e19",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/features-hooks.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "f965dadb79c712cc8f7a0d869cfe7230",
+    "mtime": 1794807512.094758,
+    "ast_hash": "485f114bd4ae1922d51de4ef3a3e3949",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/features-overrides.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "3c47c69153f2e42e01510ae42c039bbf",
+    "mtime": 1794807512.094758,
+    "ast_hash": "3ea4033304a0a7b56bf38aeb918e173c",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/features-patches.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "f30a1d9ab6413d328a19d8c2317a75b8",
+    "mtime": 1794807512.094758,
+    "ast_hash": "867189329f2463eaf31ddb6158a02990",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/features-peer-deps.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "9fe3de0b5a423b5a0dc4e4c170ecc5f9",
+    "mtime": 1794807512.094758,
+    "ast_hash": "349b8fcd726c0579163757269f6a19a8",
     "semantic_hash": ""
   },
   ".agents/skills/pnpm/references/features-supply-chain-security.md": {
-    "mtime": 1794725278.7753448,
-    "ast_hash": "73197c503e6044f8ce549eb9f26c9db7",
+    "mtime": 1794807512.094758,
+    "ast_hash": "16cea10d540ba915509edcadb9453d34",
     "semantic_hash": ""
   },
   ".agents/skills/slides/SKILL.md": {
@@ -1770,478 +1765,268 @@
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/SKILL.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1427467,
     "ast_hash": "1f57cd5290acd07e3b1a17e541c3c759",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/cache-gc-time.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "2882e841d315956d0960163d4f30bbff",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/cache-invalidation.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "e1592cff4e2bbce3e73b32ec4092702d",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/cache-placeholder-vs-initial.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "2bd62475ad60ae7094c4fb8899107096",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/cache-stale-time.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "68242e2d9dd11045aa1a23f4a9b19e1f",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/err-error-boundaries.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "8663bf3b9ef8bca336f88a4b7910a0c3",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/inf-page-params.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "71cafb9b1eba42510b60623505a2c96a",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/mut-invalidate-queries.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "e53a8a2512e40574f491ef7e9df06b3b",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/mut-mutation-state.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "8341341daaed354e79bdc38f3940434a",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/mut-optimistic-updates.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "d28b6dc3817e52eaf2cf7bc38519451e",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/network-mode.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "35b0abeb6064b6eb9ad6d15f7ab7ff0e",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/parallel-use-queries.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "63556cf3a9a7255156bd578a469d4196",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/perf-select-transform.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "743ffe651a988089885c806a771989b5",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/persist-queries.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "0ba16c0ed925ff2233c1624fd4ec4051",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/pf-intent-prefetch.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "1b9416ac3cf89669205dd4e1a9a10550",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/qk-array-structure.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "17415115763bf343f03ca3e4f352dd61",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/qk-factory-pattern.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "da33aa366b6f3305eaa53496424e7fd1",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/qk-hierarchical-organization.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "e095672682594e72ce8953920a671b31",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/qk-include-dependencies.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "512d2fad72ff598bfc7ffc0dae4e80ff",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/qk-serializable.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "c1c902c3ba0ea9e441fbf9b5a1e6f2bc",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/query-cancellation.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "8ddcf8882961088b843ef27a823af2f9",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-query-best-practices/rules/ssr-dehydration.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.1515467,
     "ast_hash": "67394b280f6b74f28c3ae406bbc146cb",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/SKILL.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.6355467,
     "ast_hash": "ca213fdf8d220e4f31d03f95dc8e95fa",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/ctx-root-context.md": {
-    "mtime": 1794725278.7797449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "3a50fc4d7195617a18e999040c36a9ef",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/err-not-found.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "d91488ff1dd8968d25b1a756823b6e08",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/load-ensure-query-data.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "fcdbdf9557c2eb7127b6bbc8d4cbd062",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/load-parallel.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "0946a4f77aa454faefd6975d954c8e63",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/load-use-loaders.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "1553fb84fe6b7aec3e8181a3d68df1a8",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/nav-link-component.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "af7f5a93929ec3cbb0c7caa18b30618f",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/nav-route-masks.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "a9daca297cfbefdd1de8e24e521d4795",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/org-virtual-routes.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "61c8c48892695df9e2af764d86ce0be8",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/preload-intent.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "c5a2d1b184ecb8a51da80a7ee33010b6",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/router-default-options.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "129f9cf8b9d77562aee84c2d4ceadd8a",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/search-custom-serializer.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "90b528c34028bbe54635cc699dc07676",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/search-validation.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "8aa405538feda6a89261c9504e36faf2",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/split-lazy-routes.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "f361c0ecab88a73569bc63a46ee813c0",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/ts-register-router.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "8dbe6acc28f5fb97a1b2ff6e93aa21b5",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-router-best-practices/rules/ts-use-from-param.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806826.6487467,
     "ast_hash": "3ae0ddfdc7e9b6eaaa57bd79992613c4",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/SKILL.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "dd051062a4f42a32f15d753d2f7e022e",
+    "mtime": 1794807512.099158,
+    "ast_hash": "62be3284c45f8232a8d2fc9767caa447",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/rules/api-routes.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "2e507c61c07d51da03ed06441245a82d",
+    "mtime": 1794807512.099158,
+    "ast_hash": "741dca84368b4ae3bcec9d08c1c6eb61",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/rules/auth-route-protection.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806827.0931468,
     "ast_hash": "36ff3e9dbe1c816ac88e96fa91c74c1e",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/rules/auth-session-management.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "19f8911906abe9e3ea7d8c06acc99190",
+    "mtime": 1794807512.099158,
+    "ast_hash": "fb6a59e0266bb8ec2531ca071c5f237d",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/rules/deploy-adapters.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "b617f8f44be5ff377f7841cbc5f036b5",
+    "mtime": 1794807512.099158,
+    "ast_hash": "c397c3247d992389dcda72f66c6bc88b",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/rules/env-functions.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806827.0931468,
     "ast_hash": "0275bc94b95f35a024d40a7abe868583",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/rules/err-server-errors.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "30a869df82955c78479a80e3be1fbca7",
+    "mtime": 1794807512.099158,
+    "ast_hash": "a3d551dbb3d46f70e15c254bd3a4a70f",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/rules/file-separation.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "9349e35d6c09c01c837eed0633f91e30",
+    "mtime": 1794807512.099158,
+    "ast_hash": "1609b8644dc63d11895470a42c184954",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/rules/mw-request-middleware.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "be17a37a10f457f08b495c086a0a17ce",
+    "mtime": 1794807512.099158,
+    "ast_hash": "8a707ae097ad08486bdc7ebb203a38da",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/rules/sf-create-server-fn.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "6584241d226e6075cfe947b0648249a1",
+    "mtime": 1794807512.099158,
+    "ast_hash": "c5dc93bcfe9d592504eb73e95f371275",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/rules/sf-input-validation.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "4f51dc3cf0c6e00528e9c68b26f1b997",
+    "mtime": 1794807512.099158,
+    "ast_hash": "e4d3997fbf615d9a1de58954b8dd0c58",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/rules/ssr-hydration-safety.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806827.0931468,
     "ast_hash": "a05a461611cd24b5acea581d41eae063",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/rules/ssr-prerender.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "d1fe7265be68b973ab688cfbac0410f8",
+    "mtime": 1794807512.099158,
+    "ast_hash": "55ffaeca98a8ab71b513e74ed9341d48",
     "semantic_hash": ""
   },
   ".agents/skills/tanstack-start-best-practices/rules/ssr-streaming.md": {
-    "mtime": 1794725278.7841449,
+    "mtime": 1794806827.0931468,
     "ast_hash": "3730bdf03def457474cfa5359f892c2e",
     "semantic_hash": ""
   },
-  ".agents/skills/tsdown/LICENSE.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "e8d8782376f5a9160d6a71c831c87f2e",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/README.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "0e06a57ae77782df673035e93ead2a0b",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/SKILL.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "750556cb1bc5060185479033a25655f7",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/SYNC.md": {
-    "mtime": 1794725278.7841449,
-    "ast_hash": "b1f90a45be08df4c84c6d4b181538c87",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/README.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "85f65d386efc906df28aa36d47ec047f",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/advanced-benchmark.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "58b0b24fa523e8f9830241dd3bddcaf6",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/advanced-ci.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "9e0e1c213bb99a65ef3b69d6a157f904",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/advanced-hooks.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "6586aea0c002707c3e27e76582ee1e07",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/advanced-plugins.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "8fa3248190889d9f0f72a94b5c1d516d",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/advanced-programmatic.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "6ecff7db8748eeb656dd684b3f48a06b",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/advanced-rolldown-options.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "0dd9e868d0bd7454b7a2331c295723f9",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/guide-getting-started.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "eb350bb27dcb651683e1c53f90165a0f",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/guide-introduction.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "d8f2ab5b5c1e47ff5326408bf3f5bc18",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/guide-migrate-from-tsup.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "1981c0c4e30f6859a1fa18579bfd7188",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-cjs-default.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "8bd3b521e3c61d3efa25bc550125b059",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-cleaning.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "f744a2d2ea1071414f3eccbc75a5d0b0",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-config-file.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "25d8f9c44b2b36bc3548950b0fcea8c4",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-css.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "cec3dd9fd4f393231d409a038cb31222",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-dependencies.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "152a5e79105b9a96b2386f833c753bd7",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-dts.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "d67c24606da1130c17ca0ad55f2b2e5c",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-entry.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "a72f79f7c45d638f5083e429ea83ec5c",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-exe.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "6ecb0d7bc6a8e77c71ee4c11e8d895de",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-lint.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "015743cddb5d5c9385618b0bcc137596",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-log-level.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "860fe7b11759487192bbd5b44c09c284",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-minification.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "90b26fc470573903b12b356ec59bed88",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-output-directory.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "41e6a0ac2516514e3f18f4f5f430fb6b",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-output-format.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "0fa080943d20ebc313791b2647b1ae9d",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-package-exports.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "5af18805f1d2b13d672813b273459ddb",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-platform.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "58389f4689adc6e4eab3e0d054adde14",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-root.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "899d81c4ce16c191a3910a26697468b2",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-shims.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "e9329ce8172bd1b76e17fc40d8139782",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-sourcemap.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "2c84298a6652828dbf5d228bd450d889",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-target.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "ac14d3bce22b8436a0d0a96797adde62",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-tree-shaking.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "8294bb4791630bb1dceb2af83bf66725",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-unbundle.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "04fbcb0db5ded5d405ea094528b72b63",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/option-watch-mode.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "d903eb4a4305f322041294b52371edf2",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/recipe-react.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "d7f070961f079a50e71936a35092a62f",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/recipe-solid.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "7f371c7cfbd54b2ff075d01352d068cd",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/recipe-svelte.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "67ac0d4fd482beaf2f72c7c37d19e98a",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/recipe-vue.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "218b37a2e0529ea43b8cdd8ed61fab69",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/recipe-wasm.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "20104c2fb5a8b83f4ba8a03e126ddd17",
-    "semantic_hash": ""
-  },
-  ".agents/skills/tsdown/references/reference-cli.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "d179de54d2f8aca514cefd88887af69c",
-    "semantic_hash": ""
-  },
   ".agents/skills/two-factor-authentication-best-practices/SKILL.md": {
-    "mtime": 1794725278.788545,
-    "ast_hash": "62f2fd7d61b1a29960a115ff56d79ae8",
+    "mtime": 1794807512.099158,
+    "ast_hash": "e07e76775a19b89e49df954e34015117",
     "semantic_hash": ""
   },
   ".agents/skills/ui-styling/LICENSE.txt": {
@@ -2305,107 +2090,107 @@
     "semantic_hash": ""
   },
   ".agents/skills/vitest/GENERATION.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "0da1428634eeea71dd4b36e97ab58387",
+    "mtime": 1794807512.099158,
+    "ast_hash": "cf8c9d8ed18613831b687c36c5328659",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/SKILL.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "fca19beab6d397a5ea0d6682c938241f",
+    "mtime": 1794807512.099158,
+    "ast_hash": "64c0cb7bc47544c00d479959c86c1c32",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/advanced-environments.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "1e2381a1e835eadb9bbfd821c106a7c6",
+    "mtime": 1794807512.099158,
+    "ast_hash": "6dfab5303505d8dbd6ccec95350665ac",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/advanced-projects.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "dadc5345bb3c7c0265c66b7191cc7323",
+    "mtime": 1794807512.099158,
+    "ast_hash": "1f1f35ab41da9a70789069cc39077c4b",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/advanced-type-testing.md": {
-    "mtime": 1794725278.814945,
+    "mtime": 1794806825.6279469,
     "ast_hash": "37bda3214fc8aff1c89f68c92130f77a",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/advanced-vi.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "35adcaedeb22a25adbdcd9fb5d49b649",
+    "mtime": 1794807512.099158,
+    "ast_hash": "38e721c706671e1470b345c8cdf0ca17",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/core-cli.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "bfe82700ece9d2e2050f3d7affa3739c",
+    "mtime": 1794807512.103558,
+    "ast_hash": "c213979e7c47d91e184a26bdc3873f22",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/core-config.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "8d78fe91e243ec404f6926cfd802bedf",
+    "mtime": 1794807512.103558,
+    "ast_hash": "157b62c4233bfd9ff0bfb78028256beb",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/core-describe.md": {
-    "mtime": 1794725278.814945,
+    "mtime": 1794806825.6279469,
     "ast_hash": "b772960530e491a4cde0227bd73991e7",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/core-expect.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "9f1e57813465b47855ab21698e4c9a1c",
+    "mtime": 1794807512.103558,
+    "ast_hash": "d7a5eaffa9de6e4fd539efbea0af1a85",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/core-hooks.md": {
-    "mtime": 1794725278.814945,
+    "mtime": 1794806825.6279469,
     "ast_hash": "8c5630ea945c494c0dcdb9888a3fc8d8",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/core-test-api.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "afb20e7031fb0168a617ae81b2d075df",
+    "mtime": 1794807512.103558,
+    "ast_hash": "fca1084edf856f06bc7bcb18afc9893b",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/features-benchmarking.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "fdb7f6ec149d3f78690389104ac579b9",
+    "mtime": 1794807512.103558,
+    "ast_hash": "bc44aab91f0c30912038a9d2c7f6fb7d",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/features-concurrency.md": {
-    "mtime": 1794725278.814945,
+    "mtime": 1794806825.6279469,
     "ast_hash": "56fe3873da9b97bfabec37c95804e653",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/features-context.md": {
-    "mtime": 1794725278.814945,
+    "mtime": 1794806825.6279469,
     "ast_hash": "a8a96325b8c6b1bf790db9f9430811da",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/features-coverage.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "1efe68cefcb6cc4a5232755f87dc9802",
+    "mtime": 1794807512.103558,
+    "ast_hash": "79afeeeff81d8db577214a4d5b3ea6ad",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/features-filtering.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "381f885dd7cdcadb183dbd846dbd0234",
+    "mtime": 1794807512.103558,
+    "ast_hash": "03cce1ea615afc02c2d232d100067468",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/features-mocking.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "f22fe63716a1df440415d1e7ec7dc6c2",
+    "mtime": 1794807512.103558,
+    "ast_hash": "4b92ba20a7a24c7132f51ea4fb0c3c57",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/features-reporters.md": {
-    "mtime": 1794725278.814945,
-    "ast_hash": "4d5d82117198be9827de8374b4f2f4ca",
+    "mtime": 1794807512.103558,
+    "ast_hash": "b13e8c9c4e7560c0c4f3f3c04142e0cc",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/features-snapshots.md": {
-    "mtime": 1794725278.814945,
+    "mtime": 1794806825.6279469,
     "ast_hash": "7261ba65bba9be8270cdbbbfcf1ffb02",
     "semantic_hash": ""
   },
   ".agents/skills/vitest/references/features-test-tags.md": {
-    "mtime": 1794725278.814945,
+    "mtime": 1794806825.6279469,
     "ast_hash": "1e068f1a897a0c9928f4e200cd599c43",
     "semantic_hash": ""
   },
@@ -2865,8 +2650,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794734909.2340074,
-    "ast_hash": "7ce8223f45ddb81e36787b7b819163fd",
+    "mtime": 1794810741.4677348,
+    "ast_hash": "5712e53dc1a182edea65ed6063bc8041",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -2950,8 +2735,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/admin-topbar.tsx": {
-    "mtime": 1792052774.8786912,
-    "ast_hash": "51c334e57925c19be53f72c852fdd5ba",
+    "mtime": 1794872579.8907561,
+    "ast_hash": "6a9b5abca6e57e1e8bee00fdde949683",
     "semantic_hash": ""
   },
   "apps/admin/src/components/stub-screen.tsx": {
@@ -3520,8 +3305,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/cms/shared.tsx": {
-    "mtime": 1792318225.0332866,
-    "ast_hash": "47a1f43e16e08b484e6dd32d3dac4a0a",
+    "mtime": 1794872579.8907561,
+    "ast_hash": "0393010c1b556621dbe12cfd6a689879",
     "semantic_hash": ""
   },
   "apps/admin/src/components/gallery/gallery-screen.tsx": {
@@ -3550,8 +3335,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/testimonials/testimonials-screen.tsx": {
-    "mtime": 1794779689.8671243,
-    "ast_hash": "f8c4d9121cd99ef6065f654c42caf256",
+    "mtime": 1794872579.8907561,
+    "ast_hash": "54d16710949aefb6b620ff0cee405685",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/admin.functions.ts": {
@@ -3615,8 +3400,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/routes/_shell.testimonials.tsx": {
-    "mtime": 1794725002.462478,
-    "ast_hash": "259f6307c9d5ee5f56b8531d03451d01",
+    "mtime": 1794872579.8950758,
+    "ast_hash": "7950bc7946cd824fffc141c324c31388",
     "semantic_hash": ""
   },
   "apps/admin/src/routes/api/admin/gallery-photos/$id.thumb.ts": {
@@ -4315,8 +4100,8 @@
     "semantic_hash": ""
   },
   "docs/ship-provisioning-runbook.md": {
-    "mtime": 1794725278.8545449,
-    "ast_hash": "66c0a27da624cb8012531931c17150c0",
+    "mtime": 1794809851.583765,
+    "ast_hash": "77e8cb2f85a66fc92fb380613c2f46d2",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-10-11-191-ship-provisioning-runbook.md": {
@@ -4585,13 +4370,13 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/submissions-state.test.ts": {
-    "mtime": 1792164735.5178037,
-    "ast_hash": "c7d6fa7c6e040783e1f475d8037a7216",
+    "mtime": 1794872579.8950758,
+    "ast_hash": "668336f8daf6c01e5c90e8ff82fef80c",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/submissions-state.ts": {
-    "mtime": 1792164735.5178037,
-    "ast_hash": "e38f98803be4c64825bd92cecaff6ac2",
+    "mtime": 1794872579.8950758,
+    "ast_hash": "65a37afd6080b0f1e0facface219fb70",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-10-15-218-cms-interaction-system.md": {
@@ -5197,6 +4982,341 @@
   "docs/superpowers/plans/2026-11-15-309-dnd-tbody-nesting.md": {
     "mtime": 1794779689.8671243,
     "ast_hash": "29a4fa8c06248293b00bc1f68eff232b",
+    "semantic_hash": ""
+  },
+  "apps/admin/src/components/notification.tsx": {
+    "mtime": 1794872579.8907561,
+    "ast_hash": "e76f4c8390ac3f7a252bc9c19a0a0e3a",
+    "semantic_hash": ""
+  },
+  "apps/admin/src/lib/notification-state.test.ts": {
+    "mtime": 1794872579.8907561,
+    "ast_hash": "cb3193eeb90004227d9446be79e80179",
+    "semantic_hash": ""
+  },
+  "apps/admin/src/lib/notification-state.ts": {
+    "mtime": 1794872579.8950758,
+    "ast_hash": "239d8ae6e0016d83c989f41857494d63",
+    "semantic_hash": ""
+  },
+  ".agents/skills/pnpm/references/features-multi-ecosystem.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "12e9057c774257206a439a18d94088ac",
+    "semantic_hash": ""
+  },
+  ".agents/skills/pnpm/references/features-task-orchestration.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "e915c23fef8ec5642c21a4e60dd51f26",
+    "semantic_hash": ""
+  },
+  ".agents/skills/pnpm/references/features-versioning.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "64752fb089e6a7980fdbd3da2a2b37f3",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/cache-defaults.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "f165699d4fb635fe284bedeaf5f53cfc",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/err-fallback-data.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "c7951df352dc3d0816bd6ccb05071969",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/err-retry-config.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "8bf834243a4d31e2d99a35f800243dff",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/inf-loading-guards.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "10a7748a082853f7b04a02d6adf0d249",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/inf-max-pages.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "11825f0bfd3e4b2db63d3f473ba2dd5b",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/mut-error-handling.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "fbb53f7e9cfa511499b7936fd8f2239f",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/mut-loading-states.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "addce97dafbdb7fcf5754795a8e96571",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/mut-rollback-context.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "cb4c86d248c25ad57b464931df5ba858",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/perf-notify-change-props.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "fb70f6562cc33ddf7b18d70611c90022",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/perf-placeholder-data.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "77c9c2308ec1ce84348c2ba3f37ff919",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/perf-structural-sharing.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "6af5a0c153b60c8b0472b0917de9c1c7",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/pf-ensure-query-data.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "8d362b085acc3b436a7858f9e8191e48",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/pf-route-prefetch.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "3eeaed390ad78de8565254198e8b8052",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/pf-stale-time-config.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "4594148005482f5e4425088dcffbdba8",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/ssr-client-per-request.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "e4ace852e4219dcabcd32b177c851f40",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/ssr-hydration-boundary.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "cdfb5522a66d4f53d49d99e1c7b5c115",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-query-best-practices/rules/ssr-stale-time-server.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "7380b08755369a251388016342b205a3",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/ctx-before-load.md": {
+    "mtime": 1794807512.094758,
+    "ast_hash": "71183f7869bfe01d89f66a9f5f18ccf4",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/ctx-dependency-injection.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "d8eb90c0f9962723de3559d2dea1ef20",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/load-deferred-data.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "408ade7fceeca99869c0edd78532caf0",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/load-error-handling.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "bbd2ac68d6c70de330ff5806345bb77f",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/load-loader-deps.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "19e79bda98c94c086a00a833bb16e69b",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/nav-active-states.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "8fab261dd026bc7fcc4ee5172151438c",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/nav-relative-paths.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "61361f4271b43e36739ddabfbd000b22",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/nav-use-navigate.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "0b60c8beffef7edaab9e28bcb54c3fe0",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/org-file-based-routing.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "5a19d55bdf9f4bcc8d8f04a7187aa96c",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/org-index-routes.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "e21103c91c4b1b30eb12e566560fc831",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/org-pathless-layouts.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "8a2216543ced0069f513f3446a720cf1",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/org-route-tree-structure.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "3d16677d19ca7eaa3012c89b892af738",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/preload-manual.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "6b2a85609f02a27098b8e5eedc9af7a7",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/preload-stale-time.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "23ac72bca3a20860647f0edabe928ecf",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/search-defaults.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "6a9970d64d3a54836e9b885f7eee1eb8",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/search-middleware.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "239e8ff7050665592c02dce6e1d5b3ef",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/search-type-inheritance.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "97222e14d945bf5c49d5578bab5cec3c",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/split-auto-splitting.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "1155618397701b74a0119d0a85f1247f",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/split-critical-path.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "d0bee3e8fc057208409d81becf52f644",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/ts-query-options-loader.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "fa58ad43279b64725f2513cce018bc4d",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-router-best-practices/rules/ts-route-context-typing.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "1be7cb22b2eae6d18e900289ed2ba2bc",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/auth-cookie-security.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "2179c5a294d634c2286f5d954cb1a72c",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/auth-server-functions.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "54372aefde182e96597d225a64ed7361",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/deploy-env-config.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "8ad84143bc348962aeba682e0e27f9b0",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/err-not-found.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "81d41e07d31595468c7c951da83ce391",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/err-redirects.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "cfbba1eece0524f17420b5a9ac5616fd",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/file-functions-file.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "68e8090ac49a8a518c28f152850b6180",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/file-shared-validation.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "23828a3022a0277911710a0e78e2664c",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/mw-composability.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "00bd5d7362578b29f7e73d70155aa2ed",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/mw-context-flow.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "1e808a3068df299a3c44bdb7f3776c39",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/mw-function-middleware.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "32b5ea29c0ae4446635c4c3a159faedc",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/sec-auth-middleware.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "df5df3264baa469029043d9dea8f6033",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/sec-csrf-protection.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "4615940727ac7e0aeb00a4024a93607f",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/sec-sensitive-data.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "d0f8f49db98dd6f572db076b3c18b474",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/sec-validate-inputs.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "6b6743813737a1f3a0321a0a1a52ee0e",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/sf-error-handling.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "cd6c9cebec6a2e21dcc5bb4f06a289d4",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/sf-method-selection.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "0503628d455d4297f0ca3a4b2f5def36",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/sf-response-headers.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "24f38e5dcb6d9f8edf994f42355a2710",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/ssr-data-loading.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "d3cec64abe96fbbaa140036687313858",
+    "semantic_hash": ""
+  },
+  ".agents/skills/tanstack-start-best-practices/rules/ssr-selective.md": {
+    "mtime": 1794807512.099158,
+    "ast_hash": "fb7c19b6672291b3d77f668c7d342ff9",
+    "semantic_hash": ""
+  },
+  "docs/adr/0028-derived-notifications-queue-in-chrome.md": {
+    "mtime": 1794809851.579365,
+    "ast_hash": "1feee5f3575f993d2ef940528202244b",
+    "semantic_hash": ""
+  },
+  "docs/specs/2026-11-16-m9-admin-notifications-search-spec.md": {
+    "mtime": 1794809851.583765,
+    "ast_hash": "1080a2884ac84695c41385445ceae4a2",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-16-310-teaser-cold-isolate-census.md": {
+    "mtime": 1794784833.036654,
+    "ast_hash": "e0a66e9beceb6ca035095da2da3c4d2d",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-16-314-notification-bell-panel.md": {
+    "mtime": 1794872579.8993955,
+    "ast_hash": "c9009b9d830bc2373cf9dc784b4afbb1",
     "semantic_hash": ""
   }
 }
