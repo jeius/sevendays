@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "apps/admin/package.json": {
-    "mtime": 1794807205.9054396,
-    "ast_hash": "594c6c4533b66bafb3a35271f23cf14d",
+    "mtime": 1794881313.3371918,
+    "ast_hash": "cbe3c96d0da42370ffa4f5868371537c",
     "semantic_hash": ""
   },
   "apps/admin/src/integrations/posthog/provider.tsx": {
@@ -700,8 +700,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1794872579.8907561,
-    "ast_hash": "fbff35d4f29ca73de8bbe1cb30174657",
+    "mtime": 1794881313.3371918,
+    "ast_hash": "da5a6cc1ecb4c0681479a2fb515a6196",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -830,13 +830,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1794872579.8950758,
-    "ast_hash": "7a6cd44b8b7ed86c855932937347c084",
+    "mtime": 1794881313.341539,
+    "ast_hash": "4141a09a32ac17d3193f64f45807dc93",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794872579.8993955,
-    "ast_hash": "f54ac5881345679972ddf51dbec25fb5",
+    "mtime": 1794881313.341539,
+    "ast_hash": "b84556a54be45cc5c4c170d3fd6023e8",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2650,8 +2650,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794810741.4677348,
-    "ast_hash": "5712e53dc1a182edea65ed6063bc8041",
+    "mtime": 1794882537.8426027,
+    "ast_hash": "5c7f23d2a78a4328002563d4db39bfaa",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -2735,8 +2735,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/admin-topbar.tsx": {
-    "mtime": 1794872579.8907561,
-    "ast_hash": "6a9b5abca6e57e1e8bee00fdde949683",
+    "mtime": 1794881313.341539,
+    "ast_hash": "9c34fe52abcd8252fee289850f86fa77",
     "semantic_hash": ""
   },
   "apps/admin/src/components/stub-screen.tsx": {
@@ -5317,6 +5317,26 @@
   "docs/superpowers/plans/2026-11-16-314-notification-bell-panel.md": {
     "mtime": 1794872579.8993955,
     "ast_hash": "c9009b9d830bc2373cf9dc784b4afbb1",
+    "semantic_hash": ""
+  },
+  "apps/admin/src/components/global-search.tsx": {
+    "mtime": 1794881313.341539,
+    "ast_hash": "2374d779cb700dac7453db3128250430",
+    "semantic_hash": ""
+  },
+  "apps/admin/src/lib/global-search.test.ts": {
+    "mtime": 1794881313.341539,
+    "ast_hash": "c9925f4c2daa708404c1340145c7d335",
+    "semantic_hash": ""
+  },
+  "apps/admin/src/lib/global-search.ts": {
+    "mtime": 1794881313.341539,
+    "ast_hash": "045631a3ec2642aae424c04d7f061228",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-17-315-global-search-core.md": {
+    "mtime": 1794881313.345886,
+    "ast_hash": "0dbd04e515a98233ca443f1f82649105",
     "semantic_hash": ""
   }
 }
