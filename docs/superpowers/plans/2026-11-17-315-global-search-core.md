@@ -66,7 +66,7 @@ The ticket's whole test surface, plus every pure value Task 2 consumes. No compo
 
 **Not here:** any component or topbar edit (Task 2); the below-sm form, magnifier, or sheet (#316); any `validateSearch`/route edit (#316); the `?focus=` landing (#316); the engine switcher/cmdk-filter fallback from the prototype (dead — D7 documents it, production never loads it); new busy labels or toasts (nothing here is async-visible); `cmdk` imports in the LIB (it is the component's listbox core — the seam is pure fuse.js + pure functions).
 
-- [ ] **Step 1: Land the two deps (the ruled manifest change — the churn-free path, the 2026-11-17 execution ruling)**
+- [✅] **Step 1: Land the two deps (the ruled manifest change — the churn-free path, the 2026-11-17 execution ruling)**
 
 `pnpm add` re-resolves the admin manifest's floating ranges — the `@tanstack/*` `"latest"` tags churned ~25 unrelated lockfile entries (211+/199−) when trialed live — so the deps land by hand-edit + install instead: the lockfile freezes every existing entry and resolves ONLY the new packages.
 
@@ -88,7 +88,7 @@ pnpm --filter @sevendays/admin test -- --run
 
 Expected: the diff shows exactly two added dependency lines; the suite stays green at **31 files / 325 passed** (the deps break nothing). Save the diff as `.superpowers/sdd/2026-11-17-315-global-search-core/task-1-deps.txt`.
 
-- [ ] **Step 2: Write the failing tests**
+- [✅] **Step 2: Write the failing tests**
 
 New file `apps/admin/src/lib/global-search.test.ts` — the whole file:
 
@@ -403,7 +403,7 @@ describe('the copy, verbatim (D5 at #305 + the 2026-11-17 owner rulings)', () =>
 });
 ```
 
-- [ ] **Step 3: Run the tests to verify they fail**
+- [✅] **Step 3: Run the tests to verify they fail**
 
 ```bash
 pnpm --filter @sevendays/admin test -- --run global-search
@@ -411,7 +411,7 @@ pnpm --filter @sevendays/admin test -- --run global-search
 
 Expected: FAIL — the file fails at collection (`Failed to resolve import "./global-search.js"` — the module does not exist yet, so none of its 19 its run). Record the output in `.superpowers/sdd/2026-11-17-315-global-search-core/task-1-red.txt`.
 
-- [ ] **Step 4: Write the minimal implementation**
+- [✅] **Step 4: Write the minimal implementation**
 
 New file `apps/admin/src/lib/global-search.ts` — the whole file:
 
@@ -682,7 +682,7 @@ export function runSearch(index: SearchIndex, query: string): SearchGroup[] {
 }
 ```
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [✅] **Step 5: Run the tests to verify they pass**
 
 ```bash
 pnpm --filter @sevendays/admin test -- --run
@@ -690,7 +690,7 @@ pnpm --filter @sevendays/admin test -- --run
 
 Expected: PASS — the full admin suite runs (admin's `test` script is bare `vitest run`, so the full-suite floor IS the verification): **Test Files 32 passed (32) · Tests 344 passed (344)** (the 325 baseline + the 19 new its).
 
-- [ ] **Step 6: Lint, format, typecheck**
+- [✅] **Step 6: Lint, format, typecheck**
 
 ```bash
 pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/admin typecheck
@@ -698,7 +698,7 @@ pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/admin typecheck
 
 Expected: both green (accept `fix`'s rewrites — import order especially; re-run the suite from Step 5 if it rewrote anything).
 
-- [ ] **Step 7: Commit**
+- [✅] **Step 7: Commit**
 
 ```bash
 git add apps/admin/package.json pnpm-lock.yaml apps/admin/src/lib/global-search.ts apps/admin/src/lib/global-search.test.ts
@@ -719,11 +719,11 @@ The composition: the prototype's `variant-b-dropdown.tsx` + `search-results-body
 
 **Not here:** the below-sm magnifier + sheet (#316 — `sm:hidden` never appears in this file); the `?focus=` landing / `validateSearch` / any route edit (#316); any mutation, prefetch, polling, or new query key (the index law); cmdk's `Command.Input`/`Command.Dialog`/`defaultFilter` (the palette machinery died with variant A; `shouldFilter={false}` is the only cmdk filter posture here); browse-all (the sidebar navigates); clearing the query on selection (the query persists by ruling); edits to `packages/ui` (the popover + input primitives are consumed as installed); the Notification or any other topbar member (byte-identical neighbors).
 
-- [ ] **Step 1: Load the UI/UX skill set**
+- [✅] **Step 1: Load the UI/UX skill set**
 
 Per AGENTS.md and the ticket's Execution notes: `prototype` + `ui-ux-pro-max`, plus `ui-styling`, `tanstack-query-best-practices`, and `dark-mode-design`. The render is pinned below — the skills inform judgment (the dropdown's elevation/contrast legs, the roving highlight's theme read, the deferred typing feel), not re-composition.
 
-- [ ] **Step 2: New file `apps/admin/src/components/global-search.tsx`** — the whole file:
+- [✅] **Step 2: New file `apps/admin/src/components/global-search.tsx`** — the whole file:
 
 ```tsx
 // The Global Search dropdown (M9 #315, glossary — never "command palette" /
@@ -985,7 +985,7 @@ function SearchResultItem({
 }
 ```
 
-- [ ] **Step 3: The topbar mount**
+- [✅] **Step 3: The topbar mount**
 
 Replace `apps/admin/src/components/admin-topbar.tsx` whole:
 
@@ -1018,7 +1018,7 @@ export function AdminTopbar() {
 
 (The old inert `Input` import dies with the raw mount — `GlobalSearch` owns the Input, its `w-56`, and the ⌘K chip; the right-cluster layout is byte-identical: the Notification's trigger still carries `relative ml-auto` internally.)
 
-- [ ] **Step 4: Grep gates — the AC laws are present, the fences hold**
+- [✅] **Step 4: Grep gates — the AC laws are present, the fences hold**
 
 ```bash
 grep -c "shouldFilter={false}" apps/admin/src/components/global-search.tsx
@@ -1034,7 +1034,7 @@ grep -c "adminPackageQueries.all()\|adminBranchQueries.all()\|adminTestimonialQu
 
 Expected: `3` (the prop on `<Command>` once — line 181 in the pinned block — plus the two pinned comment mentions; the count includes prose, the SUBSTANTIVE gate is the single `Command ref={commandRef} shouldFilter` form); `1` (the ONE binding rule, no platform sniffing); `1` (the glyph-only sniff, mounted-gated); `3` (the import + the call + the header comment's prose mention); `1` (the keyboard bridge); **`0`** (the narrow form is #316's — a nonzero count is a fence break, stop and report); **`0`** (no palette machinery, no polling, no prefetch — a nonzero count is a re-ruling, stop and report); the copy greps show every customer-visible string routed through `SEARCH_COPY` (hint, noResults, overflow, deactivated — four distinct member accesses; `groupLabels` arrives via the seam's groups); `5` (the five unchanged #288 factories — the index law). Save as `.superpowers/sdd/2026-11-17-315-global-search-core/task-2-grep.txt`. (2026-11-17 execution note: the original `1`/`2` expectations miscounted the pinned comment blocks — corrected here, the substantive forms verified live by the controller.)
 
-- [ ] **Step 5: Lint, format, test, typecheck, build**
+- [✅] **Step 5: Lint, format, test, typecheck, build**
 
 ```bash
 pnpm --filter @sevendays/admin fix
@@ -1045,7 +1045,7 @@ pnpm --filter @sevendays/admin build
 
 Expected: all green; the suite stays at **Test Files 32 passed (32) · Tests 344 passed (344)** (no suite change in this task); the build succeeds with `global-search.tsx` entering every route's graph via the topbar (the #218 execution ruling).
 
-- [ ] **Step 6: Commit**
+- [✅] **Step 6: Commit**
 
 ```bash
 git add apps/admin/src/components/global-search.tsx apps/admin/src/components/admin-topbar.tsx
@@ -1062,7 +1062,7 @@ git commit -m "feat(admin): the Global Search dropdown - Variant B ported, live 
 
 **Not here:** any code change (a defect found by Step 2 or Step 3 goes back to its owning task's file with its own `fix(admin): … (#315)` commit, then this task re-runs from Step 1); #316's M9 roadmap box and #317's (never tick them here); `docs/plan.md` beyond the one checkbox; the milestone exit-gate walkthrough (#317's live-stack ceremony — Task 3's walkthrough is this ticket's own verification, not the milestone's); any mutation of dev-DB data (the admin `.env.local` DB is the LIVE pooler — this ticket's verification is read-only: navigation + search).
 
-- [ ] **Step 1: The full check + the soft-ceiling gates**
+- [✅] **Step 1: The full check + the soft-ceiling gates**
 
 ```bash
 pnpm check
@@ -1072,11 +1072,11 @@ git diff main...HEAD -- apps/admin/package.json
 
 Expected: `pnpm check` green across the repo; the first diff-stat **empty** (D11 proven — zero api/landing/packages changes); the package.json diff shows exactly the two added dependency lines (`cmdk`, `fuse.js`). Floors after this ticket: admin **32 files / 344 tests**; every other suite unchanged from AGENTS.md's recorded floors.
 
-- [ ] **Step 2: The owner's as-built variants reaction (BLOCKING — the #94 amendment)**
+- [✅] **Step 2: The owner's as-built variants reaction (BLOCKING — the #94 amendment)**
 
 The #94 amendment's round for this ticket: the as-built production render, both themes, light judged first. Mechanics: bring up the dev stack (`pnpm --filter @sevendays/api dev` + `pnpm --filter @sevendays/admin dev` — serial note: never admin + landing together, both pin `:3000`); capture with a throwaway HEADLESS Playwright script kept OUTSIDE the repo (scripted sign-in with the controller's dev staff account — the owner's local credentials, never written to the evidence dir, never committed). The states, light first, then the dark counterparts via the topbar's theme toggle: (1) Ctrl+K from an unrelated screen — focused Input, open dropdown, the zero-query hint line, the `Ctrl K` chip; (2) a cross-group query over the live catalog — the four fixed group headers in order, item anatomy visible (muted icons, snippets, peso on package rows, gallery thumbs in the muted slot); (3) a roving capture — ArrowDown twice, the `data-selected` highlight visible; (4) the no-results line for a gibberish query; (5) the overflow tail + the `Deactivated` suffix ONLY if the live catalog yields them (5+ same-keyword rows / a deactivated match) — if not, note their absence on the post (both are suite-pinned: the cap/overflow law and the deactivated marking; never mutate the live DB for a capture). Post the captures to #315 (`gh issue comment 315`) with the question: **the as-built Global Search dropdown in both themes — accept as-rendered, or findings?** Then **BLOCK on the owner's answer** (the wait-for-owner rule — never assume while the owner may be AFK). Disposition per the house pattern: accept → proceed; findings → fix-batch commits on this branch (or follow-up issues if ruled out of scope), re-capture, re-ask. Record the verdict in `.superpowers/sdd/2026-11-17-315-global-search-core/variants-verdict.md`.
 
-- [ ] **Step 3: The live walkthrough (the headed go-gate, evidence for the PR)**
+- [✅] **Step 3: The live walkthrough (the headed go-gate, evidence for the PR)**
 
 **Announce first, wait for the owner's "go" before firing any headed-browser login** (the #310 census rule — the timer flow ends "ready — say go", never auto-fires). With the go: drive a HEADED browser over the dev stack (read-only — no data mutations). Walk, in order, capturing each numbered state to the evidence dir (light first, then dark via the topbar toggle):
 
@@ -1091,7 +1091,7 @@ The #94 amendment's round for this ticket: the as-built production render, both 
 
 Then dark theme: repeat 1-5 (the roving accent, the muted hierarchy, chip + thumbs in dark — the #217 law). Write `walkthrough.md` narrating each state's observed outcome. Any deviation is a defect — fix it in the owning task's file, re-run that task's gates, commit `fix(admin): … (#315)`, and restart this task from Step 1. If the keyboard bridge itself fails live (arrows dead), apply the named repair from the recon note — a plain roving-state fallback inside `global-search.tsx` — as a `fix(admin): …` commit and re-walk Step 5.
 
-- [ ] **Step 4: `docs/progress.md` — the dated entry (newest first, pinned)**
+- [✅] **Step 4: `docs/progress.md` — the dated entry (newest first, pinned)**
 
 Insert as the first entry under `# Progress` (replace `2026-11-XX` with the docs commit's date):
 
@@ -1099,7 +1099,7 @@ Insert as the first entry under `# Progress` (replace `2026-11-XX` with the docs
 - **2026-11-XX — M9 ticket 2, Global Search core (#315) — build complete on `feat/315-global-search`, PR pending.** The admin topbar's inert search Input is live as Global Search's typing surface: an inline non-modal dropdown (anchored `align='start'` + `sideOffset=8`, the ruled width law `w-[min(24rem,calc(100vw-1.5rem))]`, no footer chrome) where ⌘K and Ctrl+K — one binding rule, no platform sniffing; the kbd chip's glyph alone is platform-picked (`⌘K` on Apple, `Ctrl K` elsewhere, owner-ruled 2026-11-17, mounted-gated against hydration mismatch) — focus + open, and filtering starts at the first character over a hand-wired fuse.js seam (the new `global-search.ts`: identity 2× / body 1× weights pinned as constants, threshold 0.3 + `ignoreLocation`, the gallery photos joined to their category's name at body weight so "graduation" finds graduation photos however captioned, null title/caption/category honestly coalesced), with cmdk as the headless listbox core (`shouldFilter={false}`) for roving + selection only — the keyboard bridge re-dispatches arrows/Enter/Home/End from the topbar Input onto the cmdk root (focus lives outside the popover portal; the mechanism dist-verified at plan time and asserted live in the walkthrough), Escape closes deterministically. The index builds from the five unchanged #288 factories over `useQueries` at topbar scope — full arrays, deactivated rows findable + marked with the visible `Deactivated` suffix, zero new fetch machinery; four fixed group headers capped at 5 with the `+N more in {group}` tail; the ratified item anatomy (muted entity icons, identity line + suffix, one-line snippet — gallery `category · caption`, peso on package rows with unpriced blank, the #287 versioned thumb in the muted slot); selection navigates via the seam's `?focus=` href through `navigate({ href })` (href navigation spike-verified at plan time; the landing — scroll + highlight — is #316's). All copy one-sourced in `SEARCH_COPY` (D5's table + the two 2026-11-17 rulings — the no-results period sits inside the closing curly quote). Admin-only; the one manifest change is the two ruled deps (`cmdk@^1.1.1` + `fuse.js@^7.5.0`); zero api/types/landing/db/ui changes (the D11 soft ceiling proven by the diff); admin floor 32 files / 344 tests (+19 global-search seam its).
 ```
 
-- [ ] **Step 5: `AGENTS.md` + `docs/plan.md` — the pinned edits**
+- [✅] **Step 5: `AGENTS.md` + `docs/plan.md` — the pinned edits**
 
 (a) In *Current status of `pnpm test`*, replace the admin floor head (occurs once — verified at plan time):
 
@@ -1151,7 +1151,7 @@ with the same line ticked:
 
 (The narrow-form box and the Verify box stay unticked — they are #316/#317's deliverables; #315 never ticks them.)
 
-- [ ] **Step 6: The docs commit**
+- [✅] **Step 6: The docs commit**
 
 Tick this plan's executed boxes (`- [✅]`), then:
 
@@ -1160,11 +1160,11 @@ git add docs/progress.md AGENTS.md docs/plan.md docs/superpowers/plans/2026-11-1
 git commit -m "docs(m9): #315 lands the Global Search core - progress, AGENTS floor, the M9 roadmap tick (#315)"
 ```
 
-- [ ] **Step 7: PR + squash merge**
+- [✅] **Step 7: PR + squash merge**
 
 Push `feat/315-global-search`; open the PR against main titled `M9: Global Search core — the fuse.js engine seam + the inline dropdown (#315)`; body: the fourteen ACs each answered with its evidence pointer — the inline dropdown posture + width law + no footer (walkthrough state 1 + the component's pinned classes), ⌘K/Ctrl+K one rule (states 1 + 8 + the task-2 grep's single `metaKey || event.ctrlKey`), hint/first-character/no-results/no-browse-all (states 1-2, 7 + the state-selection its), the hand-wired engine + `shouldFilter={false}` + `useDeferredValue` (Task 1's seam + state 2), the index over the #288 queries + the join (state 3 + the five-factory grep), four headers + cap/tail (Task 1 its + state 4 if staged), item anatomy incl. peso blank + thumbs (state 4 + the hit its), the full keyboard model (state 5 — the bridge's live proof), deactivated findable + identity > body (Task 1 its + state 4), the `?focus=` emit (state 5 URLs + `focusUrlFor` its), the deps admin-local + zero packages/* changes (Step 1's gates + the package.json diff), the lib-seam suite (+19 its, floor 32/344), the owner reaction (Step 2's verdict), `pnpm check` green + docs updated + the v1-pick triaged (Step 8). Squash-merge.
 
-- [ ] **Step 8: The v1 pick (per `docs/agents/v1-picks.md`)**
+- [✅] **Step 8: The v1 pick (per `docs/agents/v1-picks.md`)**
 
 Run the path pass on the squash SHA:
 
@@ -1183,7 +1183,7 @@ git add docs/agents/v1-picks.md
 git commit -m "docs(v1-picks): #<PR> ledger row - the #315 Global Search core pick"
 ```
 
-- [ ] **Step 9: Issue closes + graphify**
+- [✅] **Step 9: Issue closes + graphify**
 
 Tick #315's fourteen AC boxes in its body, then close it with the AC → evidence mapping:
 
