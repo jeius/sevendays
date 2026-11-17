@@ -167,7 +167,7 @@ export function GlobalSearch() {
   const land = (hit: SearchHit) => {
     setOpen(false);
     setSheetOpen(false);
-    void navigate({ href: hit.focusUrl });
+    void navigate({ href: hit.focusUrl, resetScroll: false });
   };
 
   return (
@@ -342,7 +342,7 @@ function SearchResultItem({
     <Command.Item
       value={hit.id}
       onSelect={() => onSelect(hit)}
-      className='data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-2 text-sm'
+      className='data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground data-[selected=true]:ring-1 data-[selected=true]:ring-ring flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-2 text-sm'
     >
       <Icon aria-hidden='true' className='text-muted-foreground size-4 shrink-0' />
       <span className='min-w-0 flex-1'>
