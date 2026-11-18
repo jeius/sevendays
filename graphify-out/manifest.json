@@ -830,13 +830,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1794917367.9804623,
-    "ast_hash": "8b3dbc3c3ddbc3c17ac0b7d4b98a2c25",
+    "mtime": 1794961472.369975,
+    "ast_hash": "45481a7a10d9960878acb429c1958bc0",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794917367.9804623,
-    "ast_hash": "6cc096aff05232983de959b06e74b657",
+    "mtime": 1794961472.369975,
+    "ast_hash": "c99186e5d519ffb9d570886bc98be12e",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -5320,8 +5320,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/global-search.tsx": {
-    "mtime": 1794917367.9763196,
-    "ast_hash": "af776306b14989655c39b9317e198870",
+    "mtime": 1794961472.3656416,
+    "ast_hash": "956836b8c080a7c5b6f67fc9989e49d0",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/global-search.test.ts": {
@@ -5357,6 +5357,11 @@
   "docs/superpowers/plans/2026-11-17-316-search-narrow-form-focus-landing.md": {
     "mtime": 1794917367.9804623,
     "ast_hash": "c8edf0660bd6969b781479d19fedfada",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-17-317-m9-exit-gate.md": {
+    "mtime": 1794961472.369975,
+    "ast_hash": "fa0efccd4b442b4a2b1d2b1a9eef9b55",
     "semantic_hash": ""
   }
 }
