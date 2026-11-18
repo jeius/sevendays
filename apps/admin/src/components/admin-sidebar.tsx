@@ -5,7 +5,6 @@
 // trigger. Brand = wordmark + primary only (the tool-neutral mapping);
 // the user card renders the gate's session identity (#120).
 
-import { EMPTY_SITE_SETTINGS, resolveSiteSettings } from '@sevendays/types';
 import { Button } from '@sevendays/ui/components/button';
 import { Separator } from '@sevendays/ui/components/separator';
 import {
@@ -25,6 +24,13 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useMatchRoute, useNavigate } from '@tanstack/react-router';
 import { LogOut } from 'lucide-react';
 import { authClient } from '#/lib/auth-client';
+import {
+  BRAND_ROW_RAIL_CLASSES,
+  brandLockup,
+  LOCKUP_MONOGRAM,
+  LOGO_CHIP_GEOMETRY_CLASSES,
+  LOGO_IMG_CLASSES,
+} from '#/lib/brand-lockup';
 import { siteSettingsQuery } from '#/lib/cms-queries';
 import { visibleNavGroups } from '#/lib/nav';
 
@@ -63,29 +69,35 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   // M7 #223: the brand block consumes site settings — the studio's name
   // and logo (when set) ride the sidebar; the 7d monogram is the fallback.
   // The "Admin" kicker stays fixed — it names the tool, not the brand.
+  // #322: both brand surfaces ride the brand-lockup seam (#/lib/brand-lockup)
+  // — the model AND the rail/fit vocabulary are pinned there.
   const { data: rawSettings } = useQuery(siteSettingsQuery.all());
-  const settings = resolveSiteSettings(rawSettings ?? EMPTY_SITE_SETTINGS);
+  const lockup = brandLockup(rawSettings);
 
   return (
     <Sidebar collapsible='icon'>
       <SidebarHeader>
-        <div className='flex items-center gap-3 px-2 py-2'>
-          {settings.logoImageUrl ? (
-            <span className='bg-sidebar-primary text-sidebar-primary-foreground flex size-9 items-center justify-center overflow-hidden rounded-lg'>
+        <div className={`flex items-center gap-3 px-2 py-2 ${BRAND_ROW_RAIL_CLASSES}`}>
+          {lockup.logoImageUrl ? (
+            <span
+              className={`bg-sidebar-primary text-sidebar-primary-foreground flex size-9 items-center justify-center overflow-hidden rounded-lg ${LOGO_CHIP_GEOMETRY_CLASSES}`}
+            >
               <img
-                src={settings.logoImageUrl}
+                src={lockup.logoImageUrl}
                 alt=''
                 aria-hidden='true'
-                className='size-full object-cover'
+                className={LOGO_IMG_CLASSES}
               />
             </span>
           ) : (
-            <span className='bg-sidebar-primary text-sidebar-primary-foreground flex size-9 items-center justify-center rounded-lg font-mono text-sm font-bold'>
-              7d
+            <span
+              className={`bg-sidebar-primary text-sidebar-primary-foreground flex size-9 items-center justify-center rounded-lg font-mono text-sm font-bold ${LOGO_CHIP_GEOMETRY_CLASSES}`}
+            >
+              {LOCKUP_MONOGRAM}
             </span>
           )}
           <div className='group-data-[collapsible=icon]:hidden'>
-            <p className='text-sm leading-tight font-semibold'>{settings.brandName}</p>
+            <p className='text-sm leading-tight font-semibold'>{lockup.brandName}</p>
             <p className='text-sidebar-foreground/60 font-mono text-[0.65rem] tracking-widest uppercase'>
               Admin
             </p>
