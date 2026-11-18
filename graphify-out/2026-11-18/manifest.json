@@ -830,13 +830,13 @@
     "semantic_hash": "fd553b6c825082f1d2922017dd367015"
   },
   "docs/plan.md": {
-    "mtime": 1794917367.9804623,
-    "ast_hash": "8b3dbc3c3ddbc3c17ac0b7d4b98a2c25",
+    "mtime": 1794961472.369975,
+    "ast_hash": "45481a7a10d9960878acb429c1958bc0",
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794917367.9804623,
-    "ast_hash": "6cc096aff05232983de959b06e74b657",
+    "mtime": 1794961472.369975,
+    "ast_hash": "c99186e5d519ffb9d570886bc98be12e",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2650,8 +2650,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794917963.1821783,
-    "ast_hash": "3b0d8ac7fbfac8cf9fa530dd1e75b39f",
+    "mtime": 1794962299.607854,
+    "ast_hash": "6941459e51b6c2537a61c10ecd3a59ef",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -5320,8 +5320,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/global-search.tsx": {
-    "mtime": 1794917367.9763196,
-    "ast_hash": "af776306b14989655c39b9317e198870",
+    "mtime": 1794961472.3656416,
+    "ast_hash": "956836b8c080a7c5b6f67fc9989e49d0",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/global-search.test.ts": {
@@ -5357,6 +5357,26 @@
   "docs/superpowers/plans/2026-11-17-316-search-narrow-form-focus-landing.md": {
     "mtime": 1794917367.9804623,
     "ast_hash": "c8edf0660bd6969b781479d19fedfada",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-17-317-m9-exit-gate.md": {
+    "mtime": 1794962319.5520954,
+    "ast_hash": "768bfa2580ad8906e63ee9e293a4d12e",
+    "semantic_hash": ""
+  },
+  "apps/admin/src/lib/brand-lockup.test.ts": {
+    "mtime": 1794970384.949553,
+    "ast_hash": "7f01acc427c0d713fcf9a256d96180d5",
+    "semantic_hash": ""
+  },
+  "apps/admin/src/lib/brand-lockup.ts": {
+    "mtime": 1794970410.00028,
+    "ast_hash": "0672282cd82488ef9aa388fd5d840c33",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-18-322-admin-logo-lockup-rail.md": {
+    "mtime": 1794968799.9250371,
+    "ast_hash": "4dbd5c11670aeaf4dc635ff2947f040c",
     "semantic_hash": ""
   }
 }
