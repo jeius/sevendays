@@ -251,7 +251,16 @@ export function GlobalSearch() {
             <Search aria-hidden='true' />
           </Button>
         </PopoverTrigger>
+        {/* initialFocus={false} — the installed Base UI popover's sanctioned
+            "do not move focus on open" control (@base-ui/react 1.8.0,
+            Popover.Popup.Props.initialFocus: `false: Do not move focus`):
+            without it the popup's open-focus steals the topbar Input's focus
+            as it mounts (walk-probed on the deployed teaser — the INPUT at
+            T+100, the content DIV at T+400), killing the D6 contract's
+            "focuses" half. Focus stays on the Input for every open path
+            (⌘K, click, onFocus) — this posture never wants it inside. */}
         <PopoverContent
+          initialFocus={false}
           align='start'
           sideOffset={8}
           className='w-[min(24rem,calc(100vw-1.5rem))] gap-0 p-0'
