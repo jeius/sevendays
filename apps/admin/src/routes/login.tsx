@@ -9,16 +9,22 @@
 // Both submit buttons ride the one pending vocabulary (#218's, completed by
 // the M7 post-flight #242): disabled + aria-busy + the spinner prefix + the
 // "Signing in…" / "Sending…" swap while `submitting` holds.
+// #322: the AdminLockup consumes site settings (the brand-lockup seam) —
+// server-primed by this route's loader, the 7d monogram as fallback.
+
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@sevendays/ui/components/card';
 import { Input } from '@sevendays/ui/components/input';
 import { Label } from '@sevendays/ui/components/label';
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { z } from 'zod';
 import { PendingSpinner } from '#/components/cms/shared';
 import { authClient } from '#/lib/auth-client';
+import { brandLockup, LOCKUP_MONOGRAM, LOGO_IMG_CLASSES } from '#/lib/brand-lockup';
+import { siteSettingsQuery } from '#/lib/cms-queries';
 import { SENDING_LABEL, SIGNING_IN_LABEL } from '#/lib/save-contract';
 
 const loginSearchSchema = z.object({
@@ -33,6 +39,14 @@ const loginSearchSchema = z.object({
 export const Route = createFileRoute('/login')({
   validateSearch: loginSearchSchema,
   head: () => ({ meta: [{ title: 'Sign in | Sevendays Admin' }] }),
+  // #322: prime the settings read so the lockup's brand renders server-side
+  // (the shell loader's own guarded pattern, _shell.tsx): a failed read
+  // renders the 7d monogram fallback and never blocks the form.
+  loader: async ({ context: { queryClient } }) => {
+    await queryClient
+      .query({ ...siteSettingsQuery.all(), staleTime: 'static' })
+      .catch(() => undefined);
+  },
   component: LoginPage,
 });
 
@@ -45,14 +59,26 @@ function safeRedirect(target: string | undefined): string {
   return '/';
 }
 
+// #322: the lockup reads site settings — the same seam the sidebar's brand
+// block rides (the logo when set, the 7d monogram fallback when not, the
+// resolved brand name). Built in M4 pre-CMS, it stayed hardcoded when the
+// M7 redesign wired the rest of the chrome.
 function AdminLockup() {
+  const { data: rawSettings } = useQuery(siteSettingsQuery.all());
+  const lockup = brandLockup(rawSettings);
   return (
     <div className='flex items-center gap-3'>
-      <span className='bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-lg font-mono text-sm font-bold'>
-        7d
-      </span>
+      {lockup.logoImageUrl ? (
+        <span className='bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg'>
+          <img src={lockup.logoImageUrl} alt='' aria-hidden='true' className={LOGO_IMG_CLASSES} />
+        </span>
+      ) : (
+        <span className='bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-lg font-mono text-sm font-bold'>
+          {LOCKUP_MONOGRAM}
+        </span>
+      )}
       <span className='flex items-baseline gap-2.5'>
-        <span className='text-lg leading-tight font-semibold text-white'>Sevendays</span>
+        <span className='text-lg leading-tight font-semibold text-white'>{lockup.brandName}</span>
         <span className='font-mono text-[0.65rem] tracking-widest text-brand-300 uppercase'>
           Admin
         </span>
