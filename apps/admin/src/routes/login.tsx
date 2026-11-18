@@ -10,7 +10,7 @@
 // the M7 post-flight #242): disabled + aria-busy + the spinner prefix + the
 // "Signing in…" / "Sending…" swap while `submitting` holds.
 // #322: the AdminLockup consumes site settings (the brand-lockup seam) —
-// server-primed by this route's loader, the 7d monogram as fallback.
+// server-primed by this route's loader, the SD monogram as fallback.
 
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@sevendays/ui/components/card';
@@ -41,7 +41,7 @@ export const Route = createFileRoute('/login')({
   head: () => ({ meta: [{ title: 'Sign in | Sevendays Admin' }] }),
   // #322: prime the settings read so the lockup's brand renders server-side
   // (the shell loader's own guarded pattern, _shell.tsx): a failed read
-  // renders the 7d monogram fallback and never blocks the form.
+  // renders the SD monogram fallback and never blocks the form.
   loader: async ({ context: { queryClient } }) => {
     await queryClient
       .query({ ...siteSettingsQuery.all(), staleTime: 'static' })
@@ -60,7 +60,7 @@ function safeRedirect(target: string | undefined): string {
 }
 
 // #322: the lockup reads site settings — the same seam the sidebar's brand
-// block rides (the logo when set, the 7d monogram fallback when not, the
+// block rides (the logo when set, the SD monogram fallback when not, the
 // resolved brand name). Built in M4 pre-CMS, it stayed hardcoded when the
 // M7 redesign wired the rest of the chrome.
 function AdminLockup() {
@@ -69,7 +69,7 @@ function AdminLockup() {
   return (
     <div className='flex items-center gap-3'>
       {lockup.logoImageUrl ? (
-        <span className='bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg'>
+        <span className='flex size-9 shrink-0 items-center justify-center overflow-hidden'>
           <img src={lockup.logoImageUrl} alt='' aria-hidden='true' className={LOGO_IMG_CLASSES} />
         </span>
       ) : (

@@ -67,7 +67,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   const rail = state === 'collapsed';
   const groups = visibleNavGroups(user.role);
   // M7 #223: the brand block consumes site settings — the studio's name
-  // and logo (when set) ride the sidebar; the 7d monogram is the fallback.
+  // and logo (when set) ride the sidebar; the SD monogram is the fallback.
   // The "Admin" kicker stays fixed — it names the tool, not the brand.
   // #322: both brand surfaces ride the brand-lockup seam (#/lib/brand-lockup)
   // — the model AND the rail/fit vocabulary are pinned there.
@@ -80,7 +80,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
         <div className={`flex items-center gap-3 px-2 py-2 ${BRAND_ROW_RAIL_CLASSES}`}>
           {lockup.logoImageUrl ? (
             <span
-              className={`bg-sidebar-primary text-sidebar-primary-foreground flex size-9 items-center justify-center overflow-hidden rounded-lg ${LOGO_CHIP_GEOMETRY_CLASSES}`}
+              className={`flex size-9 items-center justify-center overflow-hidden ${LOGO_CHIP_GEOMETRY_CLASSES}`}
             >
               <img
                 src={lockup.logoImageUrl}

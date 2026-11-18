@@ -17,7 +17,7 @@ export interface BrandLockup {
 }
 
 // The monogram fallback when no logo is set — the pre-CMS chip's own glyph.
-export const LOCKUP_MONOGRAM = '7d';
+export const LOCKUP_MONOGRAM = 'SD';
 
 // The collapsed icon-rail posture for the sidebar brand row (#322 bug B):
 // the footer row's own pattern — column stack, tightened gap, no horizontal
