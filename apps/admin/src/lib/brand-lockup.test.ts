@@ -62,6 +62,6 @@ describe('the lockup geometry/fit vocabulary (#322 bug B: the rail sliver)', () 
   });
 
   it('pins the monogram fallback glyph', () => {
-    expect(LOCKUP_MONOGRAM).toBe('7d');
+    expect(LOCKUP_MONOGRAM).toBe('SD');
   });
 });
