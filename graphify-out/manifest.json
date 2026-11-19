@@ -700,8 +700,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1794972137.3506477,
-    "ast_hash": "5ca6bea5b5803b73c684be01f504a81e",
+    "mtime": 1794983768.0059001,
+    "ast_hash": "1aaf3fb2136966141494f7b4fa4d17c8",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1794972088.1690679,
-    "ast_hash": "2c65e387f9c3dd3f200a01337a9fb914",
+    "mtime": 1795067561.2574935,
+    "ast_hash": "1c27f990762004b45115f0c3f4c71580",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2650,8 +2650,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1794962299.607854,
-    "ast_hash": "6941459e51b6c2537a61c10ecd3a59ef",
+    "mtime": 1794984454.8289385,
+    "ast_hash": "ce81a59abc90fd03e2903a1eb33a9059",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -2730,8 +2730,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/admin-sidebar.tsx": {
-    "mtime": 1794970956.7799358,
-    "ast_hash": "e9a81cedbbe6ef06b1a94a61b889b941",
+    "mtime": 1794983689.3329334,
+    "ast_hash": "1ccab3cd4b221868ec61d361ce57ed94",
     "semantic_hash": ""
   },
   "apps/admin/src/components/admin-topbar.tsx": {
@@ -2775,8 +2775,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/routes/_shell.studio-services.tsx": {
-    "mtime": 1794725002.462478,
-    "ast_hash": "b92a5315f00ad3ef2490455ccc2a21fb",
+    "mtime": 1795066047.0063858,
+    "ast_hash": "21b1197757bea6f93b4650591edf8975",
     "semantic_hash": ""
   },
   "apps/admin/src/routes/_shell.tsx": {
@@ -3105,8 +3105,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/routes/login.tsx": {
-    "mtime": 1794971565.688651,
-    "ast_hash": "0be7843b5d1020b53f7c15eb76f93cdb",
+    "mtime": 1794983689.4209318,
+    "ast_hash": "9fc7bb0785a863ea61706df2a54598f4",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-22-120-login-shell-gate.md": {
@@ -3285,13 +3285,13 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/addons/addons-screen.tsx": {
-    "mtime": 1794523046.663184,
-    "ast_hash": "22755db75fdb69a1936694fc79eb281d",
+    "mtime": 1795066390.6460032,
+    "ast_hash": "bf1c7eb4849f9b8be8e6f406410e3f19",
     "semantic_hash": ""
   },
   "apps/admin/src/components/branches/branches-screen.tsx": {
-    "mtime": 1794917367.9763196,
-    "ast_hash": "968487f111dfe27b1340fc12f3ddcc7c",
+    "mtime": 1795066390.4726698,
+    "ast_hash": "93c458fa4628d46cbc9a68a1eba831db",
     "semantic_hash": ""
   },
   "apps/admin/src/components/cms/bulk-bar.tsx": {
@@ -3315,8 +3315,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/lookups/lookups-screen.tsx": {
-    "mtime": 1794523046.6674995,
-    "ast_hash": "88cc549d02032926a2334520c1be5b1c",
+    "mtime": 1795067138.7579818,
+    "ast_hash": "ce87f190520cbf2b04b20e1d27b4beeb",
     "semantic_hash": ""
   },
   "apps/admin/src/components/packages/package-editor.tsx": {
@@ -3325,18 +3325,18 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/packages/packages-table.tsx": {
-    "mtime": 1794917367.9763196,
-    "ast_hash": "8c27bae435f1a68abdaf79971ed6b2d2",
+    "mtime": 1795066806.8172603,
+    "ast_hash": "979715d2a23ae4fba6355d97f6ca6e23",
     "semantic_hash": ""
   },
   "apps/admin/src/components/studio-services/studio-services-screen.tsx": {
-    "mtime": 1794523046.6674995,
-    "ast_hash": "9535e11ce285172e2cce9f0ef18b78d3",
+    "mtime": 1795066046.9783857,
+    "ast_hash": "dd48e706d6385e28e079918c04317c11",
     "semantic_hash": ""
   },
   "apps/admin/src/components/testimonials/testimonials-screen.tsx": {
-    "mtime": 1794917367.9763196,
-    "ast_hash": "6ec5aeb03a6f955f1f70081f7a6f5d4a",
+    "mtime": 1795066390.5593364,
+    "ast_hash": "9c218a85d021ce7568f48d56e3b4a857",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/admin.functions.ts": {
@@ -3390,8 +3390,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/routes/_shell.packages.index.tsx": {
-    "mtime": 1794917367.9804623,
-    "ast_hash": "8c48052465fa761b2152cfaf97eb69f7",
+    "mtime": 1795066806.766904,
+    "ast_hash": "d996c40752e32ee7ef5e6556bcd4013b",
     "semantic_hash": ""
   },
   "apps/admin/src/routes/_shell.packages.new.tsx": {
@@ -5365,18 +5365,38 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/brand-lockup.test.ts": {
-    "mtime": 1794970384.949553,
-    "ast_hash": "7f01acc427c0d713fcf9a256d96180d5",
+    "mtime": 1794983689.4449315,
+    "ast_hash": "14e83a3e9c57d188e2adf7d0bd2f8c62",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/brand-lockup.ts": {
-    "mtime": 1794970410.00028,
-    "ast_hash": "0672282cd82488ef9aa388fd5d840c33",
+    "mtime": 1794980505.1707013,
+    "ast_hash": "fd66a7961f7513f0928402bd811741ae",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-18-322-admin-logo-lockup-rail.md": {
-    "mtime": 1794968799.9250371,
+    "mtime": 1794973150.466803,
     "ast_hash": "4dbd5c11670aeaf4dc635ff2947f040c",
+    "semantic_hash": ""
+  },
+  "docs/specs/2026-11-19-create-button-polish-spec.md": {
+    "mtime": 1795046682.6169147,
+    "ast_hash": "cace3efe5337592f6f55ca1066b6f73d",
+    "semantic_hash": ""
+  },
+  "docs/specs/2026-11-19-landing-image-viewer-spec.md": {
+    "mtime": 1795046960.4674182,
+    "ast_hash": "591b2054387f5a9452f3e69635685ff1",
+    "semantic_hash": ""
+  },
+  "docs/specs/2026-11-19-services-cover-photos-spec.md": {
+    "mtime": 1795046393.5086389,
+    "ast_hash": "b07ee248480e4664ff138c07d0d16215",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-19-337-create-button-plus-rename.md": {
+    "mtime": 1795065905.8119025,
+    "ast_hash": "24f128efe41c297b4b7125e5dd0ed44b",
     "semantic_hash": ""
   }
 }
