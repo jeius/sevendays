@@ -36,7 +36,7 @@ import {
 import { Textarea } from '@sevendays/ui/components/textarea';
 import { TooltipProvider } from '@sevendays/ui/components/tooltip';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { SquarePen } from 'lucide-react';
+import { Plus, SquarePen } from 'lucide-react';
 import { Fragment, useId, useState } from 'react';
 import { BulkActionBar, BulkSelectCell, BulkSelectHeader } from '#/components/cms/bulk-bar';
 import { RelationBadges } from '#/components/cms/relation-badges';
@@ -79,7 +79,7 @@ import { peso } from '#/lib/peso';
 import { blockerLines } from '#/lib/save-contract';
 import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
-/** The editor's mode switch: create (from `New studio service`) or edit (a row snapshot). */
+/** The editor's mode switch: create (from `New service`) or edit (a row snapshot). */
 type EditingTarget = { mode: 'create' } | { mode: 'edit'; row: StudioServiceWithBranches };
 
 /** One editor save: the target plus the exact field state the user saw. */
@@ -455,7 +455,8 @@ export function StudioServicesScreen() {
           <>
             <StatusSegmented value={segment} onChange={setSegment} />
             <Button type='button' onClick={openCreate}>
-              New studio service
+              <Plus aria-hidden='true' />
+              New service
             </Button>
           </>
         }
@@ -484,7 +485,8 @@ export function StudioServicesScreen() {
         // TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items)
         <EmptyState line='No studio services yet.'>
           <Button type='button' onClick={openCreate}>
-            New studio service
+            <Plus aria-hidden='true' />
+            New service
           </Button>
         </EmptyState>
       ) : (
@@ -655,7 +657,7 @@ export function StudioServicesScreen() {
 
       {editing ? (
         <LightEntityEditor
-          title={editing.mode === 'create' ? 'New studio service' : editing.row.name}
+          title={editing.mode === 'create' ? 'New service' : editing.row.name}
           description='Fields plus the branches this service is bookable at.'
           open={editorOpen}
           onOpenChange={(next) => {

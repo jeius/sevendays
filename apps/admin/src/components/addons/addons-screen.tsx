@@ -43,7 +43,7 @@ import {
 import { Textarea } from '@sevendays/ui/components/textarea';
 import { TooltipProvider } from '@sevendays/ui/components/tooltip';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { SquarePen } from 'lucide-react';
+import { Plus, SquarePen } from 'lucide-react';
 import { Fragment, useId, useState } from 'react';
 import { BulkActionBar, BulkSelectCell, BulkSelectHeader } from '#/components/cms/bulk-bar';
 import { RelationBadges } from '#/components/cms/relation-badges';
@@ -478,6 +478,7 @@ export function AddonsScreen() {
           <>
             <StatusSegmented value={segment} onChange={setSegment} />
             <Button type='button' onClick={openCreate}>
+              <Plus aria-hidden='true' />
               New add-on
             </Button>
           </>
@@ -507,6 +508,7 @@ export function AddonsScreen() {
         // TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items)
         <EmptyState line='No add-ons yet.'>
           <Button type='button' onClick={openCreate}>
+            <Plus aria-hidden='true' />
             New add-on
           </Button>
         </EmptyState>

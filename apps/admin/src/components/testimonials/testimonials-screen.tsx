@@ -51,7 +51,7 @@ import { Textarea } from '@sevendays/ui/components/textarea';
 import { TooltipProvider } from '@sevendays/ui/components/tooltip';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { GripVertical, SquarePen } from 'lucide-react';
+import { GripVertical, Plus, SquarePen } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Fragment, useId, useState } from 'react';
 import {
@@ -498,6 +498,7 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
             <>
               <StatusSegmented value={segment} onChange={setSegment} />
               <Button type='button' onClick={openCreate}>
+                <Plus aria-hidden='true' />
                 New testimonial
               </Button>
             </>
@@ -544,6 +545,7 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
           // TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items)
           <EmptyState line='No testimonials yet.'>
             <Button type='button' onClick={openCreate}>
+              <Plus aria-hidden='true' />
               New testimonial
             </Button>
           </EmptyState>
