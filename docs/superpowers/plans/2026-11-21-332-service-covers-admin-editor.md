@@ -265,7 +265,7 @@ export function newStudioServiceState(): StudioServiceEditorState {
 }
 ```
 
-(d) The builder split — the retiring `buildStudioServicePayload` (lines 303–320, with its Task-3 #331 JSDoc) is REPLACED by the two new builders, and the flip's JSDoc gains the cover-absence law. Current block for exact match:
+(d) The builder split — the two new builders INSERT ALONGSIDE the retiring `buildStudioServicePayload` (lines 303–320, with its Task-3 #331 JSDoc): it SURVIVES this task untouched (the screen still calls it; Task 2 deletes it with its last caller, converging the file to the after-block below's end-state), and the flip's JSDoc gains the cover-absence law. Current block for exact match:
 
 ```ts
 /**
