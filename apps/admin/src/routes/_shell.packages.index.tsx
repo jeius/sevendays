@@ -10,6 +10,7 @@
 // edit route stays one deliberate click away — the landing never opens it).
 import { Button } from '@sevendays/ui/components/button';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { Plus } from 'lucide-react';
 import { PageHeader } from '#/components/cms/shared';
 import { PackagesTable } from '#/components/packages/packages-table';
 import { cmsRoutePriming, primeCmsQueries } from '#/lib/cms-queries';
@@ -33,7 +34,12 @@ function PackagesPage() {
       <PageHeader
         title='Packages'
         subline="Everything on the landing site's /packages page, editable in place."
-        actions={<Button render={<Link to='/packages/new' />}>New package</Button>}
+        actions={
+          <Button render={<Link to='/packages/new' />}>
+            <Plus aria-hidden='true' />
+            New package
+          </Button>
+        }
       />
       <PackagesTable focus={focus} />
     </section>

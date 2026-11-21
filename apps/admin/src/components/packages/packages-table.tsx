@@ -25,7 +25,7 @@ import {
 import { TooltipProvider } from '@sevendays/ui/components/tooltip';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { Image, SquarePen } from 'lucide-react';
+import { Image, Plus, SquarePen } from 'lucide-react';
 import { Fragment, useState } from 'react';
 import {
   ActionTooltip,
@@ -195,7 +195,10 @@ export function PackagesTable({ focus }: { focus: string | undefined }) {
   if (packages.length === 0) {
     return (
       <EmptyState line='No packages yet.'>
-        <Button render={<Link to='/packages/new' />}>New package</Button>
+        <Button render={<Link to='/packages/new' />}>
+          <Plus aria-hidden='true' />
+          New package
+        </Button>
       </EmptyState>
     );
   }

@@ -29,7 +29,7 @@ import {
 } from '@sevendays/ui/components/table';
 import { TooltipProvider } from '@sevendays/ui/components/tooltip';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Image, SquarePen } from 'lucide-react';
+import { Image, Plus, SquarePen } from 'lucide-react';
 import { Fragment, useEffect, useId, useRef, useState } from 'react';
 import { BulkActionBar, BulkSelectCell, BulkSelectHeader } from '#/components/cms/bulk-bar';
 import {
@@ -422,6 +422,7 @@ export function BranchesScreen({ focus }: { focus: string | undefined }) {
           <>
             <StatusSegmented value={segment} onChange={setSegment} />
             <Button type='button' onClick={openCreate}>
+              <Plus aria-hidden='true' />
               New branch
             </Button>
           </>
@@ -459,6 +460,7 @@ export function BranchesScreen({ focus }: { focus: string | undefined }) {
         // TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items)
         <EmptyState line='No branches yet.'>
           <Button type='button' onClick={openCreate}>
+            <Plus aria-hidden='true' />
             New branch
           </Button>
         </EmptyState>

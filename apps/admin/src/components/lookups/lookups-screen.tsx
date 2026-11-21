@@ -37,7 +37,7 @@ import {
 import { Textarea } from '@sevendays/ui/components/textarea';
 import { TooltipProvider } from '@sevendays/ui/components/tooltip';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { SquarePen } from 'lucide-react';
+import { Plus, SquarePen } from 'lucide-react';
 import { Fragment, useId, useState } from 'react';
 import {
   ActionTooltip,
@@ -666,6 +666,7 @@ function PrintSizesSection({
           <CardTitle>Print sizes</CardTitle>
           <CardAction>
             <Button onClick={onCreate} size='sm' type='button' variant='outline'>
+              <Plus aria-hidden='true' />
               New print size
             </Button>
           </CardAction>
@@ -687,6 +688,7 @@ function PrintSizesSection({
           <CardTitle>Print sizes</CardTitle>
           <CardAction>
             <Button onClick={onCreate} size='sm' type='button' variant='outline'>
+              <Plus aria-hidden='true' />
               New print size
             </Button>
           </CardAction>
@@ -714,6 +716,7 @@ function PrintSizesSection({
           <CardTitle>Print sizes</CardTitle>
           <CardAction>
             <Button onClick={onCreate} size='sm' type='button' variant='outline'>
+              <Plus aria-hidden='true' />
               New print size
             </Button>
           </CardAction>
@@ -722,6 +725,7 @@ function PrintSizesSection({
           {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items) */}
           <EmptyState line='No print sizes yet.'>
             <Button type='button' onClick={onCreate}>
+              <Plus aria-hidden='true' />
               New print size
             </Button>
           </EmptyState>
@@ -741,6 +745,7 @@ function PrintSizesSection({
         <CardAction className='flex items-center gap-2'>
           <StatusSegmented value={segment} onChange={onSegmentChange} />
           <Button onClick={onCreate} size='sm' type='button' variant='outline'>
+            <Plus aria-hidden='true' />
             New print size
           </Button>
         </CardAction>
@@ -935,6 +940,7 @@ function AttiresSection({
           <CardTitle>Attires</CardTitle>
           <CardAction>
             <Button onClick={onCreate} size='sm' type='button' variant='outline'>
+              <Plus aria-hidden='true' />
               New attire
             </Button>
           </CardAction>
@@ -955,6 +961,7 @@ function AttiresSection({
           <CardTitle>Attires</CardTitle>
           <CardAction>
             <Button onClick={onCreate} size='sm' type='button' variant='outline'>
+              <Plus aria-hidden='true' />
               New attire
             </Button>
           </CardAction>
@@ -979,6 +986,7 @@ function AttiresSection({
           <CardTitle>Attires</CardTitle>
           <CardAction>
             <Button onClick={onCreate} size='sm' type='button' variant='outline'>
+              <Plus aria-hidden='true' />
               New attire
             </Button>
           </CardAction>
@@ -987,6 +995,7 @@ function AttiresSection({
           {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items) */}
           <EmptyState line='No attires yet.'>
             <Button type='button' onClick={onCreate}>
+              <Plus aria-hidden='true' />
               New attire
             </Button>
           </EmptyState>
@@ -1006,6 +1015,7 @@ function AttiresSection({
         <CardAction className='flex items-center gap-2'>
           <StatusSegmented value={segment} onChange={onSegmentChange} />
           <Button onClick={onCreate} size='sm' type='button' variant='outline'>
+            <Plus aria-hidden='true' />
             New attire
           </Button>
         </CardAction>
