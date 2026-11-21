@@ -80,6 +80,8 @@ No library or design recommendation applies — the register, gesture set, and c
 
 > **[AMENDED at execution 2026-11-21 — the environment ruling.]** The owner ordered **"Execute the plan. Hold the push after."** with the branch unpushed. The original Steps 1–2 (deploy provenance + the post-merge sync — inherited from the #338 template, whose code had already merged when its pass ran) contradict both this instruction and the parent spec's own law — #336's Further Notes: "the executor renders the throwaway variant pass … **The owner reacts to the D8 chrome register and the D3 caption interpretation before merge**." The original gate's anti-stale rationale ("react to the viewer, never a stale environment") is satisfied by the branch build itself: the pass runs against a **LOCAL serve of the branch tip** — the exact code that will merge — reading the same live DB the teaser serves. Never a remote deploy (the bare-deploy lesson stands); the push/PR stays held; the pass's record commits (progress, graphify, ticks) land on the branch and ride the eventual push. The ticket AC's "teaser walked" leg is satisfied pre-merge by the branch build; Task 3's comment records the deviation.
 
+> **[Second ruling — the rig defects, first fire aborted 2026-11-21.]** The first fire aborted at the home-zoom step (the failure branch executed as designed: catch → log written → exit 1, no stitched evidence). Diagnosis: `.yarl__slide_image` resolves to FIVE elements (preload 2 renders ±2 neighbors; spacing 30% peeks them around the viewport) and Playwright dblclicks the FIRST — an off-viewport preload — retrying past the 30 s timeout; separately, the `--yarl__color_backdrop` var read resolves empty (the dist paints it only as a var() fallback default on `.yarl__container`). The fix targets the CURRENT slide by geometry, not DOM order: `page.mouse.dblclick(720, 450)` (the desktop viewport center, where the carousel centers the current slide) at all three zoom steps, fixed viewport-center coordinates (195, 422) for the mobile swipe/pinch synthesis, and the D8 probe reads the container's computed `background-color` (the painted stage). The whole pass re-fires — one clean run (the failure branch's law).
+
 - [ ] **Step 1: Verify the branch-build provenance.** The pass reacts to the exact code that will merge — no push, no PR, no merge happens in this pass:
 
 ```bash
@@ -205,10 +207,14 @@ async function zoomScale(page) {
   });
 }
 
+// The painted stage: the container's computed background-color (the dist
+// paints background-color: var(--yarl__container_background_color,
+// var(--yarl__color_backdrop, #000)) on .yarl__container — the raw var
+// read resolves empty; the computed color is the real thing).
 async function backdropVar(page) {
   return page.evaluate(() => {
     const el = document.querySelector('.yarl__container');
-    return el ? getComputedStyle(el).getPropertyValue('--yarl__color_backdrop').trim() : null;
+    return el ? getComputedStyle(el).backgroundColor : null;
   });
 }
 
@@ -303,7 +309,10 @@ try {
     await counterText(page),
   );
 
-  await page.dblclick('.yarl__slide_image');
+  // The viewport center — the carousel centers the CURRENT slide there; a
+  // .yarl__slide_image selector would dblclick the FIRST of the five
+  // rendered slides (preload 2 ± neighbors), an off-viewport preload.
+  await page.mouse.dblclick(720, 450);
   await page.waitForTimeout(600);
   assert('double-click zooms (wrapper scale > 1)', (await zoomScale(page)) > 1.01, `scale=${await zoomScale(page)}`);
   await shotViewport(page, '03-home-viewer-zoom-light');
@@ -396,7 +405,7 @@ try {
   );
   assert('cover: NO counter (D4)', (await page.locator('.yarl__counter').count()) === 0);
   await shotViewport(page, '07-cover-viewer-light');
-  await page.dblclick('.yarl__slide_image');
+  await page.mouse.dblclick(720, 450); // the lone slide sits at the center
   await page.waitForTimeout(600);
   assert('cover: zooms (lone image, scale > 1)', (await zoomScale(page)) > 1.01, `scale=${await zoomScale(page)}`);
   await page.keyboard.press('Escape');
@@ -469,7 +478,7 @@ try {
   await settle(page);
   await page.locator("section[data-strip='gallery'] button.cursor-zoom-in").first().click();
   await viewerReady(page);
-  await page.dblclick('.yarl__slide_image');
+  await page.mouse.dblclick(720, 450); // the current slide, by geometry
   await page.waitForTimeout(600);
   assert(
     'zoom still engages under reduced motion (D7 spot-check)',
@@ -503,9 +512,10 @@ try {
   // swipe has no pointerType gate; a hasTouch context makes these real
   // touch pointers).
   const cdp = await mcontext.newCDPSession(mpage);
-  const box = await mpage.locator('.yarl__slide_image').boundingBox();
-  const cx = box.x + box.width / 2;
-  const cy = box.y + box.height / 2;
+  // Fixed viewport-center coords — the same off-viewport-preload trap a
+  // .yarl__slide_image boundingBox would hit (five slides render).
+  const cx = 195; // 390 / 2
+  const cy = 422; // 844 / 2
   const beforeSwipe = await counterText(mpage);
   await cdp.send('Input.dispatchTouchEvent', {
     type: 'touchStart',
@@ -657,7 +667,7 @@ The owner's words ARE the record — quote them verbatim per question in Step 3'
 | 11 | zoom under reduced motion | light, emulateMedia |
 | 12–13 | mobile wall + viewer | light, hasTouch 390×844 |
 
-**DOM-level proofs (capture-log.json):** one zoom affordance per wall photo (24/24); the counter reads `1 / 24` on open and advances on arrow/swipe; the seam's chrome labels present (Previous/Next/Close photo); **no caption line on home, the caption line with the caption text on /about (D3)**; Esc closes (from zoomed too), scroll lock on-while-open/off-after-close; **focus restored to the trigger after close (D7's hand-added law)**; Tab moves focus into the chrome; **the immersive stage constant across themes (D8 — backdrop var identical light/dark)**; the cover: no arrows, no counter, zooms; the coverless detail: no affordance at all (D4's placeholder-inert law); zoom engages under reduced motion; touch swipe navigates; pinch zooms. Caption inventory at capture: <N> captioned of <M> photos (populated before the walk per the owner ruling).
+**DOM-level proofs (capture-log.json):** one zoom affordance per wall photo (24/24); the counter reads `1 / 24` on open and advances on arrow/swipe; the seam's chrome labels present (Previous/Next/Close photo); **no caption line on home, the caption line with the caption text on /about (D3)**; Esc closes (from zoomed too), scroll lock on-while-open/off-after-close; **focus restored to the trigger after close (D7's hand-added law)**; Tab moves focus into the chrome; **the immersive stage constant across themes (D8 — the container's painted backdrop identical light/dark)**; the cover: no arrows, no counter, zooms; the coverless detail: no affordance at all (D4's placeholder-inert law); zoom engages under reduced motion; touch swipe navigates; pinch zooms. Caption inventory at capture: <N> captioned of <M> photos (populated before the walk per the owner ruling).
 
 **Owner's reactions:** D8 chrome register — <verdict words, verbatim>. D3 caption interpretation — <verdict words, verbatim>. Overall — <verdict words, verbatim>.
 
