@@ -122,6 +122,19 @@ describe('uploadCover', () => {
     });
   });
 
+  it('passes the caller purpose through to presign (#332: service covers presign as service-cover)', async () => {
+    const seen: CoverUploadStatus[] = [];
+    const presign = vi.fn(() => Promise.resolve({ key: 'tmp/k.jpg', uploadUrl: 'https://r2/put' }));
+    const promise = uploadCover(JPEG, presign, (s) => seen.push(s), 'service-cover');
+    await vi.waitFor(() => expect(FakeXhr.last).toBeDefined());
+    FakeXhr.last?.onload?.();
+    await expect(promise).resolves.toBeUndefined();
+    expect(presign).toHaveBeenCalledWith({
+      purpose: 'service-cover',
+      contentType: 'image/jpeg',
+    });
+  });
+
   it('#246: a PNG passes the pre-check for the site-logo purpose and presigns image/png', async () => {
     const presign = vi.fn(() => Promise.resolve({ key: 'tmp/k.png', uploadUrl: 'https://r2/put' }));
     const seen: CoverUploadStatus[] = [];

@@ -53,6 +53,39 @@ describe('studio-service state', () => {
     expect(state.branchIds).not.toBe(service.bookableBranchIds);
   });
 
+  it('a studio-service read with a cover seeds coverImageUrl; the editor key starts undefined (a read never echoes keys)', () => {
+    const covered = { ...service, coverImageUrl: 'https://pub-test.r2.dev/covers/aaaa.jpg' };
+    const state = light.studioServiceStateFromRead(covered);
+    expect(state.coverImageUrl).toBe('https://pub-test.r2.dev/covers/aaaa.jpg');
+    expect(state.coverImageKey).toBeUndefined();
+    const fresh = light.newStudioServiceState();
+    expect(fresh.coverImageUrl).toBeNull();
+    expect(fresh.coverImageKey).toBeUndefined();
+  });
+
+  it('studio-service CREATE payload includes the cover ONLY when the state carries a fresh staging key', () => {
+    const state = light.studioServiceStateFromRead(service);
+    expect('coverImageKey' in light.buildStudioServiceCreatePayload(state)).toBe(false);
+    const bound = { ...state, coverImageKey: 'tmp/00000000-0000-4000-8000-00000000000c.jpg' };
+    expect(light.buildStudioServiceCreatePayload(bound).coverImageKey).toBe(
+      'tmp/00000000-0000-4000-8000-00000000000c.jpg'
+    );
+  });
+
+  it('studio-service UPDATE payload encodes the cover tri-state: absent = property ABSENT, null = clear, string = bind', () => {
+    const state = light.studioServiceStateFromRead(service);
+    expect('coverImageKey' in light.buildStudioServiceUpdatePayload(state)).toBe(false);
+    expect(
+      light.buildStudioServiceUpdatePayload({ ...state, coverImageKey: null }).coverImageKey
+    ).toBeNull();
+    expect(
+      light.buildStudioServiceUpdatePayload({
+        ...state,
+        coverImageKey: 'tmp/00000000-0000-4000-8000-00000000000c.jpg',
+      }).coverImageKey
+    ).toBe('tmp/00000000-0000-4000-8000-00000000000c.jpg');
+  });
+
   it('branch state/payload round-trip; the flip carries every editable field with ONLY isActive flipped and NO cover key', () => {
     const state = light.branchStateFromRead(branch);
     expect(state).toEqual({
