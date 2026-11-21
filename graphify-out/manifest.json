@@ -225,8 +225,8 @@
     "semantic_hash": ""
   },
   "apps/landing/package.json": {
-    "mtime": 1795223048.5671473,
-    "ast_hash": "f9523d9004e978e0d62cb584f490048f",
+    "mtime": 1795270189.2200675,
+    "ast_hash": "4e4a67d36036d7f804fde77a0ef71640",
     "semantic_hash": ""
   },
   "apps/landing/src/integrations/posthog/provider.tsx": {
@@ -700,8 +700,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1795242777.6080618,
-    "ast_hash": "6c61694e9eded527b6bf9ade2df5de68",
+    "mtime": 1795270281.2905397,
+    "ast_hash": "7c99241a73521ec2c07363612e48a015",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1795262433.4517436,
-    "ast_hash": "5d62c101918dd46ed3c656b0dd933209",
+    "mtime": 1795270302.0948725,
+    "ast_hash": "0692ec5082691df615fb3ee0b60a53c5",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -2650,8 +2650,8 @@
     "semantic_hash": ""
   },
   "docs/agents/v1-picks.md": {
-    "mtime": 1795223048.614814,
-    "ast_hash": "ca10fb51f85d59ace92e8e9935c55f84",
+    "mtime": 1795270206.523067,
+    "ast_hash": "5a9f31a30986cb121df4a626e12af3f7",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-09-12-57-brand-token-unification-prototype.md": {
@@ -4565,8 +4565,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/mosaic-photo-grid.tsx": {
-    "mtime": 1795223048.601814,
-    "ast_hash": "f02f5483d0265fc4da9833994f876594",
+    "mtime": 1795270189.2200675,
+    "ast_hash": "1422cc4ad8596d94284656a1683f4ab9",
     "semantic_hash": ""
   },
   "apps/landing/src/components/not-found.tsx": {
@@ -4590,8 +4590,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/package-detail.tsx": {
-    "mtime": 1795223048.601814,
-    "ast_hash": "163502694e4500ec5abfb9bf7aa52f88",
+    "mtime": 1795270189.2200675,
+    "ast_hash": "fc04d3027863a101cf603ea9ecf49ca3",
     "semantic_hash": ""
   },
   "apps/landing/src/lib/page-head.test.ts": {
@@ -5399,6 +5399,51 @@
     "ast_hash": "24f128efe41c297b4b7125e5dd0ed44b",
     "semantic_hash": ""
   },
+  "docs/superpowers/plans/2026-11-21-338-create-button-polish-teaser-pass.md": {
+    "mtime": 1795270189.2330675,
+    "ast_hash": "33806b19a867137214191fc05e95b659",
+    "semantic_hash": ""
+  },
+  "apps/landing/src/components/photo-viewer.tsx": {
+    "mtime": 1795270189.2244008,
+    "ast_hash": "9af963551a890ad448b326a0d70e74b2",
+    "semantic_hash": ""
+  },
+  "apps/landing/src/lib/viewer.test.ts": {
+    "mtime": 1795270189.2244008,
+    "ast_hash": "106ee0ae171ea4ef5e7573cf24b9f928",
+    "semantic_hash": ""
+  },
+  "apps/landing/src/lib/viewer.ts": {
+    "mtime": 1795270189.2244008,
+    "ast_hash": "07f28b50cdfc11451b95805ee4d5859a",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-21-339-image-viewer-spine.md": {
+    "mtime": 1795270189.2330675,
+    "ast_hash": "31f68433e6b514382ddfa40bc91d3e7a",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-21-340-image-viewer-cover-zoom.md": {
+    "mtime": 1795270189.2374008,
+    "ast_hash": "997b123b1fedc61febe613532d6cc124",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-21-341-image-viewer-teaser-pass.md": {
+    "mtime": 1795270189.2374008,
+    "ast_hash": "01a651707473603a2fa185626c1516e2",
+    "semantic_hash": ""
+  },
+  "apps/landing/src/lib/service-image.test.ts": {
+    "mtime": 1795242073.5968525,
+    "ast_hash": "6b5cb6c10f7d8e9e010ed4a3149dfd1f",
+    "semantic_hash": ""
+  },
+  "apps/landing/src/lib/service-image.ts": {
+    "mtime": 1795242066.2431862,
+    "ast_hash": "d048c5b62c6e24d039e701b5295e4f87",
+    "semantic_hash": ""
+  },
   "packages/db/migrations/0015_premium_baron_zemo.sql": {
     "mtime": 1795224679.7557206,
     "ast_hash": "0d6f050a286261aa263fbb3bfa9a94aa",
@@ -5417,16 +5462,6 @@
   "docs/superpowers/plans/2026-11-21-332-service-covers-admin-editor.md": {
     "mtime": 1795239106.212528,
     "ast_hash": "15d2b87a3740e648ba6436f2cafef99f",
-    "semantic_hash": ""
-  },
-  "apps/landing/src/lib/service-image.test.ts": {
-    "mtime": 1795242073.5968525,
-    "ast_hash": "6b5cb6c10f7d8e9e010ed4a3149dfd1f",
-    "semantic_hash": ""
-  },
-  "apps/landing/src/lib/service-image.ts": {
-    "mtime": 1795242066.2431862,
-    "ast_hash": "d048c5b62c6e24d039e701b5295e4f87",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-21-333-service-covers-landing-consumption.md": {

@@ -5,6 +5,9 @@
 @import "@fontsource-variable/figtree";
 @import "@fontsource-variable/roboto-slab";
 @import "@fontsource-variable/geist-mono";
+@import "yet-another-react-lightbox/styles.css";
+@import "yet-another-react-lightbox/plugins/captions.css";
+@import "yet-another-react-lightbox/plugins/counter.css";
 @source "../../../packages/ui/src";
 
 @plugin "@tailwindcss/typography";
@@ -168,4 +171,29 @@ pre code {
   .skeleton-grammar [data-slot="skeleton"]::after {
     animation: none;
   }
+}
+
+/* Landing image viewer (#336 D8, built M9 #339): the immersive near-black
+   stage is the library's own default backdrop (#000 via
+   --yarl__color_backdrop) in BOTH themes — the recorded deliberate token
+   exception (photo viewing wants a constant dark stage; a light-mode
+   viewer that flashed white would be the jarring surface). The chrome ink
+   (buttons, counter) keeps the library's white registers. Token-native
+   parts only, below: the caption line re-registered to the wall's mono
+   vocabulary, and the brand focus ring on chrome focus-visible (the
+   library ships a color change alone). Dark mode needs no casing — the
+   portal is a body child, so the `.dark` block's variables resolve inside
+   it. */
+.yarl__root {
+  --yarl__slide_description_color: rgba(255, 255, 255, 0.8);
+}
+
+.yarl__slide_description {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.yarl__button:focus-visible {
+  outline: 3px solid var(--brand-focus-ring);
+  outline-offset: -3px;
 }
