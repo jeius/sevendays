@@ -3,6 +3,7 @@ import {
   branches,
   branchStudioServices,
   studioServiceAddonServices,
+  studioServices,
 } from '@sevendays/db';
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -84,6 +85,23 @@ describe('studio services admin CRUD', () => {
     );
     expect(res.status).toBe(404);
     expect(await res.json()).toEqual({ error: 'Studio Service not found.' });
+  });
+
+  it('#331: GET /:id resolves coverImageUrl for a covered row; the raw key never rides the read', async () => {
+    const COVER_KEY = 'covers/aaaaaaaa-0000-4000-8000-0000000000e2.jpg';
+    await db
+      .update(studioServices)
+      .set({ coverImageKey: COVER_KEY })
+      .where(eq(studioServices.id, ids.serviceStudio));
+    const res = await authed(
+      'GET',
+      `/api/v1/admin/studio-services/${ids.serviceStudio}`,
+      'admin-services-cover-read@sevendays.test'
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { coverImageUrl: string | null };
+    expect(body.coverImageUrl).toBe(`https://pub-test.r2.dev/${COVER_KEY}`);
+    expect(body).not.toHaveProperty('coverImageKey');
   });
 
   it('POST → 201 canonical read with empty link embeds (create carries no link fields)', async () => {

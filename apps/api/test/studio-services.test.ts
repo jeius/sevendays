@@ -1,4 +1,6 @@
+import { studioServices } from '@sevendays/db';
 import type { StudioServiceWithBranches } from '@sevendays/types';
+import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import app from '../src/index.js';
 import { createTestDb } from './helpers/db.js';
@@ -59,5 +61,21 @@ describe('GET /api/v1/studio-services', () => {
     // activity filter's whole point, mirroring ticket-03's ruling).
     expect(portrait?.applicableAddonServiceIds).toEqual([ids.addonMakeup]);
     expect(studio?.applicableAddonServiceIds).toEqual([]);
+  });
+
+  it('#331: resolves coverImageUrl for covered rows; null passthrough; the raw key never rides the read', async () => {
+    const COVER_KEY = 'covers/aaaaaaaa-0000-4000-8000-0000000000e1.jpg';
+    await db
+      .update(studioServices)
+      .set({ coverImageKey: COVER_KEY })
+      .where(eq(studioServices.id, ids.servicePortrait));
+    const res = await app.request('/api/v1/studio-services', undefined, testEnv(url));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as (StudioServiceWithBranches & { coverImageKey?: string })[];
+    const portrait = body.find((s) => s.id === ids.servicePortrait);
+    const studio = body.find((s) => s.id === ids.serviceStudio);
+    expect(portrait?.coverImageUrl).toBe(`https://pub-test.r2.dev/${COVER_KEY}`);
+    expect(portrait).not.toHaveProperty('coverImageKey');
+    expect(studio?.coverImageUrl).toBeNull();
   });
 });

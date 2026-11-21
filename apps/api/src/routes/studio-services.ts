@@ -5,5 +5,5 @@ import { listActiveStudioServicesWithBranches } from '../services/studio-service
 // Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts.
 export const studioServices = new Hono<ApiEnv>().get('/', async (c) => {
   const db = c.get('db');
-  return c.json(await listActiveStudioServicesWithBranches(db));
+  return c.json(await listActiveStudioServicesWithBranches(db, c.env));
 });

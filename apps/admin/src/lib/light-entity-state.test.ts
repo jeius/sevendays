@@ -39,6 +39,7 @@ const service = studioServiceWithBranchesSchema.parse({
   description: 'On-location styling.',
   priceCents: 150000,
   isActive: true,
+  coverImageUrl: null,
   createdAt: STAMP,
   updatedAt: STAMP,
   bookableBranchIds: [uuid(1), uuid(3)],

@@ -33,18 +33,23 @@ import { validatedJson, validatedParam } from '../services/validator.js';
 // convention and does not extend here).
 export const adminStudioServices = new Hono<ApiEnv>()
   .get('/', async (c) => {
-    return c.json(await listAdminStudioServices(c.get('db')));
+    return c.json(await listAdminStudioServices(c.get('db'), c.env));
   })
   .get('/:id', validatedParam(z.object({ id: z.uuid() })), async (c) => {
     const { id } = c.req.valid('param');
-    const row = await getAdminStudioService(c.get('db'), id);
+    const row = await getAdminStudioService(c.get('db'), c.env, id);
     if (!row) {
       return notFound(c, 'Studio Service not found.');
     }
     return c.json(row);
   })
   .post('/', validatedJson(createStudioServiceSchema), async (c) => {
-    const result = await createAdminStudioService(c.get('db'), auditActor(c), c.req.valid('json'));
+    const result = await createAdminStudioService(
+      c.get('db'),
+      c.env,
+      auditActor(c),
+      c.req.valid('json')
+    );
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
     }
@@ -59,6 +64,7 @@ export const adminStudioServices = new Hono<ApiEnv>()
       const { id } = c.req.valid('param');
       const result = await updateAdminStudioService(
         c.get('db'),
+        c.env,
         auditActor(c),
         id,
         c.req.valid('json')
@@ -80,7 +86,13 @@ export const adminStudioServices = new Hono<ApiEnv>()
     async (c) => {
       const { id } = c.req.valid('param');
       const { branchIds } = c.req.valid('json');
-      const result = await setStudioServiceBranchMatrix(c.get('db'), auditActor(c), id, branchIds);
+      const result = await setStudioServiceBranchMatrix(
+        c.get('db'),
+        c.env,
+        auditActor(c),
+        id,
+        branchIds
+      );
       if (!result.ok) {
         if (result.reason === 'not_found') {
           return notFound(c, 'Studio Service not found.');
@@ -100,6 +112,7 @@ export const adminStudioServices = new Hono<ApiEnv>()
       const { addonServiceIds } = c.req.valid('json');
       const result = await setStudioServiceAddonMatrix(
         c.get('db'),
+        c.env,
         auditActor(c),
         id,
         addonServiceIds

@@ -9,6 +9,9 @@ import {
 } from './studio-service.js';
 
 const UUID = '00000000-0000-4000-8000-000000000000';
+const COVER_KEY = 'covers/00000000-0000-4000-8000-000000000001.jpg';
+const COVER_URL = `https://pub-0000.r2.dev/${COVER_KEY}`;
+const STAGING_KEY = 'tmp/00000000-0000-4000-8000-000000000002.jpg';
 
 const fullRow = {
   id: UUID,
@@ -16,6 +19,7 @@ const fullRow = {
   description: 'Studio portraits and ID photos.',
   priceCents: 50000,
   isActive: true,
+  coverImageKey: COVER_KEY,
   createdAt: '2026-09-07T00:00:00.000Z',
   updatedAt: '2026-09-07T00:00:00.000Z',
 };
@@ -40,6 +44,11 @@ describe('studioServiceSchema', () => {
     const result = studioServiceSchema.safeParse({ ...fullRow, priceCents: -1 });
     expect(result.success).toBe(false);
   });
+
+  it('parses a bare row (coverImageKey null) — born-null covers are the default state (#331)', () => {
+    const result = studioServiceSchema.safeParse({ ...fullRow, coverImageKey: null });
+    expect(result.success).toBe(true);
+  });
 });
 
 describe('createStudioServiceSchema', () => {
@@ -60,12 +69,33 @@ describe('createStudioServiceSchema', () => {
     });
     expect(parsed.isActive).toBe(true);
   });
+
+  it('accepts a fresh staging key; rejects null (clear-before-create is meaningless, #331)', () => {
+    const base = { name: 'X', description: 'Y', priceCents: 1 };
+    expect(
+      createStudioServiceSchema.safeParse({ ...base, coverImageKey: STAGING_KEY }).success
+    ).toBe(true);
+    expect(createStudioServiceSchema.safeParse({ ...base, coverImageKey: null }).success).toBe(
+      false
+    );
+  });
+
+  it('drops coverImageUrl from the parsed create output (reads never echo through writes, #331)', () => {
+    const parsed = createStudioServiceSchema.parse({
+      name: 'X',
+      description: 'Y',
+      priceCents: 1,
+      coverImageUrl: COVER_URL,
+    });
+    expect('coverImageUrl' in parsed).toBe(false);
+  });
 });
 
 describe('studioServiceWithBranchesSchema', () => {
   it('parses a read row with embedded bookable branch ids', () => {
     const result = studioServiceWithBranchesSchema.safeParse({
       ...fullRow,
+      coverImageUrl: null,
       bookableBranchIds: [UUID, '00000000-0000-4000-8000-000000000001'],
       applicableAddonServiceIds: [],
     });
@@ -84,6 +114,7 @@ describe('studioServiceWithBranchesSchema', () => {
     const parsed = studioServiceWithBranchesSchema.parse({
       ...fullRow,
       isActive: undefined,
+      coverImageUrl: null,
       bookableBranchIds: [],
       applicableAddonServiceIds: [],
     });
@@ -93,6 +124,7 @@ describe('studioServiceWithBranchesSchema', () => {
   it('parses a read row with embedded applicable add-on ids', () => {
     const parsed = studioServiceWithBranchesSchema.parse({
       ...fullRow,
+      coverImageUrl: null,
       bookableBranchIds: [UUID],
       applicableAddonServiceIds: [UUID, '00000000-0000-4000-8000-000000000001'],
     });
@@ -120,6 +152,30 @@ describe('studioServiceWithBranchesSchema', () => {
   });
 });
 
+describe('the canonical read resolves covers (#331, the branchReadSchema precedent)', () => {
+  const read = {
+    ...fullRow,
+    bookableBranchIds: [],
+    applicableAddonServiceIds: [],
+    coverImageUrl: COVER_URL,
+  };
+
+  it('parses a resolved read (coverImageUrl is the absolute URL)', () => {
+    expect(studioServiceWithBranchesSchema.safeParse(read).success).toBe(true);
+  });
+
+  it('null coverImageUrl parses (no cover is a null URL, never a string)', () => {
+    expect(
+      studioServiceWithBranchesSchema.safeParse({ ...read, coverImageUrl: null }).success
+    ).toBe(true);
+  });
+
+  it('strips a smuggled coverImageKey from the parsed read output (ADR-0019: raw keys never leave)', () => {
+    const parsed = studioServiceWithBranchesSchema.parse({ ...read, coverImageKey: COVER_KEY });
+    expect('coverImageKey' in parsed).toBe(false);
+  });
+});
+
 describe('studio-service matrix payloads (M5)', () => {
   it('studioServiceBranchMatrixSchema parses { branchIds }; rejects a non-uuid entry', () => {
     expect(studioServiceBranchMatrixSchema.safeParse({ branchIds: [UUID] }).success).toBe(true);
@@ -137,8 +193,36 @@ describe('studio-service matrix payloads (M5)', () => {
     ).toBe(false);
   });
 
-  it('update is the create schema (full-object PUT)', () => {
-    expect(updateStudioServiceSchema).toBe(createStudioServiceSchema);
+  it('absent coverImageKey stays ABSENT from the parsed output (unchanged, #331)', () => {
+    const parsed = updateStudioServiceSchema.parse({
+      name: 'X',
+      description: 'Y',
+      priceCents: 1,
+      isActive: true,
+    });
+    expect('coverImageKey' in parsed).toBe(false);
+  });
+
+  it('null parses and survives (explicit clear, #331)', () => {
+    const parsed = updateStudioServiceSchema.parse({
+      name: 'X',
+      description: 'Y',
+      priceCents: 1,
+      isActive: true,
+      coverImageKey: null,
+    });
+    expect(parsed.coverImageKey).toBeNull();
+  });
+
+  it('a staging-key string parses (bind/replace via a fresh staging key, #331)', () => {
+    const parsed = updateStudioServiceSchema.parse({
+      name: 'X',
+      description: 'Y',
+      priceCents: 1,
+      isActive: true,
+      coverImageKey: STAGING_KEY,
+    });
+    expect(parsed.coverImageKey).toBe(STAGING_KEY);
   });
 });
 

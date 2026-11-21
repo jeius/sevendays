@@ -17,6 +17,7 @@ import type {
   Attire,
   BranchRead,
   CreateBranchInput,
+  CreateStudioServiceInput,
   PrintSize,
   StudioServiceAddonMatrixInput,
   StudioServiceBranchMatrixInput,
@@ -303,10 +304,13 @@ export function newStudioServiceState(): StudioServiceEditorState {
  * `#143 seam: studio-service state → full-object PUT payload`. The four
  * entity fields ONLY — never the matrix ids; relations ride their own
  * full-replace PUTs (`buildBranchMatrixPayload` / the add-on diff).
+ * Task-3 #331: typed as the CREATE input — the body is create-shaped (no
+ * cover key), and Create assigns to the update fn at the screen's update
+ * site (#332 supersedes this builder with the split + tri-state encoding).
  */
 export function buildStudioServicePayload(
   state: StudioServiceEditorState
-): UpdateStudioServiceInput {
+): CreateStudioServiceInput {
   return {
     name: state.name,
     description: state.description,

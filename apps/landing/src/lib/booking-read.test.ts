@@ -105,6 +105,7 @@ function service(id: string, name: string): StudioServiceWithBranches {
     description: 'test service',
     priceCents: 150000,
     isActive: true,
+    coverImageUrl: null,
     createdAt: new Date('2026-01-01T00:00:00Z'),
     updatedAt: new Date('2026-01-01T00:00:00Z'),
     bookableBranchIds: [],

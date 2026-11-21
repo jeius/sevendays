@@ -458,6 +458,7 @@ const STUDIO_SERVICE_UNIQUE: Record<string, string> = { studio_services_name_uni
  */
 async function assembleAdminStudioServices(
   db: Database,
+  env: BranchEnv,
   serviceRows: StudioServiceRow[]
 ): Promise<StudioServiceWithBranches[]> {
   const serviceIds = serviceRows.map((s) => s.id);
@@ -479,31 +480,42 @@ async function assembleAdminStudioServices(
     .orderBy(asc(studioServiceAddonServices.createdAt), asc(studioServiceAddonServices.id));
   const branchesByService = groupChildren(linkRows, (row) => row.studioServiceId);
   const addonsByService = groupChildren(addonRows, (row) => row.studioServiceId);
-  return serviceRows.map((s) => ({
-    ...s,
-    bookableBranchIds: branchesByService(s.id).map((l) => l.branchId),
-    applicableAddonServiceIds: addonsByService(s.id).map((l) => l.addonServiceId),
-  }));
+  // #331: strip the raw key, resolve the absolute URL — ALL rows including
+  // deactivated (the admin truth), raw keys never leaving.
+  return serviceRows.map((s) => {
+    const { coverImageKey, ...rest } = s;
+    return {
+      ...rest,
+      coverImageUrl: resolveMediaUrl(env, coverImageKey),
+      bookableBranchIds: branchesByService(s.id).map((l) => l.branchId),
+      applicableAddonServiceIds: addonsByService(s.id).map((l) => l.addonServiceId),
+    };
+  });
 }
 
-export async function listAdminStudioServices(db: Database): Promise<StudioServiceWithBranches[]> {
+export async function listAdminStudioServices(
+  db: Database,
+  env: BranchEnv
+): Promise<StudioServiceWithBranches[]> {
   const serviceRows = await db.select().from(studioServices).orderBy(asc(studioServices.name));
   if (serviceRows.length === 0) return [];
-  return assembleAdminStudioServices(db, serviceRows);
+  return assembleAdminStudioServices(db, env, serviceRows);
 }
 
 export async function getAdminStudioService(
   db: Database,
+  env: BranchEnv,
   id: string
 ): Promise<StudioServiceWithBranches | null> {
   const [row] = await db.select().from(studioServices).where(eq(studioServices.id, id)).limit(1);
   if (!row) return null;
-  const [assembled] = await assembleAdminStudioServices(db, [row]);
+  const [assembled] = await assembleAdminStudioServices(db, env, [row]);
   return assembled ?? null;
 }
 
 export async function createAdminStudioService(
   db: Database,
+  env: BranchEnv,
   audit: AuditActor,
   input: CreateStudioServiceInput
 ): Promise<AdminCreateResult<StudioServiceWithBranches>> {
@@ -521,13 +533,14 @@ export async function createAdminStudioService(
     })
   );
   if (!result.ok) return result;
-  const [assembled] = await assembleAdminStudioServices(db, [result.row]);
+  const [assembled] = await assembleAdminStudioServices(db, env, [result.row]);
   if (!assembled) throw new Error('studio service create: assembly lost the row');
   return { ok: true, row: assembled };
 }
 
 export async function updateAdminStudioService(
   db: Database,
+  env: BranchEnv,
   audit: AuditActor,
   id: string,
   input: UpdateStudioServiceInput
@@ -566,7 +579,7 @@ export async function updateAdminStudioService(
     })
   );
   if (!result.ok) return result;
-  const [assembled] = await assembleAdminStudioServices(db, [result.row]);
+  const [assembled] = await assembleAdminStudioServices(db, env, [result.row]);
   if (!assembled) throw new Error('studio service update: assembly lost the row');
   return { ok: true, row: assembled };
 }
@@ -581,6 +594,7 @@ export async function updateAdminStudioService(
  */
 export async function setStudioServiceBranchMatrix(
   db: Database,
+  env: BranchEnv,
   audit: AuditActor,
   id: string,
   branchIds: string[]
@@ -629,7 +643,7 @@ export async function setStudioServiceBranchMatrix(
       summary: service.name,
     });
   });
-  const read = await getAdminStudioService(db, id);
+  const read = await getAdminStudioService(db, env, id);
   if (!read) throw new Error('matrix save: read-back found no service row');
   return { ok: true, row: read };
 }
@@ -637,6 +651,7 @@ export async function setStudioServiceBranchMatrix(
 /** The add-on matrix — the branch matrix one junction over (same contract). */
 export async function setStudioServiceAddonMatrix(
   db: Database,
+  env: BranchEnv,
   audit: AuditActor,
   id: string,
   addonServiceIds: string[]
@@ -690,7 +705,7 @@ export async function setStudioServiceAddonMatrix(
       summary: service.name,
     });
   });
-  const read = await getAdminStudioService(db, id);
+  const read = await getAdminStudioService(db, env, id);
   if (!read) throw new Error('matrix save: read-back found no service row');
   return { ok: true, row: read };
 }
