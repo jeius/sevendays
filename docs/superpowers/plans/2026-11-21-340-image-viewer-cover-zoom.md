@@ -572,7 +572,7 @@ Expected: EMPTY (all seven byte-identical — the wall, the shared panel, and ev
 grep -rn "CoverPanel" apps/landing/src --include='*.tsx' | grep -v 'cover-panel.tsx' | grep -c "import\|<CoverPanel"
 ```
 
-Expected: `8` (the same four files, unchanged import+render counts).
+Expected: `9` (the same four consumer FILES — package-detail's count moves 2→3: the import plus one `<CoverPanel` render in EACH arm of the only-when-covered ternary Block C mandates; the three fence consumers stay at 2 each; no new consumer file. [AMENDED at execution 2026-11-21: this pin originally said `8` — the PRE-change census; the plan's own Block C makes 9 the only possible outcome. The fence's intent (no new consumer, the three other surfaces untouched) is carried by the empty byte-identity fence above.]).
 
 - [ ] **Step 5: Gates.**
 
