@@ -26,7 +26,7 @@ All four spec tickets — **#331 (this plan) → #332 (admin editor) → #333 (l
 
 **NOT here (siblings / out of scope):**
 
-- **#332 — the admin editor Cover field** (`studio-services-screen.tsx`, `light-entity-state.ts` seam, `cover-upload.ts` purpose wiring, `admin.functions.ts`). The ONLY admin-file edits in this plan are test-fixture repairs in `light-entity-state.test.ts` (one parse literal + `coverImageUrl: null`) — the tri-state editor state, builders, and flip payload are #332's deliverable and stay out.
+- **#332 — the admin editor Cover field** (`studio-services-screen.tsx`, `light-entity-state.ts` seam, `cover-upload.ts` purpose wiring, `admin.functions.ts`). The ONLY admin-file edits in this plan are: test-fixture repairs in `light-entity-state.test.ts` (one parse literal + `coverImageUrl: null`) AND one mechanical schema-ripple line in `light-entity-state.ts` — `buildStudioServicePayload`'s return annotation retypes `UpdateStudioServiceInput` → `CreateStudioServiceInput` (Task 3; the alias death splits Create≠Update, the builder's body is create-shaped — no cover key — and Create assigns to Update at the update site; zero behavior; **#332 supersedes** with the builder split + the tri-state encoding per spec D7). The tri-state editor state, builders' bodies, and flip payload are #332's deliverable and stay out.
 - **#333 — landing consumption** (`home-cards.tsx` `serviceBackground()` demotion, the precedence helper, ServiceImageCard/ServiceCard swaps). The ONLY landing edits here are three test-factory literals gaining `coverImageUrl: null` — typecheck repairs, not consumption.
 - **#334 — teaser variant pass + owner reaction** — the #94 rendered-variants gate. Nothing here is "done done" until it records.
 - **The live package / branch / site-logo cover flows** — untouched (map ruling; only studio services gain covers).
@@ -444,14 +444,36 @@ describe('the canonical read resolves covers (#331, the branchReadSchema precede
 Replace with:
 
 ```ts
-  it('update tri-state: absent stays ABSENT (unchanged), null survives (explicit clear), a staging string parses (bind/replace, #331)', () => {
-    const base = { name: 'X', description: 'Y', priceCents: 1, isActive: true };
-    const absent = updateStudioServiceSchema.parse(base);
-    expect('coverImageKey' in absent).toBe(false);
-    const cleared = updateStudioServiceSchema.parse({ ...base, coverImageKey: null });
-    expect(cleared.coverImageKey).toBeNull();
-    const bound = updateStudioServiceSchema.parse({ ...base, coverImageKey: STAGING_KEY });
-    expect(bound.coverImageKey).toBe(STAGING_KEY);
+  it('absent coverImageKey stays ABSENT from the parsed output (unchanged, #331)', () => {
+    const parsed = updateStudioServiceSchema.parse({
+      name: 'X',
+      description: 'Y',
+      priceCents: 1,
+      isActive: true,
+    });
+    expect('coverImageKey' in parsed).toBe(false);
+  });
+
+  it('null parses and survives (explicit clear, #331)', () => {
+    const parsed = updateStudioServiceSchema.parse({
+      name: 'X',
+      description: 'Y',
+      priceCents: 1,
+      isActive: true,
+      coverImageKey: null,
+    });
+    expect(parsed.coverImageKey).toBeNull();
+  });
+
+  it('a staging-key string parses (bind/replace via a fresh staging key, #331)', () => {
+    const parsed = updateStudioServiceSchema.parse({
+      name: 'X',
+      description: 'Y',
+      priceCents: 1,
+      isActive: true,
+      coverImageKey: STAGING_KEY,
+    });
+    expect(parsed.coverImageKey).toBe(STAGING_KEY);
   });
 ```
 
@@ -936,7 +958,7 @@ git add packages/types/src/studio-service.ts packages/types/src/studio-service.t
 git commit -m "feat(types,api): the studio-service read resolves coverImageUrl - raw keys stay server-side; the save schemas split create/update (#331)"
 ```
 
-**Not here:** no cover WRITE behavior (Task 4: `resolveServiceCover`, the displaced-key deletes, the logger threading); no `deleteAdminStudioService` env (Task 4); no admin editor/state-seam work (#332 — the `light-entity-state.test.ts` edit is the parse literal only); no landing consumption (#333 — the factories are typecheck repairs); the `service-teaser-item.tsx`/`home-cards.tsx`/`service-card.tsx` type consumers need no edit (they read fields; they never construct literals — verified by the typecheck gate).
+**Not here:** no cover WRITE behavior (Task 4: `resolveServiceCover`, the displaced-key deletes, the logger threading); no `deleteAdminStudioService` env (Task 4); no admin editor/state-seam work beyond the two authorized ripples (#332 — the `light-entity-state.test.ts` parse literal + the one-line `buildStudioServicePayload` return-annotation retype in `light-entity-state.ts`, both zero-behavior mechanical schema repairs; the builder's BODY, the flip payload, and the tri-state encoding stay #332's); no landing consumption (#333 — the factories are typecheck repairs); the `service-teaser-item.tsx`/`home-cards.tsx`/`service-card.tsx` type consumers need no edit (they read fields; they never construct literals — verified by the typecheck gate).
 
 ## Task 4 — the tri-state save + the delete cleanup (admin-entities, admin-delete, routes, pins, cache verify)
 
