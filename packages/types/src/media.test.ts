@@ -38,6 +38,14 @@ describe('mediaPresignRequestSchema', () => {
     expect(parsed.purpose).toBe('site-logo');
   });
 
+  it('parses the service-cover purpose (M9 #331: studio services join the covers pipeline)', () => {
+    const parsed = mediaPresignRequestSchema.parse({
+      purpose: 'service-cover',
+      contentType: 'image/jpeg',
+    });
+    expect(parsed.purpose).toBe('service-cover');
+  });
+
   it('rejects a non-jpeg contentType for a JPG-only purpose (the #170 cap: gallery stays JPG-only)', () => {
     expect(
       mediaPresignRequestSchema.safeParse({ purpose: 'gallery-photo', contentType: 'image/png' })

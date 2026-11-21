@@ -24,12 +24,15 @@ export const MEDIA_UPLOAD_CAP_BYTES = 10 * 1024 * 1024;
 
 // 'branch-cover' joined with M7 #214; 'site-logo' with M7 #215: the brand
 // logo rides the same presign/commit pipeline under its own purpose (the
-// brand/ prefix — a logo is not a cover).
+// brand/ prefix — a logo is not a cover); 'service-cover' with M9 #331:
+// studio services join the covers pipeline (JPG-only like every non-logo
+// purpose — the #170 ruling rides the pair check untouched).
 export const mediaPurposeSchema = z.enum([
   'package-cover',
   'branch-cover',
   'site-logo',
   'gallery-photo',
+  'service-cover',
 ]);
 
 export type MediaPurpose = z.infer<typeof mediaPurposeSchema>;
