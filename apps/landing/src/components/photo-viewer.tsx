@@ -4,14 +4,22 @@ import Lightbox from 'yet-another-react-lightbox';
 import Captions from 'yet-another-react-lightbox/plugins/captions';
 import Counter from 'yet-another-react-lightbox/plugins/counter';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
-import { MOSAIC_CAROUSEL, MOSAIC_CONTROLLER, VIEWER_LABELS } from '../lib/viewer';
+import {
+  COVER_CAROUSEL,
+  COVER_RENDER,
+  MOSAIC_CAROUSEL,
+  MOSAIC_CONTROLLER,
+  VIEWER_LABELS,
+} from '../lib/viewer';
 
 // The viewer composition (#336 D2/D6/D7): one Lightbox over the seam's
-// mosaic vocabulary. The two laws the library does NOT carry live here —
-// the live-index track (a re-render while open must re-sync to the CURRENT
-// slide, never snap the carousel back to the opening photo) and the
-// focus-restore (the library moves focus IN on open but never back).
-// #340 widens this with the lone-image cover variant; nothing here branches.
+// option vocabulary, in two variants — the mosaic walls (arrows + counter +
+// captions, the carousel loops) and (#340) the lone-image cover (zoom only,
+// finite, no arrows, no counter — D4). The two laws the library does NOT
+// carry live here for BOTH variants — the live-index track (a re-render
+// while open must re-sync to the CURRENT slide, never snap the carousel
+// back to the opening photo) and the focus-restore (the library moves
+// focus IN on open but never back).
 
 // Focus-restore capture must run BEFORE the library's focus-on-open —
 // which registers as a PASSIVE effect in the shipped dist (verified
@@ -25,16 +33,21 @@ export function PhotoViewer({
   slides,
   index,
   onClose,
+  variant = 'mosaic',
 }: {
   /** The mapped slides (the lib seam) — pass a STABLE reference (memoized at the surface). */
   slides: Slide[];
   /** null = closed; a number opens AT that photo (the clicked one). */
   index: number | null;
   onClose: () => void;
+  /** The mosaic walls (default) or the package-detail lone-image cover (D4). */
+  variant?: 'mosaic' | 'cover';
 }) {
   const open = index !== null;
   // D6: `live` tracks navigation (on.view) so the surface's `index` sets
   // only the OPENING slide; while open, the Lightbox re-syncs to `live`.
+  // On the cover variant there is nothing to navigate — `live` stays null
+  // and the single slide is the only view.
   const [live, setLive] = useState<number | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
 
@@ -56,6 +69,12 @@ export function PhotoViewer({
     if (trigger?.isConnected) trigger.focus();
   }, [open]);
 
+  // D4: the cover variant zooms a LONE image — plugins shrink to Zoom only
+  // (no Counter, no Captions: a lone image has no caption law), the
+  // carousel cannot loop, and the arrows are hidden by the render slots.
+  // The controller and labels are shared (D5's "the shared labels strings").
+  const cover = variant === 'cover';
+
   return (
     <Lightbox
       open={open}
@@ -63,10 +82,11 @@ export function PhotoViewer({
       index={live ?? index ?? 0}
       on={{ view: ({ index: current }) => setLive(current) }}
       slides={slides}
-      plugins={[Captions, Counter, Zoom]}
-      carousel={MOSAIC_CAROUSEL}
+      plugins={cover ? [Zoom] : [Captions, Counter, Zoom]}
+      carousel={cover ? COVER_CAROUSEL : MOSAIC_CAROUSEL}
       controller={MOSAIC_CONTROLLER}
       labels={VIEWER_LABELS}
+      render={cover ? COVER_RENDER : undefined}
     />
   );
 }
