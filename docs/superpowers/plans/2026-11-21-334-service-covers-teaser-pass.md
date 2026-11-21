@@ -81,7 +81,7 @@ No design recommendation applies — the tri-state law, the fallback posture, th
 - Consumes: the branch serves (api remote preview 8787; admin/landing dev 3000); `@playwright/test` 1.63.0 (worktree-root-resolvable); the pre-flight's verified DOM.
 - Produces: the rig + the booted api leg (Task 2 consumes both); twelve PNGs + two capture-logs (Tasks 2–3 produce, Task 4 consumes).
 
-- [ ] **Step 1: Verify the branch-build provenance.** The pass reacts to the exact code that will merge — no push, no PR, no merge happens in this pass:
+- [✅] **Step 1: Verify the branch-build provenance.** The pass reacts to the exact code that will merge — no push, no PR, no merge happens in this pass:
 
 ```bash
 git rev-parse --short HEAD && git status --short && node -e "console.log(require('@playwright/test/package.json').version)"
@@ -89,7 +89,7 @@ git rev-parse --short HEAD && git status --short && node -e "console.log(require
 
 Expected: HEAD is this plan's commit atop #331+#332+#333's `75d5865` (record the actual tip — the pass comment cites it); worktree clean; the version prints `1.63.0`. If a newer commit has landed on the branch since, proceed — the capture-log records the actual tip.
 
-- [ ] **Step 2: Boot the api leg in remote mode and prove the born-null state.** Run in the background (the session survives this turn):
+- [✅] **Step 2: Boot the api leg in remote mode and prove the born-null state.** Run in the background (the session survives this turn):
 
 ```bash
 pnpm --filter @sevendays/api exec wrangler dev --remote
@@ -103,7 +103,7 @@ curl -s http://localhost:8787/api/v1/studio-services | node -e "let d='';process
 
 Expected: `rows: 4, covered: 0` and the four names — the born-null state, the migration proven live (a 200 with the resolved field means 0015 is applied). **If any row carries a coverImageUrl, STOP and report** — the pass expects the born-null catalog; reconcile with the owner before firing (the re-fire path in Task 2's script tolerates an already-bound service only when the owner names that state at the go gate). Leave the api leg running — both acts consume it; it stops at Task 3 Step 5.
 
-- [ ] **Step 3: Write the admin-act script verbatim** to `.superpowers/334-teaser-pass/act1-admin.mjs`:
+- [✅] **Step 3: Write the admin-act script verbatim** to `.superpowers/334-teaser-pass/act1-admin.mjs`:
 
 ```js
 // #334 — Act 1: the admin editor's four cover preview states, both themes.
@@ -430,7 +430,7 @@ console.log(
 process.exit(log.failures === 0 ? 0 : 1);
 ```
 
-- [ ] **Step 4: Write the landing-act script verbatim** to `.superpowers/334-teaser-pass/act2-landing.mjs`:
+- [✅] **Step 4: Write the landing-act script verbatim** to `.superpowers/334-teaser-pass/act2-landing.mjs`:
 
 ```js
 // #334 — Act 2: the landing's two service postures, both themes. Walks
@@ -638,7 +638,7 @@ console.log(
 process.exit(log.failures === 0 ? 0 : 1);
 ```
 
-- [ ] **Step 5: Syntax gates.**
+- [✅] **Step 5: Syntax gates.**
 
 ```bash
 node --check .superpowers/334-teaser-pass/act1-admin.mjs
@@ -647,14 +647,14 @@ node --check .superpowers/334-teaser-pass/act2-landing.mjs
 
 Expected: both silent (exit 0).
 
-- [ ] **Step 6: Commit the plan record.**
+- [✅] **Step 6: Commit the plan record.**
 
 ```bash
 git add docs/superpowers/plans/2026-11-21-334-service-covers-teaser-pass.md
 git commit -m "docs: the #334 service-covers teaser-pass plan (the spec branch's owner gate)"
 ```
 
-- [ ] **Step 7: The go-gate announcement (STOP here — end the turn).** End the turn with this message and do NOT fire the admin act until the owner's next message says go AND names the service:
+- [✅] **Step 7: The go-gate announcement (STOP here — end the turn).** End the turn with this message and do NOT fire the admin act until the owner's next message says go AND names the service:
 
 > The #334 variant pass is staged. Act 1 opens a Chromium window on your desktop for the **local admin** login (you sign in, ≤180 s; no credentials are shared or stored — it's the branch build at localhost, reading the same live data). Then, with your hands: open the editor of the service you want to carry the cover, upload **your** cover JPG (JPG only, up to 10 MiB), and click Save — that bind is the pass's one real write and it stays (the teaser serves it once integration lands). I capture the editor's four preview states in both themes around your hands, then the landing's two postures headlessly. **Say go — and name the service you'll cover** (e.g. "Photo Recovery").
 
@@ -670,7 +670,7 @@ This step's box is ticked only when the owner has said go and named the service.
 
 All commands run from the **worktree root** (the scripts resolve `@playwright/test` and the relative scratch path from there).
 
-- [ ] **Step 1: Boot the admin serve and probe it.** Run in the background:
+- [✅] **Step 1: Boot the admin serve and probe it.** Run in the background:
 
 ```bash
 pnpm --filter @sevendays/admin dev
@@ -684,7 +684,7 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/login
 
 Expected: `200`. (The admin reads/writes/presign all proxy to `127.0.0.1:8787` via the already-set `API_URL` — no env work.)
 
-- [ ] **Step 2: Fire (ONLY after the owner's "go" AND the named service — never before).** Substitute the service the owner named at Task 1 Step 7:
+- [✅] **Step 2: Fire (ONLY after the owner's "go" AND the named service — never before).** Substitute the service the owner named at Task 1 Step 7:
 
 ```bash
 DISPLAY=:0 CAPTURE_SERVICE='<the owner's named service>' node .superpowers/334-teaser-pass/act1-admin.mjs
@@ -692,9 +692,9 @@ DISPLAY=:0 CAPTURE_SERVICE='<the owner's named service>' node .superpowers/334-t
 
 Expected: the probe line (fresh-bind or already-bound), the `[auth]` wait — the owner signs in the visible Chromium — then the two `[owner]` guidance lines (open the editor; upload the JPG and stop at "Cover ready — save to bind it."), the bound-state asserts, shot 01–02 (bound, light/dark), the `[owner] Click Save now.` line (fresh-bind) or the Cancel line (already-bound), the bind-LIVE assert, shots 03–04 (stored), the pending-removal asserts + shots 05–06, the cancel-kept assert, the empty-state asserts + shots 07–08, and the closing JSON verdict: `shots: 8, failures: 0` with `boundUrl` a resolved URL and `path` recording which branch ran. Exit 0.
 
-- [ ] **Step 3: The failure branches.** Any `[FAIL]` line, a non-zero exit, or a thrown abort = **STOP and diagnose before presenting** — never present broken evidence. Diagnosis order: (a) the serves (the api leg's `Ready on 8787` line alive; the admin serve's 200 — a dead serve fails the very first assert); (b) the owner-hand timeouts (`[error]` naming a waitFor timeout on an `[owner]` step = the owner stepped away — this is the wait-for-owner-answers block, not a retry: re-announce Task 1 Step 7's message and end the turn); (c) a failed SAVE (the sheet holding past `Click Save now.` = the save contract resolved false — read the editor's error lines in the log/screenshot, diagnose the conflict, never blind-retry); (d) the rig itself (locators against the branch DOM — only after (a)–(c) are green). A diagnosed rig defect is fixed in the script and the WHOLE act re-fires (one clean run, not stitched halves — the log and shots must come from a single execution). A re-fire after a landed bind runs the script's `already-bound` path automatically (the fire-time probe picks it; the unsaved re-upload's commit leaves one orphaned `covers/<uuid>.jpg` — recorded as `orphanedCover` and disclosed in the record comment; never a replace-save). Never retake a shot to "improve" it — the pass records what the branch build serves; a retake is only for a FAILED assert, diagnosed first.
+- [✅] **Step 3: The failure branches.** Any `[FAIL]` line, a non-zero exit, or a thrown abort = **STOP and diagnose before presenting** — never present broken evidence. Diagnosis order: (a) the serves (the api leg's `Ready on 8787` line alive; the admin serve's 200 — a dead serve fails the very first assert); (b) the owner-hand timeouts (`[error]` naming a waitFor timeout on an `[owner]` step = the owner stepped away — this is the wait-for-owner-answers block, not a retry: re-announce Task 1 Step 7's message and end the turn); (c) a failed SAVE (the sheet holding past `Click Save now.` = the save contract resolved false — read the editor's error lines in the log/screenshot, diagnose the conflict, never blind-retry); (d) the rig itself (locators against the branch DOM — only after (a)–(c) are green). A diagnosed rig defect is fixed in the script and the WHOLE act re-fires (one clean run, not stitched halves — the log and shots must come from a single execution). A re-fire after a landed bind runs the script's `already-bound` path automatically (the fire-time probe picks it; the unsaved re-upload's commit leaves one orphaned `covers/<uuid>.jpg` — recorded as `orphanedCover` and disclosed in the record comment; never a replace-save). Never retake a shot to "improve" it — the pass records what the branch build serves; a retake is only for a FAILED assert, diagnosed first.
 
-- [ ] **Step 4: Verify the artifacts before presenting.**
+- [✅] **Step 4: Verify the artifacts before presenting.**
 
 ```bash
 ls .superpowers/334-teaser-pass/ && cat .superpowers/334-teaser-pass/capture-log-admin.json
@@ -702,7 +702,7 @@ ls .superpowers/334-teaser-pass/ && cat .superpowers/334-teaser-pass/capture-log
 
 Expected: exactly eight PNGs (`01-editor-bound-light.png` … `08-editor-empty-dark.png`) + `capture-log-admin.json` (act2's artifacts join later); every `asserts` entry (10) has `ok: true`; `failures: 0`; `boundUrl` is an absolute resolved URL; `path` and `orphanedCover` recorded. Any red → Step 3's branch, not the reaction.
 
-- [ ] **Step 5: Stop the admin serve** (both apps pin :3000 — the landing act needs it next).
+- [✅] **Step 5: Stop the admin serve** (both apps pin :3000 — the landing act needs it next).
 
 **Not here:** no editor saves, uploads, or replaces by the controller (`Remove cover` + `Cancel` only — the one-write law); no navigation beyond `/studio-services` and the login redirect; no second fire without diagnosis (and an owner-hand timeout is a stop-and-wait, never a retry); no screenshots beyond the eight (the asserts carry the rest).
 
@@ -712,7 +712,7 @@ Expected: exactly eight PNGs (`01-editor-bound-light.png` … `08-editor-empty-d
 - Consumes: `.superpowers/334-teaser-pass/act2-landing.mjs` (Task 1); the api leg with the bind LIVE; the owner's bound cover.
 - Produces: four PNGs + `capture-log-landing.json` under `.superpowers/334-teaser-pass/`.
 
-- [ ] **Step 1: Boot the landing serve and probe both postures.** Run in the background:
+- [✅] **Step 1: Boot the landing serve and probe both postures.** Run in the background:
 
 ```bash
 pnpm --filter @sevendays/landing dev
@@ -727,7 +727,7 @@ curl -s http://localhost:3000/services | grep -a -o "<article" | wc -l
 
 Expected: ≥ 1 and ≥ 4 — the serve renders both postures over the live data (the landing's `API_URL` already points at the local api leg).
 
-- [ ] **Step 2: Fire.** Nothing is gated here — the landing is public and headless:
+- [✅] **Step 2: Fire.** Nothing is gated here — the landing is public and headless:
 
 ```bash
 node .superpowers/334-teaser-pass/act2-landing.mjs
@@ -735,9 +735,9 @@ node .superpowers/334-teaser-pass/act2-landing.mjs
 
 Expected: the `[gate]` line (covered: the owner's service + its resolved URL; the three fallbacks named), then the four `checkCards` passes (10 asserts each — the 4-card count over the marquee's four originals via the not-[aria-hidden] selector on the strip and over the four articles on /services, the decode gate, per card the exact-cover-or-stand-in src law and the decorative+lazy img laws) and the dark-applied assert — 41 asserts total — plus four `[shot]` lines (the strip shots pause the marquee track — runtime-only `addStyleTag`), closing with the JSON verdict: `shots: 4, failures: 0`. Exit 0.
 
-- [ ] **Step 3: The failure branch.** Any `[FAIL]`, a non-zero exit, or the `[gate]` tripping = **STOP and diagnose before presenting**. Diagnosis order: (a) the serves (a dead api leg trips the gate's probe — Task 1 Step 2's posture; a dead landing serve fails the first `checkCards` wait); (b) the bind state (the gate demands exactly one covered service — zero means Task 2's bind never landed, two+ means an earlier fire bound twice: reconcile with the owner); (c) a decode-gate failure is REAL evidence (a broken cover URL fails `naturalWidth > 0` — that is a finding, never a rig bug to fix away — stop and present it); (d) the rig itself (the card selectors against the branch DOM — only after (a)–(c) are green). A diagnosed rig defect is fixed in the script and the WHOLE act re-fires (one clean run). Never retake a shot to "improve" it.
+- [✅] **Step 3: The failure branch.** Any `[FAIL]`, a non-zero exit, or the `[gate]` tripping = **STOP and diagnose before presenting**. Diagnosis order: (a) the serves (a dead api leg trips the gate's probe — Task 1 Step 2's posture; a dead landing serve fails the first `checkCards` wait); (b) the bind state (the gate demands exactly one covered service — zero means Task 2's bind never landed, two+ means an earlier fire bound twice: reconcile with the owner); (c) a decode-gate failure is REAL evidence (a broken cover URL fails `naturalWidth > 0` — that is a finding, never a rig bug to fix away — stop and present it); (d) the rig itself (the card selectors against the branch DOM — only after (a)–(c) are green). A diagnosed rig defect is fixed in the script and the WHOLE act re-fires (one clean run). Never retake a shot to "improve" it.
 
-- [ ] **Step 4: Verify the artifacts before presenting.**
+- [✅] **Step 4: Verify the artifacts before presenting.**
 
 ```bash
 ls .superpowers/334-teaser-pass/ && cat .superpowers/334-teaser-pass/capture-log-landing.json
@@ -745,7 +745,7 @@ ls .superpowers/334-teaser-pass/ && cat .superpowers/334-teaser-pass/capture-log
 
 Expected: twelve PNGs total now (`09-home-services-strip-light.png` … `12-services-list-dark.png` joining act1's eight) + both capture-logs; every `asserts` entry (41) has `ok: true`; `failures: 0`; `covered.name` is the owner's service and `covered.url` the resolved URL. Any red → Step 3's branch, not the reaction.
 
-- [ ] **Step 5: Stop both serves** (the landing dev server and the api's remote-preview session). Nothing to restore — the pass performed zero env swaps (Global Constraints); the scratch stays gitignored.
+- [✅] **Step 5: Stop both serves** (the landing dev server and the api's remote-preview session). Nothing to restore — the pass performed zero env swaps (Global Constraints); the scratch stays gitignored.
 
 **Not here:** no navigation beyond `/` and `/services` (the pass is scoped, not a walkthrough); no booking-flow pages (the spec-pinned fact: booking has no imagery — nothing to consume there); no clicks on the landing beyond scrolling (the cards deep-link to `/book` — never followed); no screenshots beyond the four.
 
@@ -756,9 +756,9 @@ Expected: twelve PNGs total now (`09-home-services-strip-light.png` … `12-serv
 - Modify: `docs/progress.md` (append a dated section at file end — the house pattern); graphify output.
 - Issue writes: #334 comment (+ close on approve), #330 closing NOTE (a comment — the close rides the owner's integration call) — approve path.
 
-- [ ] **Step 1: Present the twelve PNGs in-session** (Read renders them), one line each naming surface, state, and the matrix leg it proves — in file order (01 the editor's bound preview … 12 the dark /services list). Do not editorialize the renderings; the owner judges. Name where each ruled decision is judged: the editor Cover field register (shots 01–08 — the four states, the placeholder tile, the machine's status lines, both themes) and the landing cover-beside-fallback adjacency with the treatment identity (shots 09–12 — the covered card riding the house tints beside the stand-ins). One framing fact to state when presenting: the home strip is the ruled **marquee** — the shot is the paused window (the track runs the cards three times; ~3 cards fit a desktop frame), so the /services grid shots (10/12) are the full-adjacency frame — all four cards visible at once. The serves are down (Task 3 Step 5) — offer to re-boot them if the owner wants to walk any surface themselves before answering.
+- [✅] **Step 1: Present the twelve PNGs in-session** (Read renders them), one line each naming surface, state, and the matrix leg it proves — in file order (01 the editor's bound preview … 12 the dark /services list). Do not editorialize the renderings; the owner judges. Name where each ruled decision is judged: the editor Cover field register (shots 01–08 — the four states, the placeholder tile, the machine's status lines, both themes) and the landing cover-beside-fallback adjacency with the treatment identity (shots 09–12 — the covered card riding the house tints beside the stand-ins). One framing fact to state when presenting: the home strip is the ruled **marquee** — the shot is the paused window (the track runs the cards three times; ~3 cards fit a desktop frame), so the /services grid shots (10/12) are the full-adjacency frame — all four cards visible at once. The serves are down (Task 3 Step 5) — offer to re-boot them if the owner wants to walk any surface themselves before answering.
 
-- [ ] **Step 2: Ask the reactions — AskUserQuestion, three questions in ONE call** (ask and block; never assume while the owner may be AFK):
+- [✅] **Step 2: Ask the reactions — AskUserQuestion, three questions in ONE call** (ask and block; never assume while the owner may be AFK):
 
 1. "The editor's Cover field register — the four preview states (the blob preview with 'Cover ready — save to bind it.', the stored cover preview, the muted Image-icon placeholder on pending-removal and empty), both themes: approve or adjust?" — options `Approve` / `Adjust`.
 2. "The landing's cover-beside-fallback — the covered card riding the identical house treatment (ink wash + scrim, decorative lazy img) beside the documented stand-ins on the home strip and /services, both themes: approve or adjust?" — options `Approve` / `Adjust`.
@@ -766,7 +766,7 @@ Expected: twelve PNGs total now (`09-home-services-strip-light.png` … `12-serv
 
 The owner's words ARE the record — quote them verbatim per question in Step 3's comment (the "Other" field carries nuance; quote it too). Any `Adjust` or `Fix-list` routes through Step 4b even if another question approved.
 
-- [ ] **Step 3: Record on #334** — post this body verbatim (the angle-bracket slots fill from the recorded facts: the date; the branch tip from Task 1 Step 1; the covered service's name; the covered URL's host; the already-bound orphan disclosure only if that path ran; the three verdicts quoted exactly):
+- [✅] **Step 3: Record on #334** — post this body verbatim (the angle-bracket slots fill from the recorded facts: the date; the branch tip from Task 1 Step 1; the covered service's name; the covered URL's host; the already-bound orphan disclosure only if that path ran; the three verdicts quoted exactly):
 
 ```markdown
 ## Variant pass — the services-cover feature (verifying #331 + #332 + #333's landed work)
@@ -791,7 +791,7 @@ The owner's words ARE the record — quote them verbatim per question in Step 3'
 **Flagged apart (not this ticket):** the nightly E2E's ADR-0022 landing visual baselines (light) have failed 3 consecutive scheduled runs (latest 44845874350, 2026-11-21T00:45Z; also 44651735229, 44434041556) — landing-side baseline drift predating this pass; needs its own triage.
 ```
 
-- [ ] **Step 4a (Approve path — all three verdicts approve): close out.**
+- [✅] **Step 4a (Approve path — all three verdicts approve): close out.**
 
 ```bash
 gh issue close 334 --reason completed --comment "The variant pass is rendered and the owner's three reactions record above — the acceptance boxes hold: the feature walk covered the editor's four preview states and both landing postures in both themes (on the branch build pre-merge — the same code serves the teaser when integration is called); the owner's bind went through the feature's own flow; the findings were none. The services-cover feature is accepted; #330's rendered-variants gate is satisfied."
@@ -818,7 +818,7 @@ git commit -m "chore(graphify): post-#334 graph update"
 
 - [ ] **Step 4b (Adjust / Fix-list path): record + route, never fix.** Post the Step 3 comment with the verdicts quoted; keep #334 AND #330 open; post a brief #330 note recording the pass + that findings are routed to fix tickets (honest, not the approve note); skip the Step 4a closes and the approve-path progress text (the progress entry instead records the pass + the findings, drafted from the owner's recorded words — no invented text). Propose the follow-up path to the owner: each finding becomes its own fix ticket via the triage discipline; the re-pass after fixes re-runs Tasks 1–3 (the rig is staged — the already-bound path covers a re-fire after any landed bind).
 
-- [ ] **Step 5: Self-review tick + records.** `grep -c '<!-- APPEND' docs/superpowers/plans/2026-11-21-334-service-covers-teaser-pass.md` → 0 (anchors consumed); amend this plan's checkboxes to reflect what actually ran (the #338/#341 precedent — `docs:` commits; the plan file rides the branch's eventual push). The serves stopped at Task 3 Step 5; nothing to restore (zero env swaps). **The push/PR stays held — nothing is pushed in this pass; the integration call (with the #331–#333 closes + the v1 picks/ledger) is the owner's.**
+- [✅] **Step 5: Self-review tick + records.** `grep -c '<!-- APPEND' docs/superpowers/plans/2026-11-21-334-service-covers-teaser-pass.md` → 0 (anchors consumed); amend this plan's checkboxes to reflect what actually ran (the #338/#341 precedent — `docs:` commits; the plan file rides the branch's eventual push). The serves stopped at Task 3 Step 5; nothing to restore (zero env swaps). **The push/PR stays held — nothing is pushed in this pass; the integration call (with the #331–#333 closes + the v1 picks/ledger) is the owner's.**
 
 **Not here:** no v1 pick work (rides the integration ceremony, main-only); no AGENTS.md edit (floors don't move; zero code); no ADR (no architectural choice — acceptance tooling on the #310/#338/#341 pattern); no fix implementation even for a one-line tuning (the fix-list is NEW tickets, always); no #330 close (the owner's integration call, never the capture alone).
 
@@ -833,6 +833,19 @@ git commit -m "chore(graphify): post-#334 graph update"
 - [✅] **Cross-reference consistency:** the Cover-field locators cite the verified DOM (`div.rounded-lg.border.p-4` block; `img[src^='blob:']` bound; `div.bg-muted` placeholder; the exact status line "Cover ready — save to bind it."; `button[aria-label='Edit']` row-scoped; the sheet title = the row name — never matching the 'New service' create sheet); the stand-in paths match `service-image.ts:8-15` verbatim; the stored-src assert reads the resolved URL as an exact attribute match; the theme flips assert `html.dark` in both acts; the dark-open-sheet mechanism (next-themes 0.4.6 storage listener) is probed in the pre-flight; the Cancel-keeps-cover assert mirrors #332's AC. (Anchors read from the branch source at plan time; the rig re-proves them at execution.)
 - [✅] **Gate integrity:** the go gate (Task 1 Step 7 → end of turn; the fire requires "go" AND the named service) and the reaction gate (Task 4 Step 2, ask-and-block) are both blocking; the scripts never fire before their prerequisites (act1's CAPTURE_SERVICE gate exits 1 without the service; act2's exactly-one-covered gate exits 1 without the live bind); the plan never posts to an issue before the reactions record. The owner-hand waits (open editor / upload / Save) are blocking with printed guidance and never auto-advance.
 - [✅] **Sibling fences:** the push/PR/merge + the #331–#333 closes + the v1 picks (owner-initiated integration ceremony), the nightly-baseline triage, every code change, the #330 close — all named in Scope fences with their owners; no fence doubles as a step. The one-write law is fenced AND script-enforced (no `Upload cover`/`Save` clicks by the controller; `Remove cover`/`Cancel` are state-only).
+
+---
+
+## Execution record (2026-11-21 — what actually ran)
+
+**Filled slots:** branch tip `75ee91e` (this plan's commit — Task 1 Step 6 was satisfied at write time); service **Portraits & ID Photo**; bound URL host `pub-0e2d375a0ded418f84366c03cf37e4a8.r2.dev` (`covers/4b05b618-fd5e-45a6-ab7d-848c9ebbfe6f.jpg`); verdicts **Approve / Approve / Approve** (the owner's selected words, no Other-nuance). Artifact truth: act1 8 shots / 10 asserts all ok (exit 0); act2 4 shots / 41 asserts all ok (exit 0) — each from a single clean execution.
+
+**Ruling 1 — the reconciliation (Task 1 Step 2's STOP branch + Task 2 Step 3's branch (b), both exercised):** the first admin fire aborted at the editor-open owner-hand wait (Task 1 Step 7's re-announce given; the owner's next "go" re-fired). The re-fire's probe answered **already-bound** — during the first fire's window the owner had performed the bind themselves, outside the automation page (the automation wrote nothing). Per the STOP law the act was killed at its auth wait (zero shots, zero writes, zero orphans), the owner confirmed the bind as theirs and chose the script's already-bound path; the re-fire ran it clean (the bound shots ride the re-fire's unsaved re-upload; Cancel, never a replace-save; `orphanedCover: true` recorded — one orphaned `covers/<uuid>.jpg`, disclosed in the #334 record).
+
+**Ruling 2 — the act2 rig defect (Task 3 Step 3's branch (d), exercised):** the landing act's first run failed 1 of 41 asserts — the decode gate scoped `section[data-strip='services'] img` (12 imgs: the 4 originals + 8 aria-hidden marquee loop copies), while every other assert scopes the four originals via `div:not([aria-hidden]) > a:has(h3)`; the paused track's viewport-disjoint lazy copies never decode. Diagnosed a rig defect, not a broken URL (the covered R2 object decoded on three other passes in the same run); the gate re-scoped to `${scopeSel} ${cardCss}` and the **whole act re-fired clean** — the recorded log + shots come from that single execution (the plan's one-clean-run law). Both rulings are disclosed in the #334 record's Execution record paragraph (issuecomment-7062255446).
+
+**Disposition (Step 4a ran; 4b not taken):** #334 closed completed; #330 carries the closing note (issuecomment-7062257726); `docs/progress.md` section committed (`b2e2e3f`). The push/PR/merge stays held — the integration call (with the #331–#333 closes + the v1 picks/ledger) is the owner's.
+
 
 
 
