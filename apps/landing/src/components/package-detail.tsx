@@ -3,9 +3,12 @@ import { buttonVariants } from '@sevendays/ui/components/button';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
 import { ArrowLeft, Phone } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { peso } from '../lib/format';
+import { coverSlides } from '../lib/viewer';
 import { CoverPanel } from './cover-panel';
 import { inclusionPhrase } from './inclusions-list';
+import { PhotoViewer } from './photo-viewer';
 
 // The package detail on the ruled D2 split language (#164 Round 3): the
 // cover as a full plate half (untouched photo — the CoverPanel law renders
@@ -17,6 +20,13 @@ import { inclusionPhrase } from './inclusions-list';
 // stays fully bookable.
 export function PackageDetail({ pkg }: { pkg: ServicePackageRead }) {
   const price = peso(pkg.priceCents);
+  // The cover zoom (#336 D4): the lone-image variant opens at the one
+  // slide; a coverless package maps to zero slides (the seam's law) and
+  // renders no affordance at all — the placeholder is inert.
+  const [viewerOpen, setViewerOpen] = useState(false);
+  // A stable slides reference (the library's documented pitfall — the
+  // detail re-renders on query refetches while the viewer is open).
+  const slides = useMemo(() => coverSlides(pkg), [pkg]);
 
   return (
     <div className='mx-auto max-w-5xl px-6 pt-8 pb-16'>
@@ -29,11 +39,31 @@ export function PackageDetail({ pkg }: { pkg: ServicePackageRead }) {
       </Link>
       <div className='mt-6 grid overflow-hidden rounded-xl border border-line-soft bg-card shadow-sm md:grid-cols-5'>
         <div className='relative min-h-64 md:col-span-3 md:min-h-[26rem]'>
-          <CoverPanel
-            name={pkg.name}
-            coverImageUrl={pkg.coverImageUrl}
-            className='absolute inset-0 size-full rounded-none object-cover'
-          />
+          {/* The zoom affordance exists ONLY when the row carries a photo —
+              the initials placeholder is not a photograph and does not zoom
+              (D4). The button is the positioning box (CoverPanel's absolute
+              classes anchor to it); the ring is inset (the grid's
+              overflow-hidden would clip an outset one); the accessible name
+              is the img's alt = the package name (content-based). */}
+          {pkg.coverImageUrl ? (
+            <button
+              type='button'
+              onClick={() => setViewerOpen(true)}
+              className='absolute inset-0 cursor-zoom-in rounded-none focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring focus-visible:ring-inset'
+            >
+              <CoverPanel
+                name={pkg.name}
+                coverImageUrl={pkg.coverImageUrl}
+                className='absolute inset-0 size-full rounded-none object-cover'
+              />
+            </button>
+          ) : (
+            <CoverPanel
+              name={pkg.name}
+              coverImageUrl={pkg.coverImageUrl}
+              className='absolute inset-0 size-full rounded-none object-cover'
+            />
+          )}
         </div>
         <div className='flex flex-col justify-center gap-1 p-6 md:col-span-2 md:p-8'>
           <h1 className='font-bold font-serif text-2xl text-brand-ink md:text-3xl dark:text-foreground'>
@@ -61,6 +91,12 @@ export function PackageDetail({ pkg }: { pkg: ServicePackageRead }) {
           </Link>
         </div>
       </div>
+      <PhotoViewer
+        variant='cover'
+        slides={slides}
+        index={viewerOpen ? 0 : null}
+        onClose={() => setViewerOpen(false)}
+      />
       <section className='mt-10'>
         <h2 className='font-semibold font-serif text-2xl text-brand-ink dark:text-foreground'>
           What's included
