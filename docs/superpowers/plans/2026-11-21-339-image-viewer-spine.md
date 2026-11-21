@@ -671,16 +671,16 @@ Replace with:
 + #224's two redesign-II seams — the page-head composition, the about story paragraphs; + #339's nine viewer seam pins — the alt law, the captions law, the mosaic option vocabulary — 18 files / 143 tests).
 ```
 
-- [ ] **Step 3: The scope census (both commands exclude gitignored build artifacts — the #337 lesson).**
+- [ ] **Step 3: The scope census (both commands exclude gitignored build artifacts — the #337 lesson; `coverage` joined by the Task 5 execution ruling — the istanbul report embeds the source lines).**
 
 ```bash
-grep -rn "yet-another-react-lightbox" apps/ packages/ --exclude-dir=node_modules --exclude-dir=dist
+grep -rn "yet-another-react-lightbox" apps/ packages/ --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=coverage
 ```
 
 Expected: exactly four files — `apps/landing/package.json`, `apps/landing/src/lib/viewer.ts`, `apps/landing/src/components/photo-viewer.tsx`, `apps/landing/src/styles.css`. Anything else is a scope violation (the library is landing-only, AC).
 
 ```bash
-grep -rn "cursor-zoom-in" apps/ packages/ --exclude-dir=node_modules --exclude-dir=dist
+grep -rn "cursor-zoom-in" apps/ packages/ --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=coverage
 ```
 
 Expected: exactly one line — the wall button in `mosaic-photo-grid.tsx` (the affordance lives in the shared wall, nowhere else).
