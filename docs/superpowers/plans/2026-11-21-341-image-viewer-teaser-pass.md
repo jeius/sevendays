@@ -82,6 +82,8 @@ No library or design recommendation applies — the register, gesture set, and c
 
 > **[Second ruling — the rig defects, first fire aborted 2026-11-21.]** The first fire aborted at the home-zoom step (the failure branch executed as designed: catch → log written → exit 1, no stitched evidence). Diagnosis: `.yarl__slide_image` resolves to FIVE elements (preload 2 renders ±2 neighbors; spacing 30% peeks them around the viewport) and Playwright dblclicks the FIRST — an off-viewport preload — retrying past the 30 s timeout; separately, the `--yarl__color_backdrop` var read resolves empty (the dist paints it only as a var() fallback default on `.yarl__container`). The fix targets the CURRENT slide by geometry, not DOM order: `page.mouse.dblclick(720, 450)` (the desktop viewport center, where the carousel centers the current slide) at all three zoom steps, fixed viewport-center coordinates (195, 422) for the mobile swipe/pinch synthesis, and the D8 probe reads the container's computed `background-color` (the painted stage). The whole pass re-fires — one clean run (the failure branch's law).
 
+> **[Third ruling — the load race, second fire 2026-11-21.]** The second fire ran 24/25 asserts green (13 shots; touch swipe 1→2, pinch 2.56×, D8 painted `rgb(0, 0, 0)` both themes, D7 focus restore, D3 both sides, D4 both arms) but the home double-click zoom assert failed at `scale=1` — the load race: `viewerReady` waited on the FIRST-in-DOM `.yarl__slide_image`, which with preload 2 is a NEIGHBOR preload, not the current slide (the cover leg zoomed because a lone slide has no neighbors; the reduced-motion leg because index 0 IS first-in-DOM); `cacheFirstOpen` measured the same wrong element (null). The fix extends the by-geometry law to readiness: `viewerReady` waits for the image CONTAINING THE VIEWPORT CENTER to be `complete` with `naturalWidth > 0`, a 700 ms settle after the Next-click lets the swipe animation (500 ms) finish before the zoom dblclick, and `cacheFirstOpen` reads the current slide's src (record-only: a zero-transferSize resource entry = the open served from cache). Third fire follows.
+
 - [ ] **Step 1: Verify the branch-build provenance.** The pass reacts to the exact code that will merge — no push, no PR, no merge happens in this pass:
 
 ```bash
@@ -170,12 +172,21 @@ function assert(name, ok, detail = '') {
 const out = (name) => resolve(outDir, name);
 const settle = (page) => page.waitForTimeout(1500); // hydration + reveal stagger (the probe's wait)
 
+// The CURRENT slide's image is the one containing the viewport center —
+// the same by-geometry law as the zoom dblclick (a bare selector would
+// match the first of the five rendered slides, an off-viewport preload,
+// and the wait would pass before the current image has even loaded).
 async function viewerReady(page) {
   await page.waitForSelector('.yarl__container', { timeout: 30_000 });
   await page.waitForFunction(
     () => {
-      const img = document.querySelector('.yarl__slide_image');
-      return img && img.complete && img.naturalWidth > 0;
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const cur = [...document.querySelectorAll('.yarl__slide_image')].find((img) => {
+        const r = img.getBoundingClientRect();
+        return r.width > 0 && r.left <= cx && cx <= r.right && r.top <= cy && cy <= r.bottom;
+      });
+      return cur && cur.complete && cur.naturalWidth > 0;
     },
     undefined,
     { timeout: 30_000 },
@@ -275,10 +286,19 @@ try {
 
   await wallButtons.first().click();
   await viewerReady(page);
-  log.cacheFirstOpen = await page.evaluate((src) => {
-    const entry = performance.getEntriesByType('resource').find((r) => r.name === src);
-    return entry ? { transferSize: entry.transferSize, cached: entry.transferSize === 0 } : null;
-  }, await page.evaluate(() => document.querySelector('.yarl__slide_image')?.src));
+  // Record-only (D5): the current slide's src IS the wall-rendered URL —
+  // a zero-transferSize resource entry means the open was served from cache.
+  log.cacheFirstOpen = await page.evaluate(() => {
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const cur = [...document.querySelectorAll('.yarl__slide_image')].find((img) => {
+      const r = img.getBoundingClientRect();
+      return r.width > 0 && r.left <= cx && cx <= r.right && r.top <= cy && cy <= r.bottom;
+    });
+    if (!cur?.src) return null;
+    const entries = performance.getEntriesByType('resource').filter((r) => r.name === cur.src);
+    return { entries: entries.length, cachedHit: entries.some((e) => e.transferSize === 0) };
+  });
   assert(
     'counter reads "1 / N" on open',
     (await counterText(page)) === `1 / ${gallery.photos.length}`,
@@ -303,6 +323,7 @@ try {
 
   await page.click("button[aria-label='Next photo']");
   await viewerReady(page);
+  await page.waitForTimeout(700); // the swipe animation (500 ms) settles before the zoom dblclick
   assert(
     'next arrow navigates (counter 2 / N)',
     (await counterText(page)) === `2 / ${gallery.photos.length}`,
