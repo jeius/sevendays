@@ -70,7 +70,7 @@ The #214 Task-1 precedent verbatim, one entity over. The column is additive-null
 - Consumes: nothing (the frontier task).
 - Produces (what Tasks 2–4 + #332/#333 consume): `studioServices.$inferSelect` gains `coverImageKey: string | null` (every `db.select().from(studioServices)` row carries it); `studio_services.cover_image_key` exists on the live DB + test DB (the api suite's global-setup replays 0015 from dist).
 
-- [ ] **Step 1: Add the column to the schema.** In `packages/db/src/schema/studio-services.ts`, current block for exact match (lines 16–20):
+- [ ] **Step 1: Add the column to the schema.** In `packages/db/src/schema/studio-services.ts`, current block for exact match (lines 14–20):
 
 ```ts
     // Null = unpriced (ADR-0020): inquiry-priced offerings live in the
@@ -954,7 +954,7 @@ git commit -m "feat(types,api): the studio-service read resolves coverImageUrl -
 
 - [ ] **Step 1: Write the failing save pins.** In `apps/api/test/admin-studio-services.test.ts`:
 
-(a) Extend the imports — current lines 1–10 for exact match:
+(a) Extend the imports — the file's current import head, through the `signUpSession` line (post-Task-3 state, lines 1–11), for exact match:
 
 ```ts
 import {
@@ -1135,7 +1135,7 @@ describe('the cover tri-state (#331)', () => {
 
 - [ ] **Step 2: Write the failing delete pin.** In `apps/api/test/admin-delete.test.ts`:
 
-(a) Extend the `@sevendays/db` import — add `studioServices as studioServicesTable,` after the `servicePackages as servicePackagesTable,` line (current lines 11–12 for exact match):
+(a) Extend the `@sevendays/db` import — add `studioServices as studioServicesTable,` after the `servicePackages as servicePackagesTable,` line (current lines 13–14 for exact match):
 
 ```ts
   servicePackages as servicePackagesTable,
