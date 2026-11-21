@@ -2,7 +2,7 @@ import type { PublicGalleryPhoto } from '@sevendays/types';
 import type {
   CarouselSettings,
   ControllerSettings,
-  DeepPartial,
+  DeepPartialValue,
   Labels,
   Slide,
 } from 'yet-another-react-lightbox';
@@ -40,14 +40,14 @@ export function photoSlides(
 
 // The mosaic variant's pinned option vocabulary (D6). #340's cover variant
 // adds its own constants beside these; nothing here is a variant switch.
-export const MOSAIC_CONTROLLER: DeepPartial<ControllerSettings> = {
+export const MOSAIC_CONTROLLER: DeepPartialValue<ControllerSettings, 'ref'> = {
   closeOnEscape: true, // the library default — set explicit to name the gesture
   closeOnBackdropClick: true, // ruled ON — defaults FALSE upstream (D6)
   closeOnPullUp: false, // pull-close stays out of the ruled gesture set
   closeOnPullDown: false,
 };
 
-export const MOSAIC_CAROUSEL: DeepPartial<CarouselSettings> = {
+export const MOSAIC_CAROUSEL: DeepPartialValue<CarouselSettings, 'imageProps'> = {
   finite: false, // the wall loops
   preload: 2,
   padding: '16px',
