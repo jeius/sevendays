@@ -87,7 +87,7 @@ No trips. The two flagged decisions the skill cannot settle (the D8 chrome regis
 
 **Interfaces:**
 - Consumes: `PublicGalleryPhoto` from `@sevendays/types` (`{ id, photoUrl, title: string | null, caption: string | null, categoryId }` — `packages/types/src/gallery.ts:99-115`).
-- Produces (Tasks 2–3 consume these; #340 will extend): `GALLERY_ALT_FALLBACK: string`; `photoSlides(photos: PublicGalleryPhoto[], opts?: { captions?: boolean }): Slide[]`; `MOSAIC_CONTROLLER: DeepPartial<ControllerSettings>`; `MOSAIC_CAROUSEL: DeepPartial<CarouselSettings>`; `VIEWER_LABELS: Labels` — all five type names are type-only root imports from `yet-another-react-lightbox` (erased at runtime — the plain-node vitest graph never loads the library). **Execution amendment (controller, 2026-11-21, Task 1 NEEDS_CONTEXT):** `ControllerSettings`/`CarouselSettings` are the library's internal all-required resolved types (verified in the installed 3.33.1 `dist/types.d.ts` — 12 and 6 required fields; the deprecated `ref`/`focus`/`touchAction`/`aria` + `imageProps` the pinned literals never set) — the public prop shape is their `DeepPartial`, both names root-exported, so the constants annotate as `DeepPartial<…>` with the pinned VALUES byte-unchanged. The seam also carries `import type {} from 'yet-another-react-lightbox/plugins/captions'` — a type-only import (erased at runtime) that activates the Captions plugin's `SlideImage.description` module augmentation so the captions law typechecks in the plain-node graph without loading the plugin.
+- Produces (Tasks 2–3 consume these; #340 will extend): `GALLERY_ALT_FALLBACK: string`; `photoSlides(photos: PublicGalleryPhoto[], opts?: { captions?: boolean }): Slide[]`; `MOSAIC_CONTROLLER: DeepPartialValue<ControllerSettings, 'ref'>`; `MOSAIC_CAROUSEL: DeepPartialValue<CarouselSettings, 'imageProps'>`; `VIEWER_LABELS: Labels` — all five type names are type-only root imports from `yet-another-react-lightbox` (erased at runtime — the plain-node vitest graph never loads the library). **Execution amendment (controller, 2026-11-21; two rounds):** `ControllerSettings`/`CarouselSettings` are the library's internal all-required resolved types (verified in the installed 3.33.1 `dist/types.d.ts` — 12 and 6 required fields; the deprecated `ref`/`focus`/`touchAction`/`aria` + `imageProps` the pinned literals never set), so the constants annotate with the library's OWN public branch shapes — `DeepPartialValue<ControllerSettings, 'ref'>` and `DeepPartialValue<CarouselSettings, 'imageProps'>`, both root-exported — with the pinned VALUES byte-unchanged. Round 1 (Task 1) ruled plain `DeepPartial<…>`; it compiled standalone but was falsified at Task 2's consumption site: `LightboxExternalProps` (`dist/types.d.ts:60`) deep-partializes `carousel`/`controller` while its third argument KEEPS `imageProps`/`ref` full (partializing them breaks assignability — `AriaRole`'s `string & {}` member and `RefObject.current` optionality), so the unexcluded `DeepPartial<…>` rejects at the props (TS2322 ×2). Round 2 re-ruled to the branch shapes the library itself yields. The seam also carries `import type {} from 'yet-another-react-lightbox/plugins/captions'` — a type-only import (erased at runtime) that activates the Captions plugin's slide-`description` module augmentation (on `GenericSlide` in 3.33.1) so the captions law typechecks in the plain-node graph without loading the plugin.
 
 - [ ] **Step 1: Install the library (landing app-local).**
 
@@ -200,7 +200,7 @@ Expected: FAIL — the not-yet-written module's import unresolvable (this stack 
 
 ```ts
 import type { PublicGalleryPhoto } from '@sevendays/types';
-import type { CarouselSettings, ControllerSettings, DeepPartial, Labels, Slide } from 'yet-another-react-lightbox';
+import type { CarouselSettings, ControllerSettings, DeepPartialValue, Labels, Slide } from 'yet-another-react-lightbox';
 // Type-only: loads the Captions plugin's SlideImage.description module
 // augmentation into the type graph (erased at runtime — the plain-node
 // vitest graph never loads the plugin; the captions law typechecks without it).
@@ -235,14 +235,14 @@ export function photoSlides(
 
 // The mosaic variant's pinned option vocabulary (D6). #340's cover variant
 // adds its own constants beside these; nothing here is a variant switch.
-export const MOSAIC_CONTROLLER: DeepPartial<ControllerSettings> = {
+export const MOSAIC_CONTROLLER: DeepPartialValue<ControllerSettings, 'ref'> = {
   closeOnEscape: true, // the library default — set explicit to name the gesture
   closeOnBackdropClick: true, // ruled ON — defaults FALSE upstream (D6)
   closeOnPullUp: false, // pull-close stays out of the ruled gesture set
   closeOnPullDown: false,
 };
 
-export const MOSAIC_CAROUSEL: DeepPartial<CarouselSettings> = {
+export const MOSAIC_CAROUSEL: DeepPartialValue<CarouselSettings, 'imageProps'> = {
   finite: false, // the wall loops
   preload: 2,
   padding: '16px',
