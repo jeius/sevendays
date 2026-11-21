@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1795239548.0218577,
-    "ast_hash": "89e2aa4ed87a19ce051755deb245a551",
+    "mtime": 1795244303.4580603,
+    "ast_hash": "5ba9485fcf7d8ceb5b12427f9efd1294",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -5427,6 +5427,11 @@
   "docs/superpowers/plans/2026-11-21-340-image-viewer-cover-zoom.md": {
     "mtime": 1795239158.872787,
     "ast_hash": "997b123b1fedc61febe613532d6cc124",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-21-341-image-viewer-teaser-pass.md": {
+    "mtime": 1795243747.3634076,
+    "ast_hash": "50c2e923afa43e73129732528ff2eb24",
     "semantic_hash": ""
   }
 }

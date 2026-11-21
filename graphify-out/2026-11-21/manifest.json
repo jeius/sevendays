@@ -700,8 +700,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1795227667.0301716,
-    "ast_hash": "12c3ec4306c0f40dffdcfb7e39e55526",
+    "mtime": 1795239548.0695245,
+    "ast_hash": "417b6c6cf5bc9b2c2b29a66be2cfe157",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1795227659.758839,
-    "ast_hash": "b1042f3b2522a87049e1d49e8ae1f736",
+    "mtime": 1795239548.0218577,
+    "ast_hash": "89e2aa4ed87a19ce051755deb245a551",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -4590,8 +4590,8 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/package-detail.tsx": {
-    "mtime": 1795224014.1681378,
-    "ast_hash": "163502694e4500ec5abfb9bf7aa52f88",
+    "mtime": 1795238926.5877628,
+    "ast_hash": "fc04d3027863a101cf603ea9ecf49ca3",
     "semantic_hash": ""
   },
   "apps/landing/src/lib/page-head.test.ts": {
@@ -5405,23 +5405,28 @@
     "semantic_hash": ""
   },
   "apps/landing/src/components/photo-viewer.tsx": {
-    "mtime": 1795225773.2171009,
-    "ast_hash": "e95db54bc2705cfc2c9696d2c734a468",
+    "mtime": 1795238745.3818264,
+    "ast_hash": "9af963551a890ad448b326a0d70e74b2",
     "semantic_hash": ""
   },
   "apps/landing/src/lib/viewer.test.ts": {
-    "mtime": 1795225234.2717032,
-    "ast_hash": "2eddf2eb612fd7ee5aea20ce89a5f662",
+    "mtime": 1795238321.3682618,
+    "ast_hash": "106ee0ae171ea4ef5e7573cf24b9f928",
     "semantic_hash": ""
   },
   "apps/landing/src/lib/viewer.ts": {
-    "mtime": 1795226397.5106924,
-    "ast_hash": "03e44f6fb52621d6370e570344edd4a9",
+    "mtime": 1795238308.9619288,
+    "ast_hash": "07f28b50cdfc11451b95805ee4d5859a",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-21-339-image-viewer-spine.md": {
     "mtime": 1795227833.9480507,
     "ast_hash": "31f68433e6b514382ddfa40bc91d3e7a",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-21-340-image-viewer-cover-zoom.md": {
+    "mtime": 1795239158.872787,
+    "ast_hash": "997b123b1fedc61febe613532d6cc124",
     "semantic_hash": ""
   }
 }
