@@ -86,6 +86,8 @@ No library or design recommendation applies — the register, gesture set, and c
 
 > **[Fourth ruling — the counter TOCTOU, third fire 2026-11-21.]** The third fire reached 25/26 asserts green — the home zoom fixed (scale=2) and the D5 cache win OBSERVED (`cacheFirstOpen: { entries: 1, cachedHit: true }`) — but the keyboard ArrowRight assert failed with the detail print showing exactly the expected `2 / 24`: a read-once TOCTOU race, two separate `counterText` calls (the compare-read caught `1 / 24` before the view event re-rendered the counter — `viewerReady` returns instantly when the target slide was already preloaded — the detail-read caught `2 / 24`); the second fire had passed the same assert on luckier timing. The fix: a `counterIs(page, expected)` poll (150 ms interval, 10 s bound, one read source) replaces the three fixed-expectation counter asserts — the assert compares the poll's LAST read, so the evidence is real and the race is gone. Fourth fire follows.
 
+> **[Fifth ruling — the mid-fade shots, fourth fire 2026-11-21.]** The fourth fire ran 25/25 asserts green, but the artifact review caught TWO shots misrepresenting the settled state — 02 (home viewer open) and 13 (mobile viewer, badly: ~40% opacity, the page bleeding through the whole stage) captured the library's 250 ms portal fade mid-completion; every shot with an intervening wait (03/04/06/07/08/09/10/11) is fully settled, isolating the cause to screenshot timing, not the viewer. The D8 chrome-register reaction must judge the SETTLED stage — mid-fade frames are broken evidence for that purpose. Fix: `viewerReady` gains a 400 ms settle after the readiness wait (the fade completes before any read or screenshot — one line, uniform across all open paths). Fifth fire follows.
+
 - [ ] **Step 1: Verify the branch-build provenance.** The pass reacts to the exact code that will merge — no push, no PR, no merge happens in this pass:
 
 ```bash
@@ -193,6 +195,10 @@ async function viewerReady(page) {
     undefined,
     { timeout: 30_000 },
   );
+  // The portal fade (250 ms) must complete before any read or screenshot —
+  // mid-fade frames bleed the page through the backdrop and would mislead
+  // the D8 chrome-register reaction (the fourth fire's shots 02/13).
+  await page.waitForTimeout(400);
 }
 
 async function closed(page) {
