@@ -78,25 +78,40 @@ No library or design recommendation applies — the register, gesture set, and c
 - Consumes: the merged-and-deployed teaser landing; `@playwright/test` 1.63.0 (root-resolvable); the public gallery API; the pre-flight's verified DOM.
 - Produces: the rig + the caption-gate confirmation (Task 2 consumes both).
 
-- [ ] **Step 1: Re-verify the integration state at execution time.** The pass runs only after the owner has called the push and the `image-viewer` PR squash-merged and CI deployed main:
+> **[AMENDED at execution 2026-11-21 — the environment ruling.]** The owner ordered **"Execute the plan. Hold the push after."** with the branch unpushed. The original Steps 1–2 (deploy provenance + the post-merge sync — inherited from the #338 template, whose code had already merged when its pass ran) contradict both this instruction and the parent spec's own law — #336's Further Notes: "the executor renders the throwaway variant pass … **The owner reacts to the D8 chrome register and the D3 caption interpretation before merge**." The original gate's anti-stale rationale ("react to the viewer, never a stale environment") is satisfied by the branch build itself: the pass runs against a **LOCAL serve of the branch tip** — the exact code that will merge — reading the same live DB the teaser serves. Never a remote deploy (the bare-deploy lesson stands); the push/PR stays held; the pass's record commits (progress, graphify, ticks) land on the branch and ride the eventual push. The ticket AC's "teaser walked" leg is satisfied pre-merge by the branch build; Task 3's comment records the deviation.
+
+- [ ] **Step 1: Verify the branch-build provenance.** The pass reacts to the exact code that will merge — no push, no PR, no merge happens in this pass:
 
 ```bash
-gh pr list --state merged --search "image-viewer in:title" --limit 3 --json number,title,mergeCommit --jq '.[] | [.number, .title, .mergeCommit.oid[0:7]] | @tsv'
-git ls-remote origin main | cut -c1-7
-gh run list --limit 5 --workflow=ci.yml --json databaseId,headSha,event,conclusion --jq '.[] | select(.event=="push") | [.databaseId, .headSha[0:7], .conclusion] | @tsv'
+git rev-parse --short HEAD && git status --short && node -e "console.log(require('@playwright/test/package.json').version)"
 ```
 
-Expected: a MERGED PR carrying #339+#340; `origin/main` == that PR's merge SHA; the newest main-push CI run on that SHA with `conclusion: success` (the `Deploy teaser (main)` job's landing leg deployed `sevendays-landing`). Record the run id — it rides Task 3's comment. **If the PR is not yet merged (the owner's call still pending), STOP here** — report the state and end the turn; the pass must react to the viewer on its deploy, never a stale environment. If the run failed or predates the merge, re-check CI first — same stop.
+Expected: HEAD `0b93b46` (the plan commit atop #339+#340's `b38ecf5` — the viewer implementation); worktree clean; the version prints `1.63.0`. If a newer commit has landed on the branch since, proceed — the capture-log records the actual tip.
 
-- [ ] **Step 2: Sync the worktree to the merged main** (the #340 handoff law's final state — the squash-merge discipline, never a merge commit):
+- [ ] **Step 2: Point the local serve at the teaser api and boot it.** The worktree's `apps/landing/.env.local` carries `API_URL=http://127.0.0.1:8787` (a local api) — the pass needs the LIVE data (the owner's caption edits via the teaser admin must flow through), so swap the line for the pass and restore it after (Task 3 Step 5):
 
 ```bash
-git fetch origin && git reset --hard origin/main
-ls docs/superpowers/plans/2026-11-21-341-image-viewer-teaser-pass.md
-node -e "console.log(require('@playwright/test/package.json').version)"
+mkdir -p .superpowers/341-teaser-pass
+cp apps/landing/.env.local .superpowers/341-teaser-pass/env.local.bak
+sed -i 's|^API_URL=.*|API_URL=https://sevendays-api.pahamajulius.workers.dev|' apps/landing/.env.local
+grep -n "^API_URL" apps/landing/.env.local
 ```
 
-Expected: HEAD == the merge SHA; this plan file present on main (it rode the squash); the version prints `1.63.0`. The rig runs from this worktree root.
+Expected: the backup saved under the gitignored scratch root; `API_URL=https://sevendays-api.pahamajulius.workers.dev`. Then boot (port 3000 verified free at pre-flight):
+
+```bash
+pnpm --filter @sevendays/landing dev
+```
+
+Wait for compile, then probe the three surfaces (dev HTML carries NUL bytes — `-a`; `-o | wc -l` counts occurrences on the one-line document):
+
+```bash
+curl -s http://localhost:3000/ | grep -a -o "cursor-zoom-in" | wc -l
+curl -s http://localhost:3000/about | grep -a -o "data-portfolio-grid" | wc -l
+curl -s http://localhost:3000/packages/package-a | grep -a -o "cursor-zoom-in" | wc -l
+```
+
+Expected: ≥ 24 / ≥ 1 / ≥ 1 — the serve renders the viewer's affordances on all three surfaces over the live data. A bottom-right devtools panel in dev shots is dev-only chrome (absent from the deployed site) — named to the owner at presentation, never part of the judged surface.
 
 - [ ] **Step 3: Write the capture script verbatim** to `.superpowers/341-teaser-pass/capture.mjs`:
 
@@ -567,7 +582,7 @@ Expected: silent (exit 0).
 
 - [ ] **Step 5: The caption gate (STOP here — end the turn).** The owner ruling: captions get populated before the walk. End the turn with this message and do NOT proceed until the owner's next message confirms:
 
-> The #341 caption gate: the walk needs captioned photos on the teaser (probed today: 24 photos, 0 captions). Add at least one caption — your wording — to a gallery photo in the teaser admin's gallery editor, and say **done**. The pass then probes the API to confirm before firing.
+> The #341 caption gate: the walk needs captioned photos (probed today: 24 photos, 0 captions). Add at least one caption — your wording — to a gallery photo in the teaser admin's gallery editor, and say **done**. The pass then probes the API to confirm before firing. (The local serve reads the same live DB via the teaser api — your caption flows straight into the captured surfaces.)
 
 On the owner's "done", confirm the probe before ticking:
 
@@ -587,11 +602,13 @@ Expected: `withCaption: 1` or more. **Zero captions after "done"** → the edge 
 
 - [ ] **Step 1: Fire.**
 
-Run: `node .superpowers/341-teaser-pass/capture.mjs`
+Run: `CAPTURE_BASE_URL=http://localhost:3000 node .superpowers/341-teaser-pass/capture.mjs`
+
+(The environment ruling — the rig's built-in override points it at the local branch-build serve; `CAPTURE_API_URL` stays its default, the teaser api — the same live data the serve reads.)
 
 Expected: the script probes the gallery (caption gate), then walks the phases headlessly — light desktop (home wall → viewer → zoom → keyboard walk + focus-ring → about wall + caption → cover + coverless), dark desktop (home/about/cover), reduced-motion, mobile (wall → viewer → swipe → pinch) — printing one `[ok]`/`[FAIL]` line per assert, thirteen `[shot]` lines, and a closing JSON verdict: `shots: 13`, `captioned: ≥1`, `failures: 0`, plus the backdrop pair (expected equal) and the `cacheFirstOpen` record. Exit 0.
 
-- [ ] **Step 2: The failure branch.** Any `[FAIL]` line, a non-zero exit, or the caption gate tripping = **STOP and diagnose before presenting** — never present broken evidence. Diagnosis order: (a) the deploy provenance (Task 1 Step 1 — a stale teaser fails the very first assert, `one zoom affordance per photo`); (b) the live data (photos/captions/packages re-probed — the counts are the script's own inputs); (c) the rig itself (locators against the merged tree's DOM — only after (a) and (b) are green). A diagnosed rig defect is fixed in the script and the WHOLE pass re-fires (one clean run, not stitched halves — the log and shots must come from a single execution). Never retake a shot to "improve" it — the pass records what the teaser serves; a retake is only for a FAILED assert, diagnosed first.
+- [ ] **Step 2: The failure branch.** Any `[FAIL]` line, a non-zero exit, or the caption gate tripping = **STOP and diagnose before presenting** — never present broken evidence. Diagnosis order: (a) the local serve (Task 1 Step 2 — a dead or stale serve fails the very first assert, `one zoom affordance per photo`); (b) the live data (photos/captions/packages re-probed — the counts are the script's own inputs); (c) the rig itself (locators against the merged tree's DOM — only after (a) and (b) are green). A diagnosed rig defect is fixed in the script and the WHOLE pass re-fires (one clean run, not stitched halves — the log and shots must come from a single execution). Never retake a shot to "improve" it — the pass records what the teaser serves; a retake is only for a FAILED assert, diagnosed first.
 
 - [ ] **Step 3: Verify the artifacts before presenting.**
 
@@ -620,12 +637,12 @@ Expected: exactly thirteen PNGs (`01-home-wall-light.png` … `13-mobile-viewer-
 
 The owner's words ARE the record — quote them verbatim per question in Step 3's comment (the "Other" field carries nuance; quote it too). Any `Adjust` or `Fix-list` routes through Step 4b even if another question approved.
 
-- [ ] **Step 3: Record on #341** — post this body verbatim (the angle-bracket slots fill from the recorded facts: the capture date; the CI deploy run id from Task 1 Step 1; the caption inventory from the capture-log; the three verdicts quoted exactly):
+- [ ] **Step 3: Record on #341** — post this body verbatim (the angle-bracket slots fill from the recorded facts: the capture date; the branch tip from Task 1 Step 1; the caption inventory from the capture-log; the three verdicts quoted exactly):
 
 ```markdown
 ## Teaser variant pass — the landing image viewer (verifying #339 + #340's landed work)
 
-**Provenance:** the teaser landing (`https://sevendays-landing.pahamajulius.workers.dev`) serving the merged viewer — `Deploy teaser (main)` success on CI run <run id>. Captured <date> — headless Chromium, zero credentials (the landing is public; nothing logged in), light first then `localStorage` dark (`html.dark` asserted), reduced-motion via `emulateMedia`, mobile via a `hasTouch` context (390×844). Tooling: `.superpowers/341-teaser-pass/capture.mjs` (gitignored, outside every suite per ADR-0022); thirteen PNGs + `capture-log.json`.
+**Provenance:** a LOCAL serve of the `image-viewer` branch tip `<tip>` — the exact code that will merge; the pass ran **pre-merge** per the owner's instruction ("execute; hold the push") + the spec's before-merge law (#336 Further Notes; the plan's environment ruling). Landing at `http://localhost:3000` (dev server, `API_URL` pointed at the teaser api for the pass), so every read is the live data the teaser serves — the same DB the caption edits wrote. Captured <date> — headless Chromium, zero credentials (nothing logged in), light first then `localStorage` dark (`html.dark` asserted), reduced-motion via `emulateMedia`, mobile via a `hasTouch` context (390×844). Tooling: `.superpowers/341-teaser-pass/capture.mjs` (gitignored, outside every suite per ADR-0022); thirteen PNGs + `capture-log.json`.
 
 **The matrix (thirteen shots + the assert log):**
 
@@ -650,7 +667,7 @@ The owner's words ARE the record — quote them verbatim per question in Step 3'
 - [ ] **Step 4a (Approve path — all three verdicts approve): close out.**
 
 ```bash
-gh issue close 341 --reason completed --comment "The teaser variant pass is rendered and the owner's three reactions record above — the acceptance boxes hold: the three surfaces walked across both themes, reduced-motion, keyboard-only, and mobile (pinch + swipe); the two flagged decisions (D8, D3) got explicit approves; every finding was none. The image viewer is accepted; #336's rendered-variants gate is satisfied."
+gh issue close 341 --reason completed --comment "The teaser variant pass is rendered and the owner's three reactions record above — the acceptance boxes hold: the three surfaces walked across both themes, reduced-motion, keyboard-only, and mobile (pinch + swipe) — walked on the branch build pre-merge (the owner holds the push; the same code serves the teaser when integration is called); the two flagged decisions (D8, D3) got explicit approves; every finding was none. The image viewer is accepted; #336's rendered-variants gate is satisfied."
 gh issue close 336 --reason completed --comment "Closing note: the viewer spec's rendered-variants gate is satisfied by the #341 teaser pass (its comment carries the thirteen-shot matrix, the DOM-level proofs, and the owner's three reactions — D8 chrome register and D3 caption interpretation both approved). The implementation is #339 + #340 on the image-viewer branch; the pass verified it on the deployed teaser. The spec is done."
 ```
 
@@ -674,7 +691,7 @@ git commit -m "chore(graphify): post-#341 graph update"
 
 - [ ] **Step 4b (Adjust / Fix-list path): record + route, never fix.** Post the Step 3 comment with the verdicts quoted; keep #341 AND #336 open; skip the Step 4a closes and the approve-path progress text (the progress entry instead records the pass + the findings, drafted from the owner's recorded words — no invented text). Propose the follow-up path to the owner: each finding becomes its own fix ticket via the triage discipline (the YARL skill names what a chrome-tuning finding would change — the `--yarl__*` variables and the override block in `apps/landing/src/styles.css`); the re-pass after fixes re-runs Tasks 1–3.
 
-- [ ] **Step 5: Self-review tick.** `grep -c '<!-- APPEND' docs/superpowers/plans/2026-11-21-341-image-viewer-teaser-pass.md` → 0 (anchors consumed); amend this plan's checkboxes to reflect what actually ran (the #338 precedent — one `docs:` commit; the plan file lives on main via the squash).
+- [ ] **Step 5: Self-review tick + environment restore.** `grep -c '<!-- APPEND' docs/superpowers/plans/2026-11-21-341-image-viewer-teaser-pass.md` → 0 (anchors consumed); amend this plan's checkboxes to reflect what actually ran (the #338 precedent — one `docs:` commit; the plan file rides the branch's eventual push). Restore the env swap byte-for-byte (`cp .superpowers/341-teaser-pass/env.local.bak apps/landing/.env.local`) and stop the background dev server. **The push/PR stays held — nothing is pushed in this pass.**
 
 **Not here:** no v1 pick work (rides the code PR's merge ceremony, main-only); no AGENTS.md edit (floors don't move; zero code); no ADR (no architectural choice — acceptance tooling on the #310/#338 pattern); no fix implementation even for a one-line tuning (the fix-list is NEW tickets, always); no e2e/visual baseline work (the standing nightly flag is named in the comment, its triage is another ticket's).
 
