@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1795242777.582062,
-    "ast_hash": "5bb3ee84b94ee1d6eac426d9bc54db0f",
+    "mtime": 1795262433.4517436,
+    "ast_hash": "5d62c101918dd46ed3c656b0dd933209",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -5432,6 +5432,11 @@
   "docs/superpowers/plans/2026-11-21-333-service-covers-landing-consumption.md": {
     "mtime": 1795241745.633615,
     "ast_hash": "f1518cc085fde8adf0035bf5af19a3cf",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-21-334-service-covers-teaser-pass.md": {
+    "mtime": 1795262533.9288487,
+    "ast_hash": "75e7096df7ea8a2cf69b40e1e0588cbc",
     "semantic_hash": ""
   }
 }
