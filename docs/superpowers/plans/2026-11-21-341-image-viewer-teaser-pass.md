@@ -84,6 +84,8 @@ No library or design recommendation applies — the register, gesture set, and c
 
 > **[Third ruling — the load race, second fire 2026-11-21.]** The second fire ran 24/25 asserts green (13 shots; touch swipe 1→2, pinch 2.56×, D8 painted `rgb(0, 0, 0)` both themes, D7 focus restore, D3 both sides, D4 both arms) but the home double-click zoom assert failed at `scale=1` — the load race: `viewerReady` waited on the FIRST-in-DOM `.yarl__slide_image`, which with preload 2 is a NEIGHBOR preload, not the current slide (the cover leg zoomed because a lone slide has no neighbors; the reduced-motion leg because index 0 IS first-in-DOM); `cacheFirstOpen` measured the same wrong element (null). The fix extends the by-geometry law to readiness: `viewerReady` waits for the image CONTAINING THE VIEWPORT CENTER to be `complete` with `naturalWidth > 0`, a 700 ms settle after the Next-click lets the swipe animation (500 ms) finish before the zoom dblclick, and `cacheFirstOpen` reads the current slide's src (record-only: a zero-transferSize resource entry = the open served from cache). Third fire follows.
 
+> **[Fourth ruling — the counter TOCTOU, third fire 2026-11-21.]** The third fire reached 25/26 asserts green — the home zoom fixed (scale=2) and the D5 cache win OBSERVED (`cacheFirstOpen: { entries: 1, cachedHit: true }`) — but the keyboard ArrowRight assert failed with the detail print showing exactly the expected `2 / 24`: a read-once TOCTOU race, two separate `counterText` calls (the compare-read caught `1 / 24` before the view event re-rendered the counter — `viewerReady` returns instantly when the target slide was already preloaded — the detail-read caught `2 / 24`); the second fire had passed the same assert on luckier timing. The fix: a `counterIs(page, expected)` poll (150 ms interval, 10 s bound, one read source) replaces the three fixed-expectation counter asserts — the assert compares the poll's LAST read, so the evidence is real and the race is gone. Fourth fire follows.
+
 - [ ] **Step 1: Verify the branch-build provenance.** The pass reacts to the exact code that will merge — no push, no PR, no merge happens in this pass:
 
 ```bash
@@ -203,6 +205,20 @@ async function counterText(page) {
     .trim();
 }
 
+// The counter re-renders on the view event — a read-once assert races it
+// (the third fire's ArrowRight fail). Poll until the expected value and
+// return the last read as the assert's evidence.
+async function counterIs(page, expected) {
+  let last = null;
+  const deadline = Date.now() + 10_000;
+  while (Date.now() < deadline) {
+    last = await counterText(page);
+    if (last === expected) return last;
+    await page.waitForTimeout(150);
+  }
+  return last;
+}
+
 // The zoom plugin transforms the slide WRAPPER (scale(${zoom}) translateX…),
 // not the img — read the max computed scale across wrappers.
 async function zoomScale(page) {
@@ -299,11 +315,8 @@ try {
     const entries = performance.getEntriesByType('resource').filter((r) => r.name === cur.src);
     return { entries: entries.length, cachedHit: entries.some((e) => e.transferSize === 0) };
   });
-  assert(
-    'counter reads "1 / N" on open',
-    (await counterText(page)) === `1 / ${gallery.photos.length}`,
-    await counterText(page),
-  );
+  const openCounter = await counterIs(page, `1 / ${gallery.photos.length}`);
+  assert('counter reads "1 / N" on open', openCounter === `1 / ${gallery.photos.length}`, openCounter);
   assert(
     'chrome labels: prev/next/close present (the seam labels)',
     (await page.locator("button[aria-label='Previous photo']").count()) === 1 &&
@@ -324,11 +337,8 @@ try {
   await page.click("button[aria-label='Next photo']");
   await viewerReady(page);
   await page.waitForTimeout(700); // the swipe animation (500 ms) settles before the zoom dblclick
-  assert(
-    'next arrow navigates (counter 2 / N)',
-    (await counterText(page)) === `2 / ${gallery.photos.length}`,
-    await counterText(page),
-  );
+  const nextCounter = await counterIs(page, `2 / ${gallery.photos.length}`);
+  assert('next arrow navigates (counter 2 / N)', nextCounter === `2 / ${gallery.photos.length}`, nextCounter);
 
   // The viewport center — the carousel centers the CURRENT slide there; a
   // .yarl__slide_image selector would dblclick the FIRST of the five
@@ -353,11 +363,8 @@ try {
   await viewerReady(page);
   await page.keyboard.press('ArrowRight');
   await viewerReady(page);
-  assert(
-    'keyboard: ArrowRight navigates',
-    (await counterText(page)) === `2 / ${gallery.photos.length}`,
-    await counterText(page),
-  );
+  const kbCounter = await counterIs(page, `2 / ${gallery.photos.length}`);
+  assert('keyboard: ArrowRight navigates', kbCounter === `2 / ${gallery.photos.length}`, kbCounter);
   await page.keyboard.press('+');
   await page.waitForTimeout(600);
   assert('keyboard: + zooms', (await zoomScale(page)) > 1.01, `scale=${await zoomScale(page)}`);
