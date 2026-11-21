@@ -107,6 +107,42 @@ async function resolveBranchCover(
   return { ok: true, finalKey: commit.finalKey };
 }
 
+// The studio-service cover commit (#331, resolveBranchCover's ruling
+// verbatim, one purpose over): HEAD-verify through commitUpload ONLY when
+// a key is present — presence-encoding makes "changed" structural (stored
+// keys are immutable final keys, inputs are staging keys, and the
+// staging-key regex rejects final keys, so a present string is always a
+// new bind). undefined = unchanged, null = clear, string = bind/replace.
+// A commit failure re-paths its details onto the payload field and
+// resolves as the conflict failure (→ 400). Runs BEFORE the transaction —
+// bucket I/O never holds a tx open.
+async function resolveServiceCover(
+  env: BranchEnv,
+  key: string | null | undefined,
+  log?: RequestLogger
+): Promise<{ ok: true; finalKey: string | null | undefined } | AdminWriteFailure> {
+  if (key === undefined) return { ok: true, finalKey: undefined };
+  if (key === null) return { ok: true, finalKey: null };
+  const commit = await commitUpload(env.MEDIA_BUCKET, {
+    stagingKey: key,
+    purpose: 'service-cover',
+  });
+  if (!commit.ok) {
+    if (log) {
+      logMediaFailure(log, { op: 'commit', reason: commit.reason });
+    }
+    return {
+      ok: false,
+      reason: 'conflict',
+      message: commit.message,
+      details: (commit.details ?? [{ path: ['key'], message: commit.message }]).map(
+        (detail): Detail => ({ path: ['coverImageKey'], message: detail.message })
+      ),
+    };
+  }
+  return { ok: true, finalKey: commit.finalKey };
+}
+
 export async function listAdminBranches(db: Database, env: BranchEnv): Promise<BranchRead[]> {
   // Admin read: ALL rows including deactivated (spec § Route topology),
   // covers resolved — raw keys never leave.
@@ -517,11 +553,17 @@ export async function createAdminStudioService(
   db: Database,
   env: BranchEnv,
   audit: AuditActor,
-  input: CreateStudioServiceInput
+  input: CreateStudioServiceInput,
+  log?: RequestLogger
 ): Promise<AdminCreateResult<StudioServiceWithBranches>> {
+  const cover = await resolveServiceCover(env, input.coverImageKey, log);
+  if (!cover.ok) return cover;
   const result = await guardUnique(STUDIO_SERVICE_UNIQUE, () =>
     db.transaction(async (tx) => {
-      const [row] = await tx.insert(studioServices).values(input).returning();
+      const [row] = await tx
+        .insert(studioServices)
+        .values({ ...input, coverImageKey: cover.finalKey ?? null })
+        .returning();
       if (!row) throw new Error('insert studio_services: no row returned');
       await writeAuditRow(tx, audit, {
         entity: 'studio-service',
@@ -543,7 +585,8 @@ export async function updateAdminStudioService(
   env: BranchEnv,
   audit: AuditActor,
   id: string,
-  input: UpdateStudioServiceInput
+  input: UpdateStudioServiceInput,
+  log?: RequestLogger
 ): Promise<AdminWriteResult<StudioServiceWithBranches>> {
   const [current] = await db
     .select()
@@ -559,13 +602,18 @@ export async function updateAdminStudioService(
       .limit(1);
     if (clash) return conflict('name');
   }
+  const cover = await resolveServiceCover(env, input.coverImageKey, log);
+  if (!cover.ok) return cover;
   const action: AuditAction =
     current.isActive && input.isActive === false ? 'deactivate' : 'update';
+  // The cover tri-state composes the stored key: absent = keep the
+  // current one, null = clear, string = the committed final key (#331).
+  const storedCover = cover.finalKey === undefined ? current.coverImageKey : cover.finalKey;
   const result = await guardUnique(STUDIO_SERVICE_UNIQUE, () =>
     db.transaction(async (tx) => {
       const [row] = await tx
         .update(studioServices)
-        .set({ ...input, updatedAt: new Date() })
+        .set({ ...input, coverImageKey: storedCover, updatedAt: new Date() })
         .where(eq(studioServices.id, id))
         .returning();
       if (!row) throw new Error('update studio_services: no row returned');
@@ -579,6 +627,13 @@ export async function updateAdminStudioService(
     })
   );
   if (!result.ok) return result;
+  // After-commit bucket hygiene (#331, the #137 precedent): the
+  // replaced/cleared cover's old object is deleted only AFTER the save
+  // committed — a rolled-back save never deletes (the row still points
+  // at it).
+  if (current.coverImageKey && storedCover !== current.coverImageKey) {
+    await env.MEDIA_BUCKET.delete(current.coverImageKey);
+  }
   const [assembled] = await assembleAdminStudioServices(db, env, [result.row]);
   if (!assembled) throw new Error('studio service update: assembly lost the row');
   return { ok: true, row: assembled };

@@ -12,6 +12,7 @@ import {
   packageInclusionAttires as junctionsTable,
   servicePackages as servicePackagesTable,
   studioServiceAddonServices,
+  studioServices as studioServicesTable,
   testimonials as testimonialsTable,
 } from '@sevendays/db';
 import { and, eq } from 'drizzle-orm';
@@ -449,6 +450,24 @@ describe('guarded DELETE — the appointment-bearing entities (any Appointment e
       .from(branchStudioServices)
       .where(eq(branchStudioServices.studioServiceId, ids.servicePortrait));
     expect(portraitBranchLinks).toHaveLength(2);
+  });
+
+  it("studio service with a cover deletes clean — the cover object goes only after the row's commit (#331)", async () => {
+    const COVER_KEY = 'covers/aaaaaaaa-0000-4000-8000-0000000000e3.jpg';
+    await db
+      .update(studioServicesTable)
+      .set({ coverImageKey: COVER_KEY })
+      .where(eq(studioServicesTable.id, ids.serviceStudio));
+    const stub = stubCommitBucket();
+    const res = await authed(
+      'DELETE',
+      `/api/v1/admin/studio-services/${ids.serviceStudio}`,
+      'delete-service-cover@sevendays.test',
+      undefined,
+      { MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(204);
+    expect(stub.deleteCalls).toEqual([COVER_KEY]);
   });
 
   it('studio service unknown id → the uniform per-entity 404', async () => {

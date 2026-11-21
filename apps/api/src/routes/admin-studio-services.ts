@@ -48,7 +48,8 @@ export const adminStudioServices = new Hono<ApiEnv>()
       c.get('db'),
       c.env,
       auditActor(c),
-      c.req.valid('json')
+      c.req.valid('json'),
+      c.get('logger')
     );
     if (!result.ok) {
       return badRequest(c, result.message, result.details);
@@ -67,7 +68,8 @@ export const adminStudioServices = new Hono<ApiEnv>()
         c.env,
         auditActor(c),
         id,
-        c.req.valid('json')
+        c.req.valid('json'),
+        c.get('logger')
       );
       if (!result.ok) {
         if (result.reason === 'not_found') {
@@ -129,7 +131,7 @@ export const adminStudioServices = new Hono<ApiEnv>()
   )
   .delete('/:id', validatedParam(z.object({ id: z.uuid() })), async (c) => {
     const { id } = c.req.valid('param');
-    const result = await deleteAdminStudioService(c.get('db'), auditActor(c), id);
+    const result = await deleteAdminStudioService(c.get('db'), c.env, auditActor(c), id);
     if (!result.ok) {
       if (result.reason === 'not_found') {
         return notFound(c, 'Studio Service not found.');

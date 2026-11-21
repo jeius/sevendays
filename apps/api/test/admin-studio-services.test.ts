@@ -13,6 +13,7 @@ import { createTestDb } from './helpers/db.js';
 import { testEnv } from './helpers/env.js';
 import type { FixtureIds } from './helpers/fixtures.js';
 import { loadFixtures } from './helpers/fixtures.js';
+import { stubCommitBucket } from './helpers/r2-stub.js';
 import { truncateAll } from './helpers/truncate.js';
 
 const url = process.env.TEST_DATABASE_URL as string;
@@ -452,5 +453,147 @@ describe('unpriced saves (ADR-0020)', () => {
     );
     expect(res.status).toBe(200);
     expect(((await res.json()) as { priceCents: number | null }).priceCents).toBeNull();
+  });
+});
+
+describe('the cover tri-state (#331)', () => {
+  const STAGING = 'tmp/00000000-0000-4000-8000-0000000000d1.jpg';
+
+  it('POST with a staging cover → 201, the cover promoted + resolved (raw key never on the read)', async () => {
+    const stub = stubCommitBucket({ [STAGING]: { size: 1024, contentType: 'image/jpeg' } });
+    const { token } = await signUpSession(url, 'admin-services-cover-create@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/studio-services',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Photo Restoration',
+          description: 'Restore old photographs.',
+          priceCents: 45000,
+          coverImageKey: STAGING,
+        }),
+      },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { coverImageUrl: string | null };
+    expect(body.coverImageUrl).toMatch(/^https:\/\/pub-test\.r2\.dev\/covers\/[0-9a-f-]+\.jpg$/);
+    expect(body).not.toHaveProperty('coverImageKey');
+    // The promote happened: one put at the final key, the staging deleted.
+    expect(stub.putCalls).toHaveLength(1);
+    expect(stub.deleteCalls).toEqual([STAGING]);
+  });
+
+  it('PUT without the cover field leaves the cover UNCHANGED (absent = keep; no bucket touch)', async () => {
+    const OLD_KEY = 'covers/aaaaaaaa-0000-4000-8000-0000000000d2.jpg';
+    await db
+      .update(studioServices)
+      .set({ coverImageKey: OLD_KEY })
+      .where(eq(studioServices.id, ids.serviceStudio));
+    const stub = stubCommitBucket();
+    const { token } = await signUpSession(url, 'admin-services-cover-keep@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/studio-services/${ids.serviceStudio}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Studio Portraits',
+          description: 'Module-level service fixture.',
+          priceCents: 70000,
+          isActive: true,
+        }),
+      },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { coverImageUrl: string | null };
+    expect(body.coverImageUrl).toBe(`https://pub-test.r2.dev/${OLD_KEY}`);
+    expect(stub.deleteCalls).toEqual([]);
+  });
+
+  it('PUT with coverImageKey null clears the cover and deletes the old object post-commit', async () => {
+    const OLD_KEY = 'covers/aaaaaaaa-0000-4000-8000-0000000000d3.jpg';
+    await db
+      .update(studioServices)
+      .set({ coverImageKey: OLD_KEY })
+      .where(eq(studioServices.id, ids.serviceStudio));
+    const stub = stubCommitBucket();
+    const { token } = await signUpSession(url, 'admin-services-cover-clear@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/studio-services/${ids.serviceStudio}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Studio Portraits',
+          description: 'Module-level service fixture.',
+          priceCents: 70000,
+          isActive: true,
+          coverImageKey: null,
+        }),
+      },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { coverImageUrl: string | null };
+    expect(body.coverImageUrl).toBeNull();
+    expect(stub.deleteCalls).toEqual([OLD_KEY]);
+  });
+
+  it('PUT with a new staging key replaces the cover; the OLD object deletes only after the commit', async () => {
+    const OLD_KEY = 'covers/aaaaaaaa-0000-4000-8000-0000000000d4.jpg';
+    await db
+      .update(studioServices)
+      .set({ coverImageKey: OLD_KEY })
+      .where(eq(studioServices.id, ids.serviceStudio));
+    const stub = stubCommitBucket({ [STAGING]: { size: 1024, contentType: 'image/jpeg' } });
+    const { token } = await signUpSession(url, 'admin-services-cover-replace@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/studio-services/${ids.serviceStudio}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Studio Portraits',
+          description: 'Module-level service fixture.',
+          priceCents: 70000,
+          isActive: true,
+          coverImageKey: STAGING,
+        }),
+      },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { coverImageUrl: string | null };
+    expect(body.coverImageUrl).not.toBe(`https://pub-test.r2.dev/${OLD_KEY}`);
+    expect(stub.deleteCalls).toContain(OLD_KEY);
+  });
+
+  it('PUT with a staging key that has no object → 400 with the coverImageKey field detail (the commit re-path)', async () => {
+    const stub = stubCommitBucket(); // empty — head misses
+    const { token } = await signUpSession(url, 'admin-services-cover-miss@sevendays.test');
+    const res = await app.request(
+      `/api/v1/admin/studio-services/${ids.serviceStudio}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+        body: JSON.stringify({
+          name: 'Studio Portraits',
+          description: 'Module-level service fixture.',
+          priceCents: 70000,
+          isActive: true,
+          coverImageKey: STAGING,
+        }),
+      },
+      { ...testEnv(url), MEDIA_BUCKET: stub.bucket }
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as {
+      error: string;
+      details: { path: string[]; message: string }[];
+    };
+    expect(body.details[0]?.path).toEqual(['coverImageKey']);
   });
 });
