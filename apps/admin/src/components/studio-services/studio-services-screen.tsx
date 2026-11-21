@@ -9,7 +9,8 @@
 // `adminStudioServiceQueries.all()` + `adminBranchQueries.all()` (both
 // lists load — the badge join AND the editor's matrix vocabulary), Task 3's
 // state seam (studioServiceStateFromRead / newStudioServiceState /
-// buildStudioServicePayload / buildStudioServiceFlipPayload /
+// buildStudioServiceCreatePayload / buildStudioServiceUpdatePayload /
+// buildStudioServiceFlipPayload /
 // validateStudioServiceState) driving the create/edit Sheet editor, and
 // Task 2's result-valued save fns behind the create-then-matrix save
 // (AQ-4). The matrix renders as the ruled V3 selectable name-only cards —
@@ -17,7 +18,11 @@
 // selectable (AQ-6: the admin matrix is staff-visible truth; the booking
 // form filters). Not here: the add-on applies-to matrix (edited from the
 // ADD-ON side — AQ-1), any add-on CRUD, hours/capacity.
-import type { StudioServiceWithBranches } from '@sevendays/types';
+import type {
+  MediaPresignRequest,
+  MediaPresignResponse,
+  StudioServiceWithBranches,
+} from '@sevendays/types';
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent } from '@sevendays/ui/components/card';
 import { Checkbox } from '@sevendays/ui/components/checkbox';
@@ -36,8 +41,8 @@ import {
 import { Textarea } from '@sevendays/ui/components/textarea';
 import { TooltipProvider } from '@sevendays/ui/components/tooltip';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, SquarePen } from 'lucide-react';
-import { Fragment, useId, useState } from 'react';
+import { Image, Plus, SquarePen } from 'lucide-react';
+import { Fragment, useEffect, useId, useRef, useState } from 'react';
 import { BulkActionBar, BulkSelectCell, BulkSelectHeader } from '#/components/cms/bulk-bar';
 import { RelationBadges } from '#/components/cms/relation-badges';
 import {
@@ -50,6 +55,7 @@ import {
   ExpandRow,
   LightEntityEditor,
   PageHeader,
+  PendingSpinner,
   QUERY_ERROR_LINE,
   QueryErrorState,
   RowActionsCluster,
@@ -59,6 +65,7 @@ import {
 } from '#/components/cms/shared';
 import type { AdminMutationResult } from '#/lib/admin.functions';
 import {
+  presignAdminCoverUpload,
   removeAdminStudioService,
   saveAdminStudioServiceBranchMatrix,
   saveAdminStudioServiceCreate,
@@ -66,17 +73,19 @@ import {
 } from '#/lib/admin.functions';
 import { bulkConfirmName } from '#/lib/bulk-counts';
 import { adminBranchQueries, adminStudioServiceQueries } from '#/lib/cms-queries';
+import { type CoverUploadStatus, uploadCover } from '#/lib/cover-upload';
 import type { LightFieldErrors, StudioServiceEditorState } from '#/lib/light-entity-state';
 import {
+  buildStudioServiceCreatePayload,
   buildStudioServiceFlipPayload,
-  buildStudioServicePayload,
+  buildStudioServiceUpdatePayload,
   conflictFieldErrors,
   newStudioServiceState,
   studioServiceStateFromRead,
   validateStudioServiceState,
 } from '#/lib/light-entity-state';
 import { peso } from '#/lib/peso';
-import { blockerLines } from '#/lib/save-contract';
+import { blockerLines, UPLOADING_LABEL } from '#/lib/save-contract';
 import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment';
 
 /** The editor's mode switch: create (from `New service`) or edit (a row snapshot). */
@@ -168,6 +177,62 @@ export function StudioServicesScreen() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorState, setEditorState] = useState<StudioServiceEditorState>(newStudioServiceState());
   const [fieldErrors, setFieldErrors] = useState<LightFieldErrors>({});
+  // The cover loop (#332 — the branch editor's M7 #214 loop, ported):
+  // presign → XHR PUT → the staging key rides the NEXT save. The preview
+  // object URL is revoked on replace/remove/unmount (the loop's contract).
+  const [coverStatus, setCoverStatus] = useState<CoverUploadStatus>({ phase: 'idle' });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
+  const coverUploading = coverStatus.phase === 'presigning' || coverStatus.phase === 'uploading';
+
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+    };
+  }, []);
+
+  async function presign(req: MediaPresignRequest): Promise<MediaPresignResponse> {
+    const result = await presignAdminCoverUpload({ data: req });
+    if (!result.ok) {
+      throw new Error(result.message);
+    }
+    return result.data;
+  }
+
+  function handleCoverStatus(next: CoverUploadStatus) {
+    setCoverStatus(next);
+    if (next.phase === 'bound') {
+      // Re-upload replaces the key (and revokes the replaced preview URL);
+      // binding happens only through the save — the preview reflects
+      // state, never commits.
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+      previewUrlRef.current = next.previewUrl;
+      setEditorState((prev) => ({ ...prev, coverImageKey: next.stagingKey }));
+    }
+  }
+
+  async function startCoverUpload(file: File) {
+    try {
+      await uploadCover(file, presign, handleCoverStatus, 'service-cover');
+    } catch {
+      // XHR error/abort already emitted `failed` through onStatus — the
+      // machine never stalls; nothing further to surface here.
+    }
+  }
+
+  function removeCover() {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+    setCoverStatus({ phase: 'idle' });
+    // Three-state encoding: null = explicit clear on the next save.
+    setEditorState((prev) => ({ ...prev, coverImageKey: null }));
+  }
   const nameId = useId();
   const descriptionId = useId();
   const priceId = useId();
@@ -246,9 +311,11 @@ export function StudioServicesScreen() {
     mutationFn: async (input: SaveStudioServiceInput): Promise<SaveStudioServiceOutcome> => {
       const entityResult =
         input.mode === 'create'
-          ? await saveAdminStudioServiceCreate({ data: buildStudioServicePayload(input.state) })
+          ? await saveAdminStudioServiceCreate({
+              data: buildStudioServiceCreatePayload(input.state),
+            })
           : await saveAdminStudioServiceUpdate({
-              data: { id: input.row.id, payload: buildStudioServicePayload(input.state) },
+              data: { id: input.row.id, payload: buildStudioServiceUpdatePayload(input.state) },
             });
       if (!entityResult.ok) {
         return { kind: 'entity-failed', input, result: entityResult };
@@ -416,6 +483,14 @@ export function StudioServicesScreen() {
   }
 
   function openCreate() {
+    // The Sheet's children stay mounted across the async Save contract's
+    // held saves, so the upload state resets explicitly — a reopened
+    // Sheet never shows a stale preview (the port's lifecycle law).
+    setCoverStatus({ phase: 'idle' });
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
     setEditorState(newStudioServiceState());
     setFieldErrors({});
     setEditing({ mode: 'create' });
@@ -423,6 +498,12 @@ export function StudioServicesScreen() {
   }
 
   function openEdit(row: StudioServiceWithBranches) {
+    // Same explicit reset as openCreate (the port's lifecycle law).
+    setCoverStatus({ phase: 'idle' });
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
     setEditorState(studioServiceStateFromRead(row));
     setFieldErrors({});
     setEditing({ mode: 'edit', row });
@@ -749,6 +830,82 @@ export function StudioServicesScreen() {
             />
             Active
           </label>
+          <div className='space-y-3 rounded-lg border p-4'>
+            <p className='text-sm font-medium'>Cover</p>
+            {/* Preview precedence (the packages editor's law): a fresh
+                bound upload shows the local object URL; a pending removal
+                (coverImageKey: null) shows the placeholder; else the
+                read's coverImageUrl; else the placeholder. The preview
+                reflects state, never commits. */}
+            {coverStatus.phase === 'bound' ? (
+              <img
+                src={coverStatus.previewUrl}
+                alt={`${editorState.name} cover`}
+                className='aspect-[3/2] w-full rounded-md object-cover'
+              />
+            ) : editorState.coverImageKey === null ? (
+              <div className='bg-muted text-muted-foreground grid aspect-[3/2] w-full place-items-center rounded-md'>
+                <Image aria-hidden='true' className='size-8' />
+              </div>
+            ) : editorState.coverImageUrl ? (
+              <img
+                src={editorState.coverImageUrl}
+                alt={`${editorState.name} cover`}
+                className='aspect-[3/2] w-full rounded-md object-cover'
+              />
+            ) : (
+              <div className='bg-muted text-muted-foreground grid aspect-[3/2] w-full place-items-center rounded-md'>
+                <Image aria-hidden='true' className='size-8' />
+              </div>
+            )}
+            <div className='flex items-center gap-2'>
+              <input
+                ref={fileInputRef}
+                type='file'
+                accept='image/jpeg'
+                className='hidden'
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = '';
+                  if (file) {
+                    void startCoverUpload(file);
+                  }
+                }}
+              />
+              <Button
+                variant='outline'
+                type='button'
+                disabled={coverUploading}
+                aria-busy={coverUploading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {coverUploading ? <PendingSpinner /> : null}
+                {coverUploading ? UPLOADING_LABEL : 'Upload cover'}
+              </Button>
+              <Button variant='ghost' type='button' disabled={coverUploading} onClick={removeCover}>
+                Remove cover
+              </Button>
+            </div>
+            {coverStatus.phase === 'presigning' ? (
+              <p className='text-muted-foreground text-xs'>Presigning…</p>
+            ) : null}
+            {coverStatus.phase === 'uploading' ? (
+              <p className='text-muted-foreground text-xs'>
+                Uploading…{' '}
+                {coverStatus.total > 0
+                  ? Math.round((coverStatus.sent / coverStatus.total) * 100)
+                  : 0}
+                %
+              </p>
+            ) : null}
+            {coverStatus.phase === 'bound' ? (
+              <p className='text-muted-foreground text-xs'>Cover ready — save to bind it.</p>
+            ) : null}
+            {coverStatus.phase === 'failed' ? (
+              <p className='text-destructive text-xs'>Upload failed: {coverStatus.message}</p>
+            ) : null}
+            <p className='text-muted-foreground text-xs'>JPG only, up to 10 MiB.</p>
+          </div>
 
           <section className='space-y-2'>
             <h3 className='text-sm font-medium'>Bookable at branches</h3>

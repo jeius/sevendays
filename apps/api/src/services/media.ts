@@ -35,6 +35,9 @@ const FINAL_PREFIXES: Record<MediaPurpose, string> = {
   // not a cover (the purpose names the owner, the prefix names the class).
   'site-logo': 'brand',
   'gallery-photo': 'gallery',
+  // M9 #331: studio-service covers share the covers/ prefix — the
+  // branch-cover ruling carried to the fifth purpose.
+  'service-cover': 'covers',
 };
 
 const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';

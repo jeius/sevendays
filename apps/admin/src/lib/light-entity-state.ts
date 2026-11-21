@@ -17,6 +17,7 @@ import type {
   Attire,
   BranchRead,
   CreateBranchInput,
+  CreateStudioServiceInput,
   PrintSize,
   StudioServiceAddonMatrixInput,
   StudioServiceBranchMatrixInput,
@@ -62,6 +63,10 @@ export interface BranchEditorState {
  * The studio-service editor's whole state. `#143 seam: the studio-service
  * state shape`. `branchIds` is in CLICK order (the prototype's toggle
  * appends): junction order is the fact, membership is what round-trips.
+ * The cover fields carry the branch editor's tri-state law (#332, the
+ * #214 port): `coverImageUrl` mirrors the read's resolved URL for the
+ * preview; `coverImageKey`: undefined = unchanged, null = clear, string =
+ * a fresh staging key (ADR-0019) to bind on the next save.
  */
 export interface StudioServiceEditorState {
   name: string;
@@ -72,6 +77,8 @@ export interface StudioServiceEditorState {
   priceCents: number;
   isActive: boolean;
   branchIds: string[];
+  coverImageUrl: string | null;
+  coverImageKey: string | null | undefined;
 }
 
 /**
@@ -279,6 +286,10 @@ export function studioServiceStateFromRead(
     // The state owns its own copy — a push on editor state must never
     // mutate the React Query cache row (#143 sweep: replace, never push).
     branchIds: [...row.bookableBranchIds],
+    // #332: a read never echoes keys — the cover is unchanged until the
+    // editor says otherwise (the branch seam's law verbatim).
+    coverImageUrl: row.coverImageUrl,
+    coverImageKey: undefined,
   };
 }
 
@@ -296,15 +307,37 @@ export function newStudioServiceState(): StudioServiceEditorState {
     priceCents: Number.NaN,
     isActive: true,
     branchIds: [],
+    coverImageUrl: null,
+    coverImageKey: undefined,
   };
 }
 
 /**
- * `#143 seam: studio-service state → full-object PUT payload`. The four
- * entity fields ONLY — never the matrix ids; relations ride their own
- * full-replace PUTs (`buildBranchMatrixPayload` / the add-on diff).
+ * `#143 seam: studio-service state → create payload` (#332, the #214
+ * branch-builder split's law). The four entity fields ONLY — never the
+ * matrix ids; relations ride their own full-replace PUTs
+ * (`buildBranchMatrixPayload` / the add-on diff). `coverImageKey` is
+ * included ONLY when the state carries a fresh staging key string.
  */
-export function buildStudioServicePayload(
+export function buildStudioServiceCreatePayload(
+  state: StudioServiceEditorState
+): CreateStudioServiceInput {
+  return {
+    name: state.name,
+    description: state.description,
+    priceCents: state.hasPrice ? state.priceCents : null,
+    isActive: state.isActive,
+    ...(typeof state.coverImageKey === 'string' ? { coverImageKey: state.coverImageKey } : {}),
+  };
+}
+
+/**
+ * `#143 seam: studio-service state → full-object PUT payload` (#332, the
+ * create mapping plus the three-state cover encoding): `undefined` =
+ * property ABSENT from the object (unchanged), `null` = explicit clear,
+ * string = bind the fresh staging key (#137's update shape / ADR-0019).
+ */
+export function buildStudioServiceUpdatePayload(
   state: StudioServiceEditorState
 ): UpdateStudioServiceInput {
   return {
@@ -312,6 +345,7 @@ export function buildStudioServicePayload(
     description: state.description,
     priceCents: state.hasPrice ? state.priceCents : null,
     isActive: state.isActive,
+    ...(state.coverImageKey !== undefined ? { coverImageKey: state.coverImageKey } : {}),
   };
 }
 
@@ -319,6 +353,9 @@ export function buildStudioServicePayload(
  * `#143 seam: read → studio-service flip payload`. The read reshaped
  * into the full-object update payload with ONLY `isActive` flipped —
  * every entity field carried, the flip never drops a field (#137).
+ * `coverImageKey` is deliberately ABSENT: the absence is what makes a
+ * flip never re-verify or clobber media — the cover is untouched by the
+ * PUT (the tri-state encoding; the read never echoes keys anyway).
  */
 export function buildStudioServiceFlipPayload(
   row: StudioServiceWithBranches,

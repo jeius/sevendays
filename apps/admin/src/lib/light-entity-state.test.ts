@@ -39,6 +39,7 @@ const service = studioServiceWithBranchesSchema.parse({
   description: 'On-location styling.',
   priceCents: 150000,
   isActive: true,
+  coverImageUrl: null,
   createdAt: STAMP,
   updatedAt: STAMP,
   bookableBranchIds: [uuid(1), uuid(3)],
@@ -50,6 +51,39 @@ describe('studio-service state', () => {
     const state = light.studioServiceStateFromRead(service);
     expect(state.branchIds).toEqual([uuid(1), uuid(3)]);
     expect(state.branchIds).not.toBe(service.bookableBranchIds);
+  });
+
+  it('a studio-service read with a cover seeds coverImageUrl; the editor key starts undefined (a read never echoes keys)', () => {
+    const covered = { ...service, coverImageUrl: 'https://pub-test.r2.dev/covers/aaaa.jpg' };
+    const state = light.studioServiceStateFromRead(covered);
+    expect(state.coverImageUrl).toBe('https://pub-test.r2.dev/covers/aaaa.jpg');
+    expect(state.coverImageKey).toBeUndefined();
+    const fresh = light.newStudioServiceState();
+    expect(fresh.coverImageUrl).toBeNull();
+    expect(fresh.coverImageKey).toBeUndefined();
+  });
+
+  it('studio-service CREATE payload includes the cover ONLY when the state carries a fresh staging key', () => {
+    const state = light.studioServiceStateFromRead(service);
+    expect('coverImageKey' in light.buildStudioServiceCreatePayload(state)).toBe(false);
+    const bound = { ...state, coverImageKey: 'tmp/00000000-0000-4000-8000-00000000000c.jpg' };
+    expect(light.buildStudioServiceCreatePayload(bound).coverImageKey).toBe(
+      'tmp/00000000-0000-4000-8000-00000000000c.jpg'
+    );
+  });
+
+  it('studio-service UPDATE payload encodes the cover tri-state: absent = property ABSENT, null = clear, string = bind', () => {
+    const state = light.studioServiceStateFromRead(service);
+    expect('coverImageKey' in light.buildStudioServiceUpdatePayload(state)).toBe(false);
+    expect(
+      light.buildStudioServiceUpdatePayload({ ...state, coverImageKey: null }).coverImageKey
+    ).toBeNull();
+    expect(
+      light.buildStudioServiceUpdatePayload({
+        ...state,
+        coverImageKey: 'tmp/00000000-0000-4000-8000-00000000000c.jpg',
+      }).coverImageKey
+    ).toBe('tmp/00000000-0000-4000-8000-00000000000c.jpg');
   });
 
   it('branch state/payload round-trip; the flip carries every editable field with ONLY isActive flipped and NO cover key', () => {
@@ -286,7 +320,13 @@ describe('studio-service state', () => {
 
   it('studio-service payload round-trip and flip', () => {
     const state = light.studioServiceStateFromRead(service);
-    expect(light.buildStudioServicePayload(state)).toEqual({
+    expect(light.buildStudioServiceCreatePayload(state)).toEqual({
+      name: 'Hair & Makeup',
+      description: 'On-location styling.',
+      priceCents: 150000,
+      isActive: true,
+    });
+    expect(light.buildStudioServiceUpdatePayload(state)).toEqual({
       name: 'Hair & Makeup',
       description: 'On-location styling.',
       priceCents: 150000,
@@ -298,6 +338,9 @@ describe('studio-service state', () => {
       priceCents: 150000,
       isActive: false,
     });
+    // The cover is deliberately ABSENT from a flip — the absence is what
+    // makes a flip never re-verify or clobber media (the tri-state law).
+    expect('coverImageKey' in light.buildStudioServiceFlipPayload(service, false)).toBe(false);
   });
 
   it('buildBranchMatrixPayload is the {branchIds} full-replace in the state order', () => {
@@ -444,12 +487,14 @@ describe('unpriced editors (ADR-0020)', () => {
     const state = light.studioServiceStateFromRead({ ...service, priceCents: null });
     expect(state.hasPrice).toBe(false);
     expect(Number.isNaN(state.priceCents)).toBe(true);
-    expect(light.buildStudioServicePayload(state).priceCents).toBeNull();
+    expect(light.buildStudioServiceUpdatePayload(state).priceCents).toBeNull();
   });
 
   it('studio-service: create defaults unchecked (owner ruling 2026-10-12) — the fresh payload saves null', () => {
     expect(light.newStudioServiceState().hasPrice).toBe(false);
-    expect(light.buildStudioServicePayload(light.newStudioServiceState()).priceCents).toBeNull();
+    expect(
+      light.buildStudioServiceCreatePayload(light.newStudioServiceState()).priceCents
+    ).toBeNull();
   });
 
   it('studio-service: validation demands entry when checked, skips the price entirely when unchecked', () => {

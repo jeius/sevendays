@@ -7,7 +7,11 @@ import {
 } from '@sevendays/db';
 import type { StudioServiceWithBranches } from '@sevendays/types';
 import { and, asc, eq, inArray } from 'drizzle-orm';
+import type { Env } from '../env.js';
 import { groupChildren } from './group-children.js';
+import { resolveMediaUrl } from './media.js';
+
+type MediaEnv = Pick<Env, 'MEDIA_PUBLIC_BASE_URL'>;
 
 /**
  * Active Studio Services with the branches each is bookable at and the
@@ -21,7 +25,8 @@ import { groupChildren } from './group-children.js';
  * order is id-stable, and membership is the only consumer-facing fact.
  */
 export async function listActiveStudioServicesWithBranches(
-  db: Database
+  db: Database,
+  env: MediaEnv
 ): Promise<StudioServiceWithBranches[]> {
   const serviceRows = await db
     .select()
@@ -68,9 +73,15 @@ export async function listActiveStudioServicesWithBranches(
 
   const addonsByService = groupChildren(applicabilityRows, (row) => row.studioServiceId);
 
-  return serviceRows.map((s) => ({
-    ...s,
-    bookableBranchIds: branchesByService(s.id).map((l) => l.branchId),
-    applicableAddonServiceIds: addonsByService(s.id).map((l) => l.addonServiceId),
-  }));
+  // #331: strip the raw key, resolve the absolute URL (the branches read's
+  // shape) — raw keys never leave the API.
+  return serviceRows.map((s) => {
+    const { coverImageKey, ...rest } = s;
+    return {
+      ...rest,
+      coverImageUrl: resolveMediaUrl(env, coverImageKey),
+      bookableBranchIds: branchesByService(s.id).map((l) => l.branchId),
+      applicableAddonServiceIds: addonsByService(s.id).map((l) => l.addonServiceId),
+    };
+  });
 }

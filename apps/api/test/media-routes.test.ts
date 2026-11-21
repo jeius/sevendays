@@ -248,6 +248,47 @@ describe('POST /api/v1/admin/media/presign', () => {
     expect(parsed.filter((line) => line.evt === 'media_failure')).toEqual([]);
     expect(parsed.filter((line) => line.evt === 'access')).toHaveLength(1);
   });
+
+  it('#331: service-cover presigns a JPG (200, staging key minted)', async () => {
+    const { token } = await signUpSession(url, 'presign-service-cover@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/media/presign',
+      {
+        method: 'POST',
+        body: JSON.stringify({ purpose: 'service-cover', contentType: 'image/jpeg' }),
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+      },
+      withCreds()
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { key: string; uploadUrl: string };
+    expect(body.key).toMatch(/^tmp\/[0-9a-f-]+\.jpg$/);
+  });
+
+  it('#331: service-cover with image/png → the pair-check 400 naming the purpose at contentType', async () => {
+    const { token } = await signUpSession(url, 'presign-service-cover-png@sevendays.test');
+    const res = await app.request(
+      '/api/v1/admin/media/presign',
+      {
+        method: 'POST',
+        body: JSON.stringify({ purpose: 'service-cover', contentType: 'image/png' }),
+        headers: { 'content-type': 'application/json', ...bearer(token) },
+      },
+      withCreds()
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as {
+      error: string;
+      details: { path: string[]; message: string }[];
+    };
+    expect(body.error).toBe('Invalid request payload.');
+    const detail = body.details[0];
+    if (!detail) throw new Error('expected one validation detail');
+    expect(detail.path).toEqual(['contentType']);
+    expect(detail.message).toBe(
+      "contentType 'image/png' is not allowed for purpose 'service-cover' (allowed: image/jpeg)"
+    );
+  });
 });
 
 describe('GET /api/v1/admin/gallery-photos/:id/thumb', () => {

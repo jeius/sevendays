@@ -273,6 +273,7 @@ export async function deleteAdminAddonService(
 
 export async function deleteAdminStudioService(
   db: Database,
+  env: Pick<Env, 'MEDIA_BUCKET'>,
   audit: AuditActor,
   id: string
 ): Promise<AdminDeleteResult> {
@@ -308,6 +309,11 @@ export async function deleteAdminStudioService(
       summary: current.name,
     });
   });
+  // ADR-0019 §5 + the #137 precedent: the cover object goes only after the
+  // row's commit — a blocked or rolled-back delete never touches the bucket.
+  if (current.coverImageKey) {
+    await env.MEDIA_BUCKET.delete(current.coverImageKey);
+  }
   return { ok: true };
 }
 

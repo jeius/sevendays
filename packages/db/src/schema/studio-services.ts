@@ -17,6 +17,10 @@ export const studioServices = pgTable(
     // is_active gates the booking surface without deleting catalog history
     // (same posture as addon_services).
     isActive: boolean('is_active').notNull().default(true),
+    // R2 object key for the cover image (#331, the branches.coverImageKey
+    // shape): nullable — born-null on every existing row (no cover = the
+    // documented landing fallback); raw keys never leave the API (ADR-0019).
+    coverImageKey: text('cover_image_key'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     // Natural key: the seed upserts studio services by name (re-runnable, ids stable).

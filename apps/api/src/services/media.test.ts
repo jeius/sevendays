@@ -177,6 +177,16 @@ describe('commitUpload', () => {
     expect(result.finalKey).toMatch(/^covers\//);
   });
 
+  it('service-cover purpose promotes to covers/ (M9 #331: the branch-cover ruling carried to the fifth purpose)', async () => {
+    const stub = stubBucket({ [STAGING_KEY]: { size: 1024, contentType: 'image/jpeg' } });
+    const result = await commitUpload(stub.bucket, {
+      stagingKey: STAGING_KEY,
+      purpose: 'service-cover',
+    });
+    if (!result.ok) throw new Error(`expected ok, got ${result.reason}`);
+    expect(result.finalKey).toMatch(/^covers\//);
+  });
+
   it('site-logo purpose promotes to brand/ (M7 #215: the logo gets its own immutable directory)', async () => {
     const stub = stubBucket({ [STAGING_KEY]: { size: 1024, contentType: 'image/jpeg' } });
     const result = await commitUpload(stub.bucket, {

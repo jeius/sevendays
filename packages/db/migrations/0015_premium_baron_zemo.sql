@@ -1,0 +1,1 @@
+ALTER TABLE "studio_services" ADD COLUMN "cover_image_key" text;

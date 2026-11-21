@@ -150,6 +150,7 @@ describe('create→read round-trips (the canonical fixtures, all nine entities)'
       description: 'Restore old photographs',
       priceCents: 50000,
       isActive: true,
+      coverImageKey: null,
       createdAt: DATE,
       updatedAt: DATE,
     });
