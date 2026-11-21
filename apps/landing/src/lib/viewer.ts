@@ -4,6 +4,7 @@ import type {
   ControllerSettings,
   DeepPartialValue,
   Labels,
+  Render,
   Slide,
 } from 'yet-another-react-lightbox';
 // Type-only: loads the Captions plugin's SlideImage.description module
@@ -59,4 +60,36 @@ export const VIEWER_LABELS: Labels = {
   Previous: 'Previous photo',
   Next: 'Next photo',
   Close: 'Close photo viewer',
+};
+
+// The cover variant (#336 D4/D5): the package-detail cover zooms as a LONE
+// image. The mapping carries D4's law itself — a null cover maps to ZERO
+// slides (the initials placeholder is not a photograph and does not zoom),
+// so the inertness is structural, not a render-site convention. The slide
+// carries the package name as its alt (the CoverPanel img's own alt law —
+// one source) and never a title or description: a lone image has no
+// caption law, and the same-URL cache win rides here too (the slide src IS
+// the coverImageUrl the panel already rendered).
+export function coverSlides(pkg: { name: string; coverImageUrl: string | null }): Slide[] {
+  if (!pkg.coverImageUrl) return [];
+  return [{ src: pkg.coverImageUrl, alt: pkg.name }];
+}
+
+// The lone-image option vocabulary (D4): the single slide cannot loop, and
+// the arrows are hidden by the library's named render slots (no arrows
+// render at all). No Counter joins the cover variant's plugins — that
+// lives in PhotoViewer's variant branch. The controller (Esc / backdrop /
+// × close, pull-close off) and the labels are SHARED with the mosaic
+// variant (D5's "the shared labels strings").
+export const COVER_CAROUSEL: DeepPartialValue<CarouselSettings, 'imageProps'> = {
+  finite: true,
+  preload: 2,
+  padding: '16px',
+  spacing: '30%',
+  imageFit: 'contain',
+};
+
+export const COVER_RENDER: Render = {
+  buttonPrev: () => null,
+  buttonNext: () => null,
 };

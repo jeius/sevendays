@@ -1,6 +1,9 @@
 import type { PublicGalleryPhoto } from '@sevendays/types';
 import { describe, expect, it } from 'vitest';
 import {
+  COVER_CAROUSEL,
+  COVER_RENDER,
+  coverSlides,
   GALLERY_ALT_FALLBACK,
   MOSAIC_CAROUSEL,
   MOSAIC_CONTROLLER,
@@ -82,5 +85,47 @@ describe('the pinned option vocabulary (#336 D5/D6)', () => {
       Next: 'Next photo',
       Close: 'Close photo viewer',
     });
+  });
+});
+
+describe('coverSlides (the lone-image law, #336 D4/D5)', () => {
+  it('a covered package maps to exactly one slide — src = coverImageUrl, alt = the package name, no title', () => {
+    const slides = coverSlides({
+      name: 'The Wedding Package',
+      coverImageUrl: 'https://pub-test.r2.dev/covers/pkg.jpg',
+    });
+    expect(slides).toHaveLength(1);
+    expect(slides[0]?.src).toBe('https://pub-test.r2.dev/covers/pkg.jpg');
+    expect(slides[0]?.alt).toBe('The Wedding Package');
+    expect('title' in (slides[0] ?? {})).toBe(false);
+  });
+
+  it('a null cover maps to ZERO slides — the placeholder is not a photograph (D4)', () => {
+    expect(coverSlides({ name: 'The Wedding Package', coverImageUrl: null })).toEqual([]);
+  });
+
+  it('the cover slide never carries a description (the lone image has no caption law)', () => {
+    const slides = coverSlides({
+      name: 'The Wedding Package',
+      coverImageUrl: 'https://pub-test.r2.dev/covers/pkg.jpg',
+    });
+    expect('description' in (slides[0] ?? {})).toBe(false);
+  });
+});
+
+describe('the cover variant constants (#336 D4)', () => {
+  it('COVER_CAROUSEL: the lone image cannot loop (finite true) on the shared defaults', () => {
+    expect(COVER_CAROUSEL).toEqual({
+      finite: true,
+      preload: 2,
+      padding: '16px',
+      spacing: '30%',
+      imageFit: 'contain',
+    });
+  });
+
+  it('COVER_RENDER: both arrows render null — the library’s named hide (no arrows at all)', () => {
+    expect(COVER_RENDER.buttonPrev?.()).toBe(null);
+    expect(COVER_RENDER.buttonNext?.()).toBe(null);
   });
 });
