@@ -12,14 +12,17 @@ import { cn } from 'cn';
 import { CalendarPlus } from 'lucide-react';
 import { useState } from 'react';
 import { peso } from '../lib/format';
+import { serviceImage } from '../lib/service-image';
 import { useTruncated } from '../lib/use-truncated';
-import { serviceBackground } from './home-cards';
 
 // The studio-service row (/services), OWNER-RULED Round 3: the cover image
-// IS the card — full-bleed themed background (the serviceBackground mapping
-// the home marquee shares), the two-layer ink wash + bottom scrim keeping
-// every text zone at the measured white-on-ink AA pair (#111's law),
-// content anchored bottom, and the CTA PINNED at the bottom-right corner.
+// IS the card — full-bleed themed background (since #333 the serviceImage
+// precedence both service surfaces share: the stored cover first, the
+// serviceBackground stand-ins as the documented no-cover fallback — owner
+// ruling, the home stays photo-led with zero admin work), the two-layer
+// ink wash + bottom scrim keeping every text zone at the measured
+// white-on-ink AA pair (#111's law), content anchored bottom, and the CTA
+// PINNED at the bottom-right corner.
 // Bookability chips ride the scrim as outline-on-dark badges. The CTA obeys
 // the law (main books with CalendarPlus; the v1 arm's solid-primary "Call
 // us" + Phone is a pick-time transform on the v1 branch, never runtime);
@@ -66,7 +69,7 @@ export function ServiceCard({
   return (
     <article className='group relative flex min-h-72 flex-col justify-end overflow-hidden rounded-xl shadow-sm'>
       <img
-        src={serviceBackground(service.name)}
+        src={serviceImage(service)}
         alt=''
         aria-hidden='true'
         className='absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.05] motion-reduce:transition-none'
