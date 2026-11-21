@@ -374,7 +374,8 @@ git commit -m "feat(admin): #332 — the studio-service editor seam gains the co
 The branch editor's cover loop and Cover card port element-for-element; the retiring builder's three call-site pins re-seat onto the split builders. One commit — the screen and the deletion are inseparable (the old name dies with its last caller).
 
 **Files:**
-- Modify: `apps/admin/src/components/studio-services/studio-services-screen.tsx` (imports, the cover loop, open/reset lifecycle, save-path builders, the Cover card)
+- Modify: `apps/admin/src/components/studio-services/studio-services-screen.tsx` (imports, the cover loop, open/reset lifecycle, save-path builders, the Cover card, the header-comment seam vocabulary)
+- Modify: `apps/admin/src/lib/light-entity-state.ts` (DELETE the retiring `buildStudioServicePayload` block — its Task-3 #331 JSDoc + function, exactly the block quoted as Task 1 Step 4(d)'s before-block; the two new builders and the flip stay)
 - Modify (rename ripples): `apps/admin/src/lib/light-entity-state.test.ts` (the three `buildStudioServicePayload` call sites + the round-trip extension)
 
 **Interfaces:**
@@ -462,6 +463,23 @@ import {
 } from '#/lib/light-entity-state';
 import { peso } from '#/lib/peso';
 import { blockerLines, UPLOADING_LABEL } from '#/lib/save-contract';
+```
+
+(e) The header comment's seam vocabulary — the census in Step 6 expects ZERO `buildStudioServicePayload\b` hits on this file, and the file header names it. Current block (lines 11–13) for exact match:
+
+```ts
+// state seam (studioServiceStateFromRead / newStudioServiceState /
+// buildStudioServicePayload / buildStudioServiceFlipPayload /
+// validateStudioServiceState) driving the create/edit Sheet editor, and
+```
+
+Replace with:
+
+```ts
+// state seam (studioServiceStateFromRead / newStudioServiceState /
+// buildStudioServiceCreatePayload / buildStudioServiceUpdatePayload /
+// buildStudioServiceFlipPayload /
+// validateStudioServiceState) driving the create/edit Sheet editor, and
 ```
 
 And extend the admin.functions value import (lines 62–67) for exact match:
@@ -632,6 +650,8 @@ Replace with:
               data: { id: input.row.id, payload: buildStudioServiceUpdatePayload(input.state) },
             });
 ```
+
+(d) The retiring builder deletion — in `apps/admin/src/lib/light-entity-state.ts`, delete the WHOLE `buildStudioServicePayload` block: its Task-3 #331 JSDoc (the block beginning `/**` above `export function buildStudioServicePayload(` through the function's closing `}`) — exactly the block quoted as Task 1 Step 4(d)'s before-block. The two new builders and the flip (JSDoc + body) stay untouched; the file's builder order becomes fromRead → newState → Create → Update → flip.
 
 - [ ] **Step 4: The Cover card (the branch editor's block ported verbatim, alt texts re-based).** In `studio-services-screen.tsx`, the editor's field sequence — current region (lines 743–756) for exact match:
 
@@ -825,7 +845,7 @@ Run: `grep -c "'service-cover'" apps/admin/src/components/studio-services/studio
 Run: `pnpm --filter @sevendays/admin test -- --run && pnpm --filter @sevendays/admin typecheck` → green — **34 files / 364 tests** (Task 1's +4 held; Task 2 adds none).
 
 ```bash
-git add apps/admin/src/components/studio-services/studio-services-screen.tsx apps/admin/src/lib/light-entity-state.test.ts
+git add apps/admin/src/components/studio-services/studio-services-screen.tsx apps/admin/src/lib/light-entity-state.ts apps/admin/src/lib/light-entity-state.test.ts
 git commit -m "feat(admin): #332 — the studio-services editor gains the Cover field (the branch composition ported; the builder split rewired)"
 ```
 
