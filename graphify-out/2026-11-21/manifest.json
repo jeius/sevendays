@@ -700,8 +700,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1795231355.7241983,
-    "ast_hash": "87ca2cb3fb449223d40c7b113fb4482d",
+    "mtime": 1795240007.4359856,
+    "ast_hash": "664a18392dcb3f39d5022a943ad57785",
     "semantic_hash": ""
   },
   "CONTEXT-MAP.md": {
@@ -835,8 +835,8 @@
     "semantic_hash": ""
   },
   "docs/progress.md": {
-    "mtime": 1795231336.364476,
-    "ast_hash": "09963843f67ceb8e9af35b72622d5be8",
+    "mtime": 1795239996.2299857,
+    "ast_hash": "cc0482620a5353b02390e0797e28d349",
     "semantic_hash": ""
   },
   "docs/specs/2026-08-30-m1-real-data-layer-spec.md": {
@@ -3330,8 +3330,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/components/studio-services/studio-services-screen.tsx": {
-    "mtime": 1795223048.5281472,
-    "ast_hash": "dd48e706d6385e28e079918c04317c11",
+    "mtime": 1795239379.016084,
+    "ast_hash": "aa7b4705ace9a4d7a242109f76cb62bd",
     "semantic_hash": ""
   },
   "apps/admin/src/components/testimonials/testimonials-screen.tsx": {
@@ -3365,8 +3365,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/light-entity-state.ts": {
-    "mtime": 1795227633.081553,
-    "ast_hash": "c0f6a9257b867eabfac04fedebc7ce3f",
+    "mtime": 1795239379.0594172,
+    "ast_hash": "dbd25a400a04cdcf53eedf75ff70d619",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/package-editor-state.ts": {
@@ -3590,8 +3590,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/cover-upload.test.ts": {
-    "mtime": 1795223048.536814,
-    "ast_hash": "cbe4eca11d52b63f19b882d41b3c1298",
+    "mtime": 1795238671.4643297,
+    "ast_hash": "66dafdea3f685dbdd3b49b78c00297dc",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/gallery-state.test.ts": {
@@ -3600,8 +3600,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/lib/light-entity-state.test.ts": {
-    "mtime": 1795226459.2972324,
-    "ast_hash": "58eea5b9e2450c60c4391853e68dcf76",
+    "mtime": 1795239399.61675,
+    "ast_hash": "96b6f01536348895664267ed773ef128",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/package-editor-state.test.ts": {
@@ -5412,6 +5412,11 @@
   "docs/superpowers/plans/2026-11-21-331-service-covers-api-spine.md": {
     "mtime": 1795227571.500243,
     "ast_hash": "a5bd603d345b3fd17794bb06065af29e",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-21-332-service-covers-admin-editor.md": {
+    "mtime": 1795239106.212528,
+    "ast_hash": "15d2b87a3740e648ba6436f2cafef99f",
     "semantic_hash": ""
   }
 }
