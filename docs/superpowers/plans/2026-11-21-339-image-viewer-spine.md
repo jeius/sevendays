@@ -87,7 +87,7 @@ No trips. The two flagged decisions the skill cannot settle (the D8 chrome regis
 
 **Interfaces:**
 - Consumes: `PublicGalleryPhoto` from `@sevendays/types` (`{ id, photoUrl, title: string | null, caption: string | null, categoryId }` — `packages/types/src/gallery.ts:99-115`).
-- Produces (Tasks 2–3 consume these; #340 will extend): `GALLERY_ALT_FALLBACK: string`; `photoSlides(photos: PublicGalleryPhoto[], opts?: { captions?: boolean }): Slide[]`; `MOSAIC_CONTROLLER: ControllerSettings`; `MOSAIC_CAROUSEL: CarouselSettings`; `VIEWER_LABELS: Labels` — `Slide`/`ControllerSettings`/`CarouselSettings`/`Labels` are type-only imports from `yet-another-react-lightbox` (erased at runtime — the plain-node vitest graph never loads the library).
+- Produces (Tasks 2–3 consume these; #340 will extend): `GALLERY_ALT_FALLBACK: string`; `photoSlides(photos: PublicGalleryPhoto[], opts?: { captions?: boolean }): Slide[]`; `MOSAIC_CONTROLLER: DeepPartial<ControllerSettings>`; `MOSAIC_CAROUSEL: DeepPartial<CarouselSettings>`; `VIEWER_LABELS: Labels` — all five type names are type-only root imports from `yet-another-react-lightbox` (erased at runtime — the plain-node vitest graph never loads the library). **Execution amendment (controller, 2026-11-21, Task 1 NEEDS_CONTEXT):** `ControllerSettings`/`CarouselSettings` are the library's internal all-required resolved types (verified in the installed 3.33.1 `dist/types.d.ts` — 12 and 6 required fields; the deprecated `ref`/`focus`/`touchAction`/`aria` + `imageProps` the pinned literals never set) — the public prop shape is their `DeepPartial`, both names root-exported, so the constants annotate as `DeepPartial<…>` with the pinned VALUES byte-unchanged. The seam also carries `import type {} from 'yet-another-react-lightbox/plugins/captions'` — a type-only import (erased at runtime) that activates the Captions plugin's `SlideImage.description` module augmentation so the captions law typechecks in the plain-node graph without loading the plugin.
 
 - [ ] **Step 1: Install the library (landing app-local).**
 
@@ -95,7 +95,7 @@ No trips. The two flagged decisions the skill cannot settle (the D8 chrome regis
 pnpm --filter @sevendays/landing add yet-another-react-lightbox@^3.33.1
 ```
 
-Verify: `grep '"yet-another-react-lightbox"' apps/landing/package.json` shows `"yet-another-react-lightbox": "^3.33.1"` under `dependencies`, and `pnpm --filter @sevendays/landing exec node -p "require('yet-another-react-lightbox/package.json').version"` prints `3.33.1`. No other workspace's package.json mentions the package (Task 5's census proves it repo-wide).
+Verify: `grep '"yet-another-react-lightbox"' apps/landing/package.json` shows `"yet-another-react-lightbox": "^3.33.1"` under `dependencies`, and `node -p "require('./apps/landing/node_modules/yet-another-react-lightbox/package.json').version"` prints `3.33.1` (the direct manifest read — the package's `exports` map does not expose `./package.json`, so `require('yet-another-react-lightbox/package.json')` errors `ERR_PACKAGE_PATH_NOT_EXPORTED`). No other workspace's package.json mentions the package (Task 5's census proves it repo-wide).
 
 - [ ] **Step 2: Write the failing seam suite — `apps/landing/src/lib/viewer.test.ts` (the whole file).**
 
@@ -194,13 +194,17 @@ describe('the pinned option vocabulary (#336 D5/D6)', () => {
 pnpm --filter @sevendays/landing exec vitest run src/lib/viewer.test.ts
 ```
 
-Expected: FAIL — `Failed to resolve import "./viewer"` (module does not exist yet).
+Expected: FAIL — the not-yet-written module's import unresolvable (this stack emits it as `Cannot find module './viewer'`; any resolution error naming `./viewer` is the expected red).
 
 - [ ] **Step 4: Write the seam — `apps/landing/src/lib/viewer.ts` (the whole file).**
 
 ```ts
 import type { PublicGalleryPhoto } from '@sevendays/types';
-import type { CarouselSettings, ControllerSettings, Labels, Slide } from 'yet-another-react-lightbox';
+import type { CarouselSettings, ControllerSettings, DeepPartial, Labels, Slide } from 'yet-another-react-lightbox';
+// Type-only: loads the Captions plugin's SlideImage.description module
+// augmentation into the type graph (erased at runtime — the plain-node
+// vitest graph never loads the plugin; the captions law typechecks without it).
+import type {} from 'yet-another-react-lightbox/plugins/captions';
 
 // The landing image viewer's pure seam (#336 D5): the slide mapping and the
 // pinned option vocabulary, in the gallery-tabs.ts lib-seam shape. The wall
@@ -231,14 +235,14 @@ export function photoSlides(
 
 // The mosaic variant's pinned option vocabulary (D6). #340's cover variant
 // adds its own constants beside these; nothing here is a variant switch.
-export const MOSAIC_CONTROLLER: ControllerSettings = {
+export const MOSAIC_CONTROLLER: DeepPartial<ControllerSettings> = {
   closeOnEscape: true, // the library default — set explicit to name the gesture
   closeOnBackdropClick: true, // ruled ON — defaults FALSE upstream (D6)
   closeOnPullUp: false, // pull-close stays out of the ruled gesture set
   closeOnPullDown: false,
 };
 
-export const MOSAIC_CAROUSEL: CarouselSettings = {
+export const MOSAIC_CAROUSEL: DeepPartial<CarouselSettings> = {
   finite: false, // the wall loops
   preload: 2,
   padding: '16px',
