@@ -17,7 +17,7 @@
 
 ## Controller pre-flight (live-run, record before Task 1)
 
-- **Floors (must not move anywhere in this ticket):** api 34 files / 482 passed + 3 skipped; types 18 files / 197 passed; api-client 5 files / 45; landing 19 files / 152; admin 34 files / 364; db 4 files / 22 passed + 8 skipped. Live-run each and record; any drift means something merged — reconcile before starting.
+- **Floors (must not move anywhere in this ticket):** api 34 files / 482 passed + 3 skipped; types 18 files / 197 passed; api-client 5 files / 45; landing 19 files / 152; admin 34 files / 364; db 4 files / **30 passed + 0 skipped with `TEST_DATABASE_URL` set** (the with-var form every gate in this plan uses; the without-var form is 22 passed + 8 skipped — the 8 live-probe tests are `skipIf(!TEST_DATABASE_URL)`/`runIf`-gated and open under the var; ruling #349-R4). Live-run each and record; any drift means something merged — reconcile before starting.
 - **Dash census:** `git grep '—' -- packages scripts e2e | wc -l` → **568 dash lines across 104 files** (measured 2026-11-22). Re-run and record. Drift means something merged — reconcile.
 - **Hand-class census:** 10 line-end dashes (the `—$` class: `e2e/smoke/production.spec.ts:51`, `e2e/visual/redesign.spec.ts:56,124,349,402`, `packages/db/scripts/db-state.mjs:1,31`, `packages/db/scripts/probe-pooler-transaction.mjs:1`, `packages/db/scripts/rehearsal-fixture.mjs:2`, `packages/db/src/schema/addon-services.ts:3`); 24 decorative separator lines across 7 files (`e2e/README.md`, `e2e/visual/redesign.spec.ts`, `packages/api-client/test/loopback.test.ts`, `packages/types/src/reset-email.ts`, `packages/ui/src/tokens.css`, `scripts/audit-v1-absence.mjs`, `scripts/measure-theme-pairs.mjs`); 5 double-space dash lines (`packages/db/scripts/verify-appointment-row.mjs` ×3, `packages/db/scripts/verify-seed.ts` ×1, `scripts/measure-theme-pairs.mjs` ×1).
 - **En-dash inventory:** exactly **2** en dashes repo-wide-in-scope, both in `packages/types/src/testimonial-submission.ts` lines 8–9 (`quote 20–600 chars`, `person 2–80`). They must survive every task byte-identical.
@@ -636,7 +636,7 @@ pnpm --filter @sevendays/types test -- --run && pnpm --filter @sevendays/types t
 pnpm --filter @sevendays/api-client test -- --run && pnpm --filter @sevendays/api-client typecheck
 TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test pnpm --filter @sevendays/db test -- --run && pnpm --filter @sevendays/db typecheck
 ```
-Expected: types 18 files / 197 passed; api-client 5 files / 45; db 4 files / 22 passed + 8 skipped. No count moved.
+Expected: types 18 files / 197 passed; api-client 5 files / 45; db 4 files / 30 passed + 0 skipped (with-var form; ruling #349-R4). No count moved.
 
 - [ ] **Step 8: Commit.** `git add -A && git commit -m "chore(copy): the hand-rewritten strings, their pins, and the echo repairs (#349)"` (stage the named files; `git status` must show nothing else).
 
@@ -774,7 +774,7 @@ Expected: both suites list (smoke + visual) with no compile/collection error. `-
 docker start sevendays-test-db-5433 2>/dev/null || true
 TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test pnpm check
 ```
-Expected: green across lint + format + typecheck + test for every workspace member, with every floor **identical** to the pre-flight record: api 34 files / 482 passed + 3 skipped; types 18 files / 197; api-client 5 files / 45; landing 19 files / 152; admin 34 files / 364; db 4 files / 22 passed + 8 skipped. Any count drift: stop and reconcile (nothing in this plan adds or removes a test).
+Expected: green across lint + format + typecheck + test for every workspace member, with every floor **identical** to the pre-flight record: api 34 files / 482 passed + 3 skipped; types 18 files / 197; api-client 5 files / 45; landing 19 files / 152; admin 34 files / 364; db 4 files / 30 passed + 0 skipped (with-var form; ruling #349-R4). Any count drift: stop and reconcile (nothing in this plan adds or removes a test).
 
 - [ ] **Step 3: The progress.md entry.** Append at the end of `docs/progress.md` (matching the house entry format; the heading deliberately carries no em dash — this text must survive the gate):
 
@@ -802,7 +802,7 @@ Closes #349. Spec #348 item 1, first leg.
 
 **Owner flag:** the 8 strings are the PROPOSED hand-rewrites pinned in the plan (docs/superpowers/plans/2026-11-22-349-em-dash-sweep-tool-and-trees.md); the copy question went unanswered at plan time, so the wording awaits ratification here. Edit any string and the pins + echoes re-run before merge.
 
-Floors unchanged: api 34 files / 482+3sk, types 18 / 197, api-client 5 / 45, landing 19 / 152, admin 34 / 364, db 4 / 22+8sk. En dashes preserved. Live DB rows untouched (Q5).
+Floors unchanged: api 34 files / 482+3sk, types 18 / 197, api-client 5 / 45, landing 19 / 152, admin 34 / 364, db 4 / 30 (with-var). En dashes preserved. Live DB rows untouched (Q5).
 EOF
 )
 ```
