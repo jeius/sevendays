@@ -57,7 +57,7 @@
 - **Test DB:** db-suite runs and the final `pnpm check` prefix `TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test` (start the standalone container first if down: `docker start sevendays-test-db-5433`). Port 5432 belongs to another project — never fall back.
 - **Per-task gates:** the touched packages' `test -- --run` AND `typecheck` both green before each task's commit. Final gate: `pnpm fix` then `pnpm check` green at the repo root (with `TEST_DATABASE_URL` set). Do not commit code that fails it for the packages/apps touched.
 - **Floors do not move.** Every suite's file/test count is identical before and after (string edits edit pins in place; the script is outside every vitest project). A count that differs at any gate means something else drifted: stop and reconcile.
-- **Biome covers `scripts/` and `e2e/` from the root** (`biome.json` `files:{}` = everything not gitignored): the new script passes `pnpm lint:root`; any format drift heals in Task 4's `pnpm fix`.
+- **Biome covers `scripts/` and `e2e/` from the root** (`biome.json` `files:{}` = everything not gitignored): the touched files pass `pnpm exec biome check <files>` (touched-files clean; `pnpm lint:root` is pre-existing red at main and is NOT a gate — ruling #349-R3); any format drift heals in Task 4's `pnpm fix`.
 - Checklist ticks in `docs/*.md` use `- [✅]`, never plain `[x]`.
 - Commits follow the repo's commit-work convention, each referencing #349. Prefixes: `feat(scripts):` (Task 1), `chore(copy):` (Task 2), `chore(sweep):` (Task 3), `docs(progress):` + `chore(graphify):` (Task 4).
 - Run from the repo root (the branch checkout's root). The script reads `git ls-files` from cwd.
@@ -79,7 +79,7 @@
 
 ```js
 #!/usr/bin/env node
-// em-dash-sweep.mjs — the em-dash gate and sweep tool (Handover polish #349,
+// em-dash-sweep.mjs \u2014 the em-dash gate and sweep tool (Handover polish #349,
 // spec #348 item 1). Two modes plus a self-test, over the tracked working
 // tree (git ls-files):
 //
@@ -349,14 +349,14 @@ Expected: the `SELF-TEST PASS` block (exclusions held, en dash preserved, binary
 ```bash
 node scripts/em-dash-sweep.mjs check scripts
 ```
-Expected: `EM DASH: clean, 0 hits (scripts)` — **the tool must not flag its own file**. If it lists `scripts/em-dash-sweep.mjs`, a literal dash leaked into the source; fix the escape and re-run.
+Expected: exit 1 listing the 7 pre-existing dash-carrying `scripts/` files (58 lines — `audit-v1-absence.mjs`, `measure-theme-pairs.mjs`, `probe-cold-hydration.mjs`, `seed-v1/paths.txt`, `seed-v1/replace-message.txt`, `seed-v1/replace-text.txt`, `v1-triage.mjs`; Task 3 sweeps them) — and **`scripts/em-dash-sweep.mjs` must never be among them** (the tool's own file is em-dash-free). If the tool lists itself, a literal dash leaked into the source; fix the escape and re-run. The clean `scripts` verdict becomes available only after Task 3. (Ruling #349-R1: the original `clean, 0 hits (scripts)` expectation was a plan defect.)
 
 ```bash
 pnpm em-dash check packages
 ```
 Expected: exit 1 listing the packages dash lines (the census files) — the alias resolves and the scoped check works.
 
-- [ ] **Step 5: Biome gate.** `pnpm lint:root` green. Then `pnpm exec biome format scripts/em-dash-sweep.mjs` — if it reports formatting drift, apply `pnpm exec biome format --write scripts/em-dash-sweep.mjs` and re-run Step 4's three commands (formatting must not change behavior).
+- [ ] **Step 5: Biome gate (touched files only).** `pnpm exec biome check scripts/em-dash-sweep.mjs package.json` exits 0. Then `pnpm exec biome format scripts/em-dash-sweep.mjs` — if it reports formatting drift, apply `pnpm exec biome format --write scripts/em-dash-sweep.mjs` and re-run Step 4's three commands (formatting must not change behavior). Do NOT gate on `pnpm lint:root`: it is root-biome over every non-member path and is pre-existing red at main (2 errors: `e2e/visual/redesign.spec.ts:312` `useIterableCallbackReturn` + generated `graphify-out/graph.html:304`), and turbo's `pnpm check` never runs it (ruling #349-R3).
 
 - [ ] **Step 6: Commit.** `git add scripts/em-dash-sweep.mjs package.json && git commit -m "feat(scripts): the em-dash sweep tool with check, fix, and self-test (#349)"`
 
