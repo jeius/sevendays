@@ -754,7 +754,7 @@ E2E_BASE_URL=http://127.0.0.1:9 E2E_API_URL=http://127.0.0.1:9 E2E_SMOKE_STAFF_E
 ```
 Expected: both suites list (smoke + visual) with no compile/collection error. `--list` needs no browser. (The baselines are untouched: explicit snapshot names per the scope fence.)
 
-- [ ] **Step 8: Lint.** `pnpm lint:root` green (biome covers `scripts/` and `e2e/` from the root). Format drift, if any, heals in Task 4's `pnpm fix`.
+- [ ] **Step 8: Format drift is deferred — no lint gate here.** `pnpm lint:root` is ruled not-a-gate (#349-R3: turbo's `pnpm check` never runs root biome; its 2 errors are pre-existing at main), and the sweep may leave biome-format drift on shortened lines. That drift heals in Task 4's `pnpm fix` before the full gate — do not run or gate on `pnpm lint:root` in this task.
 
 - [ ] **Step 9: Commit.** `git add -A && git commit -m "chore(sweep): packages, scripts, and e2e em-dash-free (#349)"` (`git status` first — only swept files, no app/doc/root strays).
 
