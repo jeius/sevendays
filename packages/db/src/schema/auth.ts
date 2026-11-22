@@ -1,8 +1,8 @@
-// BetterAuth 1.7 schema — generated via `pnpm dlx auth@1.7.5 generate
+// BetterAuth 1.7 schema, generated via `pnpm dlx auth@1.7.5 generate
 // --config apps/admin/src/lib/auth.config.ts --output
 // packages/db/src/schema/auth.ts --adapter drizzle --dialect pg -y`
 // (user/session/account/verification core + the admin plugin's fields +
-// rateLimit for database-backed rate limiting). Regenerate — never hand-edit —
+// rateLimit for database-backed rate limiting). Regenerate, never hand-edit,
 // when plugins change; the relations blocks live in relations.ts (house
 // style), so a regeneration re-moves them.
 import { bigint, boolean, index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';

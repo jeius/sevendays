@@ -3,9 +3,9 @@ import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 // The shared sun/moon toggle (#162's ruling): a plain ghost icon button
-// flipping the class strategy's light/dark pair — no system option (the
+// flipping the class strategy's light/dark pair, no system option (the
 // ruled offer is Light/Dark only, default light). The icons swap via the
-// dark: variant, not mounted state — SSR and client markup are identical
+// dark: variant, not mounted state, SSR and client markup are identical
 // (no hydration mismatch), and the static aria-label keeps it true in
 // both themes. Apps own placement and ground tint through className: the
 // landing's ink band passes its own tint classes; surfaces on the

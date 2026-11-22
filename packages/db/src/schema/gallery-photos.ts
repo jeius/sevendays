@@ -11,7 +11,7 @@ import {
 import { galleryCategories } from './gallery-categories.js';
 
 // Gallery Photo (M5, ADR-0019): the row stores the R2 object key; reads
-// resolve photoUrl at read time — raw keys never leave the API. The
+// resolve photoUrl at read time, raw keys never leave the API. The
 // category FK is NULLABLE by ruling: an uncategorized photo is staff-only
 // and absent from public reads. Deactivation is the reversible is_active
 // flip; replacing a photo is a new immutable key + row update + old-key

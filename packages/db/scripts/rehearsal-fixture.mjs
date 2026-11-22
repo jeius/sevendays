@@ -1,11 +1,11 @@
 // M1.5 rehearsal fixture (throwaway tooling): inserts one appointment + one
-// add-on join into the COMPOSE database only. Never points at Supabase —
+// add-on join into the COMPOSE database only. Never points at Supabase:
 // it reads TEST_DATABASE_URL and refuses to run without it.
 import postgres from 'postgres';
 
 const url = process.env.TEST_DATABASE_URL;
 if (!url) {
-  console.error('TEST_DATABASE_URL is not set — this fixture only ever runs against compose.');
+  console.error('TEST_DATABASE_URL is not set, this fixture only ever runs against compose.');
   process.exit(1);
 }
 if (/supabase/i.test(url)) {
@@ -35,7 +35,7 @@ const [appt] = await sql`
   values (${branch.id}, ${pkg.id}, NULL, 'M1.5 Rehearsal', 'rehearsal@example.com', '+63 900 000 000',
           '2026-10-01 09:00:00+08', 'pending', 'scheduled', 99000, 'rehearsal')
   returning id`;
-// The probe's confirm mode asserts the add-on join rows too — the fixture
+// The probe's confirm mode asserts the add-on join rows too, the fixture
 // must create the same shape the API's POST writes (plan T2 defect: the
 // original rehearsal fixture omitted this insert, so addonCount mismatched).
 await sql`

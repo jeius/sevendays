@@ -47,7 +47,7 @@ describe('siteSettingsSchema (the read wire)', () => {
     expect(siteSettingsSchema.safeParse(read).success).toBe(true);
   });
 
-  it('parses the born-empty read — every content field null, the banner off, no logo', () => {
+  it('parses the born-empty read, every content field null, the banner off, no logo', () => {
     const parsed = siteSettingsSchema.parse(EMPTY_SITE_SETTINGS);
     expect(parsed).toEqual(EMPTY_SITE_SETTINGS);
     expect(parsed.brandName).toBeNull();
@@ -106,19 +106,19 @@ describe('the defaults (M7 #215: unset fields fall back to today’s hardcoded c
       logoImageUrl: null,
       homeTitle: 'Three branches. One standard of light.',
       homeDescription:
-        'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.',
+        'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios. Booked in minutes, delivered in seven days.',
       packagesTitle: 'Packages',
       packagesDescription:
-        'From graduation portraits to family sessions — every package with its price, duration, and inclusions at a glance. Tap a package for the full details.',
+        'From graduation portraits to family sessions: every package with its price, duration, and inclusions at a glance. Tap a package for the full details.',
       branchesTitle: 'Branches',
       branchesDescription:
-        'Three studios, one standard of light. Walk-ins are welcome where flagged — everywhere else, call ahead or book online.',
+        'Three studios, one standard of light. Walk-ins are welcome where flagged; everywhere else, call ahead or book online.',
       servicesTitle: 'Services',
       servicesDescription:
-        'Photo recovery, printing, portraits, and framing — studio services you can book at the branches listed on each card.',
+        'Photo recovery, printing, portraits, and framing: studio services you can book at the branches listed on each card.',
       aboutTitle: 'About',
       aboutDescription:
-        'The studio behind the work — our story, our portfolio, and the people who sat for us.',
+        'The studio behind the work: our story, our portfolio, and the people who sat for us.',
       aboutStory: 'Our studio story is coming soon.',
       kickerGallery: 'The work',
       kickerPackages: 'Featured packages',
@@ -141,7 +141,7 @@ describe('the defaults (M7 #215: unset fields fall back to today’s hardcoded c
   });
 });
 
-describe('resolveSiteSettings (the defaults seam — both apps consume this one fn)', () => {
+describe('resolveSiteSettings (the defaults seam, both apps consume this one fn)', () => {
   it('resolving the born-empty settings yields exactly the defaults', () => {
     expect(resolveSiteSettings(EMPTY_SITE_SETTINGS)).toEqual(SITE_SETTINGS_DEFAULTS);
   });

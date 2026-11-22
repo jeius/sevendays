@@ -10,7 +10,7 @@ async function loadProbe() {
 }
 
 async function seedProbeFixtures(sql: postgres.Sql) {
-  // Two catalog rows + one appointment + one add-on join — the minimal shape
+  // Two catalog rows + one appointment + one add-on join, the minimal shape
   // confirm mode asserts. Insert with explicit uuids so expectations are stable.
   const [branch] = await sql`
     insert into branches (id, name, address, phone, accepts_walk_ins)
@@ -137,7 +137,7 @@ describe.skipIf(!TEST_DATABASE_URL)('verify-appointment-row probe (live compose 
     });
     const gone = await probe.assertAppointmentAbsent(sql, ids.appointmentId);
     expect(gone.absent).toBe(true);
-    // Junction rows are gone too — deleteAppointmentRow removes them
+    // Junction rows are gone too, deleteAppointmentRow removes them
     // explicitly (the FK is ON DELETE no action, so no DB-side cascade).
     const joinRows =
       await sql`select * from appointment_addon_services where appointment_id = ${ids.appointmentId}`;

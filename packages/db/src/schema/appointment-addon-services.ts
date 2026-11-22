@@ -3,7 +3,7 @@ import { addonServices } from './addon-services.js';
 import { appointments } from './appointments.js';
 
 // Booking-time attachment of add-on services. price_cents snapshots the
-// add-on's flat price at booking — later price edits don't rewrite history.
+// add-on's flat price at booking, later price edits don't rewrite history.
 // Nullable since migration 0009 (ADR-0020): null = the add-on was unpriced
 // at booking; priced entries keep their snapshot. The unique pair means an
 // add-on attaches at most once per appointment; quantity lives in the

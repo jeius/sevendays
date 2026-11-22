@@ -12,12 +12,12 @@ export const servicePackageSchema = z.object({
   // no sentinel value. Nullable on reads AND writes alike.
   priceCents: z.number().int().nonnegative().nullable(),
   // The catalog specifies no durations and availability (ADR-0005) ignores
-  // duration — nullable until the client supplies real values.
+  // duration, nullable until the client supplies real values.
   durationMinutes: z.number().int().positive().nullable(),
   isActive: z.boolean().default(true),
   coverImageKey: z.string().nullable(),
   // Stable shareable identifier (M2 ticket 01): URL key for /packages/:slug.
-  // Seed/server-assigned from the name — never rewritten on rename.
+  // Seed/server-assigned from the name, never rewritten on rename.
   slug: z.string().min(1),
   // Home-page featured strip flag; seed-controlled until the M5 CMS.
   isFeatured: z.boolean().default(false),
@@ -28,7 +28,7 @@ export const servicePackageSchema = z.object({
 export type ServicePackage = z.infer<typeof servicePackageSchema>;
 
 // The atomic package save (M5 § Mutation shapes): POST/PUT carries entity
-// fields + coverImageKey + frames[] + inclusions[] in ONE payload — the
+// fields + coverImageKey + frames[] + inclusions[] in ONE payload, the
 // inclusions editor is a screen, not a resource. Array order is the order:
 // frameNumber = frames array order, inclusion position = array order
 // (server-side, #137).
@@ -44,7 +44,7 @@ export const packageSaveFrameSchema = z.object({
 export type PackageSaveFrame = z.infer<typeof packageSaveFrameSchema>;
 
 // One inclusion row inside the save. frameId references a frames[] token
-// (framed_picture only — membership is enforced at the package level below,
+// (framed_picture only, membership is enforced at the package level below,
 // where the token set exists). attireIds is a required array: full-object,
 // possibly empty (privileges with no grant; picture kinds need ≥1, enforced
 // here where the path is the inclusion's own).
@@ -78,13 +78,13 @@ const packageSaveObjectSchema = z.object({
   description: z.string().min(1),
   priceCents: z.number().int().nonnegative().nullable(),
   // The catalog specifies no durations and availability (ADR-0005) ignores
-  // duration — nullable until the client supplies real values.
+  // duration, nullable until the client supplies real values.
   durationMinutes: z.number().int().positive().nullable(),
   isActive: z.boolean().default(true),
   // Home-page featured strip flag; the CMS editor owns it from M5 on.
   isFeatured: z.boolean().default(false),
   // Media-bind field (ADR-0019): a fresh STAGING key just uploaded via
-  // presign. Absent = no cover at create. Presence-encoded by design —
+  // presign. Absent = no cover at create. Presence-encoded by design:
   // reads never echo keys, so there is no full-object echo to make.
   coverImageKey: z.string().min(1).optional(),
   frames: z.array(packageSaveFrameSchema),
@@ -151,7 +151,7 @@ export const updateServicePackageSchema = packageSaveObjectSchema
 export type UpdateServicePackageInput = z.infer<typeof updateServicePackageSchema>;
 
 // Resolved lookups (M1.4 Q1=B): the catalog read carries the lookup values,
-// not bare uuids — one join away server-side, no second request for M2.
+// not bare uuids, one join away server-side, no second request for M2.
 export const resolvedPrintSizeSchema = printSizeSchema.pick({
   id: true,
   code: true,
@@ -186,7 +186,7 @@ export const servicePackageWithInclusionsSchema = servicePackageSchema.extend({
 export type ServicePackageWithInclusions = z.infer<typeof servicePackageWithInclusionsSchema>;
 
 // The canonical read shape (M5, ADR-0019): the wire never carries the raw R2
-// object key — every read resolves coverImageUrl against MEDIA_PUBLIC_BASE_URL
+// object key, every read resolves coverImageUrl against MEDIA_PUBLIC_BASE_URL
 // at read time (#136/#137's wiring, #138's swap). Admin reads (deactivated
 // rows included) and public reads share this shape; trim rules are
 // content-level (#138), not shape-level.

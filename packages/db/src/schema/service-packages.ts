@@ -11,7 +11,7 @@ export const servicePackages = pgTable(
     // insert; the seed's coalesce upsert never rewrites an existing slug, so
     // /packages/:slug URLs survive catalog renames. NOT NULL since migration
     // 0003 (0002 added it nullable+unique; the seed backfilled the 11 live
-    // rows between the two migrations — the populated-table two-step).
+    // rows between the two migrations, the populated-table two-step).
     slug: text('slug').notNull().unique('service_packages_slug_unique'),
     // Home-page featured strip flag; owner-controlled via seed until the M5 CMS.
     isFeatured: boolean('is_featured').notNull().default(false),

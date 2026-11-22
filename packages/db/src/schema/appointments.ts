@@ -12,7 +12,7 @@ export const appointmentStatusEnum = pgEnum('appointment_status', [
   'no_show',
 ]);
 
-// How the session happens (scheduled, walk-in, visitation) — recorded only;
+// How the session happens (scheduled, walk-in, visitation), recorded only;
 // the walk-in booking and visitation flows are deferred features.
 export const appointmentKindEnum = pgEnum('appointment_kind', [
   'scheduled',
@@ -29,9 +29,9 @@ export const appointments = pgTable(
       .references(() => branches.id),
     // The appointment carries EITHER offering (M2 ticket 02): nullable refs
     // + the appointments_offering_exactly_one CHECK below. NULL means "not
-    // booked" — the CHECK rejects both-set and neither alike, mirroring the
+    // booked", the CHECK rejects both-set and neither alike, mirroring the
     // Zod refine in packages/types/src/appointment.ts (one formula, two
-    // sides — changing one means changing both).
+    // sides, changing one means changing both).
     servicePackageId: uuid('service_package_id').references(() => servicePackages.id),
     studioServiceId: uuid('studio_service_id').references(() => studioServices.id),
     customerName: text('customer_name').notNull(),
@@ -40,12 +40,12 @@ export const appointments = pgTable(
     scheduledAt: timestamp('scheduled_at', { withTimezone: true }).notNull(),
     status: appointmentStatusEnum('status').notNull().default('pending'),
     kind: appointmentKindEnum('kind').notNull().default('scheduled'),
-    // Booking-time snapshot of the booked offering's price — the quoted
+    // Booking-time snapshot of the booked offering's price, the quoted
     // price survives later catalog price changes. Server-written at booking
     // (M1.4). Renamed from package_price_cents (M2 ticket 02): it now
     // snapshots either offering kind. Nullable since migration 0009
     // (ADR-0020): null = the booked item was unpriced. The invariant reads
-    // amended — every appointment carries its quoted price WHEN the booked
+    // amended, every appointment carries its quoted price WHEN the booked
     // item had one; a snapshot taken while priced keeps that price forever
     // (a row later going unpriced never rewrites history).
     bookedPriceCents: integer('booked_price_cents'),

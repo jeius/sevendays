@@ -1,4 +1,4 @@
-// Read-only database-state probe. Prints record counts and table names only —
+// Read-only database-state probe. Prints record counts and table names only;
 // never a connection string. Run: node --env-file=.env scripts/db-state.mjs
 
 import dns from 'node:dns/promises';
@@ -26,9 +26,9 @@ const tables = await sql`
 `;
 console.log(
   'public tables:',
-  tables.length === 0 ? '(none — database untouched)' : tables.map((r) => r.table_name).join(', ')
+  tables.length === 0 ? '(none, database untouched)' : tables.map((r) => r.table_name).join(', ')
 );
-// drizzle-kit writes its journal to the dedicated `drizzle` schema (not public) —
+// drizzle-kit writes its journal to the dedicated `drizzle` schema (not public);
 // scan every schema (Task 5 execution finding).
 const journal = await sql`
   select table_schema, table_name from information_schema.tables
@@ -38,6 +38,6 @@ console.log(
   'drizzle journal:',
   journal.length
     ? journal.map((r) => `${r.table_schema}.${r.table_name}`).join(', ')
-    : 'absent — nothing applied yet'
+    : 'absent, nothing applied yet'
 );
 await sql.end();

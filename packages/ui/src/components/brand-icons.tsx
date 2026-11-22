@@ -1,9 +1,9 @@
 import type { SVGProps } from 'react';
 
 // The studio's brand glyphs (from the owner's #247 asset set, verbatim path
-// data): monochrome `currentColor` components so every surface colors them —
+// data): monochrome `currentColor` components so every surface colors them:
 // the footer's ink band (brand-300 → white on hover) and the admin's
-// label-foreground rows, both themes (#275). Decorative by default — the
+// label-foreground rows, both themes (#275). Decorative by default, the
 // consumer's sr-only text is the accessible name.
 function InstagramIcon(props: SVGProps<SVGSVGElement>) {
   return (

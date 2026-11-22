@@ -99,9 +99,9 @@ describe('the read row + the generic public answer', () => {
     expect(parsed.status).toBe('pending');
   });
 
-  it('TESTIMONIAL_SUBMISSION_ACCEPTED is the fixed message — the no-echo pin (M7 #216)', () => {
+  it('TESTIMONIAL_SUBMISSION_ACCEPTED is the fixed message, the no-echo pin (M7 #216)', () => {
     expect(TESTIMONIAL_SUBMISSION_ACCEPTED).toEqual({
-      message: 'Thank you — your story is on its way.',
+      message: 'Thank you! Your story is on its way.',
     });
     expect(testimonialSubmissionAcceptedSchema.parse(TESTIMONIAL_SUBMISSION_ACCEPTED)).toEqual(
       TESTIMONIAL_SUBMISSION_ACCEPTED

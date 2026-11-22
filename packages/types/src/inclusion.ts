@@ -8,18 +8,18 @@ export const packageInclusionSchema = z.object({
   id: z.uuid(),
   kind: packageInclusionKindSchema,
   // Framed pictures and prints carry a count; privileges (wardrobe/accessory
-  // usage, High-Resolution soft copies) are quantityless — null by design.
+  // usage, High-Resolution soft copies) are quantityless, null by design.
   quantity: z.number().int().positive().nullable(),
   // Structural finish rule (no finish column): framed_picture rows are
-  // laminated, print rows are loose — the kind decides, not data.
+  // laminated, print rows are loose, the kind decides, not data.
   printSizeId: z.uuid().nullable(),
   // Attire context lives in the package_inclusion_attires junction (ADR-0009
-  // revision): the read shape carries the resolved id array (0..N — the ≥1
+  // revision): the read shape carries the resolved id array (0..N, the ≥1
   // rule for picture inclusions is kind-dependent and enforced on the create
   // shape, not here).
   attireIds: z.array(z.uuid()),
   // Frame identity (ADR-0009 revision): which catalog frame this framed
-  // picture belongs to — null for prints and privileges. Required-nullable
+  // picture belongs to, null for prints and privileges. Required-nullable
   // on the row shape; optional+nullable on the create shape.
   frameId: z.uuid().nullable(),
   description: z.string().min(1).nullable(),

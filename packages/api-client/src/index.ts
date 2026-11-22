@@ -26,7 +26,7 @@ export interface ApiClient {
 
 /**
  * Build the shared API client (ADR-0006). Fails loudly when baseUrl is
- * missing — a misconfigured deployment never silently calls localhost.
+ * missing, a misconfigured deployment never silently calls localhost.
  * The route groups are thin wrappers over `raw` (the pre-plan surface
  * ruling): each delegates to the RPC client so paths/params/types stay
  * inferred from AppType, and each runs its response through unwrap().

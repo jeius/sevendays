@@ -2,11 +2,11 @@
 // CMS-curated catalog + content state from the source database to the
 // destination database in ONE transaction (reverse-FK deletes, then
 // forward-FK inserts), superseding the seed's docs/catalog.md baseline
-// with what the studio actually curated — the 2026-10-11 read-only probe
+// with what the studio actually curated, the 2026-10-11 read-only probe
 // showed every family had drifted past the seed. Auth, appointments,
 // audit_log, rate_limit, and verification rows never cross: the
 // destination's own history starts at ship. Owner tooling, run from the
-// runbook — never CI. Every input is an exported env value (no .env file
+// runbook, never CI. Every input is an exported env value (no .env file
 // is read): the runbook's command line is the audit record.
 import postgres from 'postgres';
 
@@ -14,7 +14,7 @@ function required(name) {
   const value = process.env[name];
   if (!value) {
     throw new Error(
-      `${name} is not set. The ship runbook exports it before running this script — see docs/ship-provisioning-runbook.md.`
+      `${name} is not set. The ship runbook exports it before running this script, see docs/ship-provisioning-runbook.md.`
     );
   }
   return value;
@@ -40,7 +40,7 @@ const TABLES = [
 
 // Identifier gate for sql.unsafe (postgres 3.4.9 ships no sql.identifier):
 // the only two identifier sources are this script's own TABLES constant and
-// the driver's own column names — both must pass the strict snake_case
+// the driver's own column names, both must pass the strict snake_case
 // check, then ride double quotes. VALUES are always parameterized ($1…),
 // never interpolated.
 const ident = (name) => {
@@ -86,7 +86,7 @@ for (const table of TABLES) {
 await source.end();
 await dest.end();
 if (mismatched > 0) {
-  console.error(`${mismatched} table(s) mismatched — the carry is NOT verified`);
+  console.error(`${mismatched} table(s) mismatched, the carry is NOT verified`);
   process.exit(1);
 }
 console.log(`carry verified: ${TABLES.length} table(s), all counts match`);

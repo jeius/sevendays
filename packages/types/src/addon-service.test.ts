@@ -58,7 +58,7 @@ describe('unpriced catalogs (ADR-0020)', () => {
     expect(parsed.priceCents).toBeNull();
   });
 
-  it('create accepts a null price — the unchecked Priced save', () => {
+  it('create accepts a null price, the unchecked Priced save', () => {
     const parsed = createAddonServiceSchema.parse({
       name: 'Oncall stylist',
       description: 'Quoted on the day.',

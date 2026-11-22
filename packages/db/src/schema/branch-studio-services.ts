@@ -3,8 +3,8 @@ import { branches } from './branches.js';
 import { studioServices } from './studio-services.js';
 
 // Presence-row junction (M2 ticket 01): a row MEANS the Studio Service is
-// bookable at that Branch — no boolean column to drift. Seeded all-branches
-// today; the M5 CMS edits rows directly. Children of the studio service —
+// bookable at that Branch, no boolean column to drift. Seeded all-branches
+// today; the M5 CMS edits rows directly. Children of the studio service:
 // cascade delete keeps the seed's per-service rebuild trivial.
 export const branchStudioServices = pgTable(
   'branch_studio_services',

@@ -8,7 +8,7 @@ import {
 import { Hono } from 'hono';
 import { type ZodSchema, z } from 'zod';
 
-// Fixture rows shaped to the shared schemas (valid v4 uuids — zod's z.uuid()
+// Fixture rows shaped to the shared schemas (valid v4 uuids, zod's z.uuid()
 // enforces RFC 4122 version/variant bits, so all-ones constants fail parse).
 const NOW = new Date('2026-09-04T00:00:00.000Z');
 
@@ -162,7 +162,7 @@ const TESTIMONIALS = [
 ];
 
 // M7 #215: the born-empty singleton (the mock answers the saved state after
-// any PUT — the loopback's update round-trip).
+// any PUT, the loopback's update round-trip).
 let MOCK_SITE_SETTINGS_SAVED = false;
 const SITE_SETTINGS_EMPTY = {
   brandName: null,
@@ -201,7 +201,7 @@ const SITE_SETTINGS_SAVED = {
   logoImageUrl: 'https://pub-test.r2.dev/brand/00000000-0000-4000-8000-0000000000e1.jpg',
 };
 
-// M7 #216: the submissions subtree's state — mutable module state like
+// M7 #216: the submissions subtree's state, mutable module state like
 // MOCK_SITE_SETTINGS_SAVED, seeded newest-first; the loopback's mutation
 // its run in file order over these two rows.
 const SUBMISSION_NOW = new Date('2026-10-14T00:00:00.000Z');
@@ -285,7 +285,7 @@ const makeApi = ({
     brokenTestimonials ? c.json({ error: 'Not found.' }, 404) : c.json(TESTIMONIALS)
   );
 
-  // M7 #216: the public POST — the generic body for inserts AND honeypot
+  // M7 #216: the public POST, the generic body for inserts AND honeypot
   // discards alike (byte-identical, the no-echo law).
   const testimonialSubmissions = new Hono<MockEnv>().post(
     '/',
@@ -324,7 +324,7 @@ const makeApi = ({
     )
   );
 
-  // M7 #213: a minimal admin subtree — the delete wrappers' loopback leg.
+  // M7 #213: a minimal admin subtree, the delete wrappers' loopback leg.
   // The mock mirrors the real DELETE envelopes: 204 with no body on success,
   // the blocked 400 with details, the per-entity 404, and the uuid-param 400.
   const admin = new Hono<MockEnv>()

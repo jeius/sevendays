@@ -6,7 +6,7 @@ import { createApiClient } from '../src/index.js';
 
 const client = createApiClient({ baseUrl: 'http://localhost:4949/' });
 
-// Type-level only — method REFERENCES (never invoked; expectTypeOf does not
+// Type-level only, method REFERENCES (never invoked; expectTypeOf does not
 // execute). The wrappers' return types flow from the API's AppType via RPC:
 // the acceptance criterion "type-level inference assertions" plus the
 // drift-kill visible at the wrapper level.

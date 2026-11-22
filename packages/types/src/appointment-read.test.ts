@@ -53,7 +53,7 @@ const serviceOnly = {
   bookedPriceCents: 50000,
 };
 
-describe('appointmentWithAddonsSchema (generalized — M2 ticket 02)', () => {
+describe('appointmentWithAddonsSchema (generalized, M2 ticket 02)', () => {
   it('parses a service-only record with embedded add-ons', () => {
     const result = appointmentWithAddonsSchema.safeParse({
       ...serviceOnly,
@@ -85,7 +85,7 @@ describe('appointmentWithAddonsSchema (generalized — M2 ticket 02)', () => {
 });
 
 describe('unpriced bookings (ADR-0020)', () => {
-  it('parses a null bookedPriceCents — the unpriced-offering snapshot', () => {
+  it('parses a null bookedPriceCents, the unpriced-offering snapshot', () => {
     const parsed = appointmentWithAddonsSchema.parse({
       ...base,
       bookedPriceCents: null,
@@ -94,7 +94,7 @@ describe('unpriced bookings (ADR-0020)', () => {
     expect(parsed.bookedPriceCents).toBeNull();
   });
 
-  it('parses a null add-on entry price — the unpriced add-on snapshot', () => {
+  it('parses a null add-on entry price, the unpriced add-on snapshot', () => {
     const parsed = appointmentWithAddonsSchema.parse({
       ...base,
       addonServices: [{ addonServiceId: OTHER_UUID, name: 'Oncall stylist', priceCents: null }],

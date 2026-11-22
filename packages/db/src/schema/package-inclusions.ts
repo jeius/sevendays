@@ -10,12 +10,12 @@ export const packageInclusionKindEnum = pgEnum('package_inclusion_kind', [
 ]);
 
 // Per-Service-Package Inclusion rows. Privileges (wardrobe/accessory usage,
-// High-Resolution soft copies) are quantityless rows with no lookup refs —
+// High-Resolution soft copies) are quantityless rows with no lookup refs:
 // seeded per package even though the catalog list is universal, so the CMS
 // can edit them later rather than the model hard-coding them.
-// No finish column: framed_picture rows are laminated, print rows are raw —
+// No finish column: framed_picture rows are laminated, print rows are raw;
 // structural, decided by kind.
-// Attire context lives in package_inclusion_attires (ADR-0009 revision) —
+// Attire context lives in package_inclusion_attires (ADR-0009 revision);
 // this table carries no attire reference.
 export const packageInclusions = pgTable(
   'package_inclusions',
@@ -34,7 +34,7 @@ export const packageInclusions = pgTable(
     // Display order within the package (M5): array order under the atomic
     // package save (#137). Landed DEFAULT 1 NOT NULL (populated-table-safe)
     // and was backfilled from today's id order in #135 before the default
-    // dropped — a forgetful insert now fails loudly instead of tying at 1.
+    // dropped, a forgetful insert now fails loudly instead of tying at 1.
     position: integer('position').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
