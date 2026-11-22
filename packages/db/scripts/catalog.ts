@@ -1,10 +1,10 @@
-// The seed's single source of truth — transcribed verbatim from docs/catalog.md.
+// The seed's single source of truth, transcribed verbatim from docs/catalog.md.
 // The verify script compares the DATABASE rows against these values, so any
 // edit here must mirror the catalog file (and vice versa).
-// Phones are user-sanctioned placeholders (TODO(seed)) — replaced after seed review.
+// Phones are user-sanctioned placeholders (TODO(seed)), replaced after seed review.
 // Attire lines are structured arrays (ADR-0009 revision): combined contexts
 // like 'Filipiniana/Executive' are attireNames arrays in the catalog's own
-// attire order (Toga, Filipiniana, Executive, Uniform) — never alphabetized.
+// attire order (Toga, Filipiniana, Executive, Uniform), never alphabetized.
 
 export const printSizeSeeds = [
   { code: '1x1', description: 'One by one inch portrait print.' },
@@ -68,7 +68,7 @@ export const addonServiceSeeds = [
 
 // Universal privileges seeded per package (catalog: "All packages includes
 // High Resolution soft copies" + the "Include Usage of" list). Lamination is
-// NOT here — framed_picture kind encodes it structurally. attireNames is the
+// NOT here, framed_picture kind encodes it structurally. attireNames is the
 // junction set: the Executive grant links Executive; the rest link none.
 export const privilegeSeeds = [
   { description: 'High Resolution soft copies', attireNames: [] },
@@ -544,9 +544,9 @@ export const packageSeeds: PackageSeed[] = [
   },
 ];
 
-// M2 ticket 01 — Studio Services. Names verbatim from the spec / CONTEXT.md
+// M2 ticket 01, Studio Services. Names verbatim from the spec / CONTEXT.md
 // glossary; descriptions + prices from the prototype's owner-seen stubs
-// (prototype-booking-data.ts). Prices are TODO(seed) placeholders — same
+// (prototype-booking-data.ts). Prices are TODO(seed) placeholders, same
 // user-sanctioned posture as the branch phones.
 export const studioServiceSeeds = [
   {
@@ -573,7 +573,7 @@ export const studioServiceSeeds = [
 
 // Applicability matrix seeds (M2 ticket 01): add-on NAMES that apply to each
 // Studio Service. Makeup + Hairstyle apply to Portraits & ID photo only; the
-// other three services list none. Names must match addonServiceSeeds — the
+// other three services list none. Names must match addonServiceSeeds, the
 // seed fails loudly on an unknown name.
 export const studioServiceApplicableAddons: Record<string, string[]> = {
   'Photo Recovery': [],
@@ -593,7 +593,7 @@ export const featuredPackageNames: readonly string[] = [
 
 // Canonical inclusion signature: `kind|quantity|printSizeCode|attireNames` for
 // pictures/prints, `privilege|0|<attireNames or ->|<description>` for
-// privileges. attireNames joins with '/' in catalog order — byte-identical to
+// privileges. attireNames joins with '/' in catalog order, byte-identical to
 // the docs/catalog.md strings (e.g. 'Filipiniana/Executive/Uniform'). Shared
 // with verify-seed.ts so the comparison is byte-consistent.
 export function inclusionSignatures(pkg: PackageSeed): string[] {

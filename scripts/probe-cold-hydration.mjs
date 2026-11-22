@@ -1,9 +1,9 @@
-// #307 — the cold-load hydration-mismatch probe. Walks the admin's CMS
+// #307, the cold-load hydration-mismatch probe. Walks the admin's CMS
 // routes as fresh document loads (each page.goto is a new document: fresh
-// JS context, fresh query cache — the cold-load shape) and counts
+// JS context, fresh query cache, the cold-load shape) and counts
 // browser-console RACE-class hydration messages per route (the DOM-nesting
-// class is counted separately — see the census-amendment note in the walk
-// loop). Main-side tooling only — never part of pnpm check or test:e2e
+// class is counted separately, see the census-amendment note in the walk
+// loop). Main-side tooling only, never part of pnpm check or test:e2e
 // (ADR-0022).
 //
 // Usage:
@@ -11,10 +11,10 @@
 //   (credentials are supplied at invocation, never committed;
 //    PROBE_BASE_URL defaults to http://localhost:3000; PROBE_ROUTES is a
 //    comma list defaulting to the eight parameterless CMS routes;
-//    PROBE_HEADED=1 opens a visible browser — leave ADMIN_* unset and sign
+//    PROBE_HEADED=1 opens a visible browser, leave ADMIN_* unset and sign
 //    in yourself within PROBE_LOGIN_TIMEOUT_MS, default 180000 headed)
 // Prereq: `pnpm exec playwright install chromium`; the local dev stack up
-// and freshly booted (api dev on :8787 first, then admin dev on :3000) —
+// and freshly booted (api dev on :8787 first, then admin dev on :3000):
 // the BEFORE/AFTER arms compare boots, so restart the stack between arms.
 import { chromium } from '@playwright/test';
 
@@ -41,7 +41,7 @@ const nestingByRoute = {};
 let walked = 0;
 
 try {
-  // Sign in through the real form — one card, two modes; the sign-in mode
+  // Sign in through the real form, one card, two modes; the sign-in mode
   // carries #login-email/#login-password. Headless fills the fields; headed
   // waits for the owner. This also exercises the #306 guard: the submit
   // lands post-hydration, where it is inert.
@@ -59,11 +59,11 @@ try {
     const onConsole = (message) => {
       const text = message.text();
       // Two classes, counted separately (the #307 census amendment): the
-      // RACE class is text/attribute mismatches — "Hydration failed …" /
+      // RACE class is text/attribute mismatches, "Hydration failed …" /
       // "A tree hydrated but …". The DOM-nesting class ("<div> cannot be
       // a child of <tbody> … This will cause a hydration error.") is a
       // separate pre-existing bug (dnd-kit's Accessibility described-by
-      // div inside the testimonials sortable tbody — filed apart) that
+      // div inside the testimonials sortable tbody, filed apart) that
       // must neither mask nor fake either probe arm.
       if (/cannot be a child of/.test(text)) nesting.push(text);
       else if (/hydrat/i.test(text)) bucket.push(text);

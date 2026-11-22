@@ -6,7 +6,7 @@ export const printSizeSchema = z.object({
   code: z.string().min(1),
   // Human-readable explanation. The 8R-vs-8x10 nominal duplicate (both appear
   // in docs/catalog.md) is recorded here for client confirmation at seed
-  // review — deliberately not resolved by code.
+  // review, deliberately not resolved by code.
   description: z.string().min(1),
   // Deactivation (M5): a deactivated print size hides its referencing
   // inclusions from public reads (the trim rule, #138).

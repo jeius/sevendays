@@ -96,7 +96,7 @@ it('a 400 envelope surfaces as ApiClientError with status + details', async () =
 
 it('a 404 envelope surfaces as ApiClientError through the unwrap gate', async () => {
   // Drive the mock's uniform notFound envelope through the exact gate the
-  // wrappers use — same assertions the $url/raw path would hit.
+  // wrappers use, same assertions the $url/raw path would hit.
   const res = await mockApi.request(`${BASE}api/v1/nope`);
   expect(res.status).toBe(404);
   const err = await unwrap(res, branchSchema.array()).catch((e) => e);
@@ -250,7 +250,7 @@ it('admin.siteSettings.update round-trips the full-object save through the parse
   expect(saved.logoImageUrl).toBe(
     'https://pub-test.r2.dev/brand/00000000-0000-4000-8000-0000000000e1.jpg'
   );
-  // The mock's GET now answers the saved state — the editor's load-after-save.
+  // The mock's GET now answers the saved state, the editor's load-after-save.
   const after = await client.siteSettings.get();
   expect(after.brandName).toBe('Sevendays Studio');
 });
@@ -281,7 +281,7 @@ it('admin.testimonialSubmissions.list parses rows newest-first with the status e
   const client = clientFor(mockApi);
   const rows = await client.admin.testimonialSubmissions.list();
   // The first create it unshifted 'Loopback Sender' ahead of the two seeds
-  // — newest-first, and the honeypot row from the it above is absent.
+  //, newest-first, and the honeypot row from the it above is absent.
   expect(rows.map((r) => r.person)).toEqual(['Loopback Sender', 'Maria, batch 2026', 'John B.']);
   expect(rows[0]?.status).toBe('pending');
   expect(rows[0]?.createdAt).toBeInstanceOf(Date);
@@ -302,7 +302,7 @@ it('admin.testimonialSubmissions.accept applies the edit and returns the updated
 it('admin.testimonialSubmissions.reject flips the row to rejected', async () => {
   const client = clientFor(mockApi);
   // The mock mirrors the WIRE, not the pending-only transition law (the
-  // api suite owns that law) — row 2 answers the rejected wire shape.
+  // api suite owns that law), row 2 answers the rejected wire shape.
   const rejected = await client.admin.testimonialSubmissions.reject(
     'b0000000-0000-4000-8000-000000000002'
   );
@@ -318,7 +318,7 @@ it('admin.testimonialSubmissions.remove resolves void on 204', async () => {
   expect(rows.some((r) => r.id === 'b0000000-0000-4000-8000-000000000002')).toBe(false);
 });
 
-it('admin.branches.remove resolves undefined on 204 — the delete seam never unwraps a body', async () => {
+it('admin.branches.remove resolves undefined on 204, the delete seam never unwraps a body', async () => {
   const client = clientFor(mockApi);
   await expect(
     client.admin.branches.remove({ param: { id: '11111111-1111-4111-8111-111111111111' } })

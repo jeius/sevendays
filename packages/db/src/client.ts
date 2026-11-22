@@ -4,7 +4,7 @@ import * as schema from './schema/index.js';
 
 /**
  * The one db client (ADR-0007): `prepare: false` is required under Supabase
- * transaction-mode pooling. Callers pass the URL their runtime owns — the
+ * transaction-mode pooling. Callers pass the URL their runtime owns, the
  * deployed Worker its pooled `DATABASE_URL` secret (per-request, ADR-0011),
  * test harnesses `TEST_DATABASE_URL` (compose/CI).
  *

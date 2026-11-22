@@ -8,7 +8,7 @@ import {
   slugifyName,
 } from './catalog-rows.js';
 
-// Synthetic lookups — the builders are data-agnostic (spec: they shape real
+// Synthetic lookups, the builders are data-agnostic (spec: they shape real
 // catalog entries and minimal test data identically).
 const printSizeId = new Map([
   ['2R', 'ps-2r'],
@@ -126,7 +126,7 @@ describe('buildInclusionRowValues', () => {
     expect(rows.map((r) => r.position)).toEqual([1, 2, 3]);
   });
 
-  it('sets only the seven shape fields — id/createdAt/updatedAt stay DB defaults', () => {
+  it('sets only the seven shape fields, id/createdAt/updatedAt stay DB defaults', () => {
     const rows = buildInclusionRowValues({
       servicePackageId: 'pkg-1',
       entries: [{ kind: 'print', quantity: 1, printSizeCode: '2R', attireNames: [] }],
@@ -317,18 +317,18 @@ describe('slugifyName', () => {
 });
 
 // Live probe (ADR-0008 pattern: skipped unless a reachable test db is
-// configured) — proves the builders' values insert cleanly against the real
+// configured), proves the builders' values insert cleanly against the real
 // schema, i.e. the shapes match the tables, not just the type signatures.
 // package_inclusions.service_package_id is a NOT-NULL FK, so the probe
 // inserts a real parent service package first. Drizzle's transaction COMMITs
-// on success — there is no rollback-on-success primitive — so instead of a
+// on success, there is no rollback-on-success primitive, so instead of a
 // transaction the probe pre-cleans any rows a prior committed run left behind
 // (FK-safe deletes on name LIKE 'BuilderProbe%'), then inserts plain. That
 // keeps it re-runnable despite unique keys (attires.name,
 // service_packages.name, frames natural key).
 // Self-provisioning on a fresh database (CI service container): the db
 // package's vitest config has no globalSetup, so migrations are NOT applied
-// before tests here, and vitest orders files largest-first — this file can
+// before tests here, and vitest orders files largest-first, this file can
 // run before migrate.test.ts. The probe therefore checks for the core table
 // and applies migrations itself (migrateDatabase is idempotent: drizzle's
 // migrations journal tracks what already ran).

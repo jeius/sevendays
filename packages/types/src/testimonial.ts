@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-// Testimonial (M5, glossary): a structured customer quote — quote text,
+// Testimonial (M5, glossary): a structured customer quote, quote text,
 // person attributed, display position. The order PUT owns reordering, so
 // create/update carry no position field; array order is the render order.
 export const testimonialSchema = z.object({

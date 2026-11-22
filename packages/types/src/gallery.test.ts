@@ -30,7 +30,7 @@ describe('galleryCategorySchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('create drops the server-assigned fields (id/position/timestamps — order PUTs own position)', () => {
+  it('create drops the server-assigned fields (id/position/timestamps, order PUTs own position)', () => {
     const parsed = createGalleryCategorySchema.parse({
       name: 'Graduation',
       isActive: true,
@@ -55,7 +55,7 @@ describe('galleryCategorySchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('update is the create schema (full-object PUT — the same client field set)', () => {
+  it('update is the create schema (full-object PUT, the same client field set)', () => {
     expect(updateGalleryCategorySchema).toBe(createGalleryCategorySchema);
   });
 });
@@ -131,7 +131,7 @@ describe('gallery order payloads (collection full-replace PUTs)', () => {
 });
 
 describe('galleryReadSchema (the public assembled read)', () => {
-  it('parses an assembled payload — categories (tab order) + categorized photos', () => {
+  it('parses an assembled payload, categories (tab order) + categorized photos', () => {
     const result = galleryReadSchema.safeParse({
       categories: [
         { id: UUID2, name: 'Graduation' },

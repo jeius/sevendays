@@ -1,6 +1,6 @@
 import { boolean, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
-// Testimonial (M5, glossary): a structured customer quote — quote text,
+// Testimonial (M5, glossary): a structured customer quote, quote text,
 // person attributed, display position. Array order (renumbered by the
 // collection order PUT) is the render order; no lookups reference this
 // table.

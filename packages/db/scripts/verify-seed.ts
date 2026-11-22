@@ -1,8 +1,8 @@
 // psql-equivalent acceptance read-back (psql is not installed on this machine):
 // counts, catalog price checks, line-for-line inclusion comparison (with
-// junction-resolved attire names), frame count + partition checks — all
+// junction-resolved attire names), frame count + partition checks, all
 // against scripts/catalog.ts (the docs/catalog.md transcription).
-// Run: pnpm --filter @sevendays/db db:verify-seed   — exit 0 = verified.
+// Run: pnpm --filter @sevendays/db db:verify-seed, exit 0 = verified.
 import process from 'node:process';
 import { eq } from 'drizzle-orm';
 import { slugifyName } from '../src/catalog-rows.js';
@@ -33,7 +33,7 @@ import {
 
 const url = process.env.DATABASE_MIGRATE_URL ?? process.env.DATABASE_URL;
 if (!url) {
-  console.error('No database URL: run scripts/check-env.mjs — DATABASE_MIGRATE_URL must be set.');
+  console.error('No database URL: run scripts/check-env.mjs, DATABASE_MIGRATE_URL must be set.');
   process.exit(1);
 }
 
@@ -60,12 +60,12 @@ printSizeRows.length === 6
 
 const attireRows = await db.select().from(attires);
 attireRows.length === 4
-  ? pass(`attires: ${attireRows.length}/4 (atomic — combined contexts are junction-composed)`)
+  ? pass(`attires: ${attireRows.length}/4 (atomic, combined contexts are junction-composed)`)
   : fail(`attires: ${attireRows.length} != 4`);
 
-// Junction attires — fetched once; the junction has no position column, so
+// Junction attires, fetched once; the junction has no position column, so
 // each inclusion's names are re-sorted by the canonical catalog order
-// (attireSeeds index) before joining — the line-for-line guarantee is
+// (attireSeeds index) before joining, the line-for-line guarantee is
 // order-independent, not accident-of-insertion dependent.
 const junctionRows = await db
   .select({ inclusionId: packageInclusionAttires.inclusionId, attireName: attires.name })
@@ -171,7 +171,7 @@ for (const seed of packageSeeds) {
   const firstDiff = diffs[0];
   if (firstDiff !== undefined) {
     fail(
-      `${seed.name}: inclusion mismatch — first diff: expected "${firstDiff}" got "${actual[expected.indexOf(firstDiff)]}"`
+      `${seed.name}: inclusion mismatch, first diff: expected "${firstDiff}" got "${actual[expected.indexOf(firstDiff)]}"`
     );
   } else {
     pass(`${seed.name}: ${actual.length} inclusion rows match docs/catalog.md line-for-line`);
@@ -194,7 +194,7 @@ for (const seed of packageSeeds) {
   includedFrameIds.size === pkgFrameRows.length && foreignFrames.length === 0
     ? pass(`${seed.name}: every frame carries ≥1 framed picture (ownership verified)`)
     : fail(
-        `${seed.name}: frame partition broken — referenced ${includedFrameIds.size}/${pkgFrameRows.length} frames, ${foreignFrames.length} foreign`
+        `${seed.name}: frame partition broken, referenced ${includedFrameIds.size}/${pkgFrameRows.length} frames, ${foreignFrames.length} foreign`
       );
 
   // Attire completeness: every picture inclusion carries ≥1 junction row.
@@ -207,7 +207,7 @@ for (const seed of packageSeeds) {
     : fail(`${seed.name}: ${barePictures.length} picture inclusions have no attire`);
 }
 
-// M2 ticket 01 — Studio Services: rows, prices, bookability (all 3 branches),
+// M2 ticket 01, Studio Services: rows, prices, bookability (all 3 branches),
 // applicability (Makeup + Hairstyle → Portraits & ID Photo only).
 const studioServiceRows = await db.select().from(studioServices);
 studioServiceRows.length === studioServiceSeeds.length
@@ -253,7 +253,7 @@ for (const seed of studioServiceSeeds) {
       );
 }
 
-// Spot rows (public seed data — safe to print).
+// Spot rows (public seed data, safe to print).
 console.log('--- branches ---');
 for (const b of branchRows) {
   console.log(`${b.name} | ${b.address} | ${b.phone} | accepts_walk_ins: ${b.acceptsWalkIns}`);
@@ -264,4 +264,4 @@ if (failures.length > 0) {
   console.log(`VERIFY: FAILED (${failures.length} problem(s))`);
   process.exit(1);
 }
-console.log('VERIFY: PASSED — the seeded catalog matches docs/catalog.md.');
+console.log('VERIFY: PASSED, the seeded catalog matches docs/catalog.md.');

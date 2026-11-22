@@ -1,6 +1,6 @@
 # The v1 seed's commit-message rules (#80; ADR-0015). The client reads git
 # log: no message may carry booking/edition vocabulary. The ruled-shared
-# stems (bookable/bookability) are exempt — the regex guards protect them.
+# stems (bookable/bookability) are exempt, the regex guards protect them.
 # Dangling (#NN) refs and kept-ADR numbers are accepted (ADR gaps are ruled
 # acceptable).
 regex:/book(?!able)==>/visit

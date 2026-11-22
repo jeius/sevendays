@@ -7,9 +7,9 @@ export const defaultMigrationsFolder = fileURLToPath(new URL('../migrations', im
 
 /**
  * Programmatic migration apply for test global setup (ADR-0008): opens its
- * own postgres-js client (prepare:false — session-pooler compatible), runs
+ * own postgres-js client (prepare:false, session-pooler compatible), runs
  * the drizzle migrator over packages/db/migrations, and closes the client.
- * Never hand-edit packages/db/migrations — generated via db:generate only.
+ * Never hand-edit packages/db/migrations, generated via db:generate only.
  */
 export async function migrateDatabase(
   connectionString: string,

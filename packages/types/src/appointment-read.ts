@@ -6,7 +6,7 @@ import {
 } from './appointment.js';
 
 // Read shape for the created/listed Appointment: the row plus its attached
-// Add-on Services with booking-time price snapshots (M1.4 — POST returns
+// Add-on Services with booking-time price snapshots (M1.4, POST returns
 // this; snapshot correctness is provable over the HTTP seam).
 export const appointmentAddonEntrySchema = z.object({
   addonServiceId: z.uuid(),
@@ -19,7 +19,7 @@ export const appointmentAddonEntrySchema = z.object({
 export type AppointmentAddonEntry = z.infer<typeof appointmentAddonEntrySchema>;
 
 // Chains from the UNrefined field basis (appointmentFieldsSchema) then attaches
-// the exactly-one refine LAST (zod v4 chain rule — .extend() on a refined object
+// the exactly-one refine LAST (zod v4 chain rule, .extend() on a refined object
 // would also be fine, but extending from the plain basis keeps the refine terminal).
 export const appointmentWithAddonsSchema = appointmentFieldsSchema
   .extend({

@@ -4,7 +4,7 @@ import { auditActionSchema, auditEntitySchema, auditLogRowSchema } from './audit
 // The Audit Log row's contract (M6 #185, spec § The Audit Log): the enum
 // vocabulary is the spec's own pin; the row schema mirrors packages/db's
 // audit_log table 1:1 so #188's reads parse what the write side stores.
-// Assertions run on PARSED OUTPUT (zod strips unknown keys — the strip is
+// Assertions run on PARSED OUTPUT (zod strips unknown keys, the strip is
 // proven by the output's key set, never by expecting a throw).
 
 const fullRow = {

@@ -30,7 +30,7 @@ describe('studioServiceSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('parses an inactive row (the read shape does not filter — the server does)', () => {
+  it('parses an inactive row (the read shape does not filter, the server does)', () => {
     const result = studioServiceSchema.safeParse({ ...fullRow, isActive: false });
     expect(result.success).toBe(true);
   });
@@ -45,7 +45,7 @@ describe('studioServiceSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('parses a bare row (coverImageKey null) — born-null covers are the default state (#331)', () => {
+  it('parses a bare row (coverImageKey null), born-null covers are the default state (#331)', () => {
     const result = studioServiceSchema.safeParse({ ...fullRow, coverImageKey: null });
     expect(result.success).toBe(true);
   });
@@ -232,7 +232,7 @@ describe('unpriced catalogs (ADR-0020)', () => {
     expect(parsed.priceCents).toBeNull();
   });
 
-  it('create accepts a null price — the unchecked Priced save', () => {
+  it('create accepts a null price, the unchecked Priced save', () => {
     const parsed = createStudioServiceSchema.parse({
       name: 'On-inquiry service',
       description: 'Quoted per job.',

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Gallery Category (M5, glossary): a staff-managed grouping of Gallery
-// Photos — one tab of the about grid. Reordering is the collection order PUT
+// Photos, one tab of the about grid. Reordering is the collection order PUT
 // ({ categoryIds }); position is server-assigned and never client-supplied,
 // so create/update carry no position field.
 export const galleryCategorySchema = z.object({
@@ -30,7 +30,7 @@ export const updateGalleryCategorySchema = createGalleryCategorySchema;
 export type UpdateGalleryCategoryInput = CreateGalleryCategoryInput;
 
 // Gallery Photo (M5, ADR-0019): the row stores the R2 object key; the wire
-// carries photoUrl only — raw keys never leave the API. This is the admin
+// carries photoUrl only, raw keys never leave the API. This is the admin
 // read (deactivated rows included); the public read below is the trimmed
 // active-only assembly. categoryId null = uncategorized = staff-only.
 export const galleryPhotoSchema = z.object({
@@ -49,7 +49,7 @@ export type GalleryPhoto = z.infer<typeof galleryPhotoSchema>;
 
 // Spec-pinned create payload (§ The media pipeline): the staging key the
 // client just uploaded, plus optional metadata. The commit endpoint verifies
-// and promotes the key (#136/#137) — a final key never appears on an input.
+// and promotes the key (#136/#137), a final key never appears on an input.
 export const createGalleryPhotoSchema = z.object({
   r2Key: z.string().min(1),
   title: z.string().nullable().optional(),
@@ -62,7 +62,7 @@ export type CreateGalleryPhotoInput = z.infer<typeof createGalleryPhotoSchema>;
 // Full-object metadata edit; r2Key is presence-encoded (ADR-0019): present
 // only to REPLACE the photo through a fresh staging key (keys are immutable;
 // replace = new key + row update + old-key delete). title/caption/categoryId
-// are full-object — null clears, never "leave alone".
+// are full-object, null clears, never "leave alone".
 export const updateGalleryPhotoSchema = z.object({
   r2Key: z.string().min(1).optional(),
   title: z.string().nullable(),
@@ -74,7 +74,7 @@ export const updateGalleryPhotoSchema = z.object({
 export type UpdateGalleryPhotoInput = z.infer<typeof updateGalleryPhotoSchema>;
 
 // Collection order PUTs (M5 § Ordering): one full-replace per positioned
-// collection — the server renumbers in one transaction (#137).
+// collection, the server renumbers in one transaction (#137).
 export const galleryCategoryOrderSchema = z.object({
   categoryIds: z.array(z.uuid()),
 });
@@ -87,7 +87,7 @@ export const galleryPhotoOrderSchema = z.object({
 
 export type GalleryPhotoOrderInput = z.infer<typeof galleryPhotoOrderSchema>;
 
-// Public read (GET /api/v1/gallery, #138): one assembled payload — active
+// Public read (GET /api/v1/gallery, #138): one assembled payload, active
 // categories (array order = tab order) and active categorized photos.
 // Positions are server-side ordering; the payload carries no position
 // fields, and uncategorized photos never appear here.

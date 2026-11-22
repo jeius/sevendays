@@ -49,7 +49,7 @@ describe('branchSchema (the row shape)', () => {
     expect(branchSchema.safeParse(row).success).toBe(true);
   });
 
-  it('parses a bare row (coverImageKey null) — born-null covers are the default state', () => {
+  it('parses a bare row (coverImageKey null), born-null covers are the default state', () => {
     expect(branchSchema.safeParse({ ...row, coverImageKey: null }).success).toBe(true);
   });
 });
@@ -225,7 +225,7 @@ describe('branch maps links (#273)', () => {
     );
   });
 
-  it('each link is independently optional — one set, other null', () => {
+  it('each link is independently optional, one set, other null', () => {
     const parsed = createBranchSchema.parse({
       ...bareCreate,
       appleMapsUrl: 'https://maps.apple.com/?q=studio',

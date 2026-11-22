@@ -47,7 +47,7 @@ describe('siteSettingsSchema (the read wire)', () => {
     expect(siteSettingsSchema.safeParse(read).success).toBe(true);
   });
 
-  it('parses the born-empty read — every content field null, the banner off, no logo', () => {
+  it('parses the born-empty read, every content field null, the banner off, no logo', () => {
     const parsed = siteSettingsSchema.parse(EMPTY_SITE_SETTINGS);
     expect(parsed).toEqual(EMPTY_SITE_SETTINGS);
     expect(parsed.brandName).toBeNull();
@@ -141,7 +141,7 @@ describe('the defaults (M7 #215: unset fields fall back to today’s hardcoded c
   });
 });
 
-describe('resolveSiteSettings (the defaults seam — both apps consume this one fn)', () => {
+describe('resolveSiteSettings (the defaults seam, both apps consume this one fn)', () => {
   it('resolving the born-empty settings yields exactly the defaults', () => {
     expect(resolveSiteSettings(EMPTY_SITE_SETTINGS)).toEqual(SITE_SETTINGS_DEFAULTS);
   });

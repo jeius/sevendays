@@ -1,10 +1,10 @@
 // CONTRACT (M5 close-out, #143): bootstrap/dev-only. This seeder stands up
-// fresh environments and resets dev — it NEVER runs against production
+// fresh environments and resets dev, it NEVER runs against production
 // content: the admin CMS owns the catalog, and a re-run after real edits
 // would overwrite them by design (packages/db/README.md).
 // Re-runnable catalog seeder: one transaction, natural-key upserts, per-package
 // inclusion rebuild. Reruns never duplicate rows; branch/lookup/package ids stay
-// stable — inclusion rows are deleted and rebuilt per package (with their
+// stable, inclusion rows are deleted and rebuilt per package (with their
 // junction rows, which cascade).
 // Run: pnpm --filter @sevendays/db db:seed
 import process from 'node:process';
@@ -58,7 +58,7 @@ const db = createDbClient(url);
 
 try {
   await db.transaction(async (tx) => {
-    // Lookups — upsert by unique code / name.
+    // Lookups, upsert by unique code / name.
     for (const size of printSizeSeeds) {
       await tx
         .insert(printSizes)
@@ -77,7 +77,7 @@ try {
     const printSizeId = new Map(printSizeRows.map((r) => [r.code, r.id]));
     const attireIdMap = new Map(attireRows.map((r) => [r.name, r.id]));
 
-    // Branches + add-on services — upsert by unique name.
+    // Branches + add-on services, upsert by unique name.
     for (const branch of branchSeeds) {
       await tx
         .insert(branches)
@@ -106,7 +106,7 @@ try {
         });
     }
 
-    // M2 ticket 01 — Studio Services + junctions. Natural-key upsert by name;
+    // M2 ticket 01, Studio Services + junctions. Natural-key upsert by name;
     // junctions rebuild delete-then-insert per service so the DB stays
     // exactly in sync with scripts/catalog.ts on every run.
     const studioServiceIdByName = new Map<string, string>();
@@ -126,7 +126,7 @@ try {
     const branchRows = await tx.select({ id: branches.id, name: branches.name }).from(branches);
 
     // Bookability: every seeded service bookable at every branch (spec
-    // ruling — the prototype's not-Calamba Portraits stub was demo-only).
+    // ruling, the prototype's not-Calamba Portraits stub was demo-only).
     for (const svc of studioServiceSeeds) {
       const serviceId = studioServiceIdByName.get(svc.name);
       if (!serviceId) throw new Error(`seed: no id for studio service ${svc.name}`);
@@ -171,17 +171,17 @@ try {
       for (const [owner, existing] of slugByPackageName) {
         if (existing === slug)
           throw new Error(
-            `seed: slug collision — "${pkg.name}" and "${owner}" both slugify to "${slug}"`
+            `seed: slug collision, "${pkg.name}" and "${owner}" both slugify to "${slug}"`
           );
       }
       slugByPackageName.set(pkg.name, slug);
     }
     const featuredNames = new Set<string>(featuredPackageNames);
 
-    // Packages — upsert by unique name. Deliberately does NOT touch
+    // Packages, upsert by unique name. Deliberately does NOT touch
     // coverImageKey (Milestone 5 uploads it; reseeding must not null it).
     // slug backfills a NULL (first post-0002 seed) but never rewrites an
-    // existing slug — /packages/:slug URLs survive catalog renames.
+    // existing slug, /packages/:slug URLs survive catalog renames.
     for (const pkg of packageSeeds) {
       const [row] = await tx
         .insert(servicePackages)
@@ -190,7 +190,7 @@ try {
           description: pkg.description,
           priceCents: pkg.priceCents,
           // Every packageSeeds entry has a resolved slug (the up-front loop
-          // above guarantees it) — the guard only satisfies noUncheckedIndexedAccess.
+          // above guarantees it), the guard only satisfies noUncheckedIndexedAccess.
           slug:
             slugByPackageName.get(pkg.name) ??
             (() => {
@@ -210,7 +210,7 @@ try {
         .returning({ id: servicePackages.id });
       if (!row) throw new Error(`seed: upsert returned no row for package ${pkg.name}`);
 
-      // Frames — upsert per (package, frameNumber); reseed keeps ids stable
+      // Frames, upsert per (package, frameNumber); reseed keeps ids stable
       // for unchanged frames so CMS references survive (ADR-0009 revision).
       const frameId = new Map<number, string>();
       for (const fp of pkg.framedPictures) {

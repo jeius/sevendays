@@ -1,4 +1,4 @@
-// Owner tooling — main only. Never cherry-picked to `v1`, never present in an
+// Owner tooling, main only. Never cherry-picked to `v1`, never present in an
 // export: the file is booking-token-laden by construction (its own inventory
 // would fail the audit it runs). The v1 seed (#80) must remove this path from
 // the rewritten history; the per-PR pick discipline skips it.
@@ -19,7 +19,7 @@
 //        node scripts/audit-v1-absence.mjs HEAD --repo <export-clone>
 //                                                      → must exit 0
 //
-// Running it against this repo's own `main` always exits 1 BY DESIGN — main
+// Running it against this repo's own `main` always exits 1 BY DESIGN, main
 // keeps booking until v2 is commissioned, and this script's own commits are
 // themselves hits (they add every token below). Exit 1 on main is the
 // detection proof, not a defect.
@@ -31,13 +31,13 @@
 //       Build throwaway clean + dirty fixture repos in a temp dir; assert
 //       exit 0 on the clean one, exit 1 on the dirty one.
 //   node scripts/audit-v1-absence.mjs --list-tokens
-//       Print the inventory (mode<TAB>token per line) — the seed's
+//       Print the inventory (mode<TAB>token per line), the seed's
 //       content-ruleset authoring input (#80).
 //
 // Exit codes: 0 clean (or self-test pass) · 1 hits found (or self-test fail)
 // · 2 usage/environment error.
 //
-// Token design rule — no generic stems. Kept content legitimately contains
+// Token design rule, no generic stems. Kept content legitimately contains
 // `appointment` (inert tables ship: packages/db schema + migrations,
 // packages/types appointment schemas, db tests), `booking` (PRD/architecture
 // prose), and `resend` (pnpm-lock.yaml history is not scrubbable). Every
@@ -47,7 +47,7 @@
 // deliberately NOT tokens.
 //
 // Re-derivation (2026-09-11, #80's re-verification): the original
-// `/appointments` and `/book` literals false-hit the ruled-kept set — the db
+// `/appointments` and `/book` literals false-hit the ruled-kept set, the db
 // schema barrel imports './appointments.js' (inert tables ship verbatim) and
 // the landing bookable module imports './bookable-branches' (chips stay, no
 // internal rename). Tokens must be absent-cluster-specific against the KEPT
@@ -63,14 +63,14 @@ import { join } from 'node:path';
 import process from 'node:process';
 
 // -S: literal occurrence-count pickaxe. -G: regex diff-line pickaxe, used
-// where a word boundary is what makes the token precise — kept
+// where a word boundary is what makes the token precise, kept
 // packages/types owns `createAppointmentSchema`, so only the standalone
 // identifier is absence-significant. `\b` is GNU-regex: proven on this
 // toolchain (git 2.43.0 / glibc) to match standalone uses and NOT match
 // `createAppointmentSchema`. Portability fallback if `\b` ever fails:
 // createAppointment([^A-Za-z0-9_]|$)
 const TOKENS = [
-  // — landing pure-booking cluster (spec § The v1 Absence Boundary) —
+  // landing pure-booking cluster (spec § The v1 Absence Boundary)
   { mode: 'S', token: 'appointmentQueries' },
   { mode: 'G', token: '\\bcreateAppointment\\b' },
   { mode: 'S', token: 'getAppointment' },
@@ -80,9 +80,9 @@ const TOKENS = [
   { mode: 'S', token: 'components/booking' },
   { mode: 'S', token: "'/book" }, // quoted route literals (to='/book'); ./bookable-… can't match
   { mode: 'S', token: '/booking' }, // prose/route forms (/booking/:id, {ORIGIN}/booking/{id})
-  // — api cluster, env shed included —
+  // api cluster, env shed included
   { mode: 'S', token: 'routes/appointments' }, // v1.ts mount + api-client registration
-  { mode: 'S', token: ".route('/appointments'" }, // api mount registration call (the quoted-literal form false-hit the admin shell's ruled v1 stub literals — owner ruling 2026-09-16)
+  { mode: 'S', token: ".route('/appointments'" }, // api mount registration call (the quoted-literal form false-hit the admin shell's ruled v1 stub literals, owner ruling 2026-09-16)
   { mode: 'S', token: '/api/v1/appointments' }, // URL/prose forms (architecture.md, span names)
   { mode: 'S', token: 'confirmation-email' },
   { mode: 'S', token: 'RESEND_API_KEY' },
@@ -130,7 +130,7 @@ function audit(repoPath, ref, { quiet = false } = {}) {
     if (!quiet) console.log(line);
   };
   const sha = git(repoPath, ['rev-parse', '--verify', `${ref}^{commit}`]).trim();
-  say(`absence audit — repo: ${repoPath}`);
+  say(`absence audit, repo: ${repoPath}`);
   say(
     `  ref: ${ref} → ${sha.slice(0, 7)} · tokens: ${TOKENS.length} · full history (git log -S/-G)`
   );
@@ -138,7 +138,7 @@ function audit(repoPath, ref, { quiet = false } = {}) {
   const shas = new Set();
   for (const r of results) {
     if (r.commits.length === 0) continue;
-    say(`FAIL ${r.mode}:${r.token} — ${r.commits.length} commit(s):`);
+    say(`FAIL ${r.mode}:${r.token}, ${r.commits.length} commit(s):`);
     for (const c of r.commits.slice(0, 5)) say(`  ${c.sha.slice(0, 7)} ${c.subject}`);
     if (r.commits.length > 5) say(`  … and ${r.commits.length - 5} more`);
     for (const c of r.commits) shas.add(c.sha);
@@ -146,12 +146,12 @@ function audit(repoPath, ref, { quiet = false } = {}) {
   const hitCount = results.filter((r) => r.commits.length > 0).length;
   if (hitCount > 0) {
     say(
-      `AUDIT FAIL — ${hitCount}/${TOKENS.length} tokens with hits · ${shas.size} matching commits · exit 1`
+      `AUDIT FAIL, ${hitCount}/${TOKENS.length} tokens with hits · ${shas.size} matching commits · exit 1`
     );
     return { code: 1, lines };
   }
   say(
-    `AUDIT PASS — 0 hits across ${TOKENS.length} tokens · ${ref} (${sha.slice(0, 7)}) is booking-free · exit 0`
+    `AUDIT PASS, 0 hits across ${TOKENS.length} tokens · ${ref} (${sha.slice(0, 7)}) is booking-free · exit 0`
   );
   return { code: 0, lines };
 }
@@ -202,24 +202,24 @@ function selfTest() {
 
     const clean = audit(cleanDir, 'main', { quiet: true });
     if (clean.code !== 0) {
-      console.error('SELF-TEST FAIL — clean fixture flagged (false alarm):');
+      console.error('SELF-TEST FAIL, clean fixture flagged (false alarm):');
       console.error(clean.lines.join('\n'));
       process.exit(1);
     }
     const dirty = audit(dirtyDir, 'main', { quiet: true });
     if (dirty.code !== 1) {
       console.error(
-        `SELF-TEST FAIL — dirty fixture exited ${dirty.code}, expected 1 (not detected):`
+        `SELF-TEST FAIL, dirty fixture exited ${dirty.code}, expected 1 (not detected):`
       );
       console.error(dirty.lines.join('\n'));
       process.exit(1);
     }
     if (!dirty.lines.join('\n').includes('appointmentQueries')) {
-      console.error('SELF-TEST FAIL — dirty fixture report does not name the planted token:');
+      console.error('SELF-TEST FAIL, dirty fixture report does not name the planted token:');
       console.error(dirty.lines.join('\n'));
       process.exit(1);
     }
-    console.log('SELF-TEST PASS — clean fixture exit 0 (no false alarms, incl. the');
+    console.log('SELF-TEST PASS, clean fixture exit 0 (no false alarms, incl. the');
     console.log('createAppointmentSchema + schema-import + bookable-import');
     console.log('near-misses); dirty fixture exit 1 with');
     console.log('appointmentQueries named; fixtures discarded.');

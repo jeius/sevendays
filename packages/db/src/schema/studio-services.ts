@@ -1,6 +1,6 @@
 import { boolean, integer, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 
-// Standalone studio offerings bookable in their own right (M2 ticket 01) —
+// Standalone studio offerings bookable in their own right (M2 ticket 01):
 // photo recovery, tarpaulin & bulletin printing, portraits & ID photo,
 // picture framing. Distinct from service_packages (bundles Inclusions) and
 // addon_services (attach to a booking). Per-branch bookability lives in
@@ -18,7 +18,7 @@ export const studioServices = pgTable(
     // (same posture as addon_services).
     isActive: boolean('is_active').notNull().default(true),
     // R2 object key for the cover image (#331, the branches.coverImageKey
-    // shape): nullable — born-null on every existing row (no cover = the
+    // shape): nullable, born-null on every existing row (no cover = the
     // documented landing fallback); raw keys never leave the API (ADR-0019).
     coverImageKey: text('cover_image_key'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
