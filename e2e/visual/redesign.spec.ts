@@ -1,12 +1,28 @@
-import { expect, type Locator, type Page, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 
 import { requiredEnv } from '../smoke/env';
 
 // ADR-0022's flagship consumer (#225): the redesigned public surfaces
 // (the #223/#224 redesign), teaser edition, light + dark — 8 surfaces x
-// 2 themes = 16 committed baselines. Baselines are advisory on the
-// nightly — CMS content edits surface as drift in the nightly log; the
-// owner re-baselines on intent (--update-snapshots). Never PR-gating.
+// 2 themes = 16 committed baselines. The 2026-11-22 contract (the
+// owner's pick after the 11-14 nightly-drift diagnosis, #346): the
+// baselines assert LAYOUT/CHROME only — every CMS-content region is
+// either pinned to a fixed height + masked (variable-height regions:
+// the mosaic walls, testimonials, the story, the tab row) or masked
+// outright (fixed-height boxes: brand lockups, cover panels, the
+// announcement strip, the footer contact grid). CMS pixel content can
+// no longer redden the nightly; a red run now means a layout/chrome
+// drift, a broken capture gate, or a CMS-fed region not yet in the
+// mask list — re-baseline on intent (--update-snapshots). Never
+// PR-gating.
+//
+// Documented residuals (rare, geometry-class edits that stay advisory):
+// the home hero copy and the page-head h1s/descriptions (settings-fed),
+// the featured strip's heading, and every grid's ITEM COUNT (featured,
+// catalog, services, branches) plus the text panels beside the masked
+// covers (names, descriptions, inclusions, prices). Those change page
+// geometry rather than pixels-in-place; the sentinels + the smoke suite
+// own their presence.
 //
 // Theme is pinned BEFORE load: next-themes' class strategy reads the
 // DEFAULT storageKey 'theme' from localStorage in its pre-paint script
@@ -16,21 +32,6 @@ import { requiredEnv } from '../smoke/env';
 // deterministic class-setter. Verified against the live mount in
 // apps/landing/src/routes/__root.tsx.
 const THEME_INIT = (theme: 'light' | 'dark') => `window.localStorage.setItem('theme', '${theme}');`;
-
-// The home services strip is masked at its STATIC outer section
-// (`data-strip='services'`, apps/landing/src/components/
-// home-image-led.tsx) — NEVER at the moving track: `animations:
-// 'disabled'` only freezes CSS motion, so a translating track's bbox —
-// and with it the mask box itself — would land differently per capture
-// (the #225 home-dark finding: ratio 0.03 around the mask edges). The
-// section's bbox is layout-stable, so the mask paints the whole marquee
-// area regardless of where the track sits inside it — the mask ALONE is
-// the deterministic fix. (A `reducedMotion: 'reduce'` emulation was
-// tried and reverted in fix round 2: the redesign's IntersectionObserver
-// reveals honor motion-reduce too, so every reveal-bearing surface
-// rendered differently than its baseline.) The strip collapses entirely
-// on a zero-service read, so the mask applies only when it resolves.
-const MARQUEE_SECTION_MASK = "[data-strip='services']";
 
 // The 8 redesigned public surfaces. The detail path derives its slug
 // from the LIVE packages payload at run time — never a hardcoded slug
@@ -47,6 +48,106 @@ const SURFACES = [
   ['share-your-story', '/share-your-story'],
   ['not-found', '/__m7_visual_not_found__'],
 ] as const;
+
+type Surface = (typeof SURFACES)[number][0];
+
+// The capture-stabilization layer (#346). Playwright compares IMAGE
+// DIMENSIONS before masks apply, so a region whose height follows CMS
+// content must be pinned to a fixed height (pure CSS) AND masked —
+// masking alone only hides pixels, not the height drift (the 11-19
+// failure class: about 2177→3165px, home 4845→5777px after the gallery
+// repopulation). Fixed-height CMS regions need no clamp. Every rule is
+// `!important` + `overflow: hidden` — the utilities they pin are
+// single-class Tailwind, and overflow:hidden creates a BFC so interior
+// margins can't collapse through the pinned box. The clamp VALUES are
+// arbitrary-but-fixed: whatever is inside is masked, so the number only
+// chooses how much composition the baseline keeps.
+//
+// The CSS lands BEFORE any measurement (injected right after goto), so
+// the tall-viewport law's pageHeight read below sees the pinned page.
+const SHARED_STABILIZE_CSS = `
+aside[aria-label='Announcement'] > div { height: 3.75rem !important; overflow: hidden !important; }
+footer div.mt-8 { height: 6.5rem !important; overflow: hidden !important; }
+`;
+
+const STABILIZE_CSS: Record<Surface, string> = {
+  home: `
+section[data-strip='gallery'] > div { height: 56rem !important; overflow: hidden !important; }
+section[data-strip='testimonials'] > div { height: 36rem !important; overflow: hidden !important; }
+`,
+  'packages-index': '',
+  'package-detail': '',
+  services: '',
+  branches: '',
+  about: `
+main div.max-w-prose.space-y-3 { height: 8rem !important; overflow: hidden !important; }
+[data-gallery-tabs] { height: 2.5rem !important; overflow: hidden !important; }
+[data-portfolio-grid] { height: 48rem !important; overflow: hidden !important; }
+main div.columns-1 { height: 22rem !important; overflow: hidden !important; }
+`,
+  'share-your-story': '',
+  'not-found': '',
+};
+
+// The mask list. Mask locators run with `strict: false` inside Playwright's
+// screenshot pipeline and a zero-match entry is skipped there
+// (coreBundle _maskElements → callOnSelector strict:false), so a region
+// that is legitimately absent (the collapsed strips, the off banner, the
+// branch-grid's zero read) needs no conditional — and a selector matching
+// many elements (every plate's cover box) masks all of them.
+//
+// Shared chrome: the announcement strip (bannerFor: off/untitled renders
+// nothing), the brand lockups (mark + name + tagline are all
+// settings-fed; the img-vs-sd.png fallback sits inside), the footer's
+// live branch contact grid, and the copyright row's CMS-fed CHILDREN
+// (© name+tagline, socials, brand contact) — children only, so the row's
+// border-t stays asserted.
+const SHARED_MASK_SELECTORS = [
+  "aside[aria-label='Announcement']",
+  "header a[href='/']",
+  "footer a[href='/']",
+  'footer div.mt-8',
+  'footer div.mt-6 > p',
+  'footer div.mt-6 > div',
+] as const;
+
+// Per-surface CMS regions. Cover boxes are masked at their wrapper div
+// (`:first-child` of the plate/card link) because the CoverPanel flip
+// swaps element TYPE (img vs the initials-placeholder div) while the box
+// — fixed by aspect ratio or min-height — is the stable element in both
+// branches.
+const MASK_SELECTORS: Record<Surface, readonly string[]> = {
+  home: [
+    // The home services strip is masked at its STATIC outer section
+    // (`data-strip='services'`, apps/landing/src/components/
+    // home-image-led.tsx) — NEVER at the moving track: `animations:
+    // 'disabled'` only freezes CSS motion, so a translating track's bbox —
+    // and with it the mask box itself — would land differently per capture
+    // (the #225 home-dark finding: ratio 0.03 around the mask edges). The
+    // section's bbox is layout-stable, so the mask paints the whole marquee
+    // area regardless of where the track sits inside it. (A
+    // `reducedMotion: 'reduce'` emulation was tried and reverted in fix
+    // round 2: the redesign's IntersectionObserver reveals honor
+    // motion-reduce too, so every reveal-bearing surface rendered
+    // differently than its baseline.)
+    "section[data-strip='services']",
+    "section[data-strip='gallery'] > div",
+    "section[data-strip='testimonials'] > div",
+    "section[data-strip='featured'] a[href^='/packages/'] > div:first-child",
+  ],
+  'packages-index': ["main a[href^='/packages/'] > div:first-child"],
+  'package-detail': ['main div.min-h-64'],
+  services: ['main article > img'],
+  branches: ['main article > div:first-child'],
+  about: [
+    'main div.max-w-prose.space-y-3',
+    '[data-gallery-tabs]',
+    '[data-portfolio-grid]',
+    'main div.columns-1',
+  ],
+  'share-your-story': [],
+  'not-found': [],
+};
 
 // The data-present sentinels (#259): per-surface predicates over the
 // data-bearing DOM, evaluated in the page AFTER the images gate and
@@ -189,6 +290,27 @@ test.describe('the redesigned landing — visual baselines', () => {
       test(`${name} — ${theme}`, async ({ page }) => {
         await page.addInitScript(THEME_INIT(theme));
         await page.goto(path ?? detailPath, { waitUntil: 'load' });
+        // The stabilization layer lands before ANY measurement: the
+        // clamps pin the CMS-height regions so the tall-viewport law
+        // measures a stable page, and the masks below then hide whatever
+        // the CMS renders inside them (#346).
+        await page.addStyleTag({
+          content: `${SHARED_STABILIZE_CSS}\n${STABILIZE_CSS[name]}`,
+        });
+        // The clamps clip their interiors — and IntersectionObserver
+        // honors ancestor overflow clipping, so reveal wrappers BELOW a
+        // pinned height can never intersect and would hang the reveal
+        // gate forever (the 12/16 re-record finding). Stamp those shown:
+        // attribute-driven CSS takes the shown state immediately, React's
+        // diff never un-sets it (absent → absent re-renders emit no DOM
+        // op), and the gate still owns every unclamped reveal on the page.
+        await page.evaluate(() => {
+          document
+            .querySelectorAll(
+              "[data-portfolio-grid] [data-reveal]:not([data-shown]), section[data-strip='gallery'] [data-reveal]:not([data-shown])"
+            )
+            .forEach((el) => el.setAttribute('data-shown', 'true'));
+        });
         // Break the lazy-load loop: below-fold images are loading="lazy"
         // and only fetch when they intersect the viewport. Forcing every
         // image eager starts all loads regardless of viewport — the
@@ -287,13 +409,12 @@ test.describe('the redesigned landing — visual baselines', () => {
         // The settle covers the worst-case reveal tail end to end
         // (≈270ms column delay + 700ms transition).
         await page.waitForTimeout(1000);
-        let mask: Locator[] = [];
-        if (name === 'home') {
-          const marqueeSection = page.locator(MARQUEE_SECTION_MASK);
-          if ((await marqueeSection.count()) > 0) {
-            mask = [marqueeSection];
-          }
-        }
+        // Zero-match selectors no-op inside the screenshot pipeline (see
+        // MASK_SELECTORS above), so collapsed strips and absent regions
+        // need no conditional.
+        const mask = [...SHARED_MASK_SELECTORS, ...MASK_SELECTORS[name]].map((selector) =>
+          page.locator(selector)
+        );
         await expect(page).toHaveScreenshot(`${name}-${theme}.png`, {
           fullPage: true,
           mask,
