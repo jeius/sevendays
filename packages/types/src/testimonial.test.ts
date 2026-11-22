@@ -61,7 +61,7 @@ describe('testimonialOrderSchema', () => {
 });
 
 describe('publicTestimonialSchema', () => {
-  it('parses the trimmed public read (id, quote, person — array order is the render order)', () => {
+  it('parses the trimmed public read (id, quote, person, array order is the render order)', () => {
     const result = publicTestimonialSchema.safeParse({
       id: UUID,
       quote: 'The photos came out better than we hoped.',

@@ -1,7 +1,7 @@
 import { boolean, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 // Catalog size codes: 1x1, 2x2, 2R, 8R, 8x10, 11x14. The 8R/8x10 nominal
-// duplicate stays two rows — the discrepancy is recorded in the description
+// duplicate stays two rows, the discrepancy is recorded in the description
 // for client confirmation at seed review, never resolved by code.
 export const printSizes = pgTable('print_sizes', {
   id: uuid('id').primaryKey().defaultRandom(),

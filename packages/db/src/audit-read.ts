@@ -1,16 +1,16 @@
-// The Audit Log viewer's read module (#188, ADR-0023 — the #186 probes
+// The Audit Log viewer's read module (#188, ADR-0023, the #186 probes
 // precedent extended to dynamic queries): the filtered, newest-first,
 // paginated reads over audit_log. This module exists because apps/admin
-// owns no drizzle-orm dependency by ruling — the typed builder (and its
+// owns no drizzle-orm dependency by ruling, the typed builder (and its
 // safe parameter binding) lives here, beside the schema it reads; the
 // admin passes the per-request client and structural params only. No
 // joins anywhere: the row is self-describing by design (actorEmail
-// snapshotted at write, summary inline — #185). Ordering is occurredAt
-// DESC with id DESC as the tiebreaker (rows sharing a timestamp — e.g.
-// written in one transaction — keep a stable order). The row's
+// snapshotted at write, summary inline, #185). Ordering is occurredAt
+// DESC with id DESC as the tiebreaker (rows sharing a timestamp, e.g.
+// written in one transaction, keep a stable order). The row's
 // occurredAt field carries an ISO STRING (not a Date): the result
 // crosses an RPC boundary where Dates do not survive, and the viewer's
-// landed auditLogRowSchema coerces the string back — one shape, the
+// landed auditLogRowSchema coerces the string back, one shape, the
 // AuditWireRow convention, no mapping anywhere.
 import { and, asc, count, desc, eq, gte, lt, type SQL } from 'drizzle-orm';
 
@@ -30,7 +30,7 @@ export type AuditLogQueryParams = {
 
 export type AuditLogRowData = {
   id: string;
-  /** ISO string — the RPC-boundary convention (see the module comment). */
+  /** ISO string, the RPC-boundary convention (see the module comment). */
   occurredAt: string;
   actorId: string;
   actorEmail: string;

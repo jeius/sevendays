@@ -99,7 +99,7 @@ async function main() {
   // wire — #215).
   const expectedBlurb =
     settings.homeDescription ??
-    'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.';
+    'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios. Booked in minutes, delivered in seven days.';
   check(
     'home: hero blurb renders the live settings (ratified default ⇔ null)',
     home.includes(expectedBlurb)

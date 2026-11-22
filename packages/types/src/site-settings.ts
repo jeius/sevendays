@@ -1,15 +1,15 @@
 import { z } from 'zod';
 
-// Site Settings (M7 #215, spec § Settings made real — the 2026-10-02
-// Site-tab amendment): the singleton wire — brand + the five pages ×
+// Site Settings (M7 #215, spec § Settings made real, the 2026-10-02
+// Site-tab amendment): the singleton wire, brand + the five pages ×
 // title/description + the About story + the ruled extras (social links,
 // announcement banner, home section kickers, brand contact block). Every
 // content field is nullable on the wire: the row is BORN-EMPTY and unset
-// means "today's hardcoded default" (SITE_SETTINGS_DEFAULTS below — the
+// means "today's hardcoded default" (SITE_SETTINGS_DEFAULTS below, the
 // chrome never renders broken; a fresh DB renders today's site). The wire
 // never carries the raw R2 logo key: reads resolve logoImageUrl
 // (ADR-0019); the save tri-state encodes the key (absent = unchanged,
-// null = clear, staging string = bind — the #214 cover law).
+// null = clear, staging string = bind, the #214 cover law).
 export const siteSettingsSchema = z.object({
   brandName: z.string().max(300).nullable(),
   brandTagline: z.string().max(300).nullable(),
@@ -41,10 +41,10 @@ export const siteSettingsSchema = z.object({
 
 export type SiteSettings = z.infer<typeof siteSettingsSchema>;
 
-// The full-object PUT body (M7 #215 — the singleton precedent: one save
+// The full-object PUT body (M7 #215, the singleton precedent: one save
 // like every other editor, NO per-field patching): every content field is
 // REQUIRED-and-nullable (the editor always sends the whole object; null =
-// unset → default), plus the logo's tri-state media encoding (ADR-0019 —
+// unset → default), plus the logo's tri-state media encoding (ADR-0019:
 // reads never echo keys, so the save cannot either): absent = unchanged,
 // null = clear, staging string = bind via the commit pipeline.
 export const saveSiteSettingsSchema = siteSettingsSchema
@@ -53,7 +53,7 @@ export const saveSiteSettingsSchema = siteSettingsSchema
 
 export type SaveSiteSettingsInput = z.infer<typeof saveSiteSettingsSchema>;
 
-// The born-empty read (M7 #215): what GET answers before the first save —
+// The born-empty read (M7 #215): what GET answers before the first save;
 // every content field null, the banner switch off, no logo. Defaults
 // NEVER ride the wire; consumers resolve through the seam below.
 export const EMPTY_SITE_SETTINGS: SiteSettings = {
@@ -86,37 +86,39 @@ export const EMPTY_SITE_SETTINGS: SiteSettings = {
 };
 
 // Today's hardcoded copy, pinned VERBATIM from the landing's code (the
-// owner-ratified source — swept 2026-10-13): brand + tagline from the
+// owner-ratified source, swept 2026-10-13): brand + tagline from the
 // header/footer wordmark (the logo slot's null default IS the incumbent
 // sd.png monogram), home title/description from the hero (home-copy's
 // HERO_BLURB), the page titles + sub-copy from the ruled redesign intros
-// (#224 — the #164 Round-3/4-ratified drafts; the About sub-copy ratified
+// (#224, the #164 Round-3/4-ratified drafts; the About sub-copy ratified
 // verbatim at the #224 variants round), the About story from /about's placeholder line, the four
 // kickers from the ruled one-voice section headings (#223). Fields today renders NOTHING for stay
-// null (the extras — socials, banner copy, brand contact): their null default renders
+// null (the extras, socials, banner copy, brand contact): their null default renders
 // exactly today's page. This object IS the fallback the chrome renders
-// while the row is born-empty.
+// while the row is born-empty. Strings de-dashed 2026-11-22 (#349, spec
+// #348 item 1, hand-rewritten); the live settings row keeps its pre-sweep
+// copy per the round's no-DB-pass ruling.
 export const SITE_SETTINGS_DEFAULTS: SiteSettings = {
   brandName: 'Sevendays',
   brandTagline: 'Photography',
   logoImageUrl: null,
   homeTitle: 'Three branches. One standard of light.',
   homeDescription:
-    'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.',
+    'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios. Booked in minutes, delivered in seven days.',
   packagesTitle: 'Packages',
   packagesDescription:
-    'From graduation portraits to family sessions — every package with its price, duration, and inclusions at a glance. Tap a package for the full details.',
+    'From graduation portraits to family sessions: every package with its price, duration, and inclusions at a glance. Tap a package for the full details.',
   branchesTitle: 'Branches',
   branchesDescription:
-    'Three studios, one standard of light. Walk-ins are welcome where flagged — everywhere else, call ahead or book online.',
+    'Three studios, one standard of light. Walk-ins are welcome where flagged; everywhere else, call ahead or book online.',
   servicesTitle: 'Services',
   servicesDescription:
-    'Photo recovery, printing, portraits, and framing — studio services you can book at the branches listed on each card.',
+    'Photo recovery, printing, portraits, and framing: studio services you can book at the branches listed on each card.',
   aboutTitle: 'About',
-  // Ratified verbatim at the #224 variants round (2026-10-21, "all goods" —
+  // Ratified verbatim at the #224 variants round (2026-10-21, "all goods",
   // no retune); the round's evidence carries the captured drives.
   aboutDescription:
-    'The studio behind the work — our story, our portfolio, and the people who sat for us.',
+    'The studio behind the work: our story, our portfolio, and the people who sat for us.',
   aboutStory: 'Our studio story is coming soon.',
   kickerGallery: 'The work',
   kickerPackages: 'Featured packages',
@@ -134,7 +136,7 @@ export const SITE_SETTINGS_DEFAULTS: SiteSettings = {
 
 // The defaults seam (spec § Settings made real: "unset fields fall back to
 // today's hardcoded defaults"): per key, the row's value when set, the
-// default when null. Both apps consume this ONE fn — never per-app
+// default when null. Both apps consume this ONE fn, never per-app
 // fallbacks. Nullable-by-design keys resolve to their null default, which
 // is exactly today's renders-nothing behavior. The explicit field list is
 // the point: the SiteSettings return type makes it exhaustive by

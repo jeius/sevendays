@@ -1,6 +1,6 @@
 # The v1 seed's blob content rules (#80; ADR-0015). Applied to EVERY blob at
 # EVERY commit: no revision of v1 may contain an absence-inventory token.
-# Historical revisions need not typecheck (ADR-0015) — the seed content
+# Historical revisions need not typecheck (ADR-0015), the seed content
 # commit makes HEAD coherent. Replacement vocabulary is pinned: booking→visit,
 # appointment→visit, email→notice, Resend→mailer. The /book rule is a regex
 # with (?!able) so the ruled-kept bookable module's import paths survive.

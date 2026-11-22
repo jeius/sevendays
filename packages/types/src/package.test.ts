@@ -62,7 +62,7 @@ describe('servicePackageWithInclusionsSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('parses an inactive package (the read shape does not filter — the server does)', () => {
+  it('parses an inactive package (the read shape does not filter, the server does)', () => {
     const result = servicePackageWithInclusionsSchema.safeParse({
       ...fullRow,
       isActive: false,
@@ -92,13 +92,13 @@ describe('servicePackageSchema slug/isFeatured (M2 ticket 01)', () => {
     expect(result.success).toBe(false);
   });
 
-  it('still parses a row without isFeatured (defaults false — pre-flag fixtures)', () => {
+  it('still parses a row without isFeatured (defaults false, pre-flag fixtures)', () => {
     const parsed = servicePackageSchema.parse({ ...fullRow });
     expect(parsed.isFeatured).toBe(false);
   });
 
   it('createServicePackageSchema strips slug and every server-assigned field', () => {
-    // z.object strips unknown keys, so a payload carrying them still parses —
+    // z.object strips unknown keys, so a payload carrying them still parses:
     // the contract is that they never appear in the parsed create output.
     const parsed = createServicePackageSchema.parse({
       name: 'New Package',
@@ -345,7 +345,7 @@ describe('packageSaveInclusionSchema (the inclusion row inside the save)', () =>
     }
   });
 
-  it('accepts a privilege payload carrying attireIds — both granted and empty (seed reality)', () => {
+  it('accepts a privilege payload carrying attireIds, both granted and empty (seed reality)', () => {
     const granted = packageSaveInclusionSchema.safeParse({
       kind: 'privilege',
       quantity: null,
@@ -373,7 +373,7 @@ describe('unpriced catalogs (ADR-0020)', () => {
     expect(parsed.priceCents).toBeNull();
   });
 
-  it('create accepts a null price — the unchecked Priced save', () => {
+  it('create accepts a null price, the unchecked Priced save', () => {
     const parsed = createServicePackageSchema.parse({
       name: 'Inquiry Package',
       description: 'Priced on inquiry.',

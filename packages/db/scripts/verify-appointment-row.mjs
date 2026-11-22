@@ -1,9 +1,9 @@
 // psql-equivalent Appointment row probe (M1.5, Q1=A). Prints derived facts
-// only — never a connection string. Modes:
-//   confirm <appointmentId>  — assert the row + add-on join rows against
+// only, never a connection string. Modes:
+//   confirm <appointmentId>: assert the row + add-on join rows against
 //                              expectations read from stdin (JSON)
-//   delete  <appointmentId>  — delete the single row, re-assert absence
-//   absent  <appointmentId>  — assert the row is gone
+//   delete  <appointmentId>: delete the single row, re-assert absence
+//   absent  <appointmentId>: assert the row is gone
 // Exit 0 = verified; exit 1 = mismatch/missing/error. Run from packages/db:
 //   node --env-file=.env scripts/verify-appointment-row.mjs confirm <id>
 import postgres from 'postgres';
@@ -75,8 +75,8 @@ export async function assertAppointmentRecord(sql, expected) {
   }
   console.log(
     failed.length === 0
-      ? `CONFIRM: PASS — appointment ${expected.id} matches every expected value (${checks.length} checks)`
-      : `CONFIRM: FAIL — ${failed.length} mismatch(es)`
+      ? `CONFIRM: PASS, appointment ${expected.id} matches every expected value (${checks.length} checks)`
+      : `CONFIRM: FAIL, ${failed.length} mismatch(es)`
   );
   return { ok: failed.length === 0, row, addons, failed };
 }
@@ -99,8 +99,8 @@ export async function assertAppointmentAbsent(sql, id) {
   const absent = rows.length === 0 && joinRows.length === 0;
   console.log(
     absent
-      ? `ABSENT: verified — no appointment row, no join rows for ${id}`
-      : `ABSENT: FAIL — rows remain`
+      ? `ABSENT: verified, no appointment row, no join rows for ${id}`
+      : `ABSENT: FAIL, rows remain`
   );
   return { absent };
 }

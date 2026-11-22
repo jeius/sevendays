@@ -1,6 +1,6 @@
 /**
  * Admin wrappers (M5 #139, ADR-0006): the gated /api/v1/admin subtree's
- * client surface. Every response passes unwrap() — a shape drift from the
+ * client surface. Every response passes unwrap(), a shape drift from the
  * API fails loudly here. Grows with the CMS tickets (#140 matrices riders,
  * #141 gallery/testimonials/lookups).
  */
@@ -39,7 +39,7 @@ import type { RpcClient } from '../client.js';
 import { unwrap, unwrapError } from '../unwrap.js';
 
 // Type-flow law (pinned): every path rides the admin subtree of the built
-// AppType — a route rename in the API breaks THIS file's compile (the
+// AppType, a route rename in the API breaks THIS file's compile (the
 // drift-kill). Bracket notation for the hyphenated segment keys.
 type AdminRpc = RpcClient['api']['v1']['admin'];
 
@@ -54,7 +54,7 @@ type DeleteServicePackageEndpoint = AdminRpc['service-packages'][':id']['$delete
 export type DeleteServicePackageArgs = InferRequestType<DeleteServicePackageEndpoint>;
 
 /**
- * The atomic save's POST body, as the RPC surface declares it — the zod
+ * The atomic save's POST body, as the RPC surface declares it, the zod
  * INPUT side of createServicePackageSchema (the CreateAppointmentArgs
  * precedent: defaulted fields optional, no hand-typing).
  */
@@ -203,27 +203,27 @@ export type PresignArgs = InferRequestType<PresignEndpoint>['json'];
 /** Service Package wrappers over /api/v1/admin/service-packages (list+byId only for ticket 05's screens; create/update are the editor's atomic save). */
 export function adminServicePackages(raw: RpcClient) {
   return {
-    /** GET /api/v1/admin/service-packages — ALL packages incl. deactivated, coverImageUrl-resolved. */
+    /** GET /api/v1/admin/service-packages, ALL packages incl. deactivated, coverImageUrl-resolved. */
     async list(): Promise<ServicePackageRead[]> {
       const res = await raw.api.v1.admin['service-packages'].$get();
       return unwrap(res, servicePackageReadSchema.array());
     },
-    /** GET /api/v1/admin/service-packages/:id — one package incl. deactivated; 404 when unknown. */
+    /** GET /api/v1/admin/service-packages/:id, one package incl. deactivated; 404 when unknown. */
     async byId(args: GetAdminPackageArgs): Promise<ServicePackageRead> {
       const res = await raw.api.v1.admin['service-packages'][':id'].$get(args);
       return unwrap(res, servicePackageReadSchema);
     },
-    /** POST /api/v1/admin/service-packages — the atomic save; 201 with the created read (slug server-generated). */
+    /** POST /api/v1/admin/service-packages, the atomic save; 201 with the created read (slug server-generated). */
     async create(json: CreateServicePackageArgs): Promise<ServicePackageRead> {
       const res = await raw.api.v1.admin['service-packages'].$post({ json });
       return unwrap(res, servicePackageReadSchema);
     },
-    /** PUT /api/v1/admin/service-packages/:id — the atomic save (full-object PUT); the refreshed read. */
+    /** PUT /api/v1/admin/service-packages/:id, the atomic save (full-object PUT); the refreshed read. */
     async update(args: UpdateServicePackageArgs): Promise<ServicePackageRead> {
       const res = await raw.api.v1.admin['service-packages'][':id'].$put(args);
       return unwrap(res, servicePackageReadSchema);
     },
-    /** DELETE /api/v1/admin/service-packages/:id — 204 No Content (the delete seam: no body to unwrap); blocked → 400 naming what blocks; the cover object goes with the row. */
+    /** DELETE /api/v1/admin/service-packages/:id, 204 No Content (the delete seam: no body to unwrap); blocked → 400 naming what blocks; the cover object goes with the row. */
     async remove(args: DeleteServicePackageArgs): Promise<void> {
       const res = await raw.api.v1.admin['service-packages'][':id'].$delete(args);
       if (!res.ok) {
@@ -236,27 +236,27 @@ export function adminServicePackages(raw: RpcClient) {
 /** Branch wrappers over /api/v1/admin/branches (list+byId are ticket 05's calls; create/update ride along for #140). */
 export function adminBranches(raw: RpcClient) {
   return {
-    /** GET /api/v1/admin/branches — ALL branches incl. deactivated. */
+    /** GET /api/v1/admin/branches, ALL branches incl. deactivated. */
     async list(): Promise<BranchRead[]> {
       const res = await raw.api.v1.admin.branches.$get();
       return unwrap(res, branchReadSchema.array());
     },
-    /** GET /api/v1/admin/branches/:id — one branch; 404 when unknown. */
+    /** GET /api/v1/admin/branches/:id, one branch; 404 when unknown. */
     async byId(args: GetAdminBranchArgs): Promise<BranchRead> {
       const res = await raw.api.v1.admin.branches[':id'].$get(args);
       return unwrap(res, branchReadSchema);
     },
-    /** POST /api/v1/admin/branches — 201 with the created branch. */
+    /** POST /api/v1/admin/branches, 201 with the created branch. */
     async create(json: CreateAdminBranchArgs): Promise<BranchRead> {
       const res = await raw.api.v1.admin.branches.$post({ json });
       return unwrap(res, branchReadSchema);
     },
-    /** PUT /api/v1/admin/branches/:id — full-object update; the refreshed branch. */
+    /** PUT /api/v1/admin/branches/:id, full-object update; the refreshed branch. */
     async update(args: UpdateAdminBranchArgs): Promise<BranchRead> {
       const res = await raw.api.v1.admin.branches[':id'].$put(args);
       return unwrap(res, branchReadSchema);
     },
-    /** DELETE /api/v1/admin/branches/:id — 204 (the delete seam); blocked → 400 with the appointment count. */
+    /** DELETE /api/v1/admin/branches/:id, 204 (the delete seam); blocked → 400 with the appointment count. */
     async remove(args: DeleteAdminBranchArgs): Promise<void> {
       const res = await raw.api.v1.admin.branches[':id'].$delete(args);
       if (!res.ok) {
@@ -269,37 +269,37 @@ export function adminBranches(raw: RpcClient) {
 /** Studio Service wrappers over /api/v1/admin/studio-services (list+byId for ticket 05; create/update/matrix ride along for #140). */
 export function adminStudioServices(raw: RpcClient) {
   return {
-    /** GET /api/v1/admin/studio-services — ALL studio services with embedded bookableBranchIds + applicableAddonServiceIds. */
+    /** GET /api/v1/admin/studio-services, ALL studio services with embedded bookableBranchIds + applicableAddonServiceIds. */
     async list(): Promise<StudioServiceWithBranches[]> {
       const res = await raw.api.v1.admin['studio-services'].$get();
       return unwrap(res, studioServiceWithBranchesSchema.array());
     },
-    /** GET /api/v1/admin/studio-services/:id — one studio service with the embeds; 404 when unknown. */
+    /** GET /api/v1/admin/studio-services/:id, one studio service with the embeds; 404 when unknown. */
     async byId(args: GetAdminStudioServiceArgs): Promise<StudioServiceWithBranches> {
       const res = await raw.api.v1.admin['studio-services'][':id'].$get(args);
       return unwrap(res, studioServiceWithBranchesSchema);
     },
-    /** POST /api/v1/admin/studio-services — 201 with the created read. */
+    /** POST /api/v1/admin/studio-services, 201 with the created read. */
     async create(json: CreateAdminStudioServiceArgs): Promise<StudioServiceWithBranches> {
       const res = await raw.api.v1.admin['studio-services'].$post({ json });
       return unwrap(res, studioServiceWithBranchesSchema);
     },
-    /** PUT /api/v1/admin/studio-services/:id — full-object update; the refreshed read. */
+    /** PUT /api/v1/admin/studio-services/:id, full-object update; the refreshed read. */
     async update(args: UpdateAdminStudioServiceArgs): Promise<StudioServiceWithBranches> {
       const res = await raw.api.v1.admin['studio-services'][':id'].$put(args);
       return unwrap(res, studioServiceWithBranchesSchema);
     },
-    /** PUT /api/v1/admin/studio-services/:id/branches — full-replace bookability matrix; the refreshed read. */
+    /** PUT /api/v1/admin/studio-services/:id/branches, full-replace bookability matrix; the refreshed read. */
     async setBranchMatrix(args: SetBranchMatrixArgs): Promise<StudioServiceWithBranches> {
       const res = await raw.api.v1.admin['studio-services'][':id']['branches'].$put(args);
       return unwrap(res, studioServiceWithBranchesSchema);
     },
-    /** PUT /api/v1/admin/studio-services/:id/addons — full-replace applicable-addons matrix; the refreshed read. */
+    /** PUT /api/v1/admin/studio-services/:id/addons, full-replace applicable-addons matrix; the refreshed read. */
     async setAddonMatrix(args: SetAddonMatrixArgs): Promise<StudioServiceWithBranches> {
       const res = await raw.api.v1.admin['studio-services'][':id']['addons'].$put(args);
       return unwrap(res, studioServiceWithBranchesSchema);
     },
-    /** DELETE /api/v1/admin/studio-services/:id — 204 (the delete seam); blocked → 400; both matrices' rows go with the row. */
+    /** DELETE /api/v1/admin/studio-services/:id, 204 (the delete seam); blocked → 400; both matrices' rows go with the row. */
     async remove(args: DeleteAdminStudioServiceArgs): Promise<void> {
       const res = await raw.api.v1.admin['studio-services'][':id'].$delete(args);
       if (!res.ok) {
@@ -312,27 +312,27 @@ export function adminStudioServices(raw: RpcClient) {
 /** Add-on Service wrappers over /api/v1/admin/addon-services (CRUD rides along for #140). */
 export function adminAddonServices(raw: RpcClient) {
   return {
-    /** GET /api/v1/admin/addon-services — ALL add-on services incl. deactivated. */
+    /** GET /api/v1/admin/addon-services, ALL add-on services incl. deactivated. */
     async list(): Promise<AddonService[]> {
       const res = await raw.api.v1.admin['addon-services'].$get();
       return unwrap(res, addonServiceSchema.array());
     },
-    /** GET /api/v1/admin/addon-services/:id — one add-on service; 404 when unknown. */
+    /** GET /api/v1/admin/addon-services/:id, one add-on service; 404 when unknown. */
     async byId(args: GetAdminAddonArgs): Promise<AddonService> {
       const res = await raw.api.v1.admin['addon-services'][':id'].$get(args);
       return unwrap(res, addonServiceSchema);
     },
-    /** POST /api/v1/admin/addon-services — 201 with the created add-on service. */
+    /** POST /api/v1/admin/addon-services, 201 with the created add-on service. */
     async create(json: CreateAddonArgs): Promise<AddonService> {
       const res = await raw.api.v1.admin['addon-services'].$post({ json });
       return unwrap(res, addonServiceSchema);
     },
-    /** PUT /api/v1/admin/addon-services/:id — full-object update; the refreshed add-on service. */
+    /** PUT /api/v1/admin/addon-services/:id, full-object update; the refreshed add-on service. */
     async update(args: UpdateAddonArgs): Promise<AddonService> {
       const res = await raw.api.v1.admin['addon-services'][':id'].$put(args);
       return unwrap(res, addonServiceSchema);
     },
-    /** DELETE /api/v1/admin/addon-services/:id — 204 (the delete seam); blocked → 400 with the appointment count. */
+    /** DELETE /api/v1/admin/addon-services/:id, 204 (the delete seam); blocked → 400 with the appointment count. */
     async remove(args: DeleteAdminAddonArgs): Promise<void> {
       const res = await raw.api.v1.admin['addon-services'][':id'].$delete(args);
       if (!res.ok) {
@@ -342,30 +342,30 @@ export function adminAddonServices(raw: RpcClient) {
   };
 }
 
-/** Print Size wrappers over /api/v1/admin/print-sizes (#139's lookup list grew the full CRUD in #141 — the package editor's vocabulary incl. deactivated rows). */
+/** Print Size wrappers over /api/v1/admin/print-sizes (#139's lookup list grew the full CRUD in #141, the package editor's vocabulary incl. deactivated rows). */
 export function adminPrintSizes(raw: RpcClient) {
   return {
-    /** GET /api/v1/admin/print-sizes — ALL print sizes incl. deactivated. */
+    /** GET /api/v1/admin/print-sizes, ALL print sizes incl. deactivated. */
     async list(): Promise<PrintSize[]> {
       const res = await raw.api.v1.admin['print-sizes'].$get();
       return unwrap(res, printSizeSchema.array());
     },
-    /** GET /api/v1/admin/print-sizes/:id — one print size; 404 when unknown. */
+    /** GET /api/v1/admin/print-sizes/:id, one print size; 404 when unknown. */
     async byId(args: GetAdminPrintSizeArgs): Promise<PrintSize> {
       const res = await raw.api.v1.admin['print-sizes'][':id'].$get(args);
       return unwrap(res, printSizeSchema);
     },
-    /** POST /api/v1/admin/print-sizes — 201 with the created print size. */
+    /** POST /api/v1/admin/print-sizes, 201 with the created print size. */
     async create(json: CreatePrintSizeArgs): Promise<PrintSize> {
       const res = await raw.api.v1.admin['print-sizes'].$post({ json });
       return unwrap(res, printSizeSchema);
     },
-    /** PUT /api/v1/admin/print-sizes/:id — full-object update; the refreshed print size. */
+    /** PUT /api/v1/admin/print-sizes/:id, full-object update; the refreshed print size. */
     async update(args: UpdatePrintSizeArgs): Promise<PrintSize> {
       const res = await raw.api.v1.admin['print-sizes'][':id'].$put(args);
       return unwrap(res, printSizeSchema);
     },
-    /** DELETE /api/v1/admin/print-sizes/:id — 204 (the delete seam); blocked → 400 with the inclusion count. */
+    /** DELETE /api/v1/admin/print-sizes/:id, 204 (the delete seam); blocked → 400 with the inclusion count. */
     async remove(args: DeleteAdminPrintSizeArgs): Promise<void> {
       const res = await raw.api.v1.admin['print-sizes'][':id'].$delete(args);
       if (!res.ok) {
@@ -375,30 +375,30 @@ export function adminPrintSizes(raw: RpcClient) {
   };
 }
 
-/** Attire wrappers over /api/v1/admin/attires (#139's lookup list grew the full CRUD in #141 — same growth as print sizes). */
+/** Attire wrappers over /api/v1/admin/attires (#139's lookup list grew the full CRUD in #141, same growth as print sizes). */
 export function adminAttires(raw: RpcClient) {
   return {
-    /** GET /api/v1/admin/attires — ALL attires incl. deactivated. */
+    /** GET /api/v1/admin/attires, ALL attires incl. deactivated. */
     async list(): Promise<Attire[]> {
       const res = await raw.api.v1.admin.attires.$get();
       return unwrap(res, attireSchema.array());
     },
-    /** GET /api/v1/admin/attires/:id — one attire; 404 when unknown. */
+    /** GET /api/v1/admin/attires/:id, one attire; 404 when unknown. */
     async byId(args: GetAdminAttireArgs): Promise<Attire> {
       const res = await raw.api.v1.admin.attires[':id'].$get(args);
       return unwrap(res, attireSchema);
     },
-    /** POST /api/v1/admin/attires — 201 with the created attire. */
+    /** POST /api/v1/admin/attires, 201 with the created attire. */
     async create(json: CreateAttireArgs): Promise<Attire> {
       const res = await raw.api.v1.admin.attires.$post({ json });
       return unwrap(res, attireSchema);
     },
-    /** PUT /api/v1/admin/attires/:id — full-object update; the refreshed attire. */
+    /** PUT /api/v1/admin/attires/:id, full-object update; the refreshed attire. */
     async update(args: UpdateAttireArgs): Promise<Attire> {
       const res = await raw.api.v1.admin.attires[':id'].$put(args);
       return unwrap(res, attireSchema);
     },
-    /** DELETE /api/v1/admin/attires/:id — 204 (the delete seam); blocked → 400 with the junction count. */
+    /** DELETE /api/v1/admin/attires/:id, 204 (the delete seam); blocked → 400 with the junction count. */
     async remove(args: DeleteAdminAttireArgs): Promise<void> {
       const res = await raw.api.v1.admin.attires[':id'].$delete(args);
       if (!res.ok) {
@@ -411,32 +411,32 @@ export function adminAttires(raw: RpcClient) {
 /** Gallery Category wrappers over /api/v1/admin/gallery-categories (CRUD + the display-order PUT, #141). */
 export function adminGalleryCategories(raw: RpcClient) {
   return {
-    /** GET /api/v1/admin/gallery-categories — ALL categories incl. deactivated. */
+    /** GET /api/v1/admin/gallery-categories, ALL categories incl. deactivated. */
     async list(): Promise<GalleryCategory[]> {
       const res = await raw.api.v1.admin['gallery-categories'].$get();
       return unwrap(res, galleryCategorySchema.array());
     },
-    /** GET /api/v1/admin/gallery-categories/:id — one category; 404 when unknown. */
+    /** GET /api/v1/admin/gallery-categories/:id, one category; 404 when unknown. */
     async byId(args: GetAdminGalleryCategoryArgs): Promise<GalleryCategory> {
       const res = await raw.api.v1.admin['gallery-categories'][':id'].$get(args);
       return unwrap(res, galleryCategorySchema);
     },
-    /** POST /api/v1/admin/gallery-categories — 201 with the created category (slug server-generated). */
+    /** POST /api/v1/admin/gallery-categories, 201 with the created category (slug server-generated). */
     async create(json: CreateGalleryCategoryArgs): Promise<GalleryCategory> {
       const res = await raw.api.v1.admin['gallery-categories'].$post({ json });
       return unwrap(res, galleryCategorySchema);
     },
-    /** PUT /api/v1/admin/gallery-categories/:id — full-object update; the refreshed category. */
+    /** PUT /api/v1/admin/gallery-categories/:id, full-object update; the refreshed category. */
     async update(args: UpdateGalleryCategoryArgs): Promise<GalleryCategory> {
       const res = await raw.api.v1.admin['gallery-categories'][':id'].$put(args);
       return unwrap(res, galleryCategorySchema);
     },
-    /** PUT /api/v1/admin/gallery-categories/order — full-replace display order; the reordered list. */
+    /** PUT /api/v1/admin/gallery-categories/order, full-replace display order; the reordered list. */
     async setOrder(json: GalleryCategoryOrderArgs): Promise<GalleryCategory[]> {
       const res = await raw.api.v1.admin['gallery-categories']['order'].$put({ json });
       return unwrap(res, galleryCategorySchema.array());
     },
-    /** DELETE /api/v1/admin/gallery-categories/:id — 204 (the delete seam); blocked → 400 while any photo sits in the category. */
+    /** DELETE /api/v1/admin/gallery-categories/:id, 204 (the delete seam); blocked → 400 while any photo sits in the category. */
     async remove(args: DeleteAdminGalleryCategoryArgs): Promise<void> {
       const res = await raw.api.v1.admin['gallery-categories'][':id'].$delete(args);
       if (!res.ok) {
@@ -449,32 +449,32 @@ export function adminGalleryCategories(raw: RpcClient) {
 /** Gallery Photo wrappers over /api/v1/admin/gallery-photos (CRUD + order + the binary by-id thumb seam, #141). */
 export function adminGalleryPhotos(raw: RpcClient) {
   return {
-    /** GET /api/v1/admin/gallery-photos — ALL photos incl. deactivated, photoUrl resolved. */
+    /** GET /api/v1/admin/gallery-photos, ALL photos incl. deactivated, photoUrl resolved. */
     async list(): Promise<GalleryPhoto[]> {
       const res = await raw.api.v1.admin['gallery-photos'].$get();
       return unwrap(res, galleryPhotoSchema.array());
     },
-    /** GET /api/v1/admin/gallery-photos/:id — one photo; 404 when unknown. */
+    /** GET /api/v1/admin/gallery-photos/:id, one photo; 404 when unknown. */
     async byId(args: GetAdminGalleryPhotoArgs): Promise<GalleryPhoto> {
       const res = await raw.api.v1.admin['gallery-photos'][':id'].$get(args);
       return unwrap(res, galleryPhotoSchema);
     },
-    /** POST /api/v1/admin/gallery-photos — 201 with the created photo (the staging key is commit-verified and promoted at persist). */
+    /** POST /api/v1/admin/gallery-photos, 201 with the created photo (the staging key is commit-verified and promoted at persist). */
     async create(json: CreateGalleryPhotoArgs): Promise<GalleryPhoto> {
       const res = await raw.api.v1.admin['gallery-photos'].$post({ json });
       return unwrap(res, galleryPhotoSchema);
     },
-    /** PUT /api/v1/admin/gallery-photos/:id — full-object update; the refreshed photo. */
+    /** PUT /api/v1/admin/gallery-photos/:id, full-object update; the refreshed photo. */
     async update(args: UpdateGalleryPhotoArgs): Promise<GalleryPhoto> {
       const res = await raw.api.v1.admin['gallery-photos'][':id'].$put(args);
       return unwrap(res, galleryPhotoSchema);
     },
-    /** PUT /api/v1/admin/gallery-photos/order — full-replace display order; the reordered list. */
+    /** PUT /api/v1/admin/gallery-photos/order, full-replace display order; the reordered list. */
     async setOrder(json: GalleryPhotoOrderArgs): Promise<GalleryPhoto[]> {
       const res = await raw.api.v1.admin['gallery-photos']['order'].$put({ json });
       return unwrap(res, galleryPhotoSchema.array());
     },
-    /** GET /api/v1/admin/gallery-photos/:id/thumb — BINARY seam: a 2xx returns the raw Response untouched (never unwrapped); non-2xx throws the envelope error via unwrapError. */
+    /** GET /api/v1/admin/gallery-photos/:id/thumb, BINARY seam: a 2xx returns the raw Response untouched (never unwrapped); non-2xx throws the envelope error via unwrapError. */
     async thumbResponse(args: GetGalleryPhotoThumbArgs): Promise<Response> {
       const res = await raw.api.v1.admin['gallery-photos'][':id']['thumb'].$get(args);
       if (!res.ok) {
@@ -482,7 +482,7 @@ export function adminGalleryPhotos(raw: RpcClient) {
       }
       return res;
     },
-    /** DELETE /api/v1/admin/gallery-photos/:id — 204 (the delete seam); the image object goes with the row. */
+    /** DELETE /api/v1/admin/gallery-photos/:id, 204 (the delete seam); the image object goes with the row. */
     async remove(args: DeleteAdminGalleryPhotoArgs): Promise<void> {
       const res = await raw.api.v1.admin['gallery-photos'][':id'].$delete(args);
       if (!res.ok) {
@@ -495,32 +495,32 @@ export function adminGalleryPhotos(raw: RpcClient) {
 /** Testimonial wrappers over /api/v1/admin/testimonials (CRUD + the display-order PUT, #141). */
 export function adminTestimonials(raw: RpcClient) {
   return {
-    /** GET /api/v1/admin/testimonials — ALL testimonials incl. deactivated. */
+    /** GET /api/v1/admin/testimonials, ALL testimonials incl. deactivated. */
     async list(): Promise<Testimonial[]> {
       const res = await raw.api.v1.admin.testimonials.$get();
       return unwrap(res, testimonialSchema.array());
     },
-    /** GET /api/v1/admin/testimonials/:id — one testimonial; 404 when unknown. */
+    /** GET /api/v1/admin/testimonials/:id, one testimonial; 404 when unknown. */
     async byId(args: GetAdminTestimonialArgs): Promise<Testimonial> {
       const res = await raw.api.v1.admin.testimonials[':id'].$get(args);
       return unwrap(res, testimonialSchema);
     },
-    /** POST /api/v1/admin/testimonials — 201 with the created testimonial. */
+    /** POST /api/v1/admin/testimonials, 201 with the created testimonial. */
     async create(json: CreateTestimonialArgs): Promise<Testimonial> {
       const res = await raw.api.v1.admin.testimonials.$post({ json });
       return unwrap(res, testimonialSchema);
     },
-    /** PUT /api/v1/admin/testimonials/:id — full-object update; the refreshed testimonial. */
+    /** PUT /api/v1/admin/testimonials/:id, full-object update; the refreshed testimonial. */
     async update(args: UpdateTestimonialArgs): Promise<Testimonial> {
       const res = await raw.api.v1.admin.testimonials[':id'].$put(args);
       return unwrap(res, testimonialSchema);
     },
-    /** PUT /api/v1/admin/testimonials/order — full-replace display order; the reordered list. */
+    /** PUT /api/v1/admin/testimonials/order, full-replace display order; the reordered list. */
     async setOrder(json: TestimonialOrderArgs): Promise<Testimonial[]> {
       const res = await raw.api.v1.admin.testimonials['order'].$put({ json });
       return unwrap(res, testimonialSchema.array());
     },
-    /** DELETE /api/v1/admin/testimonials/:id — 204 (the delete seam); testimonials are blocked by nothing. */
+    /** DELETE /api/v1/admin/testimonials/:id, 204 (the delete seam); testimonials are blocked by nothing. */
     async remove(args: DeleteAdminTestimonialArgs): Promise<void> {
       const res = await raw.api.v1.admin.testimonials[':id'].$delete(args);
       if (!res.ok) {
@@ -530,15 +530,15 @@ export function adminTestimonials(raw: RpcClient) {
   };
 }
 
-/** Testimonial-submission moderation wrappers over /api/v1/admin/testimonial-submissions (M7 #216 — the media action-endpoint precedent). */
+/** Testimonial-submission moderation wrappers over /api/v1/admin/testimonial-submissions (M7 #216, the media action-endpoint precedent). */
 export function adminTestimonialSubmissions(raw: RpcClient) {
   return {
-    /** GET — the whole queue, newest-first (pending + rejected retained — the audit trail). */
+    /** GET, the whole queue, newest-first (pending + rejected retained, the audit trail). */
     async list(): Promise<TestimonialSubmission[]> {
       const res = await raw.api.v1.admin['testimonial-submissions'].$get();
       return unwrap(res, testimonialSubmissionSchema.array());
     },
-    /** POST /:id/accept — optionally edited {quote, person}; the Testimonial appends at the end of render order. */
+    /** POST /:id/accept, optionally edited {quote, person}; the Testimonial appends at the end of render order. */
     async accept(
       id: string,
       json: AcceptTestimonialSubmissionInput = {}
@@ -549,14 +549,14 @@ export function adminTestimonialSubmissions(raw: RpcClient) {
       });
       return unwrap(res, testimonialSubmissionSchema);
     },
-    /** POST /:id/reject — retains the row as rejected (no body: the route carries no validator). */
+    /** POST /:id/reject, retains the row as rejected (no body: the route carries no validator). */
     async reject(id: string): Promise<TestimonialSubmission> {
       const res = await raw.api.v1.admin['testimonial-submissions'][':id'].reject.$post({
         param: { id },
       });
       return unwrap(res, testimonialSubmissionSchema);
     },
-    /** DELETE /:id — regardless of status; 204 (the delete seam: no body to unwrap). */
+    /** DELETE /:id, regardless of status; 204 (the delete seam: no body to unwrap). */
     async remove(id: string): Promise<void> {
       const res = await raw.api.v1.admin['testimonial-submissions'][':id'].$delete({
         param: { id },
@@ -569,7 +569,7 @@ export function adminTestimonialSubmissions(raw: RpcClient) {
 /** Media wrappers over /api/v1/admin/media (ticket 02's presign route). */
 export function adminMedia(raw: RpcClient) {
   return {
-    /** POST /api/v1/admin/media/presign — purpose+contentType in, staging key + type-enforced upload URL out (ADR-0019). */
+    /** POST /api/v1/admin/media/presign, purpose+contentType in, staging key + type-enforced upload URL out (ADR-0019). */
     async presign(json: PresignArgs): Promise<MediaPresignResponse> {
       const res = await raw.api.v1.admin.media.presign.$post({ json });
       return unwrap(res, mediaPresignResponseSchema);
@@ -580,7 +580,7 @@ export function adminMedia(raw: RpcClient) {
 /** Site-settings wrappers over /api/v1/admin/site-settings (the singleton full-object PUT, M7 #215). */
 export function adminSiteSettings(raw: RpcClient) {
   return {
-    /** PUT /api/v1/admin/site-settings — the one full-object save (no per-field patching); the refreshed read. */
+    /** PUT /api/v1/admin/site-settings, the one full-object save (no per-field patching); the refreshed read. */
     async update(json: SaveSiteSettingsInput): Promise<SiteSettings> {
       const res = await raw.api.v1.admin['site-settings'].$put({ json });
       return unwrap(res, siteSettingsSchema);

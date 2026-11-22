@@ -1,13 +1,13 @@
-// Owner tooling — main only. Never cherry-picked to `v1` (it lives under
+// Owner tooling, main only. Never cherry-picked to `v1` (it lives under
 // `scripts/`, a path the seed removed; the pick discipline skips it).
 //
 // The per-PR triage classifier for the v1 pick discipline (issue #82;
 // ADR-0015 decision 2; runbook docs/agents/v1-picks.md). Given a commit on
 // main, it classifies every path the commit touched as MAIN-ONLY or v1-path
 // and prints the path-level verdict:
-//   SKIP  — every touched path is main-only (nothing can enter v1)
-//   PICK  — no touched path is main-only (candidate; content rules still apply)
-//   SPLIT — both kinds (pick the v1-paths, drop the main-only ones)
+//   SKIP: every touched path is main-only (nothing can enter v1)
+//   PICK: no touched path is main-only (candidate; content rules still apply)
+//   SPLIT: both kinds (pick the v1-paths, drop the main-only ones)
 //
 // MAIN-ONLY = the seed's invert-paths list (scripts/seed-v1/paths.txt, read
 // live so the ruleset of record drives the verdict) + the booking-cluster
@@ -17,7 +17,7 @@
 // Usage:
 //   node scripts/v1-triage.mjs <commit> [--repo <path>]
 // Exit codes: 0 verdict printed · 2 usage/environment error.
-// The verdict is path-level only — apply the runbook's content rules before
+// The verdict is path-level only, apply the runbook's content rules before
 // executing a PICK or SPLIT.
 
 import { spawnSync } from 'node:child_process';
@@ -34,7 +34,7 @@ const CLUSTER = [
   /^apps\/api\/src\/services\/(appointments|confirmation-email)/,
   /^apps\/api\/test\/appointments/,
   /^packages\/api-client\/src\/routes\/appointments/,
-  /^docs\/client(\/|$)/, // main-only fence (spec § Docs) — post-dates the seed, so not on paths.txt
+  /^docs\/client(\/|$)/, // main-only fence (spec § Docs), post-dates the seed, so not on paths.txt
 ];
 
 function failUsage(message) {
@@ -87,7 +87,7 @@ function main(argv) {
     .split('\n')
     .filter(Boolean);
 
-  console.log(`v1 triage — ${sha.slice(0, 7)} ${subject}`);
+  console.log(`v1 triage, ${sha.slice(0, 7)} ${subject}`);
   let mainOnly = 0;
   let v1 = 0;
   for (const p of paths) {
@@ -99,13 +99,13 @@ function main(argv) {
       console.log(`  v1-path    ${p}`);
     }
   }
-  if (paths.length === 0) console.log('  (no paths — empty commit)');
+  if (paths.length === 0) console.log('  (no paths, empty commit)');
 
   let verdict;
-  if (v1 === 0) verdict = `SKIP — all ${mainOnly} path(s) main-only`;
+  if (v1 === 0) verdict = `SKIP, all ${mainOnly} path(s) main-only`;
   else if (mainOnly === 0)
-    verdict = `PICK — ${v1} v1-path(s); apply the content rules before picking`;
-  else verdict = `SPLIT — ${v1} v1-path(s) + ${mainOnly} main-only; drop the main-only paths`;
+    verdict = `PICK, ${v1} v1-path(s); apply the content rules before picking`;
+  else verdict = `SPLIT, ${v1} v1-path(s) + ${mainOnly} main-only; drop the main-only paths`;
   console.log(`VERDICT ${verdict}`);
 }
 

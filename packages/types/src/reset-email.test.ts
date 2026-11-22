@@ -1,5 +1,5 @@
 // The internal send endpoint's wire schema (M7 #221, ADR-0021): the admin
-// forwards exactly { to, url } — the recipient and BetterAuth's built token
+// forwards exactly { to, url }, the recipient and BetterAuth's built token
 // URL. Internal Worker-to-Worker machinery, not a public /api/v1 contract
 // (ADR-0006 wraps that surface; this rides ADR-0016's transport), but the
 // same validate-external-input-with-Zod law applies, so the schema lives

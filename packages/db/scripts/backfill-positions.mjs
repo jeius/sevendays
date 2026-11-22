@@ -1,9 +1,9 @@
 // One-off M5 backfill (ticket #135, Task 3): rewrites inclusion + junction
-// positions from today's render order — inclusions by id (the list read's
-// key), junctions by (created_at, id) per inclusion — then verifies the
+// positions from today's render order, inclusions by id (the list read's
+// key), junctions by (created_at, id) per inclusion, then verifies the
 // ticket's acceptance shape: all lookups active, positions contiguous 1..N
 // per package and per inclusion, zero NULLs. Idempotent: row_number()
-// re-derives the same values on rerun. Prints counts only — never a
+// re-derives the same values on rerun. Prints counts only, never a
 // connection string.
 // Run: node --env-file=.env scripts/backfill-positions.mjs  (exit 0 = verified)
 
@@ -120,7 +120,7 @@ if (summary) {
 await sql.end({ timeout: 5 });
 
 if (failures.length > 0) {
-  console.log(`GATE: FAIL — ${failures.length} violation(s) above`);
+  console.log(`GATE: FAIL, ${failures.length} violation(s) above`);
   process.exit(1);
 }
-console.log('GATE: PASS — backfill verified (lookups active; positions monotonic 1..N)');
+console.log('GATE: PASS, backfill verified (lookups active; positions monotonic 1..N)');

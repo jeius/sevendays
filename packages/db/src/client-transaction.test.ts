@@ -5,7 +5,7 @@ import { createDbClient, type Database } from './client.js';
 // Seam 2 of the intake spec: pin the rollback/commit semantics the
 // createAppointment transaction relies on, at the db-client layer, over real
 // Postgres (ADR-0008). The live-pooler twin is the one-shot
-// scripts/probe-pooler-transaction.mjs — workerd/pooler behavior does not
+// scripts/probe-pooler-transaction.mjs, workerd/pooler behavior does not
 // surface in Node-env compose tests (the M1.5 lesson).
 const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL;
 

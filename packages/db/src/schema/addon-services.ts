@@ -1,6 +1,6 @@
 import { boolean, integer, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 
-// Paid per-booking extras (Makeup, Hairstyle) with flat per-service pricing —
+// Paid per-booking extras (Makeup, Hairstyle) with flat per-service pricing:
 // no per-package price variants. is_active gates the booking surface without
 // deleting catalog history.
 export const addonServices = pgTable(

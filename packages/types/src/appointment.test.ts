@@ -36,7 +36,7 @@ const baseCreate = {
   scheduledAt: '2026-09-05T10:00:00.000Z',
 };
 
-// No servicePackageId key at all — exercises the default(null) fill.
+// No servicePackageId key at all, exercises the default(null) fill.
 const serviceOnlyCreate = {
   branchId: UUID,
   studioServiceId: UUID,
@@ -46,7 +46,7 @@ const serviceOnlyCreate = {
   scheduledAt: '2026-09-05T10:00:00.000Z',
 };
 
-// Neither key — both refs default null, so the refine must reject.
+// Neither key, both refs default null, so the refine must reject.
 const neitherCreate = {
   branchId: UUID,
   customerName: 'Juan Dela Cruz',
@@ -55,7 +55,7 @@ const neitherCreate = {
   scheduledAt: '2026-09-05T10:00:00.000Z',
 };
 
-describe('appointmentSchema (generalized — M2 ticket 02)', () => {
+describe('appointmentSchema (generalized, M2 ticket 02)', () => {
   it('parses a package-only row (service ref null)', () => {
     const result = appointmentSchema.safeParse(packageRow);
     expect(result.success).toBe(true);
@@ -101,7 +101,7 @@ describe('appointmentSchema (generalized — M2 ticket 02)', () => {
   });
 });
 
-describe('createAppointmentSchema (generalized — M2 ticket 02)', () => {
+describe('createAppointmentSchema (generalized, M2 ticket 02)', () => {
   it('accepts package-only and defaults the service ref to null', () => {
     const result = createAppointmentSchema.safeParse(baseCreate);
     expect(result.success).toBe(true);
@@ -165,7 +165,7 @@ describe('createAppointmentSchema (generalized — M2 ticket 02)', () => {
   });
 
   it('strips a client-supplied price snapshot (server-written, renamed)', () => {
-    // z.object strips unknown keys — the contract is that the server-written
+    // z.object strips unknown keys, the contract is that the server-written
     // snapshot never appears in the parsed create output (assert on output,
     // not on a supposed rejection).
     const result = createAppointmentSchema.safeParse({

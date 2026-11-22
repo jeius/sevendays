@@ -3,7 +3,7 @@
  * functions from catalog-style entries plus resolved id lookups to typed row
  * values and junction pairs. What an Inclusion row needs per Kind, how
  * combined Attire contexts decompose into junction pairs in catalog order,
- * how Frames attach — nothing about HOW or WHEN rows are written: no I/O, no
+ * how Frames attach, nothing about HOW or WHEN rows are written: no I/O, no
  * client creation, no transactions. The seeder (upsert-and-rebuild) and the
  * API test fixtures (plain inserts) are its two write adapters.
  *
@@ -11,7 +11,7 @@
  * resolved, frameId required, description null; print → entry quantity,
  * printSizeId resolved, frameId null, description null; privilege →
  * quantity/printSizeId/frameId null, description carried. Junction pairs
- * decompose an entry's attireNames in array order — 'Filipiniana/Executive'
+ * decompose an entry's attireNames in array order, 'Filipiniana/Executive'
  * is two pairs, Filipiniana first (the canonical catalog attire order, never
  * alphabetized). Positions are 1-based: inclusion position = entry order
  * within the package (M5 array-order-is-the-position), junction position =
@@ -63,7 +63,7 @@ export function buildInclusionRowValues(input: {
   entries: readonly InclusionEntry[];
   printSizeId: PrintSizeIdLookup;
 }): InclusionRowValues[] {
-  // biome-ignore lint/suspicious/useIterableCallbackReturn: exhaustive switch over InclusionEntry is deliberate — no default branch (adding a Kind becomes a compile error)
+  // biome-ignore lint/suspicious/useIterableCallbackReturn: exhaustive switch over InclusionEntry is deliberate, no default branch (adding a Kind becomes a compile error)
   return input.entries.map((entry, index) => {
     const base = { servicePackageId: input.servicePackageId, position: index + 1 };
     switch (entry.kind) {
@@ -146,7 +146,7 @@ function resolvePrintSize(code: string | null, lookup: PrintSizeIdLookup): strin
 
 // Stable URL identifier from a display name (M2 ticket 01): lowercase, strip
 // everything but letters/digits/hyphens, collapse whitespace to single
-// hyphens. The seed generates once and backfills with coalesce — a later
+// hyphens. The seed generates once and backfills with coalesce, a later
 // catalog rename must never rewrite an existing slug (/packages/:slug URLs
 // survive renames). The random fallback covers a name with no alphanumeric
 // characters; the unique constraint (checked in the seed before insert)

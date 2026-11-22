@@ -1,5 +1,5 @@
 // The metrics probe module (#186, ADR-0023): the DB half of the admin's
-// metrics seam. DB access goes through packages/db — the system-view SQL
+// metrics seam. DB access goes through packages/db, the system-view SQL
 // (pg_stat_activity, pg_database_size) has no schema table, so it ships as
 // pinned static strings executed over the caller's client. Everything is
 // deliberately drizzle-free at the seam: callers pass a structural `exec`
@@ -10,7 +10,7 @@
 export type SqlExec = (statement: string) => Promise<Record<string, unknown>[]>;
 
 // Supavisor's session-pooler client ceiling at Micro compute (the dev/studio
-// plan) — a REFERENCE marker for the census widget, not a quota (research
+// plan), a REFERENCE marker for the census widget, not a quota (research
 // #174: ceilings are compute-tied and hard-coded).
 export const POOLER_CLIENT_CEILING = 200;
 

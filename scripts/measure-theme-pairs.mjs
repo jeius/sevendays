@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-// measure-theme-pairs.mjs — the theme-pair measurement harness (M7 #217,
+// measure-theme-pairs.mjs, the theme-pair measurement harness (M7 #217,
 // spec #172 § Dark mode). Parses packages/ui/src/tokens.css and measures
 // WCAG 2.x contrast for the pinned pair tables:
-//   LIGHT — must reproduce M3's recorded table EXACTLY (#96, 2026-09-14):
+//   LIGHT: must reproduce M3's recorded table EXACTLY (#96, 2026-09-14):
 //     the "light pairs re-measured unchanged" acceptance.
-//   DARK  — the .dark block's counterpart table, each pair at its floor
+//   DARK: the .dark block's counterpart table, each pair at its floor
 //     (4.5:1 text, 3:1 non-text indicators).
 // Also enforces the token layer's discipline: every inline `/* #hex */`
 // comment must equal the oklch-derived hex (hexes are canonical), and
 // every oklch must round-trip (oklch -> sRGB -> hex stable on re-derive).
 // The oklch->sRGB math below reproduces all six of M3/#97's recorded light
-// pairs exactly (13.85 / 5.65 / 8.22 / 4.59 / 17.36 / 18.64) — verified
+// pairs exactly (13.85 / 5.65 / 8.22 / 4.59 / 17.36 / 18.64), verified
 // 2026-10-14; if you change the math, re-verify against that table.
 // Exit 0 = all green; 1 = any failure. Plain Node, zero imports.
 
@@ -18,7 +18,7 @@ import { readFileSync } from 'node:fs';
 
 const TOKENS = new URL('../packages/ui/src/tokens.css', import.meta.url);
 
-// — oklch <-> sRGB (Björn Ottosson's OKLab matrices; sRGB gamut clamped) —
+// oklch <-> sRGB (Björn Ottosson's OKLab matrices; sRGB gamut clamped)
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
 
 function oklchToSrgb(L, C, H) {
@@ -82,11 +82,11 @@ function contrast(fgOklch, bgOklch) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-// — tokens.css parsing: the :root and .dark blocks, var-chain resolution —
+// tokens.css parsing: the :root and .dark blocks, var-chain resolution.
 const css = readFileSync(TOKENS, 'utf8');
 
-// Match a selector as a RULE START at line start (e.g. `:root {`, `.dark {`)
-// — a bare indexOf would false-hit the header comment's ".dark block"
+// Match a selector as a RULE START at line start (e.g. `:root {`, `.dark {`):
+// a bare indexOf would false-hit the header comment's ".dark block"
 // prose and slice the wrong braces. `^\.dark\s*\{` cannot match
 // `.dark img {` (the selector continues before the brace).
 function block(selector) {
@@ -125,7 +125,7 @@ function rawOklch(value) {
 }
 
 // Resolve a token to an oklch triple: literals first, then var() chains
-// (own block first — a .dark token may reference a token .dark redefines —
+// (own block first, a .dark token may reference a token .dark redefines,
 // then :root). Alpha values (any '/') are not pairs and resolve to null.
 function resolve(name, from, seen = new Set()) {
   if (seen.has(name)) return null;
@@ -146,8 +146,8 @@ const fail = (line) => {
 };
 const fmt = (n) => n.toFixed(2);
 
-// — the pinned pair tables —
-// LIGHT: [label, fg, bg, recorded] — measured value must equal `recorded`.
+// the pinned pair tables:
+// LIGHT: [label, fg, bg, recorded], measured value must equal `recorded`.
 const LIGHT_PAIRS = [
   ['ink on secondary (gray-light)', 'brand-ink', 'secondary', 13.85],
   ['white on primary', 'primary-foreground', 'primary', 5.65],
@@ -155,7 +155,7 @@ const LIGHT_PAIRS = [
   ['muted on wash-b (the darkest wash)', 'muted-text', 'wash-b', 4.59],
 ];
 
-// DARK: [label, fg, bg, floor] — measured value must be >= floor.
+// DARK: [label, fg, bg, floor], measured value must be >= floor.
 // Floors encode the class: 4.5 = text pairs, 3.0 = non-text indicators.
 const DARK_PAIRS = [
   ['87 foreground on background', 'foreground', 'background', 4.5],
@@ -179,7 +179,7 @@ const DARK_PAIRS = [
   ['ring (brand-400) on card', 'ring', 'card', 3.0],
 ];
 
-console.log('LIGHT — must reproduce M3\u2019s recorded table (#96, 2026-09-14)');
+console.log('LIGHT, must reproduce M3\u2019s recorded table (#96, 2026-09-14)');
 for (const [label, fg, bg, recorded] of LIGHT_PAIRS) {
   const f = resolve(fg, ROOT);
   const b = resolve(bg, ROOT);
@@ -195,12 +195,12 @@ for (const [label, fg, bg, recorded] of LIGHT_PAIRS) {
   if (!ok) failures++;
 }
 
-console.log('\nDARK — the .dark counterpart table (floors: 4.5 text / 3.0 non-text)');
+console.log('\nDARK, the .dark counterpart table (floors: 4.5 text / 3.0 non-text)');
 if (!DARK) {
-  fail('FAIL no .dark block in tokens.css — dark mode is parked (pre-#217 state)');
+  fail('FAIL no .dark block in tokens.css, dark mode is parked (pre-#217 state)');
 } else {
   for (const [label, fg, bg, floor] of DARK_PAIRS) {
-    // fg/bg names may live in .dark, :root, or both — resolve dark-first so
+    // fg/bg names may live in .dark, :root, or both, resolve dark-first so
     // overridden tokens measure their dark values (e.g. muted-foreground,
     // destructive, sidebar), while unchanged ones (brand-300, primary) fall
     // through to :root.
@@ -219,8 +219,8 @@ if (!DARK) {
   }
 }
 
-// — the discipline: hexes canonical + oklch round-trips —
-console.log('\nDISCIPLINE — inline hex comments vs derived hexes; round-trips');
+// the discipline: hexes canonical + oklch round-trips
+console.log('\nDISCIPLINE, inline hex comments vs derived hexes; round-trips');
 let checked = 0;
 for (const [blockName, map] of [
   [':root', ROOT],

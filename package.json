@@ -17,6 +17,7 @@
     "test:e2e": "playwright test",
     "typecheck": "turbo run typecheck",
     "check": "turbo run lint format typecheck test",
+    "em-dash": "node scripts/em-dash-sweep.mjs",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {

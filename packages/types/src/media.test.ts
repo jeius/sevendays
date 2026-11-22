@@ -53,7 +53,7 @@ describe('mediaPresignRequestSchema', () => {
     ).toBe(false);
   });
 
-  it('parse output carries exactly purpose + contentType — a smuggled sizeBytes is stripped (size is not declarable)', () => {
+  it('parse output carries exactly purpose + contentType, a smuggled sizeBytes is stripped (size is not declarable)', () => {
     const parsed = mediaPresignRequestSchema.parse({
       purpose: 'package-cover',
       contentType: 'image/jpeg',
@@ -117,7 +117,7 @@ describe('mediaStagingKeySchema', () => {
       mediaStagingKeySchema.safeParse('tmp/00000000-0000-4000-8000-000000000000.JPG').success
     ).toBe(false);
     // #154 (the #136 T3 one-liner): a lowercase NON-JPEG extension is its own
-    // reject case — the regex pins the extension, not just letter case.
+    // reject case, the regex pins the extension, not just letter case.
     expect(
       mediaStagingKeySchema.safeParse('tmp/00000000-0000-4000-8000-000000000000.txt').success
     ).toBe(false);
