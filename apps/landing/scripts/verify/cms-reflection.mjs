@@ -405,12 +405,12 @@ async function main() {
     });
     const postedBody = await posted.json().catch(() => ({}));
     // The generic 201 is a FIXED message — packages/types'
-    // TESTIMONIAL_SUBMISSION_ACCEPTED ('Thank you — your story is on its
+    // TESTIMONIAL_SUBMISSION_ACCEPTED ('Thank you! Your story is on its
     // way.'), re-derived here per the harness's no-import rule.
     check(
       'step8: the public POST answers the generic 201 with NO row echo',
       posted.status === 201 &&
-        postedBody.message === 'Thank you — your story is on its way.' &&
+        postedBody.message === 'Thank you! Your story is on its way.' &&
         !JSON.stringify(postedBody).includes(subPerson)
     );
     const queue = await statusCall('GET', '/testimonial-submissions');

@@ -13,7 +13,7 @@ export const printSizeSeeds = [
   {
     code: '8R',
     description:
-      '8R print — nominally the same physical size as 8x10; both appear in the price list. Client to confirm at seed review whether they merge.',
+      '8R print: nominally the same physical size as 8x10; both appear in the price list. Client to confirm at seed review whether they merge.',
   },
   { code: '8x10', description: '8x10 inch print, commonly framed.' },
   { code: '11x14', description: '11x14 inch print, commonly framed.' },
@@ -100,7 +100,7 @@ export type PackageSeed = {
 export const packageSeeds: PackageSeed[] = [
   {
     name: 'Basic Package',
-    description: 'Entry graduation portrait package — 1 framed 8x10 Toga plus wallet-size prints.',
+    description: 'Entry graduation portrait package: 1 framed 8x10 Toga plus wallet-size prints.',
     priceCents: 90000,
     framedPictures: [
       // Frame: 1pc 8x10 Toga

@@ -261,7 +261,7 @@ it('testimonialSubmissions.create parses the generic accepted body (message, not
     quote: 'The photographer made our graduation shoot feel effortless.',
     person: 'Loopback Sender',
   });
-  expect(accepted).toEqual({ message: 'Thank you — your story is on its way.' });
+  expect(accepted).toEqual({ message: 'Thank you! Your story is on its way.' });
 });
 
 it('a honeypot-filled create answers the byte-identical body (the discard is indistinguishable)', async () => {
@@ -271,7 +271,7 @@ it('a honeypot-filled create answers the byte-identical body (the discard is ind
     person: 'Bot Sender',
     website: 'https://spam.example',
   });
-  expect(discarded).toEqual({ message: 'Thank you — your story is on its way.' });
+  expect(discarded).toEqual({ message: 'Thank you! Your story is on its way.' });
   // And the queue never saw it: no row anywhere is 'Bot Sender'.
   const rows = await client.admin.testimonialSubmissions.list();
   expect(rows.some((r) => r.person === 'Bot Sender')).toBe(false);

@@ -60,7 +60,7 @@ export type AcceptTestimonialSubmissionInput = z.infer<typeof acceptTestimonialS
 // construction. The line is the #164 prototype Round-4 success-panel h2
 // (owner-reacted 2026-10-01, .scratch/2026-09-30-164-rulings.md).
 export const TESTIMONIAL_SUBMISSION_ACCEPTED = {
-  message: 'Thank you — your story is on its way.',
+  message: 'Thank you! Your story is on its way.',
 } as const;
 
 export const testimonialSubmissionAcceptedSchema = z.object({
