@@ -1,26 +1,26 @@
 # Staff provisioning & password reset (v1)
 
-The admin app has no self-serve sign-up (`disableSignUp: true` —
+The admin app has no self-serve sign-up (`disableSignUp: true`,
 `apps/admin/src/lib/auth.ts`): the only way a staff user comes to exist is the
 owner-run `create-staff` command, and the same command is the v1
-password-reset path. There is no email flow — resets are owner-operated by
+password-reset path. There is no email flow, resets are owner-operated by
 design (the #75 handover model: the owner operates v1's machinery for its
 life).
 
-> **Annotated 2026-11-14:** the self-serve forgot-password flow and the owner-only Users tab went live 2026-10-19 (#221) — routine user creation and password resets no longer require this CLI. This runbook remains the accurate record for the bootstrap/break-glass path it now is (first owner, lockout recovery, owner-side resets); its formal demotion to bootstrap + break-glass rides #222 (owner-ruled hold, 2026-11-05).
+> **Annotated 2026-11-14:** the self-serve forgot-password flow and the owner-only Users tab went live 2026-10-19 (#221), routine user creation and password resets no longer require this CLI. This runbook remains the accurate record for the bootstrap/break-glass path it now is (first owner, lockout recovery, owner-side resets); its formal demotion to bootstrap + break-glass rides #222 (owner-ruled hold, 2026-11-05).
 
 ## Creating a staff user
 
 Prerequisites (the dev machine already has these; a fresh clone needs all):
 
-1. `pnpm install && pnpm build:packages` — the CLI loads
+1. `pnpm install && pnpm build:packages`, the CLI loads
    `apps/admin/src/lib/auth.config.ts`, which imports `@sevendays/db`'s
    built `dist/`.
 2. `apps/admin/.env.local` carrying `DATABASE_URL` (the pooled transaction
    URL, ADR-0007), `BETTER_AUTH_SECRET` (32+ chars, shared with the api),
-   and `BETTER_AUTH_URL` — see `apps/admin/.env.example`. For the deployed
+   and `BETTER_AUTH_URL`, see `apps/admin/.env.example`. For the deployed
    targets the same values live as Worker secrets/vars (#122's table).
-3. The auth tables applied (migration 0005 — done on the shared database).
+3. The auth tables applied (migration 0005, done on the shared database).
 
 Run from anywhere in the repo:
 
@@ -31,14 +31,14 @@ pnpm --filter @sevendays/admin create-staff --email <email> --name "<name>"
 - The command wraps the version-pinned BetterAuth CLI
   (`pnpm dlx auth@1.7.5 create-admin --config src/lib/auth.config.ts
   --role admin`); it creates the user through BetterAuth's own server-side
-  `auth.api.createUser` path — password hashed with scrypt, `role` = admin,
+  `auth.api.createUser` path, password hashed with scrypt, `role` = admin,
   email marked verified.
-- **The password is prompted interactively** — it never rides a flag, a
+- **The password is prompted interactively**, it never rides a flag, a
   file, or a script argument. Choose 12+ characters
   (`minPasswordLength: 12`).
 - If users already exist, the CLI asks for confirmation before creating
   another.
-- **Role (ADR-0018):** the script hardcodes `--role admin` — the owner's
+- **Role (ADR-0018):** the script hardcodes `--role admin`, the owner's
   role, and the only one BetterAuth's `admin()` plugin answers its
   user-management endpoints (`/api/auth/admin/*`) for. Until the dashboard
   users page ships (M5.5), provision anyone other than the owner with a
@@ -48,13 +48,13 @@ pnpm --filter @sevendays/admin create-staff --email <email> --name "<name>"
   pnpm --filter @sevendays/admin create-staff --email <email> --name "<name>" --role staff
   ```
 
-  The trailing flag overrides the script's hardcoded one — spike-verified
+  The trailing flag overrides the script's hardcoded one, spike-verified
   2026-09-24 (the created row read `role: staff`). Verify the row after
   creating: nothing validates the role vocabulary at write time.
 
 ## Resetting a staff password
 
-1. Remove the stale row — its sessions and accounts cascade with it (the
+1. Remove the stale row, its sessions and accounts cascade with it (the
    FKs are `on delete cascade`):
 
 ```sh
@@ -86,5 +86,5 @@ curl -sS -i -X POST http://localhost:3000/api/auth/sign-in/email \
 → `200` with a `set-cookie: better-auth.session_token=…` header (dev; the
 cookie is `__Secure-`-prefixed in production). A wrong password returns
 `401 {"code":"INVALID_EMAIL_OR_PASSWORD","message":"Invalid email or
-password"}` — the generic response; the login UI never says which field was
+password"}`, the generic response; the login UI never says which field was
 wrong.
