@@ -89,7 +89,7 @@ After:
 grep -rn "E2E_BASE_URL is not set" --include="*.ts" --include="*.tsx" --include="*.mjs" --include="*.yml" --include="*.md" . | grep -v node_modules | grep -v graphify-out
 ```
 
-Expected: exactly two hits: this file (now the new string) and the historical plan doc `docs/superpowers/plans/2026-10-06-189-playwright-preflight.md` (its verbatim quote of the old string; #352's tree, untouched here per the Scope fence). Any other hit is a missed quoting site: fix it in this task before committing.
+Expected: hits only in this file (now the new string) and in plan docs' verbatim quotes: the historical `docs/superpowers/plans/2026-10-06-189-playwright-preflight.md` (its quote of the old string; #352's tree, untouched here per the Scope fence) and this plan's own artifacts (the Global Constraint line, the Before/After blocks, the probe commands). (Ruling #353-R1, at execution: the original "exactly two hits" expectation forgot that this plan doc itself quotes the string seven times; the intent of the gate is unchanged.) Any hit outside those three files is a missed quoting site: fix it in this task before committing.
 
 - [ ] **Step 3: The failure probe.** Prove the curated failure still fires with the new wording:
 
