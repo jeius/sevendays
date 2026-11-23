@@ -1,10 +1,10 @@
 # Context Map
 
-Sevendays is one product domain surfaced through three deployable apps. The core vocabulary (Appointment, Branch, Service Package, Slot, …) lives in `apps/api/CONTEXT.md` — the shared data model in `packages/db`/`packages/types` is owned there — and the other contexts reference it rather than restate it.
+Sevendays is one product domain surfaced through three deployable apps. The core vocabulary (Appointment, Branch, Service Package, Slot, …) lives in `apps/api/CONTEXT.md` (the shared data model in `packages/db`/`packages/types` is owned there), and the other contexts reference it rather than restate it.
 
 ## Contexts
 
-- [API](./apps/api/CONTEXT.md): owns the shared data model and every read/write to it — appointments, availability, catalog
+- [API](./apps/api/CONTEXT.md): owns the shared data model and every read/write to it: appointments, availability, catalog
 - [Landing](./apps/landing/CONTEXT.md): the public site where customers browse and book
 - [Admin](./apps/admin/CONTEXT.md): the staff site for managing appointments and site content
 

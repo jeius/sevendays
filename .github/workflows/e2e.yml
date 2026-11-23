@@ -1,10 +1,10 @@
 name: E2E (Playwright)
 
 # The E2E workflow (M6 #189's foundation + #190's production smoke; ADR-0022):
-# against a deployed environment — NEVER PR-gating (the PR gate stays exactly
+# against a deployed environment, NEVER PR-gating (the PR gate stays exactly
 # pnpm check + pnpm build; ci.yml is untouched by this file). Scheduled
 # workflows fire from the default branch only, and this whole file is
-# main-only by classification (scripts/seed-v1/paths.txt — .github/workflows/
+# main-only by classification (scripts/seed-v1/paths.txt, .github/workflows/
 # is not seeded out), so v1 never sees it. #190's seven production assertions
 # run through this same workflow against the chosen environment's E2E_BASE_URL.
 on:
@@ -34,7 +34,7 @@ jobs:
       # The smoke's other two targets + the sign-in credentials (#190),
       # sourced from the SAME GitHub environment the job declared: the
       # api/admin URLs derive from the deployment's own vars (one source
-      # of truth — the v1 environment carries its own values, and the
+      # of truth, the v1 environment carries its own values, and the
       # ship runbook owns setting them at cutover), and the smoke-staff
       # credentials are environment secrets, never repo content.
       E2E_API_URL: ${{ vars.API_URL }}
@@ -67,7 +67,7 @@ jobs:
       - name: Install chromium (+ OS deps)
         run: pnpm exec playwright install --with-deps chromium
 
-      # An unset E2E_BASE_URL fails here with the config's curated message —
+      # An unset E2E_BASE_URL fails here with the config's curated message:
       # the visible, named fix is the environment variable.
       - name: Run the e2e suite
         run: pnpm test:e2e
