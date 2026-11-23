@@ -1,10 +1,10 @@
-# M2 Ticket 06 — Landing Content Pages — Implementation Plan
+# M2 Ticket 06, Landing Content Pages, Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** The landing site's remaining content surfaces go live over the real API — `/services` showcasing the four Studio Services (description, price, per-branch bookability chips, one-line Add-on Services cross-reference), `/branches` with address/phone/walk-in badge/"Book at this branch" deep links, `/about` with story + testimonial placeholders and the empty M5 portfolio-grid slot, and home's Studio Services teaser strip + branches strip + credibility blurb (GitHub issue #44, parent spec #37).
+**Goal:** The landing site's remaining content surfaces go live over the real API, `/services` showcasing the four Studio Services (description, price, per-branch bookability chips, one-line Add-on Services cross-reference), `/branches` with address/phone/walk-in badge/"Book at this branch" deep links, `/about` with story + testimonial placeholders and the empty M5 portfolio-grid slot, and home's Studio Services teaser strip + branches strip + credibility blurb (GitHub issue #44, parent spec #37).
 
-**Architecture:** Pure frontend ticket on `apps/landing` — every read it needs already exists (`branches.list()` from M1.4, `studioServices.list()` from ticket 04). One new server function (`getStudioServices`) + query factory join the ticket-05 data layer; one new lib-seam helper (`bookableBranchNames`) turns a service's `bookableBranchIds` into branch-name chips using the branches read's order. Five presentational components follow the ticket-05 house rule (pages compose components; only layout/heading/copy lives in routes; data only through `queries.ts` factories). The three new routes are flat file routes (no children, unlike `/packages`). The committed CDP harness gains a content-pages scenario, and ticket-05's home article-count check is scoped to the featured strip's section — #44's new strips would otherwise break it.
+**Architecture:** Pure frontend ticket on `apps/landing`, every read it needs already exists (`branches.list()` from M1.4, `studioServices.list()` from ticket 04). One new server function (`getStudioServices`) + query factory join the ticket-05 data layer; one new lib-seam helper (`bookableBranchNames`) turns a service's `bookableBranchIds` into branch-name chips using the branches read's order. Five presentational components follow the ticket-05 house rule (pages compose components; only layout/heading/copy lives in routes; data only through `queries.ts` factories). The three new routes are flat file routes (no children, unlike `/packages`). The committed CDP harness gains a content-pages scenario, and ticket-05's home article-count check is scoped to the featured strip's section, #44's new strips would otherwise break it.
 
 **Tech Stack:** TanStack Start/Router 1.170.x (file routes via `tsr generate`, loaders + `useSuspenseQuery` SSR pattern), @tanstack/react-query 5.102.x, `@sevendays/api-client` (Hono RPC + `unwrap()` gate), Zod-validated shared types via `@sevendays/types`, Tailwind v4 (CSS-first, `packages/ui` tokens), Vitest 4 for the lib-seam suite, raw-CDP Node scenarios for page checks.
 
@@ -13,15 +13,15 @@
 ## Global Constraints
 
 - **Feature branch only:** all work on `feat/m2-06-landing-content-pages`, branched from up-to-date `main`. Never commit directly to `main`; the owner pushes/merges.
-- **Scope fence (siblings share roadmap checkboxes):** ticket 06 delivers the home services-teaser + branches strips + credibility blurb, the `/services` `/branches` `/about` routes, and the harness extension (new scenario + scoping patch). NOT here: the booking form `/book` itself (#45 — deep-link hrefs exist across this ticket, the route doesn't until #45); `/booking/:id` (#46); Resend email (#47); the CMS (M5); any `apps/api`, `packages/db`, `packages/api-client`, or `packages/types` change — every read this ticket renders shipped in tickets 01/04 (`branchSchema`, `studioServiceWithBranchesSchema`, `branches.list()`, `studioServices.list()`), so NO `pnpm build:packages` is needed; any schema/migration/seed change; any visual design pass (M2's bar is data-complete, visually-rough — standing charting decision).
-- **`docs/plan.md`'s "Landing pages: …" checkbox (line 65) spans tickets 05 (#43) + 06 (#44)** — per ticket-05's standing constraint, whoever closes the LATER of the two ticks it. This ticket IS the later: Task 6 ticks it with the ✅ emoji only after Tasks 1–5 are committed. GitHub issue #44's acceptance boxes stay owner-ticked — note the criterion→task mapping in the PR description, don't edit the issue.
-- **Copy is pinned owner-ratified (clarify rounds 2026-09-08), verbatim everywhere it appears:** walk-in badge renders BOTH states — `Walk-ins welcome` when `acceptsWalkIns` is true, `No walk-ins` when false (owner choice: the negative state is explicit); home strip headings `Our services` and `Our branches`; the `/services` cross-reference line `Looking for add-ons? Makeup, hairstyle, and more can attach to your booking.`; `/about` story placeholder `Our studio story is coming soon.`; testimonials placeholder `What clients say is coming soon.`; home blurb placeholder `Our studio blurb is coming soon.` (derived from the ratified placeholder pattern — flagged for owner veto at PR review, same mechanism as ticket 05's `Packages` nav item); teaser strip-end link `View all services`; `/branches` CTA `Book at this branch` (spec-verbatim from the IA route table); offering-card CTAs read `Book now` (ticket-05 standing ruling, inherited); page h1s `Services` / `Branches` / `About` and section headings `Testimonials` / `Portfolio` (route-name-derived convention — veto-flagged). Story/blurb/testimonial placeholders carry `TODO(owner-copy)` comments at the call site — replaced when the client supplies copy (TODO(seed)-style posture). No other customer-presentable copy may be invented — anything new goes back to the owner.
-- **Deep-link grammar is spec-pinned:** `/book?branch=${branch.id}` and `/book?service=${service.id}` (uuid ids, per the IA table's `?branch=&package=&service=`). Every one is a plain `<a>` — TanStack Router's typed `Link` resolves against the generated tree and `/book` doesn't exist until #45; each anchor carries the convert-in-#45 comment (ticket-05 ruling).
-- **`peso` is the existing `src/lib/format.ts` helper — reused, not redefined.** Pinned outputs on this repo's Node 26 toolchain (ICU-complete, probed live 2026-09-08): `peso(150000)` = `₱1,500.00` (Photo Recovery), `peso(80000)` = `₱800.00` (Tarpaulin & Bulletin Printing), `peso(50000)` = `₱500.00` (Portraits & ID Photo), `peso(120000)` = `₱1,200.00` (Picture Framing). If a pinned literal fails on an executor's machine, the fix is a full-ICU Node environment — never edit the expectation.
-- **Bookability-chip semantics are pinned and pure (tested, not eyeballed):** `bookableBranchNames(service, branches)` maps the service's `bookableBranchIds` to names in the branches read's order (the API serves name-ascending), and DROPS ids absent from the branches list (never rendered). Live seed state (`packages/db/scripts/catalog.ts` — never invent data): all four services bookable at all three branches; walk-in flags Calamba `false`, Iligan `false`, Dipolog `true`; branch phones are `TODO(seed)` placeholders and render verbatim.
-- **Landing unit tests exist ONLY at the lib seam** (spec § Testing Decisions 5: no permanent page/unit harness in M2). This plan adds exactly one test file (`bookable-branches.test.ts` — suite goes 11 → 15). Page behavior (what a customer sees) is verified by the Task 5 CDP scenarios plus the milestone's end-to-end verification. Do not add route-level vitest suites.
+- **Scope fence (siblings share roadmap checkboxes):** ticket 06 delivers the home services-teaser + branches strips + credibility blurb, the `/services` `/branches` `/about` routes, and the harness extension (new scenario + scoping patch). NOT here: the booking form `/book` itself (#45, deep-link hrefs exist across this ticket, the route doesn't until #45); `/booking/:id` (#46); Resend email (#47); the CMS (M5); any `apps/api`, `packages/db`, `packages/api-client`, or `packages/types` change, every read this ticket renders shipped in tickets 01/04 (`branchSchema`, `studioServiceWithBranchesSchema`, `branches.list()`, `studioServices.list()`), so NO `pnpm build:packages` is needed; any schema/migration/seed change; any visual design pass (M2's bar is data-complete, visually-rough, standing charting decision).
+- **`docs/plan.md`'s "Landing pages: …" checkbox (line 65) spans tickets 05 (#43) + 06 (#44)**, per ticket-05's standing constraint, whoever closes the LATER of the two ticks it. This ticket IS the later: Task 6 ticks it with the ✅ emoji only after Tasks 1–5 are committed. GitHub issue #44's acceptance boxes stay owner-ticked, note the criterion→task mapping in the PR description, don't edit the issue.
+- **Copy is pinned owner-ratified (clarify rounds 2026-09-08), verbatim everywhere it appears:** walk-in badge renders BOTH states, `Walk-ins welcome` when `acceptsWalkIns` is true, `No walk-ins` when false (owner choice: the negative state is explicit); home strip headings `Our services` and `Our branches`; the `/services` cross-reference line `Looking for add-ons? Makeup, hairstyle, and more can attach to your booking.`; `/about` story placeholder `Our studio story is coming soon.`; testimonials placeholder `What clients say is coming soon.`; home blurb placeholder `Our studio blurb is coming soon.` (derived from the ratified placeholder pattern, flagged for owner veto at PR review, same mechanism as ticket 05's `Packages` nav item); teaser strip-end link `View all services`; `/branches` CTA `Book at this branch` (spec-verbatim from the IA route table); offering-card CTAs read `Book now` (ticket-05 standing ruling, inherited); page h1s `Services` / `Branches` / `About` and section headings `Testimonials` / `Portfolio` (route-name-derived convention, veto-flagged). Story/blurb/testimonial placeholders carry `TODO(owner-copy)` comments at the call site, replaced when the client supplies copy (TODO(seed)-style posture). No other customer-presentable copy may be invented, anything new goes back to the owner.
+- **Deep-link grammar is spec-pinned:** `/book?branch=${branch.id}` and `/book?service=${service.id}` (uuid ids, per the IA table's `?branch=&package=&service=`). Every one is a plain `<a>`, TanStack Router's typed `Link` resolves against the generated tree and `/book` doesn't exist until #45; each anchor carries the convert-in-#45 comment (ticket-05 ruling).
+- **`peso` is the existing `src/lib/format.ts` helper, reused, not redefined.** Pinned outputs on this repo's Node 26 toolchain (ICU-complete, probed live 2026-09-08): `peso(150000)` = `₱1,500.00` (Photo Recovery), `peso(80000)` = `₱800.00` (Tarpaulin & Bulletin Printing), `peso(50000)` = `₱500.00` (Portraits & ID Photo), `peso(120000)` = `₱1,200.00` (Picture Framing). If a pinned literal fails on an executor's machine, the fix is a full-ICU Node environment, never edit the expectation.
+- **Bookability-chip semantics are pinned and pure (tested, not eyeballed):** `bookableBranchNames(service, branches)` maps the service's `bookableBranchIds` to names in the branches read's order (the API serves name-ascending), and DROPS ids absent from the branches list (never rendered). Live seed state (`packages/db/scripts/catalog.ts`, never invent data): all four services bookable at all three branches; walk-in flags Calamba `false`, Iligan `false`, Dipolog `true`; branch phones are `TODO(seed)` placeholders and render verbatim.
+- **Landing unit tests exist ONLY at the lib seam** (spec § Testing Decisions 5: no permanent page/unit harness in M2). This plan adds exactly one test file (`bookable-branches.test.ts`, suite goes 11 → 15). Page behavior (what a customer sees) is verified by the Task 5 CDP scenarios plus the milestone's end-to-end verification. Do not add route-level vitest suites.
 - **Sentry spans on the new server function** (`.cursorrules`): wrap the handler body in `startSpan({ name: 'GET /api/v1/studio-services' }, ...)` exactly like the existing `getBranches`.
-- **Biome-clean commits:** `pnpm exec biome check --write <files>` on every created/modified code file before committing (project `fix` scripts call the `biome` bin; `apps/landing/biome.json` covers `scripts/**` too — the CDP scenarios are linted, not exempt).
+- **Biome-clean commits:** `pnpm exec biome check --write <files>` on every created/modified code file before committing (project `fix` scripts call the `biome` bin; `apps/landing/biome.json` covers `scripts/**` too, the CDP scenarios are linted, not exempt).
 - **`noUncheckedIndexedAccess` is on:** index access in new code is guarded (`if (!row) ...`), never `!`.
 - **CDP harness requirements (verification-only):** Chrome/Chromium with `--remote-debugging-port=9222`, `pnpm --filter @sevendays/api dev` (port 8787, seeded compose db), and the landing dev server (port 3000, `API_URL` set in `apps/landing/.env.local`). Scenarios are committed (owner ruling 2026-09-08: tickets 06–10 extend the same harness) and take URLs from `LANDING_VERIFY_URL` / `API_VERIFY_URL` (defaults `http://localhost:3000` / `http://127.0.0.1:8787`). Failures name the failing check and exit 1.
 - **Commit style:** unscoped conventional subjects, bullet bodies when wordy; one commit per task.
@@ -33,7 +33,7 @@
 ```
 apps/landing/src/lib/api.functions.ts              (mod, Task 1) + getStudioServices
 apps/landing/src/lib/queries.ts                    (mod, Task 1) + studioServiceQueries
-apps/landing/src/lib/bookable-branches.ts          (new, Task 1) bookableBranchNames — chip-order + unknown-id semantics
+apps/landing/src/lib/bookable-branches.ts          (new, Task 1) bookableBranchNames, chip-order + unknown-id semantics
 apps/landing/src/lib/bookable-branches.test.ts     (new, Task 1) 4 ordering/guard tests
 apps/landing/src/components/walk-in-badge.tsx      (new, Task 2) both-state badge
 apps/landing/src/components/branch-card.tsx        (new, Task 2) full card for /branches
@@ -45,18 +45,18 @@ apps/landing/src/routes/index.tsx                  (mod, Task 3) + teaser strip,
 apps/landing/src/routes/services.tsx               (new, Task 4) /services
 apps/landing/src/routes/branches.tsx               (new, Task 4) /branches
 apps/landing/src/routes/about.tsx                  (new, Task 4) /about
-apps/landing/src/routeTree.gen.ts                  (regen, Task 4) via pnpm generate-routes — never hand-edited
+apps/landing/src/routeTree.gen.ts                  (regen, Task 4) via pnpm generate-routes, never hand-edited
 apps/landing/scripts/verify/packages-pages.mjs     (mod, Task 5) home article-count scoped to the featured-strip section
 apps/landing/scripts/verify/content-pages.mjs      (new, Task 5) scenario for #44's surfaces
 docs/plan.md                                       (mod, Task 6) landing-pages checkbox → - [✅]
 docs/progress.md                                   (mod, Task 6) ticket-06 landed bullet
 ```
 
-Component rule (inherited from ticket 05): pages compose the shared components; only layout/heading/copy text lives in routes. All data flows through `queries.ts` factories — no page imports `api.functions` directly.
+Component rule (inherited from ticket 05): pages compose the shared components; only layout/heading/copy text lives in routes. All data flows through `queries.ts` factories, no page imports `api.functions` directly.
 
 ---
 
-### Task 1: Data layer — studio-services server fn, query factory, bookable-branch names (TDD)
+### Task 1: Data layer, studio-services server fn, query factory, bookable-branch names (TDD)
 
 **Files:**
 - Create: `apps/landing/src/lib/bookable-branches.ts`, `apps/landing/src/lib/bookable-branches.test.ts`
@@ -71,7 +71,7 @@ Component rule (inherited from ticket 05): pages compose the shared components; 
 
 **Not here:** no route changes (Tasks 3–4), no components (Task 2), no branch-data changes (`branchQueries` / `getBranches` exist and are consumed as-is), no api-client or types changes.
 
-- [ ] **Step 1: Write the failing test** — create `apps/landing/src/lib/bookable-branches.test.ts`:
+- [ ] **Step 1: Write the failing test**, create `apps/landing/src/lib/bookable-branches.test.ts`:
 
 ```ts
 import type { Branch, StudioServiceWithBranches } from '@sevendays/types';
@@ -141,9 +141,9 @@ describe('bookableBranchNames', () => {
 - [ ] **Step 2: Run to verify it fails**
 
 Run: `pnpm --filter @sevendays/landing test`
-Expected: FAIL — cannot resolve `./bookable-branches` (4 existing files still pass; the failure is the missing module).
+Expected: FAIL, cannot resolve `./bookable-branches` (4 existing files still pass; the failure is the missing module).
 
-- [ ] **Step 3: Implement `bookable-branches.ts`** — create `apps/landing/src/lib/bookable-branches.ts`:
+- [ ] **Step 3: Implement `bookable-branches.ts`**, create `apps/landing/src/lib/bookable-branches.ts`:
 
 ```ts
 import type { Branch, StudioServiceWithBranches } from '@sevendays/types';
@@ -151,7 +151,7 @@ import type { Branch, StudioServiceWithBranches } from '@sevendays/types';
 /**
  * Branch-name chips for a Studio Service card (/services): the branches this
  * service is bookable at, in the branches read's order (name-ascending from
- * the API) — chip order is stable regardless of the service's id order.
+ * the API), chip order is stable regardless of the service's id order.
  * Ids missing from the branches list are dropped, never rendered.
  */
 export function bookableBranchNames(
@@ -166,9 +166,9 @@ export function bookableBranchNames(
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `pnpm --filter @sevendays/landing test`
-Expected: PASS (15 tests — 11 existing + 4 new).
+Expected: PASS (15 tests, 11 existing + 4 new).
 
-- [ ] **Step 5: Add the server function and query factory** — extend `apps/landing/src/lib/api.functions.ts` (keep everything already there untouched) with:
+- [ ] **Step 5: Add the server function and query factory**, extend `apps/landing/src/lib/api.functions.ts` (keep everything already there untouched) with:
 
 ```ts
 export const getStudioServices = createServerFn().handler(async () => {
@@ -178,7 +178,7 @@ export const getStudioServices = createServerFn().handler(async () => {
 });
 ```
 
-Then extend `apps/landing/src/lib/queries.ts` — add `getStudioServices` to the existing import from `./api.functions` and append:
+Then extend `apps/landing/src/lib/queries.ts`, add `getStudioServices` to the existing import from `./api.functions` and append:
 
 ```ts
 export const studioServiceQueries = {
@@ -198,7 +198,7 @@ git add apps/landing/src/lib/bookable-branches.ts apps/landing/src/lib/bookable-
 git commit -m "feat(landing): studio-services data layer + bookable-branch chip names"
 ```
 
-(Body bullets: `getStudioServices server fn + studioServiceQueries factory — the read wrapper itself landed in ticket 04. bookableBranchNames pins chip order to the branches read and drops unknown ids. Lib-seam tests 11 → 15 (spec § Testing Decisions 5).`)
+(Body bullets: `getStudioServices server fn + studioServiceQueries factory, the read wrapper itself landed in ticket 04. bookableBranchNames pins chip order to the branches read and drops unknown ids. Lib-seam tests 11 → 15 (spec § Testing Decisions 5).`)
 
 ### Task 2: Shared page components (presentational)
 
@@ -209,14 +209,14 @@ git commit -m "feat(landing): studio-services data layer + bookable-branch chip 
 **Interfaces:**
 - Consumes: `peso(cents: number): string` (existing `src/lib/format.ts`), `bookableBranchNames(service, branches)` (Task 1), `Branch` + `StudioServiceWithBranches` from `@sevendays/types`.
 - Produces (Tasks 3–4 consume these exact names):
-  - `WalkInBadge({ acceptsWalkIns }: { acceptsWalkIns: boolean })` — renders `Walk-ins welcome` or `No walk-ins` (both states explicit, owner-ratified).
-  - `BranchCard({ branch }: { branch: Branch })` — name, address, phone, badge, `Book at this branch` deep link (`/book?branch=<uuid>`).
-  - `BranchStripItem({ branch }: { branch: Branch })` — name, address, badge (no phone; the strip pins address + badge only, per spec).
-  - `ServiceCard({ service, branchNames }: { service: StudioServiceWithBranches; branchNames: string[] })` — name, price, description, bookability chips, `Book now` deep link (`/book?service=<uuid>`). Branch names are passed in pre-resolved — the component takes no branches prop, so /services resolves via `bookableBranchNames` before rendering (single call site, single convention).
-  - `ServiceTeaserItem({ service }: { service: StudioServiceWithBranches })` — name, price, `Book now` deep link.
-  - `SiteHeader()` — nav gains `Services`, `Branches`, `About`.
+  - `WalkInBadge({ acceptsWalkIns }: { acceptsWalkIns: boolean })`, renders `Walk-ins welcome` or `No walk-ins` (both states explicit, owner-ratified).
+  - `BranchCard({ branch }: { branch: Branch })`, name, address, phone, badge, `Book at this branch` deep link (`/book?branch=<uuid>`).
+  - `BranchStripItem({ branch }: { branch: Branch })`, name, address, badge (no phone; the strip pins address + badge only, per spec).
+  - `ServiceCard({ service, branchNames }: { service: StudioServiceWithBranches; branchNames: string[] })`, name, price, description, bookability chips, `Book now` deep link (`/book?service=<uuid>`). Branch names are passed in pre-resolved, the component takes no branches prop, so /services resolves via `bookableBranchNames` before rendering (single call site, single convention).
+  - `ServiceTeaserItem({ service }: { service: StudioServiceWithBranches })`, name, price, `Book now` deep link.
+  - `SiteHeader()`, nav gains `Services`, `Branches`, `About`.
 
-**Not here:** no routes (Tasks 3–4), no data fetching (components receive props only), no component unit tests — page-level rendering is verified by the Task 5 CDP scenarios (spec § Testing Decisions 5).
+**Not here:** no routes (Tasks 3–4), no data fetching (components receive props only), no component unit tests, page-level rendering is verified by the Task 5 CDP scenarios (spec § Testing Decisions 5).
 
 - [ ] **Step 1: Create `walk-in-badge.tsx`**
 
@@ -237,7 +237,7 @@ import type { Branch } from '@sevendays/types';
 import { WalkInBadge } from './walk-in-badge';
 
 // Full branch card (/branches): address, phone, walk-in badge, and the
-// branch deep link — spec's /branches row verbatim. Branch phones are
+// branch deep link, spec's /branches row verbatim. Branch phones are
 // TODO(seed) placeholders and render verbatim until the client supplies
 // real numbers.
 export function BranchCard({ branch }: { branch: Branch }) {
@@ -266,7 +266,7 @@ import type { Branch } from '@sevendays/types';
 import { WalkInBadge } from './walk-in-badge';
 
 // Home branches-strip item: address + walk-in badge only (the strip's
-// spec-pinned shape — the full card is /branches' job).
+// spec-pinned shape, the full card is /branches' job).
 export function BranchStripItem({ branch }: { branch: Branch }) {
   return (
     <article className='flex flex-col gap-2 rounded-lg border p-4'>
@@ -286,7 +286,7 @@ import { peso } from '../lib/format';
 
 // Studio Service card (/services): description + price + per-branch
 // bookability chips + the add-on cross-reference rendered by the route
-// (spec's /services row). Bookability names arrive pre-resolved — the
+// (spec's /services row). Bookability names arrive pre-resolved, the
 // component takes no branches prop (single call-site convention).
 export function ServiceCard({
   service,
@@ -326,7 +326,7 @@ import type { StudioServiceWithBranches } from '@sevendays/types';
 import { peso } from '../lib/format';
 
 // Home teaser item (owner-ratified shape): name + price + Book now deep
-// link — user story 7 (book from any page via service deep links).
+// link, user story 7 (book from any page via service deep links).
 export function ServiceTeaserItem({ service }: { service: StudioServiceWithBranches }) {
   return (
     <article className='flex flex-col gap-2 rounded-lg border p-4'>
@@ -344,7 +344,7 @@ export function ServiceTeaserItem({ service }: { service: StudioServiceWithBranc
 }
 ```
 
-- [ ] **Step 6: Update `site-header.tsx`** — replace the `nav` block (brand `Link` and the Book-now anchor stay untouched):
+- [ ] **Step 6: Update `site-header.tsx`**, replace the `nav` block (brand `Link` and the Book-now anchor stay untouched):
 
 ```tsx
       <nav className='flex items-center gap-6'>
@@ -383,18 +383,18 @@ git commit -m "feat(landing): branch/service cards, strips, walk-in badge, expan
 
 ---
 
-### Task 3: Home — services teaser strip, branches strip, credibility blurb
+### Task 3: Home, services teaser strip, branches strip, credibility blurb
 
 **Files:**
 - Modify: `apps/landing/src/routes/index.tsx`
 
 **Interfaces:**
 - Consumes: `servicePackageQueries.all()` + `studioServiceQueries.all()` (Task 1), `branchQueries.all()` (existing), `ServiceTeaserItem` + `BranchStripItem` (Task 2).
-- Produces: home gains the `Our services` strip (teaser items + strip-end `View all services` link), the `Our branches` strip (address + badge items), and the blurb paragraph — copy per Global Constraints.
+- Produces: home gains the `Our services` strip (teaser items + strip-end `View all services` link), the `Our branches` strip (address + badge items), and the blurb paragraph, copy per Global Constraints.
 
 **Not here:** no /services /branches /about routes (Task 4), no featured-strip rework (Task 4's home edits are copy-only, below the strips), no booking CTA target (plain anchor per the standing ruling).
 
-- [ ] **Step 1: Rewrite `apps/landing/src/routes/index.tsx`** — the whole file becomes:
+- [ ] **Step 1: Rewrite `apps/landing/src/routes/index.tsx`**, the whole file becomes:
 
 ```tsx
 import { useSuspenseQuery } from '@tanstack/react-query';
@@ -437,7 +437,7 @@ function Home() {
           Book now
         </a>
       </section>
-      {/* TODO(owner-copy): placeholder blurb — replaced when the client supplies copy. */}
+      {/* TODO(owner-copy): placeholder blurb, replaced when the client supplies copy. */}
       <p className='mt-8 text-neutral-700'>Our studio blurb is coming soon.</p>
       <section className='mt-12' data-strip='featured'>
         <h2 className='font-semibold text-2xl'>{heading}</h2>
@@ -486,7 +486,7 @@ git commit -m "feat(landing): home services teaser + branches strips + credibili
 
 **Files:**
 - Create: `apps/landing/src/routes/services.tsx`, `apps/landing/src/routes/branches.tsx`, `apps/landing/src/routes/about.tsx`
-- Modify: `apps/landing/src/routeTree.gen.ts` (via `generate-routes` — never hand-edited)
+- Modify: `apps/landing/src/routeTree.gen.ts` (via `generate-routes`, never hand-edited)
 
 **Interfaces:**
 - Consumes: `studioServiceQueries.all()`, `branchQueries.all()`, `bookableBranchNames(service, branches)` (Task 1); `ServiceCard` + `BranchCard` (Task 2).
@@ -592,11 +592,11 @@ function AboutPage() {
     <div className='mx-auto max-w-5xl p-6'>
       <SiteHeader />
       <h1 className='mt-10 font-bold text-4xl'>About</h1>
-      {/* TODO(owner-copy): static studio story — replaced when the client supplies copy. */}
+      {/* TODO(owner-copy): static studio story, replaced when the client supplies copy. */}
       <p className='mt-4 text-neutral-700'>Our studio story is coming soon.</p>
       <section className='mt-10'>
         <h2 className='font-semibold text-2xl'>Testimonials</h2>
-        {/* TODO(owner-copy): testimonial placeholders — client copy pending. */}
+        {/* TODO(owner-copy): testimonial placeholders, client copy pending. */}
         <p className='mt-2 text-neutral-700'>What clients say is coming soon.</p>
       </section>
       <section className='mt-10'>
@@ -620,7 +620,7 @@ Expected: `src/routeTree.gen.ts` gains `/services`, `/branches`, `/about` (regen
 - [ ] **Step 5: Typecheck and lint**
 
 Run: `pnpm --filter @sevendays/landing typecheck && pnpm --filter @sevendays/landing exec biome check --write src/routes/services.tsx src/routes/branches.tsx src/routes/about.tsx`
-Expected: clean — the three flat routes resolve in the regenerated tree.
+Expected: clean, the three flat routes resolve in the regenerated tree.
 
 - [ ] **Step 6: Commit**
 
@@ -633,7 +633,7 @@ git commit -m "feat(landing): /services, /branches, /about content pages"
 
 ---
 
-### Task 5: CDP harness — scope ticket-05's home check + new content-pages scenario
+### Task 5: CDP harness, scope ticket-05's home check + new content-pages scenario
 
 > **Order matters:** Task 3's home change breaks ticket-05's committed scenario (its home check counts ALL `<article>`s; after Task 3 home renders 4 featured + 4 teaser + 3 strip-item articles = 11 ≠ 4). Step 1 scopes it BEFORE any live run.
 
@@ -642,12 +642,12 @@ git commit -m "feat(landing): /services, /branches, /about content pages"
 - Create: `apps/landing/scripts/verify/content-pages.mjs`
 
 **Interfaces:**
-- Consumes: live stack — seeded API (port 8787), landing dev server (port 3000, `API_URL` in `apps/landing/.env.local`), Chrome/Chromium with `--remote-debugging-port=9222`; `connect()` from `scripts/verify/lib.mjs`. Reads `GET /api/v1/studio-services` + `GET /api/v1/branches` for expected data (re-derives everything; never hard-codes catalog values).
-- Produces: `content-pages.mjs` — 16-check scenario for #44's surfaces; ticket-05's scenario stays green alongside the new strips. Both exit 1 on any failed check.
+- Consumes: live stack, seeded API (port 8787), landing dev server (port 3000, `API_URL` in `apps/landing/.env.local`), Chrome/Chromium with `--remote-debugging-port=9222`; `connect()` from `scripts/verify/lib.mjs`. Reads `GET /api/v1/studio-services` + `GET /api/v1/branches` for expected data (re-derives everything; never hard-codes catalog values).
+- Produces: `content-pages.mjs`, 16-check scenario for #44's surfaces; ticket-05's scenario stays green alongside the new strips. Both exit 1 on any failed check.
 
 **Not here:** no booking-submit scenario (#45 extends the harness with one), no admin checks, no CI wiring (owner runs it at verification time), no permanent page unit tests (spec § Testing Decisions 5).
 
-- [ ] **Step 1: Scope ticket-05's home article-count check** — in `apps/landing/scripts/verify/packages-pages.mjs`, replace:
+- [ ] **Step 1: Scope ticket-05's home article-count check**, in `apps/landing/scripts/verify/packages-pages.mjs`, replace:
 
 ```js
   const homeCards = await evaluate(`document.querySelectorAll('article').length`);
@@ -673,9 +673,9 @@ with:
   );
 ```
 
-(The strip-ordering and deep-link checks on home are unaffected — package names/links are unique to the featured strip.)
+(The strip-ordering and deep-link checks on home are unaffected, package names/links are unique to the featured strip.)
 
-- [ ] **Step 2: Create the scenario** — `apps/landing/scripts/verify/content-pages.mjs` (16 checks):
+- [ ] **Step 2: Create the scenario**, `apps/landing/scripts/verify/content-pages.mjs` (16 checks):
 
 ```js
 // Scripted CDP checks for the landing content pages (issue #44). Read-only
@@ -692,7 +692,7 @@ const API = process.env.API_VERIFY_URL ?? 'http://127.0.0.1:8787';
 const results = [];
 function check(name, ok, detail = '') {
   results.push({ name, ok });
-  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? `, ${detail}` : ''}`);
 }
 
 const peso = (cents) =>
@@ -888,7 +888,7 @@ git commit -m "test(landing): content-pages CDP scenario + scoped ticket-05 home
 **Interfaces:**
 - Consumes: Tasks 1–5 complete and committed.
 
-**Not here:** no GitHub issue edits (#44's acceptance boxes are the owner's — note the criterion→task mapping in the PR description), no PR (owner opens it), no ADR — this ticket introduces no new architectural decision (the chip-resolution convention, the strip-scoped harness check, and the TODO(owner-copy) placeholder posture are applications of standing rulings; deep-link grammar and page shapes are spec-pinned).
+**Not here:** no GitHub issue edits (#44's acceptance boxes are the owner's, note the criterion→task mapping in the PR description), no PR (owner opens it), no ADR, this ticket introduces no new architectural decision (the chip-resolution convention, the strip-scoped harness check, and the TODO(owner-copy) placeholder posture are applications of standing rulings; deep-link grammar and page shapes are spec-pinned).
 
 - [ ] **Step 1: Repo-wide gate**
 
@@ -896,7 +896,7 @@ git commit -m "test(landing): content-pages CDP scenario + scoped ticket-05 home
 pnpm check && pnpm build
 ```
 
-Expected: green — including the landing app's `test` script (15 lib-seam tests), `lint`, `typecheck` across all apps/packages, and a clean `vite build` of the landing app (SSR bundle includes the three new routes).
+Expected: green, including the landing app's `test` script (15 lib-seam tests), `lint`, `typecheck` across all apps/packages, and a clean `vite build` of the landing app (SSR bundle includes the three new routes).
 
 - [ ] **Step 2: Verify the acceptance criteria mechanically**
 
@@ -905,31 +905,31 @@ node apps/landing/scripts/verify/content-pages.mjs   # if the Task 5 stack is st
 git log --oneline main..HEAD
 ```
 
-Expected: `16/16 checks passed` (the scenario IS the mechanical proof of #44's four criteria — mapping below); one commit per task, all on `feat/m2-06-landing-content-pages`. Leave issue #44's checkboxes to the owner.
+Expected: `16/16 checks passed` (the scenario IS the mechanical proof of #44's four criteria, mapping below); one commit per task, all on `feat/m2-06-landing-content-pages`. Leave issue #44's checkboxes to the owner.
 
-- [ ] **Step 3: Tick the `docs/plan.md` checkbox** — the landing-pages checkbox (line 65) spans tickets 05 (#43) + 06 (#44); this ticket is the later, so it ticks. Change:
+- [ ] **Step 3: Tick the `docs/plan.md` checkbox**, the landing-pages checkbox (line 65) spans tickets 05 (#43) + 06 (#44); this ticket is the later, so it ticks. Change:
 
 ```markdown
-- [ ] Landing pages: home (featured strip, Studio Services teaser, branches strip), packages list, package detail by slug, branches, services (Studio Services showcase), about — reading from `apps/api`
+- [ ] Landing pages: home (featured strip, Studio Services teaser, branches strip), packages list, package detail by slug, branches, services (Studio Services showcase), about, reading from `apps/api`
 ```
 
 to (✅ emoji per AGENTS.md, never plain `[x]`):
 
 ```markdown
-- [✅] Landing pages: home (featured strip, Studio Services teaser, branches strip), packages list, package detail by slug, branches, services (Studio Services showcase), about — reading from `apps/api`
+- [✅] Landing pages: home (featured strip, Studio Services teaser, branches strip), packages list, package detail by slug, branches, services (Studio Services showcase), about, reading from `apps/api`
 ```
 
-- [ ] **Step 4: Update `docs/progress.md`** — add one bullet to the landed-work list, directly after the ticket-05 bullet (keeps the landing tickets adjacent):
+- [ ] **Step 4: Update `docs/progress.md`**, add one bullet to the landed-work list, directly after the ticket-05 bullet (keeps the landing tickets adjacent):
 
 ```markdown
-- **M2 ticket 06 — landing content pages (#44 → .scratch/m2-booking-flow-tickets/06.md):** home gained the Studio Services teaser strip (`Our services`; items name + `peso` price + `Book now` deep link `/book?service=<uuid>`, strip-end `View all services` link), the branches strip (`Our branches`; address + walk-in badge), and the credibility-blurb placeholder. New routes: `/services` (four Studio Services, description + `peso` price + per-branch bookability chips via `bookableBranchNames` — branches-read order, unknown ids dropped — plus the owner-ratified add-on cross-reference line), `/branches` (all 3 branches: address, phone, walk-in badge with both states `Walk-ins welcome`/`No walk-ins`, "Book at this branch" deep link `/book?branch=<uuid>`), `/about` (story/testimonial placeholders TODO(owner-copy), empty portfolio grid as the M5 drop-in slot). Nav expanded (Packages/Services/Branches/About + Book now). Data layer: `getStudioServices` + `studioServiceQueries` joined the ticket-05 pattern; NO api/db/types changes (reads all pre-existing). Lib-seam tests 11 → 15 (`bookableBranchNames` ×4). CDP harness: new `content-pages.mjs` scenario (16 checks, expectations re-derived from the live API) + ticket-05's home check scoped to `section[data-strip='featured']` (the new strips would have broken its article count). Copy owner-ratified 2026-09-08 (clarify rounds); `Our studio blurb is coming soon.` derived from the ratified placeholder pattern (veto-flagged at PR review like ticket-05's `Packages` nav item). Full `pnpm check` + `pnpm build` green; live CDP runs green (ticket-05 regression + new scenario). `docs/plan.md`'s landing-pages checkbox ticked ✅ (spans tickets 05+06; 06 landed later). NOT landed: booking form `/book` (#45 — deep links exist, route doesn't), `/booking/:id` (#46), Resend email (#47).
+- **M2 ticket 06, landing content pages (#44 → .scratch/m2-booking-flow-tickets/06.md):** home gained the Studio Services teaser strip (`Our services`; items name + `peso` price + `Book now` deep link `/book?service=<uuid>`, strip-end `View all services` link), the branches strip (`Our branches`; address + walk-in badge), and the credibility-blurb placeholder. New routes: `/services` (four Studio Services, description + `peso` price + per-branch bookability chips via `bookableBranchNames`, branches-read order, unknown ids dropped, plus the owner-ratified add-on cross-reference line), `/branches` (all 3 branches: address, phone, walk-in badge with both states `Walk-ins welcome`/`No walk-ins`, "Book at this branch" deep link `/book?branch=<uuid>`), `/about` (story/testimonial placeholders TODO(owner-copy), empty portfolio grid as the M5 drop-in slot). Nav expanded (Packages/Services/Branches/About + Book now). Data layer: `getStudioServices` + `studioServiceQueries` joined the ticket-05 pattern; NO api/db/types changes (reads all pre-existing). Lib-seam tests 11 → 15 (`bookableBranchNames` ×4). CDP harness: new `content-pages.mjs` scenario (16 checks, expectations re-derived from the live API) + ticket-05's home check scoped to `section[data-strip='featured']` (the new strips would have broken its article count). Copy owner-ratified 2026-09-08 (clarify rounds); `Our studio blurb is coming soon.` derived from the ratified placeholder pattern (veto-flagged at PR review like ticket-05's `Packages` nav item). Full `pnpm check` + `pnpm build` green; live CDP runs green (ticket-05 regression + new scenario). `docs/plan.md`'s landing-pages checkbox ticked ✅ (spans tickets 05+06; 06 landed later). NOT landed: booking form `/book` (#45, deep links exist, route doesn't), `/booking/:id` (#46), Resend email (#47).
 ```
 
 - [ ] **Step 5: Commit the docs**
 
 ```bash
 git add docs/plan.md docs/progress.md
-git commit -m "docs: M2 ticket 06 landed — content pages; M2 landing-pages checkbox ticked"
+git commit -m "docs: M2 ticket 06 landed, content pages; M2 landing-pages checkbox ticked"
 ```
 
 ---

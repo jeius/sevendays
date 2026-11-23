@@ -4,18 +4,18 @@
 
 **Goal:** Apply the owner's shadcn preset (`b1uGsTYZ6`) as the brand→semantic token mapping, make `packages/ui` the single shared token source for both apps, and mount a throwaway showcase route so the owner can react to the mapped look on real components.
 
-**Architecture:** The shadcn CLI writes the preset into `apps/landing/src/styles.css` (per its `components.json`). We then lift the token layer (brand primitives + shadcn semantic tokens + `@theme inline` mapping) out of both apps' stylesheets into a new `packages/ui/src/tokens.css`, imported by both apps — concretely testing the distribution ruling from research ticket #56 (shared semantic tokens in `packages/ui`) and the Tailwind v4 package-import mechanics. A `/prototype-tokens` route in landing renders representative shadcn-style components using only semantic utilities. No variant switcher: the owner authored the mapping in the shadcn editor, and the iteration loop is edit-preset → re-apply → refresh.
+**Architecture:** The shadcn CLI writes the preset into `apps/landing/src/styles.css` (per its `components.json`). We then lift the token layer (brand primitives + shadcn semantic tokens + `@theme inline` mapping) out of both apps' stylesheets into a new `packages/ui/src/tokens.css`, imported by both apps, concretely testing the distribution ruling from research ticket #56 (shared semantic tokens in `packages/ui`) and the Tailwind v4 package-import mechanics. A `/prototype-tokens` route in landing renders representative shadcn-style components using only semantic utilities. No variant switcher: the owner authored the mapping in the shadcn editor, and the iteration loop is edit-preset → re-apply → refresh.
 
 **Tech Stack:** Tailwind v4 (CSS-first `@theme`), TanStack Start (file routes, auto-registered), shadcn CLI v3 `apply` command, pnpm workspaces, Biome, Vitest.
 
 **Spec:** This plan implements wayfinder ticket [#57 "Prototype: brand → shadcn token unification"](https://github.com/jeius/sevendays/issues/57) on map [#55 "Wayfinder map: UI/UX design system milestone"](https://github.com/jeius/sevendays/issues/55). Key spec facts:
 
-- **Deliverable** (from #57): brand palette re-expressed as shadcn semantic tokens (oklch), Fraunces/Manrope wired as `--font-*`, radius/chart/sidebar tokens included — landing first, mirrored into admin — so the owner can react on real components.
+- **Deliverable** (from #57): brand palette re-expressed as shadcn semantic tokens (oklch), Fraunces/Manrope wired as `--font-*`, radius/chart/sidebar tokens included, landing first, mirrored into admin, so the owner can react on real components.
 - **The mapping question is answered by the owner's preset**, not hand-derived variants (owner decision, 2026-09-12): `pnpm dlx shadcn@latest apply --preset b1uGsTYZ6`.
-- **Fixed inputs** (map #55 charting rulings): the brand itself — sea-ink/lagoon/palm palette, Fraunces/Manrope typefaces. No rebrand. "Minor visual redesign" never extends to identity.
+- **Fixed inputs** (map #55 charting rulings): the brand itself, sea-ink/lagoon/palm palette, Fraunces/Manrope typefaces. No rebrand. "Minor visual redesign" never extends to identity.
 - **Shared-definition question** (#56 resolution, adopted on the map): shared primitives + semantic tokens live in `packages/ui`; each app imports them. AGENTS.md's "shared tokens live in packages/ui" line becomes true again through this work.
-- **Parked / out of scope:** dark mode (v1), Storybook/visual tooling, formal a11y audit, executing the milestone, `docs/progress.md` updates (this branch is throwaway; progress docs update when validated work lands on main), `graphify update` (same reason — the graph tracks main).
-- **Stack fact** (owner-corrected): shadcn/ui primitives are **Base UI**, not Radix. Some installed skill prose still says Radix — ignore it.
+- **Parked / out of scope:** dark mode (v1), Storybook/visual tooling, formal a11y audit, executing the milestone, `docs/progress.md` updates (this branch is throwaway; progress docs update when validated work lands on main), `graphify update` (same reason, the graph tracks main).
+- **Stack fact** (owner-corrected): shadcn/ui primitives are **Base UI**, not Radix. Some installed skill prose still says Radix, ignore it.
 
 ## Global Constraints
 
@@ -35,7 +35,7 @@
   | foam | `#f3faf5` | `oklch(0.978 0.010 155.1)` |
 
 - **Do not delete or redesign the `.dark` blocks.** Dark mode is parked: whatever `.dark` content exists after the preset apply is carried into the shared file unchanged, sight unseen.
-- **Leave `packages/ui/src/globals.css` (the stale v3-era file) and its `./globals.css` export untouched** — cleaning it up is milestone work, not prototype work.
+- **Leave `packages/ui/src/globals.css` (the stale v3-era file) and its `./globals.css` export untouched**, cleaning it up is milestone work, not prototype work.
 - **Leave both apps' app-specific CSS (hero gradients, `island-shell`, `nav-link`, `display-title`, etc.) in place, app-local.** Only the token layer moves.
 - pnpm-only, `async`/`await` style, single-quoted imports matching existing files (Biome enforces).
 
@@ -44,8 +44,8 @@
 ### Task 1: Apply the owner's shadcn preset to landing
 
 **Files:**
-- Modify (by CLI, not by hand): `apps/landing/src/styles.css` — the shadcn-managed token block is rewritten to the preset's values; possibly font setup changes.
-- Possibly modify (by CLI): `apps/landing/components.json`, `apps/landing/package.json` — only if the CLI adds a font dependency.
+- Modify (by CLI, not by hand): `apps/landing/src/styles.css`, the shadcn-managed token block is rewritten to the preset's values; possibly font setup changes.
+- Possibly modify (by CLI): `apps/landing/components.json`, `apps/landing/package.json`, only if the CLI adds a font dependency.
 
 **Interfaces:**
 - Consumes: preset ID `b1uGsTYZ6` (owner-authored in the shadcn editor), `apps/landing/components.json` (`css: src/styles.css`, so that's where tokens land).
@@ -73,7 +73,7 @@ Record in the Task 1 commit message (these facts drive Task 2's conditionals):
 2. Whether font parts were applied (Google Fonts import? package dep? `--font-sans` value? any `--font-serif`?).
 3. Whether `--chart-1..5` and `--sidebar-*` tokens were written, or remain at previous values.
 4. Whether a `.dark` block was written/changed, and whether it's preset-branded or still default.
-5. Whether the free-floating brand vars (`--sea-ink` … `--hero-b`) were touched (expected: not — they're not shadcn-managed tokens).
+5. Whether the free-floating brand vars (`--sea-ink` … `--hero-b`) were touched (expected: not, they're not shadcn-managed tokens).
 
 - [ ] **Step 3: Verify landing still builds**
 
@@ -111,7 +111,7 @@ git commit -m "prototype(#57): apply owner shadcn preset b1uGsTYZ6 to landing
 Assemble in this order (cut-and-paste from `apps/landing/src/styles.css` post-Task-1, not retyped):
 
 ```css
-/* PROTOTYPE (wayfinder #57) — shared token source for both apps.
+/* PROTOTYPE (wayfinder #57), shared token source for both apps.
    Brand primitives (fixed inputs) + shadcn semantic layer (owner preset
    b1uGsTYZ6) + the Tailwind v4 @theme mapping. Imported by each app's
    styles.css. Throwaway candidate: the milestone spec decides its final home.
@@ -119,12 +119,12 @@ Assemble in this order (cut-and-paste from `apps/landing/src/styles.css` post-Ta
    as-found, not designed. */
 
 :root {
-  /* — Brand primitives (fixed inputs, hex) — */
+  /*, Brand primitives (fixed inputs, hex), */
   /* <paste the --sea-ink … --hero-b :root block from landing styles.css> */
 }
 
 :root {
-  /* — shadcn semantic layer (preset b1uGsTYZ6) — */
+  /*, shadcn semantic layer (preset b1uGsTYZ6), */
   /* <paste the post-apply --background … --sidebar-ring :root block> */
 }
 
@@ -133,7 +133,7 @@ Assemble in this order (cut-and-paste from `apps/landing/src/styles.css` post-Ta
 }
 
 :root {
-  /* — Preset-gap fallbacks: only add a line if the preset did NOT write it — */
+  /*, Preset-gap fallbacks: only add a line if the preset did NOT write it, */
   --sidebar: oklch(0.978 0.010 155.1);            /* foam */
   --sidebar-foreground: oklch(0.325 0.041 210.2); /* sea-ink */
   --sidebar-primary: var(--primary);
@@ -167,12 +167,12 @@ Assemble in this order (cut-and-paste from `apps/landing/src/styles.css` post-Ta
 }
 ```
 
-Conditional rules (driven by Task 1's Step 2 record — apply each only if true):
+Conditional rules (driven by Task 1's Step 2 record, apply each only if true):
 - If the preset wrote `--chart-*` values, drop the `--chart-*` fallback lines above.
 - If the preset wrote `--sidebar-*` values, drop the `--sidebar-*` fallback lines above (keep `var()`-based ones only where the preset genuinely omitted that token).
 - If the preset set `--font-sans` to something other than Manrope, keep the fallback line (Manrope is a fixed input) and note the conflict in the commit message for the owner to resolve in the shadcn editor.
-- `--font-serif: 'Fraunces'…` always stays — shadcn presets manage `--font-sans`/`--font-mono`; the serif display face is our addition.
-- If the preset's font part removed the Google Fonts `@import url(…Fraunces…Manrope…)` line from `styles.css` and replaced it with a package dep, leave that mechanism per-app exactly as the CLI left it — fonts load per app; only the `--font-*` mappings are shared.
+- `--font-serif: 'Fraunces'…` always stays, shadcn presets manage `--font-sans`/`--font-mono`; the serif display face is our addition.
+- If the preset's font part removed the Google Fonts `@import url(…Fraunces…Manrope…)` line from `styles.css` and replaced it with a package dep, leave that mechanism per-app exactly as the CLI left it, fonts load per app; only the `--font-*` mappings are shared.
 
 - [ ] **Step 2: Export it from the package**
 
@@ -204,14 +204,14 @@ Expected: link created, lockfile updated, no resolution errors.
 - [ ] **Step 4: Cut the token blocks from both apps and import the shared file**
 
 In **both** `apps/landing/src/styles.css` and `apps/admin/src/styles.css`:
-1. Delete the `:root { --sea-ink … --hero-b … }` block, the shadcn `:root` token block, the `.dark` block(s), and the entire `@theme inline { … }` block — everything that now lives in `tokens.css`. Both apps start from identical copies, so the same cuts apply to both. Keep: the Google Fonts `@import url(...)` (or the CLI's replacement font mechanism), `@import "tailwindcss"`, `@import "tw-animate-css"`, `@plugin "@tailwindcss/typography"`, `@custom-variant dark`, and every app-specific rule below (`body` gradients, `island-shell`, `nav-link`, `@layer base`, etc.).
+1. Delete the `:root { --sea-ink … --hero-b … }` block, the shadcn `:root` token block, the `.dark` block(s), and the entire `@theme inline { … }` block, everything that now lives in `tokens.css`. Both apps start from identical copies, so the same cuts apply to both. Keep: the Google Fonts `@import url(...)` (or the CLI's replacement font mechanism), `@import "tailwindcss"`, `@import "tw-animate-css"`, `@plugin "@tailwindcss/typography"`, `@custom-variant dark`, and every app-specific rule below (`body` gradients, `island-shell`, `nav-link`, `@layer base`, etc.).
 2. Add directly after `@import "tw-animate-css";`:
 
 ```css
 @import "@sevendays/ui/tokens.css";
 ```
 
-Note: app CSS still references the brand vars (`var(--sea-ink)`, `var(--sand)`, `var(--hero-a)`, …) — they now resolve from the shared file. `@layer base { * { @apply border-border outline-ring/50 } }` still works: those utilities are generated from the shared `@theme`.
+Note: app CSS still references the brand vars (`var(--sea-ink)`, `var(--sand)`, `var(--hero-a)`, …), they now resolve from the shared file. `@layer base { * { @apply border-border outline-ring/50 } }` still works: those utilities are generated from the shared `@theme`.
 
 - [ ] **Step 5: Build both apps and prove the chain generated utilities**
 
@@ -226,7 +226,7 @@ find apps/landing -name '*.css' -path '*build*' -o -name '*.css' -path '*.output
 # grep the found asset(s) for the preset's --primary oklch value from Task 1, and for 'sea-ink'
 ```
 
-Expected: the preset's primary oklch literal and the brand var both appear in built CSS. If the find pattern matches nothing (output layout varies), the Task 3 render smoke is the fallback proof — note it and move on.
+Expected: the preset's primary oklch literal and the brand var both appear in built CSS. If the find pattern matches nothing (output layout varies), the Task 3 render smoke is the fallback proof, note it and move on.
 
 - [ ] **Step 6: Commit**
 
@@ -246,14 +246,14 @@ git commit -m "prototype(#57): shared token layer in packages/ui, both apps impo
 
 **Interfaces:**
 - Consumes: semantic utilities (`bg-primary`, `text-primary-foreground`, `bg-secondary`, `text-muted-foreground`, `border-input`, `ring-ring`, `bg-chart-1..5`, `bg-sidebar*`, `border-sidebar-border`), brand utilities (`bg-sea-ink` etc.), `font-sans`/`font-serif`, and the real `SiteHeader` from `../components/site-header`.
-- Produces: route `/prototype-tokens` (file routes are auto-registered into routeTree by the TanStack Start plugin on dev/build — no manual registration). Marker attribute `data-prototype-tokens` is what the smoke test greps for.
+- Produces: route `/prototype-tokens` (file routes are auto-registered into routeTree by the TanStack Start plugin on dev/build, no manual registration). Marker attribute `data-prototype-tokens` is what the smoke test greps for.
 
 - [ ] **Step 1: Write the route file**
 
 Create `apps/landing/src/routes/prototype-tokens.tsx` with exactly this content:
 
 ```tsx
-// PROTOTYPE (throwaway) — wayfinder #57: brand → shadcn token unification.
+// PROTOTYPE (throwaway), wayfinder #57: brand → shadcn token unification.
 // Renders representative shadcn-style components using ONLY semantic tokens
 // so the preset mapping can be judged on real UI. Not linked from any nav.
 // Delete this file when the design-system milestone work lands.
@@ -279,7 +279,7 @@ function PrototypeTokensPage() {
         <p className='text-foreground mt-3 max-w-prose'>
           Display headings render in Fraunces via <code>font-serif</code>;
           this body copy renders in Manrope via <code>font-sans</code>. Every
-          color below is a semantic token — react to the mapping, not to
+          color below is a semantic token, react to the mapping, not to
           individual hex values.
         </p>
       </header>
@@ -407,7 +407,7 @@ function PrototypeTokensPage() {
           <div className='bg-chart-5 h-2/5 w-full rounded-t-sm' title='chart-5' />
         </div>
         <p className='text-muted-foreground mt-2 text-xs'>
-          chart-1…chart-5, left to right. The brand has no five-hue ramp — these
+          chart-1…chart-5, left to right. The brand has no five-hue ramp, these
           fallbacks are a brand tonal ramp unless the preset supplied its own.
         </p>
       </section>
@@ -454,7 +454,7 @@ function PrototypeTokensPage() {
 
       <footer className='mt-12 border-t border-border pt-4'>
         <p className='text-muted-foreground text-xs'>
-          Prototype for wayfinder #57 — preset b1uGsTYZ6 applied 2026-09-12.
+          Prototype for wayfinder #57, preset b1uGsTYZ6 applied 2026-09-12.
           Throwaway: this route never ships.
         </p>
       </footer>
@@ -493,7 +493,7 @@ curl -s http://localhost:3000/prototype-tokens | grep -o 'Sevendays Admin' | hea
 kill %1
 ```
 
-Note the port the dev server prints if not 3000 (vite default is 5173 for this setup — check the startup output and adjust the URLs). Expected: both greps print a match — SSR rendered the route. The rendered HTML carries class names, not computed colors; the built-CSS grep in Task 2 Step 5 is the proof the tokens generate. Color judgment happens in the owner's browser.
+Note the port the dev server prints if not 3000 (vite default is 5173 for this setup, check the startup output and adjust the URLs). Expected: both greps print a match, SSR rendered the route. The rendered HTML carries class names, not computed colors; the built-CSS grep in Task 2 Step 5 is the proof the tokens generate. Color judgment happens in the owner's browser.
 
 - [ ] **Step 4: Commit**
 
@@ -511,7 +511,7 @@ git commit -m "prototype(#57): /prototype-tokens showcase route (throwaway)"
 
 **Interfaces:**
 - Consumes: everything from Tasks 1–3.
-- Produces: pushed branch `prototype/57-brand-token-unification` on origin + a handover comment on issue #57. The ticket is **not** closed — it's HITL; it resolves when the owner reacts.
+- Produces: pushed branch `prototype/57-brand-token-unification` on origin + a handover comment on issue #57. The ticket is **not** closed, it's HITL; it resolves when the owner reacts.
 
 - [ ] **Step 1: Repo-wide check**
 
@@ -519,7 +519,7 @@ git commit -m "prototype(#57): /prototype-tokens showcase route (throwaway)"
 pnpm check
 ```
 
-Expected: lint, format, typecheck, test all green (`@sevendays/admin` test is a documented no-op — that's expected, not a failure). If formatting fails: `pnpm fix`, re-run `pnpm check`, commit fixups as `chore(#57): prototype check fixups`.
+Expected: lint, format, typecheck, test all green (`@sevendays/admin` test is a documented no-op, that's expected, not a failure). If formatting fails: `pnpm fix`, re-run `pnpm check`, commit fixups as `chore(#57): prototype check fixups`.
 
 - [ ] **Step 2: Push the branch**
 
@@ -535,7 +535,7 @@ Stage the body as a temp file and verify the write (per wayfinder lessons):
 cat > /tmp/57-handover.md <<'EOF'
 ## Prototype ready for reaction
 
-Branch: `prototype/57-brand-token-unification` (throwaway — nothing merges until the mapping is validated)
+Branch: `prototype/57-brand-token-unification` (throwaway, nothing merges until the mapping is validated)
 
 **Run it:**
 ```bash
@@ -550,7 +550,7 @@ Then open `/prototype-tokens` on the printed port.
 
 **Iterate:** adjust the preset in the shadcn editor, then re-run `pnpm dlx shadcn@latest apply --preset <id> -y -c apps/landing` and re-do the lift (or ask the agent session to).
 
-**Recorded findings from the apply:** <paste Task 1 Step 2 record — preset primary/accent/ring/radius values, font mechanism, chart/sidebar/dark coverage, any conflicts>
+**Recorded findings from the apply:** <paste Task 1 Step 2 record, preset primary/accent/ring/radius values, font mechanism, chart/sidebar/dark coverage, any conflicts>
 
 Ticket stays open until the owner reacts (HITL).
 EOF
@@ -558,12 +558,12 @@ gh issue comment 57 --body-file /tmp/57-handover.md
 gh issue view 57 --json comments --jq '.comments[-1].body' | head -5
 ```
 
-Expected: the read-back shows the comment body. Do **not** close the ticket and do **not** edit the map's Decisions-so-far — the resolution comment and map pointer happen after the owner reacts.
+Expected: the read-back shows the comment body. Do **not** close the ticket and do **not** edit the map's Decisions-so-far, the resolution comment and map pointer happen after the owner reacts.
 
 ---
 
 ## Self-Review
 
 - **Spec coverage:** preset apply (Task 1) ✓; oklch semantic re-expression (preset carries it; fallback table in constraints) ✓; Fraunces/Manrope as `--font-*` (Task 2 Step 1 fallbacks + `@theme`) ✓; radius/chart/sidebar included (preset + explicit fallbacks) ✓; landing first, mirrored into admin (Task 2 wires both, builds both) ✓; react on real components (Task 3 showcase + real `SiteHeader`) ✓; shared-definition question demonstrated (Task 2) ✓; dark parked (constraint + unchanged carry-over) ✓.
-- **Placeholder scan:** the two `<paste …>` directives in Task 2 Step 1 are cut-and-paste operations on blocks that only exist after Task 1 runs (the preset's literal values are unknowable pre-apply) — each names its source block and destination exactly. No other placeholders.
+- **Placeholder scan:** the two `<paste …>` directives in Task 2 Step 1 are cut-and-paste operations on blocks that only exist after Task 1 runs (the preset's literal values are unknowable pre-apply), each names its source block and destination exactly. No other placeholders.
 - **Type consistency:** showcase uses only utilities guaranteed by Task 2's `@theme inline` (`font-serif`, `bg-chart-1..5`, `bg-sidebar*`, brand `bg-*`); `SiteHeader` import path and `createFileRoute` signature match `apps/landing/src/routes/about.tsx` on this branch.

@@ -1,25 +1,25 @@
-# Plan: #349 — Handover polish: sweep tool + the packages/scripts/e2e tree
+# Plan: #349, Handover polish: sweep tool + the packages/scripts/e2e tree
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** The em-dash sweep (spec #348 item 1) starts with its tool and the smallest area. A repo-root script with two modes — **check** (exit non-zero listing every author-written file still carrying an em dash, outside the excluded vendored-skills and generated-graph-output trees) and **fix** (the scripted default replacement of the spaced em dash with `, `, leaving en dashes and numeric ranges untouched) — then runs fix over the packages, scripts, and e2e trees. The eight product/visitor-visible strings in those trees are hand-rewritten for natural prose (never spaced-hyphen replacements), their pin suites and the three downstream echo sites update in lockstep, and `pnpm check` stays green with every floor unmoved.
+**Goal:** The em-dash sweep (spec #348 item 1) starts with its tool and the smallest area. A repo-root script with two modes, **check** (exit non-zero listing every author-written file still carrying an em dash, outside the excluded vendored-skills and generated-graph-output trees) and **fix** (the scripted default replacement of the spaced em dash with `, `, leaving en dashes and numeric ranges untouched), then runs fix over the packages, scripts, and e2e trees. The eight product/visitor-visible strings in those trees are hand-rewritten for natural prose (never spaced-hyphen replacements), their pin suites and the three downstream echo sites update in lockstep, and `pnpm check` stays green with every floor unmoved.
 
-**Architecture:** One new plain-Node script (`scripts/em-dash-sweep.mjs`, the `measure-theme-pairs.mjs`/`audit-v1-absence.mjs` house pattern: zero imports beyond `node:*`, exit-code contract 0/1/2, a `--self-test` mode that builds throwaway fixture git repos). Enumeration is `git ls-files` (so `.git` and every gitignored path — including the untracked `.superpowers/` — are excluded by construction) plus two explicit prefix exclusions: `graphify-out/` (generated) and `.agents/skills/` (vendored). Binary files are skipped by a NUL-byte sniff. Check mode scans decoded text for the character U+2014 in any position; fix mode rewrites exactly one shape, the spaced dash (space, U+2014, space) to `, `. Everything else an em dash can be in this repo's prose (unspaced, line-end continuations, decorative comment separators) is enumerated as hand-fix classes, not scripted. The script's own source is em-dash-free (escapes only) so the gate never flags its own tool.
+**Architecture:** One new plain-Node script (`scripts/em-dash-sweep.mjs`, the `measure-theme-pairs.mjs`/`audit-v1-absence.mjs` house pattern: zero imports beyond `node:*`, exit-code contract 0/1/2, a `--self-test` mode that builds throwaway fixture git repos). Enumeration is `git ls-files` (so `.git` and every gitignored path, including the untracked `.superpowers/`, are excluded by construction) plus two explicit prefix exclusions: `graphify-out/` (generated) and `.agents/skills/` (vendored). Binary files are skipped by a NUL-byte sniff. Check mode scans decoded text for the character U+2014 in any position; fix mode rewrites exactly one shape, the spaced dash (space, U+2014, space) to `, `. Everything else an em dash can be in this repo's prose (unspaced, line-end continuations, decorative comment separators) is enumerated as hand-fix classes, not scripted. The script's own source is em-dash-free (escapes only) so the gate never flags its own tool.
 
-**Tech Stack:** zero new dependencies; plain Node ESM script; root `package.json` gains one entry; vitest floors unchanged everywhere (no tests added — the sweep edits pin literals in place); Playwright `--list` for e2e compile sanity; pnpm + Turborepo; `gh` CLI.
+**Tech Stack:** zero new dependencies; plain Node ESM script; root `package.json` gains one entry; vitest floors unchanged everywhere (no tests added, the sweep edits pin literals in place); Playwright `--list` for e2e compile sanity; pnpm + Turborepo; `gh` CLI.
 
-**Spec:** [GitHub issue #349](https://github.com/jeius/sevendays/issues/349), authoritatively settled by its parent spec — [issue #348](https://github.com/jeius/sevendays/issues/348), repo copy `docs/specs/2026-11-22-pre-handover-polish-spec.md` (item 1: scope, method, exclusions, en-dash law, no-DB-pass ruling Q5; Testing Decisions: the em-dash gate script + copy-pinning suites updated in place).
+**Spec:** [GitHub issue #349](https://github.com/jeius/sevendays/issues/349), authoritatively settled by its parent spec, [issue #348](https://github.com/jeius/sevendays/issues/348), repo copy `docs/specs/2026-11-22-pre-handover-polish-spec.md` (item 1: scope, method, exclusions, en-dash law, no-DB-pass ruling Q5; Testing Decisions: the em-dash gate script + copy-pinning suites updated in place).
 
 ## Branch law
 
 - Branch **`em-dash-sweep`** off current `main` (`c266b6a` at plan time, 2026-11-22). All four tasks commit there; one PR to `main` titled `Handover polish: sweep tool + the packages/scripts/e2e tree (#349)` (Closes #349).
-- The sibling sweep tickets run on their own branches after this one: #350 (apps), #351/#352 (docs), #353 (root files). #354 (the CI gate) lands **last**, after every sweep — until then, the script's unscoped check is *expected* to fail on the unswept trees; each sweep ticket's verdict is the **scoped** check (`check <its trees>`).
+- The sibling sweep tickets run on their own branches after this one: #350 (apps), #351/#352 (docs), #353 (root files). #354 (the CI gate) lands **last**, after every sweep, until then, the script's unscoped check is *expected* to fail on the unswept trees; each sweep ticket's verdict is the **scoped** check (`check <its trees>`).
 
 ## Controller pre-flight (live-run, record before Task 1)
 
-- **Floors (must not move anywhere in this ticket):** api 34 files / 482 passed + 3 skipped; types 18 files / 197 passed; api-client 5 files / 45; landing 19 files / 152; admin 34 files / 364; db 4 files / **30 passed + 0 skipped with `TEST_DATABASE_URL` set** (the with-var form every gate in this plan uses; the without-var form is 22 passed + 8 skipped — the 8 live-probe tests are `skipIf(!TEST_DATABASE_URL)`/`runIf`-gated and open under the var; ruling #349-R4). Live-run each and record; any drift means something merged — reconcile before starting.
-- **Dash census:** `git grep '—' -- packages scripts e2e | wc -l` → **568 dash lines across 104 files** (measured 2026-11-22). Re-run and record. Drift means something merged — reconcile.
-- **Hand-class census:** 10 line-end dashes (the `—$` class: `e2e/smoke/production.spec.ts:51`, `e2e/visual/redesign.spec.ts:56,124,349,402`, `packages/db/scripts/db-state.mjs:1,31`, `packages/db/scripts/probe-pooler-transaction.mjs:1`, `packages/db/scripts/rehearsal-fixture.mjs:2`, `packages/db/src/schema/addon-services.ts:3`); 24 decorative separator lines across 7 files (`e2e/README.md`, `e2e/visual/redesign.spec.ts`, `packages/api-client/test/loopback.test.ts`, `packages/types/src/reset-email.ts`, `packages/ui/src/tokens.css`, `scripts/audit-v1-absence.mjs`, `scripts/measure-theme-pairs.mjs`); 5 double-space dash lines (`packages/db/scripts/verify-appointment-row.mjs` ×3, `packages/db/scripts/verify-seed.ts` ×1, `scripts/measure-theme-pairs.mjs` ×1).
+- **Floors (must not move anywhere in this ticket):** api 34 files / 482 passed + 3 skipped; types 18 files / 197 passed; api-client 5 files / 45; landing 19 files / 152; admin 34 files / 364; db 4 files / **30 passed + 0 skipped with `TEST_DATABASE_URL` set** (the with-var form every gate in this plan uses; the without-var form is 22 passed + 8 skipped, the 8 live-probe tests are `skipIf(!TEST_DATABASE_URL)`/`runIf`-gated and open under the var; ruling #349-R4). Live-run each and record; any drift means something merged, reconcile before starting.
+- **Dash census:** `git grep '-' -- packages scripts e2e | wc -l` → **568 dash lines across 104 files** (measured 2026-11-22). Re-run and record. Drift means something merged, reconcile.
+- **Hand-class census:** 10 line-end dashes (the `\u2014$` class: `e2e/smoke/production.spec.ts:51`, `e2e/visual/redesign.spec.ts:56,124,349,402`, `packages/db/scripts/db-state.mjs:1,31`, `packages/db/scripts/probe-pooler-transaction.mjs:1`, `packages/db/scripts/rehearsal-fixture.mjs:2`, `packages/db/src/schema/addon-services.ts:3`); 24 decorative separator lines across 7 files (`e2e/README.md`, `e2e/visual/redesign.spec.ts`, `packages/api-client/test/loopback.test.ts`, `packages/types/src/reset-email.ts`, `packages/ui/src/tokens.css`, `scripts/audit-v1-absence.mjs`, `scripts/measure-theme-pairs.mjs`); 5 double-space dash lines (`packages/db/scripts/verify-appointment-row.mjs` ×3, `packages/db/scripts/verify-seed.ts` ×1, `scripts/measure-theme-pairs.mjs` ×1).
 - **En-dash inventory:** exactly **2** en dashes repo-wide-in-scope, both in `packages/types/src/testimonial-submission.ts` lines 8–9 (`quote 20–600 chars`, `person 2–80`). They must survive every task byte-identical.
 - **Test DB:** `docker start sevendays-test-db-5433` if down (the db suite's live leg + the final `pnpm check`).
 
@@ -29,19 +29,19 @@
 
 **NOT here (siblings / out of scope):**
 
-- **#350 — the apps tree.** All remaining apps prose, UI copy, placeholder glyphs, and `apps/api/scripts/` stay there. The ONLY app-file edits in this plan are Task 2's three echo repairs (`apps/landing/scripts/verify/content-pages.mjs`, `apps/landing/scripts/verify/cms-reflection.mjs`, `apps/landing/src/routes/share-your-story.tsx`), each a byte-consistent mirror of a string Task 2 changes.
-- **#351/#352 — docs**, **#353 — root files** (AGENTS.md floors are NOT touched: no test count moves), **#354 — CI wiring** (the `check` script entry in CI, the both-ways demonstration).
+- **#350, the apps tree.** All remaining apps prose, UI copy, placeholder glyphs, and `apps/api/scripts/` stay there. The ONLY app-file edits in this plan are Task 2's three echo repairs (`apps/landing/scripts/verify/content-pages.mjs`, `apps/landing/scripts/verify/cms-reflection.mjs`, `apps/landing/src/routes/share-your-story.tsx`), each a byte-consistent mirror of a string Task 2 changes.
+- **#351/#352, docs**, **#353, root files** (AGENTS.md floors are NOT touched: no test count moves), **#354, CI wiring** (the `check` script entry in CI, the both-ways demonstration).
 - **Live DB rows (Q5):** catalog.ts's two changed strings change fresh seeds only; the `site_settings` row is untouched; no migration, no data pass.
-- **En dashes** — preserved everywhere, by script construction and by the fix-up rules.
-- **Git history** — tree-state only, no rewrite.
-- **`pnpm-lock.yaml`** (zero em dashes, verified 2026-11-22 — untouched), **`.superpowers/`** (untracked — excluded by construction), **`skills-lock.json`** (root file, #353's tree).
-- **`scripts/seed-v1/*.txt` RULE lines** — every `x==>y` line is untouchable sweep input (ADR-0015 seed mechanics). Verified 2026-11-22: no rule line carries the spaced dash; only `#` comment lines change. Task 3 re-verifies after the batch.
-- **Visual baselines** — `toHaveScreenshot` takes explicit `${name}-${theme}.png` names (`e2e/visual/redesign.spec.ts:418`); test titles do not feed snapshot basenames, so sweeping titles cannot rename a baseline. No re-baselining anywhere in this ticket.
-- **No ADR** — spec item 1 invents no architecture (the gate script is the `measure-theme-pairs` precedent's port).
+- **En dashes**, preserved everywhere, by script construction and by the fix-up rules.
+- **Git history**, tree-state only, no rewrite.
+- **`pnpm-lock.yaml`** (zero em dashes, verified 2026-11-22, untouched), **`.superpowers/`** (untracked, excluded by construction), **`skills-lock.json`** (root file, #353's tree).
+- **`scripts/seed-v1/*.txt` RULE lines**, every `x==>y` line is untouchable sweep input (ADR-0015 seed mechanics). Verified 2026-11-22: no rule line carries the spaced dash; only `#` comment lines change. Task 3 re-verifies after the batch.
+- **Visual baselines**, `toHaveScreenshot` takes explicit `${name}-${theme}.png` names (`e2e/visual/redesign.spec.ts:418`); test titles do not feed snapshot basenames, so sweeping titles cannot rename a baseline. No re-baselining anywhere in this ticket.
+- **No ADR**, spec item 1 invents no architecture (the gate script is the `measure-theme-pairs` precedent's port).
 
 ## Global Constraints
 
-- **The eight hand-rewritten strings (use exactly; do not paraphrase).** PROPOSED at plan time: the owner copy question went unanswered 2026-11-22 (AskUserQuestion returned no answers), so these pins await the owner's ratification at the execution review — the PR body carries the flag. If the owner edits any string at review, re-run Task 2's gates and the echo repairs with the owner's wording before merge.
+- **The eight hand-rewritten strings (use exactly; do not paraphrase).** PROPOSED at plan time: the owner copy question went unanswered 2026-11-22 (AskUserQuestion returned no answers), so these pins await the owner's ratification at the execution review, the PR body carries the flag. If the owner edits any string at review, re-run Task 2's gates and the echo repairs with the owner's wording before merge.
   - `SITE_SETTINGS_DEFAULTS.homeDescription` → `'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios. Booked in minutes, delivered in seven days.'`
   - `SITE_SETTINGS_DEFAULTS.packagesDescription` → `'From graduation portraits to family sessions: every package with its price, duration, and inclusions at a glance. Tap a package for the full details.'`
   - `SITE_SETTINGS_DEFAULTS.branchesDescription` → `'Three studios, one standard of light. Walk-ins are welcome where flagged; everywhere else, call ahead or book online.'`
@@ -53,21 +53,21 @@
 - **Method law:** product/visitor-visible strings are hand-rewritten (never the scripted comma); developer-facing strings, comments, docs prose, and test titles take fix mode + the fix-up pass. The three echo sites stay byte-consistent with the constants they mirror.
 - **The tool's own source is em-dash-free by construction:** the character appears only as `\u2014` escapes; the gate must not flag its own file (Task 1 proves it).
 - **fix mode rewrites exactly one shape:** `\u0020\u2014\u0020` → `', '`. Unspaced dashes, line-end dashes, decorative separators, and ` , `-class artifacts are hand classes (Task 3). En dashes are never touched.
-- **Dist consumers:** `packages/types` is consumed from `dist/` — after editing its source, `pnpm --filter @sevendays/types build` before the api-client/db suites and any dependent typecheck (`packages/api-client/test/mock-api.ts` imports `TESTIMONIAL_SUBMISSION_ACCEPTED` from the types dist, line 7).
-- **Test DB:** db-suite runs and the final `pnpm check` prefix `TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test` (start the standalone container first if down: `docker start sevendays-test-db-5433`). Port 5432 belongs to another project — never fall back.
+- **Dist consumers:** `packages/types` is consumed from `dist/`, after editing its source, `pnpm --filter @sevendays/types build` before the api-client/db suites and any dependent typecheck (`packages/api-client/test/mock-api.ts` imports `TESTIMONIAL_SUBMISSION_ACCEPTED` from the types dist, line 7).
+- **Test DB:** db-suite runs and the final `pnpm check` prefix `TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test` (start the standalone container first if down: `docker start sevendays-test-db-5433`). Port 5432 belongs to another project, never fall back.
 - **Per-task gates:** the touched packages' `test -- --run` AND `typecheck` both green before each task's commit. Final gate: `pnpm fix` then `pnpm check` green at the repo root (with `TEST_DATABASE_URL` set). Do not commit code that fails it for the packages/apps touched.
 - **Floors do not move.** Every suite's file/test count is identical before and after (string edits edit pins in place; the script is outside every vitest project). A count that differs at any gate means something else drifted: stop and reconcile.
-- **Biome covers `scripts/` and `e2e/` from the root** (`biome.json` `files:{}` = everything not gitignored): the touched files pass `pnpm exec biome check <files>` (touched-files clean; `pnpm lint:root` is pre-existing red at main and is NOT a gate — ruling #349-R3); any format drift heals in Task 4's `pnpm fix`.
+- **Biome covers `scripts/` and `e2e/` from the root** (`biome.json` `files:{}` = everything not gitignored): the touched files pass `pnpm exec biome check <files>` (touched-files clean; `pnpm lint:root` is pre-existing red at main and is NOT a gate, ruling #349-R3); any format drift heals in Task 4's `pnpm fix`.
 - Checklist ticks in `docs/*.md` use `- [✅]`, never plain `[x]`.
 - Commits follow the repo's commit-work convention, each referencing #349. Prefixes: `feat(scripts):` (Task 1), `chore(copy):` (Task 2), `chore(sweep):` (Task 3), `docs(progress):` + `chore(graphify):` (Task 4).
 - Run from the repo root (the branch checkout's root). The script reads `git ls-files` from cwd.
 
 ---
 
-## Task 1 — the tool: `scripts/em-dash-sweep.mjs` + the package.json entry
+## Task 1, the tool: `scripts/em-dash-sweep.mjs` + the package.json entry
 
 **Files:**
-- Create: `scripts/em-dash-sweep.mjs` (full source below — write it byte-exact)
+- Create: `scripts/em-dash-sweep.mjs` (full source below, write it byte-exact)
 - Modify: `package.json` (one scripts entry)
 
 **Interfaces:**
@@ -75,7 +75,7 @@
 
 - [ ] **Step 1: Create the branch.** From `main` at `c266b6a`: `git checkout -b em-dash-sweep`. Confirm the pre-flight census numbers on this branch before writing anything.
 
-- [ ] **Step 2: Write the script.** Create `scripts/em-dash-sweep.mjs` with exactly this source (every comment and string is em-dash-free — the character exists only as escapes; keep it that way):
+- [ ] **Step 2: Write the script.** Create `scripts/em-dash-sweep.mjs` with exactly this source (every comment and string is em-dash-free, the character exists only as escapes; keep it that way):
 
 ```js
 #!/usr/bin/env node
@@ -349,22 +349,22 @@ Expected: the `SELF-TEST PASS` block (exclusions held, en dash preserved, binary
 ```bash
 node scripts/em-dash-sweep.mjs check scripts
 ```
-Expected: exit 1 listing the 7 pre-existing dash-carrying `scripts/` files (58 lines — `audit-v1-absence.mjs`, `measure-theme-pairs.mjs`, `probe-cold-hydration.mjs`, `seed-v1/paths.txt`, `seed-v1/replace-message.txt`, `seed-v1/replace-text.txt`, `v1-triage.mjs`; Task 3 sweeps them) — and **`scripts/em-dash-sweep.mjs` must never be among them** (the tool's own file is em-dash-free). If the tool lists itself, a literal dash leaked into the source; fix the escape and re-run. The clean `scripts` verdict becomes available only after Task 3. (Ruling #349-R1: the original `clean, 0 hits (scripts)` expectation was a plan defect.)
+Expected: exit 1 listing the 7 pre-existing dash-carrying `scripts/` files (58 lines, `audit-v1-absence.mjs`, `measure-theme-pairs.mjs`, `probe-cold-hydration.mjs`, `seed-v1/paths.txt`, `seed-v1/replace-message.txt`, `seed-v1/replace-text.txt`, `v1-triage.mjs`; Task 3 sweeps them), and **`scripts/em-dash-sweep.mjs` must never be among them** (the tool's own file is em-dash-free). If the tool lists itself, a literal dash leaked into the source; fix the escape and re-run. The clean `scripts` verdict becomes available only after Task 3. (Ruling #349-R1: the original `clean, 0 hits (scripts)` expectation was a plan defect.)
 
 ```bash
 pnpm em-dash check packages
 ```
-Expected: exit 1 listing the packages dash lines (the census files) — the alias resolves and the scoped check works.
+Expected: exit 1 listing the packages dash lines (the census files), the alias resolves and the scoped check works.
 
-- [ ] **Step 5: Biome gate (touched files only).** `pnpm exec biome check scripts/em-dash-sweep.mjs package.json` exits 0. Then `pnpm exec biome format scripts/em-dash-sweep.mjs` — if it reports formatting drift, apply `pnpm exec biome format --write scripts/em-dash-sweep.mjs` and re-run Step 4's three commands (formatting must not change behavior). Do NOT gate on `pnpm lint:root`: it is root-biome over every non-member path and is pre-existing red at main (2 errors: `e2e/visual/redesign.spec.ts:312` `useIterableCallbackReturn` + generated `graphify-out/graph.html:304`), and turbo's `pnpm check` never runs it (ruling #349-R3).
+- [ ] **Step 5: Biome gate (touched files only).** `pnpm exec biome check scripts/em-dash-sweep.mjs package.json` exits 0. Then `pnpm exec biome format scripts/em-dash-sweep.mjs`, if it reports formatting drift, apply `pnpm exec biome format --write scripts/em-dash-sweep.mjs` and re-run Step 4's three commands (formatting must not change behavior). Do NOT gate on `pnpm lint:root`: it is root-biome over every non-member path and is pre-existing red at main (2 errors: `e2e/visual/redesign.spec.ts:312` `useIterableCallbackReturn` + generated `graphify-out/graph.html:304`), and turbo's `pnpm check` never runs it (ruling #349-R3).
 
 - [ ] **Step 6: Commit.** `git add scripts/em-dash-sweep.mjs package.json && git commit -m "feat(scripts): the em-dash sweep tool with check, fix, and self-test (#349)"`
 
 ---
 
-## Task 2 — the hand-rewritten strings, their pins, and the echo repairs
+## Task 2, the hand-rewritten strings, their pins, and the echo repairs
 
-Product/visitor-visible copy is hand-rewritten FIRST so fix mode (Task 3) never touches it. Every changed constant updates its quoting sites in the same commit: the pin suites (types, api-client) and the three downstream echo sites (the #331 mechanical-blast-radius precedent — app files, zero behavior, lockstep strings only). The packages/db strings are not compared by `verify-seed.ts` (it checks names, prices, frames, attires, branches, and privilege descriptions — none of which change; verified 2026-11-22), so no verify-seed coupling exists.
+Product/visitor-visible copy is hand-rewritten FIRST so fix mode (Task 3) never touches it. Every changed constant updates its quoting sites in the same commit: the pin suites (types, api-client) and the three downstream echo sites (the #331 mechanical-blast-radius precedent, app files, zero behavior, lockstep strings only). The packages/db strings are not compared by `verify-seed.ts` (it checks names, prices, frames, attires, branches, and privilege descriptions, none of which change; verified 2026-11-22), so no verify-seed coupling exists.
 
 **Files:**
 - Modify: `packages/types/src/site-settings.ts` (5 strings + one rider comment)
@@ -391,24 +391,24 @@ export const SITE_SETTINGS_DEFAULTS: SiteSettings = {
   logoImageUrl: null,
   homeTitle: 'Three branches. One standard of light.',
   homeDescription:
-    'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.',
+    'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios, booked in minutes, delivered in seven days.',
   packagesTitle: 'Packages',
   packagesDescription:
-    'From graduation portraits to family sessions — every package with its price, duration, and inclusions at a glance. Tap a package for the full details.',
+    'From graduation portraits to family sessions, every package with its price, duration, and inclusions at a glance. Tap a package for the full details.',
   branchesTitle: 'Branches',
   branchesDescription:
-    'Three studios, one standard of light. Walk-ins are welcome where flagged — everywhere else, call ahead or book online.',
+    'Three studios, one standard of light. Walk-ins are welcome where flagged, everywhere else, call ahead or book online.',
   servicesTitle: 'Services',
   servicesDescription:
-    'Photo recovery, printing, portraits, and framing — studio services you can book at the branches listed on each card.',
+    'Photo recovery, printing, portraits, and framing, studio services you can book at the branches listed on each card.',
   aboutTitle: 'About',
-  // Ratified verbatim at the #224 variants round (2026-10-21, "all goods" —
+  // Ratified verbatim at the #224 variants round (2026-10-21, "all goods",
   // no retune); the round's evidence carries the captured drives.
   aboutDescription:
-    'The studio behind the work — our story, our portfolio, and the people who sat for us.',
+    'The studio behind the work, our story, our portfolio, and the people who sat for us.',
 ```
 
-After (string literals only — the em dashes in the comment lines above stay for Task 3's mechanical sweep):
+After (string literals only, the em dashes in the comment lines above stay for Task 3's mechanical sweep):
 ```ts
 export const SITE_SETTINGS_DEFAULTS: SiteSettings = {
   brandName: 'Sevendays',
@@ -427,7 +427,7 @@ export const SITE_SETTINGS_DEFAULTS: SiteSettings = {
   servicesDescription:
     'Photo recovery, printing, portraits, and framing: studio services you can book at the branches listed on each card.',
   aboutTitle: 'About',
-  // Ratified verbatim at the #224 variants round (2026-10-21, "all goods" —
+  // Ratified verbatim at the #224 variants round (2026-10-21, "all goods",
   // no retune); the round's evidence carries the captured drives.
   aboutDescription:
     'The studio behind the work: our story, our portfolio, and the people who sat for us.',
@@ -454,7 +454,7 @@ After:
 Before:
 ```ts
 export const TESTIMONIAL_SUBMISSION_ACCEPTED = {
-  message: 'Thank you — your story is on its way.',
+  message: 'Thank you, your story is on its way.',
 } as const;
 ```
 
@@ -472,7 +472,7 @@ Before (lines 14–18):
   {
     code: '8R',
     description:
-      '8R print — nominally the same physical size as 8x10; both appear in the price list. Client to confirm at seed review whether they merge.',
+      '8R print, nominally the same physical size as 8x10; both appear in the price list. Client to confirm at seed review whether they merge.',
   },
 ```
 
@@ -487,7 +487,7 @@ After:
 
 Before (line 103):
 ```ts
-    description: 'Entry graduation portrait package — 1 framed 8x10 Toga plus wallet-size prints.',
+    description: 'Entry graduation portrait package, 1 framed 8x10 Toga plus wallet-size prints.',
 ```
 
 After:
@@ -500,19 +500,19 @@ After:
 Before:
 ```ts
       homeDescription:
-        'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.',
+        'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios, booked in minutes, delivered in seven days.',
       packagesTitle: 'Packages',
       packagesDescription:
-        'From graduation portraits to family sessions — every package with its price, duration, and inclusions at a glance. Tap a package for the full details.',
+        'From graduation portraits to family sessions, every package with its price, duration, and inclusions at a glance. Tap a package for the full details.',
       branchesTitle: 'Branches',
       branchesDescription:
-        'Three studios, one standard of light. Walk-ins are welcome where flagged — everywhere else, call ahead or book online.',
+        'Three studios, one standard of light. Walk-ins are welcome where flagged, everywhere else, call ahead or book online.',
       servicesTitle: 'Services',
       servicesDescription:
-        'Photo recovery, printing, portraits, and framing — studio services you can book at the branches listed on each card.',
+        'Photo recovery, printing, portraits, and framing, studio services you can book at the branches listed on each card.',
       aboutTitle: 'About',
       aboutDescription:
-        'The studio behind the work — our story, our portfolio, and the people who sat for us.',
+        'The studio behind the work, our story, our portfolio, and the people who sat for us.',
 ```
 
 After:
@@ -538,7 +538,7 @@ In `packages/types/src/testimonial-submission.test.ts` (line 104):
 Before:
 ```ts
     expect(TESTIMONIAL_SUBMISSION_ACCEPTED).toEqual({
-      message: 'Thank you — your story is on its way.',
+      message: 'Thank you, your story is on its way.',
     });
 ```
 
@@ -549,14 +549,14 @@ After:
     });
 ```
 
-In `packages/api-client/test/loopback.test.ts` (lines 264 and 274 — both pin the constant's value through the loopback; `mock-api.ts` serves the imported constant itself and needs no edit):
+In `packages/api-client/test/loopback.test.ts` (lines 264 and 274, both pin the constant's value through the loopback; `mock-api.ts` serves the imported constant itself and needs no edit):
 
 Before:
 ```ts
-  expect(accepted).toEqual({ message: 'Thank you — your story is on its way.' });
+  expect(accepted).toEqual({ message: 'Thank you, your story is on its way.' });
 ```
 ```ts
-  expect(discarded).toEqual({ message: 'Thank you — your story is on its way.' });
+  expect(discarded).toEqual({ message: 'Thank you, your story is on its way.' });
 ```
 
 After:
@@ -575,7 +575,7 @@ Before (lines 101–103):
 ```ts
   const expectedBlurb =
     settings.homeDescription ??
-    'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.';
+    'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios, booked in minutes, delivered in seven days.';
 ```
 
 After:
@@ -589,18 +589,18 @@ In `apps/landing/scripts/verify/cms-reflection.mjs` (the harness re-derives the 
 
 Before (lines 411–414):
 ```ts
-    // The generic 201 is a FIXED message — packages/types'
-    // TESTIMONIAL_SUBMISSION_ACCEPTED ('Thank you — your story is on its
+    // The generic 201 is a FIXED message, packages/types'
+    // TESTIMONIAL_SUBMISSION_ACCEPTED ('Thank you, your story is on its
     // way.'), re-derived here per the harness's no-import rule.
     check(
       'step8: the public POST answers the generic 201 with NO row echo',
       posted.status === 201 &&
-        postedBody.message === 'Thank you — your story is on its way.' &&
+        postedBody.message === 'Thank you, your story is on its way.' &&
 ```
 
 After (the assertion literal and the comment's quote change; the first comment line's dash stays for #350's mechanical sweep):
 ```ts
-    // The generic 201 is a FIXED message — packages/types'
+    // The generic 201 is a FIXED message, packages/types'
     // TESTIMONIAL_SUBMISSION_ACCEPTED ('Thank you! Your story is on its
     // way.'), re-derived here per the harness's no-import rule.
     check(
@@ -609,11 +609,11 @@ After (the assertion literal and the comment's quote change; the first comment l
         postedBody.message === 'Thank you! Your story is on its way.' &&
 ```
 
-In `apps/landing/src/routes/share-your-story.tsx` (the success panel's rendered sentence — line 93, the same sentence as the constant, kept byte-consistent):
+In `apps/landing/src/routes/share-your-story.tsx` (the success panel's rendered sentence, line 93, the same sentence as the constant, kept byte-consistent):
 
 Before:
 ```tsx
-            Thank you — your story is on its way.
+            Thank you, your story is on its way.
 ```
 
 After:
@@ -624,7 +624,7 @@ After:
 - [ ] **Step 6: No other quoting site exists.** Verify the blast radius closed:
 
 ```bash
-git grep -n 'Thank you —\|studios — booked\|where flagged —\|framing — studio\|work — our story' -- packages apps
+git grep -n 'Thank you \u2014\|studios, booked\|where flagged \u2014\|framing, studio\|work, our story' -- packages apps
 ```
 Expected: zero hits. Any hit is a missed pin/echo: fix it in this task (same rules) before committing.
 
@@ -642,7 +642,7 @@ Expected: types 18 files / 197 passed; api-client 5 files / 45; db 4 files / 30 
 
 ---
 
-## Task 3 — the mechanical sweep + the fix-up pass
+## Task 3, the mechanical sweep + the fix-up pass
 
 Fix mode runs over the three trees; the hand classes it deliberately leaves (line-end dashes, decorative separators, double-space dashes, comma-splice artifacts) get the fix-up pass until the scoped check is green. The eight Task 2 strings are already clean, so fix mode never touches product copy.
 
@@ -650,26 +650,26 @@ Fix mode runs over the three trees; the hand classes it deliberately leaves (lin
 
 **Interfaces:**
 - Consumes: Task 1's tool, Task 2's hand rewrites.
-- Produces: `node scripts/em-dash-sweep.mjs check packages scripts e2e` exit 0 — this ticket's acceptance verdict, and the same command #354 wires repo-wide once every sweep lands.
+- Produces: `node scripts/em-dash-sweep.mjs check packages scripts e2e` exit 0, this ticket's acceptance verdict, and the same command #354 wires repo-wide once every sweep lands.
 
 - [ ] **Step 1: Run the batch.** From the repo root:
 
 ```bash
 node scripts/em-dash-sweep.mjs fix packages scripts e2e
 ```
-Expected: per-file `fixed N:` lines (≈550 replacements across ≈100 files; Task 2's nine files appear only where comments still carry dashes), then the leftover list — the line-end dashes and decorative trailing dashes — and **exit 1** (leftovers need hands; that is the contract, not a failure). Record the replacement total against the census: replacements + hand-class lines should account for all 568 census lines (Task 2 removed 8 string dashes from it). A big gap means the census drifted: reconcile before continuing.
+Expected: per-file `fixed N:` lines (≈550 replacements across ≈100 files; Task 2's nine files appear only where comments still carry dashes), then the leftover list, the line-end dashes and decorative trailing dashes, and **exit 1** (leftovers need hands; that is the contract, not a failure). Record the replacement total against the census: replacements + hand-class lines should account for all 568 census lines (Task 2 removed 8 string dashes from it). A big gap means the census drifted: reconcile before continuing.
 
-- [ ] **Step 2: The fix-up pass — artifact greps first.** The mechanical comma lands in three ugly shapes; find and rewrite each:
+- [ ] **Step 2: The fix-up pass, artifact greps first.** The mechanical comma lands in three ugly shapes; find and rewrite each:
 
 ```bash
 git grep -nE '^//, |^\s*\*, |/\*, ' -- packages scripts e2e
 ```
-Comment-opener artifacts (from `// — foo` / `* — foo` / `/* — foo` decorative separators): **drop the dash decoration entirely** — the line becomes plain comment prose (`// foo`). For the paired closing form (`... rendered color) — */`), drop that dash too (`... rendered color) */`). Worked example, `packages/ui/src/tokens.css`:
+Comment-opener artifacts (from `//, foo` / `*, foo` / `/*, foo` decorative separators): **drop the dash decoration entirely**, the line becomes plain comment prose (`// foo`). For the paired closing form (`... rendered color), */`), drop that dash too (`... rendered color) */`). Worked example, `packages/ui/src/tokens.css`:
 
 Before:
 ```css
-  /* — Fixed brand points (#90; hexes are canonical, oklch conversions
-       round-trip verified to the identical rendered color) — */
+  /*, Fixed brand points (#90; hexes are canonical, oklch conversions
+       round-trip verified to the identical rendered color), */
 ```
 After:
 ```css
@@ -680,7 +680,7 @@ And `scripts/measure-theme-pairs.mjs`:
 
 Before:
 ```js
-// — oklch <-> sRGB (Björn Ottosson's OKLab matrices; sRGB gamut clamped) —
+// oklch <-> sRGB (Björn Ottosson's OKLab matrices; sRGB gamut clamped)
 ```
 After:
 ```js
@@ -693,13 +693,13 @@ git grep -n ' , ' -- packages scripts e2e
 Space-comma artifacts (from the double-space dashes, e.g. the usage headers in `packages/db/scripts/verify-appointment-row.mjs` and `scripts/measure-theme-pairs.mjs`): rewrite as a **colon** where the dash introduced a usage/definition (`confirm <appointmentId>: assert the row + add-on join rows against`), else a clean `, `.
 
 ```bash
-git grep -nE '—$' -- packages scripts e2e
+git grep -nE '\u2014$' -- packages scripts e2e
 ```
-Line-end continuation dashes (the pre-flight census names all 10): merge the two comment lines, or split with a period/colon — whichever reads naturally. Example shape, `packages/db/scripts/db-state.mjs:1`:
+Line-end continuation dashes (the pre-flight census names all 10): merge the two comment lines, or split with a period/colon, whichever reads naturally. Example shape, `packages/db/scripts/db-state.mjs:1`:
 
 Before:
 ```js
-// Read-only database-state probe. Prints record counts and table names only —
+// Read-only database-state probe. Prints record counts and table names only,
 ```
 After (merged with its continuation line):
 ```js
@@ -707,13 +707,13 @@ After (merged with its continuation line):
 ```
 (the executor picks merge vs. split per site; the only law is: no dash, no comma splice, natural prose)
 
-- [ ] **Step 3: The e2e failure-string upgrades.** Fix mode comma-izes the diagnostic strings; where a comma splice reads wrong, upgrade to a colon. The ~15 sentinel/failure strings in `e2e/visual/redesign.spec.ts` and `e2e/smoke/production.spec.ts` follow one rule — a dash that introduced an explanation becomes `: `:
+- [ ] **Step 3: The e2e failure-string upgrades.** Fix mode comma-izes the diagnostic strings; where a comma splice reads wrong, upgrade to a colon. The ~15 sentinel/failure strings in `e2e/visual/redesign.spec.ts` and `e2e/smoke/production.spec.ts` follow one rule, a dash that introduced an explanation becomes `: `:
 
 Worked example, `e2e/visual/redesign.spec.ts:172`:
 
 Before:
 ```ts
-      return "the featured plates strip is absent ([data-strip='featured']) — the packages read never rendered";
+      return "the featured plates strip is absent ([data-strip='featured']), the packages read never rendered";
 ```
 After fix mode:
 ```ts
@@ -754,19 +754,19 @@ E2E_BASE_URL=http://127.0.0.1:9 E2E_API_URL=http://127.0.0.1:9 E2E_SMOKE_STAFF_E
 ```
 Expected: both suites list (smoke + visual) with no compile/collection error. `--list` needs no browser. (The baselines are untouched: explicit snapshot names per the scope fence.)
 
-- [ ] **Step 8: Format drift is deferred — no lint gate here.** `pnpm lint:root` is ruled not-a-gate (#349-R3: turbo's `pnpm check` never runs root biome; its 2 errors are pre-existing at main), and the sweep may leave biome-format drift on shortened lines. That drift heals in Task 4's `pnpm fix` before the full gate — do not run or gate on `pnpm lint:root` in this task.
+- [ ] **Step 8: Format drift is deferred, no lint gate here.** `pnpm lint:root` is ruled not-a-gate (#349-R3: turbo's `pnpm check` never runs root biome; its 2 errors are pre-existing at main), and the sweep may leave biome-format drift on shortened lines. That drift heals in Task 4's `pnpm fix` before the full gate, do not run or gate on `pnpm lint:root` in this task.
 
-- [ ] **Step 9: Commit.** `git add -A && git commit -m "chore(sweep): packages, scripts, and e2e em-dash-free (#349)"` (`git status` first — only swept files, no app/doc/root strays).
+- [ ] **Step 9: Commit.** `git add -A && git commit -m "chore(sweep): packages, scripts, and e2e em-dash-free (#349)"` (`git status` first, only swept files, no app/doc/root strays).
 
 ---
 
-## Task 4 — the full gate + the records
+## Task 4, the full gate + the records
 
 **Files:**
 - Modify: `docs/progress.md` (one entry, de-dashed prose)
 - Generated: `graphify-out/**` (via `graphify update .`)
 
-- [ ] **Step 1: Heal formatting.** `pnpm fix` (turbo fix + `fix:root` biome write) — the sweep shortened lines by one character per replacement; any biome format drift lands here.
+- [ ] **Step 1: Heal formatting.** `pnpm fix` (turbo fix + `fix:root` biome write), the sweep shortened lines by one character per replacement; any biome format drift lands here.
 
 - [ ] **Step 2: The full gate.** With the test container up:
 
@@ -776,7 +776,7 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test pnp
 ```
 Expected: green across lint + format + typecheck + test for every workspace member, with every floor **identical** to the pre-flight record: api 34 files / 482 passed + 3 skipped; types 18 files / 197; api-client 5 files / 45; landing 19 files / 152; admin 34 files / 364; db 4 files / 30 passed + 0 skipped (with-var form; ruling #349-R4). Any count drift: stop and reconcile (nothing in this plan adds or removes a test).
 
-- [ ] **Step 3: The progress.md entry.** Append at the end of `docs/progress.md` (matching the house entry format; the heading deliberately carries no em dash — this text must survive the gate):
+- [ ] **Step 3: The progress.md entry.** Append at the end of `docs/progress.md` (matching the house entry format; the heading deliberately carries no em dash, this text must survive the gate):
 
 ```md
 ## 2026-11-22 #349: the em-dash sweep tool + the packages/scripts/e2e tree de-dashed
@@ -814,7 +814,7 @@ The PR body carries the owner flag verbatim; #349 closes on merge per the house 
 
 - Placeholder sweep: no `<!-- APPEND:` anchors remain; no TODO/placeholder markers; every code block is a byte-exact before/after read from the tree at plan time (recon probes 2026-11-22).
 - Step-checkbox count: Task 1 has 6, Task 2 has 8, Task 3 has 9, Task 4 has 5 (28 total, all `- [ ] **Step`).
-- Cross-task names: `em-dash-sweep.mjs`, `check`/`fix`/`--self-test`, `pnpm em-dash`, the 8 strings, and the 9 Task 2 files are spelled identically everywhere they appear; Task 3's artifact greps match the shapes Task 1's fix mode can produce (`//, `, `*, `, `/*, `, ` , `, `—$`).
+- Cross-task names: `em-dash-sweep.mjs`, `check`/`fix`/`--self-test`, `pnpm em-dash`, the 8 strings, and the 9 Task 2 files are spelled identically everywhere they appear; Task 3's artifact greps match the shapes Task 1's fix mode can produce (`//, `, `*, `, `/*, `, ` , `).
 - Counts re-derived from the probes, not from memory: 568 lines / 104 files (git grep), 10 line-end, 24 decorative, 5 double-space, 2 en dashes, 8 strings, 3 echo files, 6 suites' floors.
-- Mocked-boundary check: no test mocks added; the pin edits quote the constants' real values (mock-api.ts serves the imported constant — verified line 7/329).
+- Mocked-boundary check: no test mocks added; the pin edits quote the constants' real values (mock-api.ts serves the imported constant, verified line 7/329).
 - The unanswered AskUserQuestion is disclosed in three places (Global Constraints, the progress entry, the PR body) rather than silently assumed.

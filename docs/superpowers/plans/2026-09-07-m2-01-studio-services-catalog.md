@@ -1,8 +1,8 @@
-# M2 Ticket 01 — Studio Services Catalog + Package Slug/Featured — Implementation Plan
+# M2 Ticket 01, Studio Services Catalog + Package Slug/Featured, Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** The catalog gains Studio Services as their own bookable entity — `studio_services` plus the `branch_studio_services` (per-branch bookability) and `studio_service_addon_services` (add-on applicability) presence-row junctions — and `service_packages` gains `slug` (unique, not null, backfilled) + `is_featured`, with re-runnable seed extensions and `db:verify-seed` asserting all of it.
+**Goal:** The catalog gains Studio Services as their own bookable entity, `studio_services` plus the `branch_studio_services` (per-branch bookability) and `studio_service_addon_services` (add-on applicability) presence-row junctions, and `service_packages` gains `slug` (unique, not null, backfilled) + `is_featured`, with re-runnable seed extensions and `db:verify-seed` asserting all of it.
 
 **Architecture:** Three new Drizzle tables join the existing schema-file pattern (one file per table, barrel + relations + FK indexes per the M1.2 review ruling). The slug backfill on the populated live `service_packages` table (11 rows) forces two generated migrations: `0002` adds everything with `slug` nullable+unique, the seed backfills slugs via `coalesce(existing, new)` (so reseeds never rewrite a slug and `/packages/:slug` URLs survive renames), then `0003` enforces NOT NULL. Zod mirrors land in `packages/types`: `slug`/`isFeatured` on the package read schema, and a `StudioService` row mirror that ticket 04's `bookableBranchIds` read shape will extend.
 
@@ -16,11 +16,11 @@
 - **Migrations are generated, never hand-edited:** `pnpm --filter @sevendays/db db:generate` produces every file in `packages/db/migrations/**`; `db:migrate` applies them. This ticket generates exactly two: `0002_*.sql` and `0003_*.sql`.
 - **Why two migrations for the slug:** the live Supabase `service_packages` has 11 rows. A single `ADD COLUMN slug text NOT NULL UNIQUE` fails on a populated table (existing rows would be NULL). Sequence: `0002` adds `slug` nullable + UNIQUE (and everything else), the seed backfills slugs, `0003` is the generated `ALTER COLUMN slug SET NOT NULL`. The ticket's "a migration" describes the end state, not the file count.
 - **Live-DB gates:** run `node --env-file=.env scripts/check-env.mjs` (from `packages/db/`) and confirm `GATE: PASS` before every live operation (`db:migrate`, `db:seed`, `db:verify-seed`). Never print a connection string or any `.env` value; seed/verify/migrate ride `DATABASE_MIGRATE_URL` (session-mode pooler) from `packages/db/.env`.
-- **Seed is re-runnable:** natural-key upserts (`studio_services` by name like branches/add-ons/packages). Slug uses `coalesce(service_packages.slug, excluded.slug)` in the upsert — backfills NULLs once, never rewrites an existing slug (rename stability). Junctions rebuild delete-then-insert per service — the exact-sync posture the package-inclusions seed already uses.
-- **Seed data is fixed by the spec:** the four Studio Services are verbatim `Photo Recovery`, `Tarpaulin & Bulletin Printing`, `Portraits & ID Photo`, `Picture Framing`; placeholder prices `TODO(seed)` (₱1500 / ₱800 / ₱500 / ₱1200 — the prototype's owner-seen stubs, like the branch phones); all four **bookable at all 3 branches** (the prototype's not-Calamba Portraits stub was demo-only); applicability rows are exactly Makeup + Hairstyle → Portraits & ID Photo (the other three services get none). Featured packages: Basic, A, B, C.
-- **`appointments` is untouched.** Generalizing it (nullable offering refs, exactly-one CHECK, `bookedPriceCents` rename) is ticket 02 — no schema-file edit, no migration content for it here.
-- **Do NOT tick `docs/plan.md`'s M2 schema checkbox** — it spans tickets 01 + 02 (appointments generalization included); tick only when that whole deliverable exists (✅ emoji). This ticket updates only `docs/progress.md`.
-- **`pnpm build:packages` after every change to `packages/types` or `packages/db` `src/`** — consumers resolve workspace packages from `dist/`; a stale `dist/` looks like a missing export or stale type.
+- **Seed is re-runnable:** natural-key upserts (`studio_services` by name like branches/add-ons/packages). Slug uses `coalesce(service_packages.slug, excluded.slug)` in the upsert, backfills NULLs once, never rewrites an existing slug (rename stability). Junctions rebuild delete-then-insert per service, the exact-sync posture the package-inclusions seed already uses.
+- **Seed data is fixed by the spec:** the four Studio Services are verbatim `Photo Recovery`, `Tarpaulin & Bulletin Printing`, `Portraits & ID Photo`, `Picture Framing`; placeholder prices `TODO(seed)` (₱1500 / ₱800 / ₱500 / ₱1200, the prototype's owner-seen stubs, like the branch phones); all four **bookable at all 3 branches** (the prototype's not-Calamba Portraits stub was demo-only); applicability rows are exactly Makeup + Hairstyle → Portraits & ID Photo (the other three services get none). Featured packages: Basic, A, B, C.
+- **`appointments` is untouched.** Generalizing it (nullable offering refs, exactly-one CHECK, `bookedPriceCents` rename) is ticket 02, no schema-file edit, no migration content for it here.
+- **Do NOT tick `docs/plan.md`'s M2 schema checkbox**, it spans tickets 01 + 02 (appointments generalization included); tick only when that whole deliverable exists (✅ emoji). This ticket updates only `docs/progress.md`.
+- **`pnpm build:packages` after every change to `packages/types` or `packages/db` `src/`**, consumers resolve workspace packages from `dist/`; a stale `dist/` looks like a missing export or stale type.
 - **Biome-clean commits:** `pnpm exec biome check --write <files>` on every created/modified code file before committing (project `fix` scripts call the `biome` bin).
 - **Zod v4 style:** top-level `z.uuid()`/`z.string()`; `safeParse` in tests. **`noUncheckedIndexedAccess` is on:** guard destructures (`const [row] = ...; if (!row) throw ...`), never `!`.
 - **Commit style:** unscoped conventional subjects, bullet bodies when wordy; one commit per task.
@@ -51,14 +51,14 @@ packages/types/src/studio-service.test.ts               (new)   schema tests
 packages/types/src/index.ts                             (mod)   barrel export
 apps/api/test/helpers/fixtures.ts                       (mod)   3 package inserts gain slugs
 docs/progress.md                                        (mod)   ticket-01 landed bullet
-packages/db/migrations/0002_*.sql, 0003_*.sql           (generated — never hand-edited)
+packages/db/migrations/0002_*.sql, 0003_*.sql           (generated, never hand-edited)
 ```
 
-Task map: 1 — Drizzle: three new tables + slug/is_featured (nullable pass) + relations/barrel, migration `0002`, live apply; 2 — seed: `slugifyName` (TDD), catalog seeds, seed extensions, live seed ×2; 3 — verify-seed extensions, live VERIFY PASSED; 4 — slug NOT NULL flip (`0003`), live apply, fixture blast-radius, suites green; 5 — `packages/types` mirrors (TDD); 6 — full gate + progress.md.
+Task map: 1, Drizzle: three new tables + slug/is_featured (nullable pass) + relations/barrel, migration `0002`, live apply; 2, seed: `slugifyName` (TDD), catalog seeds, seed extensions, live seed ×2; 3, verify-seed extensions, live VERIFY PASSED; 4, slug NOT NULL flip (`0003`), live apply, fixture blast-radius, suites green; 5, `packages/types` mirrors (TDD); 6, full gate + progress.md.
 
 ---
 
-### Task 1: Drizzle — studio_services + junctions + package slug/is_featured (migration 0002)
+### Task 1: Drizzle, studio_services + junctions + package slug/is_featured (migration 0002)
 
 **Files:**
 - Create: `packages/db/src/schema/studio-services.ts`, `packages/db/src/schema/branch-studio-services.ts`, `packages/db/src/schema/studio-service-addon-services.ts`
@@ -80,7 +80,7 @@ git checkout -b feat/m2-01-studio-services-catalog
 ```ts
 import { boolean, integer, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 
-// Standalone studio offerings bookable in their own right (M2 ticket 01) —
+// Standalone studio offerings bookable in their own right (M2 ticket 01):
 // photo recovery, tarpaulin & bulletin printing, portraits & ID photo,
 // picture framing. Distinct from service_packages (bundles Inclusions) and
 // addon_services (attach to a booking). Per-branch bookability lives in
@@ -111,8 +111,8 @@ import { branches } from './branches.js';
 import { studioServices } from './studio-services.js';
 
 // Presence-row junction (M2 ticket 01): a row MEANS the Studio Service is
-// bookable at that Branch — no boolean column to drift. Seeded all-branches
-// today; the M5 CMS edits rows directly. Children of the studio service —
+// bookable at that Branch, no boolean column to drift. Seeded all-branches
+// today; the M5 CMS edits rows directly. Children of the studio service:
 // cascade delete keeps the seed's per-service rebuild trivial.
 export const branchStudioServices = pgTable(
   'branch_studio_services',
@@ -168,13 +168,13 @@ export const studioServiceAddonServices = pgTable(
 );
 ```
 
-- [ ] **Step 5: Modify `packages/db/src/schema/service-packages.ts`** — inside the columns object, directly above `priceCents`, insert (note: `slug` is deliberately **nullable** in this pass; Task 4 flips it after the seed backfill):
+- [ ] **Step 5: Modify `packages/db/src/schema/service-packages.ts`**, inside the columns object, directly above `priceCents`, insert (note: `slug` is deliberately **nullable** in this pass; Task 4 flips it after the seed backfill):
 
 ```ts
     // Stable shareable identifier (M2 ticket 01): generated from the name at
     // insert; the seed's coalesce upsert never rewrites an existing slug, so
     // /packages/:slug URLs survive catalog renames. Nullable+UNIQUE in
-    // migration 0002 (the live table is populated — the seed backfills),
+    // migration 0002 (the live table is populated, the seed backfills),
     // NOT NULL in 0003.
     slug: text('slug').unique('service_packages_slug_unique'),
     // Home-page featured strip flag; owner-controlled via seed until the M5 CMS.
@@ -183,7 +183,7 @@ export const studioServiceAddonServices = pgTable(
 
 (`text` and `boolean` are already imported in this file.)
 
-- [ ] **Step 6: Append to `packages/db/src/schema/relations.ts`** — add the three imports alongside the existing ones and the three relation groups at the end of the file:
+- [ ] **Step 6: Append to `packages/db/src/schema/relations.ts`**, add the three imports alongside the existing ones and the three relation groups at the end of the file:
 
 ```ts
 import { addonServices } from './addon-services.js';
@@ -226,7 +226,7 @@ export const studioServiceAddonServicesRelations = relations(
 
 (`branches` is already imported in this file.)
 
-- [ ] **Step 7: Update the `packages/db/src/schema/index.ts` barrel** — the export list is alphabetical; insert the two new lines so it reads:
+- [ ] **Step 7: Update the `packages/db/src/schema/index.ts` barrel**, the export list is alphabetical; insert the two new lines so it reads:
 
 ```ts
 export * from './addon-services.js';
@@ -247,7 +247,7 @@ export * from './studio-services.js';
 
 (Keep the existing BetterAuth TODO comment block at the bottom.)
 
-- [ ] **Step 8: Generate migration 0002** (offline — no DB connection needed):
+- [ ] **Step 8: Generate migration 0002** (offline, no DB connection needed):
 
 ```bash
 pnpm --filter @sevendays/db db:generate
@@ -276,7 +276,7 @@ Expected: the `public tables:` line now includes `studio_services`, `branch_stud
 pnpm build:packages && pnpm --filter @sevendays/db typecheck && pnpm --filter @sevendays/types typecheck
 ```
 
-Expected: all green. (`apps/api` compiles unchanged — the new columns are additive and the `...p` spread picks up nullable `slug` without a type conflict while the types schema is untouched.)
+Expected: all green. (`apps/api` compiles unchanged, the new columns are additive and the `...p` spread picks up nullable `slug` without a type conflict while the types schema is untouched.)
 
 - [ ] **Step 11: Commit**
 
@@ -286,12 +286,12 @@ git add packages/db/src/schema/ packages/db/migrations/
 git commit -m "feat(db): studio_services + bookability/applicability junctions, package slug + is_featured (migration 0002)" -m "- studio_services: standalone bookable entity, name natural key, is_active posture like addon_services
 - branch_studio_services / studio_service_addon_services: presence-row junctions, cascade on the service side, FK indexes per the M1.2 review ruling
 - service_packages.slug nullable+unique in 0002 (live table is populated; seed backfills), is_featured NOT NULL default false
-- 0003 (NOT NULL flip) follows the backfill — two generated migrations, never hand-edited"
+- 0003 (NOT NULL flip) follows the backfill, two generated migrations, never hand-edited"
 ```
 
 ---
 
-### Task 2: Seed — slugifyName (TDD), studio-service seeds, seed extensions (live ×2)
+### Task 2: Seed, slugifyName (TDD), studio-service seeds, seed extensions (live ×2)
 
 **Files:**
 - Modify: `packages/db/src/catalog-rows.ts`, `packages/db/src/catalog-rows.test.ts`, `packages/db/scripts/catalog.ts`, `packages/db/scripts/seed.ts`
@@ -300,7 +300,7 @@ git commit -m "feat(db): studio_services + bookability/applicability junctions, 
 - Consumes: Task 1's `studioServices` / `branchStudioServices` / `studioServiceAddonServices` / `servicePackages.slug` / `servicePackages.isFeatured` (schema barrel).
 - Produces: `slugifyName(name: string): string` (pure, exported from `../src/catalog-rows.js`); `studioServiceSeeds`, `studioServiceApplicableAddons`, `featuredPackageNames` in `scripts/catalog.ts` (Task 3's verify consumes all three). Live DB: 11 packages backfilled with slugs, 4 studio services, 12 bookability rows, 2 applicability rows, 4 featured flags.
 
-- [ ] **Step 1: Write the failing slugify tests** — in `packages/db/src/catalog-rows.test.ts`, extend the existing `import { ... } from './catalog-rows.js';` statement with `slugifyName` (keep Biome's sort order), then append this describe block at the end of the file's pure unit section (outside the `runIf(TEST_DATABASE_URL)` live-probe describe):
+- [ ] **Step 1: Write the failing slugify tests**, in `packages/db/src/catalog-rows.test.ts`, extend the existing `import { ... } from './catalog-rows.js';` statement with `slugifyName` (keep Biome's sort order), then append this describe block at the end of the file's pure unit section (outside the `runIf(TEST_DATABASE_URL)` live-probe describe):
 
 ```ts
 describe('slugifyName', () => {
@@ -326,14 +326,14 @@ describe('slugifyName', () => {
 });
 ```
 
-- [ ] **Step 2: RED** — `pnpm --filter @sevendays/db test -- catalog-rows` → FAIL: `slugifyName` is not exported.
+- [ ] **Step 2: RED**, `pnpm --filter @sevendays/db test -- catalog-rows` → FAIL: `slugifyName` is not exported.
 
-- [ ] **Step 3: Implement `slugifyName`** — append to `packages/db/src/catalog-rows.ts`:
+- [ ] **Step 3: Implement `slugifyName`**, append to `packages/db/src/catalog-rows.ts`:
 
 ```ts
 // Stable URL identifier from a display name (M2 ticket 01): lowercase, strip
 // everything but letters/digits/hyphens, collapse whitespace to single
-// hyphens. The seed generates once and backfills with coalesce — a later
+// hyphens. The seed generates once and backfills with coalesce, a later
 // catalog rename must never rewrite an existing slug (/packages/:slug URLs
 // survive renames). The random fallback covers a name with no alphanumeric
 // characters; the unique constraint (checked in the seed before insert)
@@ -350,14 +350,14 @@ export function slugifyName(name: string): string {
 }
 ```
 
-- [ ] **Step 4: GREEN** — `pnpm --filter @sevendays/db test -- catalog-rows` → PASS (the live probe describe still skips without `TEST_DATABASE_URL`; it is exercised in Task 4 Step 7 against compose).
+- [ ] **Step 4: GREEN**, `pnpm --filter @sevendays/db test -- catalog-rows` → PASS (the live probe describe still skips without `TEST_DATABASE_URL`; it is exercised in Task 4 Step 7 against compose).
 
-- [ ] **Step 5: Add the seed data to `packages/db/scripts/catalog.ts`** — append after `packageSeeds` (above `inclusionSignatures`):
+- [ ] **Step 5: Add the seed data to `packages/db/scripts/catalog.ts`**, append after `packageSeeds` (above `inclusionSignatures`):
 
 ```ts
-// M2 ticket 01 — Studio Services. Names verbatim from the spec / CONTEXT.md
+// M2 ticket 01, Studio Services. Names verbatim from the spec / CONTEXT.md
 // glossary; descriptions + prices from the prototype's owner-seen stubs
-// (prototype-booking-data.ts). Prices are TODO(seed) placeholders — same
+// (prototype-booking-data.ts). Prices are TODO(seed) placeholders, same
 // user-sanctioned posture as the branch phones.
 export const studioServiceSeeds = [
   {
@@ -384,7 +384,7 @@ export const studioServiceSeeds = [
 
 // Applicability matrix seeds (M2 ticket 01): add-on NAMES that apply to each
 // Studio Service. Makeup + Hairstyle apply to Portraits & ID photo only; the
-// other three services list none. Names must match addonServiceSeeds — the
+// other three services list none. Names must match addonServiceSeeds, the
 // seed fails loudly on an unknown name.
 export const studioServiceApplicableAddons: Record<string, string[]> = {
   'Photo Recovery': [],
@@ -403,14 +403,14 @@ export const featuredPackageNames: readonly string[] = [
 ];
 ```
 
-- [ ] **Step 6: Extend `packages/db/scripts/seed.ts`** — four edits:
+- [ ] **Step 6: Extend `packages/db/scripts/seed.ts`**, four edits:
 
-(a) Imports — `import { eq } from 'drizzle-orm';` becomes `import { eq, sql } from 'drizzle-orm';`; the `from '../src/catalog-rows.js'` import gains `slugifyName`; the `from '../src/index.js'` schema import gains `branchStudioServices`, `studioServiceAddonServices`, `studioServices`; the `from './catalog.js'` import gains `featuredPackageNames`, `studioServiceApplicableAddons`, `studioServiceSeeds` (all keeping Biome's sort order).
+(a) Imports, `import { eq } from 'drizzle-orm';` becomes `import { eq, sql } from 'drizzle-orm';`; the `from '../src/catalog-rows.js'` import gains `slugifyName`; the `from '../src/index.js'` schema import gains `branchStudioServices`, `studioServiceAddonServices`, `studioServices`; the `from './catalog.js'` import gains `featuredPackageNames`, `studioServiceApplicableAddons`, `studioServiceSeeds` (all keeping Biome's sort order).
 
-(b) Inside the transaction, directly below the add-on services loop (after it — FK integrity) and above the `// Packages — upsert by unique name.` comment, insert the studio-services block:
+(b) Inside the transaction, directly below the add-on services loop (after it, FK integrity) and above the `// Packages, upsert by unique name.` comment, insert the studio-services block:
 
 ```ts
-    // M2 ticket 01 — Studio Services + junctions. Natural-key upsert by name;
+    // M2 ticket 01, Studio Services + junctions. Natural-key upsert by name;
     // junctions rebuild delete-then-insert per service so the DB stays
     // exactly in sync with scripts/catalog.ts on every run.
     const studioServiceIdByName = new Map<string, string>();
@@ -430,7 +430,7 @@ export const featuredPackageNames: readonly string[] = [
     const branchRows = await tx.select({ id: branches.id, name: branches.name }).from(branches);
 
     // Bookability: every seeded service bookable at every branch (spec
-    // ruling — the prototype's not-Calamba Portraits stub was demo-only).
+    // ruling, the prototype's not-Calamba Portraits stub was demo-only).
     for (const svc of studioServiceSeeds) {
       const serviceId = studioServiceIdByName.get(svc.name);
       if (!serviceId) throw new Error(`seed: no id for studio service ${svc.name}`);
@@ -466,7 +466,7 @@ export const featuredPackageNames: readonly string[] = [
     }
 ```
 
-(c) Packages upsert — replace the existing package-loop insert/onConflict block with:
+(c) Packages upsert, replace the existing package-loop insert/onConflict block with:
 
 ```ts
     // M2 ticket 01: resolve every slug up front and fail loudly on a
@@ -477,16 +477,16 @@ export const featuredPackageNames: readonly string[] = [
       const slug = slugifyName(pkg.name);
       for (const [owner, existing] of slugByPackageName) {
         if (existing === slug)
-          throw new Error(`seed: slug collision — "${pkg.name}" and "${owner}" both slugify to "${slug}"`);
+          throw new Error(`seed: slug collision, "${pkg.name}" and "${owner}" both slugify to "${slug}"`);
       }
       slugByPackageName.set(pkg.name, slug);
     }
     const featuredNames = new Set<string>(featuredPackageNames);
 
-    // Packages — upsert by unique name. Deliberately does NOT touch
+    // Packages, upsert by unique name. Deliberately does NOT touch
     // coverImageKey (Milestone 5 uploads it; reseeding must not null it).
     // slug backfills a NULL (first post-0002 seed) but never rewrites an
-    // existing slug — /packages/:slug URLs survive catalog renames.
+    // existing slug, /packages/:slug URLs survive catalog renames.
     for (const pkg of packageSeeds) {
       const [row] = await tx
         .insert(servicePackages)
@@ -510,7 +510,7 @@ export const featuredPackageNames: readonly string[] = [
       if (!row) throw new Error(`seed: upsert returned no row for package ${pkg.name}`);
 ```
 
-(everything from the `// Frames — upsert per (package, frameNumber)` comment down stays untouched).
+(everything from the `// Frames, upsert per (package, frameNumber)` comment down stays untouched).
 
 (d) Extend the success log:
 
@@ -520,7 +520,7 @@ export const featuredPackageNames: readonly string[] = [
   );
 ```
 
-- [ ] **Step 7: Typecheck the package** — `pnpm --filter @sevendays/db typecheck` → PASS.
+- [ ] **Step 7: Typecheck the package**, `pnpm --filter @sevendays/db typecheck` → PASS.
 
 - [ ] **Step 8: Live seed ×2 (re-runnability proof, M1.3 convention)**
 
@@ -530,7 +530,7 @@ cd ../.. && pnpm --filter @sevendays/db db:seed
 pnpm --filter @sevendays/db db:seed
 ```
 
-Expected: `[ok] seeded: ... 4 studio services ...` both runs, no unique violations, no error. After run 1 all 11 packages carry slugs; run 2 must keep them identical (coalesce) — Task 3's verify asserts it.
+Expected: `[ok] seeded: ... 4 studio services ...` both runs, no unique violations, no error. After run 1 all 11 packages carry slugs; run 2 must keep them identical (coalesce), Task 3's verify asserts it.
 
 - [ ] **Step 9: Commit**
 
@@ -538,7 +538,7 @@ Expected: `[ok] seeded: ... 4 studio services ...` both runs, no unique violatio
 pnpm exec biome check --write packages/db/src/catalog-rows.ts packages/db/src/catalog-rows.test.ts packages/db/scripts/catalog.ts packages/db/scripts/seed.ts
 git add packages/db/src/catalog-rows.ts packages/db/src/catalog-rows.test.ts packages/db/scripts/catalog.ts packages/db/scripts/seed.ts
 git commit -m "feat(db): seed studio services, applicability matrix, featured flags, slug backfill" -m "- slugifyName (pure, unit-tested): lowercase/strip/collapse; random fallback for alphanumeric-free names
-- seed resolves all slugs up front (loud slug-collision error), upserts with coalesce(existing, excluded.slug) so reseeds never rewrite a slug — URL stability under renames
+- seed resolves all slugs up front (loud slug-collision error), upserts with coalesce(existing, excluded.slug) so reseeds never rewrite a slug, URL stability under renames
 - four studio services (TODO(seed) placeholder prices like branch phones), bookable at all 3 branches, Makeup + Hairstyle applicable to Portraits & ID photo only
 - featuredPackageNames: Basic, A, B, C; junctions rebuild delete-then-insert per service
 - live seed run twice: second run proves re-runnability and slug stability"
@@ -552,12 +552,12 @@ git commit -m "feat(db): seed studio services, applicability matrix, featured fl
 - Modify: `packages/db/scripts/verify-seed.ts`
 
 **Interfaces:**
-- Consumes: `slugifyName` (`../src/catalog-rows.js`); `studioServiceSeeds`, `studioServiceApplicableAddons`, `featuredPackageNames` (`./catalog.js`); `studioServices`, `branchStudioServices`, `studioServiceAddonServices` (`../src/index.js`) — all from Tasks 1–2.
+- Consumes: `slugifyName` (`../src/catalog-rows.js`); `studioServiceSeeds`, `studioServiceApplicableAddons`, `featuredPackageNames` (`./catalog.js`); `studioServices`, `branchStudioServices`, `studioServiceAddonServices` (`../src/index.js`), all from Tasks 1–2.
 - Produces: `db:verify-seed` exit 0 asserting the new rows. (This is ticket 01's own acceptance criterion; nothing downstream imports this script.)
 
-- [ ] **Step 1: Extend the imports** — `from '../src/index.js'` gains `branchStudioServices`, `studioServiceAddonServices`, `studioServices`; add `import { slugifyName } from '../src/catalog-rows.js';`; `from './catalog.js'` gains `featuredPackageNames`, `studioServiceApplicableAddons`, `studioServiceSeeds` (Biome sort order).
+- [ ] **Step 1: Extend the imports**, `from '../src/index.js'` gains `branchStudioServices`, `studioServiceAddonServices`, `studioServices`; add `import { slugifyName } from '../src/catalog-rows.js';`; `from './catalog.js'` gains `featuredPackageNames`, `studioServiceApplicableAddons`, `studioServiceSeeds` (Biome sort order).
 
-- [ ] **Step 2: Extend the per-package loop** — directly below the existing `else pass(\`service package ${seed.name} ₱…\`)` line, append:
+- [ ] **Step 2: Extend the per-package loop**, directly below the existing `else pass(\`service package ${seed.name} ₱…\`)` line, append:
 
 ```ts
   // M2 ticket 01: slug backfilled, format-canonical, and featured flag on-set.
@@ -574,12 +574,12 @@ git commit -m "feat(db): seed studio services, applicability matrix, featured fl
   }
 ```
 
-(`row` is `| undefined` from the `find` above — the `if (row)` guard satisfies `noUncheckedIndexedAccess`-style strictness.)
+(`row` is `| undefined` from the `find` above, the `if (row)` guard satisfies `noUncheckedIndexedAccess`-style strictness.)
 
-- [ ] **Step 3: Add the studio-services section** — insert between the per-package loop and the `// Spot rows (public seed data — safe to print).` comment:
+- [ ] **Step 3: Add the studio-services section**, insert between the per-package loop and the `// Spot rows (public seed data, safe to print).` comment:
 
 ```ts
-// M2 ticket 01 — Studio Services: rows, prices, bookability (all 3 branches),
+// M2 ticket 01, Studio Services: rows, prices, bookability (all 3 branches),
 // applicability (Makeup + Hairstyle → Portraits & ID Photo only).
 const studioServiceRows = await db.select().from(studioServices);
 studioServiceRows.length === studioServiceSeeds.length
@@ -627,7 +627,7 @@ cd packages/db && node --env-file=.env scripts/check-env.mjs   # expect GATE: PA
 cd ../.. && pnpm --filter @sevendays/db db:verify-seed
 ```
 
-Expected: `VERIFY: PASSED — the seeded catalog matches docs/catalog.md.` with the new lines: `studio_services: 4/4`, per-service bookability `3/3 branches`, applicability lines (`Portraits & ID Photo: applicable add-ons [Hairstyle, Makeup]`, others `[]`), and per-package slug + `is_featured` lines (Basic/A/B/C `true`, the rest `false`).
+Expected: `VERIFY: PASSED, the seeded catalog matches docs/catalog.md.` with the new lines: `studio_services: 4/4`, per-service bookability `3/3 branches`, applicability lines (`Portraits & ID Photo: applicable add-ons [Hairstyle, Makeup]`, others `[]`), and per-package slug + `is_featured` lines (Basic/A/B/C `true`, the rest `false`).
 
 - [ ] **Step 5: Commit**
 
@@ -650,19 +650,19 @@ git commit -m "feat(db): verify-seed asserts studio services, junctions, slugs, 
 - Modify: `apps/api/test/helpers/fixtures.ts:120-146` (3 package inserts), `packages/db/src/catalog-rows.test.ts` (BuilderProbe insert), `packages/db/src/verify-appointment-row.test.ts` (probe insert), `packages/db/scripts/rehearsal-fixture.mjs` (Rehearsal Package insert)
 
 **Interfaces:**
-- Consumes: Task 2's completed backfill (every live row has a slug) — **prerequisite, verified in Step 1**.
+- Consumes: Task 2's completed backfill (every live row has a slug), **prerequisite, verified in Step 1**.
 - Produces: `servicePackages.slug: string` (non-null, TS-side), migration `0003` applied live, all suites green on compose. Tickets 03/05 rely on NOT NULL being real in both schema and DB.
 
-- [ ] **Step 1: Confirm the backfill completed** — re-run verify:
+- [ ] **Step 1: Confirm the backfill completed**, re-run verify:
 
 ```bash
 cd packages/db && node --env-file=.env scripts/check-env.mjs   # expect GATE: PASS
 cd ../.. && pnpm --filter @sevendays/db db:verify-seed
 ```
 
-Expected: `VERIFY: PASSED` including every package's slug line (11/11 present, `basic-package` … `customize-package-cp-2`). If any slug line failed, stop — fix the seed and re-run before flipping.
+Expected: `VERIFY: PASSED` including every package's slug line (11/11 present, `basic-package` … `customize-package-cp-2`). If any slug line failed, stop, fix the seed and re-run before flipping.
 
-- [ ] **Step 2: Flip `slug` to NOT NULL in `packages/db/src/schema/service-packages.ts`** — replace
+- [ ] **Step 2: Flip `slug` to NOT NULL in `packages/db/src/schema/service-packages.ts`**, replace
 
 ```ts
     slug: text('slug').unique('service_packages_slug_unique'),
@@ -674,14 +674,14 @@ with
     slug: text('slug').notNull().unique('service_packages_slug_unique'),
 ```
 
-Keep `.unique(...)` — dropping it would make `db:generate` emit a `DROP CONSTRAINT` into 0003. Update the adjacent comment block to read:
+Keep `.unique(...)`, dropping it would make `db:generate` emit a `DROP CONSTRAINT` into 0003. Update the adjacent comment block to read:
 
 ```ts
     // Stable shareable identifier (M2 ticket 01): generated from the name at
     // insert; the seed's coalesce upsert never rewrites an existing slug, so
     // /packages/:slug URLs survive catalog renames. NOT NULL since migration
     // 0003 (0002 added it nullable+unique; the seed backfilled the 11 live
-    // rows between the two migrations — the populated-table two-step).
+    // rows between the two migrations, the populated-table two-step).
     slug: text('slug').notNull().unique('service_packages_slug_unique'),
 ```
 
@@ -691,7 +691,7 @@ Keep `.unique(...)` — dropping it would make `db:generate` emit a `DROP CONSTR
 pnpm --filter @sevendays/db db:generate
 ```
 
-Expected: `0003_*.sql` containing `ALTER TABLE "service_packages" ALTER COLUMN "slug" SET NOT NULL;` and no `DROP` of the slug unique constraint. (Drizzle may emit a table redefine instead of a bare ALTER depending on its diff engine — judge the result, not the form: nothing may DROP the `service_packages_slug_unique` constraint or touch other tables.) Read it; never edit it.
+Expected: `0003_*.sql` containing `ALTER TABLE "service_packages" ALTER COLUMN "slug" SET NOT NULL;` and no `DROP` of the slug unique constraint. (Drizzle may emit a table redefine instead of a bare ALTER depending on its diff engine, judge the result, not the form: nothing may DROP the `service_packages_slug_unique` constraint or touch other tables.) Read it; never edit it.
 
 - [ ] **Step 4: Apply 0003 live**
 
@@ -700,11 +700,11 @@ cd packages/db && node --env-file=.env scripts/check-env.mjs   # expect GATE: PA
 cd ../.. && pnpm --filter @sevendays/db db:migrate
 ```
 
-Expected: applied cleanly — possible only because Step 1 proved zero NULL slugs.
+Expected: applied cleanly, possible only because Step 1 proved zero NULL slugs.
 
 - [ ] **Step 5: Fix the four raw/typed insert sites that predate the column** (required now that the column is NOT NULL with no default):
 
-(a) `apps/api/test/helpers/fixtures.ts` — give each of the three package fixtures a slug, matching its name (`'combined-package'`, `'simple-package'`, `'retired-package'`):
+(a) `apps/api/test/helpers/fixtures.ts`, give each of the three package fixtures a slug, matching its name (`'combined-package'`, `'simple-package'`, `'retired-package'`):
 
 ```ts
       name: 'Combined Package',
@@ -716,11 +716,11 @@ Expected: applied cleanly — possible only because Step 1 proved zero NULL slug
 
 (same pattern for `Simple Package` → `slug: 'simple-package'` and `Retired Package` → `slug: 'retired-package'`).
 
-(b) `packages/db/src/catalog-rows.test.ts` BuilderProbe insert — add `slug: 'builderprobe-package',` to the `.values({...})`.
+(b) `packages/db/src/catalog-rows.test.ts` BuilderProbe insert, add `slug: 'builderprobe-package',` to the `.values({...})`.
 
-(c) `packages/db/src/verify-appointment-row.test.ts` probe insert — extend the raw SQL row to `insert into service_packages (id, name, description, price_cents, slug) values ('22222222-2222-4222-8222-222222222222', 'Probe Package', 'Probe description', 150000, 'probe-package') returning id`.
+(c) `packages/db/src/verify-appointment-row.test.ts` probe insert, extend the raw SQL row to `insert into service_packages (id, name, description, price_cents, slug) values ('22222222-2222-4222-8222-222222222222', 'Probe Package', 'Probe description', 150000, 'probe-package') returning id`.
 
-(d) `packages/db/scripts/rehearsal-fixture.mjs` — extend to `insert into service_packages (name, description, price_cents, slug) values ('Rehearsal Package', 'Rehearsal description', 99000, 'rehearsal-package') returning *`.
+(d) `packages/db/scripts/rehearsal-fixture.mjs`, extend to `insert into service_packages (name, description, price_cents, slug) values ('Rehearsal Package', 'Rehearsal description', 99000, 'rehearsal-package') returning *`.
 
 - [ ] **Step 6: Rebuild dists + typecheck the touched packages**
 
@@ -728,7 +728,7 @@ Expected: applied cleanly — possible only because Step 1 proved zero NULL slug
 pnpm build:packages && pnpm --filter @sevendays/db typecheck && pnpm --filter @sevendays/types typecheck && pnpm --filter @sevendays/api typecheck && pnpm --filter @sevendays/api-client typecheck
 ```
 
-Expected: green — `slug` is now `string` (non-null) in the Drizzle row type; `packages/types` still has no `slug` on its schema (Task 5 adds it), and nothing in the API service layer constructs a package row, so the two types are independent until Task 5.
+Expected: green, `slug` is now `string` (non-null) in the Drizzle row type; `packages/types` still has no `slug` on its schema (Task 5 adds it), and nothing in the API service layer constructs a package row, so the two types are independent until Task 5.
 
 - [ ] **Step 7: Compose-up and run the integration suites**
 
@@ -738,7 +738,7 @@ pnpm --filter @sevendays/api test
 pnpm --filter @sevendays/db test
 ```
 
-Expected: api suites green (38 passed / 8 files pre-existing + none broken — the fixtures now satisfy NOT NULL); db package tests green including the catalog-rows live probe (`slug: 'builderprobe-package'` inserts cleanly).
+Expected: api suites green (38 passed / 8 files pre-existing + none broken, the fixtures now satisfy NOT NULL); db package tests green including the catalog-rows live probe (`slug: 'builderprobe-package'` inserts cleanly).
 
 - [ ] **Step 8: Commit**
 
@@ -752,17 +752,17 @@ git commit -m "feat(db): enforce service_packages.slug NOT NULL (migration 0003)
 
 ---
 
-### Task 5: packages/types — slug/isFeatured + StudioService mirror (TDD)
+### Task 5: packages/types, slug/isFeatured + StudioService mirror (TDD)
 
 **Files:**
 - Create: `packages/types/src/studio-service.ts`, `packages/types/src/studio-service.test.ts`
 - Modify: `packages/types/src/package.ts`, `packages/types/src/package.test.ts`, `packages/types/src/index.ts`, `apps/api/test/service-packages.test.ts` (one seam assertion)
 
 **Interfaces:**
-- Consumes: the Drizzle row shapes from Tasks 1/4 (this is the Zod mirror of them — extend, don't redefine, per AGENTS.md).
+- Consumes: the Drizzle row shapes from Tasks 1/4 (this is the Zod mirror of them, extend, don't redefine, per AGENTS.md).
 - Produces: `servicePackageSchema` gains `slug: z.string().min(1)` + `isFeatured: z.boolean().default(false)`; `createServicePackageSchema` omits `slug` (server/seed-assigned, like `id`) and defaults `isFeatured`; `studioServiceSchema` / `StudioService` / `createStudioServiceSchema` / `CreateStudioServiceInput` exported from `@sevendays/types`. **Ticket 04** extends `studioServiceSchema` with `bookableBranchIds`; **ticket 02** renames `packagePriceCents` → `bookedPriceCents` in `appointment.ts` (not here).
 
-- [ ] **Step 1: Write the failing tests** — create `packages/types/src/studio-service.test.ts`:
+- [ ] **Step 1: Write the failing tests**, create `packages/types/src/studio-service.test.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -786,7 +786,7 @@ describe('studioServiceSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('parses an inactive row (the read shape does not filter — the server does)', () => {
+  it('parses an inactive row (the read shape does not filter, the server does)', () => {
     const result = studioServiceSchema.safeParse({ ...fullRow, isActive: false });
     expect(result.success).toBe(true);
   });
@@ -823,7 +823,7 @@ describe('createStudioServiceSchema', () => {
 });
 ```
 
-Then extend `packages/types/src/package.test.ts` — add `slug: 'basic-package',` to the shared `fullRow` fixture object (leave `isFeatured` out of `fullRow`; one test below exercises the schema default), and append:
+Then extend `packages/types/src/package.test.ts`, add `slug: 'basic-package',` to the shared `fullRow` fixture object (leave `isFeatured` out of `fullRow`; one test below exercises the schema default), and append:
 
 ```ts
 describe('servicePackageSchema slug/isFeatured (M2 ticket 01)', () => {
@@ -840,13 +840,13 @@ describe('servicePackageSchema slug/isFeatured (M2 ticket 01)', () => {
     expect(result.success).toBe(false);
   });
 
-  it('still parses a row without isFeatured (defaults false — pre-flag fixtures)', () => {
+  it('still parses a row without isFeatured (defaults false, pre-flag fixtures)', () => {
     const parsed = servicePackageSchema.parse({ ...fullRow });
     expect(parsed.isFeatured).toBe(false);
   });
 
-  it('createServicePackageSchema strips slug (omitted — seed/server-assigned)', () => {
-    // z.object strips unknown keys, so a payload carrying slug still parses —
+  it('createServicePackageSchema strips slug (omitted, seed/server-assigned)', () => {
+    // z.object strips unknown keys, so a payload carrying slug still parses:
     // the contract is that slug never appears in the parsed create output.
     const parsed = createServicePackageSchema.parse({
       name: 'New Package',
@@ -859,15 +859,15 @@ describe('servicePackageSchema slug/isFeatured (M2 ticket 01)', () => {
 });
 ```
 
-- [ ] **Step 2: RED** — `pnpm --filter @sevendays/types test` → FAIL: cannot resolve `./studio-service.js`, plus `servicePackageSchema slug/isFeatured` failures on `rejects an empty slug` (empty string not yet rejected) and the `isFeatured` default test. Note: `parses a row carrying slug and isFeatured` may pass pre-implementation (z.object strips unknown keys) — the two failures above are the RED signal.
+- [ ] **Step 2: RED**, `pnpm --filter @sevendays/types test` → FAIL: cannot resolve `./studio-service.js`, plus `servicePackageSchema slug/isFeatured` failures on `rejects an empty slug` (empty string not yet rejected) and the `isFeatured` default test. Note: `parses a row carrying slug and isFeatured` may pass pre-implementation (z.object strips unknown keys), the two failures above are the RED signal.
 
-- [ ] **Step 3: Create `packages/types/src/studio-service.ts`** with exactly (mirrors `addon-service.ts` — same posture, same defaults):
+- [ ] **Step 3: Create `packages/types/src/studio-service.ts`** with exactly (mirrors `addon-service.ts`, same posture, same defaults):
 
 ```ts
 import { z } from 'zod';
 
-// Mirror of the studio_services row (M2 ticket 01). The M2 API read shape —
-// StudioService plus embedded bookableBranchIds — extends THIS schema in
+// Mirror of the studio_services row (M2 ticket 01). The M2 API read shape:
+// StudioService plus embedded bookableBranchIds, extends THIS schema in
 // ticket 04; define nothing per-route elsewhere.
 export const studioServiceSchema = z.object({
   id: z.uuid(),
@@ -890,11 +890,11 @@ export const createStudioServiceSchema = studioServiceSchema.omit({
 export type CreateStudioServiceInput = z.infer<typeof createStudioServiceSchema>;
 ```
 
-- [ ] **Step 4: Extend `packages/types/src/package.ts`** — inside `servicePackageSchema`, below `coverImageKey`, insert:
+- [ ] **Step 4: Extend `packages/types/src/package.ts`**, inside `servicePackageSchema`, below `coverImageKey`, insert:
 
 ```ts
   // Stable shareable identifier (M2 ticket 01): URL key for /packages/:slug.
-  // Seed/server-assigned from the name — never rewritten on rename.
+  // Seed/server-assigned from the name, never rewritten on rename.
   slug: z.string().min(1),
   // Home-page featured strip flag; seed-controlled until the M5 CMS.
   isFeatured: z.boolean().default(false),
@@ -911,21 +911,21 @@ export const createServicePackageSchema = servicePackageSchema.omit({
 });
 ```
 
-- [ ] **Step 5: Export from the barrel** — `packages/types/src/index.ts` gains `export * from './studio-service.js';` in alphabetical position (after `./print-size.js`).
+- [ ] **Step 5: Export from the barrel**, `packages/types/src/index.ts` gains `export * from './studio-service.js';` in alphabetical position (after `./print-size.js`).
 
-- [ ] **Step 6: GREEN + rebuild** — `pnpm --filter @sevendays/types test` → PASS. Then:
+- [ ] **Step 6: GREEN + rebuild**, `pnpm --filter @sevendays/types test` → PASS. Then:
 
 ```bash
 pnpm build:packages && pnpm --filter @sevendays/api-client typecheck && pnpm --filter @sevendays/api typecheck
 ```
 
-Expected: green. The api-client's `unwrap(res, servicePackageWithInclusionsSchema.array())` now requires a `slug` on every wire row — the API serves Drizzle rows spread with `...p`, which carry `slug` after Task 4, and the API's integration tests confirm the shape end-to-end in Step 7.
+Expected: green. The api-client's `unwrap(res, servicePackageWithInclusionsSchema.array())` now requires a `slug` on every wire row, the API serves Drizzle rows spread with `...p`, which carry `slug` after Task 4, and the API's integration tests confirm the shape end-to-end in Step 7.
 
-- [ ] **Step 7: Compose suites green (the seam check)** — first add one explicit seam assertion to `apps/api/test/service-packages.test.ts`, inside the main GET describe, right after the `expect(body.some((p) => p.id === ids.packageRetired)).toBe(false);` line:
+- [ ] **Step 7: Compose suites green (the seam check)**, first add one explicit seam assertion to `apps/api/test/service-packages.test.ts`, inside the main GET describe, right after the `expect(body.some((p) => p.id === ids.packageRetired)).toBe(false);` line:
 
 ```ts
     // M2 ticket 01: the wire shape carries the new catalog fields (the client
-    // unwrap() requires slug — prove the API serves it before types ship).
+    // unwrap() requires slug, prove the API serves it before types ship).
     expect(simple?.slug).toBe('simple-package');
     expect(simple?.isFeatured).toBe(false);
 ```
@@ -937,7 +937,7 @@ docker compose up -d db
 pnpm --filter @sevendays/api test && pnpm --filter @sevendays/types test
 ```
 
-Expected: api integration suites pass including the new assertion — real-Postgres proof that the served rows carry `slug`/`isFeatured` (spec §"Slug/`isFeatured` present on the package schema", verified across the HTTP seam, not just in unit fixtures). `simple?.slug` is `string | undefined` under `noUncheckedIndexedAccess` — the `toBeDefined()` on `simple` above doesn't narrow it, so use `expect(simple?.slug).toBe('simple-package')` (no `!`).
+Expected: api integration suites pass including the new assertion, real-Postgres proof that the served rows carry `slug`/`isFeatured` (spec §"Slug/`isFeatured` present on the package schema", verified across the HTTP seam, not just in unit fixtures). `simple?.slug` is `string | undefined` under `noUncheckedIndexedAccess`, the `toBeDefined()` on `simple` above doesn't narrow it, so use `expect(simple?.slug).toBe('simple-package')` (no `!`).
 
 - [ ] **Step 8: Commit**
 
@@ -965,7 +965,7 @@ git commit -m "feat(types): slug + isFeatured on package schemas; StudioService 
 pnpm check && pnpm build
 ```
 
-Expected: lint + format + typecheck + test green across all packages/apps; build green (`pnpm test` includes apps/landing and apps/admin no-ops — fine; their real coverage is ticket 05+).
+Expected: lint + format + typecheck + test green across all packages/apps; build green (`pnpm test` includes apps/landing and apps/admin no-ops, fine; their real coverage is ticket 05+).
 
 - [ ] **Step 2: Live re-verify (post-everything sanity)**
 
@@ -974,23 +974,23 @@ cd packages/db && node --env-file=.env scripts/check-env.mjs
 cd ../.. && pnpm --filter @sevendays/db db:verify-seed
 ```
 
-Expected: `VERIFY: PASSED` — the ticket-01 acceptance criterion "passes against the live DB" proven once more after all code landed.
+Expected: `VERIFY: PASSED`, the ticket-01 acceptance criterion "passes against the live DB" proven once more after all code landed.
 
-- [ ] **Step 3: Update `docs/progress.md`** — add one bullet to the landed-work list (match the section's bullet style):
+- [ ] **Step 3: Update `docs/progress.md`**, add one bullet to the landed-work list (match the section's bullet style):
 
 ```markdown
-- **M2 ticket 01 — Studio Services catalog + package slug/featured (#37 → .scratch/m2-booking-flow-tickets/01.md):** `studio_services` + `branch_studio_services` (per-branch bookability) + `studio_service_addon_services` (add-on applicability matrix) via generated migrations `0002`/`0003`; `service_packages.slug` (unique, NOT NULL — added nullable in 0002, seed backfilled all 11 packages with `slugifyName` output via a coalesce upsert that never rewrites existing slugs, NOT NULL in 0003) + `is_featured`. Seed extensions: the four Studio Services (Photo Recovery ₱1500, Tarpaulin & Bulletin Printing ₱800, Portraits & ID Photo ₱500, Picture Framing ₱1200 — TODO(seed) placeholder prices like the branch phones), all bookable at all 3 branches, Makeup + Hairstyle applicable to Portraits & ID photo only, featured on Basic/A/B/C; `db:verify-seed` asserts all of it (live VERIFY PASSED, seed re-run ×2). `packages/types`: slug/isFeatured on the package schemas, `studioServiceSchema` row mirror (ticket 04 extends it with `bookableBranchIds`). Integration + db suites green on compose; full `pnpm check` green. NOT landed: appointments generalization (ticket 02 — the plan.md M2 schema checkbox stays unticked until then), Studio Service API routes (ticket 04).
+- **M2 ticket 01, Studio Services catalog + package slug/featured (#37 → .scratch/m2-booking-flow-tickets/01.md):** `studio_services` + `branch_studio_services` (per-branch bookability) + `studio_service_addon_services` (add-on applicability matrix) via generated migrations `0002`/`0003`; `service_packages.slug` (unique, NOT NULL, added nullable in 0002, seed backfilled all 11 packages with `slugifyName` output via a coalesce upsert that never rewrites existing slugs, NOT NULL in 0003) + `is_featured`. Seed extensions: the four Studio Services (Photo Recovery ₱1500, Tarpaulin & Bulletin Printing ₱800, Portraits & ID Photo ₱500, Picture Framing ₱1200, TODO(seed) placeholder prices like the branch phones), all bookable at all 3 branches, Makeup + Hairstyle applicable to Portraits & ID photo only, featured on Basic/A/B/C; `db:verify-seed` asserts all of it (live VERIFY PASSED, seed re-run ×2). `packages/types`: slug/isFeatured on the package schemas, `studioServiceSchema` row mirror (ticket 04 extends it with `bookableBranchIds`). Integration + db suites green on compose; full `pnpm check` green. NOT landed: appointments generalization (ticket 02, the plan.md M2 schema checkbox stays unticked until then), Studio Service API routes (ticket 04).
 ```
 
-(Adjust the section heading context as needed — it belongs with the M2 pre-flight bullets, newest-adjacent.)
+(Adjust the section heading context as needed, it belongs with the M2 pre-flight bullets, newest-adjacent.)
 
 - [ ] **Step 4: Commit**
 
 ```bash
 git add docs/progress.md
-git commit -m "docs(progress): M2 ticket 01 landed — studio services catalog + slug/featured"
+git commit -m "docs(progress): M2 ticket 01 landed, studio services catalog + slug/featured"
 ```
 
-- [ ] **Step 5: Stop here — handoff** (owner pushes/merges; tickets 02/04 branch from this state). Do **not** tick `docs/plan.md`'s M2 schema checkbox (spans tickets 01+02); do not open a PR unless asked.
+- [ ] **Step 5: Stop here, handoff** (owner pushes/merges; tickets 02/04 branch from this state). Do **not** tick `docs/plan.md`'s M2 schema checkbox (spans tickets 01+02); do not open a PR unless asked.
 
 ---

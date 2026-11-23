@@ -1,82 +1,82 @@
-# M6 Ticket 04 — The Metrics Seam + the Analytics Dashboard's System Half Implementation Plan
+# M6 Ticket 04, The Metrics Seam + the Analytics Dashboard's System Half Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Per repo AGENTS.md, tick completed boxes with the ✅ emoji (`- [✅]`), never plain `[x]`. **UI-bearing tasks (4–5) load the installed UI/UX skill set at execution time: `prototype` + `ui-ux-pro-max`, plus `design-system` / `ui-styling` as relevant (AGENTS.md rule, spec #94 amendment).**
 
-**Goal:** The Analytics Dashboard's foundation and system-facing half (§ The Analytics Dashboard of the M6 spec, `apps/admin/CONTEXT.md` ## Analytics Dashboard) becomes executable code: a dedicated **metrics seam in `apps/admin` as server functions** — the CF GraphQL client and the DB probes over the existing `packages/db` client — behind its **own session gate** (the CMS write-fns discipline, ADR-0023); the three tokens (`CF_ANALYTICS_READ_TOKEN`, `POSTHOG_PERSONAL_API_KEY`, `POSTHOG_PROJECT_ID`) in the admin's env with dev-account values on main; the dashboard shell at `/` with nav "Analytics" in the Overview group (the #93 Dashboard stub dies); the **#93 reversal made real** — chart components app-local in the admin, `--chart-*` tokens in the admin's `@theme`, `packages/ui/src/tokens.css`'s no-chart clause amended. Sections landing here: **System Health** (api requests + error-rate trend, CPU p50/p99, DB latency probe, pooler census, DB size, plus one error-rate widget per frontend) and **Content** (entity counts + last-updated per family), plus the **Sentry link-out** (`sum.errors` + a console link — never a rebuild). Caching: none server-side; TanStack Query `staleTime` 60s (system) / 5m (content); revalidate on focus + manual refresh. Per-widget curated failure states (the #155 leak-safe pattern); **the page never 500s**. Owner-reacted rendered variants for the compositions.
+**Goal:** The Analytics Dashboard's foundation and system-facing half (§ The Analytics Dashboard of the M6 spec, `apps/admin/CONTEXT.md` ## Analytics Dashboard) becomes executable code: a dedicated **metrics seam in `apps/admin` as server functions**, the CF GraphQL client and the DB probes over the existing `packages/db` client, behind its **own session gate** (the CMS write-fns discipline, ADR-0023); the three tokens (`CF_ANALYTICS_READ_TOKEN`, `POSTHOG_PERSONAL_API_KEY`, `POSTHOG_PROJECT_ID`) in the admin's env with dev-account values on main; the dashboard shell at `/` with nav "Analytics" in the Overview group (the #93 Dashboard stub dies); the **#93 reversal made real**, chart components app-local in the admin, `--chart-*` tokens in the admin's `@theme`, `packages/ui/src/tokens.css`'s no-chart clause amended. Sections landing here: **System Health** (api requests + error-rate trend, CPU p50/p99, DB latency probe, pooler census, DB size, plus one error-rate widget per frontend) and **Content** (entity counts + last-updated per family), plus the **Sentry link-out** (`sum.errors` + a console link, never a rebuild). Caching: none server-side; TanStack Query `staleTime` 60s (system) / 5m (content); revalidate on focus + manual refresh. Per-widget curated failure states (the #155 leak-safe pattern); **the page never 500s**. Owner-reacted rendered variants for the compositions.
 
-**Architecture:** Seven tasks: (1) `packages/db` — the probe module (static SQL constants + a structural exec seam + pure munging; no new client, no drizzle types leaking into the admin) with the admin-side SQL-shape/munging tests; (2) the CF GraphQL client in `apps/admin/src/lib/metrics/` — the env reader (tolerant, curated-state-bearing — NOT loud-fail), the pinned `workersInvocationsAdaptive` query builder, envelope unwrap, failure mapping, and the bucketing/CPU/error-rate munging; (3) the seam's server fns (each gated by the seam's own session check) + the `metrics-queries.ts` factories with the spec's staleTimes + the DB result-union wrapper; (4) the screen — the shadcn chart component generated app-local (recharts), the `@theme` `--chart-*` block feeding it, the widget compositions with curated states, the route rewrite at `/`, the sidebar's Analytics label, the tokens.css amendment; (5) the rendered variants the owner reacts to (temporary ungated prototype route, mock data, screenshots, ratification, adjust, delete); (6) the env + CI wiring — `.env.example`, the admin wrangler observability block, both ci.yml legs' fail-soft token syncs and script-name vars, the owner's dev-token handoff; (7) full gates + docs rotation + PR/merge + the **v1 SPLIT with the owner-ruled divergence** (v1: dashboard at `/`, Analytics nav re-added — the #168 reversal reversed; the `routeTree.gen.ts` codegen hazard carried) + ledger row + issue close.
+**Architecture:** Seven tasks: (1) `packages/db`, the probe module (static SQL constants + a structural exec seam + pure munging; no new client, no drizzle types leaking into the admin) with the admin-side SQL-shape/munging tests; (2) the CF GraphQL client in `apps/admin/src/lib/metrics/`, the env reader (tolerant, curated-state-bearing, NOT loud-fail), the pinned `workersInvocationsAdaptive` query builder, envelope unwrap, failure mapping, and the bucketing/CPU/error-rate munging; (3) the seam's server fns (each gated by the seam's own session check) + the `metrics-queries.ts` factories with the spec's staleTimes + the DB result-union wrapper; (4) the screen, the shadcn chart component generated app-local (recharts), the `@theme` `--chart-*` block feeding it, the widget compositions with curated states, the route rewrite at `/`, the sidebar's Analytics label, the tokens.css amendment; (5) the rendered variants the owner reacts to (temporary ungated prototype route, mock data, screenshots, ratification, adjust, delete); (6) the env + CI wiring, `.env.example`, the admin wrangler observability block, both ci.yml legs' fail-soft token syncs and script-name vars, the owner's dev-token handoff; (7) full gates + docs rotation + PR/merge + the **v1 SPLIT with the owner-ruled divergence** (v1: dashboard at `/`, Analytics nav re-added, the #168 reversal reversed; the `routeTree.gen.ts` codegen hazard carried) + ledger row + issue close.
 
-**Tech Stack:** TanStack Start (createServerFn, getRequestHeaders), TanStack Query v5 (queryOptions), zod 4.5.1, drizzle-orm 0.45.2 over postgres-js via `@sevendays/db`, **the shadcn chart component (a `ChartContainer` wrapper over recharts) generated app-local in the admin** (the owner's 2026-10-06 ruling), vitest 4 plain-node (the admin lib-seam pattern), pnpm + Turborepo, `gh` CLI, `@playwright/test` 1.63.0 (already installed at the root, #189 — used only as the screenshot driver in Task 5). **One new dependency: `recharts`, into `apps/admin` at an exact pin** (the shadcn chart's engine — the ruling below).
+**Tech Stack:** TanStack Start (createServerFn, getRequestHeaders), TanStack Query v5 (queryOptions), zod 4.5.1, drizzle-orm 0.45.2 over postgres-js via `@sevendays/db`, **the shadcn chart component (a `ChartContainer` wrapper over recharts) generated app-local in the admin** (the owner's 2026-10-06 ruling), vitest 4 plain-node (the admin lib-seam pattern), pnpm + Turborepo, `gh` CLI, `@playwright/test` 1.63.0 (already installed at the root, #189, used only as the screenshot driver in Task 5). **One new dependency: `recharts`, into `apps/admin` at an exact pin** (the shadcn chart's engine, the ruling below).
 
-**Spec:** Implements ticket [#186 "M6 ticket 04: the metrics seam + the Analytics Dashboard's system half"](https://github.com/jeius/sevendays/issues/186) (label `ready-for-agent`; blocked by nothing), whose parent is the M6 spec `docs/specs/2026-10-05-m6-production-hardening-observability-spec.md` (issue #182 — § The Analytics Dashboard is this ticket's section; § Testing Decisions names the admin lib-seam metrics tests; § v1-pick classes pre-rules the payload **PICK with recorded SPLIT**; ADR-0023 rules the data path). Key recon facts (2026-10-06, main `e1b3085`, tree clean, compose db up + healthy, admin suite re-run live: **7 files / 59 tests**):
+**Spec:** Implements ticket [#186 "M6 ticket 04: the metrics seam + the Analytics Dashboard's system half"](https://github.com/jeius/sevendays/issues/186) (label `ready-for-agent`; blocked by nothing), whose parent is the M6 spec `docs/specs/2026-10-05-m6-production-hardening-observability-spec.md` (issue #182, § The Analytics Dashboard is this ticket's section; § Testing Decisions names the admin lib-seam metrics tests; § v1-pick classes pre-rules the payload **PICK with recorded SPLIT**; ADR-0023 rules the data path). Key recon facts (2026-10-06, main `e1b3085`, tree clean, compose db up + healthy, admin suite re-run live: **7 files / 59 tests**):
 
-- **The admin's server-fn discipline** (ADR-0023's "own session gate"): server fns are directly callable, so they gate themselves. The house pattern (auth.functions.ts:20-29) is `createAuth().api.getSession({ headers: getRequestHeaders() })` → `throw new Error('Unauthorized')` on null — createAuth is per-request over a per-request db client (ADR-0011), never module scope. Every server fn body wraps in a Sentry `startSpan` (no-op without a DSN). The metrics fns have **no API in their path** (unlike the CMS fns whose gate is the forwarded cookie + the API's 401) — the gate is the seam's first statement.
-- **The `/` route today is the #93 stub** (`apps/admin/src/routes/_shell.index.tsx` — `StubScreen title='Dashboard' … milestone='v2'`); `/appointments` is the same stub shape and is **untouched** (the v2 teaser stays). The sidebar (`components/admin-sidebar.tsx:79-105`) has Overview = `{ Dashboard '/', Appointments '/appointments' }`; its comment (lines 76-78) says "Overview is wholly future scope — both destinations are later-milestone stubs" — both get rewritten. `StubScreen` itself stays (appointments + settings still use it).
-- **Spike-proven drizzle facts** (2026-10-06, against the compose test db, spike files deleted): `db.execute('<sql string>')` accepts a plain string and returns **the rows array directly** (`[{"one":1}]`); `count(*)::int` parses as a JS `number` but bare `count(*)` is int8 → **string** (so the content census casts); `pg_database_size()` (int8) → **string** ("10573491" — the munging parses); `max(updated_at)` → a **PG timestamp string** ("2026-10-06 09:05:17.721406+00") that normalizes via `replace(' ', 'T').replace(/\+00$/, '+00:00')` to a `Date`-parseable ISO (verified: `new Date(...)` → `2026-10-06T09:05:17.721Z`); `createDbClient` with a dead URL constructs lazily without connecting.
-- **The CF GraphQL shape is documentation-pinned** (Cloudflare's "Query Workers invocation metrics via GraphQL" tutorial, developers.cloudflare.com/analytics/graphql-api/tutorials/querying-workers-metrics): `viewer { accounts(filter: {accountTag: $accountTag}) { workersInvocationsAdaptive(limit: 100, filter: {scriptName: $scriptName, datetime_geq: $since, datetime_leq: $until}) { dimensions { datetime scriptName status } sum { requests errors subrequests } quantiles { cpuTimeP50 cpuTimeP99 } } } }`, endpoint `https://api.cloudflare.com/client/v4/graphql`, `Authorization: Bearer <token>`, account-level dataset, CPU quantiles in **microseconds**, `$accountTag: string` (CF's lowercase scalar). The scalar type of the datetime variables is the one unpinned detail — see the Task 2 fallback note.
-- **The env plumbing that already exists:** `process.env` works inside the admin Worker (`nodejs_compat_populate_process_env`, the `DATABASE_URL` secret precedent in `lib/auth.ts:17-22`); dev reads `.env.local` via the dev script's dotenv; `CLOUDFLARE_ACCOUNT_ID` is already a `--var` on **both** ci.yml legs (teaser + v1) for the api's R2 use — this ticket reuses the same name as the admin's GraphQL scope var (no new secret, ADR-0019's env precedent). The admin deploy currently passes only `--var API_URL + BETTER_AUTH_URL` (ci.yml:159/255) plus the `DATABASE_URL` secret sync (ci.yml:161-168/257-264); the api's wrangler.toml carries the `[observability] enabled = true` block (#183) — the admin's wrangler.jsonc has none.
-- **Sibling fences (spec § Sequencing; docs/plan.md M6 box 5):** this ticket owns the dashboard's **system half ONLY — the box stays `- [ ]` until #187 (Traffic + Storage & Media) lands it**; Task 7 annotates the box and leaves it unticked. NOT here, regardless of temptation: **Traffic** (any HogQL query, `$web_vitals`, pageview/visitor/top-page widgets — #187), **Storage & Media** (any `r2StorageAdaptiveGroups`/`r2OperationsAdaptiveGroups` query, the budget markers — #187), any **consumer** of the PostHog token pair beyond its env presence (the pair lands here because the ticket pins all three tokens; the queries are #187's); the Audit Log viewer screen (#188); the production smoke (#190); the ship-provisioning runbook (#191); **any `apps/api` file at all** (the api stays domain-pure — zero api changes in this PR); `packages/api-client` (no `/api/v1` route exists or appears); `packages/types` (the widget models are admin-internal — the editor-state zod precedent; the spec's "any metrics response schemas that land in types" = **none land**); the appointments stub/settings screens (untouched); `worker-configuration.d.ts`; any ADR (ADR-0023 already rules the data path — this ticket implements it); the seed.
-- **Baselines (live, 2026-10-06):** `apps/admin` = **7 files / 59 tests** (re-run this session). Per #185's close-out: api 27 files + 1 skipped / 338 passed + 3 skipped, api-client 5 files / 33 tests, landing 9 files / 73 tests, types 14 files / 118 tests, `pnpm check` 35/35 turbo tasks. After this ticket: **admin 11 files / 94 tests** (+6 env, +14 cf, +12 db-probes — 10 in Task 1 + 2 in Task 3, +3 metrics-queries; executor reconciles actuals; if any gate count differs, reconcile before proceeding — do not loosen assertions). v1's admin floor after the split: 11 files / 94 tests expected (all booking-free; executor reconciles).
+- **The admin's server-fn discipline** (ADR-0023's "own session gate"): server fns are directly callable, so they gate themselves. The house pattern (auth.functions.ts:20-29) is `createAuth().api.getSession({ headers: getRequestHeaders() })` → `throw new Error('Unauthorized')` on null, createAuth is per-request over a per-request db client (ADR-0011), never module scope. Every server fn body wraps in a Sentry `startSpan` (no-op without a DSN). The metrics fns have **no API in their path** (unlike the CMS fns whose gate is the forwarded cookie + the API's 401), the gate is the seam's first statement.
+- **The `/` route today is the #93 stub** (`apps/admin/src/routes/_shell.index.tsx`, `StubScreen title='Dashboard' … milestone='v2'`); `/appointments` is the same stub shape and is **untouched** (the v2 teaser stays). The sidebar (`components/admin-sidebar.tsx:79-105`) has Overview = `{ Dashboard '/', Appointments '/appointments' }`; its comment (lines 76-78) says "Overview is wholly future scope, both destinations are later-milestone stubs", both get rewritten. `StubScreen` itself stays (appointments + settings still use it).
+- **Spike-proven drizzle facts** (2026-10-06, against the compose test db, spike files deleted): `db.execute('<sql string>')` accepts a plain string and returns **the rows array directly** (`[{"one":1}]`); `count(*)::int` parses as a JS `number` but bare `count(*)` is int8 → **string** (so the content census casts); `pg_database_size()` (int8) → **string** ("10573491", the munging parses); `max(updated_at)` → a **PG timestamp string** ("2026-10-06 09:05:17.721406+00") that normalizes via `replace(' ', 'T').replace(/\+00$/, '+00:00')` to a `Date`-parseable ISO (verified: `new Date(...)` → `2026-10-06T09:05:17.721Z`); `createDbClient` with a dead URL constructs lazily without connecting.
+- **The CF GraphQL shape is documentation-pinned** (Cloudflare's "Query Workers invocation metrics via GraphQL" tutorial, developers.cloudflare.com/analytics/graphql-api/tutorials/querying-workers-metrics): `viewer { accounts(filter: {accountTag: $accountTag}) { workersInvocationsAdaptive(limit: 100, filter: {scriptName: $scriptName, datetime_geq: $since, datetime_leq: $until}) { dimensions { datetime scriptName status } sum { requests errors subrequests } quantiles { cpuTimeP50 cpuTimeP99 } } } }`, endpoint `https://api.cloudflare.com/client/v4/graphql`, `Authorization: Bearer <token>`, account-level dataset, CPU quantiles in **microseconds**, `$accountTag: string` (CF's lowercase scalar). The scalar type of the datetime variables is the one unpinned detail, see the Task 2 fallback note.
+- **The env plumbing that already exists:** `process.env` works inside the admin Worker (`nodejs_compat_populate_process_env`, the `DATABASE_URL` secret precedent in `lib/auth.ts:17-22`); dev reads `.env.local` via the dev script's dotenv; `CLOUDFLARE_ACCOUNT_ID` is already a `--var` on **both** ci.yml legs (teaser + v1) for the api's R2 use, this ticket reuses the same name as the admin's GraphQL scope var (no new secret, ADR-0019's env precedent). The admin deploy currently passes only `--var API_URL + BETTER_AUTH_URL` (ci.yml:159/255) plus the `DATABASE_URL` secret sync (ci.yml:161-168/257-264); the api's wrangler.toml carries the `[observability] enabled = true` block (#183), the admin's wrangler.jsonc has none.
+- **Sibling fences (spec § Sequencing; docs/plan.md M6 box 5):** this ticket owns the dashboard's **system half ONLY, the box stays `- [ ]` until #187 (Traffic + Storage & Media) lands it**; Task 7 annotates the box and leaves it unticked. NOT here, regardless of temptation: **Traffic** (any HogQL query, `$web_vitals`, pageview/visitor/top-page widgets, #187), **Storage & Media** (any `r2StorageAdaptiveGroups`/`r2OperationsAdaptiveGroups` query, the budget markers, #187), any **consumer** of the PostHog token pair beyond its env presence (the pair lands here because the ticket pins all three tokens; the queries are #187's); the Audit Log viewer screen (#188); the production smoke (#190); the ship-provisioning runbook (#191); **any `apps/api` file at all** (the api stays domain-pure, zero api changes in this PR); `packages/api-client` (no `/api/v1` route exists or appears); `packages/types` (the widget models are admin-internal, the editor-state zod precedent; the spec's "any metrics response schemas that land in types" = **none land**); the appointments stub/settings screens (untouched); `worker-configuration.d.ts`; any ADR (ADR-0023 already rules the data path, this ticket implements it); the seed.
+- **Baselines (live, 2026-10-06):** `apps/admin` = **7 files / 59 tests** (re-run this session). Per #185's close-out: api 27 files + 1 skipped / 338 passed + 3 skipped, api-client 5 files / 33 tests, landing 9 files / 73 tests, types 14 files / 118 tests, `pnpm check` 35/35 turbo tasks. After this ticket: **admin 11 files / 94 tests** (+6 env, +14 cf, +12 db-probes, 10 in Task 1 + 2 in Task 3, +3 metrics-queries; executor reconciles actuals; if any gate count differs, reconcile before proceeding, do not loosen assertions). v1's admin floor after the split: 11 files / 94 tests expected (all booking-free; executor reconciles).
 
 ## Global Constraints
 
-- **Branch & baseline:** `feat/186-metrics-seam-dashboard` off main `e1b3085` (plain checkout — single linear ticket, no worktree needed). This plan file is the branch's first commit. Commit messages follow the repo's `type(scope): … (#186)` squash style; every commit below is pinned verbatim. Evidence (test output, variant screenshots, the live-probe transcript) lands in gitignored `.superpowers/sdd/2026-10-06-186-metrics-seam-dashboard-system-half/`.
-- **Gates (repo AGENTS.md, verbatim duties):** **one manifest change exists — Task 4 adds `recharts` to `apps/admin` at an exact pin (the owner's shadcn-chart ruling); `pnpm install` runs there once and `pnpm-lock.yaml` rides the PR — the v1 split regenerates it per the runbook's transformed-lockfile procedure.** **After every `packages/db` source change (Task 1), run `pnpm build:packages` before any admin typecheck/test run** (the admin resolves `@sevendays/db` from built `dist/`). Every task commits only with `pnpm check` green for the packages it touched (`docker compose up -d db` first — the api suite runs in `pnpm check` and needs the test db; the admin's new tests are plain-node and db-free). Biome canonical form via `pnpm --filter @sevendays/admin fix` / `--filter @sevendays/db fix` before committing — accept its rewrites. Never commit secrets. Tick checklist boxes with `- [✅]`, never `[x]` (this plan file and `docs/plan.md` alike). Run `graphify update .` at close (code was modified; `graphify-out/graph.json` exists).
-- **Never commit secrets (binding):** `CF_ANALYTICS_READ_TOKEN`, `POSTHOG_PERSONAL_API_KEY`, `POSTHOG_PROJECT_ID`, and `DATABASE_URL` reach the admin Worker as wrangler secrets, set per environment — never in `wrangler.jsonc`, `.env` files, ci.yml literals, the PR body, or the evidence dir. `.env.example` documents NAMES with empty values only. Dev values live in gitignored `apps/admin/.env.local`.
-- **The env contract (binding):** the admin Worker gains, besides the spec-pinned three: `CLOUDFLARE_ACCOUNT_ID` (a `--var`, same name/value the api already consumes on both CI legs — the GraphQL scope, not a secret) and three script-name `--var`s `CF_ANALYTICS_SCRIPT_API` / `CF_ANALYTICS_SCRIPT_LANDING` / `CF_ANALYTICS_SCRIPT_ADMIN` (agent ruling, owner-reviewable at PR — the per-edition Worker names differ, `sevendays-*` on teaser vs `sevendays-v1-*` on v1, so they cannot be code constants; the deployment-identity class). Env reading is **tolerant by design** — a missing source config yields that widget's curated `not-configured` state, never a thrown env error (the inverted #155: the sentinel becomes a curated state, not a 503; the existing loud-fail `getApiUrl` pattern does NOT apply here).
-- **The result union (binding, the #155 leak-safe pattern):** every metrics server fn resolves `MetricsResult<T> = { ok: true; data: T } | { ok: false; reason: 'not-configured' | 'unavailable' }`. Source fetch/query failures map to `{ ok: false, reason: 'unavailable' }` with the loud detail (HTTP status, GraphQL error message, probe error class) in ONE `console.error` line per failed source — log-only, never in the payload, never in the UI (the spec's "loud detail stays log-only"; the admin Worker's Workers Logs retention is enabled by Task 6's observability block). The only throw a metrics fn permits is the session gate's `Unauthorized`.
-- **The never-500 law (binding):** the dashboard page renders for any staff session regardless of source health. Server fns resolve result unions; the widget components additionally map a *thrown* query error (a gate throw or an SSR transport fault) to the curated `unavailable` line — belt and suspenders. No widget error state may bubble to a route-level error boundary.
-- **Curated copy pins (spec-verbatim base, completion owner-reviewable at the variants step):** unconfigured → `Analytics source not configured.`; failure → `Analytics source unavailable.` — the same two lines across every widget (which source is named by the widget's own title). Window label copy: `24 hours` / `7 days` / `30 days`. Content family labels: `Packages`, `Add-ons`, `Gallery photos`, `Testimonials`. The Sentry link-out URL: `https://sevendays-studio.sentry.io/issues/` (**owner-ratified 2026-10-06** in the plan session — org slug `sevendays-studio`; the variants step may still flag it).
-- **The chart ruling (owner, 2026-10-06, answered in the plan session):** chart components are **the shadcn chart component** — `ChartContainer` + recharts primitives — **generated APP-LOCAL in `apps/admin`** (`apps/admin/src/components/ui/chart.tsx`), NOT into `packages/ui`: the reversal rules data-viz admin-local, and the components.json trio's aliases deliberately route `shadcn add` output to the shared package (ADR-0017), so the executor generates with a scratch destination (or moves the emitted file) and adapts two things — `cn` imports become `import { cn } from 'cn'` (the #102 consolidation), and `recharts` lands in `apps/admin/package.json` at an exact pin (record the registry-resolved version in the Task 4 commit body + evidence). The `--chart-1..5` vocabulary is exactly the CSS-variable contract the shadcn chart consumes — the admin `@theme` block feeds `ChartContainer` directly; provisional values derive from existing tokens (`--chart-1: var(--brand-primary)`, `--chart-2: var(--destructive)` for errors, `--chart-3: var(--brand-gray-mid)`, `--chart-4: var(--brand-500)`, `--chart-5: var(--brand-900)`, `--chart-grid: var(--border)`, `--chart-text: var(--muted-foreground)`); the variants step may adjust values/count before merge, the components reference `var(--chart-N)` so value changes don't ripple. Known SSR posture: recharts' `ResponsiveContainer` renders empty on the server and paints on hydration — expected, not a defect (the skeleton states own the first paint). `packages/ui/src/tokens.css`'s clause is amended (Task 4) to record the reversal and name the new home.
-- **The query contract (binding):** ONE pinned GraphQL document per script, **three parallel scriptName-filtered fetches** (api, landing, admin — the tutorial-verbatim filter shape; rows are tiny; `limit: 10000`). Time windows: `['24h','7d','30d']`, default `7d`, carried as the route's `window` search param (zod-validated, shareable, SSR-stable); `windowToRange(window, now)` computes `{ since, until }` as millisecond-truncated ISO strings. Bucketing: 24h and 7d → hourly buckets, 30d → daily buckets (client-side re-bucketing of whatever granularity `datetime` returns — adaptive datasets coarsen with age and the munging must not care). CPU quantiles convert µs → ms (÷1000, one decimal); the CPU headline = the **max** across in-window buckets (conservative ops posture). Error rate = `sum.errors / sum.requests` with a zero-guard. The DB-probe and Content widgets are **point-in-time, windowless** (spec ruling).
-- **The probe contract (binding, spike-proven):** the probe SQL lives in `packages/db/src/probes.ts` as static strings over a structural `exec` seam (`(statement: string) => Promise<Record<string, unknown>[]>` — drizzle types never leak into the admin; the server fn passes `db.execute.bind(db)`, tests pass fakes): latency = timed `select 1`; census = `select state, count(*)::int as count from pg_stat_activity where datname = current_database() group by state order by state` (a null state munges to `unknown`); size = `select pg_database_size(current_database()) as bytes` (string → number); content = one statement per family `(count(*) filter (where is_active))::int as active, max(updated_at) as last_updated` (the ::int cast is load-bearing — bare count(*) is int8 → string through postgres-js). The pooler ceiling display: `POOLER_CLIENT_CEILING = 200` (research-pinned Supavisor Micro-compute reference — a cost signal, not a quota; commented as such). `last-updated` = max over ALL rows (deactivations count as updates); counts = active rows. The DB client stays per-request `createDbClient(process.env.DATABASE_URL)` (ADR-0011 — the auth.ts pattern), never module scope.
-- **staleTime pins (spec-verbatim):** system widgets (worker metrics + DB probes) `staleTime: 60_000`; content `staleTime: 300_000`; both with explicit `refetchOnWindowFocus: true` (the spec's revalidate-on-focus; the router's QueryClient default leaves it on — the factories state it anyway). No server-side cache. No polling. Manual refresh = one button invalidating the `['metrics']` key prefix.
-- **The session gate (binding):** every metrics server fn's first statement (inside `startSpan`) is the seam's own gate — `createAuth().api.getSession({ headers: getRequestHeaders() })`, `throw new Error('Unauthorized')` on null (the `ensureSession` semantics hoisted into the seam; the fn validator stays input-strict). The `_shell` beforeLoad stays the page's gate; the fn-level gate exists because server fns are directly callable (ADR-0023's exact words).
-- **Copy pins are semantic, formatting is biome's:** every fenced file/comment/code block below lands verbatim in content; the package `fix` scripts then normalize quoting/ordering/import order to house style — accept the rewrite, commit the result.
-- **Scope fence (verbatim):** Tasks 1–6 edit only: `packages/db/src/probes.ts` (create), `packages/db/src/index.ts` (one export line), `apps/admin/src/lib/metrics/env.ts` + `env.test.ts` + `cf.ts` + `cf.test.ts` + `db.ts` + `db-probes.test.ts` + `metrics.functions.ts` (create), `apps/admin/src/lib/metrics-queries.ts` + `metrics-queries.test.ts` (create), `apps/admin/src/components/charts/trend-chart.tsx` + `stat-card.tsx` (create), `apps/admin/src/components/dashboard/widget-frame.tsx` + `system-health.tsx` + `frontend-error-widget.tsx` + `sentry-link.tsx` + `content-census.tsx` + `window-toggle.tsx` (create), `apps/admin/src/components/admin-sidebar.tsx`, `apps/admin/src/routes/_shell.index.tsx` (rewrite), `apps/admin/src/styles.css`, `apps/admin/biome.json` (the generated-components lint override — added at execution, ruling T4: the registry-faithful chart.tsx needs the packages/ui override class under `src/components/**`), `apps/admin/src/components/ui/chart.tsx` (create — the vendored shadcn chart), `apps/admin/package.json` + `pnpm-lock.yaml` (the recharts pin), `packages/ui/src/tokens.css` (the clause amendment), `apps/admin/wrangler.jsonc`, `apps/admin/.env.example`, `.github/workflows/ci.yml`. Task 5 additionally creates then DELETES `apps/admin/src/routes/prototype-dashboard.tsx` (untracked throughout — never committed). Task 7 rotates `docs/plan.md` (M6 box 5 — ANNOTATED, not ticked), `docs/progress.md`, `AGENTS.md` (floors line + status bullet), and `docs/agents/v1-picks.md` (ledger row, post-merge). NOT here: everything in the header's sibling-fences bullet.
+- **Branch & baseline:** `feat/186-metrics-seam-dashboard` off main `e1b3085` (plain checkout, single linear ticket, no worktree needed). This plan file is the branch's first commit. Commit messages follow the repo's `type(scope): … (#186)` squash style; every commit below is pinned verbatim. Evidence (test output, variant screenshots, the live-probe transcript) lands in gitignored `.superpowers/sdd/2026-10-06-186-metrics-seam-dashboard-system-half/`.
+- **Gates (repo AGENTS.md, verbatim duties):** **one manifest change exists, Task 4 adds `recharts` to `apps/admin` at an exact pin (the owner's shadcn-chart ruling); `pnpm install` runs there once and `pnpm-lock.yaml` rides the PR, the v1 split regenerates it per the runbook's transformed-lockfile procedure.** **After every `packages/db` source change (Task 1), run `pnpm build:packages` before any admin typecheck/test run** (the admin resolves `@sevendays/db` from built `dist/`). Every task commits only with `pnpm check` green for the packages it touched (`docker compose up -d db` first, the api suite runs in `pnpm check` and needs the test db; the admin's new tests are plain-node and db-free). Biome canonical form via `pnpm --filter @sevendays/admin fix` / `--filter @sevendays/db fix` before committing, accept its rewrites. Never commit secrets. Tick checklist boxes with `- [✅]`, never `[x]` (this plan file and `docs/plan.md` alike). Run `graphify update .` at close (code was modified; `graphify-out/graph.json` exists).
+- **Never commit secrets (binding):** `CF_ANALYTICS_READ_TOKEN`, `POSTHOG_PERSONAL_API_KEY`, `POSTHOG_PROJECT_ID`, and `DATABASE_URL` reach the admin Worker as wrangler secrets, set per environment, never in `wrangler.jsonc`, `.env` files, ci.yml literals, the PR body, or the evidence dir. `.env.example` documents NAMES with empty values only. Dev values live in gitignored `apps/admin/.env.local`.
+- **The env contract (binding):** the admin Worker gains, besides the spec-pinned three: `CLOUDFLARE_ACCOUNT_ID` (a `--var`, same name/value the api already consumes on both CI legs, the GraphQL scope, not a secret) and three script-name `--var`s `CF_ANALYTICS_SCRIPT_API` / `CF_ANALYTICS_SCRIPT_LANDING` / `CF_ANALYTICS_SCRIPT_ADMIN` (agent ruling, owner-reviewable at PR, the per-edition Worker names differ, `sevendays-*` on teaser vs `sevendays-v1-*` on v1, so they cannot be code constants; the deployment-identity class). Env reading is **tolerant by design**, a missing source config yields that widget's curated `not-configured` state, never a thrown env error (the inverted #155: the sentinel becomes a curated state, not a 503; the existing loud-fail `getApiUrl` pattern does NOT apply here).
+- **The result union (binding, the #155 leak-safe pattern):** every metrics server fn resolves `MetricsResult<T> = { ok: true; data: T } | { ok: false; reason: 'not-configured' | 'unavailable' }`. Source fetch/query failures map to `{ ok: false, reason: 'unavailable' }` with the loud detail (HTTP status, GraphQL error message, probe error class) in ONE `console.error` line per failed source, log-only, never in the payload, never in the UI (the spec's "loud detail stays log-only"; the admin Worker's Workers Logs retention is enabled by Task 6's observability block). The only throw a metrics fn permits is the session gate's `Unauthorized`.
+- **The never-500 law (binding):** the dashboard page renders for any staff session regardless of source health. Server fns resolve result unions; the widget components additionally map a *thrown* query error (a gate throw or an SSR transport fault) to the curated `unavailable` line, belt and suspenders. No widget error state may bubble to a route-level error boundary.
+- **Curated copy pins (spec-verbatim base, completion owner-reviewable at the variants step):** unconfigured → `Analytics source not configured.`; failure → `Analytics source unavailable.`, the same two lines across every widget (which source is named by the widget's own title). Window label copy: `24 hours` / `7 days` / `30 days`. Content family labels: `Packages`, `Add-ons`, `Gallery photos`, `Testimonials`. The Sentry link-out URL: `https://sevendays-studio.sentry.io/issues/` (**owner-ratified 2026-10-06** in the plan session, org slug `sevendays-studio`; the variants step may still flag it).
+- **The chart ruling (owner, 2026-10-06, answered in the plan session):** chart components are **the shadcn chart component**, `ChartContainer` + recharts primitives, **generated APP-LOCAL in `apps/admin`** (`apps/admin/src/components/ui/chart.tsx`), NOT into `packages/ui`: the reversal rules data-viz admin-local, and the components.json trio's aliases deliberately route `shadcn add` output to the shared package (ADR-0017), so the executor generates with a scratch destination (or moves the emitted file) and adapts two things, `cn` imports become `import { cn } from 'cn'` (the #102 consolidation), and `recharts` lands in `apps/admin/package.json` at an exact pin (record the registry-resolved version in the Task 4 commit body + evidence). The `--chart-1..5` vocabulary is exactly the CSS-variable contract the shadcn chart consumes, the admin `@theme` block feeds `ChartContainer` directly; provisional values derive from existing tokens (`--chart-1: var(--brand-primary)`, `--chart-2: var(--destructive)` for errors, `--chart-3: var(--brand-gray-mid)`, `--chart-4: var(--brand-500)`, `--chart-5: var(--brand-900)`, `--chart-grid: var(--border)`, `--chart-text: var(--muted-foreground)`); the variants step may adjust values/count before merge, the components reference `var(--chart-N)` so value changes don't ripple. Known SSR posture: recharts' `ResponsiveContainer` renders empty on the server and paints on hydration, expected, not a defect (the skeleton states own the first paint). `packages/ui/src/tokens.css`'s clause is amended (Task 4) to record the reversal and name the new home.
+- **The query contract (binding):** ONE pinned GraphQL document per script, **three parallel scriptName-filtered fetches** (api, landing, admin, the tutorial-verbatim filter shape; rows are tiny; `limit: 10000`). Time windows: `['24h','7d','30d']`, default `7d`, carried as the route's `window` search param (zod-validated, shareable, SSR-stable); `windowToRange(window, now)` computes `{ since, until }` as millisecond-truncated ISO strings. Bucketing: 24h and 7d → hourly buckets, 30d → daily buckets (client-side re-bucketing of whatever granularity `datetime` returns, adaptive datasets coarsen with age and the munging must not care). CPU quantiles convert µs → ms (÷1000, one decimal); the CPU headline = the **max** across in-window buckets (conservative ops posture). Error rate = `sum.errors / sum.requests` with a zero-guard. The DB-probe and Content widgets are **point-in-time, windowless** (spec ruling).
+- **The probe contract (binding, spike-proven):** the probe SQL lives in `packages/db/src/probes.ts` as static strings over a structural `exec` seam (`(statement: string) => Promise<Record<string, unknown>[]>`, drizzle types never leak into the admin; the server fn passes `db.execute.bind(db)`, tests pass fakes): latency = timed `select 1`; census = `select state, count(*)::int as count from pg_stat_activity where datname = current_database() group by state order by state` (a null state munges to `unknown`); size = `select pg_database_size(current_database()) as bytes` (string → number); content = one statement per family `(count(*) filter (where is_active))::int as active, max(updated_at) as last_updated` (the ::int cast is load-bearing, bare count(*) is int8 → string through postgres-js). The pooler ceiling display: `POOLER_CLIENT_CEILING = 200` (research-pinned Supavisor Micro-compute reference, a cost signal, not a quota; commented as such). `last-updated` = max over ALL rows (deactivations count as updates); counts = active rows. The DB client stays per-request `createDbClient(process.env.DATABASE_URL)` (ADR-0011, the auth.ts pattern), never module scope.
+- **staleTime pins (spec-verbatim):** system widgets (worker metrics + DB probes) `staleTime: 60_000`; content `staleTime: 300_000`; both with explicit `refetchOnWindowFocus: true` (the spec's revalidate-on-focus; the router's QueryClient default leaves it on, the factories state it anyway). No server-side cache. No polling. Manual refresh = one button invalidating the `['metrics']` key prefix.
+- **The session gate (binding):** every metrics server fn's first statement (inside `startSpan`) is the seam's own gate, `createAuth().api.getSession({ headers: getRequestHeaders() })`, `throw new Error('Unauthorized')` on null (the `ensureSession` semantics hoisted into the seam; the fn validator stays input-strict). The `_shell` beforeLoad stays the page's gate; the fn-level gate exists because server fns are directly callable (ADR-0023's exact words).
+- **Copy pins are semantic, formatting is biome's:** every fenced file/comment/code block below lands verbatim in content; the package `fix` scripts then normalize quoting/ordering/import order to house style, accept the rewrite, commit the result.
+- **Scope fence (verbatim):** Tasks 1–6 edit only: `packages/db/src/probes.ts` (create), `packages/db/src/index.ts` (one export line), `apps/admin/src/lib/metrics/env.ts` + `env.test.ts` + `cf.ts` + `cf.test.ts` + `db.ts` + `db-probes.test.ts` + `metrics.functions.ts` (create), `apps/admin/src/lib/metrics-queries.ts` + `metrics-queries.test.ts` (create), `apps/admin/src/components/charts/trend-chart.tsx` + `stat-card.tsx` (create), `apps/admin/src/components/dashboard/widget-frame.tsx` + `system-health.tsx` + `frontend-error-widget.tsx` + `sentry-link.tsx` + `content-census.tsx` + `window-toggle.tsx` (create), `apps/admin/src/components/admin-sidebar.tsx`, `apps/admin/src/routes/_shell.index.tsx` (rewrite), `apps/admin/src/styles.css`, `apps/admin/biome.json` (the generated-components lint override, added at execution, ruling T4: the registry-faithful chart.tsx needs the packages/ui override class under `src/components/**`), `apps/admin/src/components/ui/chart.tsx` (create, the vendored shadcn chart), `apps/admin/package.json` + `pnpm-lock.yaml` (the recharts pin), `packages/ui/src/tokens.css` (the clause amendment), `apps/admin/wrangler.jsonc`, `apps/admin/.env.example`, `.github/workflows/ci.yml`. Task 5 additionally creates then DELETES `apps/admin/src/routes/prototype-dashboard.tsx` (untracked throughout, never committed). Task 7 rotates `docs/plan.md` (M6 box 5, ANNOTATED, not ticked), `docs/progress.md`, `AGENTS.md` (floors line + status bullet), and `docs/agents/v1-picks.md` (ledger row, post-merge). NOT here: everything in the header's sibling-fences bullet.
 
 ## File Structure
 
 ```text
 packages/db/
-  src/probes.ts                               # create (Task 1) — SQL constants + exec seam + pure munging
-  src/index.ts                                # modify (Task 1) — one export line
+  src/probes.ts                               # create (Task 1), SQL constants + exec seam + pure munging
+  src/index.ts                                # modify (Task 1), one export line
 apps/admin/
   src/lib/metrics/
-    env.ts                                    # create (Task 2) — readMetricsEnv (tolerant)
+    env.ts                                    # create (Task 2), readMetricsEnv (tolerant)
     env.test.ts                               # create (Task 2)
-    cf.ts                                     # create (Task 2) — query builder + client + munging
+    cf.ts                                     # create (Task 2), query builder + client + munging
     cf.test.ts                                # create (Task 2)
-    db.ts                                     # create (Task 3) — result-union wrapper over the probes
+    db.ts                                     # create (Task 3), result-union wrapper over the probes
     db-probes.test.ts                         # create (Task 1; Task 3 adds the wrapper tests)
-    metrics.functions.ts                      # create (Task 3) — the session-gated server fns
-  src/lib/metrics-queries.ts                  # create (Task 3) — queryOptions factories
+    metrics.functions.ts                      # create (Task 3), the session-gated server fns
+  src/lib/metrics-queries.ts                  # create (Task 3), queryOptions factories
   src/lib/metrics-queries.test.ts             # create (Task 3)
   src/components/charts/
-    ui/chart.tsx                                 # create (Task 4) — the shadcn chart component, vendored APP-LOCAL
-    trend-chart.tsx                           # create (Task 4) — the trend chart over ChartContainer/recharts
-    stat-card.tsx                             # create (Task 4) — app-local stat card
+    ui/chart.tsx                                 # create (Task 4), the shadcn chart component, vendored APP-LOCAL
+    trend-chart.tsx                           # create (Task 4), the trend chart over ChartContainer/recharts
+    stat-card.tsx                             # create (Task 4), app-local stat card
   src/components/dashboard/
-    widget-frame.tsx                          # create (Task 4) — title/window badge/curated states
+    widget-frame.tsx                          # create (Task 4), title/window badge/curated states
     system-health.tsx                         # create (Task 4)
     frontend-error-widget.tsx                 # create (Task 4)
     sentry-link.tsx                           # create (Task 4)
     content-census.tsx                        # create (Task 4)
     window-toggle.tsx                         # create (Task 4)
-  src/components/admin-sidebar.tsx            # modify (Task 4) — Analytics label + comment
-  src/routes/_shell.index.tsx                 # rewrite (Task 4) — the dashboard at /
-  src/routes/prototype-dashboard.tsx          # temporary (Task 5 — untracked, deleted pre-PR)
-  src/styles.css                              # modify (Task 4) — the @theme --chart-* block
-  wrangler.jsonc                              # modify (Task 6) — observability block
-  .env.example                                # modify (Task 6) — the new key names
-packages/ui/src/tokens.css                    # modify (Task 4) — the no-chart clause amendment
-.github/workflows/ci.yml                      # modify (Task 6) — both legs
+  src/components/admin-sidebar.tsx            # modify (Task 4), Analytics label + comment
+  src/routes/_shell.index.tsx                 # rewrite (Task 4), the dashboard at /
+  src/routes/prototype-dashboard.tsx          # temporary (Task 5, untracked, deleted pre-PR)
+  src/styles.css                              # modify (Task 4), the @theme --chart-* block
+  wrangler.jsonc                              # modify (Task 6), observability block
+  .env.example                                # modify (Task 6), the new key names
+packages/ui/src/tokens.css                    # modify (Task 4), the no-chart clause amendment
+.github/workflows/ci.yml                      # modify (Task 6), both legs
 docs/plan.md docs/progress.md AGENTS.md docs/agents/v1-picks.md   # Task 7
 ```
 
 ---
 
-### Task 1: `packages/db` — the probe module + the admin SQL-shape tests (TDD)
+### Task 1: `packages/db`, the probe module + the admin SQL-shape tests (TDD)
 
 **Files:**
 - Create (test-first): `apps/admin/src/lib/metrics/db-probes.test.ts`
@@ -85,9 +85,9 @@ docs/plan.md docs/progress.md AGENTS.md docs/agents/v1-picks.md   # Task 7
 
 **Interfaces:**
 - Consumes: nothing from earlier tasks.
-- Produces (what Tasks 3 + the screen rely on): `packages/db` exports `SqlExec`, `POOLER_CLIENT_CEILING`, `PROBE_LATENCY_SQL`, `PROBE_CENSUS_SQL`, `PROBE_SIZE_SQL`, `CONTENT_CENSUS_SQL` (a `Record<ContentFamilyKey, string>`), `PoolerCensus`, `SystemProbes`, `ContentFamilyKey`, `ContentCensusRow`, `ContentCensus`, `mungeCensus(rows)`, `parseSizeBytes(raw)`, `parsePgTimestamp(raw)`, `mungeContentRow(key, row)`, `runSystemProbes(exec)`, `runContentCensus(exec)` — full shapes fenced in Step 3.
+- Produces (what Tasks 3 + the screen rely on): `packages/db` exports `SqlExec`, `POOLER_CLIENT_CEILING`, `PROBE_LATENCY_SQL`, `PROBE_CENSUS_SQL`, `PROBE_SIZE_SQL`, `CONTENT_CENSUS_SQL` (a `Record<ContentFamilyKey, string>`), `PoolerCensus`, `SystemProbes`, `ContentFamilyKey`, `ContentCensusRow`, `ContentCensus`, `mungeCensus(rows)`, `parseSizeBytes(raw)`, `parsePgTimestamp(raw)`, `mungeContentRow(key, row)`, `runSystemProbes(exec)`, `runContentCensus(exec)`, full shapes fenced in Step 3.
 
-**Not here:** any drizzle query-builder code (the probes are static SQL strings by design — `pg_stat_activity`/`pg_database_size` have no schema tables, and strings keep the exec seam drizzle-free); any server fn (Task 3); any CF/PostHog code (Task 2); the two-migration anything (no schema change — **`packages/db/migrations/` is untouched, no `db:generate` runs**).
+**Not here:** any drizzle query-builder code (the probes are static SQL strings by design, `pg_stat_activity`/`pg_database_size` have no schema tables, and strings keep the exec seam drizzle-free); any server fn (Task 3); any CF/PostHog code (Task 2); the two-migration anything (no schema change, **`packages/db/migrations/` is untouched, no `db:generate` runs**).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -95,10 +95,10 @@ Create `apps/admin/src/lib/metrics/db-probes.test.ts`:
 
 ```ts
 // The DB-probe seams of the metrics module (#186): the SQL shapes live in
-// packages/db (the "DB access goes through packages/db" rule — the raw SQL
+// packages/db (the "DB access goes through packages/db" rule, the raw SQL
 // for system views has no schema table, so it ships as pinned constants),
 // the munging is pure, and everything runs plain-node over fakes (the
-// admin lib-seam pattern — no db, no browser).
+// admin lib-seam pattern, no db, no browser).
 import { describe, expect, it } from 'vitest';
 import {
   CONTENT_CENSUS_SQL,
@@ -129,7 +129,7 @@ describe('the probe SQL shapes (spike-proven against the compose db)', () => {
     );
   });
 
-  it('content census counts active rows and last-updated per family (the ::int cast is load-bearing — bare count(*) is int8 → string through postgres-js)', () => {
+  it('content census counts active rows and last-updated per family (the ::int cast is load-bearing, bare count(*) is int8 → string through postgres-js)', () => {
     expect(CONTENT_CENSUS_SQL.packages).toBe(
       'select (count(*) filter (where is_active))::int as active, max(updated_at) as last_updated from service_packages'
     );
@@ -201,13 +201,13 @@ describe('mungeContentRow', () => {
 
 - [ ] **Step 2: Run the suite red**
 
-`pnpm build:packages` first (the admin test imports `@sevendays/db` from `dist/`), then `pnpm --filter @sevendays/admin test -- --run src/lib/metrics/db-probes.test.ts`. Expected: the file fails to resolve the named exports (red — the module does not exist yet). Record the red in the evidence dir.
+`pnpm build:packages` first (the admin test imports `@sevendays/db` from `dist/`), then `pnpm --filter @sevendays/admin test -- --run src/lib/metrics/db-probes.test.ts`. Expected: the file fails to resolve the named exports (red, the module does not exist yet). Record the red in the evidence dir.
 
 - [ ] **Step 3: Write `packages/db/src/probes.ts`**
 
 ```ts
 // The metrics probe module (#186, ADR-0023): the DB half of the admin's
-// metrics seam. DB access goes through packages/db — the system-view SQL
+// metrics seam. DB access goes through packages/db, the system-view SQL
 // (pg_stat_activity, pg_database_size) has no schema table, so it ships as
 // pinned static strings executed over the caller's client. Everything is
 // deliberately drizzle-free at the seam: callers pass a structural `exec`
@@ -220,7 +220,7 @@ export type SqlExec = (
 ) => Promise<Record<string, unknown>[]>;
 
 // Supavisor's session-pooler client ceiling at Micro compute (the dev/studio
-// plan) — a REFERENCE marker for the census widget, not a quota (research
+// plan), a REFERENCE marker for the census widget, not a quota (research
 // #174: ceilings are compute-tied and hard-coded).
 export const POOLER_CLIENT_CEILING = 200;
 
@@ -322,7 +322,7 @@ export async function runContentCensus(exec: SqlExec): Promise<ContentCensus> {
     keys.map((key) => exec(CONTENT_CENSUS_SQL[key]))
   );
   // `?? []` satisfies noUncheckedIndexedAccess (packages/config base); the
-  // branch is unreachable — Promise.all preserves keys' 1:1 order.
+  // branch is unreachable, Promise.all preserves keys' 1:1 order.
   return keys.map((key, index) => mungeContentRow(key, rows[index] ?? []));
 }
 ```
@@ -335,14 +335,14 @@ export * from './probes.js';
 
 - [ ] **Step 4: Green + gates + commit**
 
-`pnpm build:packages`, then `pnpm --filter @sevendays/admin test -- --run src/lib/metrics/db-probes.test.ts` (green — 10 tests), then `pnpm --filter @sevendays/db fix` and `pnpm --filter @sevendays/admin fix`, then `pnpm check` (35/35 expected; the api/landing/types suites are untouched). Commit:
+`pnpm build:packages`, then `pnpm --filter @sevendays/admin test -- --run src/lib/metrics/db-probes.test.ts` (green, 10 tests), then `pnpm --filter @sevendays/db fix` and `pnpm --filter @sevendays/admin fix`, then `pnpm check` (35/35 expected; the api/landing/types suites are untouched). Commit:
 
 ```bash
 git add packages/db/src/probes.ts packages/db/src/index.ts apps/admin/src/lib/metrics/db-probes.test.ts
-git commit -m "feat(db): the metrics probe module — latency, pooler census, size, content census (#186)"
+git commit -m "feat(db): the metrics probe module, latency, pooler census, size, content census (#186)"
 ```
 
-### Task 2: `apps/admin` — the env reader + the CF GraphQL client + munging (TDD)
+### Task 2: `apps/admin`, the env reader + the CF GraphQL client + munging (TDD)
 
 **Files:**
 - Create (test-first): `apps/admin/src/lib/metrics/env.test.ts`, `apps/admin/src/lib/metrics/cf.test.ts`
@@ -350,9 +350,9 @@ git commit -m "feat(db): the metrics probe module — latency, pooler census, si
 
 **Interfaces:**
 - Consumes: nothing from Task 1 (the CF half is env-only).
-- Produces (what Task 3's server fns consume): `MetricsResult<T>`, `MetricsEnv`, `CfAnalyticsConfig`, `PosthogConfig`, `readMetricsEnv(env?)`; `CF_GRAPHQL_URL`, `WORKER_INVOCATIONS_QUERY`, `METRICS_WINDOWS`, `MetricsWindow`, `metricsWindowSchema`, `windowToRange(window, now?)`, `InvocationsRow`, `WorkerSeries`, `WorkerMetrics`, `mungeWorkerSeries(scriptName, rows, window)`, `errorRate(series)`, `fetchWorkerMetrics(env, window, fetchImpl?)`. `POSTHOG_*` is read here but consumed by #187 — no HogQL code lands.
+- Produces (what Task 3's server fns consume): `MetricsResult<T>`, `MetricsEnv`, `CfAnalyticsConfig`, `PosthogConfig`, `readMetricsEnv(env?)`; `CF_GRAPHQL_URL`, `WORKER_INVOCATIONS_QUERY`, `METRICS_WINDOWS`, `MetricsWindow`, `metricsWindowSchema`, `windowToRange(window, now?)`, `InvocationsRow`, `WorkerSeries`, `WorkerMetrics`, `mungeWorkerSeries(scriptName, rows, window)`, `errorRate(series)`, `fetchWorkerMetrics(env, window, fetchImpl?)`. `POSTHOG_*` is read here but consumed by #187, no HogQL code lands.
 
-**Not here:** any HogQL/PostHog query (`$web_vitals`, pageviews — #187); any R2 dataset (`r2StorageAdaptiveGroups` — #187); server fns (Task 3); UI (Task 4).
+**Not here:** any HogQL/PostHog query (`$web_vitals`, pageviews, #187); any R2 dataset (`r2StorageAdaptiveGroups`, #187); server fns (Task 3); UI (Task 4).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -360,7 +360,7 @@ Create `apps/admin/src/lib/metrics/env.test.ts`:
 
 ```ts
 // The metrics env reader's contract (#186): tolerance. An unset source
-// yields null for that source — the curated not-configured widget state —
+// yields null for that source, the curated not-configured widget state,
 // never a thrown env error. The spec-pinned three tokens plus the account
 // id and the three script-name vars (the deployment-identity ruling).
 import { describe, expect, it } from 'vitest';
@@ -428,7 +428,7 @@ Create `apps/admin/src/lib/metrics/cf.test.ts`:
 // The CF GraphQL half of the metrics seam (#186): the pinned query shape
 // (the tutorial-verbatim workersInvocationsAdaptive document), the fetch
 // contract, the envelope + failure mapping, and the widget munging
-// (bucketing, error rate, CPU µs→ms). Plain-node over stubbed fetch —
+// (bucketing, error rate, CPU µs→ms). Plain-node over stubbed fetch:
 // no network, no browser (the admin lib-seam pattern).
 import { describe, expect, it } from 'vitest';
 import type { MetricsEnv } from './env';
@@ -622,7 +622,7 @@ describe('fetchWorkerMetrics', () => {
     expect(result).toEqual({ ok: false, reason: 'unavailable' });
   });
 
-  it('a GraphQL errors array (HTTP 200) maps to unavailable — the loud detail is log-only', async () => {
+  it('a GraphQL errors array (HTTP 200) maps to unavailable, the loud detail is log-only', async () => {
     const fetchImpl = async () => ({
       ok: true,
       json: async () => ({ data: null, errors: [{ message: 'Unknown field' }] }),
@@ -643,14 +643,14 @@ describe('fetchWorkerMetrics', () => {
 
 - [ ] **Step 2: Run both files red**
 
-`pnpm --filter @sevendays/admin test -- --run src/lib/metrics/env.test.ts src/lib/metrics/cf.test.ts` — both fail on the missing modules. Record the red.
+`pnpm --filter @sevendays/admin test -- --run src/lib/metrics/env.test.ts src/lib/metrics/cf.test.ts`, both fail on the missing modules. Record the red.
 
 - [ ] **Step 3: Write `apps/admin/src/lib/metrics/env.ts`**
 
 ```ts
 // The metrics seam's env reader + result vocabulary (#186, ADR-0023).
 // Tolerant by design: an unset source is null and its widgets render the
-// curated "Analytics source not configured." state — never a thrown env
+// curated "Analytics source not configured." state, never a thrown env
 // error (the inverted #155: the sentinel became a curated state; the
 // loud-fail getApiUrl pattern does not apply here). The spec pins the
 // three token names; CLOUDFLARE_ACCOUNT_ID reuses the var the api
@@ -728,7 +728,7 @@ export function readMetricsEnv(
 // metrics via GraphQL" tutorial (account-level viewer/accounts; sum
 // requests/errors/subrequests; quantiles cpuTimeP50/P99 in MICROSECONDS).
 // If the live probe (Task 6) rejects the `Time!` scalar on the datetime
-// variables, switch both to `string!` HERE and in the shape test — that
+// variables, switch both to `string!` HERE and in the shape test, that
 // is the one documented fallback, nothing else about the doc moves.
 import { z } from 'zod';
 
@@ -764,7 +764,7 @@ const WINDOW_MS: Record<MetricsWindow, number> = {
 
 // Adaptive datasets coarsen their `datetime` granularity as data ages, so
 // the range boundaries are ms-truncated ISO strings and the munging
-// re-buckets client-side — the incoming granularity never matters.
+// re-buckets client-side, the incoming granularity never matters.
 export function windowToRange(
   window: MetricsWindow,
   now: Date = new Date()
@@ -944,14 +944,14 @@ export async function fetchWorkerMetrics(
 
 - [ ] **Step 5: Green + gates + commit**
 
-`pnpm --filter @sevendays/admin test -- --run src/lib/metrics` (Task 1's file stays green alongside), then `pnpm --filter @sevendays/admin fix`, then `pnpm check`. Admin floor now **10 files / 89 tests** (Task 1's 8/69 + 6 env + 14 cf — the original 9/79 here omitted Task 1's delta; corrected at execution, ruling T2). Commit:
+`pnpm --filter @sevendays/admin test -- --run src/lib/metrics` (Task 1's file stays green alongside), then `pnpm --filter @sevendays/admin fix`, then `pnpm check`. Admin floor now **10 files / 89 tests** (Task 1's 8/69 + 6 env + 14 cf, the original 9/79 here omitted Task 1's delta; corrected at execution, ruling T2). Commit:
 
 ```bash
 git add apps/admin/src/lib/metrics/env.ts apps/admin/src/lib/metrics/env.test.ts apps/admin/src/lib/metrics/cf.ts apps/admin/src/lib/metrics/cf.test.ts
-git commit -m "feat(admin): the CF GraphQL analytics client — query builders, munging, failure mapping (#186)"
+git commit -m "feat(admin): the CF GraphQL analytics client, query builders, munging, failure mapping (#186)"
 ```
 
-### Task 3: `apps/admin` — the DB result-union wrapper, the session-gated server fns, the query factories (TDD)
+### Task 3: `apps/admin`, the DB result-union wrapper, the session-gated server fns, the query factories (TDD)
 
 **Files:**
 - Modify (test-first): `apps/admin/src/lib/metrics/db-probes.test.ts` (+2 tests)
@@ -962,16 +962,16 @@ git commit -m "feat(admin): the CF GraphQL analytics client — query builders, 
 - Consumes: Task 1's probe module (`runSystemProbes`, `runContentCensus`, types) and Task 2's env/result vocabulary + `fetchWorkerMetrics`.
 - Produces (what Task 4's screen consumes): `collectDbProbes(exec)`, `collectContentCensus(exec)` (result unions, log-only loud detail); server fns `fetchMetricsWorkers`, `fetchMetricsDbProbes`, `fetchMetricsContent` (each session-gated, startSpan-wrapped, RPC-serializable plain-object results); `metricsQueries.workers(window)` / `.dbProbes()` / `.content()` queryOptions factories with the spec's staleTimes.
 
-**Not here:** UI (Task 4); the prototype route (Task 5); env/CI wiring (Task 6); any HogQL or R2 query (#187); any api change (the seam is admin-side by ADR-0023 — the API stays domain-pure, no metrics route joins `/api/v1`).
+**Not here:** UI (Task 4); the prototype route (Task 5); env/CI wiring (Task 6); any HogQL or R2 query (#187); any api change (the seam is admin-side by ADR-0023, the API stays domain-pure, no metrics route joins `/api/v1`).
 
-**Spike-proven test-graph fact (2026-10-06, spike files deleted): a plain-node admin test CAN import a module that calls `createServerFn` at module scope (module load is safe — 1 passed), but must NOT *call* the resulting fn directly (the RPC wrapper needs request context — fails).** The tests below assert option objects and wrappers, never invoke fns.
+**Spike-proven test-graph fact (2026-10-06, spike files deleted): a plain-node admin test CAN import a module that calls `createServerFn` at module scope (module load is safe, 1 passed), but must NOT *call* the resulting fn directly (the RPC wrapper needs request context, fails).** The tests below assert option objects and wrappers, never invoke fns.
 
 - [ ] **Step 1: Write the failing tests**
 
-Append to `apps/admin/src/lib/metrics/db-probes.test.ts` (inside no new describe — two new describes after the existing ones; add `collectDbProbes` and `collectContentCensus` to the import list from `./db`):
+Append to `apps/admin/src/lib/metrics/db-probes.test.ts` (inside no new describe, two new describes after the existing ones; add `collectDbProbes` and `collectContentCensus` to the import list from `./db`):
 
 ```ts
-describe('the result-union wrappers (the #155 class — failures resolve, never throw)', () => {
+describe('the result-union wrappers (the #155 class, failures resolve, never throw)', () => {
   it('collectDbProbes maps an exec failure to unavailable', async () => {
     const exec = async () => {
       throw new Error('connection refused');
@@ -1001,14 +1001,14 @@ describe('the result-union wrappers (the #155 class — failures resolve, never 
 });
 ```
 
-(The import line becomes: `import { collectDbProbes, collectContentCensus } from './db';` beside the existing `@sevendays/db` import — `CONTENT_CENSUS_SQL` is already imported.)
+(The import line becomes: `import { collectDbProbes, collectContentCensus } from './db';` beside the existing `@sevendays/db` import, `CONTENT_CENSUS_SQL` is already imported.)
 
 Create `apps/admin/src/lib/metrics-queries.test.ts`:
 
 ```ts
 // The dashboard's query-contract tests (#186): the spec's staleTimes
 // (system 60s, content 5m), revalidate-on-focus stated explicitly, and
-// window-keyed cache identity. Asserts the OPTIONS objects only — the
+// window-keyed cache identity. Asserts the OPTIONS objects only, the
 // server fns are never invoked from a plain-node test (the RPC wrapper
 // needs request context; module import is safe, spike-proven).
 import { describe, expect, it } from 'vitest';
@@ -1048,7 +1048,7 @@ describe('metricsQueries (spec-verbatim caching posture)', () => {
 
 - [ ] **Step 2: Run red**
 
-`pnpm --filter @sevendays/admin test -- --run src/lib/metrics src/lib/metrics-queries.test.ts` — the new describes/files fail on missing modules.
+`pnpm --filter @sevendays/admin test -- --run src/lib/metrics src/lib/metrics-queries.test.ts`, the new describes/files fail on missing modules.
 
 - [ ] **Step 3: Write `apps/admin/src/lib/metrics/db.ts`**
 
@@ -1056,7 +1056,7 @@ describe('metricsQueries (spec-verbatim caching posture)', () => {
 // The DB half of the metrics seam (#186): result-union wrappers over
 // packages/db's probe module. The exec passed in is the per-request
 // drizzle client's bound execute (metrics.functions constructs the client
-// per call — ADR-0011, the auth.ts pattern; never module scope). A probe
+// per call, ADR-0011, the auth.ts pattern; never module scope). A probe
 // failure resolves unavailable with one log-only loud line (#155).
 import type {
   ContentCensus,
@@ -1101,13 +1101,13 @@ export async function collectContentCensus(
 
 ```ts
 // The metrics seam's server functions (#186, ADR-0023): the CF GraphQL
-// client and the DB probes live ADMIN-SIDE — the api stays domain-pure,
+// client and the DB probes live ADMIN-SIDE, the api stays domain-pure,
 // no metrics route joins /api/v1. Behind the seam's OWN session gate (the
 // CMS write-fns discipline: server fns are directly callable, so they
-// gate themselves — the ensureSession semantics hoisted into the seam).
+// gate themselves, the ensureSession semantics hoisted into the seam).
 // Results are plain-object unions so the RPC boundary serializes them
 // without the #155 class-erasure problem. Sentry span per the house rule
-// (no-op when Sentry is uninitialized — dev without VITE_SENTRY_DSN).
+// (no-op when Sentry is uninitialized, dev without VITE_SENTRY_DSN).
 import { startSpan } from '@sentry/tanstackstart-react';
 import { getRequestHeaders } from '@tanstack/react-start/server';
 import { createServerFn } from '@tanstack/react-start';
@@ -1169,8 +1169,8 @@ export const fetchMetricsContent = createServerFn({ method: 'GET' }).handler(
 - [ ] **Step 5: Write `apps/admin/src/lib/metrics-queries.ts`**
 
 ```ts
-// The dashboard's query factories (#186): staleTime per the spec — system
-// 60s, content 5m — revalidate on focus stated explicitly (the router's
+// The dashboard's query factories (#186): staleTime per the spec, system
+// 60s, content 5m, revalidate on focus stated explicitly (the router's
 // QueryClient leaves it on; the spec rules it, the factories say it), no
 // polling. Manual refresh invalidates the ['metrics'] prefix. No
 // server-side cache exists anywhere (single-viewer admin).
@@ -1210,47 +1210,47 @@ export const metricsQueries = {
 
 - [ ] **Step 6: Green + gates + commit**
 
-`pnpm --filter @sevendays/admin test` (green — **11 files / 94 tests**), then `pnpm --filter @sevendays/admin fix`, then `pnpm check`. Commit:
+`pnpm --filter @sevendays/admin test` (green, **11 files / 94 tests**), then `pnpm --filter @sevendays/admin fix`, then `pnpm check`. Commit:
 
 ```bash
 git add apps/admin/src/lib/metrics/db.ts apps/admin/src/lib/metrics/metrics.functions.ts apps/admin/src/lib/metrics/db-probes.test.ts apps/admin/src/lib/metrics-queries.ts apps/admin/src/lib/metrics-queries.test.ts
-git commit -m "feat(admin): the metrics seam — session-gated server fns + query factories (#186)"
+git commit -m "feat(admin): the metrics seam, session-gated server fns + query factories (#186)"
 ```
 
-### Task 4: `apps/admin` + `packages/ui` — the dashboard screen, the app-local charts, the `--chart-*` tokens, the #93 stub's death
+### Task 4: `apps/admin` + `packages/ui`, the dashboard screen, the app-local charts, the `--chart-*` tokens, the #93 stub's death
 
-**Skill set (AGENTS.md rule, loads at execution):** `prototype` + `ui-ux-pro-max`, plus `design-system` / `ui-styling` as relevant. The compositions below are the **provisional composition** — Task 5's owner reaction is the ratification gate and may adjust layout/chart mode/token values (never the curated lines' semantics, the data mapping, or the staleTimes).
+**Skill set (AGENTS.md rule, loads at execution):** `prototype` + `ui-ux-pro-max`, plus `design-system` / `ui-styling` as relevant. The compositions below are the **provisional composition**, Task 5's owner reaction is the ratification gate and may adjust layout/chart mode/token values (never the curated lines' semantics, the data mapping, or the staleTimes).
 
 **Files:**
 - Create (generated + adapted app-local): `apps/admin/src/components/ui/chart.tsx` (the shadcn chart component)
 - Create: `apps/admin/src/components/charts/trend-chart.tsx`, `apps/admin/src/components/charts/stat-card.tsx`
 - Create: `apps/admin/src/components/dashboard/format.ts`, `apps/admin/src/components/dashboard/widget-frame.tsx`, `apps/admin/src/components/dashboard/window-toggle.tsx`, `apps/admin/src/components/dashboard/refresh-button.tsx`, `apps/admin/src/components/dashboard/system-health.tsx`, `apps/admin/src/components/dashboard/frontend-error-widget.tsx`, `apps/admin/src/components/dashboard/sentry-link.tsx`, `apps/admin/src/components/dashboard/content-census.tsx`
 - Rewrite: `apps/admin/src/routes/_shell.index.tsx`
-- Modify: `apps/admin/src/components/admin-sidebar.tsx`, `apps/admin/src/styles.css`, `apps/admin/package.json` (+ root `pnpm-lock.yaml` — the recharts pin), `packages/ui/src/tokens.css`
+- Modify: `apps/admin/src/components/admin-sidebar.tsx`, `apps/admin/src/styles.css`, `apps/admin/package.json` (+ root `pnpm-lock.yaml`, the recharts pin), `packages/ui/src/tokens.css`
 
 **Interfaces:**
 - Consumes: Task 3's `metricsQueries` + the `MetricsResult` unions (`WorkerMetrics`, `SystemProbes`, `ContentCensus` types), `errorRate`, `METRICS_WINDOWS`.
 - Produces: the dashboard at `/` (any staff session, any source health); the app-local chart vocabulary; the admin `@theme` `--chart-*` block; the tokens.css amendment recording the reversal. #187's Traffic/Storage sections compose into the same page later.
 
-**Not here:** the variants route (Task 5, untracked); Traffic/Storage widgets (#187); the appointments stub and settings screens (untouched — `StubScreen` stays for them); any `packages/ui` component (the reversal rules charts admin-local — `packages/ui` gets ONLY the comment amendment).
+**Not here:** the variants route (Task 5, untracked); Traffic/Storage widgets (#187); the appointments stub and settings screens (untouched, `StubScreen` stays for them); any `packages/ui` component (the reversal rules charts admin-local, `packages/ui` gets ONLY the comment amendment).
 
-- [ ] **Step 1: The `--chart-*` home — `apps/admin/src/styles.css`**
+- [ ] **Step 1: The `--chart-*` home, `apps/admin/src/styles.css`**
 
 Append after the `@custom-variant dark` line (before the body styles):
 
 ```css
-/* The #93 reversal made real (#186): data-viz tokens are ADMIN-LOCAL —
+/* The #93 reversal made real (#186): data-viz tokens are ADMIN-LOCAL:
    the admin is data-viz's only consumer, so --chart-* lives here in the
    admin's @theme, not in packages/ui (whose header clause records the
    reversal). These feed the app-local shadcn chart component
-   (ChartContainer themes by exactly this --chart-1..5 contract — the
+   (ChartContainer themes by exactly this --chart-1..5 contract, the
    owner's 2026-10-06 ruling); values derive from the shared brand tokens
    (hexes/oklch stay canonical there); the vocabulary/count is ratified
    via the #186 rendered variants. Promotion to packages/ui reopens only
    if a second consumer appears (the spec's standing rule). */
 @theme inline {
-  --chart-1: var(--brand-primary); /* the primary series — requests, CPU */
-  --chart-2: var(--destructive); /* errors — the warm signal */
+  --chart-1: var(--brand-primary); /* the primary series, requests, CPU */
+  --chart-2: var(--destructive); /* errors, the warm signal */
   --chart-3: var(--brand-gray-mid); /* neutral/secondary series */
   --chart-4: var(--brand-500); /* the lighter petrol (ramp 500) */
   --chart-5: var(--brand-900); /* deepest petrol, emphasis */
@@ -1259,9 +1259,9 @@ Append after the `@custom-variant dark` line (before the body styles):
 }
 ```
 
-- [ ] **Step 2: The tokens.css amendment — `packages/ui/src/tokens.css`**
+- [ ] **Step 2: The tokens.css amendment, `packages/ui/src/tokens.css`**
 
-In the header comment, replace the no-chart sentence (lines 8–10 of the current file) — change
+In the header comment, replace the no-chart sentence (lines 8–10 of the current file), change
 
 ```text
 No --chart-* tokens ship
@@ -1272,27 +1272,27 @@ to
 
 ```text
 Data-viz tokens are admin-local (the #186
-   reversal of #93's steering): --chart-* lives in apps/admin's @theme —
+   reversal of #93's steering): --chart-* lives in apps/admin's @theme;
    promote to this shared file only if a second consumer appears.
 ```
 
-(The following "Dark mode is parked…" sentence is untouched. The amendment deliberately drops the edition-vocabulary term — the v1 content-pass reads clean by construction.)
+(The following "Dark mode is parked…" sentence is untouched. The amendment deliberately drops the edition-vocabulary term, the v1 content-pass reads clean by construction.)
 
-- [ ] **Step 3: The chart engine + vocabulary — the shadcn chart APP-LOCAL, then the trend/stat components**
+- [ ] **Step 3: The chart engine + vocabulary, the shadcn chart APP-LOCAL, then the trend/stat components**
 
-**(a) Generate the shadcn chart component into `apps/admin` — not `packages/ui`.** The owner's ruling (2026-10-06): charts are the shadcn chart component (`ChartContainer` + recharts). The reversal rules it app-local, but the components.json trio's aliases route `shadcn add` output into `packages/ui` (ADR-0017) — exactly where charts must NOT go. Procedure:
+**(a) Generate the shadcn chart component into `apps/admin`, not `packages/ui`.** The owner's ruling (2026-10-06): charts are the shadcn chart component (`ChartContainer` + recharts). The reversal rules it app-local, but the components.json trio's aliases route `shadcn add` output into `packages/ui` (ADR-0017), exactly where charts must NOT go. Procedure:
 
-1. From `apps/admin`: `pnpm dlx shadcn@latest add chart --path src/components/__scratch__ --yes` (a scratch destination; if the CLI refuses the path override beside the alias, generate wherever the alias points and MOVE the file — the destination is what matters).
-2. Move the emitted `chart.tsx` to `apps/admin/src/components/ui/chart.tsx`; delete the scratch directory; `git status` must show **no `packages/ui` source change** (revert any stray file the CLI wrote there — the reversal holds).
-3. Adapt the imports to the repo's conventions: `cn` comes from the `cn` package (`import { cn } from 'cn'` — the #102 consolidation); `lucide-react` and `recharts` imports stay as generated.
-4. Add the engine at an exact pin: `pnpm --filter @sevendays/admin add recharts@<X.Y.Z>` where `<X.Y.Z>` is the version the registry just resolved (check the scratch file's import or the CLI output) — house style is exact pins (the `motion@13.4.2` precedent). Record the version in the commit body and the evidence dir.
+1. From `apps/admin`: `pnpm dlx shadcn@latest add chart --path src/components/__scratch__ --yes` (a scratch destination; if the CLI refuses the path override beside the alias, generate wherever the alias points and MOVE the file, the destination is what matters).
+2. Move the emitted `chart.tsx` to `apps/admin/src/components/ui/chart.tsx`; delete the scratch directory; `git status` must show **no `packages/ui` source change** (revert any stray file the CLI wrote there, the reversal holds).
+3. Adapt the imports to the repo's conventions: `cn` comes from the `cn` package (`import { cn } from 'cn'`, the #102 consolidation); `lucide-react` and `recharts` imports stay as generated.
+4. Add the engine at an exact pin: `pnpm --filter @sevendays/admin add recharts@<X.Y.Z>` where `<X.Y.Z>` is the version the registry just resolved (check the scratch file's import or the CLI output), house style is exact pins (the `motion@13.4.2` precedent). Record the version in the commit body and the evidence dir.
 5. `pnpm install` (repo root) to settle the lockfile.
 
 **(b) `stat-card.tsx`** (no recharts involved):
 
 ```tsx
 // The dashboard's stat card (#186): label + value + optional hint, on the
-// shared Card primitive. App-local per the #93 reversal — data-viz has
+// shared Card primitive. App-local per the #93 reversal, data-viz has
 // exactly one consumer (the admin dashboard) and no shared primitive is
 // warranted for it.
 import type { ReactNode } from 'react';
@@ -1320,11 +1320,11 @@ export function StatCard({
 }
 ```
 
-**(c) `trend-chart.tsx`** — the same props seam as the plan's components consume, implemented over the shadcn chart (bars for counts, a line for rates; animations OFF for deterministic SSR/hydration and CDP frames; the empty-window line stays):
+**(c) `trend-chart.tsx`**, the same props seam as the plan's components consume, implemented over the shadcn chart (bars for counts, a line for rates; animations OFF for deterministic SSR/hydration and CDP frames; the empty-window line stays):
 
 ```tsx
 // The dashboard's trend chart (#186): the shadcn chart component
-// (ChartContainer over recharts) — the owner's 2026-10-06 ruling —
+// (ChartContainer over recharts), the owner's 2026-10-06 ruling,
 // app-local per the #93 reversal. Colors come from the admin-local
 // --chart-* tokens (the exact CSS-variable contract ChartContainer
 // themes by). Animations are disabled: deterministic SSR/hydration and
@@ -1369,7 +1369,7 @@ export function TrendChart({
     <ChartContainer
       config={config}
       className='h-16 w-full'
-      aria-label={`${ariaLabel} — latest ${String(data.at(-1)?.value ?? 0)}, peak ${String(Math.max(...data.map((datum) => datum.value)))}`}
+      aria-label={`${ariaLabel}, latest ${String(data.at(-1)?.value ?? 0)}, peak ${String(Math.max(...data.map((datum) => datum.value)))}`}
     >
       {variant === 'bars' ? (
         <BarChart data={data} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
@@ -1393,19 +1393,19 @@ export function TrendChart({
 }
 ```
 
-(The exact shape of the generated `chart.tsx`'s exports — `ChartConfig`, `ChartTooltipContent`'s props — belongs to the registry version Step 3(a) pins; if that version's API differs from the calls above (e.g. `indicator`/`hideLabel` props), adapt the CALLS to the generated file, not the other way around — the registry file is vendored app-local and stays registry-faithful.)
+(The exact shape of the generated `chart.tsx`'s exports, `ChartConfig`, `ChartTooltipContent`'s props, belongs to the registry version Step 3(a) pins; if that version's API differs from the calls above (e.g. `indicator`/`hideLabel` props), adapt the CALLS to the generated file, not the other way around, the registry file is vendored app-local and stays registry-faithful.)
 
-- [ ] **Step 4: The widget chrome — `apps/admin/src/components/dashboard/`**
+- [ ] **Step 4: The widget chrome, `apps/admin/src/components/dashboard/`**
 
 `format.ts`:
 
 ```ts
 // Deterministic formatters for the dashboard (#186): every output is a
 // pure function of its input so SSR and hydration render byte-identical
-// strings (no locale-dependent Intl for dates, no relative "3h ago" —
+// strings (no locale-dependent Intl for dates, no relative "3h ago",
 // those would mismatch across the SSR/client boundary).
 export function formatUtc(iso: string | null): string {
-  if (iso === null) return '—';
+  if (iso === null) return '-';
   return `${iso.slice(0, 10)} ${iso.slice(11, 16)}`;
 }
 
@@ -1421,7 +1421,7 @@ export function formatBytes(bytes: number): string {
 }
 
 export function formatPercent(value: number | null): string {
-  if (value === null) return '—';
+  if (value === null) return '-';
   return `${(value * 100).toFixed(2)}%`;
 }
 
@@ -1434,11 +1434,11 @@ export function formatCount(value: number): string {
 
 ```tsx
 // The dashboard's widget chrome (#186): one Card per widget with a title,
-// an optional window badge, and the CURATED failure states — the #155
+// an optional window badge, and the CURATED failure states, the #155
 // leak-safe pattern carried to the dashboard. A widget never throws, never
 // bubbles: pending renders skeletons, a resolved not-ok result renders its
 // pinned line, a thrown query error (the gate, or an SSR transport fault)
-// folds to the unavailable line — the never-500 law, structurally.
+// folds to the unavailable line, the never-500 law, structurally.
 import type { ReactNode } from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@sevendays/ui/components/card';
@@ -1509,7 +1509,7 @@ export function WidgetFrame({
 ```tsx
 // The time-window toggle (#186): 24h/7d/30d as route search params
 // (shareable, SSR-stable), 7d the spec's default. The DB-probe and Content
-// widgets are point-in-time and windowless — the toggle visually scopes
+// widgets are point-in-time and windowless, the toggle visually scopes
 // only the windowed widgets (each carries its own badge).
 import { Link } from '@tanstack/react-router';
 
@@ -1555,7 +1555,7 @@ export function WindowToggle({ window }: { window: MetricsWindow }) {
 
 ```tsx
 // The manual refresh (#186): one button invalidating the ['metrics']
-// prefix — every widget refetches (revalidate-on-focus is the passive
+// prefix, every widget refetches (revalidate-on-focus is the passive
 // path; this is the active one; there is no polling).
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
@@ -1579,13 +1579,13 @@ export function RefreshButton() {
 }
 ```
 
-- [ ] **Step 5: The section compositions (provisional — Task 5 ratifies)**
+- [ ] **Step 5: The section compositions (provisional, Task 5 ratifies)**
 
 `frontend-error-widget.tsx`:
 
 ```tsx
 // One error-rate widget per frontend (#178's addition, landed at #186):
-// the frontends' only countable server-error home — the same CF GraphQL
+// the frontends' only countable server-error home, the same CF GraphQL
 // source, the same workersInvocationsAdaptive shape, scoped to the
 // frontend's own Worker name. It receives the already-fetched series from
 // SystemHealth (one workers query = one cache entry, never three) plus
@@ -1638,7 +1638,7 @@ export function FrontendErrorWidget({
 ```tsx
 // System Health (#186): the api's request/error-rate trends + CPU
 // quantiles, the DB probes (latency, pooler census, size), the two
-// per-frontend error widgets (#178), and the Sentry link-out — one
+// per-frontend error widgets (#178), and the Sentry link-out, one
 // workers query (shared cache with the Sentry + frontend widgets) + one
 // probes query. Every widget folds to its curated state; the page never
 // 500s.
@@ -1785,13 +1785,13 @@ export function SystemHealth({ window }: { window: MetricsWindow }) {
 }
 ```
 
-(The provisional composition uses `WidgetFrame` throughout; `StatCard` exists for Task 5's ratified composition — if the ratification adopts it, the executor adds the import then. Biome's unused-import rule keeps this honest.)
+(The provisional composition uses `WidgetFrame` throughout; `StatCard` exists for Task 5's ratified composition, if the ratification adopts it, the executor adds the import then. Biome's unused-import rule keeps this honest.)
 
 `sentry-link.tsx`:
 
 ```tsx
 // The Sentry link-out (#186, ADR-0023's source discipline): Sentry is
-// capture-only — its query API is Team-gated — so this widget shows the
+// capture-only, its query API is Team-gated, so this widget shows the
 // count CF's sum.errors already gave us and LINKS to the console for
 // drill-down. Never a rebuild. The URL is owner-ratified (2026-10-06,
 // plan session): org slug sevendays-studio.
@@ -1813,7 +1813,7 @@ export function SentryLinkWidget({
   return (
     <WidgetFrame title='Sentry' badge={window} state={state}>
       <p className='text-2xl font-semibold tabular-nums'>
-        {errors === null ? '—' : formatCount(errors)}
+        {errors === null ? '-' : formatCount(errors)}
       </p>
       <p className='text-muted-foreground text-xs'>errors captured, all apps</p>
       <a
@@ -1833,7 +1833,7 @@ export function SentryLinkWidget({
 
 ```tsx
 // Content (#186): entity counts (active rows) + last-updated (max
-// updated_at over ALL rows — a deactivation is an update) per family.
+// updated_at over ALL rows, a deactivation is an update) per family.
 // Point-in-time, windowless, staleTime 5m.
 import { useQuery } from '@tanstack/react-query';
 
@@ -1882,10 +1882,10 @@ export function ContentCensusSection() {
 }
 ```
 
-- [ ] **Step 6: The route — `apps/admin/src/routes/_shell.index.tsx` (full rewrite)**
+- [ ] **Step 6: The route, `apps/admin/src/routes/_shell.index.tsx` (full rewrite)**
 
 ```tsx
-// The Analytics Dashboard (#186, ADR-0023): the admin's landing screen —
+// The Analytics Dashboard (#186, ADR-0023): the admin's landing screen,
 // the #93 Dashboard stub dies here (the appointments stub at
 // /appointments stays; it is v2 payload). Any staff session sees it; every
 // source failure renders its widget's curated state; the page never 500s.
@@ -1932,13 +1932,13 @@ function AnalyticsPage() {
 }
 ```
 
-- [ ] **Step 7: The sidebar — `apps/admin/src/components/admin-sidebar.tsx`**
+- [ ] **Step 7: The sidebar, `apps/admin/src/components/admin-sidebar.tsx`**
 
-Two edits. First, the lucide import block — replace `LayoutDashboard,` with `Activity,` (alphabetical: `Activity` sorts before `CalendarDays`, so it becomes the list's first entry). Second, the comment + the Overview item — change
+Two edits. First, the lucide import block, replace `LayoutDashboard,` with `Activity,` (alphabetical: `Activity` sorts before `CalendarDays`, so it becomes the list's first entry). Second, the comment + the Overview item, change
 
 ```tsx
 // The ruled taxonomy (#59), icons carried from the prototype unchanged.
-// Overview is wholly future scope — both destinations are later-milestone
+// Overview is wholly future scope, both destinations are later-milestone
 // stubs; Catalog and Studio carry the live CMS surfaces.
 const navGroups: NavGroup[] = [
   {
@@ -1954,7 +1954,7 @@ to
 
 ```tsx
 // The ruled taxonomy (#59), icons carried from the prototype unchanged.
-// Overview carries the Analytics dashboard (#186 — the #93 stub's
+// Overview carries the Analytics dashboard (#186, the #93 stub's
 // replacement); Appointments stays the v2 teaser stub; Catalog and Studio
 // carry the live CMS surfaces.
 const navGroups: NavGroup[] = [
@@ -1967,35 +1967,35 @@ const navGroups: NavGroup[] = [
   },
 ```
 
-(`NavTo` needs no change on main — `'/'` and `'/appointments'` are both already in the union.)
+(`NavTo` needs no change on main, `'/'` and `'/appointments'` are both already in the union.)
 
 - [ ] **Step 8: Gates + commit**
 
-`pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/ui fix`, then `pnpm check` (35/35; suites unchanged — **11 files / 94 tests**; biome does not lint the generated `chart.tsx`'s registry style beyond the import adaptation — if `fix` rewrites it, accept), then `pnpm build` (the SSR build proves the route + components compile into the Worker bundle). Commit (the commit body records the recharts version Step 3(a) pinned):
+`pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/ui fix`, then `pnpm check` (35/35; suites unchanged, **11 files / 94 tests**; biome does not lint the generated `chart.tsx`'s registry style beyond the import adaptation, if `fix` rewrites it, accept), then `pnpm build` (the SSR build proves the route + components compile into the Worker bundle). Commit (the commit body records the recharts version Step 3(a) pinned):
 
 ```bash
 git add apps/admin/src/styles.css apps/admin/src/routes/_shell.index.tsx apps/admin/src/components/admin-sidebar.tsx apps/admin/src/components/ui/chart.tsx apps/admin/src/components/charts apps/admin/src/components/dashboard apps/admin/package.json pnpm-lock.yaml packages/ui/src/tokens.css
-git commit -m "feat(admin): the Analytics Dashboard screen — System Health, Content, the Sentry link-out (#186)" -m "Chart engine: the shadcn chart component vendored app-local (the #93 reversal holds — nothing in packages/ui); recharts pinned at <X.Y.Z> per the owner's 2026-10-06 ruling."
+git commit -m "feat(admin): the Analytics Dashboard screen, System Health, Content, the Sentry link-out (#186)" -m "Chart engine: the shadcn chart component vendored app-local (the #93 reversal holds, nothing in packages/ui); recharts pinned at <X.Y.Z> per the owner's 2026-10-06 ruling."
 ```
 
-### Task 5: The rendered variants — the owner's ratification gate
+### Task 5: The rendered variants, the owner's ratification gate
 
-**Skill set:** `prototype` (the rendering discipline) — loaded at execution. This task is the spec's "Owner-reacted rendered variants" acceptance criterion; the M5 pattern (#131/#139/#140/#141): compositions rendered as frames over mock data, the owner reacts, the ratified composition lands.
+**Skill set:** `prototype` (the rendering discipline), loaded at execution. This task is the spec's "Owner-reacted rendered variants" acceptance criterion; the M5 pattern (#131/#139/#140/#141): compositions rendered as frames over mock data, the owner reacts, the ratified composition lands.
 
 **Files:**
-- Create (UNTRACKED — never committed, deleted at Step 5): `apps/admin/src/routes/prototype-dashboard.tsx`
+- Create (UNTRACKED, never committed, deleted at Step 5): `apps/admin/src/routes/prototype-dashboard.tsx`
 - Evidence: `.superpowers/sdd/2026-10-06-186-metrics-seam-dashboard-system-half/variants/*.png`
 
 **Not here:** any committed change in this task (the only durable outputs are the applied adjustments to Task 4's files and the issue comment); Traffic/Storage variants (#187 renders its own when its widgets exist).
 
-- [ ] **Step 1: The prototype route (ungated, mock data — the prototype-tokens precedent)**
+- [ ] **Step 1: The prototype route (ungated, mock data, the prototype-tokens precedent)**
 
-Create `apps/admin/src/routes/prototype-dashboard.tsx` — a TOP-LEVEL route (outside `_shell`, so no session gate and `playwright screenshot` can reach it), rendering the three composition candidates over inline mock data plus the two vocabulary strips. Full file:
+Create `apps/admin/src/routes/prototype-dashboard.tsx`, a TOP-LEVEL route (outside `_shell`, so no session gate and `playwright screenshot` can reach it), rendering the three composition candidates over inline mock data plus the two vocabulary strips. Full file:
 
 ```tsx
-// PROTOTYPE ONLY (#186 Task 5) — untracked, deleted before the PR. The
+// PROTOTYPE ONLY (#186 Task 5), untracked, deleted before the PR. The
 // owner-reacted rendered variants: three dashboard compositions over mock
-// data (no server fns, no env, no gate — the prototype-tokens precedent).
+// data (no server fns, no env, no gate, the prototype-tokens precedent).
 import { createFileRoute } from '@tanstack/react-router';
 
 import { StatCard } from '#/components/charts/stat-card';
@@ -2030,7 +2030,7 @@ function PrototypeDashboardPage() {
     <main className='mx-auto max-w-5xl space-y-4 p-6'>
       <h1 className='text-2xl font-semibold'>#186 dashboard variants</h1>
 
-      <SectionHeading>Variant A — chart-led (Task 4's provisional composition)</SectionHeading>
+      <SectionHeading>Variant A, chart-led (Task 4's provisional composition)</SectionHeading>
       <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
         <WidgetFrame title='API requests' badge='7 days' state='ready'>
           <p className='text-2xl font-semibold tabular-nums'>2,418</p>
@@ -2078,14 +2078,14 @@ function PrototypeDashboardPage() {
         </WidgetFrame>
         <WidgetFrame title='Content census' state='ready'>
           <ul className='divide-y text-sm'>
-            {['Packages — 6 active · updated 2026-10-06 09:05', 'Add-ons — 4 active · updated 2026-10-05 22:11', 'Gallery photos — 0 active · updated —', 'Testimonials — 0 active · updated —'].map((line) => (
+            {['Packages, 6 active · updated 2026-10-06 09:05', 'Add-ons, 4 active · updated 2026-10-05 22:11', 'Gallery photos, 0 active · updated -', 'Testimonials, 0 active · updated -'].map((line) => (
               <li key={line} className='py-1.5'>{line}</li>
             ))}
           </ul>
         </WidgetFrame>
       </div>
 
-      <SectionHeading>Variant B — stat-led (stat cards first, one wide trend row)</SectionHeading>
+      <SectionHeading>Variant B, stat-led (stat cards first, one wide trend row)</SectionHeading>
       <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
         <StatCard label='API requests (7 days)' value='2,418' />
         <StatCard label='API error rate' value='0.33%' hint='8 errors' />
@@ -2106,14 +2106,14 @@ function PrototypeDashboardPage() {
         </WidgetFrame>
         <WidgetFrame title='Content + DB (the quiet half)' state='ready'>
           <ul className='divide-y text-sm'>
-            {['Packages — 6 active · updated 2026-10-06 09:05', 'Add-ons — 4 active · updated 2026-10-05 22:11', 'Pooler — 8 / 200 (active 2 · idle 5 · unknown 1)'].map((line) => (
+            {['Packages, 6 active · updated 2026-10-06 09:05', 'Add-ons, 4 active · updated 2026-10-05 22:11', 'Pooler, 8 / 200 (active 2 · idle 5 · unknown 1)'].map((line) => (
               <li key={line} className='py-1.5'>{line}</li>
             ))}
           </ul>
         </WidgetFrame>
       </div>
 
-      <SectionHeading>Variant C — A's grid with the curated + loading states shown (failure rehearsal)</SectionHeading>
+      <SectionHeading>Variant C, A's grid with the curated + loading states shown (failure rehearsal)</SectionHeading>
       <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
         <WidgetFrame title='API requests' badge='7 days' state='not-configured' />
         <WidgetFrame title='API error rate' badge='7 days' state='unavailable' />
@@ -2121,7 +2121,7 @@ function PrototypeDashboardPage() {
         <WidgetFrame title='Pooler connections' state='unavailable' />
       </div>
 
-      <SectionHeading>Chart vocabulary strip — bars vs line, and the --chart-* series</SectionHeading>
+      <SectionHeading>Chart vocabulary strip, bars vs line, and the --chart-* series</SectionHeading>
       <div className='grid gap-4 lg:grid-cols-2'>
         <WidgetFrame title='Bars (counts)' state='ready'>
           <TrendChart ariaLabel='Bars demo' data={SERIES.points.map((p) => ({ bucketStart: p.bucketStart, value: p.requests }))} />
@@ -2143,11 +2143,11 @@ function PrototypeDashboardPage() {
 }
 ```
 
-(The `routeTree.gen.ts` regen this route triggers is EXPECTED and LOCAL ONLY — the file is untracked and deleted in Step 5; after deletion, `git checkout -- src/routeTree.gen.ts` restores the committed tree byte-identically. Nothing routeTree-shaped ever reaches the PR.)
+(The `routeTree.gen.ts` regen this route triggers is EXPECTED and LOCAL ONLY, the file is untracked and deleted in Step 5; after deletion, `git checkout -- src/routeTree.gen.ts` restores the committed tree byte-identically. Nothing routeTree-shaped ever reaches the PR.)
 
 - [ ] **Step 2: Render + frame**
 
-With the dev server up (`pnpm --filter @sevendays/admin dev`, port 3000), frame all variants (chromium from #189's foundation — `pnpm exec playwright install chromium` once if missing):
+With the dev server up (`pnpm --filter @sevendays/admin dev`, port 3000), frame all variants (chromium from #189's foundation, `pnpm exec playwright install chromium` once if missing):
 
 ```bash
 mkdir -p .superpowers/sdd/2026-10-06-186-metrics-seam-dashboard-system-half/variants
@@ -2157,15 +2157,15 @@ pnpm exec playwright screenshot --viewport-size=390,2400 http://localhost:3000/p
 
 - [ ] **Step 3: The owner's reaction (the gate)**
 
-Post the decision request on #186 (the frames stay local — the repo is public and GitHub has no scriptable issue-image upload; the #139 evidence precedent; the owner has the checkout):
+Post the decision request on #186 (the frames stay local, the repo is public and GitHub has no scriptable issue-image upload; the #139 evidence precedent; the owner has the checkout):
 
 ```bash
-gh issue comment 186 --body "Rendered variants for the dashboard are up (Task 5): .superpowers/sdd/2026-10-06-186-metrics-seam-dashboard-system-half/variants/ in the working checkout — run \`pnpm --filter @sevendays/admin dev\` and open http://localhost:3000/prototype-dashboard to react live. Decisions requested: (1) composition — A chart-led / B stat-led / a mix; (2) chart modes — bars for counts + line for rates, or one mode; (3) the --chart-* strip — keep the five derived values or adjust; (4) the Sentry link-out URL (pinned https://sevendays-studio.sentry.io/issues/ per your 2026-10-06 ruling — flag here if it should differ); (5) any copy nits. React here; the ratified composition then lands and this prototype route is deleted."
+gh issue comment 186 --body "Rendered variants for the dashboard are up (Task 5): .superpowers/sdd/2026-10-06-186-metrics-seam-dashboard-system-half/variants/ in the working checkout, run \`pnpm --filter @sevendays/admin dev\` and open http://localhost:3000/prototype-dashboard to react live. Decisions requested: (1) composition, A chart-led / B stat-led / a mix; (2) chart modes, bars for counts + line for rates, or one mode; (3) the --chart-* strip, keep the five derived values or adjust; (4) the Sentry link-out URL (pinned https://sevendays-studio.sentry.io/issues/ per your 2026-10-06 ruling, flag here if it should differ); (5) any copy nits. React here; the ratified composition then lands and this prototype route is deleted."
 ```
 
-The executor applies the owner's ruling to Task 4's files (composition/chart/token-value adjustments — the curated lines' semantics, the data mapping, and the staleTimes are NOT variant-adjustable). If the owner's reaction names Sentry URL corrections, fix the one constant. Then:
+The executor applies the owner's ruling to Task 4's files (composition/chart/token-value adjustments, the curated lines' semantics, the data mapping, and the staleTimes are NOT variant-adjustable). If the owner's reaction names Sentry URL corrections, fix the one constant. Then:
 
-- [ ] **Step 4: `pnpm check` re-run** (the adjustments keep it green — **11 files / 94 tests**).
+- [ ] **Step 4: `pnpm check` re-run** (the adjustments keep it green, **11 files / 94 tests**).
 
 - [ ] **Step 5: Delete the prototype + restore the tree**
 
@@ -2175,16 +2175,16 @@ git checkout -- apps/admin/src/routeTree.gen.ts
 git status --short   # expects: nothing outside the known-modified Task 4 files
 ```
 
-No commit exists for this task by design (the applied adjustments amend Task 4's commit files — stage and commit them as the ratification commit):
+No commit exists for this task by design (the applied adjustments amend Task 4's commit files, stage and commit them as the ratification commit):
 
 ```bash
 git add apps/admin packages/ui
-git commit -m "feat(admin): the owner-ratified dashboard composition — variants reacted (#186)"
+git commit -m "feat(admin): the owner-ratified dashboard composition, variants reacted (#186)"
 ```
 
-(If the owner's reaction arrives after the PR opens, the same adjustment lands as a PR commit before merge — the PR body names the variants evidence; the merge gate includes the reaction.)
+(If the owner's reaction arrives after the PR opens, the same adjustment lands as a PR commit before merge, the PR body names the variants evidence; the merge gate includes the reaction.)
 
-### Task 6: The env + CI wiring — the three tokens, the script vars, observability on
+### Task 6: The env + CI wiring, the three tokens, the script vars, observability on
 
 **Files:**
 - Modify: `apps/admin/.env.example`, `apps/admin/wrangler.jsonc`, `.github/workflows/ci.yml`
@@ -2193,25 +2193,25 @@ git commit -m "feat(admin): the owner-ratified dashboard composition — variant
 - Consumes: the env names Task 2's reader consumes.
 - Produces: the deployed teaser admin Worker with the three secrets (once the owner mints them) + the account/script vars + Workers Logs retention; the same wiring on the v1 leg (values arrive at cutover per the spec).
 
-**Not here:** the v1 CI environment's secret VALUES (ship-day, #191's runbook owns the swap); any api/landing wrangler or CI change; `.dev.vars` (dev uses `.env.local` via the dev script's dotenv — document, don't create).
+**Not here:** the v1 CI environment's secret VALUES (ship-day, #191's runbook owns the swap); any api/landing wrangler or CI change; `.dev.vars` (dev uses `.env.local` via the dev script's dotenv, document, don't create).
 
-- [ ] **Step 1: `.env.example` — document the five new names**
+- [ ] **Step 1: `.env.example`, document the five new names**
 
 Append to `apps/admin/.env.example`:
 
 ```bash
-# The metrics seam (#186, ADR-0023) — the Analytics Dashboard's sources.
+# The metrics seam (#186, ADR-0023), the Analytics Dashboard's sources.
 # All five are optional-by-design: missing = that widget's curated
 # "Analytics source not configured." state, never a crash.
 # Dev values live in .env.local (this file documents names only).
 # Prod: secrets/vars on the admin Worker via ci.yml.
 
 # Cloudflare Analytics:Read token (Account Analytics:Read permission,
-# minted in the dev CF account) — the workersInvocationsAdaptive source.
+# minted in the dev CF account), the workersInvocationsAdaptive source.
 CF_ANALYTICS_READ_TOKEN=
 
 # The GraphQL scope + the three Workers the dashboard watches (NOT
-# secrets — deployment identity; passed as --vars at deploy, per-edition
+# secrets, deployment identity; passed as --vars at deploy, per-edition
 # values in ci.yml: sevendays-* on teaser, sevendays-v1-* on v1).
 CLOUDFLARE_ACCOUNT_ID=
 CF_ANALYTICS_SCRIPT_API=
@@ -2224,19 +2224,19 @@ POSTHOG_PERSONAL_API_KEY=
 POSTHOG_PROJECT_ID=
 ```
 
-- [ ] **Step 2: `apps/admin/wrangler.jsonc` — Workers Logs on**
+- [ ] **Step 2: `apps/admin/wrangler.jsonc`, Workers Logs on**
 
-Add the observability block (the api's #183 pattern, JSON form) after the `services` line — the metrics seam's log-only loud detail needs retention to be quotable:
+Add the observability block (the api's #183 pattern, JSON form) after the `services` line, the metrics seam's log-only loud detail needs retention to be quotable:
 
 ```jsonc
-  // The metrics seam's failure detail lands on console.error (#186) —
+  // The metrics seam's failure detail lands on console.error (#186):
   // Workers Logs retains it (3-day, free tier; wrangler tail is live).
   "observability": { "enabled": true }
 ```
 
-(An inline `//` comment is legal in wrangler.jsonc — the file's `$schema`-documented format. If wrangler rejects it, move the comment above the block.)
+(An inline `//` comment is legal in wrangler.jsonc, the file's `$schema`-documented format. If wrangler rejects it, move the comment above the block.)
 
-- [ ] **Step 3: ci.yml — the teaser leg**
+- [ ] **Step 3: ci.yml, the teaser leg**
 
 Three edits to the `deploy-teaser` job. First, the env block (after the `VITE_SENTRY_ENVIRONMENT: teaser` line):
 
@@ -2254,14 +2254,14 @@ Second, the admin deploy step gains the script-name vars:
         run: pnpm exec wrangler deploy --name sevendays-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL" --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "CF_ANALYTICS_SCRIPT_API:sevendays-api" --var "CF_ANALYTICS_SCRIPT_LANDING:sevendays-landing" --var "CF_ANALYTICS_SCRIPT_ADMIN:sevendays-admin"
 ```
 
-Third, after the existing admin `DATABASE_URL` sync step, the fail-soft token sync (the R2/SENTRY_DSN pattern — the curated not-configured states are the designed interim):
+Third, after the existing admin `DATABASE_URL` sync step, the fail-soft token sync (the R2/SENTRY_DSN pattern, the curated not-configured states are the designed interim):
 
 ```yaml
       - name: Sync admin analytics secrets (skip until the owner mints them)
         working-directory: apps/admin
         run: |
           if [ -z "$CF_ANALYTICS_READ_TOKEN" ]; then
-            echo '::notice::CF_ANALYTICS_READ_TOKEN missing from the teaser GitHub environment — System Health renders its curated not-configured state (M6 #186)'
+            echo '::notice::CF_ANALYTICS_READ_TOKEN missing from the teaser GitHub environment, System Health renders its curated not-configured state (M6 #186)'
             exit 0
           fi
           printf '%s' "$CF_ANALYTICS_READ_TOKEN" | pnpm exec wrangler secret put CF_ANALYTICS_READ_TOKEN --name sevendays-admin
@@ -2269,13 +2269,13 @@ Third, after the existing admin `DATABASE_URL` sync step, the fail-soft token sy
             printf '%s' "$POSTHOG_PERSONAL_API_KEY" | pnpm exec wrangler secret put POSTHOG_PERSONAL_API_KEY --name sevendays-admin
             printf '%s' "$POSTHOG_PROJECT_ID" | pnpm exec wrangler secret put POSTHOG_PROJECT_ID --name sevendays-admin
           else
-            echo '::notice::PostHog pair missing from the teaser GitHub environment — Traffic lands with #187; put both then.'
+            echo '::notice::PostHog pair missing from the teaser GitHub environment, Traffic lands with #187; put both then.'
           fi
 ```
 
-- [ ] **Step 4: ci.yml — the v1 leg mirrors (its own names)**
+- [ ] **Step 4: ci.yml, the v1 leg mirrors (its own names)**
 
-The same three edits in `deploy-v1`: the same env additions; the admin deploy step with the v1 script names —
+The same three edits in `deploy-v1`: the same env additions; the admin deploy step with the v1 script names,
 
 ```yaml
       - name: Deploy admin (sevendays-v1-admin)
@@ -2283,14 +2283,14 @@ The same three edits in `deploy-v1`: the same env additions; the admin deploy st
         run: pnpm exec wrangler deploy --name sevendays-v1-admin --var "API_URL:$API_URL" --var "BETTER_AUTH_URL:$BETTER_AUTH_URL" --var "CLOUDFLARE_ACCOUNT_ID:$CLOUDFLARE_ACCOUNT_ID" --var "CF_ANALYTICS_SCRIPT_API:sevendays-v1-api" --var "CF_ANALYTICS_SCRIPT_LANDING:sevendays-v1-landing" --var "CF_ANALYTICS_SCRIPT_ADMIN:sevendays-v1-admin"
 ```
 
-— and the same fail-soft sync step targeting `--name sevendays-v1-admin` (notice text naming the v1 environment; the values themselves arrive at ship per the spec — until then v1's dashboard serves the curated states, by design).
+and the same fail-soft sync step targeting `--name sevendays-v1-admin` (notice text naming the v1 environment; the values themselves arrive at ship per the spec, until then v1's dashboard serves the curated states, by design).
 
 - [ ] **Step 5: The owner's dev-token handoff (the R2-pattern handoff)**
 
-Post on #186 (owner-operated; nothing blocks this PR — the fail-soft steps ARE the interim):
+Post on #186 (owner-operated; nothing blocks this PR, the fail-soft steps ARE the interim):
 
 ```bash
-gh issue comment 186 --body "Owner handoff to light System Health up on teaser (dev-account values per the spec): (1) mint a CF API token with **Account Analytics:Read** on the dev account; (2) mint a PostHog **personal API key** (query:read) + note the project id; (3) set teaser GitHub-environment secrets: CF_ANALYTICS_READ_TOKEN, POSTHOG_PERSONAL_API_KEY, POSTHOG_PROJECT_ID (CLOUDFLARE_ACCOUNT_ID is already a teaser variable); (4) local dev: the same CF values into apps/admin/.env.local. Until then the dashboard serves its curated not-configured states — the deploy notices name the gap on every run. docs/ship-provisioning-runbook.md (#191) owns the production swap."
+gh issue comment 186 --body "Owner handoff to light System Health up on teaser (dev-account values per the spec): (1) mint a CF API token with **Account Analytics:Read** on the dev account; (2) mint a PostHog **personal API key** (query:read) + note the project id; (3) set teaser GitHub-environment secrets: CF_ANALYTICS_READ_TOKEN, POSTHOG_PERSONAL_API_KEY, POSTHOG_PROJECT_ID (CLOUDFLARE_ACCOUNT_ID is already a teaser variable); (4) local dev: the same CF values into apps/admin/.env.local. Until then the dashboard serves its curated not-configured states, the deploy notices name the gap on every run. docs/ship-provisioning-runbook.md (#191) owns the production swap."
 ```
 
 - [ ] **Step 6: The live probe (when the dev token exists locally)**
@@ -2312,21 +2312,21 @@ console.log(JSON.stringify(await res.json(), null, 2).slice(0, 2000));
 ' 
 ```
 
-Expected: HTTP 200 with a `data.viewer.accounts[0].workersInvocationsAdaptive` array (possibly empty on a quiet dev account — the shape is what is proven). **If the response's `errors` names the `Time!` scalar** (validation error on `$since`/`$until`), apply the documented fallback: switch both `Time!` to `string!` in `WORKER_INVOCATIONS_QUERY` AND in the cf.test.ts shape assertion, re-run the admin suite, and note the change in the PR body. If the token does not exist yet, record "live probe deferred — no dev token minted" in the evidence dir and proceed (the curated states + fallback note carry the risk).
+Expected: HTTP 200 with a `data.viewer.accounts[0].workersInvocationsAdaptive` array (possibly empty on a quiet dev account, the shape is what is proven). **If the response's `errors` names the `Time!` scalar** (validation error on `$since`/`$until`), apply the documented fallback: switch both `Time!` to `string!` in `WORKER_INVOCATIONS_QUERY` AND in the cf.test.ts shape assertion, re-run the admin suite, and note the change in the PR body. If the token does not exist yet, record "live probe deferred, no dev token minted" in the evidence dir and proceed (the curated states + fallback note carry the risk).
 
 - [ ] **Step 7: Gates + commit**
 
-`pnpm --filter @sevendays/admin fix`, `pnpm check` (35/35 — CI YAML is not biome-checked; eyeball the indent against the neighboring steps). Commit:
+`pnpm --filter @sevendays/admin fix`, `pnpm check` (35/35, CI YAML is not biome-checked; eyeball the indent against the neighboring steps). Commit:
 
 ```bash
 git add apps/admin/.env.example apps/admin/wrangler.jsonc .github/workflows/ci.yml
-git commit -m "feat(admin): the metrics env + CI wiring — the three tokens, script vars, observability on (#186)"
+git commit -m "feat(admin): the metrics env + CI wiring, the three tokens, script vars, observability on (#186)"
 ```
 
 ### Task 7: Gates, docs rotation, PR/merge, the v1 SPLIT (with the ruled divergence), ledger, issue close
 
 **Files:**
-- Modify: `docs/plan.md` (M6 box 5 — ANNOTATED, not ticked), `docs/progress.md`, `AGENTS.md` (admin suite bullet + status bullet), `docs/agents/v1-picks.md` (ledger row, post-merge)
+- Modify: `docs/plan.md` (M6 box 5, ANNOTATED, not ticked), `docs/progress.md`, `AGENTS.md` (admin suite bullet + status bullet), `docs/agents/v1-picks.md` (ledger row, post-merge)
 
 **Interfaces:**
 - Consumes: Tasks 1–6 merged on the branch (+ Task 5's owner reaction recorded on the issue).
@@ -2336,26 +2336,26 @@ git commit -m "feat(admin): the metrics env + CI wiring — the three tokens, sc
 
 - [ ] **Step 1: Full repo gates**
 
-`docker compose up -d db`, then `pnpm check` then `pnpm build`. Expected: check 35/35 turbo tasks; build green. Floors: **admin 11 files / 94 tests** (the ticket's lib-seam coverage: query shapes + widget munging + failure states), api 27 files + 1 skipped / 338 passed + 3 skipped, api-client 5 files / 33 tests, landing 9 files / 73 tests, types 14 files / 118 tests — all untouched. If any count differs, reconcile before proceeding — do not loosen assertions.
+`docker compose up -d db`, then `pnpm check` then `pnpm build`. Expected: check 35/35 turbo tasks; build green. Floors: **admin 11 files / 94 tests** (the ticket's lib-seam coverage: query shapes + widget munging + failure states), api 27 files + 1 skipped / 338 passed + 3 skipped, api-client 5 files / 33 tests, landing 9 files / 73 tests, types 14 files / 118 tests, all untouched. If any count differs, reconcile before proceeding, do not loosen assertions.
 
 - [ ] **Step 2: Rotate the docs**
 
-(a) `docs/plan.md`, Milestone 6 block — box 5 is **SHARED with #187** (its text names all four sections): it stays `- [ ]` and gains a partial-landing annotation. Change
+(a) `docs/plan.md`, Milestone 6 block, box 5 is **SHARED with #187** (its text names all four sections): it stays `- [ ]` and gains a partial-landing annotation. Change
 
 ```markdown
-- [ ] The **Analytics Dashboard** at `/` — Traffic (PostHog, landing-scoped) / System Health (CF GraphQL + DB probes, incl. per-frontend error rates) / Storage & Media (R2 + free-tier budget markers) / Content (counts + last-updated) + the Sentry link-out; admin server fns own the queries (ADR-0023); both editions (v1 index/sidebar = recorded SPLIT); #93's data-viz deferral reversed (app-local charts, `--chart-*` in the admin `@theme`)
+- [ ] The **Analytics Dashboard** at `/`, Traffic (PostHog, landing-scoped) / System Health (CF GraphQL + DB probes, incl. per-frontend error rates) / Storage & Media (R2 + free-tier budget markers) / Content (counts + last-updated) + the Sentry link-out; admin server fns own the queries (ADR-0023); both editions (v1 index/sidebar = recorded SPLIT); #93's data-viz deferral reversed (app-local charts, `--chart-*` in the admin `@theme`)
 ```
 
 to
 
 ```markdown
-- [ ] The **Analytics Dashboard** at `/` — Traffic (PostHog, landing-scoped) / System Health (CF GraphQL + DB probes, incl. per-frontend error rates) / Storage & Media (R2 + free-tier budget markers) / Content (counts + last-updated) + the Sentry link-out; admin server fns own the queries (ADR-0023); both editions (v1 index/sidebar = recorded SPLIT); #93's data-viz deferral reversed (app-local charts, `--chart-*` in the admin `@theme`) _(system half landed 2026-10-06 via #186 — the metrics seam admin-side behind its own session gate (ADR-0023; the three tokens + account/script vars in the admin env, fail-soft in CI), the shell at `/` with Analytics in the Overview group (the #93 stub dead), System Health + the per-frontend error widgets + Content + the Sentry link-out, the shadcn chart component (recharts) vendored app-local on admin-local `--chart-*` tokens (tokens.css clause amended), staleTime 60s/5m, curated per-widget failure states, +35 admin lib-seam tests across 4 files; the box stays unticked until Traffic + Storage & Media land at #187)_
+- [ ] The **Analytics Dashboard** at `/`, Traffic (PostHog, landing-scoped) / System Health (CF GraphQL + DB probes, incl. per-frontend error rates) / Storage & Media (R2 + free-tier budget markers) / Content (counts + last-updated) + the Sentry link-out; admin server fns own the queries (ADR-0023); both editions (v1 index/sidebar = recorded SPLIT); #93's data-viz deferral reversed (app-local charts, `--chart-*` in the admin `@theme`) _(system half landed 2026-10-06 via #186, the metrics seam admin-side behind its own session gate (ADR-0023; the three tokens + account/script vars in the admin env, fail-soft in CI), the shell at `/` with Analytics in the Overview group (the #93 stub dead), System Health + the per-frontend error widgets + Content + the Sentry link-out, the shadcn chart component (recharts) vendored app-local on admin-local `--chart-*` tokens (tokens.css clause amended), staleTime 60s/5m, curated per-widget failure states, +35 admin lib-seam tests across 4 files; the box stays unticked until Traffic + Storage & Media land at #187)_
 ```
 
-(b) `docs/progress.md` — three edits. First, the dated entry at the very top (after the `# Progress` heading's blank line):
+(b) `docs/progress.md`, three edits. First, the dated entry at the very top (after the `# Progress` heading's blank line):
 
 ```markdown
-2026-10-06 — #186, M6 ticket 04, the metrics seam + the Analytics Dashboard's system half, landed: the admin's server-fn metrics seam per ADR-0023 — the CF GraphQL client (one pinned workersInvocationsAdaptive document, three parallel scriptName-filtered fetches, envelope + failure mapping, hourly/daily re-bucketing, CPU µs→ms) and the DB probes over `packages/db` (a new `probes.ts`: timed `select 1` latency, `pg_stat_activity` census against the 200-connection Micro reference, `pg_database_size`, the four-family content census — static SQL over a structural exec seam so no drizzle type reaches the admin), each server fn behind the seam's OWN session gate (the ensureSession semantics hoisted; the api stays domain-pure — zero api files touched). The dashboard shell at `/` (nav "Analytics" in Overview; the #93 Dashboard stub dead; `/appointments` untouched): System Health (api requests + error-rate trends, CPU p50/p99, DB latency/size/pooler, one error-rate widget per frontend per #178) + Content (active counts + last-updated per family) + the Sentry link-out (`sum.errors` + the console URL, never a rebuild). The #93 reversal made real: the shadcn chart component (recharts at an exact pin, the owner's 2026-10-06 ruling) vendored app-local in the admin — nothing chart-shaped entered packages/ui — with `--chart-*` in the admin's `@theme` derived from the brand tokens, and `packages/ui` tokens.css's no-chart clause amended to record the reversal. Caching: none server-side; staleTime 60s (system) / 5m (content), revalidate on focus + the Refresh button (no polling). Curated per-widget failure states (the #155 leak-safe pattern — "Analytics source not configured." / "Analytics source unavailable."; loud detail log-only into the now-observability-enabled admin Worker); the page never 500s. Env: the spec-pinned three tokens as fail-soft CI secrets + `CLOUDFLARE_ACCOUNT_ID` and the three per-edition script-name vars (deployment identity) — dev-account values are the owner's handoff (issue comment; the runbook owns the ship-day swap). Owner-reacted rendered variants rode Task 5. Gates: admin 7→11 files / 59→94 tests, `pnpm check` 35/35, `pnpm build` 7/7. NOT landed: Traffic + Storage & Media (#187, riding this seam); the Audit Log viewer (#188).
+2026-10-06, #186, M6 ticket 04, the metrics seam + the Analytics Dashboard's system half, landed: the admin's server-fn metrics seam per ADR-0023, the CF GraphQL client (one pinned workersInvocationsAdaptive document, three parallel scriptName-filtered fetches, envelope + failure mapping, hourly/daily re-bucketing, CPU µs→ms) and the DB probes over `packages/db` (a new `probes.ts`: timed `select 1` latency, `pg_stat_activity` census against the 200-connection Micro reference, `pg_database_size`, the four-family content census, static SQL over a structural exec seam so no drizzle type reaches the admin), each server fn behind the seam's OWN session gate (the ensureSession semantics hoisted; the api stays domain-pure, zero api files touched). The dashboard shell at `/` (nav "Analytics" in Overview; the #93 Dashboard stub dead; `/appointments` untouched): System Health (api requests + error-rate trends, CPU p50/p99, DB latency/size/pooler, one error-rate widget per frontend per #178) + Content (active counts + last-updated per family) + the Sentry link-out (`sum.errors` + the console URL, never a rebuild). The #93 reversal made real: the shadcn chart component (recharts at an exact pin, the owner's 2026-10-06 ruling) vendored app-local in the admin, nothing chart-shaped entered packages/ui, with `--chart-*` in the admin's `@theme` derived from the brand tokens, and `packages/ui` tokens.css's no-chart clause amended to record the reversal. Caching: none server-side; staleTime 60s (system) / 5m (content), revalidate on focus + the Refresh button (no polling). Curated per-widget failure states (the #155 leak-safe pattern, "Analytics source not configured." / "Analytics source unavailable."; loud detail log-only into the now-observability-enabled admin Worker); the page never 500s. Env: the spec-pinned three tokens as fail-soft CI secrets + `CLOUDFLARE_ACCOUNT_ID` and the three per-edition script-name vars (deployment identity), dev-account values are the owner's handoff (issue comment; the runbook owns the ship-day swap). Owner-reacted rendered variants rode Task 5. Gates: admin 7→11 files / 59→94 tests, `pnpm check` 35/35, `pnpm build` 7/7. NOT landed: Traffic + Storage & Media (#187, riding this seam); the Audit Log viewer (#188).
 ```
 
 Second, in the Known Gaps list, directly below the Audit Log write-side bullet, add:
@@ -2364,9 +2364,9 @@ Second, in the Known Gaps list, directly below the Audit Log write-side bullet, 
 - The admin's **Analytics Dashboard system half** is live (M6 #186, 2026-10-06): the metrics seam (admin server fns, own session gate, ADR-0023) serving System Health (CF GraphQL + DB probes + per-frontend error widgets), Content, and the Sentry link-out at `/`, curated failure states throughout. **Traffic + Storage & Media are #187's** (the PostHog token pair is already read by the seam's env but has no consumer yet); the dev-account token values are the owner's teaser-environment handoff until which every CF widget serves its curated not-configured state.
 ```
 
-Third, in "Immediate Next Steps" item 1, replace `**#186** (the metrics seam + the Analytics Dashboard's system half), #189 (landed 2026-10-06 — the Playwright pre-flight foundation), **#191** (the ship-provisioning runbook); then #187 off #186,` with `#189 (landed 2026-10-06 — the Playwright pre-flight foundation), **#191** (the ship-provisioning runbook), **#187** (now unblocked — Traffic + Storage & Media ride #186's seam);` and drop `#186` from the takeable frontier list (it landed).
+Third, in "Immediate Next Steps" item 1, replace `**#186** (the metrics seam + the Analytics Dashboard's system half), #189 (landed 2026-10-06, the Playwright pre-flight foundation), **#191** (the ship-provisioning runbook); then #187 off #186,` with `#189 (landed 2026-10-06, the Playwright pre-flight foundation), **#191** (the ship-provisioning runbook), **#187** (now unblocked, Traffic + Storage & Media ride #186's seam);` and drop `#186` from the takeable frontier list (it landed).
 
-(c) `AGENTS.md` — two edits. In the "Current status of `pnpm test`" section, change `The api and landing suites remain the behavioral backbones.` (the admin bullet's last sentence) to `The metrics seam's lib-seam suite joins them (M6 #186): CF GraphQL query shapes + widget munging + the DB probes + the curated failure states — admin floor 11 files / 94 tests. The api and landing suites remain the behavioral backbones.` And append this sentence to the end of the "The DB is provisioned, the catalog is seeded, and auth is wired in." bullet (after the Audit Log sentence): ` The Analytics Dashboard's system half is live (M6 #186): the admin's metrics seam — CF GraphQL + DB probes over packages/db as session-gated server functions (ADR-0023, zero api routes) — serves System Health (incl. the per-frontend error widgets), Content, and the Sentry link-out at `/` behind curated failure states; chart components are the shadcn chart (recharts) vendored app-local on admin `@theme` --chart-* tokens (the #93 reversal; tokens.css amended); Traffic + Storage & Media are #187's.`
+(c) `AGENTS.md`, two edits. In the "Current status of `pnpm test`" section, change `The api and landing suites remain the behavioral backbones.` (the admin bullet's last sentence) to `The metrics seam's lib-seam suite joins them (M6 #186): CF GraphQL query shapes + widget munging + the DB probes + the curated failure states, admin floor 11 files / 94 tests. The api and landing suites remain the behavioral backbones.` And append this sentence to the end of the "The DB is provisioned, the catalog is seeded, and auth is wired in." bullet (after the Audit Log sentence): ` The Analytics Dashboard's system half is live (M6 #186): the admin's metrics seam, CF GraphQL + DB probes over packages/db as session-gated server functions (ADR-0023, zero api routes), serves System Health (incl. the per-frontend error widgets), Content, and the Sentry link-out at `/` behind curated failure states; chart components are the shadcn chart (recharts) vendored app-local on admin `@theme` --chart-* tokens (the #93 reversal; tokens.css amended); Traffic + Storage & Media are #187's.`
 
 - [ ] **Step 3: graphify + commit**
 
@@ -2374,7 +2374,7 @@ Run: `graphify update .` then commit:
 
 ```bash
 git add docs/plan.md docs/progress.md AGENTS.md graphify-out
-git commit -m "docs: #186 — M6 box 5 annotated (the audience half rides #187), progress + AGENTS rotation (#186)"
+git commit -m "docs: #186, M6 box 5 annotated (the audience half rides #187), progress + AGENTS rotation (#186)"
 ```
 
 - [ ] **Step 4: PR, review, squash-merge**
@@ -2384,54 +2384,54 @@ git push -u origin feat/186-metrics-seam-dashboard
 gh pr create --base main --title "feat(admin): the metrics seam + the Analytics Dashboard's system half (#186)" --body-file - <<'EOF'
 ## What
 
-Implements #186 (M6 ticket 04) — § The Analytics Dashboard of the M6 spec (#182); the data path per ADR-0023.
+Implements #186 (M6 ticket 04), § The Analytics Dashboard of the M6 spec (#182); the data path per ADR-0023.
 
-- The metrics seam in apps/admin as server functions behind its own session gate: the CF GraphQL client (one pinned workersInvocationsAdaptive document, three parallel scriptName-filtered fetches, envelope + failure mapping, hourly/daily re-bucketing, CPU µs→ms) and the DB probes over a new packages/db probes module (timed select 1, pg_stat_activity census, pg_database_size, the four-family content census — static SQL over a structural exec seam). Zero api files touched — the api stays domain-pure.
+- The metrics seam in apps/admin as server functions behind its own session gate: the CF GraphQL client (one pinned workersInvocationsAdaptive document, three parallel scriptName-filtered fetches, envelope + failure mapping, hourly/daily re-bucketing, CPU µs→ms) and the DB probes over a new packages/db probes module (timed select 1, pg_stat_activity census, pg_database_size, the four-family content census, static SQL over a structural exec seam). Zero api files touched, the api stays domain-pure.
 - The dashboard at `/`: System Health (api requests + error-rate trends, CPU p50/p99, DB latency/size/pooler census, one error-rate widget per frontend), Content (active counts + last-updated per family), the Sentry link-out (sum.errors + console URL). The #93 Dashboard stub is dead; /appointments untouched.
-- The #93 reversal: the shadcn chart component (recharts, exact pin) vendored app-local — nothing chart-shaped in packages/ui; --chart-* in the admin's @theme, packages/ui tokens.css amended. staleTime 60s/5m, revalidate on focus + manual refresh, no server-side cache.
+- The #93 reversal: the shadcn chart component (recharts, exact pin) vendored app-local, nothing chart-shaped in packages/ui; --chart-* in the admin's @theme, packages/ui tokens.css amended. staleTime 60s/5m, revalidate on focus + manual refresh, no server-side cache.
 - Curated per-widget failure states (the #155 pattern); the page never 500s; loud detail log-only (admin Worker observability enabled).
-- Env: CF_ANALYTICS_READ_TOKEN / POSTHOG_PERSONAL_API_KEY / POSTHOG_PROJECT_ID as fail-soft CI secrets on both legs + CLOUDFLARE_ACCOUNT_ID and the three per-edition script-name vars. Dev-account values are the owner's handoff (issue comment) — the curated states are the interim by design.
+- Env: CF_ANALYTICS_READ_TOKEN / POSTHOG_PERSONAL_API_KEY / POSTHOG_PROJECT_ID as fail-soft CI secrets on both legs + CLOUDFLARE_ACCOUNT_ID and the three per-edition script-name vars. Dev-account values are the owner's handoff (issue comment), the curated states are the interim by design.
 - Variants: owner-reacted (Task 5 evidence in .superpowers/). admin 7→11 files / 59→94 tests; pnpm check 35/35, build green.
 
 Traffic + Storage & Media are #187's (riding this seam); the Audit Log viewer is #188's. The M6 roadmap box stays unticked until #187 lands.
 EOF
 ```
 
-After CI green on the PR AND the owner's variant reaction is recorded (Task 5's gate — the PR stays open for it if the reaction is pending), squash-merge. The squash commit title: `feat(admin): the metrics seam + the Analytics Dashboard's system half (#186) (#PR_NUMBER)`.
+After CI green on the PR AND the owner's variant reaction is recorded (Task 5's gate, the PR stays open for it if the reaction is pending), squash-merge. The squash commit title: `feat(admin): the metrics seam + the Analytics Dashboard's system half (#186) (#PR_NUMBER)`.
 
-- [ ] **Step 5: The v1 SPLIT (per `docs/agents/v1-picks.md`) — with the owner-ruled divergence**
+- [ ] **Step 5: The v1 SPLIT (per `docs/agents/v1-picks.md`), with the owner-ruled divergence**
 
-Classification (pre-ruled by the spec's v1-pick ledger: "Analytics Dashboard | **PICK with recorded SPLIT** — v1's index + sidebar hunks (dashboard at `/`, Analytics nav re-added); ship-day token swap into the v1 CI env"):
+Classification (pre-ruled by the spec's v1-pick ledger: "Analytics Dashboard | **PICK with recorded SPLIT**, v1's index + sidebar hunks (dashboard at `/`, Analytics nav re-added); ship-day token swap into the v1 CI env"):
 
-- **v1-paths, picked clean:** `packages/db/src/probes.ts` + `src/index.ts` (no migration — nothing to apply, editions share the schema); all `apps/admin/src/lib/metrics/*` + `metrics-queries.*` (new files); `apps/admin/src/components/ui/chart.tsx` + `components/charts/*` + `components/dashboard/*` (new files); `apps/admin/package.json` + `pnpm-lock.yaml` (the recharts pin — regenerate per the runbook's transformed-lockfile procedure: take v1's lockfile, `pnpm install` to apply the one resolution, commit inside the pick); `apps/admin/src/routes/_shell.index.tsx` (see the ruled divergence); `apps/admin/src/components/admin-sidebar.tsx` (see the ruled divergence); `apps/admin/src/styles.css`; `packages/ui/src/tokens.css` (the amendment replaces the clause that carried the edition term — content-pass clean by construction); `apps/admin/wrangler.jsonc` (the observability block is name-agnostic; v1's own `sevendays-v1-admin` name in ci.yml is untouched by the pick); `apps/admin/.env.example`; `.github/workflows/ci.yml` (byte-identical file — every hunk applies, both legs).
-- **Main-only, dropped:** `docs/plan.md`, `docs/progress.md`, `AGENTS.md` (content-dropped — v1's client-safe rewrite carries none of the edited sentences, the #145/#146 ruling recurring), the plan file (the recurring clean-add wrinkle — proactively `git rm` it from the index), `graphify-out/`.
-- **The owner-ruled v1-side divergence (the #168 reversal reversed — spec § Editions, "v1's / redirect is replaced by the dashboard route; the index + sidebar hunks ride as a recorded SPLIT"):**
-  1. `_shell.index.tsx`: v1's current file is #168's `beforeLoad` redirect to `/packages` — REPLACE it with main's dashboard file whole (the redirect's purpose is spent; post-login lands on the dashboard).
-  2. `admin-sidebar.tsx`: v1 has NO Overview group (dropped at #169's split). RE-ADD the group with **ONLY the Analytics item** — `{ to: '/', label: 'Analytics', icon: Activity }` — Appointments stays absent on v1 (the #169 ruling; it is booking-class content there). `NavTo` gains `'/'` only (`'/appointments'` stays out of the union). The nav comment on v1 reads: the Overview group carries the Analytics dashboard (#186/#168-reversal); appointments destinations remain out of scope in this build (#168).
-  3. **The `routeTree.gen.ts` codegen hazard (carried per the ticket):** this PR's route SET is identical on both branches (the index route file already exists on v1 as the redirect; no route is added or removed), so the pick should NOT touch `routeTree.gen.ts` — if the cherry-pick carries any routeTree hunk, restore v1's committed file (`git checkout v1 -- apps/admin/src/routeTree.gen.ts` — main's tree contains `/appointments` and `/login` registrations identical to v1's at this path… if a hunk DID apply, regenerate on v1 instead: `pnpm --filter @sevendays/admin generate-routes`, then verify the `Register` interface footer survives (the #169 `b4203af` provenance repair — a regen that drops the footer is the known trap; diff against v1's pre-pick file and restore the footer verbatim if the regen ate it).
+- **v1-paths, picked clean:** `packages/db/src/probes.ts` + `src/index.ts` (no migration, nothing to apply, editions share the schema); all `apps/admin/src/lib/metrics/*` + `metrics-queries.*` (new files); `apps/admin/src/components/ui/chart.tsx` + `components/charts/*` + `components/dashboard/*` (new files); `apps/admin/package.json` + `pnpm-lock.yaml` (the recharts pin, regenerate per the runbook's transformed-lockfile procedure: take v1's lockfile, `pnpm install` to apply the one resolution, commit inside the pick); `apps/admin/src/routes/_shell.index.tsx` (see the ruled divergence); `apps/admin/src/components/admin-sidebar.tsx` (see the ruled divergence); `apps/admin/src/styles.css`; `packages/ui/src/tokens.css` (the amendment replaces the clause that carried the edition term, content-pass clean by construction); `apps/admin/wrangler.jsonc` (the observability block is name-agnostic; v1's own `sevendays-v1-admin` name in ci.yml is untouched by the pick); `apps/admin/.env.example`; `.github/workflows/ci.yml` (byte-identical file, every hunk applies, both legs).
+- **Main-only, dropped:** `docs/plan.md`, `docs/progress.md`, `AGENTS.md` (content-dropped, v1's client-safe rewrite carries none of the edited sentences, the #145/#146 ruling recurring), the plan file (the recurring clean-add wrinkle, proactively `git rm` it from the index), `graphify-out/`.
+- **The owner-ruled v1-side divergence (the #168 reversal reversed, spec § Editions, "v1's / redirect is replaced by the dashboard route; the index + sidebar hunks ride as a recorded SPLIT"):**
+  1. `_shell.index.tsx`: v1's current file is #168's `beforeLoad` redirect to `/packages`, REPLACE it with main's dashboard file whole (the redirect's purpose is spent; post-login lands on the dashboard).
+  2. `admin-sidebar.tsx`: v1 has NO Overview group (dropped at #169's split). RE-ADD the group with **ONLY the Analytics item**, `{ to: '/', label: 'Analytics', icon: Activity }`, Appointments stays absent on v1 (the #169 ruling; it is booking-class content there). `NavTo` gains `'/'` only (`'/appointments'` stays out of the union). The nav comment on v1 reads: the Overview group carries the Analytics dashboard (#186/#168-reversal); appointments destinations remain out of scope in this build (#168).
+  3. **The `routeTree.gen.ts` codegen hazard (carried per the ticket):** this PR's route SET is identical on both branches (the index route file already exists on v1 as the redirect; no route is added or removed), so the pick should NOT touch `routeTree.gen.ts`, if the cherry-pick carries any routeTree hunk, restore v1's committed file (`git checkout v1 -- apps/admin/src/routeTree.gen.ts`, main's tree contains `/appointments` and `/login` registrations identical to v1's at this path… if a hunk DID apply, regenerate on v1 instead: `pnpm --filter @sevendays/admin generate-routes`, then verify the `Register` interface footer survives (the #169 `b4203af` provenance repair, a regen that drops the footer is the known trap; diff against v1's pre-pick file and restore the footer verbatim if the regen ate it).
 
-Execute per the runbook's SPLIT procedure: `cd ~/Projects/sevendays-v1-seed && git switch v1 && git pull --ff-only origin v1 && git fetch origin main`, `git cherry-pick -n <main-sha>`, drop the main-only paths (`git rm -qrf --ignore-unmatch -- docs/plan.md docs/progress.md AGENTS.md docs/superpowers/plans/2026-10-06-186-metrics-seam-dashboard-system-half.md graphify-out` — the DU exit on never-existing paths is expected), apply the two ruled divergences (index + sidebar), commit with the provenance + `Split:` line:
+Execute per the runbook's SPLIT procedure: `cd ~/Projects/sevendays-v1-seed && git switch v1 && git pull --ff-only origin v1 && git fetch origin main`, `git cherry-pick -n <main-sha>`, drop the main-only paths (`git rm -qrf --ignore-unmatch -- docs/plan.md docs/progress.md AGENTS.md docs/superpowers/plans/2026-10-06-186-metrics-seam-dashboard-system-half.md graphify-out`, the DU exit on never-existing paths is expected), apply the two ruled divergences (index + sidebar), commit with the provenance + `Split:` line:
 
 ```text
-Split: main-only paths dropped — docs/plan.md, docs/progress.md, AGENTS.md, docs/superpowers/plans/…186….md, graphify-out/
+Split: main-only paths dropped, docs/plan.md, docs/progress.md, AGENTS.md, docs/superpowers/plans/…186….md, graphify-out/
 Ruled v1 divergence (spec § The Analytics Dashboard / § Editions): Overview nav re-added with Analytics only (#168's hide reversed for the dashboard; Appointments stays absent per #169); _shell.index.tsx's #168 redirect replaced by the dashboard route
 ```
 
-Then the locks: `pnpm install --frozen-lockfile` (the lockfile carries exactly one new resolution — recharts; a conflict means the regen was skipped — redo the transformed-lockfile procedure above), `pnpm build:packages && pnpm --filter @sevendays/api build`, `pnpm check` (35/35; **v1 admin floor expected 11 files / 94 tests** — the metrics tests are booking-free; reconcile actuals), `pnpm build`, the export audit (`cd ~/Projects/sevendays && node scripts/audit-v1-absence.mjs v1 --repo ~/Projects/sevendays-v1-seed` — exit 0), push v1, and confirm the run shows `check` + `Deploy v1 (private)` success with `Deploy teaser (main)` skipped. Note for the ledger: v1's CI environment carries none of the three tokens yet (ship-day swap per the spec) — the deployed v1 dashboard serves the curated not-configured states, by design; the fail-soft deploy notices name the gap on every v1 run.
+Then the locks: `pnpm install --frozen-lockfile` (the lockfile carries exactly one new resolution, recharts; a conflict means the regen was skipped, redo the transformed-lockfile procedure above), `pnpm build:packages && pnpm --filter @sevendays/api build`, `pnpm check` (35/35; **v1 admin floor expected 11 files / 94 tests**, the metrics tests are booking-free; reconcile actuals), `pnpm build`, the export audit (`cd ~/Projects/sevendays && node scripts/audit-v1-absence.mjs v1 --repo ~/Projects/sevendays-v1-seed`, exit 0), push v1, and confirm the run shows `check` + `Deploy v1 (private)` success with `Deploy teaser (main)` skipped. Note for the ledger: v1's CI environment carries none of the three tokens yet (ship-day swap per the spec), the deployed v1 dashboard serves the curated not-configured states, by design; the fail-soft deploy notices name the gap on every v1 run.
 
 - [ ] **Step 6: Ledger + issue close**
 
-Append one row to `docs/agents/v1-picks.md`'s ledger table (the established format) with the actual SHAs: date 2026-10-06, issue #186, main squash SHA, verdict `split`, v1 SHA, and the description naming: the metrics seam admin-side (probes module + CF client + gated server fns + queries) + the dashboard's system half at `/` (System Health incl. the per-frontend error widgets + Content + the Sentry link-out) + the #93 reversal (the shadcn chart component app-local on recharts, admin @theme --chart-*, tokens.css amendment, the lockfile regen) + the env/CI wiring (fail-soft token syncs both legs, script-name vars, admin observability); the ruled v1 divergence (Overview re-added with Analytics only, the #168 redirect replaced — the spec's recorded SPLIT); the classifier counts (v1-paths vs main-only drops); the locks' results (incl. the v1 admin floor and the tokens-absent-by-design note); the CI run numbers. Commit the ledger row to main:
+Append one row to `docs/agents/v1-picks.md`'s ledger table (the established format) with the actual SHAs: date 2026-10-06, issue #186, main squash SHA, verdict `split`, v1 SHA, and the description naming: the metrics seam admin-side (probes module + CF client + gated server fns + queries) + the dashboard's system half at `/` (System Health incl. the per-frontend error widgets + Content + the Sentry link-out) + the #93 reversal (the shadcn chart component app-local on recharts, admin @theme --chart-*, tokens.css amendment, the lockfile regen) + the env/CI wiring (fail-soft token syncs both legs, script-name vars, admin observability); the ruled v1 divergence (Overview re-added with Analytics only, the #168 redirect replaced, the spec's recorded SPLIT); the classifier counts (v1-paths vs main-only drops); the locks' results (incl. the v1 admin floor and the tokens-absent-by-design note); the CI run numbers. Commit the ledger row to main:
 
 ```bash
 git checkout main && git pull && git add docs/agents/v1-picks.md
-git commit -m "docs(v1-picks): #186 ledger row — the Analytics Dashboard split, the #168 reversal carried (#186)"
+git commit -m "docs(v1-picks): #186 ledger row, the Analytics Dashboard split, the #168 reversal carried (#186)"
 git push
 ```
 
 Then close the issue:
 
 ```bash
-gh issue close 186 --comment "Landed via #<PR_NUMBER> (main) + the v1 split <v1_SHA>. admin 11 files / 94 tests on main (the metrics lib-seam suite); pnpm check 35/35 + pnpm build green. The M6 roadmap box stays unticked until #187 (Traffic + Storage & Media — now unblocked on this seam); the dev-account token handoff is the issue comment above. The owner's variant reaction is recorded on this issue (Task 5)."
+gh issue close 186 --comment "Landed via #<PR_NUMBER> (main) + the v1 split <v1_SHA>. admin 11 files / 94 tests on main (the metrics lib-seam suite); pnpm check 35/35 + pnpm build green. The M6 roadmap box stays unticked until #187 (Traffic + Storage & Media, now unblocked on this seam); the dev-account token handoff is the issue comment above. The owner's variant reaction is recorded on this issue (Task 5)."
 ```
 

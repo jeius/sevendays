@@ -1,66 +1,66 @@
-# M7 Ticket 07 — The CMS-Wide Interaction System Implementation Plan
+# M7 Ticket 07, The CMS-Wide Interaction System Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Per repo AGENTS.md, tick completed boxes with the ✅ emoji (`- [✅]`), never plain `[x]`. **Tasks 7 and 8 are UI-bearing and load the installed UI/UX skill set at execution time** (`prototype` + `ui-ux-pro-max`, plus `ui-styling` as relevant — AGENTS.md rule, spec #94 amendment): **Task 7 renders the Submissions tab for an owner-reacted variants round, and Task 8 renders the status palette in BOTH themes for its own owner round** (the ticket's fourth AC demands both). Those two rounds are the only controller interactions inside the build; everything else runs to the gates.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Per repo AGENTS.md, tick completed boxes with the ✅ emoji (`- [✅]`), never plain `[x]`. **Tasks 7 and 8 are UI-bearing and load the installed UI/UX skill set at execution time** (`prototype` + `ui-ux-pro-max`, plus `ui-styling` as relevant, AGENTS.md rule, spec #94 amendment): **Task 7 renders the Submissions tab for an owner-reacted variants round, and Task 8 renders the status palette in BOTH themes for its own owner round** (the ticket's fourth AC demands both). Those two rounds are the only controller interactions inside the build; everything else runs to the gates.
 
-**Goal:** The CMS brought to the interaction standard its screens promised (ticket #218, spec § *CMS UX maturation — the system* — #165's pre-named interaction ticket): the **async sheet-Save contract** on all seven sheet surfaces (`onSave` returns `Promise<boolean>`; the shell holds Save pending — disabled + spinner + "Saving…" + `aria-busy` — and closes **only on success**; failure keeps the sheet open, state intact, retry safe; the `editorNonce`/`keepEditorOpen` remount machinery **deleted, not extended**), **one pending vocabulary** (disabled + `LoaderCircle` spinner + label swap "Saving…"/"Uploading…"/"Deleting…" + `aria-busy`; icon-only buttons take the spinner in place), the **action-class law** verified screen-by-screen (single-field flips + drag-reorders stay exactly as optimistic as they already are — never spinners; full-object writes + deletes become pending-guarded), **delete dialogs** wiring the live #213 DELETE routes on all nine entities (busy confirm, stays open on failure, the blocking references rendered in-body), the **Submissions tab** on the Testimonials screen over #216's moderation endpoints (pending-guarded accept-with-edit, reject-retains, delete-any-status), the **All/Active/Deactivated segment** on every CMS list toolbar including the gallery grid (default All per visit, rail/grid counts stay unfiltered), and the **`TODO(token-ruling)` status palette** settled via rendered variants in both themes. Loads (first-load-only skeletons, muted media boxes, no background-refetch flash) are already the on-disk pattern on every screen — this ticket verifies them and extends the pattern to the one new surface (the Submissions tab).
+**Goal:** The CMS brought to the interaction standard its screens promised (ticket #218, spec § *CMS UX maturation, the system*, #165's pre-named interaction ticket): the **async sheet-Save contract** on all seven sheet surfaces (`onSave` returns `Promise<boolean>`; the shell holds Save pending, disabled + spinner + "Saving…" + `aria-busy`, and closes **only on success**; failure keeps the sheet open, state intact, retry safe; the `editorNonce`/`keepEditorOpen` remount machinery **deleted, not extended**), **one pending vocabulary** (disabled + `LoaderCircle` spinner + label swap "Saving…"/"Uploading…"/"Deleting…" + `aria-busy`; icon-only buttons take the spinner in place), the **action-class law** verified screen-by-screen (single-field flips + drag-reorders stay exactly as optimistic as they already are, never spinners; full-object writes + deletes become pending-guarded), **delete dialogs** wiring the live #213 DELETE routes on all nine entities (busy confirm, stays open on failure, the blocking references rendered in-body), the **Submissions tab** on the Testimonials screen over #216's moderation endpoints (pending-guarded accept-with-edit, reject-retains, delete-any-status), the **All/Active/Deactivated segment** on every CMS list toolbar including the gallery grid (default All per visit, rail/grid counts stay unfiltered), and the **`TODO(token-ruling)` status palette** settled via rendered variants in both themes. Loads (first-load-only skeletons, muted media boxes, no background-refetch flash) are already the on-disk pattern on every screen, this ticket verifies them and extends the pattern to the one new surface (the Submissions tab).
 
-**Architecture:** Nine tasks, admin-only code (zero api / api-client / types / landing / db changes — the nine `remove()` wrappers and the whole `adminTestimonialSubmissions` group already live in `packages/api-client/src/routes/admin.ts` from #213/#216, and the blocked-delete 400 contract is already the API's): (1) the interaction system's pure lib seams, TDD — `save-contract.ts` (the contract reducer + close rule, the pending-vocabulary mapper, the blocker-line derivation), `status-segment.ts` (the three-state segment filter), `submissions-state.ts` (the tab's segment/filter/accept-edit/date seams), 3 new suites (+22 its; admin floor 18/195 → 21/217); (2) the server fns — nine `removeAdmin<Entity>` result-valued mutations over the existing wrappers + `fetchAdminTestimonialSubmissions`/`acceptAdminTestimonialSubmission`/`rejectAdminTestimonialSubmission`/`removeAdminTestimonialSubmission` + the `adminTestimonialSubmissionQueries` factory; (3) `shared.tsx`'s additive compositions — `PendingSpinner`, `StatusSegmented` (the WindowToggle recipe as pressed buttons), the `GuardedConfirm` busy-confirm engine + `DeleteGuardDialog` composition, `SubmissionStatusBadge`, and the optional `onDelete` slot on `RowIconActions`/`RowActionsCluster`; (4) the async Save contract everywhere — `LightEntityEditor`'s footer awaits, and the type wall (`onSave: () => Promise<boolean>`) forces all seven call sites (testimonials, print sizes, attires, add-ons, branches, studio services, gallery photo) into the same commit; the nonce machinery dies, proven by a grep gate; (5) delete wiring + the segment on the five light-entity screens; (6) gallery (grid + rail segments, card + rail deletes) and packages (table segment + row delete, the editor's Save and both cover-upload buttons upgraded to the vocabulary); (7) the Submissions tab as a new component beside the testimonials screen — the two-tab switch, the pending-first segment, the accept-with-edit sheet, reject/delete confirms, its own first-load skeleton; (8) the status-palette variants round in both themes + the loads verification sweep (the round may retune the candidate classes; the `TODO(token-ruling)` markers retire here); (9) gates + docs rotation — this ticket ticks **three** `docs/plan.md` M7 boxes (its own interaction-system box, plus the guarded-DELETE box that has waited on #218's dialogs, plus the testimonial-form box that has waited on #218's tab) — then the PR, the pre-ruled **PICK clean** v1 pick, the issue close, and `graphify update .`.
+**Architecture:** Nine tasks, admin-only code (zero api / api-client / types / landing / db changes, the nine `remove()` wrappers and the whole `adminTestimonialSubmissions` group already live in `packages/api-client/src/routes/admin.ts` from #213/#216, and the blocked-delete 400 contract is already the API's): (1) the interaction system's pure lib seams, TDD, `save-contract.ts` (the contract reducer + close rule, the pending-vocabulary mapper, the blocker-line derivation), `status-segment.ts` (the three-state segment filter), `submissions-state.ts` (the tab's segment/filter/accept-edit/date seams), 3 new suites (+22 its; admin floor 18/195 → 21/217); (2) the server fns, nine `removeAdmin<Entity>` result-valued mutations over the existing wrappers + `fetchAdminTestimonialSubmissions`/`acceptAdminTestimonialSubmission`/`rejectAdminTestimonialSubmission`/`removeAdminTestimonialSubmission` + the `adminTestimonialSubmissionQueries` factory; (3) `shared.tsx`'s additive compositions, `PendingSpinner`, `StatusSegmented` (the WindowToggle recipe as pressed buttons), the `GuardedConfirm` busy-confirm engine + `DeleteGuardDialog` composition, `SubmissionStatusBadge`, and the optional `onDelete` slot on `RowIconActions`/`RowActionsCluster`; (4) the async Save contract everywhere, `LightEntityEditor`'s footer awaits, and the type wall (`onSave: () => Promise<boolean>`) forces all seven call sites (testimonials, print sizes, attires, add-ons, branches, studio services, gallery photo) into the same commit; the nonce machinery dies, proven by a grep gate; (5) delete wiring + the segment on the five light-entity screens; (6) gallery (grid + rail segments, card + rail deletes) and packages (table segment + row delete, the editor's Save and both cover-upload buttons upgraded to the vocabulary); (7) the Submissions tab as a new component beside the testimonials screen, the two-tab switch, the pending-first segment, the accept-with-edit sheet, reject/delete confirms, its own first-load skeleton; (8) the status-palette variants round in both themes + the loads verification sweep (the round may retune the candidate classes; the `TODO(token-ruling)` markers retire here); (9) gates + docs rotation, this ticket ticks **three** `docs/plan.md` M7 boxes (its own interaction-system box, plus the guarded-DELETE box that has waited on #218's dialogs, plus the testimonial-form box that has waited on #218's tab), then the PR, the pre-ruled **PICK clean** v1 pick, the issue close, and `graphify update .`.
 
-**Tech Stack:** zero new dependencies, zero manifest changes, zero migrations, zero api/types/api-client/landing work — lucide-react **1.37.0** (probed live against the installed dist: `loader-circle.mjs` and `trash-2.mjs` both exist — `LoaderCircle` + `Trash2` are the two new icons), `@tanstack/react-query` **^5.102.8** (`mutateAsync` returns the promise the contract awaits; `isPending` drives the busy states), motion/react (the existing popup recipe), the Base UI sheet/alert-dialog primitives via `@sevendays/ui`, vitest plain-node (the admin lib-seam posture — no component/DOM tests), pnpm + Turborepo, `gh` CLI.
+**Tech Stack:** zero new dependencies, zero manifest changes, zero migrations, zero api/types/api-client/landing work, lucide-react **1.37.0** (probed live against the installed dist: `loader-circle.mjs` and `trash-2.mjs` both exist, `LoaderCircle` + `Trash2` are the two new icons), `@tanstack/react-query` **^5.102.8** (`mutateAsync` returns the promise the contract awaits; `isPending` drives the busy states), motion/react (the existing popup recipe), the Base UI sheet/alert-dialog primitives via `@sevendays/ui`, vitest plain-node (the admin lib-seam posture, no component/DOM tests), pnpm + Turborepo, `gh` CLI.
 
-**Spec:** Implements ticket [#218 "M7 ticket 07: the CMS-wide interaction system — async Save, pending vocabulary, segments, the Submissions tab"](https://github.com/jeius/sevendays/issues/218) (label `ready-for-agent`), whose parent is the M7 spec `docs/specs/2026-10-02-m7-experience-cms-maturation-spec.md` (issue #172 — § *CMS UX maturation — the system (#165)* is this ticket's ruling, User Stories 45–47 + 50 its acceptance, stories 42–44 the Submissions tab's; § *Guarded DELETE everywhere* § *Confirmation UX* pins the delete-dialog posture; § *Testing Decisions* pins "the async Save-contract state seam, the pending-vocabulary mapper, the Submissions-tab state" as admin lib-seam law and "the `editorNonce` machinery's deletion is proven by the contract tests' new shape"; § *v1-pick classes* pre-rules this payload **PICK clean** — "Admin surfaces exist on both editions; the Submissions tab lands on both"). The ticket's four acceptance criteria, verbatim: the async Save contract on all sheet surfaces + the Submissions tab, the nonce machinery gone (proven by the contract tests' new shape) · the action-class law applied screen-by-screen; admin lib-seam tests over the state seams · delete dialogs pending-guarded with blockers in-body across all nine entities · the segment on every toolbar; the status palette owner-reacted via rendered variants, both themes. Key recon facts (2026-10-15, main `8bed7f2` — post-#217; every file below read this session):
+**Spec:** Implements ticket [#218 "M7 ticket 07: the CMS-wide interaction system, async Save, pending vocabulary, segments, the Submissions tab"](https://github.com/jeius/sevendays/issues/218) (label `ready-for-agent`), whose parent is the M7 spec `docs/specs/2026-10-02-m7-experience-cms-maturation-spec.md` (issue #172, § *CMS UX maturation, the system (#165)* is this ticket's ruling, User Stories 45–47 + 50 its acceptance, stories 42–44 the Submissions tab's; § *Guarded DELETE everywhere* § *Confirmation UX* pins the delete-dialog posture; § *Testing Decisions* pins "the async Save-contract state seam, the pending-vocabulary mapper, the Submissions-tab state" as admin lib-seam law and "the `editorNonce` machinery's deletion is proven by the contract tests' new shape"; § *v1-pick classes* pre-rules this payload **PICK clean**, "Admin surfaces exist on both editions; the Submissions tab lands on both"). The ticket's four acceptance criteria, verbatim: the async Save contract on all sheet surfaces + the Submissions tab, the nonce machinery gone (proven by the contract tests' new shape) · the action-class law applied screen-by-screen; admin lib-seam tests over the state seams · delete dialogs pending-guarded with blockers in-body across all nine entities · the segment on every toolbar; the status palette owner-reacted via rendered variants, both themes. Key recon facts (2026-10-15, main `8bed7f2`, post-#217; every file below read this session):
 
-- **The machinery this ticket deletes (swept — six screens, seven sheets):** the `editorNonce`/`keepEditorOpen` pair lives at `testimonials-screen.tsx:226,370,649` · `studio-services-screen.tsx:160,400,648` · `branches-screen.tsx:112,335,590` · `lookups-screen.tsx:147,349,425,474` (two sheets — print sizes + attires) · `gallery-screen.tsx:662,1085,1266` (the photo sheet) · `addons-screen.tsx:169,421,675`. Every screen runs the same law: `editing`/`editorOpen`/`editorNonce` state triple; `handleEditorSave` validates and **veto-throws** (`throw new Error('<entity>-editor-validation-hold')` — the throw is the current keep-open channel, swallowed by the shell); the save mutation's `onSuccess` maps `!ok` to conflict fields + `keepEditorOpen(input)` which re-arms `editing`, re-sets `editorOpen`, and bumps the nonce; the `LightEntityEditor` mounts with `key={editorNonce}`. The async contract replaces the whole mechanism: `onSave` resolves `true` (close) or `false` (hold, state intact — no throw, no remount); add-ons and studio services keep their AQ-4 create→edit promotion on a `matrix-failed` outcome by re-`setEditing` the created row and resolving `false`.
-- **The optimistic law already holds — untouched:** every screen's single-row flip (activate/deactivate) and drag-reorder are already optimistic with snapshot rollback + toast (the `flip`/`order` mutations with `onMutate`/`onError`/`onSettled`); `DeactivateConfirm` already closes on confirm. This ticket changes none of them — the action-class law's optimistic half is verification, not construction.
+- **The machinery this ticket deletes (swept, six screens, seven sheets):** the `editorNonce`/`keepEditorOpen` pair lives at `testimonials-screen.tsx:226,370,649` · `studio-services-screen.tsx:160,400,648` · `branches-screen.tsx:112,335,590` · `lookups-screen.tsx:147,349,425,474` (two sheets, print sizes + attires) · `gallery-screen.tsx:662,1085,1266` (the photo sheet) · `addons-screen.tsx:169,421,675`. Every screen runs the same law: `editing`/`editorOpen`/`editorNonce` state triple; `handleEditorSave` validates and **veto-throws** (`throw new Error('<entity>-editor-validation-hold')`, the throw is the current keep-open channel, swallowed by the shell); the save mutation's `onSuccess` maps `!ok` to conflict fields + `keepEditorOpen(input)` which re-arms `editing`, re-sets `editorOpen`, and bumps the nonce; the `LightEntityEditor` mounts with `key={editorNonce}`. The async contract replaces the whole mechanism: `onSave` resolves `true` (close) or `false` (hold, state intact, no throw, no remount); add-ons and studio services keep their AQ-4 create→edit promotion on a `matrix-failed` outcome by re-`setEditing` the created row and resolving `false`.
+- **The optimistic law already holds, untouched:** every screen's single-row flip (activate/deactivate) and drag-reorder are already optimistic with snapshot rollback + toast (the `flip`/`order` mutations with `onMutate`/`onError`/`onSettled`); `DeactivateConfirm` already closes on confirm. This ticket changes none of them, the action-class law's optimistic half is verification, not construction.
 - **The wrappers are already here (zero client work):** `packages/api-client/src/routes/admin.ts` carries `remove()` on all nine entity groups (`servicePackages.remove`, `branches.remove`, `studioServices.remove`, `addons.remove`, `printSizes.remove`, `attires.remove`, `galleryCategories.remove`, `galleryPhotos.remove`, `testimonials.remove`) plus the whole `testimonialSubmissions` group (`list()` newest-first, `accept(id, json?)`, `reject(id)`, `remove(id)`) from #216. Nothing in `packages/` changes in this ticket.
-- **The blocked-delete contract (pinned, owner-ratified 2026-10-12):** a blocked delete answers the house 400 with message **`'Blocked by existing references.'`** and one `{ path: string[], message: string }` detail per blocking family — `apps/api/src/services/admin-delete.ts` pins the exact messages: gallery categories `contains ${n} photo(s)` on `['photos']`; print sizes `used by ${n} package inclusion(s)` on `['inclusions']`; attires `attached to ${n} package inclusion(s)` on `['inclusions']`; branches/add-ons/studio services/packages `referenced by ${n} appointment(s)` on `['appointments']`. Testimonials and gallery photos are blocked by nothing (always deletable). The admin server fn surfaces these as `AdminMutationResult`'s `{ ok: false, status, message, details }` — the dialog renders `blockerLines(details)` in-body.
+- **The blocked-delete contract (pinned, owner-ratified 2026-10-12):** a blocked delete answers the house 400 with message **`'Blocked by existing references.'`** and one `{ path: string[], message: string }` detail per blocking family, `apps/api/src/services/admin-delete.ts` pins the exact messages: gallery categories `contains ${n} photo(s)` on `['photos']`; print sizes `used by ${n} package inclusion(s)` on `['inclusions']`; attires `attached to ${n} package inclusion(s)` on `['inclusions']`; branches/add-ons/studio services/packages `referenced by ${n} appointment(s)` on `['appointments']`. Testimonials and gallery photos are blocked by nothing (always deletable). The admin server fn surfaces these as `AdminMutationResult`'s `{ ok: false, status, message, details }`, the dialog renders `blockerLines(details)` in-body.
 - **The server-fn pattern (pinned):** every mutation server fn in `apps/admin/src/lib/admin.functions.ts` is `createServerFn({ method: 'POST', strict: { output: false } }).validator(...)` → result-valued `AdminMutationResult<T>` with the `ApiClientError → { ok: false, status, message, details }` catch. The nine removes + four submissions fns copy `saveAdminSiteSettings`'s exact shape (`admin.functions.ts:289-313` is the shortest canonical).
-- **Loads are already compliant on disk (verified this session):** every list screen renders skeletons only under `isPending || !data` (first load — react-query v5 `isPending` is false on background refetch, so no refetch flash), echoing its row anatomy; the gallery thumb is a `bg-muted` box with `loading='lazy'` (`gallery-screen.tsx:191-197`); the upload tray already speaks "Uploading…/Committing…/Done" (`trayStatusText`). This ticket's loads work = the same pattern on the one new surface (the Submissions tab) + a Task 8 verification sweep.
-- **The palette sites (swept — `TODO(token-ruling)` appears at exactly three palette sites):** `shared.tsx:77` (the `StatusBadge` dot: `bg-green-500`/`bg-gray-400`), `shared.tsx:254` (the reactivate icon's `text-green-600`), `bulk-bar.tsx:138` (the bulk reactivate's `text-green-600`). The other nine `TODO(token-ruling)` hits are the unrelated card-radius step-down — NOT this ticket's. **Measured contrast (this session, against white and the ruled dark base `#1b1e22`):** the current `text-green-600` is **3.30:1** on white — existing AA debt for interactive text; the candidates fix it: `text-green-700` (`#15803d`) **5.02:1** light ✓, `dark:text-green-400` (`#4ade80`) **9.60:1** dark ✓; dot candidates (decorative, `aria-hidden`, sr-only text carries the signal): active `bg-green-500 dark:bg-green-400` (2.28/7.34), deactivated `bg-gray-400 dark:bg-zinc-500` (2.56/3.46 — visible, decorative). The audit viewer's `AUDIT_ACTION_BADGE_CLASSES` (audit-log-screen.tsx:57-68) is the badge-palette precedent for the new `SubmissionStatusBadge` (pending → amber family, accepted → green family, rejected → slate — the #216 controller ruling's hue discipline).
-- **The segmented-control precedent:** `components/dashboard/window-toggle.tsx` — `role='group'` + `aria-label` on an `inline-flex overflow-hidden rounded-lg border` container, active segment `bg-brand-800 text-primary-foreground px-3 py-1.5 text-xs font-medium`, inactive `hover:bg-accent px-3 py-1.5 text-xs`. `StatusSegmented` ports the recipe to pressed buttons (`aria-pressed`, local state — no search params).
-- **Sibling fences (spec § Sequencing; the tickets' own bodies):** NOT here, regardless of temptation: **the packages expanded row** — #219's whole ticket (frames chips, inclusions bullets, duration line — the packages table's expand panel keeps rendering today's description-only content); **upload UI maturation** — #220 (drag-and-drop, in-flight cancel, leave-confirm; the tray and picker stay exactly as they are); **the Account/Users tabs + forgot-password** — #221; **the Resend/sending-domain work** — #222; **the landing redesign** — #223/#224 (no landing file changes at all); **the Site tab** — already #215's, untouched; **booking-endpoint rate limiting** — v2's. The `settings-screen.tsx` (not a sheet surface — a full-screen form) is out of the Save-contract sweep by construction.
-- **Baselines (live, per AGENTS.md post-#217; admin re-verified by running the suite this session):** types 17 files / 167 tests; api 30 passed + 1 skipped files (31) / 422 passed + 3 skipped; api-client 5 files / 45 tests; **admin 18 files / 195 tests**; landing 10 files / 92 tests; db 4 files. After Task 1: **admin 21 files / 217 tests** (+22 its: save-contract 10, status-segment 4, submissions-state 8). Every other package's floor is untouched by this ticket. (Executor reconciles actuals; if any gate count differs, reconcile before proceeding — do not loosen assertions.)
-- **The three `docs/plan.md` boxes this ticket ticks (Task 9):** (a) `- [ ] Admin — the CMS-wide interaction system (#165)` — this ticket's own; (b) `- [ ] API — guarded DELETE everywhere` — its annotation already says "the box stays unticked until #218 lands the delete dialogs on all nine screens — the shared checkbox"; (c) `- [ ] API + admin — the public testimonial form (#161)` — its annotation already says "the box waits for #218's Submissions tab." All three flip to `- [✅]` with dated annotations; nothing else in the M7 block changes.
+- **Loads are already compliant on disk (verified this session):** every list screen renders skeletons only under `isPending || !data` (first load, react-query v5 `isPending` is false on background refetch, so no refetch flash), echoing its row anatomy; the gallery thumb is a `bg-muted` box with `loading='lazy'` (`gallery-screen.tsx:191-197`); the upload tray already speaks "Uploading…/Committing…/Done" (`trayStatusText`). This ticket's loads work = the same pattern on the one new surface (the Submissions tab) + a Task 8 verification sweep.
+- **The palette sites (swept, `TODO(token-ruling)` appears at exactly three palette sites):** `shared.tsx:77` (the `StatusBadge` dot: `bg-green-500`/`bg-gray-400`), `shared.tsx:254` (the reactivate icon's `text-green-600`), `bulk-bar.tsx:138` (the bulk reactivate's `text-green-600`). The other nine `TODO(token-ruling)` hits are the unrelated card-radius step-down, NOT this ticket's. **Measured contrast (this session, against white and the ruled dark base `#1b1e22`):** the current `text-green-600` is **3.30:1** on white, existing AA debt for interactive text; the candidates fix it: `text-green-700` (`#15803d`) **5.02:1** light ✓, `dark:text-green-400` (`#4ade80`) **9.60:1** dark ✓; dot candidates (decorative, `aria-hidden`, sr-only text carries the signal): active `bg-green-500 dark:bg-green-400` (2.28/7.34), deactivated `bg-gray-400 dark:bg-zinc-500` (2.56/3.46, visible, decorative). The audit viewer's `AUDIT_ACTION_BADGE_CLASSES` (audit-log-screen.tsx:57-68) is the badge-palette precedent for the new `SubmissionStatusBadge` (pending → amber family, accepted → green family, rejected → slate, the #216 controller ruling's hue discipline).
+- **The segmented-control precedent:** `components/dashboard/window-toggle.tsx`, `role='group'` + `aria-label` on an `inline-flex overflow-hidden rounded-lg border` container, active segment `bg-brand-800 text-primary-foreground px-3 py-1.5 text-xs font-medium`, inactive `hover:bg-accent px-3 py-1.5 text-xs`. `StatusSegmented` ports the recipe to pressed buttons (`aria-pressed`, local state, no search params).
+- **Sibling fences (spec § Sequencing; the tickets' own bodies):** NOT here, regardless of temptation: **the packages expanded row**, #219's whole ticket (frames chips, inclusions bullets, duration line, the packages table's expand panel keeps rendering today's description-only content); **upload UI maturation**, #220 (drag-and-drop, in-flight cancel, leave-confirm; the tray and picker stay exactly as they are); **the Account/Users tabs + forgot-password**, #221; **the Resend/sending-domain work**, #222; **the landing redesign**, #223/#224 (no landing file changes at all); **the Site tab**, already #215's, untouched; **booking-endpoint rate limiting**, v2's. The `settings-screen.tsx` (not a sheet surface, a full-screen form) is out of the Save-contract sweep by construction.
+- **Baselines (live, per AGENTS.md post-#217; admin re-verified by running the suite this session):** types 17 files / 167 tests; api 30 passed + 1 skipped files (31) / 422 passed + 3 skipped; api-client 5 files / 45 tests; **admin 18 files / 195 tests**; landing 10 files / 92 tests; db 4 files. After Task 1: **admin 21 files / 217 tests** (+22 its: save-contract 10, status-segment 4, submissions-state 8). Every other package's floor is untouched by this ticket. (Executor reconciles actuals; if any gate count differs, reconcile before proceeding, do not loosen assertions.)
+- **The three `docs/plan.md` boxes this ticket ticks (Task 9):** (a) `- [ ] Admin, the CMS-wide interaction system (#165)`, this ticket's own; (b) `- [ ] API, guarded DELETE everywhere`, its annotation already says "the box stays unticked until #218 lands the delete dialogs on all nine screens, the shared checkbox"; (c) `- [ ] API + admin, the public testimonial form (#161)`, its annotation already says "the box waits for #218's Submissions tab." All three flip to `- [✅]` with dated annotations; nothing else in the M7 block changes.
 
 ## Global Constraints
 
-- **Branch & baseline:** `feat/218-cms-interaction-system` off main `8bed7f2` (plain checkout — single linear ticket, no worktree needed). This plan file is the branch's first commit. Commit messages follow the repo's `type(scope): … (#218)` squash style; every commit below is pinned verbatim. Evidence (test red/green output, grep-gate output, variants screenshots) lands in gitignored `.superpowers/sdd/2026-10-15-218-cms-interaction-system/`.
-- **Gates (repo AGENTS.md, verbatim duties):** **zero manifest changes — `pnpm-lock.yaml` is untouched and `pnpm install` never runs** (lucide/react-query/motion all installed). Every task commits only with the checks green **for the packages it touched** (this ticket touches only `apps/admin` + docs — `pnpm --filter @sevendays/admin fix` then `test -- --run` then `typecheck` is the per-task gate; run `pnpm --filter @sevendays/admin fix` BEFORE committing and accept its rewrites). No `pnpm build:packages` is needed (no `packages/` source changes). Never stage `graphify-out/` churn (dirty graph files are expected, per AGENTS.md). Never commit secrets. Tick checklist boxes with `- [✅]`, never `[x]` (this plan file and `docs/plan.md` alike). Run `graphify update .` at close (Task 9 — code was modified).
-- **The contract law (binding, spec § the async Save contract):** `LightEntityEditor.onSave` becomes `() => Promise<boolean>` — resolve `true` = success (the shell closes), resolve `false` = hold (the sheet stays open, state intact, retry safe), throw = hold (swallowed by the shell; the screen's toast owns the signal). The shell holds `saving` state: Save is disabled + `aria-busy` + spinner + the "Saving…" label swap while in flight; Cancel is disabled while saving. The `editorNonce`/`keepEditorOpen` machinery is **deleted, not extended** — Task 4 ends with a grep gate proving zero hits. The seven sheet surfaces are: testimonials, print sizes, attires, add-ons, branches, studio services, gallery photo. The Submissions tab's accept sheet rides the same component; the package editor (a full screen, not a sheet) upgrades only its Save button's vocabulary.
-- **The vocabulary law (binding, spec § one pending vocabulary):** pending = disabled + `LoaderCircle` spinner (`aria-hidden`, `animate-spin`, `currentColor`) + label swap + `aria-busy`. The three spec-pinned busy labels are constants in `save-contract.ts`: `SAVING_LABEL = 'Saving…'`, `UPLOADING_LABEL = 'Uploading…'`, `DELETING_LABEL = 'Deleting…'`. Icon-only buttons take the spinner IN PLACE of the icon (no label swap — there is no label). Theme-free by construction (`currentColor` + tokens only).
-- **The action-class law (binding, spec § the action-class law):** single-field flips (activate/deactivate) and drag-reorders stay exactly as they are — optimistic, instant, snapshot rollback + toast on failure, NEVER spinners (Task 8 verifies, no code change). Full-object writes (create/update, the accept/reject moderation verbs) and deletes are pending-guarded. `DeactivateConfirm` keeps close-on-confirm untouched.
+- **Branch & baseline:** `feat/218-cms-interaction-system` off main `8bed7f2` (plain checkout, single linear ticket, no worktree needed). This plan file is the branch's first commit. Commit messages follow the repo's `type(scope): … (#218)` squash style; every commit below is pinned verbatim. Evidence (test red/green output, grep-gate output, variants screenshots) lands in gitignored `.superpowers/sdd/2026-10-15-218-cms-interaction-system/`.
+- **Gates (repo AGENTS.md, verbatim duties):** **zero manifest changes, `pnpm-lock.yaml` is untouched and `pnpm install` never runs** (lucide/react-query/motion all installed). Every task commits only with the checks green **for the packages it touched** (this ticket touches only `apps/admin` + docs, `pnpm --filter @sevendays/admin fix` then `test -- --run` then `typecheck` is the per-task gate; run `pnpm --filter @sevendays/admin fix` BEFORE committing and accept its rewrites). No `pnpm build:packages` is needed (no `packages/` source changes). Never stage `graphify-out/` churn (dirty graph files are expected, per AGENTS.md). Never commit secrets. Tick checklist boxes with `- [✅]`, never `[x]` (this plan file and `docs/plan.md` alike). Run `graphify update .` at close (Task 9, code was modified).
+- **The contract law (binding, spec § the async Save contract):** `LightEntityEditor.onSave` becomes `() => Promise<boolean>`, resolve `true` = success (the shell closes), resolve `false` = hold (the sheet stays open, state intact, retry safe), throw = hold (swallowed by the shell; the screen's toast owns the signal). The shell holds `saving` state: Save is disabled + `aria-busy` + spinner + the "Saving…" label swap while in flight; Cancel is disabled while saving. The `editorNonce`/`keepEditorOpen` machinery is **deleted, not extended**, Task 4 ends with a grep gate proving zero hits. The seven sheet surfaces are: testimonials, print sizes, attires, add-ons, branches, studio services, gallery photo. The Submissions tab's accept sheet rides the same component; the package editor (a full screen, not a sheet) upgrades only its Save button's vocabulary.
+- **The vocabulary law (binding, spec § one pending vocabulary):** pending = disabled + `LoaderCircle` spinner (`aria-hidden`, `animate-spin`, `currentColor`) + label swap + `aria-busy`. The three spec-pinned busy labels are constants in `save-contract.ts`: `SAVING_LABEL = 'Saving…'`, `UPLOADING_LABEL = 'Uploading…'`, `DELETING_LABEL = 'Deleting…'`. Icon-only buttons take the spinner IN PLACE of the icon (no label swap, there is no label). Theme-free by construction (`currentColor` + tokens only).
+- **The action-class law (binding, spec § the action-class law):** single-field flips (activate/deactivate) and drag-reorders stay exactly as they are, optimistic, instant, snapshot rollback + toast on failure, NEVER spinners (Task 8 verifies, no code change). Full-object writes (create/update, the accept/reject moderation verbs) and deletes are pending-guarded. `DeactivateConfirm` keeps close-on-confirm untouched.
 - **The delete-dialog law (binding, spec § Confirmation UX):** busy confirm (the confirm button disabled + spinner + "Deleting…" + `aria-busy`), the dialog **stays open on failure** with the blocking references rendered in-body as `blockerLines(details)` (never toast-and-close); success clears the dialog + invalidates + toasts `'Deleted.'`. The dialog names the row; where the entity carries media, the body states the images go with it (the per-entity `mediaNote` prop).
-- **The segment law (binding, spec § retired rows + the Active filter):** every CMS list toolbar gains **All / Active / Deactivated** — packages, branches, lookups (BOTH sections), testimonials, add-ons, studio services, and the gallery grid. Default **All** per visit (local `useState`, no persistence); rail/grid counts stay **unfiltered** staff-truth totals; the filtered view is a render-time derivation — the underlying query caches and all mutations keep operating on the full lists. Segmented ≠ All disables nothing: drag-reorder under a filter uses the gallery's slot-swap law (reorder over the filtered view producing the complete global order — `reorderVisiblePhotos` from `gallery-state.ts`, reused by the testimonials drag).
-- **Copy pins are semantic, formatting is biome's:** every fenced file/comment/code block below lands verbatim in content; the package `fix` scripts then normalize quoting/ordering/import order to house style — accept the rewrite, commit the result. Spec-pinned strings (the three busy labels, the segment labels All/Active/Deactivated, 'Deleted.', 'Saved.') land verbatim with no marker. New unrated staff-facing copy carries the house `TODO(owner-copy)` marker per the on-disk convention and is pinned verbatim in this plan: the delete-dialog body lines, the accept-sheet description, the `ACCEPTING_LABEL`/reject busy label, the Submissions tab's empty/queue lines, and the two accept-edit min-error lines (reused verbatim from the landing form's `TODO(owner-copy)` pair: 'Tell us a little more — at least 20 characters.' / 'Your name needs at least 2 characters.'). The two owner rounds (Tasks 7–8) may retune any of them.
+- **The segment law (binding, spec § retired rows + the Active filter):** every CMS list toolbar gains **All / Active / Deactivated**, packages, branches, lookups (BOTH sections), testimonials, add-ons, studio services, and the gallery grid. Default **All** per visit (local `useState`, no persistence); rail/grid counts stay **unfiltered** staff-truth totals; the filtered view is a render-time derivation, the underlying query caches and all mutations keep operating on the full lists. Segmented ≠ All disables nothing: drag-reorder under a filter uses the gallery's slot-swap law (reorder over the filtered view producing the complete global order, `reorderVisiblePhotos` from `gallery-state.ts`, reused by the testimonials drag).
+- **Copy pins are semantic, formatting is biome's:** every fenced file/comment/code block below lands verbatim in content; the package `fix` scripts then normalize quoting/ordering/import order to house style, accept the rewrite, commit the result. Spec-pinned strings (the three busy labels, the segment labels All/Active/Deactivated, 'Deleted.', 'Saved.') land verbatim with no marker. New unrated staff-facing copy carries the house `TODO(owner-copy)` marker per the on-disk convention and is pinned verbatim in this plan: the delete-dialog body lines, the accept-sheet description, the `ACCEPTING_LABEL`/reject busy label, the Submissions tab's empty/queue lines, and the two accept-edit min-error lines (reused verbatim from the landing form's `TODO(owner-copy)` pair: 'Tell us a little more, at least 20 characters.' / 'Your name needs at least 2 characters.'). The two owner rounds (Tasks 7–8) may retune any of them.
 - **The palette discipline:** the candidate classes land with their `TODO(token-ruling)` comments INTACT through Tasks 3–7; Task 8's owner round settles them (retune as ruled), and only then do the three palette `TODO(token-ruling)` comments retire (replaced by an owner-reacted note carrying the date). The six card-radius `TODO(token-ruling)` comments are NOT this ticket's and never move.
-- **Scope fence (verbatim):** Task 1 edits only `apps/admin/src/lib/{save-contract.ts (new), save-contract.test.ts (new), status-segment.ts (new), status-segment.test.ts (new), submissions-state.ts (new), submissions-state.test.ts (new)}`. Task 2 edits only `apps/admin/src/lib/{admin.functions.ts, cms-queries.ts}`. Task 3 edits only `apps/admin/src/components/cms/shared.tsx`. Task 4 edits only `apps/admin/src/components/cms/shared.tsx` (the `LightEntityEditor` contract) + the seven call-site files `apps/admin/src/components/{testimonials/testimonials-screen.tsx, lookups/lookups-screen.tsx, addons/addons-screen.tsx, branches/branches-screen.tsx, studio-services/studio-services-screen.tsx, gallery/gallery-screen.tsx}`. Task 5 edits only `apps/admin/src/components/{testimonials/testimonials-screen.tsx, lookups/lookups-screen.tsx, addons/addons-screen.tsx, branches/branches-screen.tsx, studio-services/studio-services-screen.tsx, cms/bulk-bar.tsx}`. Task 6 edits only `apps/admin/src/components/{gallery/gallery-screen.tsx, packages/packages-table.tsx, packages/package-editor.tsx, branches/branches-screen.tsx}`. Task 7 edits only `apps/admin/src/components/testimonials/{testimonials-screen.tsx, submissions-tab.tsx (new)}`. Task 8 edits only palette class strings at the sites Tasks 3–7 landed (plus screenshot evidence). Task 9 rotates `docs/plan.md`, `docs/progress.md`, `AGENTS.md`, `docs/agents/v1-picks.md` (post-merge), `graphify-out/`, and works the PR/pick/issue — nothing else. NOT here: everything in the header's sibling-fences bullet.
+- **Scope fence (verbatim):** Task 1 edits only `apps/admin/src/lib/{save-contract.ts (new), save-contract.test.ts (new), status-segment.ts (new), status-segment.test.ts (new), submissions-state.ts (new), submissions-state.test.ts (new)}`. Task 2 edits only `apps/admin/src/lib/{admin.functions.ts, cms-queries.ts}`. Task 3 edits only `apps/admin/src/components/cms/shared.tsx`. Task 4 edits only `apps/admin/src/components/cms/shared.tsx` (the `LightEntityEditor` contract) + the seven call-site files `apps/admin/src/components/{testimonials/testimonials-screen.tsx, lookups/lookups-screen.tsx, addons/addons-screen.tsx, branches/branches-screen.tsx, studio-services/studio-services-screen.tsx, gallery/gallery-screen.tsx}`. Task 5 edits only `apps/admin/src/components/{testimonials/testimonials-screen.tsx, lookups/lookups-screen.tsx, addons/addons-screen.tsx, branches/branches-screen.tsx, studio-services/studio-services-screen.tsx, cms/bulk-bar.tsx}`. Task 6 edits only `apps/admin/src/components/{gallery/gallery-screen.tsx, packages/packages-table.tsx, packages/package-editor.tsx, branches/branches-screen.tsx}`. Task 7 edits only `apps/admin/src/components/testimonials/{testimonials-screen.tsx, submissions-tab.tsx (new)}`. Task 8 edits only palette class strings at the sites Tasks 3–7 landed (plus screenshot evidence). Task 9 rotates `docs/plan.md`, `docs/progress.md`, `AGENTS.md`, `docs/agents/v1-picks.md` (post-merge), `graphify-out/`, and works the PR/pick/issue, nothing else. NOT here: everything in the header's sibling-fences bullet.
 
 ## File Structure
 
 ```text
 apps/admin/src/lib/
-  save-contract.ts                     # create (T1) — the contract reducer + close rule, the vocabulary mapper, blockerLines
-  save-contract.test.ts                # create (T1) — the 10-it contract suite
-  status-segment.ts                    # create (T1) — StatusSegment + the filter (the segment's pure half)
-  status-segment.test.ts               # create (T1) — the 4-it segment suite
-  submissions-state.ts                 # create (T1) — the tab's segment/filter, accept-edit state/validation/payload, submittedOn
-  submissions-state.test.ts            # create (T1) — the 8-it tab suite
-  admin.functions.ts                   # modify (T2) — nine removes + the four submissions fns
-  cms-queries.ts                       # modify (T2) — adminTestimonialSubmissionQueries
+  save-contract.ts                     # create (T1), the contract reducer + close rule, the vocabulary mapper, blockerLines
+  save-contract.test.ts                # create (T1), the 10-it contract suite
+  status-segment.ts                    # create (T1), StatusSegment + the filter (the segment's pure half)
+  status-segment.test.ts               # create (T1), the 4-it segment suite
+  submissions-state.ts                 # create (T1), the tab's segment/filter, accept-edit state/validation/payload, submittedOn
+  submissions-state.test.ts            # create (T1), the 8-it tab suite
+  admin.functions.ts                   # modify (T2), nine removes + the four submissions fns
+  cms-queries.ts                       # modify (T2), adminTestimonialSubmissionQueries
 apps/admin/src/components/cms/
-  shared.tsx                           # modify (T3+T4) — PendingSpinner, StatusSegmented, GuardedConfirm, DeleteGuardDialog,
+  shared.tsx                           # modify (T3+T4), PendingSpinner, StatusSegmented, GuardedConfirm, DeleteGuardDialog,
                                        #   SubmissionStatusBadge, the row-actions onDelete slot; the async LightEntityEditor
-  bulk-bar.tsx                         # modify (T5) — the palette candidates (round-retunable)
+  bulk-bar.tsx                         # modify (T5), the palette candidates (round-retunable)
 apps/admin/src/components/
-  testimonials/testimonials-screen.tsx # modify (T4+T5+T7) — the async save, delete + segment, the two-tab switch
-  testimonials/submissions-tab.tsx     # create (T7) — the Submissions tab composition
-  lookups/lookups-screen.tsx           # modify (T4+T5) — both sheets async; per-section delete + segment
+  testimonials/testimonials-screen.tsx # modify (T4+T5+T7), the async save, delete + segment, the two-tab switch
+  testimonials/submissions-tab.tsx     # create (T7), the Submissions tab composition
+  lookups/lookups-screen.tsx           # modify (T4+T5), both sheets async; per-section delete + segment
   addons/addons-screen.tsx             # modify (T4+T5)
-  branches/branches-screen.tsx         # modify (T4+T5+T6) — + the cover button's vocabulary
+  branches/branches-screen.tsx         # modify (T4+T5+T6), + the cover button's vocabulary
   studio-services/studio-services-screen.tsx # modify (T4+T5)
-  gallery/gallery-screen.tsx           # modify (T4+T6) — the photo sheet async; grid + rail segments; card + rail deletes
-  packages/packages-table.tsx          # modify (T6) — the segment row + the row delete
-  packages/package-editor.tsx          # modify (T6) — the Save + cover buttons' vocabulary
+  gallery/gallery-screen.tsx           # modify (T4+T6), the photo sheet async; grid + rail segments; card + rail deletes
+  packages/packages-table.tsx          # modify (T6), the segment row + the row delete
+  packages/package-editor.tsx          # modify (T6), the Save + cover buttons' vocabulary
 docs/plan.md docs/progress.md AGENTS.md graphify-out/ docs/agents/v1-picks.md  # T9
 ```
 
@@ -68,15 +68,15 @@ docs/plan.md docs/progress.md AGENTS.md graphify-out/ docs/agents/v1-picks.md  #
 
 ### Task 1: The interaction system's pure lib seams (TDD)
 
-Three modules, three suites, plain data in and out — the components in Tasks 3–7 render these; the modules never import React. This is the ticket's "admin lib-seam tests over the state seams" acceptance criterion.
+Three modules, three suites, plain data in and out, the components in Tasks 3–7 render these; the modules never import React. This is the ticket's "admin lib-seam tests over the state seams" acceptance criterion.
 
 **Files:**
 - Create (test-first): `apps/admin/src/lib/save-contract.test.ts`, `apps/admin/src/lib/status-segment.test.ts`, `apps/admin/src/lib/submissions-state.test.ts`
 - Create: `apps/admin/src/lib/save-contract.ts`, `apps/admin/src/lib/status-segment.ts`, `apps/admin/src/lib/submissions-state.ts`
 
 **Interfaces:**
-- Produces (what Tasks 3–7 consume): from `save-contract.ts` — `SAVING_LABEL`/`UPLOADING_LABEL`/`DELETING_LABEL` (the three spec-pinned busy labels) + `ACCEPTING_LABEL`/`REJECTING_LABEL` (the moderation extensions, `TODO(owner-copy)`), `pendingVocabulary({ pending, idleLabel, busyLabel }) → { disabled, ariaBusy, label }`, `SaveContractState`/`idleSaveContract`/`SaveContractEvent`/`reduceSaveContract(state, event)`, `closesOnEvent(event) → boolean`, `blockerLines(details: unknown) → string[]`. From `status-segment.ts` — `StatusSegment` (`'all' | 'active' | 'deactivated'`), `STATUS_SEGMENTS` (the ordered label triple), `filterByStatusSegment<T extends { isActive: boolean }>(rows, segment) → T[]`. From `submissions-state.ts` — `SubmissionSegment` (`'pending' | 'accepted' | 'rejected' | 'all'`), `SUBMISSION_SEGMENTS`, `filterSubmissions(rows, segment)`, `AcceptEditState`, `acceptEditStateFromSubmission(row)`, `validateAcceptEdit(state) → { quote?: string; person?: string }`, `buildAcceptPayload(state) → AcceptTestimonialSubmissionInput`, `submittedOn(row) → string`.
-- Consumes: `@sevendays/types`' `TestimonialSubmission`, `AcceptTestimonialSubmissionInput`, and the four bounds constants (`TESTIMONIAL_QUOTE_MIN/MAX`, `TESTIMONIAL_PERSON_MIN/MAX`) — imported, never re-declared.
+- Produces (what Tasks 3–7 consume): from `save-contract.ts`, `SAVING_LABEL`/`UPLOADING_LABEL`/`DELETING_LABEL` (the three spec-pinned busy labels) + `ACCEPTING_LABEL`/`REJECTING_LABEL` (the moderation extensions, `TODO(owner-copy)`), `pendingVocabulary({ pending, idleLabel, busyLabel }) → { disabled, ariaBusy, label }`, `SaveContractState`/`idleSaveContract`/`SaveContractEvent`/`reduceSaveContract(state, event)`, `closesOnEvent(event) → boolean`, `blockerLines(details: unknown) → string[]`. From `status-segment.ts`, `StatusSegment` (`'all' | 'active' | 'deactivated'`), `STATUS_SEGMENTS` (the ordered label triple), `filterByStatusSegment<T extends { isActive: boolean }>(rows, segment) → T[]`. From `submissions-state.ts`, `SubmissionSegment` (`'pending' | 'accepted' | 'rejected' | 'all'`), `SUBMISSION_SEGMENTS`, `filterSubmissions(rows, segment)`, `AcceptEditState`, `acceptEditStateFromSubmission(row)`, `validateAcceptEdit(state) → { quote?: string; person?: string }`, `buildAcceptPayload(state) → AcceptTestimonialSubmissionInput`, `submittedOn(row) → string`.
+- Consumes: `@sevendays/types`' `TestimonialSubmission`, `AcceptTestimonialSubmissionInput`, and the four bounds constants (`TESTIMONIAL_QUOTE_MIN/MAX`, `TESTIMONIAL_PERSON_MIN/MAX`), imported, never re-declared.
 
 **Not here:** any component (`shared.tsx` is Task 3); any server fn (Task 2); the packages expanded row (#219); upload maturation (#220).
 
@@ -132,7 +132,7 @@ describe('reduceSaveContract (the async Save contract state)', () => {
     });
   });
 
-  it('settled ok:false → saving released too — the hold is the OPEN sheet, never a stuck spinner (retry is safe)', () => {
+  it('settled ok:false → saving released too, the hold is the OPEN sheet, never a stuck spinner (retry is safe)', () => {
     expect(reduceSaveContract({ saving: true }, { type: 'settled', ok: false })).toEqual({
       saving: false,
     });
@@ -155,8 +155,8 @@ describe('blockerLines (the delete dialog’s in-body blockers, from the #213 40
         { path: ['photos'], message: 'contains 2 photo(s)' },
       ])
     ).toEqual([
-      'Appointments — referenced by 3 appointment(s)',
-      'Photos — contains 2 photo(s)',
+      'Appointments, referenced by 3 appointment(s)',
+      'Photos, contains 2 photo(s)',
     ]);
   });
 
@@ -200,7 +200,7 @@ const rows = [
 ];
 
 describe('STATUS_SEGMENTS (the toolbar triple)', () => {
-  it('is All / Active / Deactivated in order — the spec-pinned labels', () => {
+  it('is All / Active / Deactivated in order, the spec-pinned labels', () => {
     expect(STATUS_SEGMENTS).toEqual([
       { value: 'all', label: 'All' },
       { value: 'active', label: 'Active' },
@@ -210,7 +210,7 @@ describe('STATUS_SEGMENTS (the toolbar triple)', () => {
 });
 
 describe('filterByStatusSegment', () => {
-  it("segment 'all' returns every row as a COPY (never the caller's array — render-time derivation only)", () => {
+  it("segment 'all' returns every row as a COPY (never the caller's array, render-time derivation only)", () => {
     const all = filterByStatusSegment(rows, 'all');
     expect(all).toEqual(rows);
     expect(all).not.toBe(rows);
@@ -254,7 +254,7 @@ const base = {
 };
 
 describe('SUBMISSION_SEGMENTS (the queue\'s own segment)', () => {
-  it('is Pending / Accepted / Rejected / All in order — pending leads because the queue IS the work', () => {
+  it('is Pending / Accepted / Rejected / All in order, pending leads because the queue IS the work', () => {
     expect(SUBMISSION_SEGMENTS).toEqual([
       { value: 'pending', label: 'Pending' },
       { value: 'accepted', label: 'Accepted' },
@@ -278,7 +278,7 @@ describe('filterSubmissions (the tab\'s own status segment)', () => {
     expect(filterSubmissions(rows, 'rejected').map((r) => r.id)).toEqual(['3']);
   });
 
-  it("'all' returns the queue whole — retained rows stay spottable (repeat submitters)", () => {
+  it("'all' returns the queue whole, retained rows stay spottable (repeat submitters)", () => {
     expect(filterSubmissions(rows, 'all')).toHaveLength(4);
   });
 });
@@ -294,7 +294,7 @@ describe('acceptEditStateFromSubmission + validateAcceptEdit + buildAcceptPayloa
     expect(buildAcceptPayload(state)).toEqual({ quote: base.quote, person: 'Maria D.' });
   });
 
-  it('out-of-bounds edits fail on the imported constants — quote under 20 / over 600, person under 2 / over 80', () => {
+  it('out-of-bounds edits fail on the imported constants, quote under 20 / over 600, person under 2 / over 80', () => {
     expect(validateAcceptEdit({ quote: 'x'.repeat(19), person: 'Maria D.' }).quote).toBeDefined();
     expect(validateAcceptEdit({ quote: 'x'.repeat(601), person: 'Maria D.' }).quote).toBeDefined();
     expect(validateAcceptEdit({ quote: base.quote, person: 'x' }).person).toBeDefined();
@@ -303,7 +303,7 @@ describe('acceptEditStateFromSubmission + validateAcceptEdit + buildAcceptPayloa
     ).toBeDefined();
     // The min-error copy is the landing form's pinned pair, verbatim.
     expect(validateAcceptEdit({ quote: 'x'.repeat(19), person: 'Maria D.' }).quote).toBe(
-      'Tell us a little more — at least 20 characters.'
+      'Tell us a little more, at least 20 characters.'
     );
     expect(validateAcceptEdit({ quote: base.quote, person: 'x' }).person).toBe(
       'Your name needs at least 2 characters.'
@@ -316,7 +316,7 @@ describe('acceptEditStateFromSubmission + validateAcceptEdit + buildAcceptPayloa
 });
 
 describe('submittedOn (the queue’s UTC date line)', () => {
-  it('formats UTC-stable — pinned on full-ICU Node (never edit the expectation; fix the runtime instead)', () => {
+  it('formats UTC-stable, pinned on full-ICU Node (never edit the expectation; fix the runtime instead)', () => {
     expect(submittedOn(base)).toBe('Oct 14, 2026');
     expect(submittedOn({ ...base, createdAt: new Date('2026-01-02T23:59:00.000Z') })).toBe(
       'Jan 2, 2026'
@@ -327,7 +327,7 @@ describe('submittedOn (the queue’s UTC date line)', () => {
 
 - [ ] **Step 4: Run red**
 
-`pnpm --filter @sevendays/admin test -- --run src/save-contract.test.ts src/status-segment.test.ts src/submissions-state.test.ts` — all three FAIL (the modules do not exist). Record red in the evidence dir.
+`pnpm --filter @sevendays/admin test -- --run src/save-contract.test.ts src/status-segment.test.ts src/submissions-state.test.ts`, all three FAIL (the modules do not exist). Record red in the evidence dir.
 
 - [ ] **Step 5: Write the three modules**
 
@@ -335,9 +335,9 @@ describe('submittedOn (the queue’s UTC date line)', () => {
 
 ```ts
 // The CMS interaction system's pure seams (M7 #218, spec § the CMS UX
-// maturation system — #165's ruling): the async Save contract's state, the
+// maturation system, #165's ruling): the async Save contract's state, the
 // one pending vocabulary's mapper, and the delete dialog's blocker-line
-// derivation. Plain data in, plain data out — components/cms/shared.tsx
+// derivation. Plain data in, plain data out, components/cms/shared.tsx
 // renders these; this module never imports React.
 //
 // The async Save contract (binding): onSave resolves true = success (the
@@ -346,7 +346,7 @@ describe('submittedOn (the queue’s UTC date line)', () => {
 // rule lives in closesOnEvent; the editorNonce/keepEditorOpen remount
 // machinery it replaces is deleted, not extended.
 
-/** The three spec-pinned busy labels (+ the two moderation extensions, TODO(owner-copy) — ratify at the variants round). */
+/** The three spec-pinned busy labels (+ the two moderation extensions, TODO(owner-copy), ratify at the variants round). */
 export const SAVING_LABEL = 'Saving…';
 export const UPLOADING_LABEL = 'Uploading…';
 export const DELETING_LABEL = 'Deleting…';
@@ -370,7 +370,7 @@ export function pendingVocabulary(options: {
   };
 }
 
-/** The shell's save-cycle state: started → saving; settled → idle (either way — the hold is the open sheet, never a stuck spinner). */
+/** The shell's save-cycle state: started → saving; settled → idle (either way, the hold is the open sheet, never a stuck spinner). */
 export type SaveContractState = { saving: boolean };
 
 export const idleSaveContract: SaveContractState = { saving: false };
@@ -386,7 +386,7 @@ export function reduceSaveContract(
 
 /**
  * The close rule: ONLY a settled-true closes. In-flight holds (the sheet is
- * busy), settled-false holds (a validation veto or a failed save — the
+ * busy), settled-false holds (a validation veto or a failed save, the
  * state is intact and retry is safe).
  */
 export function closesOnEvent(event: SaveContractEvent): boolean {
@@ -397,8 +397,8 @@ export function closesOnEvent(event: SaveContractEvent): boolean {
  * Derives the delete dialog's in-body blocker lines from a guarded-delete
  * 400's details (the #213 contract: one { path, message } per blocking
  * family, e.g. ['appointments'] + 'referenced by 3 appointment(s)'). Each
- * line leads with the capitalized family: 'Appointments — referenced by 3
- * appointment(s)'. Unknown shapes answer empty — the dialog then shows only
+ * line leads with the capitalized family: 'Appointments, referenced by 3
+ * appointment(s)'. Unknown shapes answer empty, the dialog then shows only
  * the failure message.
  */
 export function blockerLines(details: unknown): string[] {
@@ -415,7 +415,7 @@ export function blockerLines(details: unknown): string[] {
       continue;
     }
     const family = Array.isArray(path) && typeof path[0] === 'string' ? path[0] : null;
-    lines.push(family ? `${family.charAt(0).toUpperCase()}${family.slice(1)} — ${message}` : message);
+    lines.push(family ? `${family.charAt(0).toUpperCase()}${family.slice(1)}, ${message}` : message);
   }
   return lines;
 }
@@ -427,12 +427,12 @@ export function blockerLines(details: unknown): string[] {
 // The All/Active/Deactivated segment's pure half (M7 #218, spec § retired
 // rows + the Active filter): every CMS list toolbar gains the triple;
 // default All per visit (component state, never persisted); the filtered
-// view is a render-time derivation — query caches and mutations keep
+// view is a render-time derivation, query caches and mutations keep
 // operating on the full lists, and rail/grid counts stay unfiltered.
 
 export type StatusSegment = 'all' | 'active' | 'deactivated';
 
-/** The ordered label triple — the spec-pinned copy. */
+/** The ordered label triple, the spec-pinned copy. */
 export const STATUS_SEGMENTS: ReadonlyArray<{ value: StatusSegment; label: string }> = [
   { value: 'all', label: 'All' },
   { value: 'active', label: 'Active' },
@@ -455,10 +455,10 @@ export function filterByStatusSegment<T extends { isActive: boolean }>(
 
 ```ts
 // The Submissions tab's pure seams (M7 #218 over #216's moderation
-// endpoints): the tab's own status segment (pending-first — the queue IS
+// endpoints): the tab's own status segment (pending-first, the queue IS
 // the work), the accept-with-edit state machine (prefill → validate on the
 // imported bounds → the trimmed payload), and the UTC-stable submitted-on
-// line. The bounds constants are imported from @sevendays/types — never
+// line. The bounds constants are imported from @sevendays/types, never
 // re-declared.
 import {
   TESTIMONIAL_PERSON_MAX,
@@ -471,7 +471,7 @@ import {
 
 export type SubmissionSegment = 'pending' | 'accepted' | 'rejected' | 'all';
 
-/** Pending leads — the moderation queue's default view; All closes the row (audit-trail spotting). */
+/** Pending leads, the moderation queue's default view; All closes the row (audit-trail spotting). */
 export const SUBMISSION_SEGMENTS: ReadonlyArray<{ value: SubmissionSegment; label: string }> = [
   { value: 'pending', label: 'Pending' },
   { value: 'accepted', label: 'Accepted' },
@@ -489,7 +489,7 @@ export function filterSubmissions<T extends { status: TestimonialSubmission['sta
   return rows.filter((row) => row.status === segment);
 }
 
-/** The accept-with-edit sheet's field state — prefilled from the submission, edited in place. */
+/** The accept-with-edit sheet's field state, prefilled from the submission, edited in place. */
 export type AcceptEditState = { quote: string; person: string };
 
 export function acceptEditStateFromSubmission(row: TestimonialSubmission): AcceptEditState {
@@ -497,14 +497,14 @@ export function acceptEditStateFromSubmission(row: TestimonialSubmission): Accep
 }
 
 // The min-error copy is the landing form's pinned TODO(owner-copy) pair,
-// verbatim (#216) — one product, one line. The max lines are this tab's
-// TODO(owner-copy) proposals — ratify at the variants round.
-const QUOTE_MIN_ERROR = 'Tell us a little more — at least 20 characters.';
+// verbatim (#216), one product, one line. The max lines are this tab's
+// TODO(owner-copy) proposals, ratify at the variants round.
+const QUOTE_MIN_ERROR = 'Tell us a little more, at least 20 characters.';
 const PERSON_MIN_ERROR = 'Your name needs at least 2 characters.';
-const QUOTE_MAX_ERROR = 'That’s a little long — at most 600 characters.';
-const PERSON_MAX_ERROR = 'That name is a little long — at most 80 characters.';
+const QUOTE_MAX_ERROR = 'That’s a little long, at most 600 characters.';
+const PERSON_MAX_ERROR = 'That name is a little long, at most 80 characters.';
 
-/** Validates the TRIMMED text against the wire bounds (the API re-verifies — a staff edit that breaks a bound is a 400, never a silent trim). */
+/** Validates the TRIMMED text against the wire bounds (the API re-verifies, a staff edit that breaks a bound is a 400, never a silent trim). */
 export function validateAcceptEdit(state: AcceptEditState): {
   quote?: string;
   person?: string;
@@ -525,12 +525,12 @@ export function validateAcceptEdit(state: AcceptEditState): {
   return errors;
 }
 
-/** The accept payload always carries the trimmed pair — the sheet prefilled both, so both ride the request. */
+/** The accept payload always carries the trimmed pair, the sheet prefilled both, so both ride the request. */
 export function buildAcceptPayload(state: AcceptEditState): AcceptTestimonialSubmissionInput {
   return { quote: state.quote.trim(), person: state.person.trim() };
 }
 
-/** UTC-stable date line (fixed locale + timeZone — SSR/hydration-safe; pinned on full-ICU Node). */
+/** UTC-stable date line (fixed locale + timeZone, SSR/hydration-safe; pinned on full-ICU Node). */
 export function submittedOn(row: TestimonialSubmission): string {
   return row.createdAt.toLocaleDateString('en-PH', {
     timeZone: 'UTC',
@@ -543,7 +543,7 @@ export function submittedOn(row: TestimonialSubmission): string {
 
 - [ ] **Step 6: Green + gates + commit**
 
-`pnpm --filter @sevendays/admin test -- --run` — **21 files / 217 tests** (18/195 + the 22 new its: 10 + 4 + 8). Then `pnpm --filter @sevendays/admin fix` (re-run — counts unchanged), `pnpm --filter @sevendays/admin typecheck`. Commit:
+`pnpm --filter @sevendays/admin test -- --run`, **21 files / 217 tests** (18/195 + the 22 new its: 10 + 4 + 8). Then `pnpm --filter @sevendays/admin fix` (re-run, counts unchanged), `pnpm --filter @sevendays/admin typecheck`. Commit:
 
 ```bash
 git add apps/admin/src/lib/save-contract.ts apps/admin/src/lib/save-contract.test.ts apps/admin/src/lib/status-segment.ts apps/admin/src/lib/status-segment.test.ts apps/admin/src/lib/submissions-state.ts apps/admin/src/lib/submissions-state.test.ts
@@ -552,7 +552,7 @@ git commit -m "feat(admin): the interaction-system lib seams - the save contract
 
 ### Task 2: The delete + moderation server fns + the submissions query
 
-Additive only — thirteen new server fns over the live #213/#216 wrappers plus one query factory. `saveAdminSiteSettings` (`admin.functions.ts:289-313`) is the canonical shape; every fn below copies it.
+Additive only, thirteen new server fns over the live #213/#216 wrappers plus one query factory. `saveAdminSiteSettings` (`admin.functions.ts:289-313`) is the canonical shape; every fn below copies it.
 
 **Files:**
 - Modify: `apps/admin/src/lib/admin.functions.ts` (append at end of file; extend the two existing import lists)
@@ -564,17 +564,17 @@ Additive only — thirteen new server fns over the live #213/#216 wrappers plus 
 
 **Not here:** any API/api-client/types change (the wrappers are live); any component (Tasks 3+); any audit or rate-limit work (API-side, already live).
 
-- [ ] **Step 1: admin.functions.ts — imports**
+- [ ] **Step 1: admin.functions.ts, imports**
 
 Extend the existing `@sevendays/types` type-import list with `TestimonialSubmission` (alphabetical, after `Testimonial`) and the schema-import list with `acceptTestimonialSubmissionSchema` (after `createTestimonialSchema`). No other import changes.
 
-- [ ] **Step 2: admin.functions.ts — the delete result type + the nine removes + the four submissions fns**
+- [ ] **Step 2: admin.functions.ts, the delete result type + the nine removes + the four submissions fns**
 
 Append at the end of the file, exactly:
 
 ```ts
 // M7 #218: the guarded-delete server fns over the #213 remove() wrappers.
-// A 204 has no data, so the delete result carries only ok — and !ok keeps
+// A 204 has no data, so the delete result carries only ok, and !ok keeps
 // the result-value channel's details (the blocked-delete 400's one
 // { path, message } per blocking family) for the delete dialogs' in-body
 // blockers (blockerLines in lib/save-contract.ts).
@@ -582,19 +582,19 @@ export type AdminDeleteResult =
   | { ok: true }
   | { ok: false; status: number; message: string; details?: unknown };
 
-// (RULING 2026-10-16, superseding the helper design below — the original
+// (RULING 2026-10-16, superseding the helper design below, the original
 // runAdminAction/adminDeleteFn helpers lived as plain module-scope functions
 // in THIS file, so their server-only references survived the client
 // transform and the production build failed import-protection: "Import
 // denied in client environment … Import: ./api.server". The helpers now
 // live in src/lib/admin.functions.server.ts, and every delete fn is an
 // explicit createServerFn whose handler body is the ONLY runAdminAction
-// reference — handler-body-only references to ./admin.functions.server are
+// reference, handler-body-only references to ./admin.functions.server are
 // stripped from client builds exactly like the file's existing ./api.server
 // import. The build gate (`pnpm --filter @sevendays/admin build`) is part
 // of this task's gates from the ruling on.)
 
-// admin.functions.server.ts (NEW file) — the server-only helper half:
+// admin.functions.server.ts (NEW file), the server-only helper half:
 //
 // import { startSpan } from '@sentry/tanstackstart-react';
 // import { ApiClientError } from '@sevendays/api-client';
@@ -615,7 +615,7 @@ export type AdminDeleteResult =
 //     } catch (error) {
 //       if (error instanceof ApiClientError) {
 //         // ApiClientError.details is the parsed apiErrorSchema ENVELOPE
-//         // { error, details? } — unwrap so consumers get the inner array.
+//         // { error, details? }, unwrap so consumers get the inner array.
 //         const envelope = error.details as { details?: unknown } | undefined;
 //         return { ok: false, status: error.status, message: error.message, details: envelope?.details };
 //       }
@@ -630,7 +630,7 @@ export type AdminDeleteResult =
 //
 export const removeAdminPackage = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -648,7 +648,7 @@ export const removeAdminPackage = createServerFn({
 // block with their own span names + wrapper groups:
 //   branches.remove / studioServices.remove / addons.remove /
 //   printSizes.remove / attires.remove / galleryCategories.remove /
-//   galleryPhotos.remove / testimonials.remove — each { param: { id } }.
+//   galleryPhotos.remove / testimonials.remove, each { param: { id } }.
 
 export const removeAdminTestimonialSubmission = createServerFn({
   method: 'POST',
@@ -663,7 +663,7 @@ export const removeAdminTestimonialSubmission = createServerFn({
   });
 
 // M7 #218: the Submissions tab's read + moderation fns over #216's
-// endpoints (the media action-endpoint precedent — accept/reject are
+// endpoints (the media action-endpoint precedent, accept/reject are
 // action POSTs, not full-object PUTs).
 export const fetchAdminTestimonialSubmissions = createServerFn({ method: 'GET' }).handler(
   async () => {
@@ -700,14 +700,14 @@ export const rejectAdminTestimonialSubmission = createServerFn({
   });
 ```
 
-**Design note (superseded 2026-10-16):** the original helper design (shared `runAdminAction`/`adminDeleteFn` at this file's module scope) broke the production build — plain module-scope functions keep their server-only references in the client transform, and import-protection denies the build. The corrected shape above moves the helper to `admin.functions.server.ts` (handler-body-only reference → stripped client-side) and writes the nine deletes as explicit blocks. The accept/reject fns below already call `runAdminAction` inside their handler bodies and keep their shape. `pnpm --filter @sevendays/admin build` joins this task's gates.
+**Design note (superseded 2026-10-16):** the original helper design (shared `runAdminAction`/`adminDeleteFn` at this file's module scope) broke the production build, plain module-scope functions keep their server-only references in the client transform, and import-protection denies the build. The corrected shape above moves the helper to `admin.functions.server.ts` (handler-body-only reference → stripped client-side) and writes the nine deletes as explicit blocks. The accept/reject fns below already call `runAdminAction` inside their handler bodies and keep their shape. `pnpm --filter @sevendays/admin build` joins this task's gates.
 
-- [ ] **Step 3: cms-queries.ts — the submissions factory**
+- [ ] **Step 3: cms-queries.ts, the submissions factory**
 
 Add to the imports (`fetchAdminTestimonialSubmissions` joins the `./admin.functions` list, alphabetical) and append after `adminTestimonialQueries`, exactly:
 
 ```ts
-// M7 #218: the Submissions tab's queue — newest-first from the API (#216's list).
+// M7 #218: the Submissions tab's queue, newest-first from the API (#216's list).
 export const adminTestimonialSubmissionQueries = {
   all: () =>
     queryOptions({
@@ -726,7 +726,7 @@ git add apps/admin/src/lib/admin.functions.ts apps/admin/src/lib/cms-queries.ts
 git commit -m "feat(admin): the delete + moderation server fns - nine removes over the #213 wrappers, the submissions fetch/accept/reject/remove (#218)"
 ```
 
-### Task 3: `shared.tsx` — the additive interaction compositions
+### Task 3: `shared.tsx`, the additive interaction compositions
 
 Everything here is additive: new exports plus two optional-prop widenings plus the palette candidates on the two existing sites. `LightEntityEditor`'s contract does NOT change yet (Task 4 owns it, with the type wall).
 
@@ -734,8 +734,8 @@ Everything here is additive: new exports plus two optional-prop widenings plus t
 - Modify: `apps/admin/src/components/cms/shared.tsx`
 
 **Interfaces:**
-- Produces (what Tasks 4–7 consume): `PendingSpinner()`; `SegmentedControl<T extends string>({ options: ReadonlyArray<{ value: T; label: string }>, value, onChange, ariaLabel })`; `StatusSegmented({ value, onChange })` (typed to `StatusSegment`, aria-label 'Status filter'); `GuardedConfirm({ title, description, confirmLabel, busyLabel, pending, blockers, open, onOpenChange, onConfirm })`; `DeleteGuardDialog({ name, mediaNote?, blockers, pending, open, onOpenChange, onDelete })`; `SubmissionStatusBadge({ status })`; `RowIconActions`/`RowActionsCluster` gain optional `onDelete?: () => void` (a `Trash2` destructive icon, rendered LAST — farthest from Edit); the `StatusBadge` dot + reactivate icon carry the dark-aware palette candidates.
-- Consumes: Task 1's `STATUS_SEGMENTS`/`StatusSegment` + `DELETING_LABEL`; `@sevendays/types`' `TestimonialSubmissionStatus`; the existing `Badge` primitive (`@sevendays/ui/components/badge` — a new import for this file).
+- Produces (what Tasks 4–7 consume): `PendingSpinner()`; `SegmentedControl<T extends string>({ options: ReadonlyArray<{ value: T; label: string }>, value, onChange, ariaLabel })`; `StatusSegmented({ value, onChange })` (typed to `StatusSegment`, aria-label 'Status filter'); `GuardedConfirm({ title, description, confirmLabel, busyLabel, pending, blockers, open, onOpenChange, onConfirm })`; `DeleteGuardDialog({ name, mediaNote?, blockers, pending, open, onOpenChange, onDelete })`; `SubmissionStatusBadge({ status })`; `RowIconActions`/`RowActionsCluster` gain optional `onDelete?: () => void` (a `Trash2` destructive icon, rendered LAST, farthest from Edit); the `StatusBadge` dot + reactivate icon carry the dark-aware palette candidates.
+- Consumes: Task 1's `STATUS_SEGMENTS`/`StatusSegment` + `DELETING_LABEL`; `@sevendays/types`' `TestimonialSubmissionStatus`; the existing `Badge` primitive (`@sevendays/ui/components/badge`, a new import for this file).
 
 **Not here:** the async Save contract (Task 4); any screen wiring (Tasks 5–7); retiring the `TODO(token-ruling)` comments (Task 8's round).
 
@@ -744,18 +744,18 @@ Everything here is additive: new exports plus two optional-prop widenings plus t
 Add to the lucide import: `LoaderCircle`, `Trash2`. Add imports: `Badge` from `@sevendays/ui/components/badge`; `type StatusSegment` + `STATUS_SEGMENTS` from `#/lib/status-segment`; `DELETING_LABEL` from `#/lib/save-contract`; `type TestimonialSubmissionStatus` from `@sevendays/types`. Then, after the `peso` helper, exactly:
 
 ```tsx
-/** M7 #218: the pending vocabulary's spinner — LoaderCircle, animate-spin, currentColor, aria-hidden. Icon-only buttons render this IN PLACE of their icon; labeled buttons prefix it. */
+/** M7 #218: the pending vocabulary's spinner, LoaderCircle, animate-spin, currentColor, aria-hidden. Icon-only buttons render this IN PLACE of their icon; labeled buttons prefix it. */
 export function PendingSpinner() {
   return <LoaderCircle aria-hidden='true' className='animate-spin' />;
 }
 
 /**
- * The segmented control (M7 #218) — the WindowToggle recipe (dashboard) as
+ * The segmented control (M7 #218), the WindowToggle recipe (dashboard) as
  * pressed buttons: role=group + aria-label on an inline-flex bordered
  * container; the active segment rides the design system's own active stop
- * (--brand-primary-active, the tokens.css convention — white on #034356 is
+ * (--brand-primary-active, the tokens.css convention, white on #034356 is
  * 10.82:1); the inactive segments hover on accent. Local state at the call
- * site — no routes, no persistence.
+ * site, no routes, no persistence.
  */
 export function SegmentedControl<T extends string>({
   options,
@@ -796,7 +796,7 @@ export function SegmentedControl<T extends string>({
   );
 }
 
-/** The All/Active/Deactivated triple — the spec's retired-row filter, default All per visit at the call site. */
+/** The All/Active/Deactivated triple, the spec's retired-row filter, default All per visit at the call site. */
 export function StatusSegmented({
   value,
   onChange,
@@ -818,7 +818,7 @@ After `DeactivateConfirm`, exactly:
 /**
  * The guarded-action confirm (M7 #218): DeactivateConfirm's motion recipe
  * (visible latch + AnimatePresence exit + the mobile dock) on a
- * PENDING-GUARDED action — the confirm button goes disabled + spinner + the
+ * PENDING-GUARDED action, the confirm button goes disabled + spinner + the
  * busy label swap + aria-busy while the parent's mutation runs; the dialog
  * STAYS OPEN on failure with the blocking references rendered in-body
  * (never toast-and-close); the parent clears `open` on success. Cancel is
@@ -932,10 +932,10 @@ export function GuardedConfirm({
 
 /**
  * The delete confirm (M7 #218, spec § Confirmation UX): GuardedConfirm with
- * the delete copy — names the row, states the irreversible, and where the
+ * the delete copy, names the row, states the irreversible, and where the
  * entity carries media, `mediaNote` states the images go with it (audit
  * story 37). No typed-name gate (guarded deletes destroy no booking
- * history). Blockers arrive only after a blocked 400 — the dialog's first
+ * history). Blockers arrive only after a blocked 400, the dialog's first
  * open shows none.
  */
 export function DeleteGuardDialog({
@@ -961,7 +961,7 @@ export function DeleteGuardDialog({
       description={
         <>
           {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items).
-              Spans, not <p> — AlertDialogDescription renders its own <p>. */}
+              Spans, not <p>, AlertDialogDescription renders its own <p>. */}
           <span className='block'>This permanently deletes it from the catalog.</span>
           {mediaNote ? <span className='block'>{mediaNote}</span> : null}
         </>
@@ -986,7 +986,7 @@ export function DeleteGuardDialog({
 // The submissions queue's status palette (M7 #218): the audit viewer's
 // badge discipline (outline Badge + hue family, audit-log-screen.tsx:57)
 // on the three moderation states.
-// TODO(token-ruling): status palette pending the owner's variants round —
+// TODO(token-ruling): status palette pending the owner's variants round;
 // the classes are candidates, retunable at this ticket's Task 8.
 const SUBMISSION_STATUS_META: Record<
   TestimonialSubmissionStatus,
@@ -1009,7 +1009,7 @@ const SUBMISSION_STATUS_META: Record<
   },
 };
 
-/** One moderation state — visible text, never color alone. */
+/** One moderation state, visible text, never color alone. */
 export function SubmissionStatusBadge({ status }: { status: TestimonialSubmissionStatus }) {
   const meta = SUBMISSION_STATUS_META[status];
   return (
@@ -1020,7 +1020,7 @@ export function SubmissionStatusBadge({ status }: { status: TestimonialSubmissio
 }
 ```
 
-(b) `StatusBadge`'s dot span (line ~78) and the reactivate button's classes (line ~260) take the dark-aware candidates — the `TODO(token-ruling)` comments STAY until Task 8:
+(b) `StatusBadge`'s dot span (line ~78) and the reactivate button's classes (line ~260) take the dark-aware candidates, the `TODO(token-ruling)` comments STAY until Task 8:
 
 ```tsx
         className={`size-2.5 rounded-full ${
@@ -1032,7 +1032,7 @@ export function SubmissionStatusBadge({ status }: { status: TestimonialSubmissio
               className='text-green-700 hover:bg-green-600/10 hover:text-green-700 dark:text-green-400 dark:hover:bg-green-400/10 dark:hover:text-green-400'
 ```
 
-(c) `RowIconActions` gains `onDelete?: () => void` — the Trash2 renders LAST, after the Power/PowerOff pair, same destructive styling as Deactivate:
+(c) `RowIconActions` gains `onDelete?: () => void`, the Trash2 renders LAST, after the Power/PowerOff pair, same destructive styling as Deactivate:
 
 ```tsx
       {onDelete ? (
@@ -1065,7 +1065,7 @@ git add apps/admin/src/components/cms/shared.tsx
 git commit -m "feat(admin): the shared interaction compositions - SegmentedControl, StatusSegmented, the guarded confirm pair, the submissions badge, the row delete slot (#218)"
 ```
 
-### Task 4: The async Save contract on all seven sheet surfaces — the nonce machinery deleted
+### Task 4: The async Save contract on all seven sheet surfaces, the nonce machinery deleted
 
 One commit, forced by the type wall: `LightEntityEditor.onSave` becomes `() => Promise<boolean>`, and every call site converts in the same commit or the package does not typecheck. The `editorNonce`/`keepEditorOpen` machinery, the veto-throws, and the `onSuccess`/`onError` keep-open branches all die here.
 
@@ -1077,20 +1077,20 @@ One commit, forced by the type wall: `LightEntityEditor.onSave` becomes `() => P
 - Produces: `LightEntityEditor`'s `onSave: () => Promise<boolean>` (resolve `true` = the shell closes; resolve `false` = hold; throw = hold, swallowed). The shell owns `saving` and renders the Save/Cancel pair under the vocabulary (`SAVING_LABEL` + `PendingSpinner` + `aria-busy`; both buttons disabled in flight).
 - Consumes: Task 3's `PendingSpinner`; Task 1's `SAVING_LABEL`; react-query's `mutateAsync`.
 
-**Not here:** delete wiring + segments (Task 5/6); the package editor (Task 6 — a full screen, not a sheet); the Submissions tab (Task 7); any change to the optimistic `flip`/`order` mutations or `DeactivateConfirm` (the action-class law's optimistic half — untouched).
+**Not here:** delete wiring + segments (Task 5/6); the package editor (Task 6, a full screen, not a sheet); the Submissions tab (Task 7); any change to the optimistic `flip`/`order` mutations or `DeactivateConfirm` (the action-class law's optimistic half, untouched).
 
-- [ ] **Step 1: `shared.tsx` — the `LightEntityEditor` contract**
+- [ ] **Step 1: `shared.tsx`, the `LightEntityEditor` contract**
 
 Replace the component's JSDoc "Veto contract" paragraph (the last paragraph of its doc block) with exactly:
 
 ```text
  * The async Save contract (M7 #218, replacing the M5 veto-throw channel):
- * onSave returns a promise — resolve true = success (the shell closes);
+ * onSave returns a promise, resolve true = success (the shell closes);
  * resolve false = hold (the sheet stays open, its field state intact,
  * retry safe); throw = hold (swallowed; the screen's inline errors + toast
  * are the UX). The shell owns the pending state: Save disabled + the
  * LoaderCircle spinner + the "Saving…" label swap + aria-busy in flight,
- * Cancel disabled alongside. The close is the shell's alone — a failed
+ * Cancel disabled alongside. The close is the shell's alone, a failed
  * save can never silently discard edits. The editorNonce remount machinery
  * this replaces is deleted, not extended.
 ```
@@ -1099,7 +1099,7 @@ Change the `onSave` prop type from `onSave: () => void;` to `onSave: () => Promi
 
 ```tsx
   // The async Save contract: the shell awaits onSave; ONLY a resolved-true
-  // closes — a resolved-false (validation veto, failed save, matrix
+  // closes, a resolved-false (validation veto, failed save, matrix
   // failure) or a throw holds the sheet open over the intact state.
   async function handleSave() {
     if (saving) {
@@ -1144,18 +1144,18 @@ Change the `onSave` prop type from `onSave: () => void;` to `onSave: () => Promi
 
 ```tsx
   // The editor's create/edit switch and its open flag are separate: the
-  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // async Save contract (#218) closes the shell ONLY on a resolved-true;
   // a held save (veto, failure) keeps the sheet open over the intact
   // parent-held state; onOpenChange(false) (Cancel, overlay, or the
   // post-success exit) clears both.
 ```
 
 ```tsx
-  // Editor saves: NON-optimistic — the form state is the source of truth;
+  // Editor saves: NON-optimistic, the form state is the source of truth;
   // the async Save contract owns the flow: await the full-object PUT,
   // resolve true on ok (the shell closes), false on any hold (retry is
-  // safe — the save is a full-object PUT). No unique fields on this
-  // table, so no conflict mapping — every !ok surfaces as its message
+  // safe, the save is a full-object PUT). No unique fields on this
+  // table, so no conflict mapping, every !ok surfaces as its message
   // toast.
   const saveTestimonial = useMutation({
     mutationFn: async (input: SaveTestimonialInput) => {
@@ -1177,7 +1177,7 @@ Change the `onSave` prop type from `onSave: () => void;` to `onSave: () => Promi
     if (errors.person || errors.quote) {
       setFieldErrors(errors);
       toast.error('Fix the highlighted fields.');
-      return false; // the async contract's hold — no throw, no remount
+      return false; // the async contract's hold, no throw, no remount
     }
     setFieldErrors({});
     try {
@@ -1194,7 +1194,7 @@ Change the `onSave` prop type from `onSave: () => void;` to `onSave: () => Promi
       toast.error(result.message);
       return false;
     } catch (error) {
-      // Not an API failure (serialization, session loss) — loud toast, same hold.
+      // Not an API failure (serialization, session loss), loud toast, same hold.
       toast.error(error.message);
       return false;
     }
@@ -1306,11 +1306,11 @@ Same deletions as Step 2 (`editorNonce`, `keepEditorOpen`, both saves' `onSucces
 
 - [ ] **Step 4: addons-screen.tsx**
 
-Same deletions (including the whole big `onSuccess` of `saveAddon` — its logic moves into the handler). The `SaveAddonOutcome` type and `mutationFn` stay verbatim; in `saveAddon`'s JSDoc, reword every `onSuccess` reference to "the async Save handler" (the behavior it describes moved there). Replace the state comment + handler with exactly:
+Same deletions (including the whole big `onSuccess` of `saveAddon`, its logic moves into the handler). The `SaveAddonOutcome` type and `mutationFn` stay verbatim; in `saveAddon`'s JSDoc, reword every `onSuccess` reference to "the async Save handler" (the behavior it describes moved there). Replace the state comment + handler with exactly:
 
 ```tsx
   // The editor's create/edit switch and its open flag are separate: the
-  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // async Save contract (#218) closes the shell ONLY on a resolved-true;
   // a held save keeps the sheet open over the intact parent-held state,
   // INCLUDING AQ-4's create→edit promotion after a matrix failure;
   // onOpenChange(false) clears both.
@@ -1335,7 +1335,7 @@ Same deletions (including the whole big `onSuccess` of `saveAddon` — its logic
     try {
       const outcome = await saveAddon.mutateAsync(input);
       if (outcome.kind === 'saved') {
-        // The badges live on the services read — both lists invalidate.
+        // The badges live on the services read, both lists invalidate.
         queryClient.invalidateQueries({ queryKey: adminAddonQueries.all().queryKey });
         queryClient.invalidateQueries({ queryKey: adminStudioServiceQueries.all().queryKey });
         toast.success('Saved.');
@@ -1344,10 +1344,10 @@ Same deletions (including the whole big `onSuccess` of `saveAddon` — its logic
       if (outcome.kind === 'matrix-failed') {
         // The entity write landed (and possibly earlier fan-out PUTs); the
         // failing matrix PUT did not. The sheet HOLDS with the checks
-        // intact — the retry's Save re-runs the chain. AQ-4's mode switch:
+        // intact, the retry's Save re-runs the chain. AQ-4's mode switch:
         // a create that already created promotes to edit-over-the-created-
         // row, so the retry is an UPDATE + fan-out, never a duplicate
-        // create. Both lists invalidate — the entity half is real either
+        // create. Both lists invalidate, the entity half is real either
         // way, and the PUTs before the failure may have landed too.
         setEditing(
           outcome.input.mode === 'create'
@@ -1369,7 +1369,7 @@ Same deletions (including the whole big `onSuccess` of `saveAddon` — its logic
       return false;
     } catch (error) {
       // Bounded duplicate-POST window: a fast double-submit can fire the
-      // create twice — the second lands on the unique-name constraint and
+      // create twice, the second lands on the unique-name constraint and
       // surfaces as its 400 conflict message, never a duplicate row.
       toast.error(error.message);
       return false;
@@ -1379,7 +1379,7 @@ Same deletions (including the whole big `onSuccess` of `saveAddon` — its logic
 
 - [ ] **Step 5: branches-screen.tsx**
 
-Same deletions (`saveBranch`'s handlers die; `keepEditorOpen` dies — note `openCreate`/`openEdit` keep their cover-reset blocks untouched). State comment per Step 2(b), then exactly:
+Same deletions (`saveBranch`'s handlers die; `keepEditorOpen` dies, note `openCreate`/`openEdit` keep their cover-reset blocks untouched). State comment per Step 2(b), then exactly:
 
 ```tsx
   // Editor saves: NON-optimistic; the async Save contract owns the flow
@@ -1464,7 +1464,7 @@ Same deletions. State comment per Step 4 (without `services`), then exactly:
       }
       if (outcome.kind === 'matrix-failed') {
         // The entity write landed; the branch matrix PUT failed. The sheet
-        // HOLDS with the selections intact — the retry re-runs both PUTs.
+        // HOLDS with the selections intact, the retry re-runs both PUTs.
         // AQ-4's mode switch: create promotes to the created row.
         setEditing(
           outcome.input.mode === 'create'
@@ -1490,21 +1490,21 @@ Same deletions. State comment per Step 4 (without `services`), then exactly:
   }
 ```
 
-(`saveStudioService` keeps only its `mutationFn` + its own JSDoc block, with every `onSuccess` reference reworded to "the async Save handler" — the behavior it describes moved there.)
+(`saveStudioService` keeps only its `mutationFn` + its own JSDoc block, with every `onSuccess` reference reworded to "the async Save handler", the behavior it describes moved there.)
 
 - [ ] **Step 7: gallery-screen.tsx (the photo sheet)**
 
-Delete `editorNonce`, `keepEditorOpen`, `photoSave`'s `onSuccess`/`onError`, `key={editorNonce}`, and the state-pair comment. The sheet's `onSave` was an inline arrow — it becomes the named handler. Exactly:
+Delete `editorNonce`, `keepEditorOpen`, `photoSave`'s `onSuccess`/`onError`, `key={editorNonce}`, and the state-pair comment. The sheet's `onSave` was an inline arrow, it becomes the named handler. Exactly:
 
 ```tsx
   // The photo editor: edit-only (photos are created by upload); the async
-  // Save contract owns the flow (#218) — a held save keeps the sheet open
+  // Save contract owns the flow (#218), a held save keeps the sheet open
   // over the intact parent-held state; onOpenChange(false) clears both.
 ```
 
 ```tsx
   // Editor saves: NON-optimistic; await the full-object PUT, resolve true
-  // on ok. No inline Field slot — every photo 400 is toast-carried.
+  // on ok. No inline Field slot, every photo 400 is toast-carried.
   const photoSave = useMutation({
     mutationFn: async (input: { row: GalleryPhoto; state: PhotoEditorState }) => {
       return saveAdminGalleryPhotoUpdate({
@@ -1544,7 +1544,7 @@ grep -rn "editorNonce\|keepEditorOpen" apps/admin/src; echo "exit=$?"
 grep -rn "validation-hold" apps/admin/src; echo "exit=$?"
 ```
 
-Expected (re-scoped, 2026-10-16 controller ruling after the live run): the `editorNonce\|keepEditorOpen` pattern cannot reach literal zero — this JSDoc's own pinned text plus save-contract.ts's module comment match it in prose. The gate PASSES when the only hits are comment prose and the FUNCTIONAL markers are all zero (`grep -rn "setEditorNonce\|key={editorNonce}\|keepEditorOpen(" apps/admin/src` → exit=1) and `validation-hold` is zero (exit=1). Record both outputs in the evidence dir. Then `pnpm --filter @sevendays/admin fix` → `test -- --run` (21/217 unchanged) → `typecheck` (the wall: green ONLY if all seven sites converted). Bare `catch (error)` blocks take the house idiom `error instanceof Error ? error.message : 'The save failed.'` (TS18046 under strict; the plan's fences predate the check). Commit:
+Expected (re-scoped, 2026-10-16 controller ruling after the live run): the `editorNonce\|keepEditorOpen` pattern cannot reach literal zero, this JSDoc's own pinned text plus save-contract.ts's module comment match it in prose. The gate PASSES when the only hits are comment prose and the FUNCTIONAL markers are all zero (`grep -rn "setEditorNonce\|key={editorNonce}\|keepEditorOpen(" apps/admin/src` → exit=1) and `validation-hold` is zero (exit=1). Record both outputs in the evidence dir. Then `pnpm --filter @sevendays/admin fix` → `test -- --run` (21/217 unchanged) → `typecheck` (the wall: green ONLY if all seven sites converted). Bare `catch (error)` blocks take the house idiom `error instanceof Error ? error.message : 'The save failed.'` (TS18046 under strict; the plan's fences predate the check). Commit:
 
 ```bash
 git add apps/admin/src/components/cms/shared.tsx apps/admin/src/components/testimonials/testimonials-screen.tsx apps/admin/src/components/lookups/lookups-screen.tsx apps/admin/src/components/addons/addons-screen.tsx apps/admin/src/components/branches/branches-screen.tsx apps/admin/src/components/studio-services/studio-services-screen.tsx apps/admin/src/components/gallery/gallery-screen.tsx
@@ -1554,28 +1554,28 @@ git commit -m "feat(admin): the async Save contract on all seven sheet surfaces 
 
 ### Task 5: Delete dialogs + the status segment on the five light-entity screens
 
-The same wiring lands on testimonials, add-ons, branches, studio services, and both lookups sections: a `segment` state + `StatusSegmented` in the toolbar, a `deleteId`/`deleteBlockers` pair + a `removeRow` mutation + a `DeleteGuardDialog` mount, and the `onDelete` slot threaded into every row's actions. The filtered view is a render-time derivation — the mutations and caches keep operating on the FULL lists (`deleteRow` is found in the full array, never the filtered one).
+The same wiring lands on testimonials, add-ons, branches, studio services, and both lookups sections: a `segment` state + `StatusSegmented` in the toolbar, a `deleteId`/`deleteBlockers` pair + a `removeRow` mutation + a `DeleteGuardDialog` mount, and the `onDelete` slot threaded into every row's actions. The filtered view is a render-time derivation, the mutations and caches keep operating on the FULL lists (`deleteRow` is found in the full array, never the filtered one).
 
 **Files:**
 - Modify: `apps/admin/src/components/testimonials/testimonials-screen.tsx`, `addons/addons-screen.tsx`, `branches/branches-screen.tsx`, `studio-services/studio-services-screen.tsx`, `lookups/lookups-screen.tsx`, `cms/bulk-bar.tsx`
 
 **Interfaces:**
 - Consumes: Task 2's `removeAdmin<Entity>` fns; Task 3's `StatusSegmented`/`DeleteGuardDialog` + the `onDelete` slot; Task 1's `filterByStatusSegment`/`StatusSegment` + `blockerLines`.
-- Produces: six of the eight segment surfaces (testimonials, add-ons, branches, studio services, and both lookups sections) + six of the nine entity delete dialogs (the same six entities); the gallery grid + packages table are Task 6; the testimonials Submissions tab is Task 7 — this task does NOT touch the testimonials screen's tab structure.
+- Produces: six of the eight segment surfaces (testimonials, add-ons, branches, studio services, and both lookups sections) + six of the nine entity delete dialogs (the same six entities); the gallery grid + packages table are Task 6; the testimonials Submissions tab is Task 7, this task does NOT touch the testimonials screen's tab structure.
 
-**Not here:** the gallery grid/rail (Task 6); packages (Task 6); any change to `DeactivateConfirm` (optimistic, close-on-confirm, untouched); bulk-delete (not ruled — the bulk bar keeps Deactivate/Reactivate only); the submissions moderation verbs (Task 7).
+**Not here:** the gallery grid/rail (Task 6); packages (Task 6); any change to `DeactivateConfirm` (optimistic, close-on-confirm, untouched); bulk-delete (not ruled, the bulk bar keeps Deactivate/Reactivate only); the submissions moderation verbs (Task 7).
 
 - [ ] **Step 1: testimonials-screen.tsx**
 
-Imports: `StatusSegmented`, `DeleteGuardDialog` join the `#/components/cms/shared` list; `StatusSegment`, `filterByStatusSegment` from `#/lib/status-segment`; `blockerLines` from `#/lib/save-contract`; `removeAdminTestimonial` joins the `#/lib/admin.functions` import; `reorderVisiblePhotos` joins the `#/lib/gallery-state` import (beside the existing `reorderIds`, which stays until Step (d) removes its last use — then delete it from the import). State + derived, after `confirmId`:
+Imports: `StatusSegmented`, `DeleteGuardDialog` join the `#/components/cms/shared` list; `StatusSegment`, `filterByStatusSegment` from `#/lib/status-segment`; `blockerLines` from `#/lib/save-contract`; `removeAdminTestimonial` joins the `#/lib/admin.functions` import; `reorderVisiblePhotos` joins the `#/lib/gallery-state` import (beside the existing `reorderIds`, which stays until Step (d) removes its last use, then delete it from the import). State + derived, after `confirmId`:
 
 ```tsx
   // The toolbar segment (#218): default All per visit, never persisted; the
-  // filtered view is render-time only — the caches and mutations ride the
+  // filtered view is render-time only, the caches and mutations ride the
   // full list.
   const [segment, setSegment] = useState<StatusSegment>('all');
   // The delete dialog's target + its last blockers (empty until a blocked
-  // 400 answers — testimonials are blocked by nothing, but the wiring is
+  // 400 answers, testimonials are blocked by nothing, but the wiring is
   // the same everywhere).
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
@@ -1619,7 +1619,7 @@ Imports: `StatusSegmented`, `DeleteGuardDialog` join the `#/components/cms/share
         }
 ```
 
-(c) Both render maps (`testimonials.map`) switch to `rows.map`, and both action clusters gain `onDelete={() => setDeleteId(row.id)}`; `SortableContext`'s `items` switch to `rows.map((row) => row.id)`. (d) The drag's filtered-view law — replace `onDragEnd`'s body with exactly:
+(c) Both render maps (`testimonials.map`) switch to `rows.map`, and both action clusters gain `onDelete={() => setDeleteId(row.id)}`; `SortableContext`'s `items` switch to `rows.map((row) => row.id)`. (d) The drag's filtered-view law, replace `onDragEnd`'s body with exactly:
 
 ```tsx
   // A drop reorders the ONE rows array (array order is the display order),
@@ -1676,7 +1676,7 @@ Imports: `StatusSegmented`, `DeleteGuardDialog` join the `#/components/cms/share
 
 - [ ] **Step 2: addons-screen.tsx**
 
-Identical wiring with the addon names: `removeAdminAddon`; state trio; `const rows = filterByStatusSegment(addons ?? [], segment);` + `const deleteRow = addons?.find(...)`; PageHeader actions gain the segment; `toggleAll` selects the FILTERED rows — `setSelected(next ? new Set(rows.map((row) => row.id)) : new Set());`; every `addons.map` render loop switches to `rows.map` (both postures) and each `RowActionsCluster`/`RowIconActions` gains `onDelete={() => setDeleteId(row.id)}`; the mutation (exactly):
+Identical wiring with the addon names: `removeAdminAddon`; state trio; `const rows = filterByStatusSegment(addons ?? [], segment);` + `const deleteRow = addons?.find(...)`; PageHeader actions gain the segment; `toggleAll` selects the FILTERED rows, `setSelected(next ? new Set(rows.map((row) => row.id)) : new Set());`; every `addons.map` render loop switches to `rows.map` (both postures) and each `RowActionsCluster`/`RowIconActions` gains `onDelete={() => setDeleteId(row.id)}`; the mutation (exactly):
 
 ```tsx
   const removeRow = useMutation({
@@ -1701,7 +1701,7 @@ Identical wiring with the addon names: `removeAdminAddon`; state trio; `const ro
   });
 ```
 
-(both lists invalidate — the addon's service-matrix rows cascade with the delete, and the badges live on the services read). Dialog mount per Step 1(e) with `name={deleteRow.name}`. No `mediaNote`.
+(both lists invalidate, the addon's service-matrix rows cascade with the delete, and the badges live on the services read). Dialog mount per Step 1(e) with `name={deleteRow.name}`. No `mediaNote`.
 
 - [ ] **Step 3: branches-screen.tsx**
 
@@ -1764,7 +1764,7 @@ TWO independent wirings, one per section (the segment law covers both tabs). Sta
   });
 ```
 
-The sections take new props — `PrintSizesSection` gains `segment`, `onSegmentChange`, `onDelete`; `AttiresSection` the same. Each section's `CardAction` becomes:
+The sections take new props, `PrintSizesSection` gains `segment`, `onSegmentChange`, `onDelete`; `AttiresSection` the same. Each section's `CardAction` becomes:
 
 ```tsx
           <CardAction className='flex items-center gap-2'>
@@ -1798,7 +1798,7 @@ The sections take new props — `PrintSizesSection` gains `segment`, `onSegmentC
 
 with `const deleteSize = printSizes?.find((row) => row.id === deleteId);` and `const deleteAttire = attires?.find((row) => row.id === deleteId);` beside the existing `confirmSize`/`confirmAttire` derives (attires mirror with `deleteAttire.name` + `removeAttire`). No `mediaNote` on either.
 
-- [ ] **Step 6: bulk-bar.tsx — the palette candidates**
+- [ ] **Step 6: bulk-bar.tsx, the palette candidates**
 
 The reactivate button's `className='text-green-600'` (line ~143) becomes the AA-safe candidates; the `TODO(token-ruling)` comment STAYS until Task 8:
 
@@ -1815,20 +1815,20 @@ git add apps/admin/src/components/testimonials/testimonials-screen.tsx apps/admi
 git commit -m "feat(admin): delete dialogs + the status segment on the five light-entity screens (#218)"
 ```
 
-### Task 6: Gallery + packages — the grid/rail/table segments, the card/rail/row deletes, the editor vocabulary
+### Task 6: Gallery + packages, the grid/rail/table segments, the card/rail/row deletes, the editor vocabulary
 
-The two non-uniform surfaces. Gallery: the grid toolbar gains the segment (composed AFTER the category filter — both filters narrow the view, the rail counts stay unfiltered), the photo card and the rail entry each gain a Trash2 action, and both entities get delete dialogs. Packages: the table gains the segment + row delete; the editor's Save button and both cover-upload buttons (package editor + branches sheet) upgrade to the full vocabulary.
+The two non-uniform surfaces. Gallery: the grid toolbar gains the segment (composed AFTER the category filter, both filters narrow the view, the rail counts stay unfiltered), the photo card and the rail entry each gain a Trash2 action, and both entities get delete dialogs. Packages: the table gains the segment + row delete; the editor's Save button and both cover-upload buttons (package editor + branches sheet) upgrade to the full vocabulary.
 
 **Files:**
 - Modify: `apps/admin/src/components/gallery/gallery-screen.tsx`, `packages/packages-table.tsx`, `packages/package-editor.tsx`, `branches/branches-screen.tsx` (the cover button only)
 
 **Interfaces:**
 - Consumes: Task 2's `removeAdminGalleryPhoto`/`removeAdminGalleryCategory`/`removeAdminPackage`; Task 3's `StatusSegmented`/`DeleteGuardDialog`/`PendingSpinner`/`onDelete` slot; Task 1's `filterByStatusSegment`/`StatusSegment`/`blockerLines`/`SAVING_LABEL`/`UPLOADING_LABEL`.
-- Produces: the last two of the eight segment surfaces (the gallery grid + the packages table); the last three of the nine entity delete dialogs (packages, gallery photos, gallery categories — completing testimonials/add-ons/branches/studio services/print sizes/attires from Task 5); the package editor's + both cover buttons' vocabulary.
+- Produces: the last two of the eight segment surfaces (the gallery grid + the packages table); the last three of the nine entity delete dialogs (packages, gallery photos, gallery categories, completing testimonials/add-ons/branches/studio services/print sizes/attires from Task 5); the package editor's + both cover buttons' vocabulary.
 
-**Not here:** the packages expanded row (#219 — the expand panel keeps today's description-only content); upload maturation (#220 — the tray, picker, and abort seam are untouched); the Submissions tab (Task 7).
+**Not here:** the packages expanded row (#219, the expand panel keeps today's description-only content); upload maturation (#220, the tray, picker, and abort seam are untouched); the Submissions tab (Task 7).
 
-- [ ] **Step 1: gallery-screen.tsx — the grid segment**
+- [ ] **Step 1: gallery-screen.tsx, the grid segment**
 
 State beside `filter`:
 
@@ -1854,7 +1854,7 @@ The derived block becomes:
           </div>
 ```
 
-- [ ] **Step 2: gallery-screen.tsx — the photo delete**
+- [ ] **Step 2: gallery-screen.tsx, the photo delete**
 
 State + mutation beside `confirmId`:
 
@@ -1932,17 +1932,17 @@ State + mutation beside `confirmId`:
       ) : null}
 ```
 
-- [ ] **Step 3: gallery-screen.tsx — the category delete (rail)**
+- [ ] **Step 3: gallery-screen.tsx, the category delete (rail)**
 
-Same shape: `categoryDeleteId`/`categoryDeleteBlockers` state; `removeCategory` mutation over `removeAdminGalleryCategory` invalidating `adminGalleryQueries.categories().queryKey` only (a deleted category holds no photos — the guard guarantees it); `const deleteCategory = categories.find((c) => c.id === categoryDeleteId);`; the rail entry's mini-actions (`SortableCategoryEntry`, desktop hover/mobile-visible cluster) gain the same Trash2 button wired `onDelete={() => onCategoryDelete(category.id)}` — a new prop threaded from `CategoryRail` → `setCategoryDeleteId` (the entry already takes `onDeactivate`/`onReactivate`; `onCategoryDelete` joins them, rendered after the Power/PowerOff pair); the dialog mounts with `name={deleteCategory.name}`, **no** `mediaNote` (categories carry no image).
+Same shape: `categoryDeleteId`/`categoryDeleteBlockers` state; `removeCategory` mutation over `removeAdminGalleryCategory` invalidating `adminGalleryQueries.categories().queryKey` only (a deleted category holds no photos, the guard guarantees it); `const deleteCategory = categories.find((c) => c.id === categoryDeleteId);`; the rail entry's mini-actions (`SortableCategoryEntry`, desktop hover/mobile-visible cluster) gain the same Trash2 button wired `onDelete={() => onCategoryDelete(category.id)}`, a new prop threaded from `CategoryRail` → `setCategoryDeleteId` (the entry already takes `onDeactivate`/`onReactivate`; `onCategoryDelete` joins them, rendered after the Power/PowerOff pair); the dialog mounts with `name={deleteCategory.name}`, **no** `mediaNote` (categories carry no image).
 
-- [ ] **Step 4: packages-table.tsx — the segment + the row delete**
+- [ ] **Step 4: packages-table.tsx, the segment + the row delete**
 
 State + derived + mutation inside `PackagesTable`:
 
 ```tsx
   // The toolbar segment (#218) + the pending-guarded delete (the #213
-  // route; a package with any Appointment ever is blocked — the dialog
+  // route; a package with any Appointment ever is blocked, the dialog
   // answers with the blockers in-body).
   const [segment, setSegment] = useState<StatusSegment>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -1979,9 +1979,9 @@ The loaded-table branch renders a toolbar row above the Card:
       </div>
 ```
 
-(the pending/error/empty postures render no segment — nothing to narrow). Both render maps switch `packages.map` → `rows.map`, and each `RowActionsCluster` gains `onDelete={() => setDeleteId(row.id)}`. The dialog mounts per Task 5's shape with `name={deleteRow.name}` + **`mediaNote='Its cover image goes with it.'`** (the cover key deletes with the row per ADR-0019 §5). Imports: `StatusSegmented`/`DeleteGuardDialog` from shared; `StatusSegment`/`filterByStatusSegment`; `blockerLines`; `removeAdminPackage`.
+(the pending/error/empty postures render no segment, nothing to narrow). Both render maps switch `packages.map` → `rows.map`, and each `RowActionsCluster` gains `onDelete={() => setDeleteId(row.id)}`. The dialog mounts per Task 5's shape with `name={deleteRow.name}` + **`mediaNote='Its cover image goes with it.'`** (the cover key deletes with the row per ADR-0019 §5). Imports: `StatusSegmented`/`DeleteGuardDialog` from shared; `StatusSegment`/`filterByStatusSegment`; `blockerLines`; `removeAdminPackage`.
 
-- [ ] **Step 5: package-editor.tsx — the vocabulary upgrades**
+- [ ] **Step 5: package-editor.tsx, the vocabulary upgrades**
 
 (a) The Save button (line ~724) becomes:
 
@@ -2007,9 +2007,9 @@ The loaded-table branch renders a toolbar row above the Card:
                 </Button>
 ```
 
-(Remove cover keeps its plain `disabled={uploading}` — it is disabled-during, not the in-flight action.) Imports: `PendingSpinner` from `#/components/cms/shared`; `SAVING_LABEL`/`UPLOADING_LABEL` from `#/lib/save-contract`.
+(Remove cover keeps its plain `disabled={uploading}`, it is disabled-during, not the in-flight action.) Imports: `PendingSpinner` from `#/components/cms/shared`; `SAVING_LABEL`/`UPLOADING_LABEL` from `#/lib/save-contract`.
 
-- [ ] **Step 6: branches-screen.tsx — the cover button's vocabulary**
+- [ ] **Step 6: branches-screen.tsx, the cover button's vocabulary**
 
 The sheet's cover Upload button (line ~701, `disabled={coverUploading}`) gets the same treatment:
 
@@ -2037,9 +2037,9 @@ git add apps/admin/src/components/gallery/gallery-screen.tsx apps/admin/src/comp
 git commit -m "feat(admin): gallery + packages - the grid/rail/table segments, card/rail/row deletes, the editor + cover pending vocabulary (#218)"
 ```
 
-### Task 7: The Submissions tab (UI-bearing — skills + owner-reacted variants)
+### Task 7: The Submissions tab (UI-bearing, skills + owner-reacted variants)
 
-**Load the installed UI/UX skill set at execution time** (`prototype` + `ui-ux-pro-max`, plus `ui-styling` as relevant — AGENTS.md rule) before composing. The Testimonials screen becomes two tabs — the published list (today's screen) and the Submissions queue (#216's moderation endpoints, first consumer). The queue: pending-first segment, per-row Accept (an edit-first sheet riding `LightEntityEditor`'s async contract)/Reject (a `GuardedConfirm`)/Delete (a `DeleteGuardDialog`), its own first-load skeleton, pending-guarded throughout.
+**Load the installed UI/UX skill set at execution time** (`prototype` + `ui-ux-pro-max`, plus `ui-styling` as relevant, AGENTS.md rule) before composing. The Testimonials screen becomes two tabs, the published list (today's screen) and the Submissions queue (#216's moderation endpoints, first consumer). The queue: pending-first segment, per-row Accept (an edit-first sheet riding `LightEntityEditor`'s async contract)/Reject (a `GuardedConfirm`)/Delete (a `DeleteGuardDialog`), its own first-load skeleton, pending-guarded throughout.
 
 **Files:**
 - Create: `apps/admin/src/components/testimonials/submissions-tab.tsx`
@@ -2047,7 +2047,7 @@ git commit -m "feat(admin): gallery + packages - the grid/rail/table segments, c
 
 **Interfaces:**
 - Consumes: Task 2's `adminTestimonialSubmissionQueries` + `acceptAdminTestimonialSubmission`/`rejectAdminTestimonialSubmission`/`removeAdminTestimonialSubmission`; Task 3's `SegmentedControl`/`GuardedConfirm`/`DeleteGuardDialog`/`SubmissionStatusBadge`/`LightEntityEditor`/`PendingSpinner` + `QueryErrorState`/`QUERY_ERROR_LINE`/`EmptyState`; Task 1's `submissions-state` seams + `ACCEPTING_LABEL`/`REJECTING_LABEL`/`blockerLines`; `adminTestimonialQueries` (the accept invalidates the published list too).
-- Produces: `SubmissionsTab()` — mounted by the testimonials screen under its `'submissions'` tab.
+- Produces: `SubmissionsTab()`, mounted by the testimonials screen under its `'submissions'` tab.
 
 **Not here:** staff notifications (the queue IS the notification); a status query param on the API (client-side segment per #216's plan); Turnstile; any landing surface.
 
@@ -2057,11 +2057,11 @@ Create `apps/admin/src/components/testimonials/submissions-tab.tsx` with exactly
 
 ```tsx
 // The Submissions tab (M7 #218 over #216's moderation endpoints): the
-// pending queue on the Testimonials screen — a stop on an existing screen,
+// pending queue on the Testimonials screen, a stop on an existing screen,
 // not a new place to remember. Pending-guarded accept-with-edit (the
 // accept sheet rides LightEntityEditor's async Save contract, saveLabel
-// 'Accept' — busy 'Accepting…'), reject-retains (GuardedConfirm), and
-// delete-any-status (DeleteGuardDialog — a submission references nothing,
+// 'Accept', busy 'Accepting…'), reject-retains (GuardedConfirm), and
+// delete-any-status (DeleteGuardDialog, a submission references nothing,
 // so blockers never arrive). The tab's own status segment defaults to
 // Pending: the queue IS the work. The list renders newest-first as the API
 // serves it; no reordering exists here.
@@ -2103,7 +2103,7 @@ import {
 } from '#/lib/submissions-state';
 import type { AcceptEditState, SubmissionSegment } from '#/lib/submissions-state';
 
-/** The pending posture's fixed four rows — stable keys, never reordered. */
+/** The pending posture's fixed four rows, stable keys, never reordered. */
 const PENDING_ROW_KEYS = ['row-1', 'row-2', 'row-3', 'row-4'];
 
 export function SubmissionsTab() {
@@ -2114,17 +2114,17 @@ export function SubmissionsTab() {
     refetch,
   } = useQuery(adminTestimonialSubmissionQueries.all());
   const queryClient = useQueryClient();
-  // Pending leads — the moderation queue's default view.
+  // Pending leads, the moderation queue's default view.
   const [segment, setSegment] = useState<SubmissionSegment>('pending');
-  // The three actions' targets (one dialog/sheet at a time — uuid ids never
+  // The three actions' targets (one dialog/sheet at a time, uuid ids never
   // collide).
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const [rejectId, setRejectId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The accept sheet's field state + inline errors (the async Save contract
-  // holds the sheet open on a failed accept — state intact, retry safe).
-  // The empty seed only holds between mounts — opening a row re-seeds.
+  // holds the sheet open on a failed accept, state intact, retry safe).
+  // The empty seed only holds between mounts, opening a row re-seeds.
   const [acceptState, setAcceptState] = useState<AcceptEditState>({ quote: '', person: '' });
   const [acceptErrors, setAcceptErrors] = useState<{ quote?: string; person?: string }>({});
   const quoteId = useId();
@@ -2242,7 +2242,7 @@ export function SubmissionsTab() {
         />
       ) : isPending || !submissions ? (
         // Pending posture: skeleton rows echoing the queue's anatomy (quote
-        // + person, badge, actions) — first load only.
+        // + person, badge, actions), first load only.
         <Card className='rounded-lg'>
           <CardContent className='space-y-4'>
             {PENDING_ROW_KEYS.map((key) => (
@@ -2333,7 +2333,7 @@ export function SubmissionsTab() {
       {acceptingRow ? (
         <LightEntityEditor
           title='Accept submission'
-          description='Fix or trim the words first if needed — accepting publishes it as a testimonial at the end of the list.'
+          description='Fix or trim the words first if needed, accepting publishes it as a testimonial at the end of the list.'
           open={acceptingId === acceptingRow.id}
           onOpenChange={(next) => {
             if (!next) {
@@ -2372,7 +2372,7 @@ export function SubmissionsTab() {
       {rejectRow ? (
         <GuardedConfirm
           title='Reject this submission?'
-          description='The submission stays on record as rejected — nothing publishes, and the sender is never told.'
+          description='The submission stays on record as rejected, nothing publishes, and the sender is never told.'
           confirmLabel='Reject'
           busyLabel={REJECTING_LABEL}
           pending={reject.isPending}
@@ -2407,7 +2407,7 @@ export function SubmissionsTab() {
 }
 ```
 
-Notes: (a) the `LightEntityEditor`'s busy Save label is `SAVING_LABEL` by contract — the sheet shows 'Saving…' over the 'Accept' label while in flight; `ACCEPTING_LABEL` is therefore consumed only by the owner-copy round (if the owner rules the accept-specific label, swap the shell to accept a `busyLabel` prop in the retune commit — do NOT widen the component speculatively now). (Ruling 2026-10-16, live run: the import is therefore NOT fenced into the file — `noUnusedLocals` fails the typecheck gate on it (TS6133); the retune commit re-adds it if the owner rules it.) (b) the accept sheet's `description` and the two confirm descriptions carry `TODO(owner-copy)` per the convention — the fenced strings are the proposals the round ratifies or retunes. (c) `PENDING_ROW_KEYS` is this file's own local (the other screens' constants are module-private to theirs).
+Notes: (a) the `LightEntityEditor`'s busy Save label is `SAVING_LABEL` by contract, the sheet shows 'Saving…' over the 'Accept' label while in flight; `ACCEPTING_LABEL` is therefore consumed only by the owner-copy round (if the owner rules the accept-specific label, swap the shell to accept a `busyLabel` prop in the retune commit, do NOT widen the component speculatively now). (Ruling 2026-10-16, live run: the import is therefore NOT fenced into the file, `noUnusedLocals` fails the typecheck gate on it (TS6133); the retune commit re-adds it if the owner rules it.) (b) the accept sheet's `description` and the two confirm descriptions carry `TODO(owner-copy)` per the convention, the fenced strings are the proposals the round ratifies or retunes. (c) `PENDING_ROW_KEYS` is this file's own local (the other screens' constants are module-private to theirs).
 
 - [ ] **Step 2: Wire the tab switch into `testimonials-screen.tsx`**
 
@@ -2415,7 +2415,7 @@ Notes: (a) the `LightEntityEditor`'s busy Save label is `SAVING_LABEL` by contra
 
 ```tsx
   // The screen's two tabs (#218): the published list and the moderation
-  // queue — local state, no routes (the queue is a stop on an existing
+  // queue, local state, no routes (the queue is a stop on an existing
   // screen, not a new place to remember).
   const [tab, setTab] = useState<'testimonials' | 'submissions'>('testimonials');
 ```
@@ -2434,7 +2434,7 @@ Notes: (a) the `LightEntityEditor`'s busy Save label is `SAVING_LABEL` by contra
       />
 ```
 
-(d) The `PageHeader`'s `actions` render only on the testimonials tab — wrap the existing fragment: `actions={tab === 'testimonials' ? (<> …the segment + New button from Task 5… </>) : undefined}`. (e) Wrap the list block (the error/pending/empty/table chain) in `{tab === 'testimonials' ? ( … ) : <SubmissionsTab />}` — the sheet, the `DeactivateConfirm`, and the delete dialog from Task 5 stay mounted OUTSIDE the switch (their targets live on the published list; they can never be open while the submissions tab shows).
+(d) The `PageHeader`'s `actions` render only on the testimonials tab, wrap the existing fragment: `actions={tab === 'testimonials' ? (<> …the segment + New button from Task 5… </>) : undefined}`. (e) Wrap the list block (the error/pending/empty/table chain) in `{tab === 'testimonials' ? ( … ) : <SubmissionsTab />}`, the sheet, the `DeactivateConfirm`, and the delete dialog from Task 5 stay mounted OUTSIDE the switch (their targets live on the published list; they can never be open while the submissions tab shows).
 
 - [ ] **Step 3: Gates + commit**
 
@@ -2447,7 +2447,7 @@ git commit -m "feat(admin): the Submissions tab - pending-guarded accept-with-ed
 
 - [ ] **Step 4: The owner-reacted variants round (controller interaction)**
 
-Run the admin dev server (`pnpm --filter @sevendays/admin dev`), seed a spread of states (at least: one pending + one accepted + one rejected submission via the public POST or directly against the compose DB; a mixed active/deactivated list on two screens), and capture BOTH themes (the topbar toggle) of: the Submissions tab (each segment), the accept sheet (idle + the inline-error state), the reject + delete confirms, the status segment on two toolbars (one table + the gallery grid), a delete dialog with blockers in-body (force one: attempt a delete on a history-bearing row, e.g. any branch — every seeded branch carries appointments), and the palette sites (status dots, reactivate icons, bulk bar). Save to the evidence dir, present to the owner, record the rulings. If any copy/class retunes, apply them in this task's follow-up commit (the `TODO(owner-copy)`/`TODO(token-ruling)` markers stay for Task 8's palette retirement — copy markers retire HERE as ruled).
+Run the admin dev server (`pnpm --filter @sevendays/admin dev`), seed a spread of states (at least: one pending + one accepted + one rejected submission via the public POST or directly against the compose DB; a mixed active/deactivated list on two screens), and capture BOTH themes (the topbar toggle) of: the Submissions tab (each segment), the accept sheet (idle + the inline-error state), the reject + delete confirms, the status segment on two toolbars (one table + the gallery grid), a delete dialog with blockers in-body (force one: attempt a delete on a history-bearing row, e.g. any branch, every seeded branch carries appointments), and the palette sites (status dots, reactivate icons, bulk bar). Save to the evidence dir, present to the owner, record the rulings. If any copy/class retunes, apply them in this task's follow-up commit (the `TODO(owner-copy)`/`TODO(token-ruling)` markers stay for Task 8's palette retirement, copy markers retire HERE as ruled).
 
 ### Task 8: The status palette settles + the loads verification sweep
 
@@ -2456,16 +2456,16 @@ The ticket's fourth AC: "the status palette owner-reacted via rendered variants,
 **Files:**
 - Modify (only if the round retunes): `apps/admin/src/components/cms/shared.tsx`, `cms/bulk-bar.tsx` (palette class strings; the `TODO(token-ruling)` comments)
 
-**Interfaces:** none new — verification + string-level retunes only.
+**Interfaces:** none new, verification + string-level retunes only.
 
-**Not here:** the six card-radius `TODO(token-ruling)` comments (a different ruling, not this ticket's); `scripts/measure-theme-pairs.mjs` (it gates tokens.css pairs — the palette rides tailwind palette classes, no script change); any packages/ui token additions (the palette stays app-side per the M3 ruling that flagged these sites).
+**Not here:** the six card-radius `TODO(token-ruling)` comments (a different ruling, not this ticket's); `scripts/measure-theme-pairs.mjs` (it gates tokens.css pairs, the palette rides tailwind palette classes, no script change); any packages/ui token additions (the palette stays app-side per the M3 ruling that flagged these sites).
 
 - [ ] **Step 1: Retire the palette markers**
 
 With the owner's Task-7-round rulings in hand: (a) apply any retuned class strings at the three palette sites (`shared.tsx`'s `StatusBadge` dot + reactivate icon, `bulk-bar.tsx`'s reactivate) and the `SUBMISSION_STATUS_META` table; (b) replace each of the three palette `TODO(token-ruling)` comments with exactly this shape (dated with the round's date):
 
 ```tsx
-            // Status palette (owner-reacted 2026-10-XX, #218's variants round): the ruled families — never promote into packages/ui.
+            // Status palette (owner-reacted 2026-10-XX, #218's variants round): the ruled families, never promote into packages/ui.
 ```
 
 (c) if any candidate was swapped for a non-measured class on INTERACTIVE text (the reactivate buttons), re-measure before committing:
@@ -2478,11 +2478,11 @@ Expected: ≥ 4.5 against `#ffffff` (light leg) and `#1b1e22` (dark leg). The pr
 
 - [ ] **Step 2: The loads verification sweep (runnable, not prose)**
 
-For each of the seven screens + the Submissions tab, verify in the running dev server: (a) first load renders the skeleton echoing the row anatomy; (b) after ANY save/flip/delete (which invalidates + refetches), the list does NOT flash the skeleton — `isPending` stays false while data exists; (c) the gallery thumb boxes are `bg-muted` with `loading='lazy'` and no per-card image skeleton appears; (d) the tray still speaks its own status copy. Record a per-screen ✓ line in the evidence dir. If any screen flashes, that is a defect to fix HERE (the only lawful cause would be a `data === undefined` reset somewhere — none exists on disk as of `8bed7f2`).
+For each of the seven screens + the Submissions tab, verify in the running dev server: (a) first load renders the skeleton echoing the row anatomy; (b) after ANY save/flip/delete (which invalidates + refetches), the list does NOT flash the skeleton, `isPending` stays false while data exists; (c) the gallery thumb boxes are `bg-muted` with `loading='lazy'` and no per-card image skeleton appears; (d) the tray still speaks its own status copy. Record a per-screen ✓ line in the evidence dir. If any screen flashes, that is a defect to fix HERE (the only lawful cause would be a `data === undefined` reset somewhere, none exists on disk as of `8bed7f2`).
 
 - [ ] **Step 3: Gates + commit**
 
-`pnpm --filter @sevendays/admin fix` → `test -- --run` (21/217) → `typecheck`. Commit (skip if the round changed nothing — then fold Step 2's evidence into Task 9):
+`pnpm --filter @sevendays/admin fix` → `test -- --run` (21/217) → `typecheck`. Commit (skip if the round changed nothing, then fold Step 2's evidence into Task 9):
 
 ```bash
 git add apps/admin/src/components/cms/shared.tsx apps/admin/src/components/cms/bulk-bar.tsx
@@ -2493,17 +2493,17 @@ git commit -m "chore(admin): the status palette settled - both themes, the TODO(
 
 - [ ] **Step 1: The full check**
 
-`pnpm check` (lint + format + typecheck + test across the repo — green; the only touched package is admin, everything else is floor-unchanged: types 17/167, api 31 files 422+3, api-client 5/45, landing 10/92, admin **21/217**).
+`pnpm check` (lint + format + typecheck + test across the repo, green; the only touched package is admin, everything else is floor-unchanged: types 17/167, api 31 files 422+3, api-client 5/45, landing 10/92, admin **21/217**).
 
-- [ ] **Step 2: `docs/plan.md` — THREE boxes tick (pinned edits)**
+- [ ] **Step 2: `docs/plan.md`, THREE boxes tick (pinned edits)**
 
 (a) The interaction-system box (which carries no annotation yet) flips to `- [✅]` and gains this annotation appended at its line's end:
 
 ```text
- _(2026-10-XX, #218: the async Save contract live on all seven sheets + the Submissions tab (the editorNonce/keepEditorOpen machinery deleted, grep-proven), the pending vocabulary on every write/upload/delete affordance incl. the package editor + both cover buttons, delete dialogs with blockers in-body on all nine entities over the #213 routes, the All/Active/Deactivated segment on all eight list surfaces (the gallery grid included, default All per visit, counts unfiltered), the Submissions tab live over #216's endpoints (accept-with-edit / reject-retains / delete-any-status, pending-guarded), the status palette owner-reacted in both themes, and the loads law verified — first-load-only skeletons, muted media boxes, no refetch flash)_
+ _(2026-10-XX, #218: the async Save contract live on all seven sheets + the Submissions tab (the editorNonce/keepEditorOpen machinery deleted, grep-proven), the pending vocabulary on every write/upload/delete affordance incl. the package editor + both cover buttons, delete dialogs with blockers in-body on all nine entities over the #213 routes, the All/Active/Deactivated segment on all eight list surfaces (the gallery grid included, default All per visit, counts unfiltered), the Submissions tab live over #216's endpoints (accept-with-edit / reject-retains / delete-any-status, pending-guarded), the status palette owner-reacted in both themes, and the loads law verified, first-load-only skeletons, muted media boxes, no refetch flash)_
 ```
 
-(b) The guarded-DELETE box flips to `- [✅]`; its existing annotation (which ends "— the shared checkbox") gains, replacing that closing phrase: `the shared checkbox closed 2026-10-XX, #218: the CMS half landed — the delete dialogs on all nine screens, pending-guarded, blockers in-body.`
+(b) The guarded-DELETE box flips to `- [✅]`; its existing annotation (which ends ", the shared checkbox") gains, replacing that closing phrase: `the shared checkbox closed 2026-10-XX, #218: the CMS half landed, the delete dialogs on all nine screens, pending-guarded, blockers in-body.`
 
 (c) The public-testimonial-form box flips to `- [✅]`; its existing annotation's closing clause "the box waits for #218's Submissions tab." becomes `the box closed 2026-10-XX, #218: the Submissions tab seated on the Testimonials screen.`
 
@@ -2513,11 +2513,11 @@ git commit -m "chore(admin): the status palette settled - both themes, the TODO(
 
 - [ ] **Step 4: PR + squash merge**
 
-Push `feat/218-cms-interaction-system`; open the PR against main titled `The CMS-wide interaction system — async Save, pending vocabulary, segments, delete dialogs, the Submissions tab (#218)`; body: the four ACs each answered with the evidence pointer (contract suite + grep gate; the law table; the nine dialogs; the segment list + the palette round). Squash-merge.
+Push `feat/218-cms-interaction-system`; open the PR against main titled `The CMS-wide interaction system, async Save, pending vocabulary, segments, delete dialogs, the Submissions tab (#218)`; body: the four ACs each answered with the evidence pointer (contract suite + grep gate; the law table; the nine dialogs; the segment list + the palette round). Squash-merge.
 
 - [ ] **Step 5: The v1 pick (pre-ruled PICK clean)**
 
-Per the spec's class ledger ("CMS UX system … **PICK clean** — Admin surfaces exist on both editions; the Submissions tab lands on both") and `docs/agents/v1-picks.md`: run the classifier over the squash commit — every code path this ticket touches is `apps/admin/**` (both editions carry the admin verbatim), so the expected verdict is **pick** with zero content-drops; the docs files (`docs/**`, `AGENTS.md`, `graphify-out/`) are main-only per the runbook and never pick. Append the ledger row (date, PR #, main SHA, `pick`, v1 SHA, the one-line summary: "#218 — M7 ticket 07, the CMS-wide interaction system: the async Save contract (nonce machinery deleted, grep-proven), the pending vocabulary, guarded delete dialogs with in-body blockers on all nine, the All/Active/Deactivated segment everywhere, the Submissions tab over #216, the palette settled both themes"). Commit the ledger on main.
+Per the spec's class ledger ("CMS UX system … **PICK clean**, Admin surfaces exist on both editions; the Submissions tab lands on both") and `docs/agents/v1-picks.md`: run the classifier over the squash commit, every code path this ticket touches is `apps/admin/**` (both editions carry the admin verbatim), so the expected verdict is **pick** with zero content-drops; the docs files (`docs/**`, `AGENTS.md`, `graphify-out/`) are main-only per the runbook and never pick. Append the ledger row (date, PR #, main SHA, `pick`, v1 SHA, the one-line summary: "#218, M7 ticket 07, the CMS-wide interaction system: the async Save contract (nonce machinery deleted, grep-proven), the pending vocabulary, guarded delete dialogs with in-body blockers on all nine, the All/Active/Deactivated segment everywhere, the Submissions tab over #216, the palette settled both themes"). Commit the ledger on main.
 
 - [ ] **Step 6: Issue close + graphify**
 
