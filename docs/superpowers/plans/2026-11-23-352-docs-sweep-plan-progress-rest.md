@@ -23,7 +23,7 @@
 All numbers below were measured 2026-11-23 at `573f608` (both from the main checkout and re-verified inside the worktree checkout). Re-run each and record; drift means something merged, reconcile before starting.
 
 - **Floors (must not move anywhere in this ticket):** api 34 files / 482 passed + 3 skipped; types 18 files / 197 passed; api-client 5 files / 45; landing 19 files / 152; admin 34 files / 364; db 4 files / **30 passed + 0 skipped with `TEST_DATABASE_URL` set** (the with-var form; ruling #349-R4). A docs-only sweep cannot move any floor; the Task 5 closing gate proves it.
-- **The in-scope file set:** `git ls-files docs/ | grep -vE '^docs/(adr|specs|agents)/'` → **134 files** (all `.md`; no other file types live under `docs/`). Re-derive and record at pre-flight.
+- **The in-scope file set:** `git ls-files docs/ | grep -vE '^docs/(adr|specs|agents)/'` → **134 swept files** (all `.md`; no other file types live under `docs/`) **plus this plan file itself: 135 tracked total**. The plan file is em-dash-free by construction and is never swept, never hand-edited, and EXCLUDED from every per-task gate by the `grep -v 352-docs-sweep-plan-progress-rest` filter (it is absent at the merge-base, so the drift gate would false-DRIFT on it). Re-derive and record at pre-flight. (Amendment, execution pre-flight 2026-11-23: the census was taken before the plan file existed; with the exclusion in place every pinned number below holds exactly, live-verified.)
 - **Dash census (occurrences, per tree):**
 
   | tree | em occ | dash lines | spaced (scripted form) | line-end | line-start | dbl-space | en |
@@ -38,7 +38,7 @@ All numbers below were measured 2026-11-23 at `573f608` (both from the main chec
 
   ```bash
   EM=$(printf '\u2014'); EN=$(printf '\u2013')
-  FILES=$(git ls-files docs/ | grep -vE '^docs/(adr|specs|agents)/')
+  FILES=$(git ls-files docs/ | grep -vE '^docs/(adr|specs|agents)/' | grep -v 352-docs-sweep-plan-progress-rest)
   echo "occ=$(grep -ho "$EM" $FILES | wc -l) lines=$(grep -h "$EM" $FILES | wc -l) spaced=$(grep -ho " $EM " $FILES | wc -l) lineEnd=$(grep -hE "$EM$" $FILES | wc -l) en=$(grep -ho "$EN" $FILES | wc -l)"
   ```
 
@@ -89,7 +89,7 @@ All numbers below were measured 2026-11-23 at `573f608` (both from the main chec
 
   ```bash
   BASE=$(git merge-base main HEAD)
-  for f in $(git ls-files <tree paths>); do
+  for f in $(git ls-files <tree paths> | grep -v 352-docs-sweep-plan-progress-rest); do
     diff <(git show "$BASE:$f" | tr -cd '[:alnum:]') <(tr -cd '[:alnum:]' < "$f") >/dev/null || echo "DRIFT: $f"
   done; echo "drift check done"
   ```
@@ -257,14 +257,14 @@ All numbers below were measured 2026-11-23 at `573f608` (both from the main chec
   Expected: `EM DASH: clean, 0 hits (docs/superpowers/plans)`, exit 0.
 
   ```bash
-  total=0; for f in $(git ls-files docs/superpowers/plans); do n=$(grep -o '–' "$f" | wc -l); total=$((total+n)); done; echo "en=$total"
+  total=0; for f in $(git ls-files docs/superpowers/plans | grep -v 352-docs-sweep-plan-progress-rest); do n=$(grep -o '–' "$f" | wc -l); total=$((total+n)); done; echo "en=$total"
   ```
 
-  Expected: `en=1245`.
+  Expected: `en=1245` (the plan file itself is excluded; it carries 23 gate-legal en dashes of its own).
 
   ```bash
   BASE=$(git merge-base main HEAD)
-  for f in $(git ls-files docs/superpowers/plans); do
+  for f in $(git ls-files docs/superpowers/plans | grep -v 352-docs-sweep-plan-progress-rest); do
     diff <(git show "$BASE:$f" | tr -cd '[:alnum:]') <(tr -cd '[:alnum:]' < "$f") >/dev/null || echo "DRIFT: $f"
   done; echo "drift check done"
   ```
@@ -466,10 +466,10 @@ Census: 855 occurrences / 188 dash lines / 850 spaced / 4 line-end lines / 1 uns
 - [ ] **Step 2: The en grand total.**
 
   ```bash
-  total=0; for f in $(git ls-files docs/ | grep -vE '^docs/(adr|specs|agents)/'); do n=$(grep -o '–' "$f" | wc -l); total=$((total+n)); done; echo "en=$total"
+  total=0; for f in $(git ls-files docs/ | grep -vE '^docs/(adr|specs|agents)/' | grep -v 352-docs-sweep-plan-progress-rest); do n=$(grep -o '–' "$f" | wc -l); total=$((total+n)); done; echo "en=$total"
   ```
 
-  Expected: `en=1310` (acceptance criterion 1's "en dashes kept" half).
+  Expected: `en=1310` (acceptance criterion 1's "en dashes kept" half; the plan file itself carries 23 gate-legal en dashes more, excluded here).
 
 - [ ] **Step 3: The closing gate.** With the test container up:
 
@@ -519,7 +519,8 @@ EOF
 
 ## Self-review record (written after the final append, 2026-11-23)
 
-- Placeholder sweep: no `<!-- APPEND:` anchors remain; no TODO/placeholder markers; the file itself is **em-dash-free** (verified by grep: 0 literal U+2014; the character exists only as the `\u2014` escape text and inside `printf '\u2014'` runtime builders; the 22 en dashes are the gate-legal quoted contexts).
+- Placeholder sweep: no `<!-- APPEND:` anchors remain; no TODO/placeholder markers; the file itself is **em-dash-free** (verified by grep: 0 literal U+2014; the character exists only as the `\u2014` escape text and inside `printf '\u2014'` runtime builders; the 23 en dashes are the gate-legal quoted contexts).
+- Amendment (execution pre-flight, 2026-11-23): the committed plan file joins the tracked file set (135 total = 134 swept + this plan), so every loop-based gate now excludes it by the `grep -v 352-docs-sweep-plan-progress-rest` filter (it is absent at the merge-base, which would false-DRIFT the drift gate, and its 23 en dashes would inflate the en gates). With the exclusion, every pinned number holds exactly, live-verified at pre-flight (occ 20,886 / lines 14,365 / spaced 20,568 / lineEnd 224 / tree-B en 1,245 / grand en 1,310).
 - Step-checkbox count: Task 1 has 4, Task 2 has 6, Task 3 has 4, Task 4 has 4, Task 5 has 6 (24 total, all `- [ ] **Step`).
 - Cross-task names: the scoped verdict command is spelled identically in the pre-flight, Global Constraints, Task 5 Step 1, and the PR body (4 occurrences); the eight reference-doc paths are identical across Task 1's Steps 1/3/4; commit prefixes match Global Constraints (`chore(sweep):` Tasks 1–4, `docs(progress):` Task 5).
 - Counts re-derived from the probes, not from memory: 20,886 occurrences / 14,365 dash lines / 133 carrying files of 134; 20,568 spaced; 224 line-end + 15 line-start + 19 double-space lines; 1,310 en; per-tree sums equal the totals (172+19,538+321+855; 151+13,885+141+188; 165+19,232+321+850; 5+1,245+23+37); the per-task reconcile laws (165+7, 19,232+306, 321+0, 850+5) follow the same census.
