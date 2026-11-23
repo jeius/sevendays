@@ -70,7 +70,7 @@ Product-adjacent and developer-facing strings are hand-rewritten FIRST so fix mo
 Before:
 ```ts
   throw new Error(
-    'E2E_BASE_URL is not set — point it at the deployment under test (e.g. the teaser landing URL). The suites walk deployed environments, not local dev servers, so there is no default.'
+    'E2E_BASE_URL is not set, point it at the deployment under test (e.g. the teaser landing URL). The suites walk deployed environments, not local dev servers, so there is no default.'
   );
 ```
 
@@ -371,7 +371,7 @@ EOF
 )
 ```
 
-#353 closes on merge per the house pattern, with the acceptance criteria ticked (`- [✅]`) in the issue at close. The plan doc (`docs/superpowers/plans/2026-11-23-353-root-files-sweep.md`) rides the branch's first commit (`docs(plan): the #353 SDD plan — the author-written root files sweep`), committed by the controller before execution starts.
+#353 closes on merge per the house pattern, with the acceptance criteria ticked (`- [✅]`) in the issue at close. The plan doc (`docs/superpowers/plans/2026-11-23-353-root-files-sweep.md`) rides the branch's first commit (`docs(plan): the #353 SDD plan, the author-written root files sweep`), committed by the controller before execution starts.
 
 ---
 

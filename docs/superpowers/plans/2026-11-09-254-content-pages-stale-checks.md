@@ -1,39 +1,39 @@
 # Content-Pages #223-Stale Checks Rewrite Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Per repo AGENTS.md, tick completed boxes with the ✅ emoji (`- [✅]`), never plain `[x]`. **This ticket is NOT UI-bearing** — zero landing `src/` files change, so the UI/UX skill-set loading rule does not apply. The long-running stack (Task 1 Step 1) stays up through Task 6; every task's scenario run reuses it.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Per repo AGENTS.md, tick completed boxes with the ✅ emoji (`- [✅]`), never plain `[x]`. **This ticket is NOT UI-bearing**, zero landing `src/` files change, so the UI/UX skill-set loading rule does not apply. The long-running stack (Task 1 Step 1) stays up through Task 6; every task's scenario run reuses it.
 
 **Goal:** The three #223-stale checks in the landing content-pages verification scenario are rewritten against the owner-ruled current contracts (add-ons absence, walk-in aria-labels, case-insensitive testimonials), and the environment-sensitive blurb + deep-link checks are hardened to follow the live site-settings wire and parsed `/book` query params instead of exact strings.
 
-**Architecture:** Seven tasks: (1) the deep-link seam — one additive `bookParamValues(param)` helper in the shared CDP lib plus three call-site re-forms in content-pages (home teaser, /services, /branches), one commit; (2) the hero blurb follows the live site-settings read; (3) the add-ons check inverts to guard the ruling's absence; (4) the walk-in check asserts the indicator's aria-label pair; (5) the testimonials check matches case-insensitively over the unchanged `innerText` seam — each ruling its own commit, each observed flipping its named check on the live stack; (6) the verification task — content-pages green (20/20), the deployed-teaser re-check (report-only), the repo gates; (7) docs, PR, the v1 ledger row (pure SKIP), the packages-pages staleness ticket, issue close, graphify.
+**Architecture:** Seven tasks: (1) the deep-link seam, one additive `bookParamValues(param)` helper in the shared CDP lib plus three call-site re-forms in content-pages (home teaser, /services, /branches), one commit; (2) the hero blurb follows the live site-settings read; (3) the add-ons check inverts to guard the ruling's absence; (4) the walk-in check asserts the indicator's aria-label pair; (5) the testimonials check matches case-insensitively over the unchanged `innerText` seam, each ruling its own commit, each observed flipping its named check on the live stack; (6) the verification task, content-pages green (20/20), the deployed-teaser re-check (report-only), the repo gates; (7) docs, PR, the v1 ledger row (pure SKIP), the packages-pages staleness ticket, issue close, graphify.
 
-**Tech Stack:** zero new dependencies, zero manifest changes (`pnpm-lock.yaml` untouched, `pnpm install` never runs), zero migrations, zero `packages/` changes, zero landing `src/` changes — two `.mjs` files under `apps/landing/scripts/verify/` (`lib.mjs` + `content-pages.mjs`; `packages-pages.mjs` is FENCED — owner-ruled at execution, see the fences) plus main-only docs. Node's built-in WebSocket CDP harness (`lib.mjs`'s `connect()`); Playwright 1.63.0's installed chromium as the CDP browser (`~/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome` — probed this session; no system Chrome exists). `gh` CLI, GitHub Issues.
+**Tech Stack:** zero new dependencies, zero manifest changes (`pnpm-lock.yaml` untouched, `pnpm install` never runs), zero migrations, zero `packages/` changes, zero landing `src/` changes, two `.mjs` files under `apps/landing/scripts/verify/` (`lib.mjs` + `content-pages.mjs`; `packages-pages.mjs` is FENCED, owner-ruled at execution, see the fences) plus main-only docs. Node's built-in WebSocket CDP harness (`lib.mjs`'s `connect()`); Playwright 1.63.0's installed chromium as the CDP browser (`~/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome`, probed this session; no system Chrome exists). `gh` CLI, GitHub Issues.
 
-**Spec:** Implements ticket [#254 "content-pages.mjs carries three #223-stale checks (add-ons cross-reference, walk-in badges, about testimonials)"](https://github.com/jeius/sevendays/issues/254) (labels `bug` + `ready-for-agent`), whose parent is #241 and whose contract is the [agent brief](https://github.com/jeius/sevendays/issues/254#issuecomment-6731701934). The four owner rulings, verbatim from the 2026-11-09 triage: **(1)** add-ons — "Invert to absence … Byte-keep the ruled literal in the script as the guarded absence, same pattern as the #241 strip-retirement check"; **(2)** walk-ins — "The aria-label pair … the card's indicator trigger carries `acceptsWalkIns ? 'Walk-ins welcome' : 'By appointment'`. Keep the both-states requirement"; **(3)** testimonials — "Case-insensitive innerText … Keep the shared text seam (`innerText`) unchanged; match the person case-insensitively in the check. The coming-soon ⇔ zero equivalence stays as-is"; **(4)** teaser hardening — "the blurb against live site settings and loosen the href form": the hero-blurb expectation follows the public site-settings read (saved `homeDescription` wins, ratified default when null), and deep-link assertions match by parsed query param, never exact href string. Key recon facts (2026-11-09, main `1b9285a`, tree clean — post-#253; every file below read whole this session):
+**Spec:** Implements ticket [#254 "content-pages.mjs carries three #223-stale checks (add-ons cross-reference, walk-in badges, about testimonials)"](https://github.com/jeius/sevendays/issues/254) (labels `bug` + `ready-for-agent`), whose parent is #241 and whose contract is the [agent brief](https://github.com/jeius/sevendays/issues/254#issuecomment-6731701934). The four owner rulings, verbatim from the 2026-11-09 triage: **(1)** add-ons, "Invert to absence … Byte-keep the ruled literal in the script as the guarded absence, same pattern as the #241 strip-retirement check"; **(2)** walk-ins, "The aria-label pair … the card's indicator trigger carries `acceptsWalkIns ? 'Walk-ins welcome' : 'By appointment'`. Keep the both-states requirement"; **(3)** testimonials, "Case-insensitive innerText … Keep the shared text seam (`innerText`) unchanged; match the person case-insensitively in the check. The coming-soon ⇔ zero equivalence stays as-is"; **(4)** teaser hardening, "the blurb against live site settings and loosen the href form": the hero-blurb expectation follows the public site-settings read (saved `homeDescription` wins, ratified default when null), and deep-link assertions match by parsed query param, never exact href string. Key recon facts (2026-11-09, main `1b9285a`, tree clean, post-#253; every file below read whole this session):
 
-- **The premise, A/B-proven (the issue's own run, 2026-11-09):** `content-pages.mjs` scores exactly **17/20** on the local stack with exactly three FAILs — `/services: one-line add-on cross-reference visible` (the copy left with the #164 Round-3 ruled services rewrite: `services.tsx`'s own comment reads "the add-ons line is GONE"), `/branches: walk-in badges show both states (live seed has both)` (the badge recomposed into the icon `WalkInIndicator` in `branch-card.tsx`; its state text lives only in the trigger's `aria-label` pair `'Walk-ins welcome' : 'By appointment'` and the tooltip copy — neither reaches `textContent`, which is what the check reads), and `/about: testimonials render the payload (coming-soon ⇔ zero)` (the attribution renders `{t.person}` in an `uppercase` mono figcaption in `about.tsx`, and `lib.mjs`'s `text()` is `document.body.innerText`, which applies CSS `text-transform` — the match fails on casing whenever testimonials exist). The two checks #241's plan believed teaser-failing (`home: teaser items deep-link /book?service=`, `home: ratified hero blurb visible`) PASS on the local stack — they are environment-sensitive, not stale.
-- **Every find/replace pair below was applied to file copies and machine-verified this session:** each old block matches EXACTLY ONCE in its file, and the assembled post-edit files pass `node --check` and are Biome-format-canonical (`biome check --stdin-file-path` output byte-identical to input for all three files; the trailing "aren't fixed" stdin-mode message also fires on the pristine committed files — it is a stdin artifact, not a finding). The three new in-page `evaluate` bodies were syntax-checked standalone, and the `new URL(href, location.origin)` semantics probed in Node: `/book?service=x` → pathname `/book`, param `x`; `/booking/x?service=y` → pathname `/booking/x` (excluded by the pathname filter); a param-less `/book` link contributes nothing.
-- **The walk-in DOM, probed:** on `/branches` each branch renders one `article` whose `h3` is the branch name (no CSS transform on it — the existing name+address+phone check passes today), exactly one `button` carrying a walk-in `aria-label` (the call affordance is an `<a aria-label="Call …">`, the Book CTA an unlabeled `<Link>`) — so `button[aria-label='Walk-ins welcome'], button[aria-label='By appointment']` selects the indicator and nothing else. The seeded flags: Calamba/Iligan `acceptsWalkIns: false`, Dipolog `true` (the script header's own note).
-- **The site-settings wire (M7 #215):** `GET /api/v1/site-settings` answers the singleton object with every content field `string | null` on the wire — `homeDescription` is `z.string().max(1000).nullable()`; defaults never ride the wire, consumers resolve through `resolveSiteSettings`. The seed writes NO `site_settings` row (probed — zero seed references), so the local stack serves the born-empty all-null singleton and the hardened blurb check exercises its null→default arm locally; the teaser's saved copy exercises the saved-value arm. The ratified default, byte-pinned from `SITE_SETTINGS_DEFAULTS.homeDescription`: `Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.`
-- **The deep-link surfaces (all probed):** home's services strip = `ServiceImageCard` (`home-cards.tsx`, `to='/book' search={{ service: service.id }}`); `/services` = `service-card.tsx` (same form); `/branches` = the `Book at this branch` `Link` with `search={{ branch }}`. All render `a[href="/book?…"]` today (the checks pass locally) — the hardening decouples the ASSERTION from that serialization, which is what drifted on the deployed teaser. **AMENDED at execution (live probe + component read): the package deep-link seam is DETAIL-ONLY post-#223 — home featured plates wrap the whole card in one `Link to='/packages/$slug'` (`featured-plates.tsx`) and `/packages` cards likewise, so home/index carry ZERO `/book?package=` hrefs; the `/book?package=<uuid>` link exists only on the detail page's "Book this package" CTA.** The packages home hero CTA (`href === '/book'`, no query) is serialization-immune and stays untouched. `booking-wizard.mjs` and `cms-reflection.mjs` assert no `/book` hrefs (probed) — untouched, unfenced, and NOT run by this ticket (see fences).
-- **Check counts, pinned:** `content-pages.mjs` = 20 checks; `packages-pages.mjs` = 17 checks — **AMENDED at execution (owner-ruled 2026-11-09): packages-pages' true local baseline is 8/17, nine #223-stale FAILs** (plate/card DOM shapes killed the `<article>` counters; the uniform not-found replaced the package-specific copy; and home carries zero `/book?package=` links because featured plates link `/packages/$slug` by design — booking lives on the detail CTA). **The file is FENCED: zero edits this cycle**; the nine findings + the home-deep-link product question are filed as a new needs-triage ticket (Task 7). Three content-pages checks get NEW names in this ticket (the assertion semantics changed): `/services: one-line add-on cross-reference visible` → `/services: add-on cross-reference stays retired (#164 Round 3)`; `/branches: walk-in badges show both states (live seed has both)` → `/branches: walk-in indicators carry the aria-label state (live seed has both)`; `home: ratified hero blurb visible (#111 resolution; ruled edit #101)` → `home: hero blurb renders the live settings (ratified default ⇔ null)`. Every other check name is byte-stable.
-- **The v1 disposition, pre-classified:** every path this ticket touches is main-only — `apps/landing/scripts/verify` is a v1-absent path (`scripts/seed-v1/paths.txt:24`), and the plan file + `docs/progress.md` are main-only per the #241/#252 precedent. Pure SKIP; the ledger row is appended on main (Task 7).
+- **The premise, A/B-proven (the issue's own run, 2026-11-09):** `content-pages.mjs` scores exactly **17/20** on the local stack with exactly three FAILs, `/services: one-line add-on cross-reference visible` (the copy left with the #164 Round-3 ruled services rewrite: `services.tsx`'s own comment reads "the add-ons line is GONE"), `/branches: walk-in badges show both states (live seed has both)` (the badge recomposed into the icon `WalkInIndicator` in `branch-card.tsx`; its state text lives only in the trigger's `aria-label` pair `'Walk-ins welcome' : 'By appointment'` and the tooltip copy, neither reaches `textContent`, which is what the check reads), and `/about: testimonials render the payload (coming-soon ⇔ zero)` (the attribution renders `{t.person}` in an `uppercase` mono figcaption in `about.tsx`, and `lib.mjs`'s `text()` is `document.body.innerText`, which applies CSS `text-transform`, the match fails on casing whenever testimonials exist). The two checks #241's plan believed teaser-failing (`home: teaser items deep-link /book?service=`, `home: ratified hero blurb visible`) PASS on the local stack, they are environment-sensitive, not stale.
+- **Every find/replace pair below was applied to file copies and machine-verified this session:** each old block matches EXACTLY ONCE in its file, and the assembled post-edit files pass `node --check` and are Biome-format-canonical (`biome check --stdin-file-path` output byte-identical to input for all three files; the trailing "aren't fixed" stdin-mode message also fires on the pristine committed files, it is a stdin artifact, not a finding). The three new in-page `evaluate` bodies were syntax-checked standalone, and the `new URL(href, location.origin)` semantics probed in Node: `/book?service=x` → pathname `/book`, param `x`; `/booking/x?service=y` → pathname `/booking/x` (excluded by the pathname filter); a param-less `/book` link contributes nothing.
+- **The walk-in DOM, probed:** on `/branches` each branch renders one `article` whose `h3` is the branch name (no CSS transform on it, the existing name+address+phone check passes today), exactly one `button` carrying a walk-in `aria-label` (the call affordance is an `<a aria-label="Call …">`, the Book CTA an unlabeled `<Link>`), so `button[aria-label='Walk-ins welcome'], button[aria-label='By appointment']` selects the indicator and nothing else. The seeded flags: Calamba/Iligan `acceptsWalkIns: false`, Dipolog `true` (the script header's own note).
+- **The site-settings wire (M7 #215):** `GET /api/v1/site-settings` answers the singleton object with every content field `string | null` on the wire, `homeDescription` is `z.string().max(1000).nullable()`; defaults never ride the wire, consumers resolve through `resolveSiteSettings`. The seed writes NO `site_settings` row (probed, zero seed references), so the local stack serves the born-empty all-null singleton and the hardened blurb check exercises its null→default arm locally; the teaser's saved copy exercises the saved-value arm. The ratified default, byte-pinned from `SITE_SETTINGS_DEFAULTS.homeDescription`: `Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios, booked in minutes, delivered in seven days.`
+- **The deep-link surfaces (all probed):** home's services strip = `ServiceImageCard` (`home-cards.tsx`, `to='/book' search={{ service: service.id }}`); `/services` = `service-card.tsx` (same form); `/branches` = the `Book at this branch` `Link` with `search={{ branch }}`. All render `a[href="/book?…"]` today (the checks pass locally), the hardening decouples the ASSERTION from that serialization, which is what drifted on the deployed teaser. **AMENDED at execution (live probe + component read): the package deep-link seam is DETAIL-ONLY post-#223, home featured plates wrap the whole card in one `Link to='/packages/$slug'` (`featured-plates.tsx`) and `/packages` cards likewise, so home/index carry ZERO `/book?package=` hrefs; the `/book?package=<uuid>` link exists only on the detail page's "Book this package" CTA.** The packages home hero CTA (`href === '/book'`, no query) is serialization-immune and stays untouched. `booking-wizard.mjs` and `cms-reflection.mjs` assert no `/book` hrefs (probed), untouched, unfenced, and NOT run by this ticket (see fences).
+- **Check counts, pinned:** `content-pages.mjs` = 20 checks; `packages-pages.mjs` = 17 checks, **AMENDED at execution (owner-ruled 2026-11-09): packages-pages' true local baseline is 8/17, nine #223-stale FAILs** (plate/card DOM shapes killed the `<article>` counters; the uniform not-found replaced the package-specific copy; and home carries zero `/book?package=` links because featured plates link `/packages/$slug` by design, booking lives on the detail CTA). **The file is FENCED: zero edits this cycle**; the nine findings + the home-deep-link product question are filed as a new needs-triage ticket (Task 7). Three content-pages checks get NEW names in this ticket (the assertion semantics changed): `/services: one-line add-on cross-reference visible` → `/services: add-on cross-reference stays retired (#164 Round 3)`; `/branches: walk-in badges show both states (live seed has both)` → `/branches: walk-in indicators carry the aria-label state (live seed has both)`; `home: ratified hero blurb visible (#111 resolution; ruled edit #101)` → `home: hero blurb renders the live settings (ratified default ⇔ null)`. Every other check name is byte-stable.
+- **The v1 disposition, pre-classified:** every path this ticket touches is main-only, `apps/landing/scripts/verify` is a v1-absent path (`scripts/seed-v1/paths.txt:24`), and the plan file + `docs/progress.md` are main-only per the #241/#252 precedent. Pure SKIP; the ledger row is appended on main (Task 7).
 
 ## Global Constraints
 
-- **Branch:** `chore/254-content-pages-stale-checks` off main `1b9285a` (confirm `git status` clean first; if main has moved, branch off latest main — the pairs below were verified against `1b9285a` and each carries the exactly-once guard). This plan file is the branch's first commit. Commit messages follow the repo's `type(scope): … (#254)` squash style; every commit below is pinned verbatim.
-- **The pinned-edit law:** every edit below is a find/replace pair whose find-block matches EXACTLY ONCE in its file (machine-verified at plan time against `1b9285a`). If any find matches ≠ 1 at execution, STOP — the file drifted; reconcile against main before editing. After every task's edits: `node --check` both touched scripts, then `pnpm --filter @sevendays/landing fix` (expected: rewrites NOTHING — the pinned blocks are Biome-format-canonical, probed; if `fix` rewrites anything, the edits drifted from this plan — stop and reconcile before committing).
-- **The stack contract (Task 1 Step 1 brings it up; it stays up through Task 6):** three long-running processes — `pnpm --filter @sevendays/api dev` (port 8787; preexisting `packages/db/.env` provides the DB), `pnpm --filter @sevendays/landing dev` (port 3000; preexisting `apps/landing/.env.local` provides `API_URL`), and `~/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome --headless=new --remote-debugging-port=9222 --user-data-dir=/tmp/cdp-verify-254 about:blank`. Scenarios run from the repo root — this cycle's scenario is `node apps/landing/scripts/verify/content-pages.mjs` (defaults `LANDING_VERIFY_URL=http://localhost:3000`, `API_VERIFY_URL=http://127.0.0.1:8787`, `CDP_HTTP=http://127.0.0.1:9222`; `packages-pages.mjs` is fenced and never runs as a gate). This is the same stack the #241 walkthrough and the issue's A/B run used (2026-11-09, this machine). Scenario stdout lands in `.superpowers/sdd/2026-11-09-254-content-pages-stale-checks/` (gitignored) — one file per run, named in the steps.
-- **The baseline gate:** the FIRST content-pages run (before any edit) must print exactly `17/20 checks passed` with exactly the three named FAILs. Any other count — STOP: the stack or seed drifted; reconcile before editing (never loosen an assertion to make a count match). The packages-pages baseline was taken at execution and is PINNED as pre-existing: **8/17, nine FAILs, exit 1** (`baseline-packages-pages.txt` in the SDD workspace) — the #223-stale class the owner fenced OUT of this cycle; it is never a gate here, and the file is never run as one.
-- **The harness laws:** the no-import rule (expectations re-derived from live API responses; ratified copy byte-kept as literals) and the `text()` seam stays `document.body.innerText` (the casing fix lives in the check, not the lib — owner-ruled). `lib.mjs` changes are ADDITIVE only (`bookParamValues` joins the returned helpers; nothing existing is renamed or altered).
-- **The floors:** the landing vitest suite is untouched — 16 files / 123 tests at every gate (`pnpm --filter @sevendays/landing test` — if the count differs, reconcile; do not loosen). No other suite is touched (api/api-client/admin floors unchanged). No `pnpm build` gate — zero application code changes; the repo gate is `pnpm check` green (Task 6).
-- **The fences (NOT here, regardless of temptation):** landing `src/` — ZERO files change; the pages are correct, only the harness assertions change, and if an assertion cannot be rewritten without a product change, STOP and report back on the issue; **`packages-pages.mjs` — ZERO edits (owner-ruled at execution 2026-11-09: the file is #223-stale as a whole at 8/17; its two previously-ruled re-forms defer to the new ticket with the rest)**; `booking-wizard.mjs` + `cms-reflection.mjs` — untouched and NOT run (the lib change is additive; running cms-reflection mutates catalog rows for nothing); the e2e suite, visual baselines, and workflow (ADR-0022 — separate verdicts, zero overlap); `AGENTS.md` (no floor changes, no product rulings); every sibling ticket's files.
-- **Tick law:** `- [✅]` in this file and issue bodies alike, never plain `[x]`. Never commit secrets. `graphify update .` at close (code was modified) — its `graphify-out/` changes commit as their own `chore(graphify): post-#254 graph update` commit, the `1b9285a` pattern.
+- **Branch:** `chore/254-content-pages-stale-checks` off main `1b9285a` (confirm `git status` clean first; if main has moved, branch off latest main, the pairs below were verified against `1b9285a` and each carries the exactly-once guard). This plan file is the branch's first commit. Commit messages follow the repo's `type(scope): … (#254)` squash style; every commit below is pinned verbatim.
+- **The pinned-edit law:** every edit below is a find/replace pair whose find-block matches EXACTLY ONCE in its file (machine-verified at plan time against `1b9285a`). If any find matches ≠ 1 at execution, STOP, the file drifted; reconcile against main before editing. After every task's edits: `node --check` both touched scripts, then `pnpm --filter @sevendays/landing fix` (expected: rewrites NOTHING, the pinned blocks are Biome-format-canonical, probed; if `fix` rewrites anything, the edits drifted from this plan, stop and reconcile before committing).
+- **The stack contract (Task 1 Step 1 brings it up; it stays up through Task 6):** three long-running processes, `pnpm --filter @sevendays/api dev` (port 8787; preexisting `packages/db/.env` provides the DB), `pnpm --filter @sevendays/landing dev` (port 3000; preexisting `apps/landing/.env.local` provides `API_URL`), and `~/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome --headless=new --remote-debugging-port=9222 --user-data-dir=/tmp/cdp-verify-254 about:blank`. Scenarios run from the repo root, this cycle's scenario is `node apps/landing/scripts/verify/content-pages.mjs` (defaults `LANDING_VERIFY_URL=http://localhost:3000`, `API_VERIFY_URL=http://127.0.0.1:8787`, `CDP_HTTP=http://127.0.0.1:9222`; `packages-pages.mjs` is fenced and never runs as a gate). This is the same stack the #241 walkthrough and the issue's A/B run used (2026-11-09, this machine). Scenario stdout lands in `.superpowers/sdd/2026-11-09-254-content-pages-stale-checks/` (gitignored), one file per run, named in the steps.
+- **The baseline gate:** the FIRST content-pages run (before any edit) must print exactly `17/20 checks passed` with exactly the three named FAILs. Any other count, STOP: the stack or seed drifted; reconcile before editing (never loosen an assertion to make a count match). The packages-pages baseline was taken at execution and is PINNED as pre-existing: **8/17, nine FAILs, exit 1** (`baseline-packages-pages.txt` in the SDD workspace), the #223-stale class the owner fenced OUT of this cycle; it is never a gate here, and the file is never run as one.
+- **The harness laws:** the no-import rule (expectations re-derived from live API responses; ratified copy byte-kept as literals) and the `text()` seam stays `document.body.innerText` (the casing fix lives in the check, not the lib, owner-ruled). `lib.mjs` changes are ADDITIVE only (`bookParamValues` joins the returned helpers; nothing existing is renamed or altered).
+- **The floors:** the landing vitest suite is untouched, 16 files / 123 tests at every gate (`pnpm --filter @sevendays/landing test`, if the count differs, reconcile; do not loosen). No other suite is touched (api/api-client/admin floors unchanged). No `pnpm build` gate, zero application code changes; the repo gate is `pnpm check` green (Task 6).
+- **The fences (NOT here, regardless of temptation):** landing `src/`, ZERO files change; the pages are correct, only the harness assertions change, and if an assertion cannot be rewritten without a product change, STOP and report back on the issue; **`packages-pages.mjs`, ZERO edits (owner-ruled at execution 2026-11-09: the file is #223-stale as a whole at 8/17; its two previously-ruled re-forms defer to the new ticket with the rest)**; `booking-wizard.mjs` + `cms-reflection.mjs`, untouched and NOT run (the lib change is additive; running cms-reflection mutates catalog rows for nothing); the e2e suite, visual baselines, and workflow (ADR-0022, separate verdicts, zero overlap); `AGENTS.md` (no floor changes, no product rulings); every sibling ticket's files.
+- **Tick law:** `- [✅]` in this file and issue bodies alike, never plain `[x]`. Never commit secrets. `graphify update .` at close (code was modified), its `graphify-out/` changes commit as their own `chore(graphify): post-#254 graph update` commit, the `1b9285a` pattern.
 
 ## File Structure
 
 ```text
 apps/landing/scripts/verify/
-  lib.mjs             # modify (T1) — additive bookParamValues(param) helper
+  lib.mjs             # modify (T1), additive bookParamValues(param) helper
   content-pages.mjs   # modify (T1 deep-links ×3 + destructure, T2 blurb + fetch, T3 add-ons, T4 walk-ins, T5 testimonials)
 .superpowers/sdd/2026-11-09-254-content-pages-stale-checks/   # evidence (gitignored)
 docs/superpowers/plans/2026-11-09-254-content-pages-stale-checks.md   # this file (branch's first commit)
@@ -42,9 +42,9 @@ docs/progress.md  docs/agents/v1-picks.md  graphify-out/   # T7 (main-only)
 
 ---
 
-### Task 1: The deep-link seam — `bookParamValues` + three param-parsed re-forms
+### Task 1: The deep-link seam, `bookParamValues` + three param-parsed re-forms
 
-Ruling 4's href half. One additive helper in the shared lib (the only lib change in the ticket), consumed at three assertion sites in content-pages — `/branches`' re-form keeps its text anchor (`Book at this branch`) because the CTA copy is part of what that check asserts; the other two drop exact-string matching entirely. No check flips in this task: all three pass today and must still pass via the new mechanism — this task's gate is "same counts, same names, still green." **(Amendment, owner-ruled 2026-11-09: packages-pages is fenced — its two previously-ruled re-forms and its destructure are dropped from this task; see the fences.)**
+Ruling 4's href half. One additive helper in the shared lib (the only lib change in the ticket), consumed at three assertion sites in content-pages, `/branches`' re-form keeps its text anchor (`Book at this branch`) because the CTA copy is part of what that check asserts; the other two drop exact-string matching entirely. No check flips in this task: all three pass today and must still pass via the new mechanism, this task's gate is "same counts, same names, still green." **(Amendment, owner-ruled 2026-11-09: packages-pages is fenced, its two previously-ruled re-forms and its destructure are dropped from this task; see the fences.)**
 
 **Files:**
 - Modify: `apps/landing/scripts/verify/lib.mjs` (the returned-helpers tail)
@@ -52,22 +52,22 @@ Ruling 4's href half. One additive helper in the shared lib (the only lib change
 
 **Interfaces:**
 - Consumes: nothing new (Task 0 is main's code).
-- Produces: `bookParamValues(param: string): Promise<string[]>` on `connect()`'s returned page object — the deduped values of `param` across every `a` whose parsed href has pathname `/book` (Tasks 2–5 don't consume it; content-pages' destructure names it).
+- Produces: `bookParamValues(param: string): Promise<string[]>` on `connect()`'s returned page object, the deduped values of `param` across every `a` whose parsed href has pathname `/book` (Tasks 2–5 don't consume it; content-pages' destructure names it).
 
-**Not here:** the blurb/settings fetch (Task 2); any stale-check rewrite (Tasks 3–5); **`packages-pages.mjs` in its entirety (fenced — zero edits)**.
+**Not here:** the blurb/settings fetch (Task 2); any stale-check rewrite (Tasks 3–5); **`packages-pages.mjs` in its entirety (fenced, zero edits)**.
 
 - [✅] **Step 1: Baseline gate (stack already up)**
 
-The three long-running processes (api :8787, landing :3000, CDP :9222) are controller-owned and already verified up — do NOT start, stop, or restart any server. From the repo root:
+The three long-running processes (api :8787, landing :3000, CDP :9222) are controller-owned and already verified up, do NOT start, stop, or restart any server. From the repo root:
 
 ```bash
 mkdir -p .superpowers/sdd/2026-11-09-254-content-pages-stale-checks
 node apps/landing/scripts/verify/content-pages.mjs | tee .superpowers/sdd/2026-11-09-254-content-pages-stale-checks/baseline-content-pages.txt
 ```
 
-Expected (the baseline gate — anything else, STOP): content-pages exits 1 with exactly three FAIL lines — `/services: one-line add-on cross-reference visible`, `/branches: walk-in badges show both states (live seed has both)`, `/about: testimonials render the payload (coming-soon ⇔ zero)` — and `17/20 checks passed`. That exit 1 is the EXPECTED baseline, not a failure. The packages-pages baseline is already captured (`baseline-packages-pages.txt`, 8/17 — the pinned pre-existing state); do NOT re-run it.
+Expected (the baseline gate, anything else, STOP): content-pages exits 1 with exactly three FAIL lines, `/services: one-line add-on cross-reference visible`, `/branches: walk-in badges show both states (live seed has both)`, `/about: testimonials render the payload (coming-soon ⇔ zero)`, and `17/20 checks passed`. That exit 1 is the EXPECTED baseline, not a failure. The packages-pages baseline is already captured (`baseline-packages-pages.txt`, 8/17, the pinned pre-existing state); do NOT re-run it.
 
-- [✅] **Step 2: `lib.mjs` — the additive helper**
+- [✅] **Step 2: `lib.mjs`, the additive helper**
 
 Replace:
 
@@ -82,7 +82,7 @@ with:
 ```js
   const text = () => evaluate('document.body.innerText');
   // The /book deep-link seam (#254): a link's deep-link target is its
-  // PARSED query param, never an exact href string — exact matching
+  // PARSED query param, never an exact href string, exact matching
   // couples the check to the router's search serialization (environment-
   // sensitive on the deployed teaser). Pathname-filtered so /booking/<id>
   // links never qualify; only links carrying the param are collected.
@@ -101,7 +101,7 @@ with:
   return { send, evaluate, wait, go, text, bookParamValues, close };
 ```
 
-- [✅] **Step 3: `content-pages.mjs` — destructure + the three re-forms**
+- [✅] **Step 3: `content-pages.mjs`, destructure + the three re-forms**
 
 (a) Replace:
 
@@ -131,7 +131,7 @@ with:
 
 ```js
   // #254: the deep-link assertion matches the PARSED service param, never
-  // the exact href string — the router's search serialization is not the
+  // the exact href string, the router's search serialization is not the
   // contract (environment-sensitive on the deployed teaser).
   const teaserServiceIds = await bookParamValues('service');
   check(
@@ -178,7 +178,7 @@ with:
 with:
 
 ```js
-  // #254: param-parsed form, text-anchored — the CTA's copy stays part of
+  // #254: param-parsed form, text-anchored, the CTA's copy stays part of
   // the assertion; the href string does not.
   const branchLinkIds = await evaluate(`
     (() => {
@@ -206,7 +206,7 @@ pnpm --filter @sevendays/landing fix
 node apps/landing/scripts/verify/content-pages.mjs | tee .superpowers/sdd/2026-11-09-254-content-pages-stale-checks/task1-content-pages.txt
 ```
 
-Expected: two clean `node --check` runs; `fix` rewrites nothing; content-pages STILL `17/20` with the SAME three FAILs (same names — nothing flipped, the deep-link checks still PASS via the new mechanism).
+Expected: two clean `node --check` runs; `fix` rewrites nothing; content-pages STILL `17/20` with the SAME three FAILs (same names, nothing flipped, the deep-link checks still PASS via the new mechanism).
 
 - [✅] **Step 5: Commit**
 
@@ -217,14 +217,14 @@ git commit -m "chore(landing): verify deep-links match parsed /book params, neve
 
 ### Task 2: The hero blurb follows the live site-settings wire
 
-Ruling 4's blurb half. The check's expectation derives from the public settings read: the saved `homeDescription` wins (a teaser site-copy save no longer fails the check); the ratified default governs only while the field is null. No check flips locally (the local singleton is born-empty — the null→default arm runs; the saved-value arm exercises on the teaser, Task 6).
+Ruling 4's blurb half. The check's expectation derives from the public settings read: the saved `homeDescription` wins (a teaser site-copy save no longer fails the check); the ratified default governs only while the field is null. No check flips locally (the local singleton is born-empty, the null→default arm runs; the saved-value arm exercises on the teaser, Task 6).
 
 **Files:**
 - Modify: `apps/landing/scripts/verify/content-pages.mjs` (the fetch block + the guard + the blurb check)
 
 **Interfaces:**
 - Consumes: nothing from Task 1 (the fetch precedes `connect()`).
-- Produces: `settings` (the parsed `GET /api/v1/site-settings` body) in scope for the whole scenario — Tasks 3–5 don't consume it; the guard protects it.
+- Produces: `settings` (the parsed `GET /api/v1/site-settings` body) in scope for the whole scenario, Tasks 3–5 don't consume it; the guard protects it.
 
 **Not here:** any other settings field (only `homeDescription` rides an expectation); the hero title or any chrome copy (outside the brief).
 
@@ -289,7 +289,7 @@ Replace:
   check(
     'home: ratified hero blurb visible (#111 resolution; ruled edit #101)',
     home.includes(
-      'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.'
+      'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios, booked in minutes, delivered in seven days.'
     )
   );
 ```
@@ -297,14 +297,14 @@ Replace:
 with:
 
 ```js
-  // #254 (owner-ruled 2026-11-09): the hero blurb follows the live wire —
+  // #254 (owner-ruled 2026-11-09): the hero blurb follows the live wire:
   // the saved homeDescription wins (a teaser site-copy save no longer
   // fails the check); the ratified default (#111 resolution; ruled edit
   // #101) governs only while the field is null (defaults never ride the
-  // wire — #215).
+  // wire, #215).
   const expectedBlurb =
     settings.homeDescription ??
-    'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios — booked in minutes, delivered in seven days.';
+    'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios, booked in minutes, delivered in seven days.';
   check(
     'home: hero blurb renders the live settings (ratified default ⇔ null)',
     home.includes(expectedBlurb)
@@ -330,14 +330,14 @@ git commit -m "chore(landing): the hero-blurb check follows the live site settin
 
 ### Task 3: The add-ons check inverts to guard the ruling's absence
 
-Ruling 1. The ruled-gone cross-reference line stays byte-kept in the script as the guarded absence — the #241 strip-retirement pattern. This is the first flip: 17/20 → 18/20.
+Ruling 1. The ruled-gone cross-reference line stays byte-kept in the script as the guarded absence, the #241 strip-retirement pattern. This is the first flip: 17/20 → 18/20.
 
 **Files:**
 - Modify: `apps/landing/scripts/verify/content-pages.mjs` (the add-ons check, in the /services block)
 
 **Interfaces:** consumes `servicesText` (unchanged, from the existing /services walk); produces nothing.
 
-**Not here:** asserting the broader absence of the word "add-ons" (payload drift could false-fail it — the ruled literal alone is the guard, per the #241 precedent).
+**Not here:** asserting the broader absence of the word "add-ons" (payload drift could false-fail it, the ruled literal alone is the guard, per the #241 precedent).
 
 - [✅] **Step 1: The inversion**
 
@@ -356,7 +356,7 @@ with:
 
 ```js
   // #254 (owner-ruled 2026-11-09): the cross-reference left with the #164
-  // Round-3 ruled services rewrite — the check inverts to guard the
+  // Round-3 ruled services rewrite, the check inverts to guard the
   // ruling's absence, the literal byte-kept (the #241 strip-retirement
   // pattern).
   check(
@@ -375,7 +375,7 @@ pnpm --filter @sevendays/landing fix
 node apps/landing/scripts/verify/content-pages.mjs | tee .superpowers/sdd/2026-11-09-254-content-pages-stale-checks/task3-content-pages.txt
 ```
 
-Expected: `18/20` — `PASS /services: add-on cross-reference stays retired (#164 Round 3)`; the remaining FAILs are exactly the walk-in and testimonials checks (their pre-rewrite names).
+Expected: `18/20`, `PASS /services: add-on cross-reference stays retired (#164 Round 3)`; the remaining FAILs are exactly the walk-in and testimonials checks (their pre-rewrite names).
 
 - [✅] **Step 3: Commit**
 
@@ -391,9 +391,9 @@ Ruling 2. Per branch, re-derived from the live payload: the article's indicator 
 **Files:**
 - Modify: `apps/landing/scripts/verify/content-pages.mjs` (the walk-in check, in the /branches block)
 
-**Interfaces:** consumes `branches` + the `evaluate` helper (the `branchArticles` textContent map stays — the name+address+phone check still reads it); produces `walkInLabels` (local to the check).
+**Interfaces:** consumes `branches` + the `evaluate` helper (the `branchArticles` textContent map stays, the name+address+phone check still reads it); produces `walkInLabels` (local to the check).
 
-**Not here:** the tooltip copy (portal-rendered only while open — the aria-label is the stable seam, owner-ruled); the booking wizard's text `WalkInBadge` (a different surface, deliberately divergent per its own comment).
+**Not here:** the tooltip copy (portal-rendered only while open, the aria-label is the stable seam, owner-ruled); the booking wizard's text `WalkInBadge` (a different surface, deliberately divergent per its own comment).
 
 - [✅] **Step 1: The rewrite**
 
@@ -415,7 +415,7 @@ with:
 
 ```js
   // #254 (owner-ruled 2026-11-09): the text badge recomposed into the
-  // icon WalkInIndicator (#223 Round 4) — the state text lives in the
+  // icon WalkInIndicator (#223 Round 4), the state text lives in the
   // trigger's aria-label pair, never in textContent. The check asserts the
   // label per branch, re-derived from the live payload, and keeps the
   // both-states requirement (the seed carries both flags).
@@ -451,7 +451,7 @@ pnpm --filter @sevendays/landing fix
 node apps/landing/scripts/verify/content-pages.mjs | tee .superpowers/sdd/2026-11-09-254-content-pages-stale-checks/task4-content-pages.txt
 ```
 
-Expected: `19/20` — `PASS /branches: walk-in indicators carry the aria-label state (live seed has both) — labels: […]` (three labels, one `'Walk-ins welcome'` and two `'By appointment'` in branch order); the only remaining FAIL is the testimonials check (its pre-rewrite name).
+Expected: `19/20`, `PASS /branches: walk-in indicators carry the aria-label state (live seed has both), labels: […]` (three labels, one `'Walk-ins welcome'` and two `'By appointment'` in branch order); the only remaining FAIL is the testimonials check (its pre-rewrite name).
 
 - [✅] **Step 3: Commit**
 
@@ -469,7 +469,7 @@ Ruling 3. The attribution's `uppercase` transform no longer defeats the match; t
 
 **Interfaces:** consumes `about` (the existing `text()` read) + `testimonials`; produces nothing.
 
-**Not here:** `lib.mjs`'s `text()` (stays `innerText` — the fix lives in the check); the empty-branch arm's literal (kept exact — that paragraph carries no transform).
+**Not here:** `lib.mjs`'s `text()` (stays `innerText`, the fix lives in the check); the empty-branch arm's literal (kept exact, that paragraph carries no transform).
 
 - [✅] **Step 1: The casing fix**
 
@@ -489,7 +489,7 @@ with:
 
 ```js
   // #254 (owner-ruled 2026-11-09): the attribution renders uppercase mono
-  // and text() is innerText (CSS text-transform applied) — the person
+  // and text() is innerText (CSS text-transform applied), the person
   // matches case-insensitively over the unchanged seam; the ⇔ rule stays.
   const aboutLower = about.toLowerCase();
   check(
@@ -509,7 +509,7 @@ pnpm --filter @sevendays/landing fix
 node apps/landing/scripts/verify/content-pages.mjs | tee .superpowers/sdd/2026-11-09-254-content-pages-stale-checks/task5-content-pages.txt
 ```
 
-Expected: **`20/20 checks passed`**, exit 0 — the ticket's local end state.
+Expected: **`20/20 checks passed`**, exit 0, the ticket's local end state.
 
 - [✅] **Step 3: Commit**
 
@@ -518,15 +518,15 @@ git add apps/landing/scripts/verify/content-pages.mjs
 git commit -m "chore(landing): the testimonials check matches persons case-insensitively (#254)"
 ```
 
-### Task 6: Verification — the teaser re-check, the repo gates, the stack down
+### Task 6: Verification, the teaser re-check, the repo gates, the stack down
 
-The consolidated verification task (the #241 pattern): the local stack re-proves the content-pages scenario, the deployed teaser exercises the hardened checks against drifted content (report-only — the local stack is the commit gate), and the repo gates run. Nothing commits except graphify at the very end.
+The consolidated verification task (the #241 pattern): the local stack re-proves the content-pages scenario, the deployed teaser exercises the hardened checks against drifted content (report-only, the local stack is the commit gate), and the repo gates run. Nothing commits except graphify at the very end.
 
 **Files:** none modified (evidence files only, gitignored).
 
 **Interfaces:** consumes Tasks 1–5's commits; produces the evidence Task 7's PR body and close comment cite.
 
-**Not here:** `booking-wizard.mjs` / `cms-reflection.mjs` runs (fenced — additive lib change, nothing to prove); the e2e/visual suite (ADR-0022).
+**Not here:** `booking-wizard.mjs` / `cms-reflection.mjs` runs (fenced, additive lib change, nothing to prove); the e2e/visual suite (ADR-0022).
 
 - [✅] **Step 1: content-pages, final local proof**
 
@@ -538,7 +538,7 @@ Expected: `20/20 checks passed` (exit 0).
 
 - [✅] **Step 2: The deployed-teaser re-check (report-only)**
 
-The pages didn't change in this ticket — the teaser serves them already — so this validates the REWRITTEN checks against the teaser's drifted state (its saved site copy exercises the blurb's saved-value arm; its serialization exercises the param-parsed deep-links). From the repo root, against the GitHub `teaser` environment's hosts (the #241-pinned values):
+The pages didn't change in this ticket, the teaser serves them already, so this validates the REWRITTEN checks against the teaser's drifted state (its saved site copy exercises the blurb's saved-value arm; its serialization exercises the param-parsed deep-links). From the repo root, against the GitHub `teaser` environment's hosts (the #241-pinned values):
 
 ```bash
 LANDING_VERIFY_URL=https://sevendays-landing.pahamajulius.workers.dev \
@@ -546,7 +546,7 @@ API_VERIFY_URL=https://sevendays-api.pahamajulius.workers.dev \
 node apps/landing/scripts/verify/content-pages.mjs | tee .superpowers/sdd/2026-11-09-254-content-pages-stale-checks/teaser-content-pages.txt
 ```
 
-Expected: `20/20` — but ANY failure here is a FINDING, not a blocker: record the failing check names + detail lines verbatim for the PR body (that environment truth is exactly what this ticket's hardening was ruled for). If the teaser is unreachable (network), record that instead — the local run remains the gate.
+Expected: `20/20`, but ANY failure here is a FINDING, not a blocker: record the failing check names + detail lines verbatim for the PR body (that environment truth is exactly what this ticket's hardening was ruled for). If the teaser is unreachable (network), record that instead, the local run remains the gate.
 
 - [✅] **Step 3: The repo gates**
 
@@ -554,7 +554,7 @@ Expected: `20/20` — but ANY failure here is a FINDING, not a blocker: record t
 pnpm check
 ```
 
-Expected: green across the repo — the landing suite at its floor (16 files / 123 tests), lint/format/typecheck clean for the touched workspace (the `.mjs` edits are Biome-canonical and outside tsc's scope). If any gate count differs from the floors, reconcile before proceeding (never loosen).
+Expected: green across the repo, the landing suite at its floor (16 files / 123 tests), lint/format/typecheck clean for the touched workspace (the `.mjs` edits are Biome-canonical and outside tsc's scope). If any gate count differs from the floors, reconcile before proceeding (never loosen).
 
 - [✅] **Step 4: Stack down + graphify**
 
@@ -570,7 +570,7 @@ git commit -m "chore(graphify): post-#254 graph update"
 
 ### Task 7: Docs, PR, the v1 ledger row, issue close
 
-Pure main-only close-out. Every path in the PR is a v1-absent path, so the pick classifier's verdict is SKIP and the ledger row is appended on main — no v1 checkout, no cherry-pick.
+Pure main-only close-out. Every path in the PR is a v1-absent path, so the pick classifier's verdict is SKIP and the ledger row is appended on main, no v1 checkout, no cherry-pick.
 
 **Files:**
 - Modify: `docs/progress.md` (one dated entry, appended where the #241/#252–#253 entries sit)
@@ -586,7 +586,7 @@ Pure main-only close-out. Every path in the PR is a v1-absent path, so the pick 
 Append to `docs/progress.md`'s dated section (after the #241 close-out entry), filling bracketed values from the actual runs:
 
 ```markdown
-- **2026-11-XX — the content-pages #223-stale checks rewritten (#254) — harness-only, zero landing src.** The three checks that went stale with the #223 redesign now assert the current contracts (owner-ruled 2026-11-09, in the triage brief): the /services add-ons cross-reference check INVERTED to guard the ruling's absence (the literal byte-kept, the #241 strip-retirement pattern); the /branches walk-in check asserts the icon WalkInIndicator's aria-label pair per live branch (both states still required); the /about testimonials check matches persons case-insensitively over the unchanged innerText seam (the attribution's uppercase transform no longer defeats it). The environment-sensitive pair hardened per the same ruling: the hero-blurb check follows the live site-settings wire (saved homeDescription wins, ratified default ⇔ null), and every /book deep-link assertion in content-pages matches the PARSED query param via a new additive `bookParamValues` helper in the verify lib — never an exact href string. content-pages 17/20 → 20/20; teaser re-check <result>; landing floor unchanged (16 files / 123 tests). packages-pages.mjs fenced unedited at its true 8/17 baseline (owner-ruled at execution: #223-stale as a whole — plate/card DOM shapes, uniform not-found, home package deep-links moved to detail); its nine findings + the home-deep-link product question filed as #<new-issue>.
+- **2026-11-XX, the content-pages #223-stale checks rewritten (#254), harness-only, zero landing src.** The three checks that went stale with the #223 redesign now assert the current contracts (owner-ruled 2026-11-09, in the triage brief): the /services add-ons cross-reference check INVERTED to guard the ruling's absence (the literal byte-kept, the #241 strip-retirement pattern); the /branches walk-in check asserts the icon WalkInIndicator's aria-label pair per live branch (both states still required); the /about testimonials check matches persons case-insensitively over the unchanged innerText seam (the attribution's uppercase transform no longer defeats it). The environment-sensitive pair hardened per the same ruling: the hero-blurb check follows the live site-settings wire (saved homeDescription wins, ratified default ⇔ null), and every /book deep-link assertion in content-pages matches the PARSED query param via a new additive `bookParamValues` helper in the verify lib, never an exact href string. content-pages 17/20 → 20/20; teaser re-check <result>; landing floor unchanged (16 files / 123 tests). packages-pages.mjs fenced unedited at its true 8/17 baseline (owner-ruled at execution: #223-stale as a whole, plate/card DOM shapes, uniform not-found, home package deep-links moved to detail); its nine findings + the home-deep-link product question filed as #<new-issue>.
 ```
 
 - [✅] **Step 2: The PR**
@@ -594,12 +594,12 @@ Append to `docs/progress.md`'s dated section (after the #241 close-out entry), f
 ```bash
 git push -u origin chore/254-content-pages-stale-checks
 gh pr create --title "chore(landing): content-pages #223-stale checks rewritten + teaser-hardened blurb/deep-links (#254)" --body-file - << 'EOF'
-Implements #254 (brief: https://github.com/jeius/sevendays/issues/254#issuecomment-6731701934). Harness-only — zero landing `src/` files.
+Implements #254 (brief: https://github.com/jeius/sevendays/issues/254#issuecomment-6731701934). Harness-only, zero landing `src/` files.
 
 - The three #223-stale checks rewritten per the 2026-11-09 rulings: add-ons → inverted absence (literal byte-kept); walk-ins → the WalkInIndicator aria-label pair, per live branch, both states required; testimonials → case-insensitive over the unchanged `innerText` seam.
-- The teaser-sensitive pair hardened: the hero blurb follows `GET /api/v1/site-settings` (saved `homeDescription` wins, ratified default ⇔ null); every content-pages `/book` deep-link assertion matches parsed query params via the additive `bookParamValues` lib helper (home teaser, /services, /branches — the last keeps its `Book at this branch` text anchor).
-- content-pages 17/20 → **20/20** (per-task flip evidence in `.superpowers/sdd/2026-11-09-254-content-pages-stale-checks/`). Teaser re-check: <result — 20/20 or the recorded findings>. `pnpm check` green; landing floor unchanged (16 files / 123 tests).
-- packages-pages.mjs is UNTOUCHED — owner-ruled at execution: the file proved #223-stale as a whole (true baseline 8/17: plate/card DOM shapes, uniform not-found, and home carries no `/book?package=` links — featured plates link detail pages by design). Its nine findings + the home-deep-link product question are filed as #<new-issue>.
+- The teaser-sensitive pair hardened: the hero blurb follows `GET /api/v1/site-settings` (saved `homeDescription` wins, ratified default ⇔ null); every content-pages `/book` deep-link assertion matches parsed query params via the additive `bookParamValues` lib helper (home teaser, /services, /branches, the last keeps its `Book at this branch` text anchor).
+- content-pages 17/20 → **20/20** (per-task flip evidence in `.superpowers/sdd/2026-11-09-254-content-pages-stale-checks/`). Teaser re-check: <result, 20/20 or the recorded findings>. `pnpm check` green; landing floor unchanged (16 files / 123 tests).
+- packages-pages.mjs is UNTOUCHED, owner-ruled at execution: the file proved #223-stale as a whole (true baseline 8/17: plate/card DOM shapes, uniform not-found, and home carries no `/book?package=` links, featured plates link detail pages by design). Its nine findings + the home-deep-link product question are filed as #<new-issue>.
 EOF
 ```
 
@@ -610,7 +610,7 @@ Squash-merge to main. Record the merge's main sha + PR number.
 On main, append one row to `docs/agents/v1-picks.md`'s ledger, filling bracketed values:
 
 ```markdown
-| 2026-11-XX | #<PR> | `<main-sha>` | skip | — | #254 — the content-pages #223-stale checks rewritten + the teaser-hardened blurb/deep-links: harness-only (the add-ons inversion, the walk-in aria-label pair, case-insensitive testimonials, the settings-aware blurb, param-parsed /book deep-links via the additive bookParamValues lib helper). Zero landing src, zero suites (landing floor 16/123 held). All paths main-only (apps/landing/scripts/verify per paths.txt:24 + the plan file + docs) — pure SKIP. packages-pages.mjs fenced unedited at its true 8/17 baseline (owner-ruled at execution; findings filed as #<new-issue>). Locks: pnpm check green; content-pages 20/20 on the local stack; teaser re-check <result>. |
+| 2026-11-XX | #<PR> | `<main-sha>` | skip |, | #254, the content-pages #223-stale checks rewritten + the teaser-hardened blurb/deep-links: harness-only (the add-ons inversion, the walk-in aria-label pair, case-insensitive testimonials, the settings-aware blurb, param-parsed /book deep-links via the additive bookParamValues lib helper). Zero landing src, zero suites (landing floor 16/123 held). All paths main-only (apps/landing/scripts/verify per paths.txt:24 + the plan file + docs), pure SKIP. packages-pages.mjs fenced unedited at its true 8/17 baseline (owner-ruled at execution; findings filed as #<new-issue>). Locks: pnpm check green; content-pages 20/20 on the local stack; teaser re-check <result>. |
 ```
 
 Commit as `docs(v1-picks): the #254 skip row (#254)` (the `5f32dbf` pattern) and push to main.
@@ -621,28 +621,28 @@ Commit as `docs(v1-picks): the #254 skip row (#254)` (the `5f32dbf` pattern) and
 gh issue create --label needs-triage --title "packages-pages.mjs is #223-stale as a whole (9 FAILs at baseline: plate/card DOM shapes, uniform not-found, home package deep-links moved to detail)" --body-file - << 'EOF'
 > *This was generated by AI during triage.*
 
-Parent #254 (fenced there at execution, owner-ruled 2026-11-09: "Fence packages-pages out" — the same pattern #241 used when it fenced the stale content-pages checks that became #254).
+Parent #254 (fenced there at execution, owner-ruled 2026-11-09: "Fence packages-pages out", the same pattern #241 used when it fenced the stale content-pages checks that became #254).
 
 `apps/landing/scripts/verify/packages-pages.mjs` scores **8/17** against the local stack (seeded API + landing dev + Chrome CDP; evidence: #254's execution workspace `baseline-packages-pages.txt` + a live-DOM probe). The file predates the #223/#224 redesign and three drift classes broke it:
 
-1. **DOM shapes:** featured plates (`featured-plates.tsx`) and /packages cards are no longer `<article>` elements — the whole plate/card is one `Link to='/packages/$slug'`. The article-based counters get "expected 4/11, got 0" while adjacent checks pass vacuously (the names still render; the `section[data-strip='featured']` still exists).
-2. **Uniform not-found:** the script expects `Package not found.` + `Browse all packages` for unknown slugs; the site now serves the site-wide uniform not-found (`This page never developed.`) — today's ruled law, the check predates it.
-3. **The package deep-link surface moved:** home/index carry ZERO `/book?package=` hrefs — plates/cards link to detail pages by design; `/book?package=<uuid>` exists only on the detail page's "Book this package" CTA (its check still passes). #254's triage ruling to "param-parse the two package deep-link assertions" assumed drifted serialization; live shows the home seam is gone entirely.
+1. **DOM shapes:** featured plates (`featured-plates.tsx`) and /packages cards are no longer `<article>` elements, the whole plate/card is one `Link to='/packages/$slug'`. The article-based counters get "expected 4/11, got 0" while adjacent checks pass vacuously (the names still render; the `section[data-strip='featured']` still exists).
+2. **Uniform not-found:** the script expects `Package not found.` + `Browse all packages` for unknown slugs; the site now serves the site-wide uniform not-found (`This page never developed.`), today's ruled law, the check predates it.
+3. **The package deep-link surface moved:** home/index carry ZERO `/book?package=` hrefs, plates/cards link to detail pages by design; `/book?package=<uuid>` exists only on the detail page's "Book this package" CTA (its check still passes). #254's triage ruling to "param-parse the two package deep-link assertions" assumed drifted serialization; live shows the home seam is gone entirely.
 
 **The nine FAILs:** strip cards count / strip deep-link / strip cover rule; /packages renders / full details / list cover rule; :slug renders / detail cover rule; unknown-slug not-found.
 
 **Open product question for the owner:** should home featured plates deep-link `/book?package=` like the services cards do (`search={{ service }}`), or is detail-first the ruling? (Services book directly from home today; packages deliberately route through the detail pitch.)
 
-Also deferred here: #254's originally-ruled param-parsed re-forms for the two package deep-link assertions (the detail one can land immediately — its seam exists; the strip one needs the product ruling above). Harness-only ticket — zero landing `src/` changes expected; every rewrite is an owner ruling away.
+Also deferred here: #254's originally-ruled param-parsed re-forms for the two package deep-link assertions (the detail one can land immediately, its seam exists; the strip one needs the product ruling above). Harness-only ticket, zero landing `src/` changes expected; every rewrite is an owner ruling away.
 EOF
 ```
 
-Record the new issue number — the progress entry, ledger row, PR body, and close comment all cite it.
+Record the new issue number, the progress entry, ledger row, PR body, and close comment all cite it.
 
 - [✅] **Step 5: Close the issue**
 
 ```bash
-gh issue close 254 --comment "Landed in #<PR> (main \`<main-sha>\`; pure v1 SKIP — every path main-only, the ledger row records it). AC1 content-pages 20/20 local (task5/final evidence). AC2 the add-ons check inverts over the byte-kept literal. AC3 the walk-in check asserts the aria-label pair per live branch, both states required (labels echoed in the check detail). AC4 case-insensitive persons over the unchanged innerText seam, the ⇔ rule kept. AC5 the blurb follows the live settings read (null→default arm proven locally; saved-value arm <teaser result>). AC6 the content-pages /book deep-link assertions param-parsed (home teaser, /services, /branches — the last keeps its text anchor). AC7 AMENDED at execution (owner-ruled): packages-pages proved #223-stale as a whole (true baseline 8/17, not the assumed 17/17) and is fenced UNTOUCHED per your ruling — its nine findings + the home-deep-link product question filed as #<new-issue>. AC8 every rewritten check carries its #254 ruling comment. AC9 teaser re-check run via the env overrides: <result/findings>. AC10 pnpm check green."
+gh issue close 254 --comment "Landed in #<PR> (main \`<main-sha>\`; pure v1 SKIP, every path main-only, the ledger row records it). AC1 content-pages 20/20 local (task5/final evidence). AC2 the add-ons check inverts over the byte-kept literal. AC3 the walk-in check asserts the aria-label pair per live branch, both states required (labels echoed in the check detail). AC4 case-insensitive persons over the unchanged innerText seam, the ⇔ rule kept. AC5 the blurb follows the live settings read (null→default arm proven locally; saved-value arm <teaser result>). AC6 the content-pages /book deep-link assertions param-parsed (home teaser, /services, /branches, the last keeps its text anchor). AC7 AMENDED at execution (owner-ruled): packages-pages proved #223-stale as a whole (true baseline 8/17, not the assumed 17/17) and is fenced UNTOUCHED per your ruling, its nine findings + the home-deep-link product question filed as #<new-issue>. AC8 every rewritten check carries its #254 ruling comment. AC9 teaser re-check run via the env overrides: <result/findings>. AC10 pnpm check green."
 ```
 
 - [✅] **Step 6: Final sweep**

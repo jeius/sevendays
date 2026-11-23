@@ -1,79 +1,79 @@
-# M6 Ticket 06 — The Audit Log Viewer Screen Implementation Plan
+# M6 Ticket 06, The Audit Log Viewer Screen Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Per repo AGENTS.md, tick completed boxes with the ✅ emoji (`- [✅]`), never plain `[x]`. **The UI-bearing tasks (4, 5) load the installed UI/UX skill set at execution time: `prototype` + `ui-ux-pro-max`, plus `design-system` / `ui-styling` as relevant (AGENTS.md rule, spec #94 amendment, ruled in #111) — Task 4 is the owner-reacted rendered-variants gate the ticket names.**
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Per repo AGENTS.md, tick completed boxes with the ✅ emoji (`- [✅]`), never plain `[x]`. **The UI-bearing tasks (4, 5) load the installed UI/UX skill set at execution time: `prototype` + `ui-ux-pro-max`, plus `design-system` / `ui-styling` as relevant (AGENTS.md rule, spec #94 amendment, ruled in #111), Task 4 is the owner-reacted rendered-variants gate the ticket names.**
 
-**Goal:** The Audit Log's owner-only viewer (§ The Audit Log — Viewer of the M6 spec) becomes executable code: a filterable (entity, actor, action, UTC date range), newest-first, paginated table at `/audit-log` reading the `audit_log` rows #185's write side records — no joins anywhere (the snapshotted `actorEmail` + inline `summary` are the whole row) — via session+role-gated admin server functions over `packages/db` (ADR-0023's data path; zero api files), with the "Audit Log" nav entry in the Overview group beside Analytics visible to the owner role alone (ADR-0018: `role === 'admin'`). The M6 roadmap box at `docs/plan.md:150` — left unticked by #185 with the words "the box stays unticked until the owner screen lands at #188" — **is ticked by this ticket**.
+**Goal:** The Audit Log's owner-only viewer (§ The Audit Log, Viewer of the M6 spec) becomes executable code: a filterable (entity, actor, action, UTC date range), newest-first, paginated table at `/audit-log` reading the `audit_log` rows #185's write side records, no joins anywhere (the snapshotted `actorEmail` + inline `summary` are the whole row), via session+role-gated admin server functions over `packages/db` (ADR-0023's data path; zero api files), with the "Audit Log" nav entry in the Overview group beside Analytics visible to the owner role alone (ADR-0018: `role === 'admin'`). The M6 roadmap box at `docs/plan.md:150`, left unticked by #185 with the words "the box stays unticked until the owner screen lands at #188", **is ticked by this ticket**.
 
-**Architecture:** Six tasks: (1) the pure filter/pagination seam `apps/admin/src/lib/audit/filters.ts` — tolerant search-param schema (invalid values drop, never throw), UTC day-window math, page-window math, the entity/action label maps, the wire→row parse through `@sevendays/types`' landed `auditLogRowSchema` ("the #188 viewer parses rows through it" — its own doc comment); (2) the read module `packages/db/src/audit-read.ts` (the #186 probes precedent — drizzle's typed builder lives in `packages/db` because `apps/admin` deliberately carries no `drizzle-orm` dependency) + the two owner-gated server fns + the query factories; (3) the owner role through the shell — the nav taxonomy extracted to a testable `src/lib/nav.ts` with `visibleNavGroups(role)`, the sidebar consuming it, the shell context carrying `role`; (4) the rendered-variants checkpoint — an ungated prototype route over mock rows, screenshots, the owner's ratification on #188; (5) the real route + screen in the ratified composition (search-param filters, keepPreviousData pagination, curated failure + empty states); (6) gates + docs rotation (box TICKED) + PR/merge + the v1 pick (the spec's class ledger pre-rules the payload **PICK clean** — "The client's operating record from day 1; both editions by construction"; the nav wrinkle from #197's ruled v1 divergence is pre-ruled below) + ledger row + issue close.
+**Architecture:** Six tasks: (1) the pure filter/pagination seam `apps/admin/src/lib/audit/filters.ts`, tolerant search-param schema (invalid values drop, never throw), UTC day-window math, page-window math, the entity/action label maps, the wire→row parse through `@sevendays/types`' landed `auditLogRowSchema` ("the #188 viewer parses rows through it", its own doc comment); (2) the read module `packages/db/src/audit-read.ts` (the #186 probes precedent, drizzle's typed builder lives in `packages/db` because `apps/admin` deliberately carries no `drizzle-orm` dependency) + the two owner-gated server fns + the query factories; (3) the owner role through the shell, the nav taxonomy extracted to a testable `src/lib/nav.ts` with `visibleNavGroups(role)`, the sidebar consuming it, the shell context carrying `role`; (4) the rendered-variants checkpoint, an ungated prototype route over mock rows, screenshots, the owner's ratification on #188; (5) the real route + screen in the ratified composition (search-param filters, keepPreviousData pagination, curated failure + empty states); (6) gates + docs rotation (box TICKED) + PR/merge + the v1 pick (the spec's class ledger pre-rules the payload **PICK clean**, "The client's operating record from day 1; both editions by construction"; the nav wrinkle from #197's ruled v1 divergence is pre-ruled below) + ledger row + issue close.
 
-**Tech Stack:** everything is already installed — **zero new dependencies, zero manifest changes** (the drizzle reads ride `packages/db`'s existing `drizzle-orm` 0.45.2; `Table`/`Select`/`Badge`/`Button`/`Input` from `packages/ui`; `PageHeader` from the CMS shared library; `formatUtc` from the dashboard's deterministic formatters). TanStack Start server functions behind a session+role gate (ADR-0023 + ADR-0018), TanStack Query v5 `queryOptions` + `keepPreviousData` (grep-proven: re-exported from `@tanstack/query-core` 5.102.8 via `export * from "@tanstack/query-core"`), zod 4.5.1, BetterAuth 1.7.5's `admin()` plugin (the session user's `role` field — typecheck-spike-proven 2026-10-10 through our own `createAuth`), vitest 4 plain-node (the admin lib-seam pattern), pnpm + Turborepo, `gh` CLI, `@playwright/test` 1.63.0 as the Task 4 screenshot driver only.
+**Tech Stack:** everything is already installed, **zero new dependencies, zero manifest changes** (the drizzle reads ride `packages/db`'s existing `drizzle-orm` 0.45.2; `Table`/`Select`/`Badge`/`Button`/`Input` from `packages/ui`; `PageHeader` from the CMS shared library; `formatUtc` from the dashboard's deterministic formatters). TanStack Start server functions behind a session+role gate (ADR-0023 + ADR-0018), TanStack Query v5 `queryOptions` + `keepPreviousData` (grep-proven: re-exported from `@tanstack/query-core` 5.102.8 via `export * from "@tanstack/query-core"`), zod 4.5.1, BetterAuth 1.7.5's `admin()` plugin (the session user's `role` field, typecheck-spike-proven 2026-10-10 through our own `createAuth`), vitest 4 plain-node (the admin lib-seam pattern), pnpm + Turborepo, `gh` CLI, `@playwright/test` 1.63.0 as the Task 4 screenshot driver only.
 
-**Spec:** Implements ticket [#188 "M6 ticket 06: the Audit Log viewer screen"](https://github.com/jeius/sevendays/issues/188) (label `ready-for-agent`; blocked by #185 — **landed 2026-10-06**), whose parent is the M6 spec `docs/specs/2026-10-05-m6-production-hardening-observability-spec.md` (issue #182 — § The Audit Log's **Viewer** bullet is this ticket's ruling: "a dedicated owner-scoped screen in the admin CMS, named 'Audit Log' — a filterable table (entity, actor, action, date), newest first, paginated. Nav entry 'Audit Log' in the Overview group beside Analytics, owner-role-only visibility; composition variants at execution (#94/#111). It never joins the all-staff Analytics Dashboard — person-level by the standing rule"; § v1-pick classes pre-rules the payload **PICK clean**; ADR-0023 rules the data path; ADR-0018 rules the role vocabulary). Key recon facts (2026-10-10, main `a079242`; admin suite re-run live this session: **14 files / 140 tests** — AGENTS.md's "13 files / 132 tests" is stale, superseded by #201–#203's follow-ups; this ticket's close-out corrects it):
+**Spec:** Implements ticket [#188 "M6 ticket 06: the Audit Log viewer screen"](https://github.com/jeius/sevendays/issues/188) (label `ready-for-agent`; blocked by #185, **landed 2026-10-06**), whose parent is the M6 spec `docs/specs/2026-10-05-m6-production-hardening-observability-spec.md` (issue #182, § The Audit Log's **Viewer** bullet is this ticket's ruling: "a dedicated owner-scoped screen in the admin CMS, named 'Audit Log', a filterable table (entity, actor, action, date), newest first, paginated. Nav entry 'Audit Log' in the Overview group beside Analytics, owner-role-only visibility; composition variants at execution (#94/#111). It never joins the all-staff Analytics Dashboard, person-level by the standing rule"; § v1-pick classes pre-rules the payload **PICK clean**; ADR-0023 rules the data path; ADR-0018 rules the role vocabulary). Key recon facts (2026-10-10, main `a079242`; admin suite re-run live this session: **14 files / 140 tests**, AGENTS.md's "13 files / 132 tests" is stale, superseded by #201–#203's follow-ups; this ticket's close-out corrects it):
 
-- **The record it reads (#185, landed):** `packages/db/src/schema/audit-log.ts` — `audit_log` (`id` uuid PK, `occurredAt` timestamptz, `actorId`/`actorEmail`/`entity`/`action` text, `entityId`/`summary` text nullable, `requestId` text; one `occurred_at` index; no FKs; unbounded retention; born-empty on migrations, populated live since 2026-10-06 by every committed CMS write). The vocabulary is canonical in `packages/types/src/audit.ts`: `auditEntitySchema` = the nine router segments (`branch`, `print-size`, `gallery-photo`, `attire`, `addon-service`, `studio-service`, `service-package`, `gallery-category`, `testimonial`), `auditActionSchema` = `create | update | deactivate | reorder`, `auditLogRowSchema` with `occurredAt: z.coerce.date()` (ISO strings coerce back to Dates client-side — the designed RPC-boundary round trip). **The media commit records as `gallery-photo`/`create`** (its row rides the gallery-photo persist) — the nine-entity enum is complete; no tenth filter value exists.
-- **The role law (ADR-0018):** owner → `role = 'admin'` (BetterAuth's admin-plugin gate literal — do not rename), staff → `role = 'staff'`, and the column is **nullable** (`role: text('role')`) — null fails the owner check. The admin's auth instance mounts `admin()` (`apps/admin/src/lib/auth.ts`), and the plugin's user model carries `role: string` (`better-auth/dist/plugins/admin/admin.d.mts:42`) — **spike-proven 2026-10-10**: a throwaway file reading `session?.user.role` through our own `createAuth(...)` passed `pnpm --filter @sevendays/admin typecheck` clean, then was deleted (`git status` clean of it).
-- **The data path (ADR-0023, the #186/#187 seam precedent):** `apps/admin/src/lib/metrics/metrics.functions.ts` — server fns gate themselves (`requireMetricsSession` throwing `Unauthorized`), construct `createDbClient(env.dbUrl)` **per call** (ADR-0011), resolve plain-object unions `{ ok: true, data } | { ok: false, reason: 'not-configured' | 'unavailable' }` (the #155 class-erasure law), map source failures to `unavailable` with ONE log-only `console.error` line, wrap in `startSpan`. **`apps/admin` has NO `drizzle-orm` dependency** — #186 ruled the workaround ("static SQL over a structural exec seam so no drizzle type reaches apps/admin", `packages/db/src/probes.ts`); for this ticket's *dynamic* filtered reads, the whole drizzle query lives in `packages/db` (which owns `drizzle-orm` 0.45.2) as a new `audit-read` module — the admin imports only `@sevendays/db`, zero manifest changes.
-- **The nav + shell:** `apps/admin/src/routes/_shell.tsx`'s beforeLoad gates on `getSession()` and returns `{ user: { name, email } }` into route context — this ticket adds `role`. `apps/admin/src/components/admin-sidebar.tsx` holds the nav taxonomy inline (`navGroups`, the #59 ruling: Overview = Analytics + Appointments, Catalog, Studio) — Task 3 extracts it to `src/lib/nav.ts` so the owner-visibility law is lib-seam testable. Icons: `ScrollText` (grep-proven present in the installed lucide-react's `dist/esm/icons/scroll-text.*`).
-- **The screen vocabulary:** `PageHeader` from `#/components/cms/shared` (title + subline + actions row); `formatUtc(iso)` from `#/components/dashboard/format.ts` (deterministic `YYYY-MM-DD HH:mm` UTC slice — SSR/hydration-stable, no locale Intl); search params via `validateSearch: <zod schema>` directly (the `_shell.index.tsx` precedent — TanStack accepts the standard-schema form); search-param navigation via `search={{ ... }}` (the `WindowToggle` precedent). **v1 nav wrinkle:** #197's ruled v1 divergence re-added Overview with Analytics only and **no Appointments** (#169's simplified nav) — Task 6's pick pre-rules the resolution (v1's `lib/nav.ts` = main's minus the Appointments item; the sidebar hunk resolves to main's consumption shape).
-- **Sibling fences (spec § Sequencing; docs/plan.md M6 block):** this ticket owns the Audit Log **viewer screen** and TICKS the M6 audit box. NOT here, regardless of temptation: **any `apps/api` file at all** (the write side is landed #185; reads are admin-side per ADR-0023 — zero api changes in this PR, the #186/#187 precedent); `packages/db` **schema or migrations** (`audit-read.ts` is a read module over the existing table — `db:generate` never runs); `packages/types` (the row schema is landed; the wire type is admin-internal); `packages/ui` (nothing moves — the screen composes existing primitives); the dashboard routes/widgets (`_shell.index.tsx` untouched); the appointments stub (`_shell.appointments.tsx`); `apps/admin/CONTEXT.md` (the Audit Log glossary term already landed with #185); any ADR (ADR-0023 + ADR-0018 rule the path and the roles); M5.5 user management; CSV export or retention pruning (the spec rules both v2-if-ever); the production smoke (#190); the ship runbook (#191); the M6 close (#192).
-- **Baselines (live, 2026-10-10):** `apps/admin` = **14 files / 140 tests** (re-run this session). Per the ledger's #198/#203 rows: api 27 files + 1 skipped / 338 passed + 3 skipped, api-client 5 files / 33 tests, landing 6 files / 26 tests (v1 floors; main's landing floor may sit higher — only the admin suite changes here), types 14 files / 118 tests, `pnpm check` 35/35 turbo tasks. After this ticket: **admin 17 files / 164 tests** (three new lib-seam files: +16 filters, +4 queries, +4 nav — executor reconciles actuals; if any gate count differs, reconcile before proceeding — do not loosen assertions). **Working-tree note:** the checkout carries one uncommitted local change — `apps/admin/package.json`'s dev script port `3000` → `3001` (the owner's bring-up convenience from the #187 thread). Leave it untouched: never stage it, never commit it; Task 4 reads the live port from the script mechanically (pinned command below).
+- **The record it reads (#185, landed):** `packages/db/src/schema/audit-log.ts`, `audit_log` (`id` uuid PK, `occurredAt` timestamptz, `actorId`/`actorEmail`/`entity`/`action` text, `entityId`/`summary` text nullable, `requestId` text; one `occurred_at` index; no FKs; unbounded retention; born-empty on migrations, populated live since 2026-10-06 by every committed CMS write). The vocabulary is canonical in `packages/types/src/audit.ts`: `auditEntitySchema` = the nine router segments (`branch`, `print-size`, `gallery-photo`, `attire`, `addon-service`, `studio-service`, `service-package`, `gallery-category`, `testimonial`), `auditActionSchema` = `create | update | deactivate | reorder`, `auditLogRowSchema` with `occurredAt: z.coerce.date()` (ISO strings coerce back to Dates client-side, the designed RPC-boundary round trip). **The media commit records as `gallery-photo`/`create`** (its row rides the gallery-photo persist), the nine-entity enum is complete; no tenth filter value exists.
+- **The role law (ADR-0018):** owner → `role = 'admin'` (BetterAuth's admin-plugin gate literal, do not rename), staff → `role = 'staff'`, and the column is **nullable** (`role: text('role')`), null fails the owner check. The admin's auth instance mounts `admin()` (`apps/admin/src/lib/auth.ts`), and the plugin's user model carries `role: string` (`better-auth/dist/plugins/admin/admin.d.mts:42`), **spike-proven 2026-10-10**: a throwaway file reading `session?.user.role` through our own `createAuth(...)` passed `pnpm --filter @sevendays/admin typecheck` clean, then was deleted (`git status` clean of it).
+- **The data path (ADR-0023, the #186/#187 seam precedent):** `apps/admin/src/lib/metrics/metrics.functions.ts`, server fns gate themselves (`requireMetricsSession` throwing `Unauthorized`), construct `createDbClient(env.dbUrl)` **per call** (ADR-0011), resolve plain-object unions `{ ok: true, data } | { ok: false, reason: 'not-configured' | 'unavailable' }` (the #155 class-erasure law), map source failures to `unavailable` with ONE log-only `console.error` line, wrap in `startSpan`. **`apps/admin` has NO `drizzle-orm` dependency**, #186 ruled the workaround ("static SQL over a structural exec seam so no drizzle type reaches apps/admin", `packages/db/src/probes.ts`); for this ticket's *dynamic* filtered reads, the whole drizzle query lives in `packages/db` (which owns `drizzle-orm` 0.45.2) as a new `audit-read` module, the admin imports only `@sevendays/db`, zero manifest changes.
+- **The nav + shell:** `apps/admin/src/routes/_shell.tsx`'s beforeLoad gates on `getSession()` and returns `{ user: { name, email } }` into route context, this ticket adds `role`. `apps/admin/src/components/admin-sidebar.tsx` holds the nav taxonomy inline (`navGroups`, the #59 ruling: Overview = Analytics + Appointments, Catalog, Studio), Task 3 extracts it to `src/lib/nav.ts` so the owner-visibility law is lib-seam testable. Icons: `ScrollText` (grep-proven present in the installed lucide-react's `dist/esm/icons/scroll-text.*`).
+- **The screen vocabulary:** `PageHeader` from `#/components/cms/shared` (title + subline + actions row); `formatUtc(iso)` from `#/components/dashboard/format.ts` (deterministic `YYYY-MM-DD HH:mm` UTC slice, SSR/hydration-stable, no locale Intl); search params via `validateSearch: <zod schema>` directly (the `_shell.index.tsx` precedent, TanStack accepts the standard-schema form); search-param navigation via `search={{ ... }}` (the `WindowToggle` precedent). **v1 nav wrinkle:** #197's ruled v1 divergence re-added Overview with Analytics only and **no Appointments** (#169's simplified nav), Task 6's pick pre-rules the resolution (v1's `lib/nav.ts` = main's minus the Appointments item; the sidebar hunk resolves to main's consumption shape).
+- **Sibling fences (spec § Sequencing; docs/plan.md M6 block):** this ticket owns the Audit Log **viewer screen** and TICKS the M6 audit box. NOT here, regardless of temptation: **any `apps/api` file at all** (the write side is landed #185; reads are admin-side per ADR-0023, zero api changes in this PR, the #186/#187 precedent); `packages/db` **schema or migrations** (`audit-read.ts` is a read module over the existing table, `db:generate` never runs); `packages/types` (the row schema is landed; the wire type is admin-internal); `packages/ui` (nothing moves, the screen composes existing primitives); the dashboard routes/widgets (`_shell.index.tsx` untouched); the appointments stub (`_shell.appointments.tsx`); `apps/admin/CONTEXT.md` (the Audit Log glossary term already landed with #185); any ADR (ADR-0023 + ADR-0018 rule the path and the roles); M5.5 user management; CSV export or retention pruning (the spec rules both v2-if-ever); the production smoke (#190); the ship runbook (#191); the M6 close (#192).
+- **Baselines (live, 2026-10-10):** `apps/admin` = **14 files / 140 tests** (re-run this session). Per the ledger's #198/#203 rows: api 27 files + 1 skipped / 338 passed + 3 skipped, api-client 5 files / 33 tests, landing 6 files / 26 tests (v1 floors; main's landing floor may sit higher, only the admin suite changes here), types 14 files / 118 tests, `pnpm check` 35/35 turbo tasks. After this ticket: **admin 17 files / 164 tests** (three new lib-seam files: +16 filters, +4 queries, +4 nav, executor reconciles actuals; if any gate count differs, reconcile before proceeding, do not loosen assertions). **Working-tree note:** the checkout carries one uncommitted local change, `apps/admin/package.json`'s dev script port `3000` → `3001` (the owner's bring-up convenience from the #187 thread). Leave it untouched: never stage it, never commit it; Task 4 reads the live port from the script mechanically (pinned command below).
 
 ## Global Constraints
 
-- **Branch & baseline:** `feat/188-audit-log-viewer` off main `a079242` (plain checkout — single linear ticket, no worktree needed). This plan file is the branch's first commit. Commit messages follow the repo's `type(scope): … (#188)` squash style; every commit below is pinned verbatim. Evidence (test output, variant screenshots) lands in gitignored `.superpowers/sdd/2026-10-10-188-audit-log-viewer-screen/`.
-- **Gates (repo AGENTS.md, verbatim duties):** **zero manifest changes exist in this ticket — `pnpm-lock.yaml` is untouched and `pnpm install` never needs to run** (the drizzle reads ride packages/db's existing dep; the UI composes existing primitives). Every task commits only with `pnpm check` green for the packages it touched (`docker compose up -d db` first — the api suite runs in `pnpm check` and needs the test db; the admin's new tests are plain-node and db-free). **After any `packages/db/src` edit, run `pnpm build:packages` before admin typecheck/tests** (the admin resolves `@sevendays/db` from gitignored `dist/`; turbo's `typecheck` builds `^` but `test` does not — the explicit build closes the gap). Biome canonical form via `pnpm --filter @sevendays/admin fix` / `--filter @sevendays/db fix` before committing — accept its rewrites. Never commit secrets. Tick checklist boxes with `- [✅]`, never `[x]` (this plan file and `docs/plan.md` alike). Run `graphify update .` at close (code was modified; `graphify-out/graph.json` exists).
-- **The role law (ADR-0018, binding):** the owner is `role === 'admin'` — the BetterAuth admin-plugin's literal, never renamed; `'staff'` and `null`/`undefined` both fail. Three layers, all required: (a) the **server fns** gate on session AND role (the metrics seam's `Unauthorized` throw + the role check — server fns are directly callable, so they gate themselves); (b) the **route's** beforeLoad re-checks the role off the shell context and redirects a non-owner to `/` (the nav's hidden entry is not the gate); (c) the **nav** renders the Audit Log item only through `visibleNavGroups(role)`.
-- **The data path (ADR-0023 + ticket, binding):** reads are admin server functions over `packages/db` — **zero `apps/api` files, zero api routes**. The dynamic drizzle query lives in `packages/db/src/audit-read.ts` (the #186 probes precedent — no drizzle import ever appears in `apps/admin`); the admin constructs `createDbClient(process.env.DATABASE_URL)` **per call** (ADR-0011 — never module scope). Ordering inside each fn: read `dbUrl` first (null → the `not-configured` union return — no db means no auth either, one curated state for both); then the session+role gate (`Unauthorized` throw — the only throw a fn permits); then the read inside try/catch → `unavailable` with ONE log-only `console.error` line (the #155 leak-safe law: loud detail never in the payload, never in the UI). A `startSpan` wraps each handler (the server-fn house rule, no-op without a DSN).
+- **Branch & baseline:** `feat/188-audit-log-viewer` off main `a079242` (plain checkout, single linear ticket, no worktree needed). This plan file is the branch's first commit. Commit messages follow the repo's `type(scope): … (#188)` squash style; every commit below is pinned verbatim. Evidence (test output, variant screenshots) lands in gitignored `.superpowers/sdd/2026-10-10-188-audit-log-viewer-screen/`.
+- **Gates (repo AGENTS.md, verbatim duties):** **zero manifest changes exist in this ticket, `pnpm-lock.yaml` is untouched and `pnpm install` never needs to run** (the drizzle reads ride packages/db's existing dep; the UI composes existing primitives). Every task commits only with `pnpm check` green for the packages it touched (`docker compose up -d db` first, the api suite runs in `pnpm check` and needs the test db; the admin's new tests are plain-node and db-free). **After any `packages/db/src` edit, run `pnpm build:packages` before admin typecheck/tests** (the admin resolves `@sevendays/db` from gitignored `dist/`; turbo's `typecheck` builds `^` but `test` does not, the explicit build closes the gap). Biome canonical form via `pnpm --filter @sevendays/admin fix` / `--filter @sevendays/db fix` before committing, accept its rewrites. Never commit secrets. Tick checklist boxes with `- [✅]`, never `[x]` (this plan file and `docs/plan.md` alike). Run `graphify update .` at close (code was modified; `graphify-out/graph.json` exists).
+- **The role law (ADR-0018, binding):** the owner is `role === 'admin'`, the BetterAuth admin-plugin's literal, never renamed; `'staff'` and `null`/`undefined` both fail. Three layers, all required: (a) the **server fns** gate on session AND role (the metrics seam's `Unauthorized` throw + the role check, server fns are directly callable, so they gate themselves); (b) the **route's** beforeLoad re-checks the role off the shell context and redirects a non-owner to `/` (the nav's hidden entry is not the gate); (c) the **nav** renders the Audit Log item only through `visibleNavGroups(role)`.
+- **The data path (ADR-0023 + ticket, binding):** reads are admin server functions over `packages/db`, **zero `apps/api` files, zero api routes**. The dynamic drizzle query lives in `packages/db/src/audit-read.ts` (the #186 probes precedent, no drizzle import ever appears in `apps/admin`); the admin constructs `createDbClient(process.env.DATABASE_URL)` **per call** (ADR-0011, never module scope). Ordering inside each fn: read `dbUrl` first (null → the `not-configured` union return, no db means no auth either, one curated state for both); then the session+role gate (`Unauthorized` throw, the only throw a fn permits); then the read inside try/catch → `unavailable` with ONE log-only `console.error` line (the #155 leak-safe law: loud detail never in the payload, never in the UI). A `startSpan` wraps each handler (the server-fn house rule, no-op without a DSN).
 - **The result union + never-500 law (binding, the #186/#187 shape):** `AuditResult<T> = { ok: true; data: T } | { ok: false, reason: 'not-configured' | 'unavailable' }`. The screen renders for any owner session regardless of source health; a thrown query error (including `Unauthorized`) maps to the same curated `unavailable` line; nothing bubbles to a route error boundary.
-- **The wire contract (binding):** the server fns return rows as plain objects with `occurredAt` an **ISO string** (Dates do not survive the RPC boundary; `z.coerce.date()` restores them). The client parses through `@sevendays/types`' `auditLogRowSchema` — the parse is the boundary guard and is **loud** (a malformed row throws → the query's error state, never a silently dropped entry).
-- **The query contract (binding):** newest-first is `occurredAt DESC, id DESC` (the `id` tiebreaker gives rows written in one transaction a stable order — `occurredAt` alone ties). Page size is **20, fixed** (no user control). Filters are URL search params (shareable, SSR-stable — the WindowToggle precedent): `page`, `entity`, `action`, `actor` (an exact `actorEmail` match), `from`/`to` (`YYYY-MM-DD`). **Date windows are UTC day boundaries by design** (the display clock is UTC via `formatUtc` — window matches display): `from` → that day's `00:00:00.000Z` inclusive; `to` → the **next** day's `00:00:00.000Z` exclusive (an inclusive day); `from` after `to` yields an **empty window** (0 rows), not an error. **Every filter change resets `page` to 1.** A stale `?page=` beyond the end self-heals: the response carries the clamped page and the screen replace-navigates to it. staleTime 30s (page) / 5m (actors — a studio's staff list barely moves), `refetchOnWindowFocus: true` stated explicitly, `placeholderData: keepPreviousData` on the page query (page flips keep the table painted). No server-side cache, no polling.
-- **Copy pins (owner-ratifiable at Task 4, pinned here as the working defaults):** page title `Audit Log`; subline `Who changed what, when — every CMS write, newest first.`; tab title `Audit Log | Sevendays Admin`; nav label `Audit Log` (Overview, directly after Analytics); table headers `When (UTC)` / `Actor` / `Action` / `Entity` / `Summary`; the `All` filter option; filter labels `Entity` / `Action` / `Actor` / `From` / `To`; `Clear filters`; footer `Page {X} of {Y} · {N} entries`; pagination `Previous` / `Next`; curated lines `Audit Log source not configured.` and `Audit Log source unavailable.`; empty lines `No audit rows yet — they start with the first CMS write.` (unfiltered) and `No audit rows match these filters.` (filtered); loading line `Loading audit rows…`. Entity labels: `Branches`, `Print sizes`, `Gallery photos`, `Attires`, `Add-ons`, `Studio services`, `Packages`, `Gallery categories`, `Testimonials`. Action labels: `Create`, `Update`, `Deactivate`, `Reorder`. The row's `title` attribute carries `requestId` (the Application Log correlation affordance — hover reveals it, no column). The null-summary cell renders a muted `—`.
-- **Copy pins are semantic, formatting is biome's:** every fenced file/comment/code block below lands verbatim in content; the package `fix` scripts then normalize quoting/ordering/import order to house style — accept the rewrite, commit the result.
-- **Scope fence (verbatim):** Tasks 1–5 edit only: `apps/admin/src/lib/audit/filters.ts` + `filters.test.ts` + `queries.ts` + `queries.test.ts` + `audit.functions.ts` (create all five), `packages/db/src/audit-read.ts` + `packages/db/src/index.ts` (create + one export line), `apps/admin/src/lib/nav.ts` + `nav.test.ts` (create both), `apps/admin/src/components/admin-sidebar.tsx` + `apps/admin/src/routes/_shell.tsx` (modify), `apps/admin/src/components/audit/audit-log-screen.tsx` (create), `apps/admin/src/routes/_shell.audit-log.tsx` (create), `apps/admin/src/routeTree.gen.ts` (regen, Task 5's commit). Task 4 additionally creates then DELETES `apps/admin/src/routes/prototype-audit.tsx` (untracked throughout — never committed). Task 6 rotates `docs/plan.md` (the M6 audit box — **TICKED**), `docs/progress.md`, `AGENTS.md`, and `docs/agents/v1-picks.md` (ledger row, post-merge). NOT here: everything in the header's sibling-fences bullet, and `apps/admin/package.json` (the owner's uncommitted port change rides above the branch — never staged).
+- **The wire contract (binding):** the server fns return rows as plain objects with `occurredAt` an **ISO string** (Dates do not survive the RPC boundary; `z.coerce.date()` restores them). The client parses through `@sevendays/types`' `auditLogRowSchema`, the parse is the boundary guard and is **loud** (a malformed row throws → the query's error state, never a silently dropped entry).
+- **The query contract (binding):** newest-first is `occurredAt DESC, id DESC` (the `id` tiebreaker gives rows written in one transaction a stable order, `occurredAt` alone ties). Page size is **20, fixed** (no user control). Filters are URL search params (shareable, SSR-stable, the WindowToggle precedent): `page`, `entity`, `action`, `actor` (an exact `actorEmail` match), `from`/`to` (`YYYY-MM-DD`). **Date windows are UTC day boundaries by design** (the display clock is UTC via `formatUtc`, window matches display): `from` → that day's `00:00:00.000Z` inclusive; `to` → the **next** day's `00:00:00.000Z` exclusive (an inclusive day); `from` after `to` yields an **empty window** (0 rows), not an error. **Every filter change resets `page` to 1.** A stale `?page=` beyond the end self-heals: the response carries the clamped page and the screen replace-navigates to it. staleTime 30s (page) / 5m (actors, a studio's staff list barely moves), `refetchOnWindowFocus: true` stated explicitly, `placeholderData: keepPreviousData` on the page query (page flips keep the table painted). No server-side cache, no polling.
+- **Copy pins (owner-ratifiable at Task 4, pinned here as the working defaults):** page title `Audit Log`; subline `Who changed what, when, every CMS write, newest first.`; tab title `Audit Log | Sevendays Admin`; nav label `Audit Log` (Overview, directly after Analytics); table headers `When (UTC)` / `Actor` / `Action` / `Entity` / `Summary`; the `All` filter option; filter labels `Entity` / `Action` / `Actor` / `From` / `To`; `Clear filters`; footer `Page {X} of {Y} · {N} entries`; pagination `Previous` / `Next`; curated lines `Audit Log source not configured.` and `Audit Log source unavailable.`; empty lines `No audit rows yet, they start with the first CMS write.` (unfiltered) and `No audit rows match these filters.` (filtered); loading line `Loading audit rows…`. Entity labels: `Branches`, `Print sizes`, `Gallery photos`, `Attires`, `Add-ons`, `Studio services`, `Packages`, `Gallery categories`, `Testimonials`. Action labels: `Create`, `Update`, `Deactivate`, `Reorder`. The row's `title` attribute carries `requestId` (the Application Log correlation affordance, hover reveals it, no column). The null-summary cell renders a muted `-`.
+- **Copy pins are semantic, formatting is biome's:** every fenced file/comment/code block below lands verbatim in content; the package `fix` scripts then normalize quoting/ordering/import order to house style, accept the rewrite, commit the result.
+- **Scope fence (verbatim):** Tasks 1–5 edit only: `apps/admin/src/lib/audit/filters.ts` + `filters.test.ts` + `queries.ts` + `queries.test.ts` + `audit.functions.ts` (create all five), `packages/db/src/audit-read.ts` + `packages/db/src/index.ts` (create + one export line), `apps/admin/src/lib/nav.ts` + `nav.test.ts` (create both), `apps/admin/src/components/admin-sidebar.tsx` + `apps/admin/src/routes/_shell.tsx` (modify), `apps/admin/src/components/audit/audit-log-screen.tsx` (create), `apps/admin/src/routes/_shell.audit-log.tsx` (create), `apps/admin/src/routeTree.gen.ts` (regen, Task 5's commit). Task 4 additionally creates then DELETES `apps/admin/src/routes/prototype-audit.tsx` (untracked throughout, never committed). Task 6 rotates `docs/plan.md` (the M6 audit box, **TICKED**), `docs/progress.md`, `AGENTS.md`, and `docs/agents/v1-picks.md` (ledger row, post-merge). NOT here: everything in the header's sibling-fences bullet, and `apps/admin/package.json` (the owner's uncommitted port change rides above the branch, never staged).
 
 ## File Structure
 
 ```text
 packages/db/
-  src/audit-read.ts                              # create (Task 2) — the filtered, paginated reads over audit_log (drizzle lives here)
-  src/index.ts                                   # modify (Task 2) — one export line
+  src/audit-read.ts                              # create (Task 2), the filtered, paginated reads over audit_log (drizzle lives here)
+  src/index.ts                                   # modify (Task 2), one export line
 apps/admin/
   src/lib/audit/
-    filters.ts                                   # create (Task 1) — search schema, UTC windows, page math, labels, wire parse
-    filters.test.ts                              # create (Task 1) — 16 lib-seam tests
-    audit.functions.ts                           # create (Task 2) — the two owner-gated server fns
-    queries.ts                                   # create (Task 2) — the query factories (keepPreviousData page query)
-    queries.test.ts                              # create (Task 2) — 4 options-object tests
-  src/lib/nav.ts                                 # create (Task 3) — the taxonomy + visibleNavGroups(role)
-  src/lib/nav.test.ts                            # create (Task 3) — 4 owner-visibility tests
-  src/components/admin-sidebar.tsx               # modify (Task 3) — consumes visibleNavGroups; role joins the user prop
-  src/routes/_shell.tsx                          # modify (Task 3) — the context's user gains role
-  src/routes/prototype-audit.tsx                 # temporary (Task 4 — untracked, deleted pre-PR)
-  src/components/audit/audit-log-screen.tsx      # create (Task 5) — the ratified composition
-  src/routes/_shell.audit-log.tsx                # create (Task 5) — the owner-gated route
-  src/routeTree.gen.ts                           # regen (Task 5's commit — generate-routes)
+    filters.ts                                   # create (Task 1), search schema, UTC windows, page math, labels, wire parse
+    filters.test.ts                              # create (Task 1), 16 lib-seam tests
+    audit.functions.ts                           # create (Task 2), the two owner-gated server fns
+    queries.ts                                   # create (Task 2), the query factories (keepPreviousData page query)
+    queries.test.ts                              # create (Task 2), 4 options-object tests
+  src/lib/nav.ts                                 # create (Task 3), the taxonomy + visibleNavGroups(role)
+  src/lib/nav.test.ts                            # create (Task 3), 4 owner-visibility tests
+  src/components/admin-sidebar.tsx               # modify (Task 3), consumes visibleNavGroups; role joins the user prop
+  src/routes/_shell.tsx                          # modify (Task 3), the context's user gains role
+  src/routes/prototype-audit.tsx                 # temporary (Task 4, untracked, deleted pre-PR)
+  src/components/audit/audit-log-screen.tsx      # create (Task 5), the ratified composition
+  src/routes/_shell.audit-log.tsx                # create (Task 5), the owner-gated route
+  src/routeTree.gen.ts                           # regen (Task 5's commit, generate-routes)
 docs/plan.md docs/progress.md AGENTS.md docs/agents/v1-picks.md   # Task 6
 ```
 
 ---
 
-### Task 1: `apps/admin` — the pure filter/pagination seam (TDD)
+### Task 1: `apps/admin`, the pure filter/pagination seam (TDD)
 
 **Files:**
 - Create (test-first): `apps/admin/src/lib/audit/filters.test.ts`
 - Create: `apps/admin/src/lib/audit/filters.ts`
 
 **Interfaces:**
-- Consumes: `@sevendays/types`' `auditEntitySchema`, `auditActionSchema`, `auditLogRowSchema`, `AuditEntity`, `AuditAction`, `AuditLogRow` (all landed at #185 — nothing is added to packages/types).
-- Produces (what Tasks 2–5 consume): `AUDIT_PAGE_SIZE` (20), `auditLogSearchSchema`, `AuditLogSearch`, `auditDateWindow(search) → { start: string | null; endExclusive: string | null }`, `pageWindow(total, page) → { page, totalPages, offset, hasPrev, hasNext }`, `AUDIT_ENTITY_LABELS`, `AUDIT_ACTION_LABELS`, `hasActiveFilters(search) → boolean`, `AuditWireRow`, `parseAuditWireRows(rows: unknown) → AuditLogRow[]` — full shapes fenced below.
+- Consumes: `@sevendays/types`' `auditEntitySchema`, `auditActionSchema`, `auditLogRowSchema`, `AuditEntity`, `AuditAction`, `AuditLogRow` (all landed at #185, nothing is added to packages/types).
+- Produces (what Tasks 2–5 consume): `AUDIT_PAGE_SIZE` (20), `auditLogSearchSchema`, `AuditLogSearch`, `auditDateWindow(search) → { start: string | null; endExclusive: string | null }`, `pageWindow(total, page) → { page, totalPages, offset, hasPrev, hasNext }`, `AUDIT_ENTITY_LABELS`, `AUDIT_ACTION_LABELS`, `hasActiveFilters(search) → boolean`, `AuditWireRow`, `parseAuditWireRows(rows: unknown) → AuditLogRow[]`, full shapes fenced below.
 
-**Not here:** any DB access (Task 2); server fns or factories (Task 2); nav/role logic (Task 3 — the role law lives in the fns and the route, never in this seam); any UI (Tasks 4–5).
+**Not here:** any DB access (Task 2); server fns or factories (Task 2); nav/role logic (Task 3, the role law lives in the fns and the route, never in this seam); any UI (Tasks 4–5).
 
-- [ ] **Step 1: Write the failing tests — `apps/admin/src/lib/audit/filters.test.ts`**
+- [ ] **Step 1: Write the failing tests, `apps/admin/src/lib/audit/filters.test.ts`**
 
 ```ts
 // The Audit Log viewer's pure-seam contract (#188): tolerant search-param
-// parsing (invalid values drop — a stale shared URL never 500s a visit),
+// parsing (invalid values drop, a stale shared URL never 500s a visit),
 // UTC day windows, page math, the label maps, and the wire→row parse
 // through the landed auditLogRowSchema. Plain-node, no DOM (the admin
 // lib-seam pattern).
@@ -91,7 +91,7 @@ import {
   parseAuditWireRows,
 } from './filters';
 
-describe('auditLogSearchSchema (tolerant parse — invalid drops, never throws)', () => {
+describe('auditLogSearchSchema (tolerant parse, invalid drops, never throws)', () => {
   it('an empty search parses to the defaults (page 1, no filters)', () => {
     expect(auditLogSearchSchema.parse({})).toEqual({
       page: 1,
@@ -117,7 +117,7 @@ describe('auditLogSearchSchema (tolerant parse — invalid drops, never throws)'
     });
     expect(parsed.entity).toBe('service-package');
     expect(parsed.action).toBe('deactivate');
-    // Assert on the PARSED OUTPUT (z.object strips/rejects silently) — an
+    // Assert on the PARSED OUTPUT (z.object strips/rejects silently), an
     // unknown enum value is absent, and the rest of the search survives.
     const dropped = auditLogSearchSchema.parse({
       entity: 'not-an-entity',
@@ -136,8 +136,8 @@ describe('auditLogSearchSchema (tolerant parse — invalid drops, never throws)'
   });
 });
 
-describe('auditDateWindow (UTC day boundaries — the display clock is UTC)', () => {
-  it('from/to bracket their days — to is inclusive-day, exclusive-instant', () => {
+describe('auditDateWindow (UTC day boundaries, the display clock is UTC)', () => {
+  it('from/to bracket their days, to is inclusive-day, exclusive-instant', () => {
     expect(auditDateWindow({ page: 1, from: '2026-10-01', to: '2026-10-06' })).toEqual({
       start: '2026-10-01T00:00:00.000Z',
       endExclusive: '2026-10-07T00:00:00.000Z',
@@ -263,14 +263,14 @@ describe('hasActiveFilters', () => {
 
 - [ ] **Step 2: Run red**
 
-`pnpm --filter @sevendays/admin test -- --run src/lib/audit/filters.test.ts` — fails on the missing module `./filters`. Record the red in the evidence dir.
+`pnpm --filter @sevendays/admin test -- --run src/lib/audit/filters.test.ts`, fails on the missing module `./filters`. Record the red in the evidence dir.
 
 - [ ] **Step 3: Write `apps/admin/src/lib/audit/filters.ts`**
 
 ```ts
-// The Audit Log viewer's pure seam (#188, spec § The Audit Log — Viewer):
+// The Audit Log viewer's pure seam (#188, spec § The Audit Log, Viewer):
 // search-param normalization, UTC day windows, page math, the label maps,
-// and the wire→row parse — every fn pure so the lib-seam suite pins the
+// and the wire→row parse, every fn pure so the lib-seam suite pins the
 // filter/pagination semantics the screen rides. The role law (ADR-0018)
 // lives in the server fns and the route, never here. Rows parse through
 // the landed auditLogRowSchema ("the #188 viewer parses rows through it").
@@ -289,7 +289,7 @@ export const AUDIT_PAGE_SIZE = 20;
 const DAY_MS = 86_400_000;
 
 // Search params arrive as strings and may be stale or hand-edited: every
-// field is tolerant — an invalid value drops to its default (the metrics
+// field is tolerant, an invalid value drops to its default (the metrics
 // env reader's posture), never a thrown validation. z.object semantics do
 // the entity/action narrowing; .catch() is the drop.
 const dateParam = z
@@ -312,7 +312,7 @@ export type AuditLogSearch = z.infer<typeof auditLogSearchSchema>;
 
 // A regex-valid but calendar-invalid day is not a day: 2026-13-99 passes
 // the \d{2} slots and 2026-02-31 ROLLS OVER to March in V8 instead of
-// parsing NaN (controller-probed live 2026-10-10) — the round-trip check
+// parsing NaN (controller-probed live 2026-10-10), the round-trip check
 // catches both, dropping the side to null (a half-open window, the
 // tolerant posture of every field here).
 function isCalendarDay(day: string): boolean {
@@ -325,9 +325,9 @@ function dayStartUtc(day: string): Date | null {
 }
 
 // UTC day boundaries by design (occurredAt is timestamptz and the screen
-// displays UTC via formatUtc — the window matches the display): from →
+// displays UTC via formatUtc, the window matches the display): from →
 // that day's 00:00Z inclusive; to → the NEXT day's 00:00Z exclusive (an
-// inclusive day). from after to leaves start > end — an empty window
+// inclusive day). from after to leaves start > end, an empty window
 // (0 rows), not an error.
 export function auditDateWindow(search: AuditLogSearch): {
   start: string | null;
@@ -362,7 +362,7 @@ export function pageWindow(total: number, page: number): {
   };
 }
 
-// Filter-option and cell copy — the nine entity families and four
+// Filter-option and cell copy, the nine entity families and four
 // actions, human-labeled once (owner-ratifiable at the variants step).
 export const AUDIT_ENTITY_LABELS: Record<AuditEntity, string> = {
   branch: 'Branches',
@@ -398,7 +398,7 @@ export function hasActiveFilters(search: AuditLogSearch): boolean {
 export type AuditWireRow = Omit<AuditLogRow, 'occurredAt'> & { occurredAt: string };
 
 // The RPC boundary guard: parses wire rows back through the landed
-// auditLogRowSchema. A malformed row is a server bug — the throw surfaces
+// auditLogRowSchema. A malformed row is a server bug, the throw surfaces
 // as the query's error state, never a silently dropped entry.
 export function parseAuditWireRows(rows: unknown): AuditLogRow[] {
   return auditLogRowSchema.array().parse(rows);
@@ -407,14 +407,14 @@ export function parseAuditWireRows(rows: unknown): AuditLogRow[] {
 
 - [ ] **Step 4: Green + gates + commit**
 
-`pnpm --filter @sevendays/admin test -- --run src/lib/audit/filters.test.ts` (16 tests green), then `pnpm --filter @sevendays/admin fix`, then `pnpm --filter @sevendays/admin test` (the whole suite stays green: **15 files / 156 tests** — the other suites untouched), then `pnpm --filter @sevendays/admin typecheck`. Commit:
+`pnpm --filter @sevendays/admin test -- --run src/lib/audit/filters.test.ts` (16 tests green), then `pnpm --filter @sevendays/admin fix`, then `pnpm --filter @sevendays/admin test` (the whole suite stays green: **15 files / 156 tests**, the other suites untouched), then `pnpm --filter @sevendays/admin typecheck`. Commit:
 
 ```bash
 git add apps/admin/src/lib/audit/filters.ts apps/admin/src/lib/audit/filters.test.ts
 git commit -m "feat(admin): the Audit Log viewer's pure filter/pagination seam (#188)"
 ```
 
-### Task 2: `packages/db` + `apps/admin` — the read module, the owner-gated server fns, the query factories (TDD)
+### Task 2: `packages/db` + `apps/admin`, the read module, the owner-gated server fns, the query factories (TDD)
 
 **Files:**
 - Create: `packages/db/src/audit-read.ts`
@@ -424,28 +424,28 @@ git commit -m "feat(admin): the Audit Log viewer's pure filter/pagination seam (
 
 **Interfaces:**
 - Consumes: Task 1's `auditLogSearchSchema`, `AUDIT_PAGE_SIZE`, `auditDateWindow`, `pageWindow`, `parseAuditWireRows`, `AuditWireRow`, `AuditLogSearch`; `@sevendays/db`'s `createDbClient`, `Database` (re-exported type), the `auditLog` table (re-exported through `client.ts`'s `export * from './schema/index.js'`).
-- Produces (what Tasks 4–5 consume): from `@sevendays/db`: `AuditLogQueryParams`, `AuditLogRowData`, `runAuditLogPage(db, params) → Promise<{ rows: AuditLogRowData[]; total: number }>`, `runAuditActors(db) → Promise<string[]>`; from `#/lib/audit/audit.functions`: `AuditResult<T>`, `fetchAuditLogPage` (validator `auditLogSearchSchema`), `fetchAuditActors`; from `#/lib/audit/queries`: `AuditLogPage`, `auditQueries.page(search)`, `auditQueries.actors()` — full shapes fenced below.
+- Produces (what Tasks 4–5 consume): from `@sevendays/db`: `AuditLogQueryParams`, `AuditLogRowData`, `runAuditLogPage(db, params) → Promise<{ rows: AuditLogRowData[]; total: number }>`, `runAuditActors(db) → Promise<string[]>`; from `#/lib/audit/audit.functions`: `AuditResult<T>`, `fetchAuditLogPage` (validator `auditLogSearchSchema`), `fetchAuditActors`; from `#/lib/audit/queries`: `AuditLogPage`, `auditQueries.page(search)`, `auditQueries.actors()`, full shapes fenced below.
 
-**Not here:** any schema/migration change (`db:generate` never runs — the table is #185's, landed); any `apps/api` file; the nav/role plumbing (Task 3); any UI (Tasks 4–5); any db-backed test (the read module is thin over drizzle exactly as `probes.ts` is — untested-at-DB by house precedent; the pure seams carry the coverage).
+**Not here:** any schema/migration change (`db:generate` never runs, the table is #185's, landed); any `apps/api` file; the nav/role plumbing (Task 3); any UI (Tasks 4–5); any db-backed test (the read module is thin over drizzle exactly as `probes.ts` is, untested-at-DB by house precedent; the pure seams carry the coverage).
 
 - [ ] **Step 1: Write `packages/db/src/audit-read.ts`**
 
-The reads live in `packages/db` because `apps/admin` deliberately carries no `drizzle-orm` dependency (#186's ruling — "no drizzle type reaches apps/admin"; the probes precedent). The typed query builder binds every filter value safely — never string interpolation. Full file:
+The reads live in `packages/db` because `apps/admin` deliberately carries no `drizzle-orm` dependency (#186's ruling, "no drizzle type reaches apps/admin"; the probes precedent). The typed query builder binds every filter value safely, never string interpolation. Full file:
 
 ```ts
-// The Audit Log viewer's read module (#188, ADR-0023 — the #186 probes
+// The Audit Log viewer's read module (#188, ADR-0023, the #186 probes
 // precedent extended to dynamic queries): the filtered, newest-first,
 // paginated reads over audit_log. This module exists because apps/admin
-// owns no drizzle-orm dependency by ruling — the typed builder (and its
+// owns no drizzle-orm dependency by ruling, the typed builder (and its
 // safe parameter binding) lives here, beside the schema it reads; the
 // admin passes the per-request client and structural params only. No
 // joins anywhere: the row is self-describing by design (actorEmail
-// snapshotted at write, summary inline — #185). Ordering is occurredAt
-// DESC with id DESC as the tiebreaker (rows sharing a timestamp — e.g.
-// written in one transaction — keep a stable order). The row's
+// snapshotted at write, summary inline, #185). Ordering is occurredAt
+// DESC with id DESC as the tiebreaker (rows sharing a timestamp, e.g.
+// written in one transaction, keep a stable order). The row's
 // occurredAt field carries an ISO STRING (not a Date): the result
 // crosses an RPC boundary where Dates do not survive, and the viewer's
-// landed auditLogRowSchema coerces the string back — one shape, the
+// landed auditLogRowSchema coerces the string back, one shape, the
 // AuditWireRow convention, no mapping anywhere.
 import { and, asc, count, desc, eq, gte, lt, type SQL } from 'drizzle-orm';
 
@@ -465,7 +465,7 @@ export type AuditLogQueryParams = {
 
 export type AuditLogRowData = {
   id: string;
-  /** ISO string — the RPC-boundary convention (see the module comment). */
+  /** ISO string, the RPC-boundary convention (see the module comment). */
   occurredAt: string;
   actorId: string;
   actorEmail: string;
@@ -531,7 +531,7 @@ export async function runAuditActors(db: Database): Promise<string[]> {
 }
 ```
 
-- [ ] **Step 2: Export it — `packages/db/src/index.ts`**
+- [ ] **Step 2: Export it, `packages/db/src/index.ts`**
 
 The file's export block (currently two lines) gains one:
 
@@ -541,15 +541,15 @@ export * from './client.js';
 export * from './probes.js';
 ```
 
-(Biome's import-order fix may reorder the three lines — accept the rewrite.) Then rebuild the package the admin resolves: `pnpm build:packages`.
+(Biome's import-order fix may reorder the three lines, accept the rewrite.) Then rebuild the package the admin resolves: `pnpm build:packages`.
 
-- [ ] **Step 3: Write the failing tests — `apps/admin/src/lib/audit/queries.test.ts`**
+- [ ] **Step 3: Write the failing tests, `apps/admin/src/lib/audit/queries.test.ts`**
 
 ```ts
 // The viewer's query-contract tests (#188): the spec's caching posture
 // (page stale at 30s, actors at 5m), revalidate-on-focus stated
 // explicitly, keepPreviousData on the page query, and search-keyed cache
-// identity. Asserts the OPTIONS objects only — the server fns are never
+// identity. Asserts the OPTIONS objects only, the server fns are never
 // invoked from a plain-node test (the RPC wrapper needs request context;
 // module import is safe, the metrics-queries precedent).
 import { keepPreviousData } from '@tanstack/react-query';
@@ -567,7 +567,7 @@ describe('auditQueries (spec-verbatim caching posture)', () => {
     });
   });
 
-  it('the page key carries the full search — every filter is cache identity', () => {
+  it('the page key carries the full search, every filter is cache identity', () => {
     const base = auditQueries.page(auditLogSearchSchema.parse({})).queryKey;
     expect(auditQueries.page(auditLogSearchSchema.parse({ entity: 'branch' })).queryKey).not.toEqual(
       base
@@ -595,19 +595,19 @@ describe('auditQueries (spec-verbatim caching posture)', () => {
 
 - [ ] **Step 4: Run red**
 
-`pnpm --filter @sevendays/admin test -- --run src/lib/audit/queries.test.ts` — fails on the missing module `./queries` (and `./audit.functions` through it). Record the red.
+`pnpm --filter @sevendays/admin test -- --run src/lib/audit/queries.test.ts`, fails on the missing module `./queries` (and `./audit.functions` through it). Record the red.
 
 - [ ] **Step 5: Write `apps/admin/src/lib/audit/audit.functions.ts`**
 
 ```ts
 // The Audit Log viewer's server functions (#188, ADR-0023): the reads are
-// admin-side over packages/db — the api stays domain-pure, zero api
+// admin-side over packages/db, the api stays domain-pure, zero api
 // routes, zero api files. The gate is the metrics seam's discipline PLUS
-// the role law (ADR-0018): the audit record is person-level — owner-only
-// by the standing rule — so the gate demands a session AND
+// the role law (ADR-0018): the audit record is person-level, owner-only
+// by the standing rule, so the gate demands a session AND
 // role === 'admin' (the BetterAuth plugin's literal for the owner;
 // 'staff' and null both fail). Ordering inside each fn: dbUrl first (no
-// db means no auth either — one curated not-configured state for both),
+// db means no auth either, one curated not-configured state for both),
 // then the gate (the only throw a fn permits), then the read inside
 // try/catch → unavailable with one log-only line (the #155 law: the loud
 // detail never rides the payload). Sentry span per the server-fn house
@@ -707,10 +707,10 @@ export const fetchAuditActors = createServerFn({ method: 'GET' }).handler(async 
 
 ```ts
 // The viewer's query factories (#188): the page query keys on the FULL
-// search (every filter is cache identity — a filter change is a new
+// search (every filter is cache identity, a filter change is a new
 // entry), parses rows through the landed auditLogRowSchema at the RPC
 // boundary, and keeps previous data across page flips. Actors are
-// long-stale — a studio's staff list barely moves. No server-side cache;
+// long-stale, a studio's staff list barely moves. No server-side cache;
 // no polling.
 import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 
@@ -752,14 +752,14 @@ export const auditQueries = {
 
 - [ ] **Step 7: Green + gates + commit**
 
-`pnpm --filter @sevendays/admin test -- --run src/lib/audit` (16 filters + 4 queries green), then `pnpm --filter @sevendays/db fix` and `pnpm --filter @sevendays/admin fix`, then `pnpm --filter @sevendays/db test` (untouched — the db suite's four files: catalog-rows, client-transaction, migrate, verify-appointment-row; **their counts must not change**), then `pnpm build:packages` once more if `fix` touched `packages/db/src`, then `pnpm check` (35/35). Admin floor now **16 files / 160 tests**. Commit:
+`pnpm --filter @sevendays/admin test -- --run src/lib/audit` (16 filters + 4 queries green), then `pnpm --filter @sevendays/db fix` and `pnpm --filter @sevendays/admin fix`, then `pnpm --filter @sevendays/db test` (untouched, the db suite's four files: catalog-rows, client-transaction, migrate, verify-appointment-row; **their counts must not change**), then `pnpm build:packages` once more if `fix` touched `packages/db/src`, then `pnpm check` (35/35). Admin floor now **16 files / 160 tests**. Commit:
 
 ```bash
 git add packages/db/src/audit-read.ts packages/db/src/index.ts apps/admin/src/lib/audit/audit.functions.ts apps/admin/src/lib/audit/queries.ts apps/admin/src/lib/audit/queries.test.ts
 git commit -m "feat(admin,db): the audit read module + owner-gated server fns + query factories (#188)"
 ```
 
-### Task 3: `apps/admin` — the owner role through the shell: the nav taxonomy extracted, the gate testable (TDD)
+### Task 3: `apps/admin`, the owner role through the shell: the nav taxonomy extracted, the gate testable (TDD)
 
 **Files:**
 - Create (test-first): `apps/admin/src/lib/nav.test.ts`
@@ -767,19 +767,19 @@ git commit -m "feat(admin,db): the audit read module + owner-gated server fns + 
 - Modify: `apps/admin/src/routes/_shell.tsx:20`
 
 **Interfaces:**
-- Consumes: nothing from Tasks 1–2 (independent — may run in parallel with them).
+- Consumes: nothing from Tasks 1–2 (independent, may run in parallel with them).
 - Produces (what Tasks 4–5 consume): `NavTo`, `NavItem` (gains `ownerOnly?: boolean`), `NavGroup`, `navGroups`, `visibleNavGroups(role: string | null | undefined) → NavGroup[]` from `#/lib/nav`; the shell route context's `user` widens to `{ name: string; email: string; role: string | null }` (what `_shell.audit-log.tsx`'s beforeLoad gates on, Task 5).
 
-**Not here:** the audit route itself (Task 5); the screen (Tasks 4–5); **the sidebar's consumption of `visibleNavGroups` (Task 5 — sequencing law, ruled at execution: widening `NavTo` with `/audit-log` breaks the sidebar's `Link to={item.to}` / `matchRoute` typing until the route file registers the route, so the rewiring lands where the route exists)**; any change to the appointments stub or the dashboard routes; any M5.5 user-management surface (the role is read, never written).
+**Not here:** the audit route itself (Task 5); the screen (Tasks 4–5); **the sidebar's consumption of `visibleNavGroups` (Task 5, sequencing law, ruled at execution: widening `NavTo` with `/audit-log` breaks the sidebar's `Link to={item.to}` / `matchRoute` typing until the route file registers the route, so the rewiring lands where the route exists)**; any change to the appointments stub or the dashboard routes; any M5.5 user-management surface (the role is read, never written).
 
-- [ ] **Step 1: Write the failing tests — `apps/admin/src/lib/nav.test.ts`**
+- [ ] **Step 1: Write the failing tests, `apps/admin/src/lib/nav.test.ts`**
 
 ```ts
 // The owner-visibility law, lib-seam-pinned (#188, ADR-0018): the nav's
-// owner-only entries — Audit Log, person-level by the standing rule —
+// owner-only entries, Audit Log, person-level by the standing rule;
 // render for role === 'admin' alone ('staff' and null both fail; the
 // column is nullable in the user table). Plain-node over the extracted
-// taxonomy (the data was inline in admin-sidebar.tsx since #139 — the
+// taxonomy (the data was inline in admin-sidebar.tsx since #139, the
 // extraction makes the law testable).
 import { describe, expect, it } from 'vitest';
 
@@ -791,7 +791,7 @@ describe('visibleNavGroups (the ADR-0018 gate)', () => {
     expect(overview?.items.map((item) => item.to)).toEqual(['/', '/audit-log', '/appointments']);
   });
 
-  it('staff (role staff) see no Audit Log entry anywhere — Analytics and Appointments unaffected', () => {
+  it('staff (role staff) see no Audit Log entry anywhere, Analytics and Appointments unaffected', () => {
     const items = visibleNavGroups('staff').flatMap((group) => group.items);
     expect(items.some((item) => item.to === '/audit-log')).toBe(false);
     expect(items.some((item) => item.to === '/')).toBe(true);
@@ -815,7 +815,7 @@ describe('visibleNavGroups (the ADR-0018 gate)', () => {
 
 - [ ] **Step 2: Run red**
 
-`pnpm --filter @sevendays/admin test -- --run src/lib/nav.test.ts` — fails on the missing module `./nav`. Record the red.
+`pnpm --filter @sevendays/admin test -- --run src/lib/nav.test.ts`, fails on the missing module `./nav`. Record the red.
 
 - [ ] **Step 3: Create `apps/admin/src/lib/nav.ts`**
 
@@ -824,10 +824,10 @@ The taxonomy moves here verbatim from `admin-sidebar.tsx` (the #59 ruling, icons
 ```ts
 // The shell's nav taxonomy (#59 ruling, extracted from admin-sidebar.tsx
 // at #188 so the owner-visibility law is testable): navGroups is data,
-// visibleNavGroups is the role filter. Owner-only entries — Audit Log
+// visibleNavGroups is the role filter. Owner-only entries, Audit Log
 // (M6 #188: the who/what/when record is person-level by the standing
 // rule "aggregates are shared; anything person-level is owner-scoped")
-// — render for role === 'admin' alone (ADR-0018's BetterAuth mapping:
+//, render for role === 'admin' alone (ADR-0018's BetterAuth mapping:
 // the owner holds the admin plugin's 'admin' literal; 'staff' and null
 // both fail; the role column is nullable).
 import type { LucideIcon } from 'lucide-react';
@@ -871,7 +871,7 @@ export interface NavGroup {
 }
 
 // The ruled taxonomy (#59), icons carried from the prototype unchanged.
-// Overview carries the Analytics dashboard (#186) and — owner-only — the
+// Overview carries the Analytics dashboard (#186) and, owner-only, the
 // Audit Log (#188, beside Analytics); Appointments stays the v2 teaser
 // stub; Catalog and Studio carry the live CMS surfaces.
 export const navGroups: NavGroup[] = [
@@ -920,7 +920,7 @@ export function visibleNavGroups(role: string | null | undefined): NavGroup[] {
 
 `pnpm --filter @sevendays/admin test -- --run src/lib/nav.test.ts` (4 tests green). Then one edit:
 
-(a) `apps/admin/src/routes/_shell.tsx` — the gate's context return widens (line 20):
+(a) `apps/admin/src/routes/_shell.tsx`, the gate's context return widens (line 20):
 
 ```ts
     return {
@@ -932,35 +932,35 @@ export function visibleNavGroups(role: string | null | undefined): NavGroup[] {
     };
 ```
 
-(The spike-proven field: the admin plugin types `role` on the session user — read through our own `createAuth`, typecheck-clean 2026-10-10. The `?? null` is honest: the column is nullable, and nav treats null as non-owner.)
+(The spike-proven field: the admin plugin types `role` on the session user, read through our own `createAuth`, typecheck-clean 2026-10-10. The `?? null` is honest: the column is nullable, and nav treats null as non-owner.)
 
 - [ ] **Step 5: Gates + commit**
 
-`pnpm --filter @sevendays/admin fix`, then `pnpm --filter @sevendays/admin test` (**17 files / 164 tests** — the full new floor), then `pnpm --filter @sevendays/admin typecheck`, then `pnpm check` (35/35 — no other package touched since Task 2). Commit:
+`pnpm --filter @sevendays/admin fix`, then `pnpm --filter @sevendays/admin test` (**17 files / 164 tests**, the full new floor), then `pnpm --filter @sevendays/admin typecheck`, then `pnpm check` (35/35, no other package touched since Task 2). Commit:
 
 ```bash
 git add apps/admin/src/lib/nav.ts apps/admin/src/lib/nav.test.ts apps/admin/src/routes/_shell.tsx
-git commit -m "feat(admin): the owner role through the shell — nav taxonomy extracted, the Audit Log entry owner-gated (#188)"
+git commit -m "feat(admin): the owner role through the shell, nav taxonomy extracted, the Audit Log entry owner-gated (#188)"
 ```
 
-### Task 4: The rendered variants — the owner's ratification gate
+### Task 4: The rendered variants, the owner's ratification gate
 
-**Skill set:** `prototype` (the rendering discipline) + `ui-ux-pro-max`, with `design-system` / `ui-styling` as relevant — loaded at execution time (AGENTS.md rule). This task is the ticket's "Rendered variants at execution" clause; the #186/#187 pattern: compositions rendered as frames over mock data, the owner reacts, the ratified composition lands in Task 5.
+**Skill set:** `prototype` (the rendering discipline) + `ui-ux-pro-max`, with `design-system` / `ui-styling` as relevant, loaded at execution time (AGENTS.md rule). This task is the ticket's "Rendered variants at execution" clause; the #186/#187 pattern: compositions rendered as frames over mock data, the owner reacts, the ratified composition lands in Task 5.
 
 **Files:**
-- Create (UNTRACKED — never committed, deleted at Step 5): `apps/admin/src/routes/prototype-audit.tsx`
+- Create (UNTRACKED, never committed, deleted at Step 5): `apps/admin/src/routes/prototype-audit.tsx`
 - Evidence: `.superpowers/sdd/2026-10-10-188-audit-log-viewer-screen/variants/*.png`
 
-**Not here:** any committed change in this task besides the copy/label adjustments the owner's ruling asks for (they amend Task 1's `filters.ts` label maps — the only durable outputs are those adjustments and the issue comment).
+**Not here:** any committed change in this task besides the copy/label adjustments the owner's ruling asks for (they amend Task 1's `filters.ts` label maps, the only durable outputs are those adjustments and the issue comment).
 
-- [ ] **Step 1: The prototype route (ungated, mock data — the prototype-tokens precedent)**
+- [ ] **Step 1: The prototype route (ungated, mock data, the prototype-tokens precedent)**
 
-Create `apps/admin/src/routes/prototype-audit.tsx` — a TOP-LEVEL route (outside `_shell`, so no session gate and `playwright screenshot` can reach it), rendering the viewer's composition candidates over inline mock rows plus the failure/empty rehearsal. Full file:
+Create `apps/admin/src/routes/prototype-audit.tsx`, a TOP-LEVEL route (outside `_shell`, so no session gate and `playwright screenshot` can reach it), rendering the viewer's composition candidates over inline mock rows plus the failure/empty rehearsal. Full file:
 
 ```tsx
-// PROTOTYPE ONLY (#188 Task 4) — untracked, deleted before the PR. The
+// PROTOTYPE ONLY (#188 Task 4), untracked, deleted before the PR. The
 // owner-reacted rendered variants: the Audit Log viewer's composition
-// candidates over mock rows (no server fns, no env, no gate — the
+// candidates over mock rows (no server fns, no env, no gate, the
 // prototype-tokens precedent). Copy is Task 1's pinned set.
 import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
@@ -1026,7 +1026,7 @@ const ROWS = [
     actorEmail: 'owner@sevendaysstudio.test',
     action: 'update',
     entity: 'branch',
-    summary: 'Sevendays Studio Makati — ground floor unit G-21, Victory Mall, Kalayaan Avenue corner A. Arnaiz Avenue, Makati City (retouched 2026-10-08)',
+    summary: 'Sevendays Studio Makati, ground floor unit G-21, Victory Mall, Kalayaan Avenue corner A. Arnaiz Avenue, Makati City (retouched 2026-10-08)',
   },
   {
     occurredAt: '2026-10-07 09:15',
@@ -1120,7 +1120,7 @@ function Rows({ badge }: { badge: boolean }) {
   return (
     <>
       {ROWS.map((row, index) => (
-        <TableRow key={index} title='req_9f2c… (hover carries requestId — the correlation affordance)'>
+        <TableRow key={index} title='req_9f2c… (hover carries requestId, the correlation affordance)'>
           <TableCell className='w-44 py-2 tabular-nums'>{row.occurredAt}</TableCell>
           <TableCell className='max-w-56 truncate py-2'>{row.actorEmail}</TableCell>
           <TableCell className='w-28 py-2'>
@@ -1132,7 +1132,7 @@ function Rows({ badge }: { badge: boolean }) {
           </TableCell>
           <TableCell className='w-40 py-2'>{AUDIT_ENTITY_LABELS[row.entity as keyof typeof AUDIT_ENTITY_LABELS]}</TableCell>
           <TableCell className='max-w-72 truncate py-2'>
-            {row.summary ?? <span className='text-muted-foreground'>—</span>}
+            {row.summary ?? <span className='text-muted-foreground'>-</span>}
           </TableCell>
         </TableRow>
       ))}
@@ -1173,10 +1173,10 @@ function PrototypeAuditPage() {
     <main className='mx-auto max-w-5xl space-y-4 p-6'>
       <h1 className='text-2xl font-semibold'>#188 Audit Log viewer variants</h1>
       <p className='text-muted-foreground text-sm'>
-        Who changed what, when — every CMS write, newest first.
+        Who changed what, when, every CMS write, newest first.
       </p>
 
-      <SectionHeading>Variant A — toolbar row + badge actions (the working default)</SectionHeading>
+      <SectionHeading>Variant A, toolbar row + badge actions (the working default)</SectionHeading>
       <div className='space-y-4' aria-label='Variant A'>
         <Toolbar labeled={false} />
         <Table>
@@ -1192,7 +1192,7 @@ function PrototypeAuditPage() {
         <Footer />
       </div>
 
-      <SectionHeading>Variant B — labeled filter grid + muted actions (the denser read)</SectionHeading>
+      <SectionHeading>Variant B, labeled filter grid + muted actions (the denser read)</SectionHeading>
       <div className='space-y-4' aria-label='Variant B'>
         <Toolbar labeled />
         <Table>
@@ -1208,7 +1208,7 @@ function PrototypeAuditPage() {
         <Footer />
       </div>
 
-      <SectionHeading>Variant C — the failure + empty rehearsal (the curated states)</SectionHeading>
+      <SectionHeading>Variant C, the failure + empty rehearsal (the curated states)</SectionHeading>
       <div className='space-y-3' aria-label='Variant C'>
         <div className='border-input rounded-lg border p-6 text-sm text-muted-foreground'>
           Audit Log source not configured.
@@ -1217,7 +1217,7 @@ function PrototypeAuditPage() {
           Audit Log source unavailable.
         </div>
         <div className='border-input rounded-lg border p-6 text-sm text-muted-foreground'>
-          No audit rows yet — they start with the first CMS write.
+          No audit rows yet, they start with the first CMS write.
         </div>
         <div className='border-input rounded-lg border p-6 text-sm text-muted-foreground'>
           No audit rows match these filters.
@@ -1231,11 +1231,11 @@ function PrototypeAuditPage() {
 }
 ```
 
-(The `routeTree.gen.ts` regen this route triggers is EXPECTED and LOCAL ONLY — the file is untracked and deleted in Step 5; after deletion, `git checkout -- apps/admin/src/routeTree.gen.ts` restores the committed tree byte-identically. Nothing routeTree-shaped ever reaches the PR from this task.)
+(The `routeTree.gen.ts` regen this route triggers is EXPECTED and LOCAL ONLY, the file is untracked and deleted in Step 5; after deletion, `git checkout -- apps/admin/src/routeTree.gen.ts` restores the committed tree byte-identically. Nothing routeTree-shaped ever reaches the PR from this task.)
 
 - [ ] **Step 2: Render + frame**
 
-With the dev server up (`pnpm --filter @sevendays/admin dev`), frame all variants (chromium from #189's foundation). The dev port is read from the live script — the checkout's uncommitted local change serves **3001** (the committed script says 3000; the command reads whichever is live, so it works either way):
+With the dev server up (`pnpm --filter @sevendays/admin dev`), frame all variants (chromium from #189's foundation). The dev port is read from the live script, the checkout's uncommitted local change serves **3001** (the committed script says 3000; the command reads whichever is live, so it works either way):
 
 ```bash
 mkdir -p .superpowers/sdd/2026-10-10-188-audit-log-viewer-screen/variants
@@ -1246,15 +1246,15 @@ pnpm exec playwright screenshot --viewport-size=390,2400 "http://localhost:${POR
 
 - [ ] **Step 3: The owner's reaction (the gate)**
 
-Post the decision request on #188 (the frames stay local — the #186/#187 evidence precedent; the owner has the checkout):
+Post the decision request on #188 (the frames stay local, the #186/#187 evidence precedent; the owner has the checkout):
 
 ```bash
-gh issue comment 188 --body "Rendered variants for the Audit Log viewer are up (Task 4): .superpowers/sdd/2026-10-10-188-audit-log-viewer-screen/variants/ in the working checkout — run \`pnpm --filter @sevendays/admin dev\` and open /prototype-audit to react live. Decisions requested: (1) composition — A the inline toolbar row + badge actions (the working default) / B the labeled filter grid + muted action text, or a mix; (2) the requestId affordance — hover-title on the row (the current pin) vs a truncated Request column vs omitted; (3) any copy nits on the labels, headers, empty lines, or the page subline. React here; the ratified composition then lands in Task 5 and this prototype route is deleted."
+gh issue comment 188 --body "Rendered variants for the Audit Log viewer are up (Task 4): .superpowers/sdd/2026-10-10-188-audit-log-viewer-screen/variants/ in the working checkout, run \`pnpm --filter @sevendays/admin dev\` and open /prototype-audit to react live. Decisions requested: (1) composition, A the inline toolbar row + badge actions (the working default) / B the labeled filter grid + muted action text, or a mix; (2) the requestId affordance, hover-title on the row (the current pin) vs a truncated Request column vs omitted; (3) any copy nits on the labels, headers, empty lines, or the page subline. React here; the ratified composition then lands in Task 5 and this prototype route is deleted."
 ```
 
-The executor applies the owner's ruling: composition asks reshape Task 5's screen; copy asks amend Task 1's label maps and this task's pinned lines (a label-map change updates `filters.ts` only — its tests assert key coverage, not text; **never change the enum keys, only the labels**). Then:
+The executor applies the owner's ruling: composition asks reshape Task 5's screen; copy asks amend Task 1's label maps and this task's pinned lines (a label-map change updates `filters.ts` only, its tests assert key coverage, not text; **never change the enum keys, only the labels**). Then:
 
-- [ ] **Step 4: `pnpm check` re-run** (the adjustments keep it green — **17 files / 164 tests**; a label change must not move the count).
+- [ ] **Step 4: `pnpm check` re-run** (the adjustments keep it green, **17 files / 164 tests**; a label change must not move the count).
 
 - [ ] **Step 5: Delete the prototype + restore the tree**
 
@@ -1264,41 +1264,41 @@ git checkout -- apps/admin/src/routeTree.gen.ts
 git status --short   # expects: nothing outside the known-modified files (or clean, if Tasks 1–3 are committed and no ruling asked for copy changes)
 ```
 
-Commit only if the owner's ruling amended files (otherwise this task has no commit by design — Task 5 lands the ratified composition):
+Commit only if the owner's ruling amended files (otherwise this task has no commit by design, Task 5 lands the ratified composition):
 
 ```bash
 git add apps/admin/src/lib/audit/filters.ts
-git commit -m "feat(admin): the owner-ratified Audit Log copy — variant labels adjusted (#188)"
+git commit -m "feat(admin): the owner-ratified Audit Log copy, variant labels adjusted (#188)"
 ```
 
-(If the owner's reaction arrives after the PR opens, the same adjustment lands as a PR commit before merge — the PR body names the variants evidence; the merge gate includes the reaction.)
+(If the owner's reaction arrives after the PR opens, the same adjustment lands as a PR commit before merge, the PR body names the variants evidence; the merge gate includes the reaction.)
 
-### Task 5: `apps/admin` — the owner-gated route + the screen (the ratified composition)
+### Task 5: `apps/admin`, the owner-gated route + the screen (the ratified composition)
 
 **Files:**
 - Create: `apps/admin/src/routes/_shell.audit-log.tsx`
 - Create: `apps/admin/src/components/audit/audit-log-screen.tsx`
-- Modify: `apps/admin/src/components/admin-sidebar.tsx` (moved here from Task 3 at execution — the route must exist before the sidebar's `Link`/`matchRoute` typing accepts `/audit-log`)
+- Modify: `apps/admin/src/components/admin-sidebar.tsx` (moved here from Task 3 at execution, the route must exist before the sidebar's `Link`/`matchRoute` typing accepts `/audit-log`)
 - Regen (this task's commit): `apps/admin/src/routeTree.gen.ts`
 
 **Interfaces:**
 - Consumes: Task 1's `auditLogSearchSchema`, `AuditLogSearch`, `AUDIT_ENTITY_LABELS`, `AUDIT_ACTION_LABELS`, `AUDIT_PAGE_SIZE`, `hasActiveFilters`, `pageWindow`; Task 2's `auditQueries`; Task 3's `visibleNavGroups` + shell context `user.role`; the shared `PageHeader`, `formatUtc`, and the `packages/ui` table/select/badge/button/input primitives.
-- Produces: the live screen at `/audit-log` (owner-only) — the ticket's deliverable; nothing downstream consumes it.
+- Produces: the live screen at `/audit-log` (owner-only), the ticket's deliverable; nothing downstream consumes it.
 
-**Not here:** the Analytics Dashboard (`_shell.index.tsx` is untouched — the Audit Log never joins it, the standing rule); the appointments stub; the sidebar (Task 3 landed the nav); any change to `packages/ui` or `packages/types`.
+**Not here:** the Analytics Dashboard (`_shell.index.tsx` is untouched, the Audit Log never joins it, the standing rule); the appointments stub; the sidebar (Task 3 landed the nav); any change to `packages/ui` or `packages/types`.
 
-**The composition below is Variant A (toolbar row + badge actions) — the working default.** If Task 4's ruling picked B or a mix, transpose the toolbar/badge treatment accordingly (the data wiring, states, and pagination are NOT variant-adjustable — only the toolbar posture, the action presentation, and copy are).
+**The composition below is Variant A (toolbar row + badge actions), the working default.** If Task 4's ruling picked B or a mix, transpose the toolbar/badge treatment accordingly (the data wiring, states, and pagination are NOT variant-adjustable, only the toolbar posture, the action presentation, and copy are).
 
 - [ ] **Step 1: Create `apps/admin/src/routes/_shell.audit-log.tsx`**
 
 ```tsx
-// The Audit Log screen's route (#188, spec § The Audit Log — Viewer):
+// The Audit Log screen's route (#188, spec § The Audit Log, Viewer):
 // owner-only, re-gated HERE even though the nav hides the entry and the
-// server fns gate themselves — a staff arrival at the bare URL lands on
+// server fns gate themselves, a staff arrival at the bare URL lands on
 // their own dashboard, never on person-level history (the standing
 // rule). Filters are shareable search params (the WindowToggle
 // precedent), tolerant by construction (Task 1's catch-everything
-// schema — a stale shared URL never fails a visit).
+// schema, a stale shared URL never fails a visit).
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
 import { AuditLogScreen } from '#/components/audit/audit-log-screen';
@@ -1324,15 +1324,15 @@ function AuditLogPage() {
 - [ ] **Step 2: Create `apps/admin/src/components/audit/audit-log-screen.tsx`**
 
 ```tsx
-// The Audit Log screen (#188, spec § The Audit Log — Viewer): the
+// The Audit Log screen (#188, spec § The Audit Log, Viewer): the
 // owner-only, filterable, newest-first, paginated table over the durable
-// record — no joins anywhere (the snapshotted actorEmail + inline
+// record, no joins anywhere (the snapshotted actorEmail + inline
 // summary are the whole row, #185's design). Filters ride URL search
 // params; every filter change resets to page 1; a stale page beyond the
 // end self-heals via replace-navigation (the response carries the
-// clamped truth — pageWindow, the one tested math). The row's title
-// carries requestId — the Application Log correlation affordance without
-// a column. UTC throughout (formatUtc) — SSR/hydration-stable. Curated
+// clamped truth, pageWindow, the one tested math). The row's title
+// carries requestId, the Application Log correlation affordance without
+// a column. UTC throughout (formatUtc), SSR/hydration-stable. Curated
 // failure states follow the never-500 law: any thrown query error
 // (including a role-gate Unauthorized) renders the unavailable line.
 import { useQuery } from '@tanstack/react-query';
@@ -1446,7 +1446,7 @@ export function AuditLogScreen({ search }: { search: AuditLogSearch }) {
 
   // A stale ?page beyond the end (a shared URL whose filters narrowed
   // since) self-heals: replace to the clamped page so rows and footer
-  // agree. Primitive deps only — the object identity of pageWindow's
+  // agree. Primitive deps only, the object identity of pageWindow's
   // result is not stable.
   const clampedPage = window?.page;
   useEffect(() => {
@@ -1467,7 +1467,7 @@ export function AuditLogScreen({ search }: { search: AuditLogSearch }) {
     <div className='space-y-6'>
       <PageHeader
         title='Audit Log'
-        subline='Who changed what, when — every CMS write, newest first.'
+        subline='Who changed what, when, every CMS write, newest first.'
       />
 
       <div className='flex flex-wrap items-end gap-3'>
@@ -1520,7 +1520,7 @@ export function AuditLogScreen({ search }: { search: AuditLogSearch }) {
         <p className='text-muted-foreground text-sm'>
           {hasActiveFilters(search)
             ? 'No audit rows match these filters.'
-            : 'No audit rows yet — they start with the first CMS write.'}
+            : 'No audit rows yet, they start with the first CMS write.'}
         </p>
       ) : data !== null && data.rows.length > 0 ? (
         <Table>
@@ -1543,7 +1543,7 @@ export function AuditLogScreen({ search }: { search: AuditLogSearch }) {
                 </TableCell>
                 <TableCell>{AUDIT_ENTITY_LABELS[row.entity]}</TableCell>
                 <TableCell className='max-w-72 truncate'>
-                  {row.summary ?? <span className='text-muted-foreground'>—</span>}
+                  {row.summary ?? <span className='text-muted-foreground'>-</span>}
                 </TableCell>
               </TableRow>
             ))}
@@ -1584,11 +1584,11 @@ export function AuditLogScreen({ search }: { search: AuditLogSearch }) {
 }
 ```
 
-(The final `: null` branch covers the transient stale-high-page render — an empty row list before the self-heal effect fires; the effect replaces the URL within a frame.)
+(The final `: null` branch covers the transient stale-high-page render, an empty row list before the self-heal effect fires; the effect replaces the URL within a frame.)
 
-- [ ] **Step 3: Rewire the sidebar (moved from Task 3 at execution — the route now exists)**
+- [ ] **Step 3: Rewire the sidebar (moved from Task 3 at execution, the route now exists)**
 
-`apps/admin/src/components/admin-sidebar.tsx` — the taxonomy and its types leave the file. The icon import shrinks to `LogOut` (the nav icons now live in `#/lib/nav`); the local `NavTo`/`NavItem`/`NavGroup`/`navGroups` definitions are deleted; the header comment's taxonomy paragraph points at `#/lib/nav`. The full set of edits:
+`apps/admin/src/components/admin-sidebar.tsx`, the taxonomy and its types leave the file. The icon import shrinks to `LogOut` (the nav icons now live in `#/lib/nav`); the local `NavTo`/`NavItem`/`NavGroup`/`navGroups` definitions are deleted; the header comment's taxonomy paragraph points at `#/lib/nav`. The full set of edits:
 
 The import block replaces the lucide import and adds the nav import:
 
@@ -1612,7 +1612,7 @@ And inside `AdminSidebar`, `navGroups.map(...)` becomes:
   const groups = visibleNavGroups(user.role);
 ```
 
-with the render's `{navGroups.map((group, index) => (…))}` becoming `{groups.map((group, index) => (…))}` — everything else in the file (the rail logic, the user card, sign-out) is untouched.
+with the render's `{navGroups.map((group, index) => (…))}` becoming `{groups.map((group, index) => (…))}`, everything else in the file (the rail logic, the user card, sign-out) is untouched.
 
 - [ ] **Step 4: Regenerate the route tree + verify the gate live**
 
@@ -1620,7 +1620,7 @@ with the render's `{navGroups.map((group, index) => (…))}` becoming `{groups.m
 pnpm --filter @sevendays/admin generate-routes
 ```
 
-`routeTree.gen.ts` gains the `/audit-log` route — it joins this task's commit (a regenerable the v1 pick WANTS to carry: v1 gains the route too). Then, with the dev server up and the local db reachable, verify the gate by hand: signed out → `/audit-log` bounces to `/login` (the shell gate); signed in as the owner (`role=admin`) → the screen renders; and a staff-role account (if one exists locally; else note deferred) sees no nav entry and `/audit-log` redirects to `/`. Record what was verifiable in the evidence dir (owner-role check is the required one; the staff-role check may ride the owner's own account if no staff row exists — the nav.test.ts suite already pins the staff law).
+`routeTree.gen.ts` gains the `/audit-log` route, it joins this task's commit (a regenerable the v1 pick WANTS to carry: v1 gains the route too). Then, with the dev server up and the local db reachable, verify the gate by hand: signed out → `/audit-log` bounces to `/login` (the shell gate); signed in as the owner (`role=admin`) → the screen renders; and a staff-role account (if one exists locally; else note deferred) sees no nav entry and `/audit-log` redirects to `/`. Record what was verifiable in the evidence dir (owner-role check is the required one; the staff-role check may ride the owner's own account if no staff row exists, the nav.test.ts suite already pins the staff law).
 
 - [ ] **Step 5: Gates + commit**
 
@@ -1628,27 +1628,27 @@ pnpm --filter @sevendays/admin generate-routes
 
 ```bash
 git add apps/admin/src/routes/_shell.audit-log.tsx apps/admin/src/components/audit/audit-log-screen.tsx apps/admin/src/components/admin-sidebar.tsx apps/admin/src/routeTree.gen.ts
-git commit -m "feat(admin): the Audit Log screen — owner-gated route, filters, table, pagination (#188)"
+git commit -m "feat(admin): the Audit Log screen, owner-gated route, filters, table, pagination (#188)"
 ```
 
 ### Task 6: Gates, docs rotation (the audit box TICKED), PR/merge, the v1 pick, ledger, issue close
 
 **Files:**
-- Modify: `docs/plan.md` (M6 audit box — **ticked**), `docs/progress.md`, `AGENTS.md`, `docs/agents/v1-picks.md` (ledger row, post-merge)
+- Modify: `docs/plan.md` (M6 audit box, **ticked**), `docs/progress.md`, `AGENTS.md`, `docs/agents/v1-picks.md` (ledger row, post-merge)
 
 **Interfaces:**
 - Consumes: Tasks 1–5 merged on the branch (+ Task 4's owner reaction recorded on the issue).
 - Produces: main carrying the Audit Log whole (write side #185 + viewer #188); the v1 pick landed; issue #188 closed; the M6 audit roadmap box ticked.
 
-**Not here:** the production smoke (#190); the ship runbook (#191); the M6 close (#192); `apps/admin/CONTEXT.md` (the Audit Log glossary term landed with #185 and already describes the screen — no edit).
+**Not here:** the production smoke (#190); the ship runbook (#191); the M6 close (#192); `apps/admin/CONTEXT.md` (the Audit Log glossary term landed with #185 and already describes the screen, no edit).
 
 - [ ] **Step 1: Full repo gates**
 
-`docker compose up -d db`, then `pnpm check` then `pnpm build`. Expected: check 35/35 turbo tasks; build green. Floors: **admin 17 files / 164 tests** (the viewer's lib-seam coverage: the tolerant search schema, UTC windows, page math, labels, wire parse, the query contracts, the owner-visibility nav law); api 27 files + 1 skipped / 338 passed + 3 skipped, api-client 5 files / 33 tests, types 14 files / 118 tests, the db suite's four files — all untouched. If any count differs, reconcile before proceeding — do not loosen assertions.
+`docker compose up -d db`, then `pnpm check` then `pnpm build`. Expected: check 35/35 turbo tasks; build green. Floors: **admin 17 files / 164 tests** (the viewer's lib-seam coverage: the tolerant search schema, UTC windows, page math, labels, wire parse, the query contracts, the owner-visibility nav law); api 27 files + 1 skipped / 338 passed + 3 skipped, api-client 5 files / 33 tests, types 14 files / 118 tests, the db suite's four files, all untouched. If any count differs, reconcile before proceeding, do not loosen assertions.
 
 - [ ] **Step 2: Rotate the docs**
 
-(a) `docs/plan.md`, Milestone 6 block — the audit box (the line beginning `- [ ] The mutation **Audit Log**`). Two edits. First, `- [ ] The mutation **Audit Log**` → `- [✅] The mutation **Audit Log**`. Second, the annotation's tail — change
+(a) `docs/plan.md`, Milestone 6 block, the audit box (the line beginning `- [ ] The mutation **Audit Log**`). Two edits. First, `- [ ] The mutation **Audit Log**` → `- [✅] The mutation **Audit Log**`. Second, the annotation's tail, change
 
 ```markdown
 ; the box stays unticked until the owner screen lands at #188)_
@@ -1657,16 +1657,16 @@ git commit -m "feat(admin): the Audit Log screen — owner-gated route, filters,
 to
 
 ```markdown
-; the owner screen landed 2026-10-10 via #188 — the owner-only, filterable (entity / actor / action / UTC date), newest-first, paginated table at /audit-log, reads via session+role-gated admin server fns over packages/db's audit-read module (ADR-0023 — zero api files, no joins), the nav entry beside Analytics behind the ADR-0018 role gate, +3 admin lib-seam files / +24 tests)_
+; the owner screen landed 2026-10-10 via #188, the owner-only, filterable (entity / actor / action / UTC date), newest-first, paginated table at /audit-log, reads via session+role-gated admin server fns over packages/db's audit-read module (ADR-0023, zero api files, no joins), the nav entry beside Analytics behind the ADR-0018 role gate, +3 admin lib-seam files / +24 tests)_
 ```
 
-(b) `docs/progress.md` — three edits. First, the dated entry at the very top (after the `# Progress` heading's blank line):
+(b) `docs/progress.md`, three edits. First, the dated entry at the very top (after the `# Progress` heading's blank line):
 
 ```markdown
-2026-10-10 — #188, M6 ticket 06, the Audit Log viewer screen, landed: the owner-only view over the record #185 writes — a filterable (entity, actor, action, UTC date range), newest-first, paginated table (page size 20; occurredAt DESC with id DESC as the stable tiebreaker) at `/audit-log`, no joins anywhere (the snapshotted actorEmail + inline summary are the whole row; requestId rides the row's hover title as the Application Log correlation affordance). Reads via admin server functions per ADR-0023 (zero api files): `packages/db/src/audit-read.ts` (the #186 probes precedent extended to dynamic queries — the drizzle typed builder lives in packages/db because apps/admin owns no drizzle-orm dependency by ruling; safe bound filters, count + page in two queries) behind a session+ROLE gate (ADR-0018: `role === 'admin'` — the owner's BetterAuth literal; 'staff' and null both fail) in `apps/admin/src/lib/audit/audit.functions.ts`, resolving the `AuditResult` union with the curated not-configured / unavailable states (the never-500 law; one log-only line per failure). The pure seam (`filters.ts`) owns the tolerant search schema (invalid values drop, never throw), UTC day windows (from inclusive, to next-day-exclusive; calendar-invalid days drop their side), the pageWindow math (clamp + offset — the single source the fn and screen share), the label maps, and the wire parse through the landed `auditLogRowSchema`; queries keepPreviousData across page flips at staleTime 30s (actors 5m). The nav taxonomy extracted to `src/lib/nav.ts` with `visibleNavGroups(role)` (owner-only entries render for 'admin' alone — lib-seam tested); the shell context carries `role` (the admin plugin's session typing, spike-proven); the route re-gates in beforeLoad (non-owners redirect to `/`) — three layers, the server fn / the route / the nav. Owner-reacted rendered variants rode Task 4 (the ungated prototype-over-mocks pattern). Gates: admin 14→17 files / 140→164 tests, `pnpm check` 35/35, `pnpm build` green; zero new dependencies, zero manifest changes. The M6 audit box is TICKED. NOT landed: the production smoke (#190), the ship runbook (#191), the M6 close (#192).
+2026-10-10, #188, M6 ticket 06, the Audit Log viewer screen, landed: the owner-only view over the record #185 writes, a filterable (entity, actor, action, UTC date range), newest-first, paginated table (page size 20; occurredAt DESC with id DESC as the stable tiebreaker) at `/audit-log`, no joins anywhere (the snapshotted actorEmail + inline summary are the whole row; requestId rides the row's hover title as the Application Log correlation affordance). Reads via admin server functions per ADR-0023 (zero api files): `packages/db/src/audit-read.ts` (the #186 probes precedent extended to dynamic queries, the drizzle typed builder lives in packages/db because apps/admin owns no drizzle-orm dependency by ruling; safe bound filters, count + page in two queries) behind a session+ROLE gate (ADR-0018: `role === 'admin'`, the owner's BetterAuth literal; 'staff' and null both fail) in `apps/admin/src/lib/audit/audit.functions.ts`, resolving the `AuditResult` union with the curated not-configured / unavailable states (the never-500 law; one log-only line per failure). The pure seam (`filters.ts`) owns the tolerant search schema (invalid values drop, never throw), UTC day windows (from inclusive, to next-day-exclusive; calendar-invalid days drop their side), the pageWindow math (clamp + offset, the single source the fn and screen share), the label maps, and the wire parse through the landed `auditLogRowSchema`; queries keepPreviousData across page flips at staleTime 30s (actors 5m). The nav taxonomy extracted to `src/lib/nav.ts` with `visibleNavGroups(role)` (owner-only entries render for 'admin' alone, lib-seam tested); the shell context carries `role` (the admin plugin's session typing, spike-proven); the route re-gates in beforeLoad (non-owners redirect to `/`), three layers, the server fn / the route / the nav. Owner-reacted rendered variants rode Task 4 (the ungated prototype-over-mocks pattern). Gates: admin 14→17 files / 140→164 tests, `pnpm check` 35/35, `pnpm build` green; zero new dependencies, zero manifest changes. The M6 audit box is TICKED. NOT landed: the production smoke (#190), the ship runbook (#191), the M6 close (#192).
 ```
 
-Second, in the Known Gaps list, the audit write-side bullet's tail (the sentence ending the bullet that begins `- The api's **Audit Log write side** is live (M6 #185, 2026-10-06):`) — change
+Second, in the Known Gaps list, the audit write-side bullet's tail (the sentence ending the bullet that begins `- The api's **Audit Log write side** is live (M6 #185, 2026-10-06):`), change
 
 ```markdown
 The owner-scoped viewer screen (filters, pagination, nav entry) is #188's; **no read path exists yet**.
@@ -1675,12 +1675,12 @@ The owner-scoped viewer screen (filters, pagination, nav entry) is #188's; **no 
 to
 
 ```markdown
-The owner-scoped **viewer screen is live** (M6 #188, 2026-10-10): the filterable, newest-first, paginated table at `/audit-log` (filters by entity, actor, action, and UTC date; page size 20; requestId on row hover), owner-only by the ADR-0018 role gate (nav beside Analytics, route redirect, role-checked server fns), reading via admin server fns over packages/db's audit-read module (ADR-0023 — zero api files, no joins).
+The owner-scoped **viewer screen is live** (M6 #188, 2026-10-10): the filterable, newest-first, paginated table at `/audit-log` (filters by entity, actor, action, and UTC date; page size 20; requestId on row hover), owner-only by the ADR-0018 role gate (nav beside Analytics, route redirect, role-checked server fns), reading via admin server fns over packages/db's audit-read module (ADR-0023, zero api files, no joins).
 ```
 
-Third, in "Immediate Next Steps" item 1, change `#188 (now unblocked off #185 — the write side landed 2026-10-06)` to `#188 (landed 2026-10-10 — the Audit Log viewer screen; the audit box is TICKED)`.
+Third, in "Immediate Next Steps" item 1, change `#188 (now unblocked off #185, the write side landed 2026-10-06)` to `#188 (landed 2026-10-10, the Audit Log viewer screen; the audit box is TICKED)`.
 
-(c) `AGENTS.md` — two edits. In the "Current status of `pnpm test`" section, change `The metrics seam's lib-seam suite joins them (M6 #186 + #187): the CF GraphQL + R2 dataset documents, the HogQL documents + munging, the DB probes, and the curated failure states — admin floor 13 files / 132 tests.` to `The metrics seam's lib-seam suite joins them (M6 #186 + #187): the CF GraphQL + R2 dataset documents, the HogQL documents + munging, the DB probes, and the curated failure states — and the Audit Log viewer's seam joins too (M6 #188: the filter/pagination data fns, the query factories, the owner-visibility nav law) — admin floor 17 files / 164 tests (superseding the 14/140 the #201–#203 follow-ups had left the doc behind).` And in the "The DB is provisioned…" bullet, change `failed validations and rolled-back transactions record nothing; the owner viewer screen is #188's.` to `failed validations and rolled-back transactions record nothing; the owner viewer screen is live (M6 #188): the filterable (entity/actor/action/UTC date), newest-first, paginated table at /audit-log behind the ADR-0018 role gate (nav beside Analytics, owner-only), reading via session+role-gated admin server fns over packages/db's audit-read module (ADR-0023 — zero api files, no joins; requestId on row hover correlates the Application Log).`
+(c) `AGENTS.md`, two edits. In the "Current status of `pnpm test`" section, change `The metrics seam's lib-seam suite joins them (M6 #186 + #187): the CF GraphQL + R2 dataset documents, the HogQL documents + munging, the DB probes, and the curated failure states, admin floor 13 files / 132 tests.` to `The metrics seam's lib-seam suite joins them (M6 #186 + #187): the CF GraphQL + R2 dataset documents, the HogQL documents + munging, the DB probes, and the curated failure states, and the Audit Log viewer's seam joins too (M6 #188: the filter/pagination data fns, the query factories, the owner-visibility nav law), admin floor 17 files / 164 tests (superseding the 14/140 the #201–#203 follow-ups had left the doc behind).` And in the "The DB is provisioned…" bullet, change `failed validations and rolled-back transactions record nothing; the owner viewer screen is #188's.` to `failed validations and rolled-back transactions record nothing; the owner viewer screen is live (M6 #188): the filterable (entity/actor/action/UTC date), newest-first, paginated table at /audit-log behind the ADR-0018 role gate (nav beside Analytics, owner-only), reading via session+role-gated admin server fns over packages/db's audit-read module (ADR-0023, zero api files, no joins; requestId on row hover correlates the Application Log).`
 
 - [ ] **Step 3: graphify + commit**
 
@@ -1688,20 +1688,20 @@ Run: `graphify update .` then commit:
 
 ```bash
 git add docs/plan.md docs/progress.md AGENTS.md graphify-out
-git commit -m "docs: #188 — the M6 audit box TICKED (the viewer landed), progress + AGENTS rotation (#188)"
+git commit -m "docs: #188, the M6 audit box TICKED (the viewer landed), progress + AGENTS rotation (#188)"
 ```
 
 - [ ] **Step 4: PR, review, squash-merge**
 
 ```bash
 git push -u origin feat/188-audit-log-viewer
-gh pr create --base main --title "feat(admin): the Audit Log viewer screen — owner-only, filterable, paginated (#188)" --body-file - <<'EOF'
+gh pr create --base main --title "feat(admin): the Audit Log viewer screen, owner-only, filterable, paginated (#188)" --body-file - <<'EOF'
 ## What
 
-Implements #188 (M6 ticket 06) — § The Audit Log (Viewer) of the M6 spec (#182), reading the record #185 writes; ADR-0023 rules the data path, ADR-0018 the role gate.
+Implements #188 (M6 ticket 06), § The Audit Log (Viewer) of the M6 spec (#182), reading the record #185 writes; ADR-0023 rules the data path, ADR-0018 the role gate.
 
-- The screen at /audit-log: filterable (entity, actor, action, UTC date range), newest-first (occurredAt DESC, id DESC), paginated (page size 20, keepPreviousData flips), no joins — actorEmail snapshotted + summary inline are the row; requestId rides the row hover title.
-- Reads via admin server fns (zero api files): packages/db's new audit-read module (the #186 probes precedent — drizzle stays in packages/db; apps/admin owns no drizzle-orm by ruling) behind a session+role gate (role === 'admin', ADR-0018), resolving the AuditResult union with the curated not-configured/unavailable states; the never-500 law holds.
+- The screen at /audit-log: filterable (entity, actor, action, UTC date range), newest-first (occurredAt DESC, id DESC), paginated (page size 20, keepPreviousData flips), no joins, actorEmail snapshotted + summary inline are the row; requestId rides the row hover title.
+- Reads via admin server fns (zero api files): packages/db's new audit-read module (the #186 probes precedent, drizzle stays in packages/db; apps/admin owns no drizzle-orm by ruling) behind a session+role gate (role === 'admin', ADR-0018), resolving the AuditResult union with the curated not-configured/unavailable states; the never-500 law holds.
 - The owner role through the shell: nav taxonomy extracted to src/lib/nav.ts with visibleNavGroups(role) (lib-seam tested); the shell context carries role (admin-plugin typing, spike-proven); the route re-gates in beforeLoad (non-owners → /); nav entry "Audit Log" in Overview beside Analytics, owner-only.
 - The pure seam owns the tolerant search schema (invalid values drop), UTC day windows, the pageWindow clamp/offset math, label maps, and the wire parse through the landed auditLogRowSchema.
 - Variants: owner-reacted (Task 4 evidence in .superpowers/). admin 14→17 files / 140→164 tests; pnpm check 35/35, build green; zero new dependencies. The M6 audit box is TICKED.
@@ -1710,41 +1710,41 @@ The smoke is #190's; the ship runbook #191's; the M6 close #192's.
 EOF
 ```
 
-After CI green on the PR AND the owner's variant reaction is recorded (Task 4's gate — the PR stays open for it if the reaction is pending), squash-merge. The squash commit title: `feat(admin): the Audit Log viewer screen — owner-only, filterable, paginated (#188) (#PR_NUMBER)`.
+After CI green on the PR AND the owner's variant reaction is recorded (Task 4's gate, the PR stays open for it if the reaction is pending), squash-merge. The squash commit title: `feat(admin): the Audit Log viewer screen, owner-only, filterable, paginated (#188) (#PR_NUMBER)`.
 
-- [ ] **Step 5: The v1 pick (per `docs/agents/v1-picks.md`) — a SPLIT whose code core is PICK clean**
+- [ ] **Step 5: The v1 pick (per `docs/agents/v1-picks.md`), a SPLIT whose code core is PICK clean**
 
 Classification (pre-ruled by the spec's class ledger: "Audit Log (table + transactional writes + owner screen) | **PICK clean** | The client's operating record from day 1; both editions by construction"):
 
-- **v1-paths, picked:** `packages/db/src/audit-read.ts` + `packages/db/src/index.ts`; `apps/admin/src/lib/audit/filters.ts` + `filters.test.ts` + `audit.functions.ts` + `queries.ts` + `queries.test.ts`; `apps/admin/src/lib/nav.ts` + `nav.test.ts`; `apps/admin/src/components/audit/audit-log-screen.tsx`; `apps/admin/src/routes/_shell.audit-log.tsx`; `apps/admin/src/routes/_shell.tsx`; `apps/admin/src/routeTree.gen.ts` (the regen — v1 WANTS the route set change); `apps/admin/src/components/admin-sidebar.tsx` (the one expected conflict — below).
-- **Main-only, dropped:** `docs/plan.md`, `docs/progress.md`, `AGENTS.md` (content-dropped — v1 keeps its client-safe rewrite, the #145/#146 ruling recurring; the hunk will be a UU to resolve to v1's side), the plan file (`git rm` the clean-add), `graphify-out/`.
-- **The admin-sidebar.tsx conflict is pre-ruled:** v1's copy is #197's ruled divergence (the taxonomy inline, Overview = Analytics only, Appointments absent per #169). Resolution: take MAIN's consumption shape (the `#/lib/nav` import, `visibleNavGroups`, the widened user prop) — and since the taxonomy now lives in the picked `lib/nav.ts`, edit v1's `lib/nav.ts` to drop the Appointments item (the #169 ruling recurring — v1 sheds booking). Record exactly this in the Split line.
+- **v1-paths, picked:** `packages/db/src/audit-read.ts` + `packages/db/src/index.ts`; `apps/admin/src/lib/audit/filters.ts` + `filters.test.ts` + `audit.functions.ts` + `queries.ts` + `queries.test.ts`; `apps/admin/src/lib/nav.ts` + `nav.test.ts`; `apps/admin/src/components/audit/audit-log-screen.tsx`; `apps/admin/src/routes/_shell.audit-log.tsx`; `apps/admin/src/routes/_shell.tsx`; `apps/admin/src/routeTree.gen.ts` (the regen, v1 WANTS the route set change); `apps/admin/src/components/admin-sidebar.tsx` (the one expected conflict, below).
+- **Main-only, dropped:** `docs/plan.md`, `docs/progress.md`, `AGENTS.md` (content-dropped, v1 keeps its client-safe rewrite, the #145/#146 ruling recurring; the hunk will be a UU to resolve to v1's side), the plan file (`git rm` the clean-add), `graphify-out/`.
+- **The admin-sidebar.tsx conflict is pre-ruled:** v1's copy is #197's ruled divergence (the taxonomy inline, Overview = Analytics only, Appointments absent per #169). Resolution: take MAIN's consumption shape (the `#/lib/nav` import, `visibleNavGroups`, the widened user prop), and since the taxonomy now lives in the picked `lib/nav.ts`, edit v1's `lib/nav.ts` to drop the Appointments item (the #169 ruling recurring, v1 sheds booking). Record exactly this in the Split line.
 - **The routeTree regen rides:** the route set change is intentional on v1; if the cherry-pick's routeTree hunk conflicts, run `pnpm --filter @sevendays/admin generate-routes` on v1 and commit the regen.
-- **No lockfile change exists** (zero new dependencies): `pnpm install --frozen-lockfile` must be green with NO `pnpm-lock.yaml` diff — a diff means the pick carried something extra; re-examine before committing.
+- **No lockfile change exists** (zero new dependencies): `pnpm install --frozen-lockfile` must be green with NO `pnpm-lock.yaml` diff, a diff means the pick carried something extra; re-examine before committing.
 
-Execute per the runbook: `cd ~/Projects/sevendays-v1-seed && git switch v1 && git pull --ff-only origin v1 && git fetch origin main`, `git cherry-pick -n <main-sha>`, drop the main-only paths (`git rm -qrf --ignore-unmatch -- docs/plan.md docs/progress.md AGENTS.md docs/superpowers/plans/2026-10-10-188-audit-log-viewer-screen.md graphify-out` — DU exits expected; resolve AGENTS.md UU to v1's version), resolve the sidebar per the pre-rule, commit with the provenance + `Split:` line:
+Execute per the runbook: `cd ~/Projects/sevendays-v1-seed && git switch v1 && git pull --ff-only origin v1 && git fetch origin main`, `git cherry-pick -n <main-sha>`, drop the main-only paths (`git rm -qrf --ignore-unmatch -- docs/plan.md docs/progress.md AGENTS.md docs/superpowers/plans/2026-10-10-188-audit-log-viewer-screen.md graphify-out`, DU exits expected; resolve AGENTS.md UU to v1's version), resolve the sidebar per the pre-rule, commit with the provenance + `Split:` line:
 
 ```text
-Split: main-only paths dropped — docs/plan.md, docs/progress.md, AGENTS.md, docs/superpowers/plans/…188….md, graphify-out/
+Split: main-only paths dropped, docs/plan.md, docs/progress.md, AGENTS.md, docs/superpowers/plans/…188….md, graphify-out/
 Ruled v1 divergence re-applied: lib/nav.ts drops the Appointments item (the #169 ruling, recurring at the taxonomy's new home); admin-sidebar.tsx resolved to main's consumption shape; routeTree regenerated (v1 gains /audit-log)
 Lockfile untouched (zero new dependencies)
 ```
 
-Then the locks: `pnpm install --frozen-lockfile` (assert no lockfile diff), `pnpm build:packages && pnpm --filter @sevendays/api build`, `pnpm check` (35/35; **v1 admin floor expected 17 files / 164 tests** — the viewer's tests are booking-free; reconcile actuals), `pnpm build`, the export audit (`cd ~/Projects/sevendays && node scripts/audit-v1-absence.mjs v1 --repo ~/Projects/sevendays-v1-seed` — exit 0), push v1, and confirm the run shows `check` + `Deploy v1 (private)` success with `Deploy teaser (main)` skipped.
+Then the locks: `pnpm install --frozen-lockfile` (assert no lockfile diff), `pnpm build:packages && pnpm --filter @sevendays/api build`, `pnpm check` (35/35; **v1 admin floor expected 17 files / 164 tests**, the viewer's tests are booking-free; reconcile actuals), `pnpm build`, the export audit (`cd ~/Projects/sevendays && node scripts/audit-v1-absence.mjs v1 --repo ~/Projects/sevendays-v1-seed`, exit 0), push v1, and confirm the run shows `check` + `Deploy v1 (private)` success with `Deploy teaser (main)` skipped.
 
 - [ ] **Step 6: Ledger + issue close**
 
-Append one row to `docs/agents/v1-picks.md`'s ledger table (the established format) with the actual SHAs: date 2026-10-10, issue #188, main squash SHA, verdict `split`, v1 SHA, and the description naming: the viewer (the filterable newest-first paginated table at /audit-log — entity/actor/action/UTC-date filters, page size 20, the requestId hover title, the curated states); packages/db's audit-read module + the owner-gated server fns + the factories (keepPreviousData, 30s/5m); the nav extraction + the three-layer role gate (fn/route/nav, ADR-0018); the SPLIT classification (the spec's PICK-clean core; the main-only drops; the re-applied #169 Appointments drop at lib/nav.ts, the #197 sidebar divergence resolved to main's consumption shape, the routeTree regen); the locks' results (incl. the v1 admin floor 17/164 and the no-lockfile-change assertion); the CI run numbers; the variant-ratification note (owner-reacted, Task 4). Commit the ledger row to main:
+Append one row to `docs/agents/v1-picks.md`'s ledger table (the established format) with the actual SHAs: date 2026-10-10, issue #188, main squash SHA, verdict `split`, v1 SHA, and the description naming: the viewer (the filterable newest-first paginated table at /audit-log, entity/actor/action/UTC-date filters, page size 20, the requestId hover title, the curated states); packages/db's audit-read module + the owner-gated server fns + the factories (keepPreviousData, 30s/5m); the nav extraction + the three-layer role gate (fn/route/nav, ADR-0018); the SPLIT classification (the spec's PICK-clean core; the main-only drops; the re-applied #169 Appointments drop at lib/nav.ts, the #197 sidebar divergence resolved to main's consumption shape, the routeTree regen); the locks' results (incl. the v1 admin floor 17/164 and the no-lockfile-change assertion); the CI run numbers; the variant-ratification note (owner-reacted, Task 4). Commit the ledger row to main:
 
 ```bash
 git checkout main && git pull && git add docs/agents/v1-picks.md
-git commit -m "docs(v1-picks): #188 ledger row — the Audit Log viewer picked (#188)"
+git commit -m "docs(v1-picks): #188 ledger row, the Audit Log viewer picked (#188)"
 git push
 ```
 
 Then close the issue:
 
 ```bash
-gh issue close 188 --comment "Landed via #<PR_NUMBER> (main) + the v1 split <v1_SHA>. admin 17 files / 164 tests on main (the viewer's lib-seam suites: filter/pagination data fns, query contracts, the owner-visibility nav law); pnpm check 35/35 + pnpm build green; the M6 audit box is TICKED — the record (#185) and its owner view (#188) are both whole. The owner's variant reaction is recorded on this issue (Task 4). Remaining M6: the smoke (#190), the runbook (#191), the close (#192)."
+gh issue close 188 --comment "Landed via #<PR_NUMBER> (main) + the v1 split <v1_SHA>. admin 17 files / 164 tests on main (the viewer's lib-seam suites: filter/pagination data fns, query contracts, the owner-visibility nav law); pnpm check 35/35 + pnpm build green; the M6 audit box is TICKED, the record (#185) and its owner view (#188) are both whole. The owner's variant reaction is recorded on this issue (Task 4). Remaining M6: the smoke (#190), the runbook (#191), the close (#192)."
 ```
 

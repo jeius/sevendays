@@ -1,56 +1,56 @@
-# Plan: #273 — Branch Maps button v2: pasted Google/Apple Maps links replace coordinate entry
+# Plan: #273, Branch Maps button v2: pasted Google/Apple Maps links replace coordinate entry
 
 Parent: follow-up to #248 (landed 2026-11-13, e33c2f0/#272). The owner's redesign ruling, 2026-11-13.
 
 ## Scope fences
 
-**In scope:** nullable `google_maps_url`/`apple_maps_url` text columns on branches (migration 0014, the 0013 posture); the wire shapes in `packages/types` (any-https validation, independently optional — NO pair rule); the API's create/update persistence (reads ride the row spread); the admin branch Sheet — the two lat/lng inputs **hidden** (their state/payload code stays, dormant), two link inputs added where they stood; the landing card button relabeled **`Open in Maps`** over the owner-ruled device law (Google base, Apple augments), driven by two new pure seams (`mapsHrefFor`, `isAppleUserAgent`) with the device flag read **server-side** in the `/branches` route; the seam tests pinning all of it; the `docs/progress.md` bullet recording the #248 **set-aside** (code kept dormant, possible future revival).
+**In scope:** nullable `google_maps_url`/`apple_maps_url` text columns on branches (migration 0014, the 0013 posture); the wire shapes in `packages/types` (any-https validation, independently optional, NO pair rule); the API's create/update persistence (reads ride the row spread); the admin branch Sheet, the two lat/lng inputs **hidden** (their state/payload code stays, dormant), two link inputs added where they stood; the landing card button relabeled **`Open in Maps`** over the owner-ruled device law (Google base, Apple augments), driven by two new pure seams (`mapsHrefFor`, `isAppleUserAgent`) with the device flag read **server-side** in the `/branches` route; the seam tests pinning all of it; the `docs/progress.md` bullet recording the #248 **set-aside** (code kept dormant, possible future revival).
 
 **NOT here (siblings / out of scope):**
-- #248's coordinate code is NOT removed: the columns, wire fields, pair-rule machinery, `atMostSixDp` export, and `mapsUrlFor` all stay in-tree, dormant. No delete, no deprecation sweep — only the Sheet inputs hide and the card stops calling `mapsUrlFor`.
-- No brand/host enforcement on the pasted links (any https URL passes — the owner may paste Apple links into either field; the field *names* are the contract, validation is transport-only).
-- No embeds, no static maps, no geocoding, no QR — links open a new tab exactly as #248's button did.
+- #248's coordinate code is NOT removed: the columns, wire fields, pair-rule machinery, `atMostSixDp` export, and `mapsUrlFor` all stay in-tree, dormant. No delete, no deprecation sweep, only the Sheet inputs hide and the card stops calling `mapsUrlFor`.
+- No brand/host enforcement on the pasted links (any https URL passes, the owner may paste Apple links into either field; the field *names* are the contract, validation is transport-only).
+- No embeds, no static maps, no geocoding, no QR, links open a new tab exactly as #248's button did.
 - No booking surface, home strip, or booking-wizard work; the button lives on `/branches` cards only (unchanged surface).
-- No v1-branch edits here — the v1 pick keeps the button last in the single-CTA row after `Call {branch}` (the relabel arrives via the pick; the transform note is unchanged).
+- No v1-branch edits here, the v1 pick keeps the button last in the single-CTA row after `Call {branch}` (the relabel arrives via the pick; the transform note is unchanged).
 - #239's roadmap checkbox stays unticked.
 
 ## Owner rulings (ratified 2026-11-13, this plan round)
 
-- **Model:** the two pasted links REPLACE stored coordinates as the button's source. #248's coordinate path is **set aside, not removed** — inputs hidden, code dormant, documented for possible future revival.
+- **Model:** the two pasted links REPLACE stored coordinates as the button's source. #248's coordinate path is **set aside, not removed**, inputs hidden, code dormant, documented for possible future revival.
 - **Validation:** any valid **https URL** per field, independently optional. No pair rule, no host allowlist (an Apple device viewer gets the Apple link by *field*, not by URL sniffing).
 - **Sheet:** hide the two lat/lng inputs; the two link inputs stand where they did.
 - **Render:** the button relabels to **`Open in Maps`** (MapPin icon stays, outline variant, new tab, same focus ring).
-- **Device law — Google is the base, Apple augments:** Apple devices (iPhone/iPad/Mac UA) open the Apple link when set, else the Google link; non-Apple devices open the Google link; **no links set → no button, even where stored coordinates exist** (the coordinate gate no longer feeds the render).
+- **Device law, Google is the base, Apple augments:** Apple devices (iPhone/iPad/Mac UA) open the Apple link when set, else the Google link; non-Apple devices open the Google link; **no links set → no button, even where stored coordinates exist** (the coordinate gate no longer feeds the render).
 - **Both editions** (book-free, clean pick).
 
 ## Global Constraints
 
 - After editing anything under `packages/types` or `packages/db`, run `pnpm build:packages`, then `pnpm --filter @sevendays/api build` before `pnpm check`.
 - Migration discipline: `pnpm --filter @sevendays/db db:generate` (never hand-edit `packages/db/migrations`), then `pnpm --filter @sevendays/db db:migrate` (DATABASE_MIGRATE_URL already in `packages/db/.env`). The local test DB needs NO manual migration (`apps/api/test/global-setup.ts` migrates at suite start).
-- **Test-DB env (machine-specific):** the test DB is `postgres://postgres:postgres@localhost:5433/sevendays_test`, container `sevendays-test-db-5433` (`docker start` first). **Every api-suite command carries the variable INLINE** — workers' shells do NOT inherit exports. NEVER touch port 5432 (`lactalink-test-db`, another project's).
+- **Test-DB env (machine-specific):** the test DB is `postgres://postgres:postgres@localhost:5433/sevendays_test`, container `sevendays-test-db-5433` (`docker start` first). **Every api-suite command carries the variable INLINE**, workers' shells do NOT inherit exports. NEVER touch port 5432 (`lactalink-test-db`, another project's).
 - `pnpm check` (lint + format + typecheck + test) + `pnpm build` green before commit, for the packages/apps touched. Test floors this plan must not regress and should reach (post-#248): api 455 passed + 3 skipped (+ this plan's additions), api-client 5 files / 45 (unchanged), admin 27 files / 288 (+ additions), landing 17 files / 128 (+ additions), types 18 files / 183 (+ additions).
-- Zod semantics: assert on parsed OUTPUT; admin write failures are RESOLVED `{ ok: false, ... }`; the validator's 400 envelope is `{ error: 'Invalid request payload.', details: [{ path, message }] }` (verified live in #248 — new 400 pins use this envelope).
-- Known consumer sweep (the #248 lesson — the read schema's new REQUIRED keys break every literal): `packages/api-client/test/mock-api.ts` BRANCHES (both entries), `apps/landing/src/lib/{bookable-branches,booking-read,booking}.test.ts` fixture builders, `apps/landing/src/lib/branch-maps.test.ts`'s own `branch()` fixture, `apps/admin/src/lib/light-entity-state.test.ts` fixtures, `apps/api/test/cms-schema-contracts.test.ts` branch ROW literal, `apps/api/test/admin-entities.test.ts` fixtures if any assert full shapes.
-- No new secrets, no new deps, no ADR (a link column + a UA pick — no architectural choice; the #248 set-aside is recorded in `docs/progress.md`).
-- Verbatim strings this plan introduces are quoted in full — use them exactly.
+- Zod semantics: assert on parsed OUTPUT; admin write failures are RESOLVED `{ ok: false, ... }`; the validator's 400 envelope is `{ error: 'Invalid request payload.', details: [{ path, message }] }` (verified live in #248, new 400 pins use this envelope).
+- Known consumer sweep (the #248 lesson, the read schema's new REQUIRED keys break every literal): `packages/api-client/test/mock-api.ts` BRANCHES (both entries), `apps/landing/src/lib/{bookable-branches,booking-read,booking}.test.ts` fixture builders, `apps/landing/src/lib/branch-maps.test.ts`'s own `branch()` fixture, `apps/admin/src/lib/light-entity-state.test.ts` fixtures, `apps/api/test/cms-schema-contracts.test.ts` branch ROW literal, `apps/api/test/admin-entities.test.ts` fixtures if any assert full shapes.
+- No new secrets, no new deps, no ADR (a link column + a UA pick, no architectural choice; the #248 set-aside is recorded in `docs/progress.md`).
+- Verbatim strings this plan introduces are quoted in full, use them exactly.
 
 ## Design (one paragraph, pinned before Task 1)
 
-Two nullable `text` columns land beside 0013's coordinates (migration 0014). The wire row/read gain `googleMapsUrl`/`appleMapsUrl` as required-nullable fields — `z.url().refine(v => v.startsWith('https://'), 'Must be an https URL.')` (the `coverImageUrl` precedent; controller-verified against installed zod 4.5.1: https passes, http/garbage reject, `.nullable().default(null)` parses omitted to null) — and create/update carry them `.nullable().default(null)` with **no** cross-field rule (each independently optional; a plain-object `.extend` chain, no refine needed). The API write sites gain two lines each; reads ride `toBranchRead`'s spread. The admin state gains two raw strings (`''` = clear-to-null) with a client-side https-URL mirror (`new URL(v)` + protocol check); the lat/lng inputs disappear from the Sheet but their state/payload/flip code is untouched (dormant — a save sends `null` coordinates, which is the full-object PUT law and harmless where the button no longer reads them; the flip still re-sends stored values). The landing splits the render decision into two pure seams in `branch-maps.ts`: `isAppleUserAgent(ua: string): boolean` (iPhone/iPad/iPod/Macintosh tokens) and `mapsHrefFor(branch, isApple: boolean): string | null` implementing the fallback matrix; the device flag is **client-side, effect-driven** in `BranchCard` — `useState(false)` + `useEffect(() => setIsApple(isAppleUserAgent(navigator.userAgent)), [])` — because the installed TanStack Router's documented loader args carry NO `request` object (verified against the v1 data-loading docs, 2026-11-13; the server-side read was an unprovable inference and is dropped). SSR and first paint render the Google-base matrix; Apple devices swap the href post-mount (an effect-driven update — no hydration mismatch; on an Apple-only link the button appears post-mount). `mapsUrlFor` stays exported beside the new seams, dormant, its comment updated to say so. The button's label becomes `Open in Maps`; everything else about the anchor (variant, icon, ring, new tab, last-in-row placement) is unchanged.
+Two nullable `text` columns land beside 0013's coordinates (migration 0014). The wire row/read gain `googleMapsUrl`/`appleMapsUrl` as required-nullable fields, `z.url().refine(v => v.startsWith('https://'), 'Must be an https URL.')` (the `coverImageUrl` precedent; controller-verified against installed zod 4.5.1: https passes, http/garbage reject, `.nullable().default(null)` parses omitted to null), and create/update carry them `.nullable().default(null)` with **no** cross-field rule (each independently optional; a plain-object `.extend` chain, no refine needed). The API write sites gain two lines each; reads ride `toBranchRead`'s spread. The admin state gains two raw strings (`''` = clear-to-null) with a client-side https-URL mirror (`new URL(v)` + protocol check); the lat/lng inputs disappear from the Sheet but their state/payload/flip code is untouched (dormant, a save sends `null` coordinates, which is the full-object PUT law and harmless where the button no longer reads them; the flip still re-sends stored values). The landing splits the render decision into two pure seams in `branch-maps.ts`: `isAppleUserAgent(ua: string): boolean` (iPhone/iPad/iPod/Macintosh tokens) and `mapsHrefFor(branch, isApple: boolean): string | null` implementing the fallback matrix; the device flag is **client-side, effect-driven** in `BranchCard`, `useState(false)` + `useEffect(() => setIsApple(isAppleUserAgent(navigator.userAgent)), [])`, because the installed TanStack Router's documented loader args carry NO `request` object (verified against the v1 data-loading docs, 2026-11-13; the server-side read was an unprovable inference and is dropped). SSR and first paint render the Google-base matrix; Apple devices swap the href post-mount (an effect-driven update, no hydration mismatch; on an Apple-only link the button appears post-mount). `mapsUrlFor` stays exported beside the new seams, dormant, its comment updated to say so. The button's label becomes `Open in Maps`; everything else about the anchor (variant, icon, ring, new tab, last-in-row placement) is unchanged.
 
-## Task 1: DB — two nullable link columns + migration 0014
+## Task 1: DB, two nullable link columns + migration 0014
 
 **Files:**
 - Modify: `packages/db/src/schema/branches.ts`
 - Create (generated): `packages/db/migrations/0014_*.sql` + `meta/` journal entries
 
-**Interfaces:** Produces `branches.googleMapsUrl: text('google_maps_url')` and `branches.appleMapsUrl: text('apple_maps_url')`, both nullable — the exact drizzle names later tasks pin to.
+**Interfaces:** Produces `branches.googleMapsUrl: text('google_maps_url')` and `branches.appleMapsUrl: text('apple_maps_url')`, both nullable, the exact drizzle names later tasks pin to.
 
-- [ ] **Step 1: Add the columns** — after `longitude` (line 36), before `createdAt`:
+- [ ] **Step 1: Add the columns**, after `longitude` (line 36), before `createdAt`:
 
 ```ts
     // Pasted Maps links (M7 #273, the owner's v2 of #248): the branch's
-    // Google/Apple Maps share URLs, entered manually in the admin — the
+    // Google/Apple Maps share URLs, entered manually in the admin, the
     // button's source of truth (stored coordinates are SET ASIDE, dormant;
     // see the #273 progress bullet). Any https URL passes; each is
     // independently optional.
@@ -60,11 +60,11 @@ Two nullable `text` columns land beside 0013's coordinates (migration 0014). The
 
 (`text` is already imported.)
 
-- [ ] **Step 2: Generate** — `pnpm --filter @sevendays/db db:generate`; the 0014 SQL must contain exactly two `ALTER TABLE "branches" ADD COLUMN` statements (`"google_maps_url" text`, `"apple_maps_url" text`, nullable). Anything else: STOP and re-check.
-- [ ] **Step 3: Apply** — `pnpm --filter @sevendays/db db:migrate` (exit 0). No manual test-DB step (global-setup migrates at suite start).
-- [ ] **Step 4: Commit** — `git add packages/db/src/schema/branches.ts packages/db/migrations/` → `feat(db): nullable google/apple maps url columns on branches (#273)`.
+- [ ] **Step 2: Generate**, `pnpm --filter @sevendays/db db:generate`; the 0014 SQL must contain exactly two `ALTER TABLE "branches" ADD COLUMN` statements (`"google_maps_url" text`, `"apple_maps_url" text`, nullable). Anything else: STOP and re-check.
+- [ ] **Step 3: Apply**, `pnpm --filter @sevendays/db db:migrate` (exit 0). No manual test-DB step (global-setup migrates at suite start).
+- [ ] **Step 4: Commit**, `git add packages/db/src/schema/branches.ts packages/db/migrations/` → `feat(db): nullable google/apple maps url columns on branches (#273)`.
 
-## Task 2: Wire schemas — packages/types + consumer sweep
+## Task 2: Wire schemas, packages/types + consumer sweep
 
 **Files:**
 - Modify: `packages/types/src/branch.ts`
@@ -97,7 +97,7 @@ describe('branch maps links (#273)', () => {
     expect(createBranchSchema.safeParse({ ...bareCreate, appleMapsUrl: 'not a url' }).success).toBe(false);
   });
 
-  it('each link is independently optional — one set, other null', () => {
+  it('each link is independently optional, one set, other null', () => {
     const parsed = createBranchSchema.parse({ ...bareCreate, appleMapsUrl: 'https://maps.apple.com/?q=studio' });
     expect(parsed.appleMapsUrl).toBe('https://maps.apple.com/?q=studio');
     expect(parsed.googleMapsUrl).toBeNull();
@@ -105,11 +105,11 @@ describe('branch maps links (#273)', () => {
 });
 ```
 
-- [ ] **Step 2: Run red** — `pnpm --filter @sevendays/types test` FAIL.
-- [ ] **Step 3: Implement** — in `branch.ts`, add the module-private schema above `branchSchema`; in `branchSchema` (after `longitude`):
+- [ ] **Step 2: Run red**, `pnpm --filter @sevendays/types test` FAIL.
+- [ ] **Step 3: Implement**, in `branch.ts`, add the module-private schema above `branchSchema`; in `branchSchema` (after `longitude`):
 
 ```ts
-  // Pasted Maps links (M7 #273): the button's source — coordinates (#248)
+  // Pasted Maps links (M7 #273): the button's source, coordinates (#248)
   // are set aside, dormant (kept in-tree for possible future revival).
   googleMapsUrl: mapsLinkSchema.nullable(),
   appleMapsUrl: mapsLinkSchema.nullable(),
@@ -118,17 +118,17 @@ describe('branch maps links (#273)', () => {
 In `branchWriteBase`'s `.extend({...})` (beside latitude/longitude):
 
 ```ts
-    // #273: independently optional — no pair rule. Omitted = null.
+    // #273: independently optional, no pair rule. Omitted = null.
     googleMapsUrl: mapsLinkSchema.nullable().default(null),
     appleMapsUrl: mapsLinkSchema.nullable().default(null),
 ```
 
-(`updateBranchSchema`'s extend chain is untouched — no refinement wraps these.)
-- [ ] **Step 4: Green** — types suite PASS.
-- [ ] **Step 5: Consumer sweep** — add the two keys per the Files list; root `pnpm typecheck` proves it (the runtime-zod sites — mock-api, cms-schema-contracts, branch-maps.test fixtures — are the ones typecheck can't see; sweep them by hand).
-- [ ] **Step 6: Gates + commit** — `pnpm build:packages && pnpm --filter @sevendays/api build && pnpm typecheck` all 0 → commit the swept files + branch.ts/.test.ts as `feat(types): branch maps-link wire schemas — https-only, independently optional (#273)`.
+(`updateBranchSchema`'s extend chain is untouched, no refinement wraps these.)
+- [ ] **Step 4: Green**, types suite PASS.
+- [ ] **Step 5: Consumer sweep**, add the two keys per the Files list; root `pnpm typecheck` proves it (the runtime-zod sites, mock-api, cms-schema-contracts, branch-maps.test fixtures, are the ones typecheck can't see; sweep them by hand).
+- [ ] **Step 6: Gates + commit**, `pnpm build:packages && pnpm --filter @sevendays/api build && pnpm typecheck` all 0 → commit the swept files + branch.ts/.test.ts as `feat(types): branch maps-link wire schemas, https-only, independently optional (#273)`.
 
-## Task 3: API — persist the links
+## Task 3: API, persist the links
 
 **Files:**
 - Modify: `apps/api/src/services/admin-entities.ts` (the two branch write sites only)
@@ -173,17 +173,17 @@ In `branchWriteBase`'s `.extend({...})` (beside latitude/longitude):
   });
 ```
 
-- [ ] **Step 2: Red** (round-trip fails on null; the 400 may pass via the validator — keep it as the envelope pin).
-- [ ] **Step 3: Implement** — in `createAdminBranch`'s `.values({...})` and `updateAdminBranch`'s `.set({...})`, beside the latitude/longitude lines:
+- [ ] **Step 2: Red** (round-trip fails on null; the 400 may pass via the validator, keep it as the envelope pin).
+- [ ] **Step 3: Implement**, in `createAdminBranch`'s `.values({...})` and `updateAdminBranch`'s `.set({...})`, beside the latitude/longitude lines:
 
 ```ts
           googleMapsUrl: input.googleMapsUrl,
           appleMapsUrl: input.appleMapsUrl,
 ```
 
-- [ ] **Step 4: Green + commit** — file PASS → `feat(api): branch create/update persist the maps links (#273)`.
+- [ ] **Step 4: Green + commit**, file PASS → `feat(api): branch create/update persist the maps links (#273)`.
 
-## Task 4: Admin — link inputs replace the coordinate inputs
+## Task 4: Admin, link inputs replace the coordinate inputs
 
 **Files:**
 - Modify: `apps/admin/src/lib/light-entity-state.ts`
@@ -199,7 +199,7 @@ In `branchWriteBase`'s `.extend({...})` (beside latitude/longitude):
   c) Module-private validator (beside `validateCoordinate`):
 
 ```ts
-// #273: any https URL — transport check only (no host allowlist, owner-ruled).
+// #273: any https URL, transport check only (no host allowlist, owner-ruled).
 function validateMapsLink(input: string, label: string): string | undefined {
   const trimmed = input.trim();
   if (trimmed === '') {
@@ -218,9 +218,9 @@ function validateMapsLink(input: string, label: string): string | undefined {
 ```
 
   d) `validateBranchState` grows the two checks (same pattern as latitude/longitude).
-  e) `buildBranchCreatePayload`/`buildBranchUpdatePayload` emit `googleMapsUrl: state.googleMapsUrl.trim() === '' ? null : state.googleMapsUrl.trim()` (and the apple twin); `buildBranchFlipPayload` emits `row.googleMapsUrl` / `row.appleMapsUrl` (a flip re-sends stored values — the #248 law, unchanged).
+  e) `buildBranchCreatePayload`/`buildBranchUpdatePayload` emit `googleMapsUrl: state.googleMapsUrl.trim() === '' ? null : state.googleMapsUrl.trim()` (and the apple twin); `buildBranchFlipPayload` emits `row.googleMapsUrl` / `row.appleMapsUrl` (a flip re-sends stored values, the #248 law, unchanged).
 - [ ] **Step 4: Green** → **Step 5: Sheet wiring** in `branches-screen.tsx`:
-  - DELETE the two-coordinate `grid grid-cols-2` Field block (the latitude/longitude Inputs) and the `latitudeId`/`longitudeId` `useId` lines — replaced in place by:
+  - DELETE the two-coordinate `grid grid-cols-2` Field block (the latitude/longitude Inputs) and the `latitudeId`/`longitudeId` `useId` lines, replaced in place by:
 
 ```tsx
           <div className='space-y-4'>
@@ -256,9 +256,9 @@ function validateMapsLink(input: string, label: string): string | undefined {
   - The `handleEditorSave` veto check grows `|| errors.googleMapsUrl || errors.appleMapsUrl`; the two new `useId`s replace the deleted pair.
   - Description line becomes EXACTLY: `description='Name, address, phone, the walk-in flag, and optional map links.'`
   - The state's latitude/longitude fields and payload code are NOT touched (dormant).
-- [ ] **Step 6: Suite + commit** — `pnpm --filter @sevendays/admin test` green → `feat(admin): google/apple maps link inputs replace the coordinate fields (#273)`.
+- [ ] **Step 6: Suite + commit**, `pnpm --filter @sevendays/admin test` green → `feat(admin): google/apple maps link inputs replace the coordinate fields (#273)`.
 
-## Task 5: Landing — the device-law seams + the Open in Maps button
+## Task 5: Landing, the device-law seams + the Open in Maps button
 
 **Files:**
 - Modify: `apps/landing/src/lib/branch-maps.ts` + `.test.ts`
@@ -281,7 +281,7 @@ describe('isAppleUserAgent (#273)', () => {
   });
 });
 
-describe('mapsHrefFor — Google base, Apple augments (#273)', () => {
+describe('mapsHrefFor, Google base, Apple augments (#273)', () => {
   const G = 'https://maps.app.goo.gl/g';
   const A = 'https://maps.apple.com/?q=a';
   it('both set: Apple → apple, non-Apple → google', () => {
@@ -307,7 +307,7 @@ describe('mapsHrefFor — Google base, Apple augments (#273)', () => {
 });
 ```
 
-- [ ] **Step 2: Red** → **Step 3: Implement** in `branch-maps.ts` (keep `mapsUrlFor` above, comment amended to open `// DORMANT since #273 — kept for possible future revival:`):
+- [ ] **Step 2: Red** → **Step 3: Implement** in `branch-maps.ts` (keep `mapsUrlFor` above, comment amended to open `// DORMANT since #273, kept for possible future revival:`):
 
 ```ts
 // The device law (#273, OWNER-RULED): Google is the base, Apple augments.
@@ -323,22 +323,22 @@ export function mapsHrefFor(branch: BranchRead, isApple: boolean): string | null
 }
 ```
 
-- [ ] **Step 4: Green** → **Step 5: The card** — in `branch-card.tsx`: replace `const mapsUrl = mapsUrlFor(branch);` with the effect-driven device state (`useState(false)` + the one-line `useEffect`; `useEffect` joins the react import) and `const mapsHref = mapsHrefFor(branch, isApple);`; the anchor gates on `mapsHref`, its `href={mapsHref}`, and its label becomes `Open in Maps` — the comment block becomes:
+- [ ] **Step 4: Green** → **Step 5: The card**, in `branch-card.tsx`: replace `const mapsUrl = mapsUrlFor(branch);` with the effect-driven device state (`useState(false)` + the one-line `useEffect`; `useEffect` joins the react import) and `const mapsHref = mapsHrefFor(branch, isApple);`; the anchor gates on `mapsHref`, its `href={mapsHref}`, and its label becomes `Open in Maps`, the comment block becomes:
 
 ```tsx
           {/* #273 (OWNER-RULED): Open in Maps opens the pasted link in a
-              new tab — Apple devices prefer the Apple link when set, else
+              new tab, Apple devices prefer the Apple link when set, else
               the Google link; cards without links render nothing. The
               device flag is effect-driven (SSR renders the Google base). */}
 ```
 
   (`mapsUrlFor`'s import is removed from the card; nothing else in the row changes.)
-- [ ] **Step 6: Suite + typecheck + commit** — landing green (17 files / 128 + the new pins) → `feat(landing): Open in Maps over the pasted links — Google base, Apple augments (#273)`.
+- [ ] **Step 6: Suite + typecheck + commit**, landing green (17 files / 128 + the new pins) → `feat(landing): Open in Maps over the pasted links, Google base, Apple augments (#273)`.
 
 ## Task 6: Gates + docs
 
-- [ ] `pnpm build:packages && pnpm --filter @sevendays/api build && TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test pnpm check && pnpm build` — all 0; floors: api 457+3 (455 + 2), admin 288 + additions, landing 128 + additions, types 183 + additions, api-client 45.
-- [ ] `docs/progress.md` #273 bullet (dense, house voice): the two pasted link fields replace coordinate entry end to end; **#248's coordinate path SET ASIDE — code kept dormant (columns, wire fields, pair rule, mapsUrlFor) for possible future revival, inputs hidden**; the device law (Google base, Apple augments, effect-driven client pick — TanStack loaders carry no request object); the relabel to `Open in Maps`; the v1 pick note (button last after `Call {branch}`, unchanged); floor movement. No roadmap tick.
+- [ ] `pnpm build:packages && pnpm --filter @sevendays/api build && TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test pnpm check && pnpm build`, all 0; floors: api 457+3 (455 + 2), admin 288 + additions, landing 128 + additions, types 183 + additions, api-client 45.
+- [ ] `docs/progress.md` #273 bullet (dense, house voice): the two pasted link fields replace coordinate entry end to end; **#248's coordinate path SET ASIDE, code kept dormant (columns, wire fields, pair rule, mapsUrlFor) for possible future revival, inputs hidden**; the device law (Google base, Apple augments, effect-driven client pick, TanStack loaders carry no request object); the relabel to `Open in Maps`; the v1 pick note (button last after `Call {branch}`, unchanged); floor movement. No roadmap tick.
 - [ ] Commit `docs(progress): #273 branch maps links landed` + `pnpm exec graphify update .` (churn unstaged).
 
 ## Acceptance-criteria mapping (issue #273)
@@ -348,5 +348,5 @@ export function mapsHrefFor(branch: BranchRead, isApple: boolean): string | null
 - Apple→Apple-link-when-set, else Google; relabel → T5 (the matrix + UA seams; the effect wiring).
 - No links → no button even with coordinates → T5's fourth matrix test (the dormant law).
 - Coordinate code kept + documented → T4 (state/payload untouched) + T6 (the set-aside bullet).
-- Both editions + gates green → T6 (+ the post-merge v1 pick: clean — no booking paths; the branch-card transform re-applies).
+- Both editions + gates green → T6 (+ the post-merge v1 pick: clean, no booking paths; the branch-card transform re-applies).
 

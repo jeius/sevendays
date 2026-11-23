@@ -1,34 +1,34 @@
-# M2 Ticket 04 — Three Read Endpoints + Client Wrappers — Implementation Plan
+# M2 Ticket 04, Three Read Endpoints + Client Wrappers, Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** The API gains `GET /api/v1/studio-services` (active services with embedded `bookableBranchIds`), `GET /api/v1/service-packages/:slug` (one active package with inclusions; uniform 404 when unknown), and `GET /api/v1/appointments/:id` (single appointment with stitched add-on entries, same `AppointmentWithAddons` shape as the list; public deliberately until M4, like the list) — and `packages/api-client` gains `studioServices.list()`, `servicePackages.bySlug(slug)`, `appointments.get(id)`, typed-inferred through the shared Hono RPC client through the one `unwrap()` gate (GitHub issue #42, parent spec #37).
+**Goal:** The API gains `GET /api/v1/studio-services` (active services with embedded `bookableBranchIds`), `GET /api/v1/service-packages/:slug` (one active package with inclusions; uniform 404 when unknown), and `GET /api/v1/appointments/:id` (single appointment with stitched add-on entries, same `AppointmentWithAddons` shape as the list; public deliberately until M4, like the list), and `packages/api-client` gains `studioServices.list()`, `servicePackages.bySlug(slug)`, `appointments.get(id)`, typed-inferred through the shared Hono RPC client through the one `unwrap()` gate (GitHub issue #42, parent spec #37).
 
-**Architecture:** Three thin route handlers over three service-module functions, reusing the established read pattern (fetch parents → fetch children/lookups → `groupChildren` stitch). The by-slug and single-get reads reuse their list siblings' assembly code by extraction, so the list and single-record shapes cannot drift. `:id` params are Zod-validated (`z.uuid()`) — a non-uuid string against the uuid column would be a PG `22P02` → 500; `:slug` is an opaque text key and takes NO param schema (unknown slug = plain 404). The loopback mock mirrors the new endpoints exactly, including the pinned 404 wording.
+**Architecture:** Three thin route handlers over three service-module functions, reusing the established read pattern (fetch parents → fetch children/lookups → `groupChildren` stitch). The by-slug and single-get reads reuse their list siblings' assembly code by extraction, so the list and single-record shapes cannot drift. `:id` params are Zod-validated (`z.uuid()`), a non-uuid string against the uuid column would be a PG `22P02` → 500; `:slug` is an opaque text key and takes NO param schema (unknown slug = plain 404). The loopback mock mirrors the new endpoints exactly, including the pinned 404 wording.
 
-**Tech Stack:** Hono 4.13.5 (chained sub-apps, Hono RPC via `hc<AppType>`), `@hono/zod-validator` 0.4.x (`param` target), Zod 4.5.1, Drizzle ORM ^0.45.2 (select/stitch only — no migration in this ticket), Vitest (unit + real-Postgres integration per ADR-0008), `packages/api-client` loopback harness.
+**Tech Stack:** Hono 4.13.5 (chained sub-apps, Hono RPC via `hc<AppType>`), `@hono/zod-validator` 0.4.x (`param` target), Zod 4.5.1, Drizzle ORM ^0.45.2 (select/stitch only, no migration in this ticket), Vitest (unit + real-Postgres integration per ADR-0008), `packages/api-client` loopback harness.
 
 **Spec:** `docs/specs/2026-09-07-m2-booking-flow-spec.md` (§ API surface, § Confirmation read-back) + ticket `.scratch/m2-booking-flow-tickets/04.md` (= GitHub issue #42, parent #37). The plan argues from the spec; executors read both.
 
 ## Global Constraints
 
 - **Feature branch only:** all work on `feat/m2-04-read-endpoints`, branched from up-to-date `main`. Never commit directly to `main`; the owner pushes/merges.
-- **No migration in this ticket.** Every schema piece these reads need already exists: `studio_services` + `branch_studio_services` + `studio_service_addon_services` (migrations 0002/0003, ticket 01) and the generalized `appointments` (migration 0004, ticket 02). `packages/db` src is untouched by this ticket — do NOT run `db:generate`; any generated-migration diff is a defect.
-- **Routes stay thin; wording is module-owned or pinned here.** Route handlers parse/validate, call one service function, return `c.json(...)` — the convention `AGENTS.md` states and M1.4 established. The two 404 wordings are pinned exactly: `'Package not found.'` and `'Appointment not found.'` (per-entity, matching the intake rejections' per-entity style, e.g. `'Unknown branchId.'`). The 404 helper defaults to `'Not found.'` (the root app's unmounted-path wording); both mounted 404 call sites pass the explicit message.
-- **Uniform error envelope everywhere:** always `c.json({ error }, status)`, never bare `c.notFound()` — the mounted 404s go through the new `notFound` helper in `apps/api/src/services/errors.ts`; error shape stays `apiErrorSchema` (`{ error, details? }`), unchanged.
-- **Param validation asymmetry is deliberate (spike-verified pre-plan against hono 4.13.5 + @hono/zod-validator 0.4.x):** `appointments/:id` uses `validatedParam(z.object({ id: z.uuid() }))` because an unvalidated non-uuid string reaches the uuid column and PG rejects it as `22P02` — an unhandled 500. `service-packages/:slug` uses NO param schema: slug is an opaque text key, an unknown slug is a plain service-level 404, and validating would add a second error path for no benefit. Do not "symmetrize" them.
-- **`validatedParam` joins the validator family, not a third pattern:** it is a third function in `apps/api/src/services/validator.ts` alongside `validatedJson`/`validatedQuery`, with the same uniform-error hook body duplicated (zValidator's Target must be an exact literal for Hono RPC input inference; the hook generic cannot be a standalone typed const without losing inference — the file's existing rationale, now covering three functions). A generic-`validatedParam` handler keeping `c.req.valid('param')` typed was proven in the pre-plan spike (plain-JS and type-level both).
-- **Inactive = invisible on every read surface (spec ruling):** studio-services list serves only `isActive` services even when junction rows exist; by-slug serves only ACTIVE packages (an inactive slug 404s — "one active package … 404 when unknown"); the appointments single-get mirrors the list's no-active-filter posture (appointments have no active concept).
+- **No migration in this ticket.** Every schema piece these reads need already exists: `studio_services` + `branch_studio_services` + `studio_service_addon_services` (migrations 0002/0003, ticket 01) and the generalized `appointments` (migration 0004, ticket 02). `packages/db` src is untouched by this ticket, do NOT run `db:generate`; any generated-migration diff is a defect.
+- **Routes stay thin; wording is module-owned or pinned here.** Route handlers parse/validate, call one service function, return `c.json(...)`, the convention `AGENTS.md` states and M1.4 established. The two 404 wordings are pinned exactly: `'Package not found.'` and `'Appointment not found.'` (per-entity, matching the intake rejections' per-entity style, e.g. `'Unknown branchId.'`). The 404 helper defaults to `'Not found.'` (the root app's unmounted-path wording); both mounted 404 call sites pass the explicit message.
+- **Uniform error envelope everywhere:** always `c.json({ error }, status)`, never bare `c.notFound()`, the mounted 404s go through the new `notFound` helper in `apps/api/src/services/errors.ts`; error shape stays `apiErrorSchema` (`{ error, details? }`), unchanged.
+- **Param validation asymmetry is deliberate (spike-verified pre-plan against hono 4.13.5 + @hono/zod-validator 0.4.x):** `appointments/:id` uses `validatedParam(z.object({ id: z.uuid() }))` because an unvalidated non-uuid string reaches the uuid column and PG rejects it as `22P02`, an unhandled 500. `service-packages/:slug` uses NO param schema: slug is an opaque text key, an unknown slug is a plain service-level 404, and validating would add a second error path for no benefit. Do not "symmetrize" them.
+- **`validatedParam` joins the validator family, not a third pattern:** it is a third function in `apps/api/src/services/validator.ts` alongside `validatedJson`/`validatedQuery`, with the same uniform-error hook body duplicated (zValidator's Target must be an exact literal for Hono RPC input inference; the hook generic cannot be a standalone typed const without losing inference, the file's existing rationale, now covering three functions). A generic-`validatedParam` handler keeping `c.req.valid('param')` typed was proven in the pre-plan spike (plain-JS and type-level both).
+- **Inactive = invisible on every read surface (spec ruling):** studio-services list serves only `isActive` services even when junction rows exist; by-slug serves only ACTIVE packages (an inactive slug 404s, "one active package … 404 when unknown"); the appointments single-get mirrors the list's no-active-filter posture (appointments have no active concept).
 - **Public-until-M4 is deliberate, do not fix:** `GET /api/v1/appointments/:id` serves customer names/emails/phones unauthenticated, exactly like the list (standing decision, spec § API surface; Known Gap already records the list half). M4's BetterAuth closes both together. No auth code in this ticket.
-- **`pnpm build:packages` after every change to `packages/types`** — consumers resolve workspace packages from `dist/`; a stale `dist/` looks like a missing export. (`packages/db` is not edited by this plan; `apps/api` resolves `packages/types` from `dist/`.)
+- **`pnpm build:packages` after every change to `packages/types`**, consumers resolve workspace packages from `dist/`; a stale `dist/` looks like a missing export. (`packages/db` is not edited by this plan; `apps/api` resolves `packages/types` from `dist/`.)
 - **Biome-clean commits:** `pnpm exec biome check --write <files>` on every created/modified code file before committing (project `fix` scripts call the `biome` bin).
 - **`noUncheckedIndexedAccess` is on:** guard `.returning()`/indexed destructures (`const [row] = ...; if (!row) throw/return ...`), never `!`. In `apps/api/test/helpers/fixtures.ts` follow the file's existing bare-`.id` destructure style (it compiles today); in `apps/api/src/services/**` keep the existing guard style.
-- **Zod v4 chain rule:** `.extend()` is only safe on an UNrefined object schema. `studioServiceSchema` is a plain object (no refine) — extending it with `bookableBranchIds` is safe. Never extend or `.omit()` a schema carrying a refine (e.g. the appointment schemas).
-- **Compose for integration tests:** `docker compose up -d db` (postgres:17, `sevendays_test`); `apps/api`'s vitest global setup migrates via `@sevendays/db/migrate`; pass env explicitly to `app.request(path, opts, { DATABASE_URL: url })` — a bare `app.request(path)` leaves `c.env` empty.
-- **Fixture values are synthetic, not catalog:** names like `Retired Studio Service` / prices like `60000` follow the existing fixtures file's synthetic convention (`Test Branch A`, `Retired Add-on`). The TODO(seed) convention applies to the catalog seed (`packages/db/scripts/catalog.ts`), which this ticket does not touch — an executor must not invent catalog data anywhere in this plan.
+- **Zod v4 chain rule:** `.extend()` is only safe on an UNrefined object schema. `studioServiceSchema` is a plain object (no refine), extending it with `bookableBranchIds` is safe. Never extend or `.omit()` a schema carrying a refine (e.g. the appointment schemas).
+- **Compose for integration tests:** `docker compose up -d db` (postgres:17, `sevendays_test`); `apps/api`'s vitest global setup migrates via `@sevendays/db/migrate`; pass env explicitly to `app.request(path, opts, { DATABASE_URL: url })`, a bare `app.request(path)` leaves `c.env` empty.
+- **Fixture values are synthetic, not catalog:** names like `Retired Studio Service` / prices like `60000` follow the existing fixtures file's synthetic convention (`Test Branch A`, `Retired Add-on`). The TODO(seed) convention applies to the catalog seed (`packages/db/scripts/catalog.ts`), which this ticket does not touch, an executor must not invent catalog data anywhere in this plan.
 - **Mock mirrors the API envelope exactly:** the loopback mock's 404 bodies must equal the pinned real-API wordings, so the loopback tests prove the exact `ApiClientError` shapes the landing pages will hit.
-- **Scope fence (siblings share roadmap checkboxes):** ticket 04 delivers READS + client wrappers only. Not here: generalized service-path intake + typed rejections + `past_datetime` floor (#41), landing pages / booking form / confirmation page / Resend email (tickets 05–10), any schema or migration change, any seed change, any `docs/plan.md` checkbox tick (see below). `packages/types` gains exactly one read shape (`studioServiceWithBranchesSchema`) — no create schemas (Studio Services CRUD is M5 CMS).
-- **`docs/plan.md`'s M2 API checkbox stays unticked** — it spans tickets 03 (#41, POST generalization) + 04 (this ticket's three reads) and is satisfied only when BOTH have landed; whoever closes the later of the two ticks it with the ✅ emoji. GitHub issue #42's acceptance-criteria boxes are the owner's to tick — note the mapping in the PR description, don't edit the issue.
+- **Scope fence (siblings share roadmap checkboxes):** ticket 04 delivers READS + client wrappers only. Not here: generalized service-path intake + typed rejections + `past_datetime` floor (#41), landing pages / booking form / confirmation page / Resend email (tickets 05–10), any schema or migration change, any seed change, any `docs/plan.md` checkbox tick (see below). `packages/types` gains exactly one read shape (`studioServiceWithBranchesSchema`), no create schemas (Studio Services CRUD is M5 CMS).
+- **`docs/plan.md`'s M2 API checkbox stays unticked**, it spans tickets 03 (#41, POST generalization) + 04 (this ticket's three reads) and is satisfied only when BOTH have landed; whoever closes the later of the two ticks it with the ✅ emoji. GitHub issue #42's acceptance-criteria boxes are the owner's to tick, note the mapping in the PR description, don't edit the issue.
 - **Commit style:** unscoped conventional subjects, bullet bodies when wordy; one commit per task.
 
 ---
@@ -43,7 +43,7 @@ apps/api/src/services/errors.ts                    (mod) + notFound helper (unif
 apps/api/src/services/service-packages.ts          (mod) assemble-extraction refactor + getActivePackageWithInclusionsBySlug
 apps/api/src/services/appointments.ts              (mod) fetchAddonEntries extraction + getAppointmentWithAddons
 apps/api/src/services/studio-services.ts           (new) listActiveStudioServicesWithBranches
-apps/api/src/routes/service-packages.ts            (mod) + GET /:slug (no param schema — see Global Constraints)
+apps/api/src/routes/service-packages.ts            (mod) + GET /:slug (no param schema, see Global Constraints)
 apps/api/src/routes/appointments.ts                (mod) + GET /:id (validatedParam z.uuid())
 apps/api/src/routes/studio-services.ts             (new) GET /
 apps/api/src/routes/v1.ts                          (mod) + /studio-services mount
@@ -60,20 +60,20 @@ packages/api-client/test/loopback.test.ts          (mod) + 5 loopback tests
 docs/progress.md                                   (mod) ticket-04 landed bullet
 ```
 
-Task map: 1 — `packages/types` read shape (TDD) + build:packages; 2 — `apps/api` by-slug + single-get (+ validator/errors), compose green; 3 — `apps/api` studio-services read + fixtures + suite, compose green; 4 — api-client wrappers + mock + loopback tests; 5 — full gate, progress.md, handoff.
+Task map: 1, `packages/types` read shape (TDD) + build:packages; 2, `apps/api` by-slug + single-get (+ validator/errors), compose green; 3, `apps/api` studio-services read + fixtures + suite, compose green; 4, api-client wrappers + mock + loopback tests; 5, full gate, progress.md, handoff.
 
 ---
 
-### Task 1: packages/types — the Studio Service read shape (TDD)
+### Task 1: packages/types, the Studio Service read shape (TDD)
 
 **Files:**
 - Modify: `packages/types/src/studio-service.ts`
 - Modify: `packages/types/src/studio-service.test.ts`
 
 **Interfaces:**
-- Consumes: `studioServiceSchema` (plain object, no refine — `.extend()` is safe per Global Constraints).
+- Consumes: `studioServiceSchema` (plain object, no refine, `.extend()` is safe per Global Constraints).
 - Produces (Tasks 3 and 4 consume these exact names):
-  - `studioServiceWithBranchesSchema` / `StudioServiceWithBranches` — the `StudioService` row mirror plus `bookableBranchIds: z.array(z.uuid())`. The api studio-services service and the api-client wrapper both parse against this exact schema; the barrel (`packages/types/src/index.ts`) already re-exports `./studio-service.js`, so no barrel edit.
+  - `studioServiceWithBranchesSchema` / `StudioServiceWithBranches`, the `StudioService` row mirror plus `bookableBranchIds: z.array(z.uuid())`. The api studio-services service and the api-client wrapper both parse against this exact schema; the barrel (`packages/types/src/index.ts`) already re-exports `./studio-service.js`, so no barrel edit.
 
 **Not here:** no api service/route code (Task 3), no client wrapper (Task 4), no create schema (Studio Services CRUD is M5), no mock changes.
 
@@ -83,7 +83,7 @@ Task map: 1 — `packages/types` read shape (TDD) + build:packages; 2 — `apps/
 git checkout -b feat/m2-04-read-endpoints
 ```
 
-- [ ] **Step 2: Write the failing tests** — append to `packages/types/src/studio-service.test.ts` (after the existing `createStudioServiceSchema` describe), and extend the file's import line:
+- [ ] **Step 2: Write the failing tests**, append to `packages/types/src/studio-service.test.ts` (after the existing `createStudioServiceSchema` describe), and extend the file's import line:
 
 ```ts
 import {
@@ -125,16 +125,16 @@ describe('studioServiceWithBranchesSchema', () => {
 - [ ] **Step 3: Run tests to verify they fail**
 
 Run: `pnpm --filter @sevendays/types test -- studio-service.test.ts`
-Expected: FAIL — `studioServiceWithBranchesSchema` is not exported.
+Expected: FAIL, `studioServiceWithBranchesSchema` is not exported.
 
-- [ ] **Step 4: Write the schema** — append to `packages/types/src/studio-service.ts` (below the `CreateStudioServiceInput` block):
+- [ ] **Step 4: Write the schema**, append to `packages/types/src/studio-service.ts` (below the `CreateStudioServiceInput` block):
 
 ```ts
 // Read shape for GET /api/v1/studio-services (M2 ticket 04): active Studio
 // Services with the branches they are bookable at, embedded as bare branch
-// ids — the booking form's branch step filters by membership and the
+// ids, the booking form's branch step filters by membership and the
 // services page joins names from the branches read. Extends the row mirror
-// (a plain object schema, no refine — the zod v4 chain rule is not at play).
+// (a plain object schema, no refine, the zod v4 chain rule is not at play).
 export const studioServiceWithBranchesSchema = studioServiceSchema.extend({
   bookableBranchIds: z.array(z.uuid()),
 });
@@ -145,7 +145,7 @@ export type StudioServiceWithBranches = z.infer<typeof studioServiceWithBranches
 - [ ] **Step 5: Run tests to verify they pass**
 
 Run: `pnpm --filter @sevendays/types test`
-Expected: PASS — the whole types suite, including the 3 new tests.
+Expected: PASS, the whole types suite, including the 3 new tests.
 
 - [ ] **Step 6: Rebuild packages dist + typecheck**
 
@@ -166,7 +166,7 @@ git commit -m "feat(types): studio service read shape with embedded bookableBran
 
 ---
 
-### Task 2: apps/api — by-slug + single-get reads, validatedParam, uniform 404 (TDD)
+### Task 2: apps/api, by-slug + single-get reads, validatedParam, uniform 404 (TDD)
 
 **Files:**
 - Modify: `apps/api/src/services/validator.ts`
@@ -181,15 +181,15 @@ git commit -m "feat(types): studio service read shape with embedded bookableBran
 **Interfaces:**
 - Consumes: `servicePackageWithInclusionsSchema` / `ServicePackageWithInclusions` and `appointmentWithAddonsSchema` / `AppointmentWithAddons` from `@sevendays/types` (already exist).
 - Produces (Task 4's wrappers and mock mirror these):
-  - `validatedParam<S extends ZodSchema>(schema: S)` — third member of the validator family, same uniform-error hook body; `c.req.valid('param')` stays typed (spike-proven).
-  - `notFound(c: Context, message = 'Not found.')` — the uniform 404 envelope; the root app's unmounted-path wording `'Not found.'` is the default, both new call sites pass explicit entity wordings.
-  - `getActivePackageWithInclusionsBySlug(db: Database, slug: string): Promise<ServicePackageWithInclusions | null>` — `null` when unknown OR inactive (route → 404).
-  - `getAppointmentWithAddons(db: Database, id: string): Promise<AppointmentWithAddons | null>` — `null` when unknown (route → 404).
-- Internal invariants (same-file, not exported): `assemblePackageRead` (shared by list + by-slug), `fetchAddonEntries` (shared by list + single-get) — the single-get shape is provably the list's shape because it IS the same code.
+  - `validatedParam<S extends ZodSchema>(schema: S)`, third member of the validator family, same uniform-error hook body; `c.req.valid('param')` stays typed (spike-proven).
+  - `notFound(c: Context, message = 'Not found.')`, the uniform 404 envelope; the root app's unmounted-path wording `'Not found.'` is the default, both new call sites pass explicit entity wordings.
+  - `getActivePackageWithInclusionsBySlug(db: Database, slug: string): Promise<ServicePackageWithInclusions | null>`, `null` when unknown OR inactive (route → 404).
+  - `getAppointmentWithAddons(db: Database, id: string): Promise<AppointmentWithAddons | null>`, `null` when unknown (route → 404).
+- Internal invariants (same-file, not exported): `assemblePackageRead` (shared by list + by-slug), `fetchAddonEntries` (shared by list + single-get), the single-get shape is provably the list's shape because it IS the same code.
 
 **Not here:** no studio-services route/service (Task 3), no client methods (Task 4), no intake/service-path work (#41), no mount-list edit (the two routes mount already).
 
-- [ ] **Step 1: Write the failing tests** — in `apps/api/test/service-packages.test.ts`, append after the existing describe (the file already imports `ServicePackageWithInclusions`, `app`, `ids`, helpers):
+- [ ] **Step 1: Write the failing tests**, in `apps/api/test/service-packages.test.ts`, append after the existing describe (the file already imports `ServicePackageWithInclusions`, `app`, `ids`, helpers):
 
 ```ts
 describe('GET /api/v1/service-packages/:slug', () => {
@@ -245,7 +245,7 @@ describe('GET /api/v1/appointments/:id', () => {
     expect(body.bookedPriceCents).toBe(150000);
     // Set-assert the entries: intake writes both junction rows in ONE insert,
     // so their createdAt ties and the stitch's orderBy gives no order
-    // guarantee between them — the SHAPE is what's pinned, not entry order.
+    // guarantee between them, the SHAPE is what's pinned, not entry order.
     expect(body.addonServices).toHaveLength(2);
     const byId = new Map(
       (body.addonServices as { addonServiceId: string; name: string; priceCents: number }[]).map(
@@ -304,15 +304,15 @@ docker compose up -d db   # wait for healthy: docker compose ps
 pnpm --filter @sevendays/api test -- service-packages.test.ts appointments.test.ts
 ```
 
-Expected: FAIL — the by-slug route doesn't exist (unknown slug hits the root `notFound` → body `{'Not found.'}` ≠ `Package not found.`, and the 200 test fails likewise); every single-get test fails (404/`'Not found.'` or shape mismatch).
+Expected: FAIL, the by-slug route doesn't exist (unknown slug hits the root `notFound` → body `{'Not found.'}` ≠ `Package not found.`, and the 200 test fails likewise); every single-get test fails (404/`'Not found.'` or shape mismatch).
 
 - [ ] **Step 3: Implement the validator + errors helpers**
 
-In `apps/api/src/services/validator.ts`, add a comment note and the third function below `validatedQuery` (the hook body is byte-identical to the other two — the file's existing two-functions rationale now covers three):
+In `apps/api/src/services/validator.ts`, add a comment note and the third function below `validatedQuery` (the hook body is byte-identical to the other two, the file's existing two-functions rationale now covers three):
 
 ```ts
 // Third member (M2 ticket 04): path params. Same literal-target rationale as
-// above — zValidator's Target must be an exact literal for Hono RPC input
+// above, zValidator's Target must be an exact literal for Hono RPC input
 // inference. Pre-plan spike (hono 4.13.5 + @hono/zod-validator 0.4.x): a
 // generic validatedParam keeps c.req.valid('param') typed and the chained
 // ':id' route infers { param: { id: string } } through hc<AppType>.
@@ -340,7 +340,7 @@ In `apps/api/src/services/errors.ts`, append below `badRequest`:
  * The uniform 404 envelope: always c.json({ error }, 404), never a bare
  * c.notFound() (which would emit Hono's plain-text default). Default is the
  * root app's unmounted-path wording; mounted-path 404s pass the entity
- * wording ('Package not found.' / 'Appointment not found.' — per-entity,
+ * wording ('Package not found.' / 'Appointment not found.', per-entity,
  * matching the intake rejections' style).
  */
 export function notFound(c: Context, message = 'Not found.') {
@@ -348,7 +348,7 @@ export function notFound(c: Context, message = 'Not found.') {
 }
 ```
 
-- [ ] **Step 4: Refactor `apps/api/src/services/service-packages.ts` — shared assembly + by-slug getter**
+- [ ] **Step 4: Refactor `apps/api/src/services/service-packages.ts`, shared assembly + by-slug getter**
 
 Two edits:
 
@@ -362,7 +362,7 @@ import { and, asc, eq, inArray } from 'drizzle-orm';
 
 ```ts
 // The junction-row projection both reads select (attire id + name keyed by
-// inclusionId) — a projected shape, not a table row type.
+// inclusionId), a projected shape, not a table row type.
 type JunctionRow = { inclusionId: string; id: string; name: string };
 
 /**
@@ -370,7 +370,7 @@ type JunctionRow = { inclusionId: string; id: string; name: string };
  * by-slug getter must emit the identical ServicePackageWithInclusions shape,
  * so the stitch lives in ONE function both call. The print-size lookup map
  * is assembly (it joins fetched values, not rows), so it moved here with
- * the stitch — fetching (which queries, which ordering) stays in the
+ * the stitch, fetching (which queries, which ordering) stays in the
  * callers. Callers deliver rows in their pinned orders (inclusions by id,
  * junctions by created_at + id, frames by frameNumber); assembly never
  * re-sorts (groupChildren contract).
@@ -428,7 +428,7 @@ function assemblePackageRead(
 }
 ```
 
-(delete the old in-file `printSizeById` loop, `groupChildren` block, and `packageRows.map(...)` — they now live in `assemblePackageRead`)
+(delete the old in-file `printSizeById` loop, `groupChildren` block, and `packageRows.map(...)`, they now live in `assemblePackageRead`)
 
 Append the getter at the bottom of the file:
 
@@ -437,7 +437,7 @@ Append the getter at the bottom of the file:
  * One ACTIVE package by slug with resolved lookups (M2 ticket 04): the same
  * ServicePackageWithInclusions shape as the list, assembled by the same
  * function. Unknown slug OR inactive package → null (the route turns it
- * into the uniform 404 — "one active package", inactive is invisible on
+ * into the uniform 404, "one active package", inactive is invisible on
  * the booking surface). The single-slug fetch re-uses the list's exact
  * query bodies scoped to one package id, so ordering and projection stay
  * identical by construction.
@@ -465,7 +465,7 @@ export async function getActivePackageWithInclusionsBySlug(
   ];
 
   // Same junction query + ordering comment as the list (created_at, then id
-  // as tiebreak — the junction has no position column).
+  // as tiebreak, the junction has no position column).
   const junctionRows =
     inclusionIds.length > 0
       ? await db
@@ -502,7 +502,7 @@ export async function getActivePackageWithInclusionsBySlug(
 }
 ```
 
-- [ ] **Step 5: Refactor `apps/api/src/services/appointments.ts` — shared add-on stitch + single-get**
+- [ ] **Step 5: Refactor `apps/api/src/services/appointments.ts`, shared add-on stitch + single-get**
 
 Three edits:
 
@@ -521,13 +521,13 @@ import type {
 ```ts
 /**
  * Add-on entries for the given appointment ids in one inArray query (M2
- * ticket 04) — shared by the list and the single-get so both shapes come
+ * ticket 04), shared by the list and the single-get so both shapes come
  * from one stitch. Entries arrive pre-ordered: createdAt is the append-only
  * monotonic proxy (the junction has no position column; SQL gives no
- * row-order guarantee without an explicit ORDER BY — a later migration if
- * M2's UI needs persisted order). Raw rows carry appointmentId — group raw,
+ * row-order guarantee without an explicit ORDER BY, a later migration if
+ * M2's UI needs persisted order). Raw rows carry appointmentId, group raw,
  * project at the attach pass. Every requested id gets an entry list (empty
- * when it has no add-ons) — never undefined.
+ * when it has no add-ons), never undefined.
  */
 async function fetchAddonEntries(
   db: Database,
@@ -564,7 +564,7 @@ async function fetchAddonEntries(
 }
 ```
 
-(c) In `listAppointments` (NOT `createAppointment` — its own `addonRows` select inside the intake transaction stays), the tail from the `addonRows` select through the final `return rows.map(...)` is replaced by:
+(c) In `listAppointments` (NOT `createAppointment`, its own `addonRows` select inside the intake transaction stays), the tail from the `addonRows` select through the final `return rows.map(...)` is replaced by:
 
 ```ts
   const addonsByAppointment = await fetchAddonEntries(db, rows.map((r) => r.id));
@@ -580,7 +580,7 @@ async function fetchAddonEntries(
  * One Appointment with its add-on entries (M2 ticket 04): the same
  * AppointmentWithAddons shape as the list, via the same stitch. Unknown id
  * → null (the route turns it into the uniform 404). Public until M4 like
- * the list (standing decision — this serves the customer's own
+ * the list (standing decision, this serves the customer's own
  * confirmation read-back; M4's BetterAuth closes both together).
  */
 export async function getAppointmentWithAddons(
@@ -599,7 +599,7 @@ export async function getAppointmentWithAddons(
 }
 ```
 
-- [ ] **Step 6: Wire the routes** — both files become (full contents):
+- [ ] **Step 6: Wire the routes**, both files become (full contents):
 
 `apps/api/src/routes/service-packages.ts`:
 
@@ -612,13 +612,13 @@ import {
   listActivePackagesWithInclusions,
 } from '../services/service-packages.js';
 
-// Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts.
+// Chained registration (ADR-0006 Hono RPC), see routes/branches.ts.
 export const servicePackages = new Hono<ApiEnv>()
   .get('/', async (c) => {
     const db = c.get('db');
     return c.json(await listActivePackagesWithInclusions(db));
   })
-  // No param schema (Global Constraints): slug is an opaque text key — an
+  // No param schema (Global Constraints): slug is an opaque text key, an
   // unknown slug is a plain service-level 404, and validating would add a
   // second error path for no benefit. The :id/:slug asymmetry is deliberate.
   .get('/:slug', async (c) => {
@@ -646,7 +646,7 @@ import type { ApiEnv } from '../services/db.js';
 import { badRequest, notFound } from '../services/errors.js';
 import { validatedJson, validatedParam, validatedQuery } from '../services/validator.js';
 
-// Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts.
+// Chained registration (ADR-0006 Hono RPC), see routes/branches.ts.
 export const appointments = new Hono<ApiEnv>()
   .get('/', validatedQuery(z.object({ branchId: z.uuid().optional() })), async (c) => {
     const { branchId } = c.req.valid('query');
@@ -681,14 +681,14 @@ export const appointments = new Hono<ApiEnv>()
   });
 ```
 
-- [ ] **Step 7: Run the tests to verify they pass** — the two touched suites first, then the full api suite (regression: `error-seam.test.ts` and the M1.4 suites must stay green after the extraction refactors):
+- [ ] **Step 7: Run the tests to verify they pass**, the two touched suites first, then the full api suite (regression: `error-seam.test.ts` and the M1.4 suites must stay green after the extraction refactors):
 
 ```bash
 pnpm --filter @sevendays/api test -- service-packages.test.ts appointments.test.ts
 pnpm --filter @sevendays/api test
 ```
 
-Expected: all green — 3 new by-slug tests, 4 new single-get tests, every pre-existing test unchanged.
+Expected: all green, 3 new by-slug tests, 4 new single-get tests, every pre-existing test unchanged.
 
 - [ ] **Step 8: Commit**
 
@@ -697,13 +697,13 @@ pnpm exec biome check --write apps/api/src/services/validator.ts apps/api/src/se
 git add apps/api/src/services/validator.ts apps/api/src/services/errors.ts apps/api/src/services/service-packages.ts apps/api/src/services/appointments.ts apps/api/src/routes/service-packages.ts apps/api/src/routes/appointments.ts apps/api/test/service-packages.test.ts apps/api/test/appointments.test.ts
 git commit -m "feat(api): package-by-slug + appointment single-get reads on shared assembly" -m "- getActivePackageWithInclusionsBySlug + getAppointmentWithAddons (null → uniform 404 with per-entity wording)
 - assemblePackageRead / fetchAddonEntries extracted so the single-record shapes cannot drift from their list siblings
-- validatedParam joins the validator family (z.uuid() on :id — non-uuid would be a PG 22P02 500); :slug takes no param schema (opaque text key)
+- validatedParam joins the validator family (z.uuid() on :id, non-uuid would be a PG 22P02 500); :slug takes no param schema (opaque text key)
 - notFound helper: mounted 404s carry the entity wording through the uniform envelope"
 ```
 
 ---
 
-### Task 3: apps/api — studio-services read (service, route, fixtures, suite) (TDD)
+### Task 3: apps/api, studio-services read (service, route, fixtures, suite) (TDD)
 
 **Files:**
 - Create: `apps/api/src/services/studio-services.ts`
@@ -714,11 +714,11 @@ git commit -m "feat(api): package-by-slug + appointment single-get reads on shar
 
 **Interfaces:**
 - Consumes: Task 1's `studioServiceWithBranchesSchema` / `StudioServiceWithBranches` (from `@sevendays/types`, built in `dist/` by Task 1 Step 6).
-- Produces (Task 4's wrapper + mock mirror this): `listActiveStudioServicesWithBranches(db: Database): Promise<StudioServiceWithBranches[]>` — ordered by name (the addon-services/branches convention), active-only, ids embedded per `branch_studio_services` presence rows.
+- Produces (Task 4's wrapper + mock mirror this): `listActiveStudioServicesWithBranches(db: Database): Promise<StudioServiceWithBranches[]>`, ordered by name (the addon-services/branches convention), active-only, ids embedded per `branch_studio_services` presence rows.
 
-**Not here:** no client method (Task 4), no intake logic (#41), no applicability-matrix read (that matrix gates the POST path — #41 consumes `studio_service_addon_services` directly in the intake transaction; the booking form's add-on step needs it at landing-build time, a later ticket), no seed change.
+**Not here:** no client method (Task 4), no intake logic (#41), no applicability-matrix read (that matrix gates the POST path, #41 consumes `studio_service_addon_services` directly in the intake transaction; the booking form's add-on step needs it at landing-build time, a later ticket), no seed change.
 
-- [ ] **Step 1: Extend the fixtures** — in `apps/api/test/helpers/fixtures.ts`:
+- [ ] **Step 1: Extend the fixtures**, in `apps/api/test/helpers/fixtures.ts`:
 
 (a) The `FixtureIds` type gains two members (after `servicePortrait: string;`):
 
@@ -727,7 +727,7 @@ git commit -m "feat(api): package-by-slug + appointment single-get reads on shar
   serviceBranchLinks: string[];
 ```
 
-(b) Replace the single `servicePortrait` insert block (the comment above it stays) with three service inserts and the link rows. The link rows go directly below the services (the junction's `createdAt` default gives link order determinism per service — each service's links come from one statement, so intra-service id order is fine):
+(b) Replace the single `servicePortrait` insert block (the comment above it stays) with three service inserts and the link rows. The link rows go directly below the services (the junction's `createdAt` default gives link order determinism per service, each service's links come from one statement, so intra-service id order is fine):
 
 ```ts
   const [servicePortrait] = await db
@@ -750,7 +750,7 @@ git commit -m "feat(api): package-by-slug + appointment single-get reads on shar
     .returning({ id: studioServices.id });
 
   // Bookability rows (ticket 01's presence-row junction): portrait bookable
-  // at BOTH branches; the retired service linked to branchA only — the
+  // at BOTH branches; the retired service linked to branchA only, the
   // inactive filter must hide it from the read even though its link exists.
   await db.insert(branchStudioServices).values([
     { studioServiceId: servicePortrait.id, branchId: branchA.id },
@@ -772,9 +772,9 @@ git commit -m "feat(api): package-by-slug + appointment single-get reads on shar
     serviceBranchLinks: serviceBranchLinks.map((l) => l.branchId),
 ```
 
-Note: `serviceBranchLinks` as a bare branch-id list cannot distinguish which service a link belongs to — that mapping is pinned in the test below via the exact `bookableBranchIds` assertion. (If a later task needs a per-service map, extend the fixture return then.)
+Note: `serviceBranchLinks` as a bare branch-id list cannot distinguish which service a link belongs to, that mapping is pinned in the test below via the exact `bookableBranchIds` assertion. (If a later task needs a per-service map, extend the fixture return then.)
 
-(d) The dynamic-import destructure at the top of `loadFixtures` gains `branchStudioServices` — the list becomes:
+(d) The dynamic-import destructure at the top of `loadFixtures` gains `branchStudioServices`, the list becomes:
 
 ```ts
   const {
@@ -791,7 +791,7 @@ Note: `serviceBranchLinks` as a bare branch-id list cannot distinguish which ser
   } = await import('@sevendays/db');
 ```
 
-- [ ] **Step 2: Write the failing suite** — `apps/api/test/studio-services.test.ts`, exactly:
+- [ ] **Step 2: Write the failing suite**, `apps/api/test/studio-services.test.ts`, exactly:
 
 ```ts
 import type { StudioServiceWithBranches } from '@sevendays/types';
@@ -819,7 +819,7 @@ describe('GET /api/v1/studio-services', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as StudioServiceWithBranches[];
 
-    // Only the ACTIVE service is visible — even though the retired service
+    // Only the ACTIVE service is visible, even though the retired service
     // has a branch link, inactive is invisible on the read surface.
     expect(body).toHaveLength(1);
     const portrait = body[0];
@@ -845,9 +845,9 @@ docker compose up -d db   # if not still up from Task 2
 pnpm --filter @sevendays/api test -- studio-services.test.ts
 ```
 
-Expected: FAIL — `/api/v1/studio-services` is unmounted → 404 `Not found.`
+Expected: FAIL, `/api/v1/studio-services` is unmounted → 404 `Not found.`
 
-- [ ] **Step 4: Write the service** — `apps/api/src/services/studio-services.ts`, exactly:
+- [ ] **Step 4: Write the service**, `apps/api/src/services/studio-services.ts`, exactly:
 
 ```ts
 import type { Database } from '@sevendays/db';
@@ -858,12 +858,12 @@ import { groupChildren } from './group-children.js';
 
 /**
  * Active Studio Services with the branches each is bookable at (M2 ticket
- * 04) — the services page and the booking form's offering step read this.
+ * 04), the services page and the booking form's offering step read this.
  * Active-only (inactive is invisible on the read surface even when branch
- * links exist); branch ids embedded as bare ids — the branch step filters
+ * links exist); branch ids embedded as bare ids, the branch step filters
  * by membership and joins names from the branches read. Ordered by name
  * (the catalog-read convention); per-service branch ids follow the
- * junction's createdAt proxy, id tiebreak — seeded links share a statement,
+ * junction's createdAt proxy, id tiebreak, seeded links share a statement,
  * so intra-service order is id-stable, and membership is the only
  * consumer-facing fact.
  */
@@ -897,48 +897,48 @@ export async function listActiveStudioServicesWithBranches(
 }
 ```
 
-- [ ] **Step 5: Write the route + mount** — `apps/api/src/routes/studio-services.ts`:
+- [ ] **Step 5: Write the route + mount**, `apps/api/src/routes/studio-services.ts`:
 
 ```ts
 import { Hono } from 'hono';
 import type { ApiEnv } from '../services/db.js';
 import { listActiveStudioServicesWithBranches } from '../services/studio-services.js';
 
-// Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts.
+// Chained registration (ADR-0006 Hono RPC), see routes/branches.ts.
 export const studioServices = new Hono<ApiEnv>().get('/', async (c) => {
   const db = c.get('db');
   return c.json(await listActiveStudioServicesWithBranches(db));
 });
 ```
 
-`apps/api/src/routes/v1.ts` — the import block gains `import { studioServices } from './studio-services.js';` (alphabetical, after `servicePackages`), and the chain gains one line after `.route('/service-packages', servicePackages)`:
+`apps/api/src/routes/v1.ts`, the import block gains `import { studioServices } from './studio-services.js';` (alphabetical, after `servicePackages`), and the chain gains one line after `.route('/service-packages', servicePackages)`:
 
 ```ts
   .route('/studio-services', studioServices)
 ```
 
-- [ ] **Step 6: Run the tests to verify they pass** — the new suite, then the full api suite (the mount change touches the shared chain; everything must stay green):
+- [ ] **Step 6: Run the tests to verify they pass**, the new suite, then the full api suite (the mount change touches the shared chain; everything must stay green):
 
 ```bash
 pnpm --filter @sevendays/api test -- studio-services.test.ts
 pnpm --filter @sevendays/api test
 ```
 
-Expected: all green — 1 new list-shape test; every pre-existing test unchanged (the fixture edit adds rows other suites ignore: appointments/service-packages/addon-services tests assert on their own entity ids only).
+Expected: all green, 1 new list-shape test; every pre-existing test unchanged (the fixture edit adds rows other suites ignore: appointments/service-packages/addon-services tests assert on their own entity ids only).
 
 - [ ] **Step 7: Commit**
 
 ```bash
 pnpm exec biome check --write apps/api/src/services/studio-services.ts apps/api/src/routes/studio-services.ts apps/api/src/routes/v1.ts apps/api/test/helpers/fixtures.ts apps/api/test/studio-services.test.ts
 git add apps/api/src/services/studio-services.ts apps/api/src/routes/studio-services.ts apps/api/src/routes/v1.ts apps/api/test/helpers/fixtures.ts apps/api/test/studio-services.test.ts
-git commit -m "feat(api): GET /studio-services — active services with bookableBranchIds" -m "- listActiveStudioServicesWithBranches: active-only, name-ordered, branch ids stitched via groupChildren
+git commit -m "feat(api): GET /studio-services, active services with bookableBranchIds" -m "- listActiveStudioServicesWithBranches: active-only, name-ordered, branch ids stitched via groupChildren
 - /studio-services mounted in the v1 chain (thin route over the service)
-- fixtures gain the retired studio service + three branch-link rows (retired service linked yet invisible — the active filter is proven)"
+- fixtures gain the retired studio service + three branch-link rows (retired service linked yet invisible, the active filter is proven)"
 ```
 
 ---
 
-### Task 4: packages/api-client — the three wrappers + mock endpoints + loopback tests (TDD)
+### Task 4: packages/api-client, the three wrappers + mock endpoints + loopback tests (TDD)
 
 **Files:**
 - Modify: `packages/api-client/src/routes/service-packages.ts`
@@ -949,12 +949,12 @@ git commit -m "feat(api): GET /studio-services — active services with bookable
 - Modify: `packages/api-client/test/loopback.test.ts`
 
 **Interfaces:**
-- Consumes: Task 1's `studioServiceWithBranchesSchema` / `StudioServiceWithBranches`; Task 2's routes (the RPC surface `raw.api.v1['service-packages'][':slug'].$get`, `raw.api.v1.appointments[':id'].$get`, `raw.api.v1['studio-services'].$get` — exact key paths); the mock's existing `validatedJson`/`createAppointmentSchema` imports.
-- Produces (landing-build tasks consume these): `client.studioServices.list(): Promise<StudioServiceWithBranches[]>`, `client.servicePackages.bySlug(args: GetPackageBySlugArgs): Promise<ServicePackageWithInclusions>`, `client.appointments.get(args: GetAppointmentArgs): Promise<AppointmentWithAddons>` — all through the one `unwrap()` gate; exported arg types via `InferRequestType` (the established wrapper pattern). `GetPackageBySlugArgs` infers as `{ slug: string }` and `GetAppointmentArgs` as `{ param: { id: string } }` (route-level input shape — spike-pinned).
+- Consumes: Task 1's `studioServiceWithBranchesSchema` / `StudioServiceWithBranches`; Task 2's routes (the RPC surface `raw.api.v1['service-packages'][':slug'].$get`, `raw.api.v1.appointments[':id'].$get`, `raw.api.v1['studio-services'].$get`, exact key paths); the mock's existing `validatedJson`/`createAppointmentSchema` imports.
+- Produces (landing-build tasks consume these): `client.studioServices.list(): Promise<StudioServiceWithBranches[]>`, `client.servicePackages.bySlug(args: GetPackageBySlugArgs): Promise<ServicePackageWithInclusions>`, `client.appointments.get(args: GetAppointmentArgs): Promise<AppointmentWithAddons>`, all through the one `unwrap()` gate; exported arg types via `InferRequestType` (the established wrapper pattern). `GetPackageBySlugArgs` infers as `{ slug: string }` and `GetAppointmentArgs` as `{ param: { id: string } }` (route-level input shape, spike-pinned).
 
-**Not here:** no intake methods (#41 — no new POST surface; the mock's POST record keeps its existing `studioServiceId` passthrough), no landing server functions / query options (later tickets), no `mockApiBrokenBranches` extension (the ZodError-on-2xx test targets branches and stays the shape-mismatch exemplar).
+**Not here:** no intake methods (#41, no new POST surface; the mock's POST record keeps its existing `studioServiceId` passthrough), no landing server functions / query options (later tickets), no `mockApiBrokenBranches` extension (the ZodError-on-2xx test targets branches and stays the shape-mismatch exemplar).
 
-- [ ] **Step 1: Write the failing loopback tests** — append to `packages/api-client/test/loopback.test.ts`:
+- [ ] **Step 1: Write the failing loopback tests**, append to `packages/api-client/test/loopback.test.ts`:
 
 ```ts
 it('servicePackages.bySlug returns the package with resolved lookups', async () => {
@@ -1029,9 +1029,9 @@ it('studioServices.list returns active services with bookable branch ids', async
 pnpm --filter @sevendays/api-client test -- loopback.test.ts
 ```
 
-Expected: FAIL — the wrappers and mock endpoints don't exist (compile/type errors first, then assertion failures).
+Expected: FAIL, the wrappers and mock endpoints don't exist (compile/type errors first, then assertion failures).
 
-- [ ] **Step 3: Write the wrappers** — `packages/api-client/src/routes/studio-services.ts` (new file), exactly:
+- [ ] **Step 3: Write the wrappers**, `packages/api-client/src/routes/studio-services.ts` (new file), exactly:
 
 ```ts
 import type { StudioServiceWithBranches } from '@sevendays/types';
@@ -1042,7 +1042,7 @@ import { unwrap } from '../unwrap.js';
 /** Studio Service wrappers: GET /api/v1/studio-services (the only method today). */
 export function studioServicesRoutes(raw: RpcClient) {
   return {
-    /** GET /api/v1/studio-services — active services with bookableBranchIds. */
+    /** GET /api/v1/studio-services, active services with bookableBranchIds. */
     async list(): Promise<StudioServiceWithBranches[]> {
       const res = await raw.api.v1['studio-services'].$get();
       return unwrap(res, studioServiceWithBranchesSchema.array());
@@ -1064,7 +1064,7 @@ type BySlugEndpoint = RpcClient['api']['v1']['service-packages'][':slug']['$get'
 
 /**
  * The by-slug endpoint's declared input: `{ slug: string }` (the route
- * takes no param schema — slug is an opaque text key). Inferred, not
+ * takes no param schema, slug is an opaque text key). Inferred, not
  * hand-typed, so the RPC surface remains the drift-kill.
  */
 export type GetPackageBySlugArgs = InferRequestType<BySlugEndpoint>;
@@ -1072,12 +1072,12 @@ export type GetPackageBySlugArgs = InferRequestType<BySlugEndpoint>;
 /** Service Package wrappers: list + by-slug under /api/v1/service-packages. */
 export function servicePackagesRoutes(raw: RpcClient) {
   return {
-    /** GET /api/v1/service-packages — active packages with resolved lookups. */
+    /** GET /api/v1/service-packages, active packages with resolved lookups. */
     async list(): Promise<ServicePackageWithInclusions[]> {
       const res = await raw.api.v1['service-packages'].$get();
       return unwrap(res, servicePackageWithInclusionsSchema.array());
     },
-    /** GET /api/v1/service-packages/:slug — one active package; 404 when unknown/inactive. */
+    /** GET /api/v1/service-packages/:slug, one active package; 404 when unknown/inactive. */
     async bySlug(args: GetPackageBySlugArgs): Promise<ServicePackageWithInclusions> {
       const res = await raw.api.v1['service-packages'][':slug'].$get(args);
       return unwrap(res, servicePackageWithInclusionsSchema);
@@ -1086,7 +1086,7 @@ export function servicePackagesRoutes(raw: RpcClient) {
 }
 ```
 
-`packages/api-client/src/routes/appointments.ts` becomes (full contents — the two new pieces are the endpoint/args types above the factory and the `get` method between `list` and `create`):
+`packages/api-client/src/routes/appointments.ts` becomes (full contents, the two new pieces are the endpoint/args types above the factory and the `get` method between `list` and `create`):
 
 ```ts
 import type { AppointmentWithAddons } from '@sevendays/types';
@@ -1099,7 +1099,7 @@ type CreateEndpoint = RpcClient['api']['v1']['appointments']['$post'];
 type GetEndpoint = RpcClient['api']['v1']['appointments'][':id']['$get'];
 
 /**
- * Create input as the RPC surface declares it — the zod INPUT side of
+ * Create input as the RPC surface declares it, the zod INPUT side of
  * createAppointmentSchema: timestamps as ISO strings, addonServiceIds and
  * notes optional, and NO price field (the server snapshots the price).
  */
@@ -1108,7 +1108,7 @@ export type CreateAppointmentArgs = InferRequestType<CreateEndpoint>['json'];
 /**
  * The single-get endpoint's declared input: `{ param: { id: string } }`
  * (the route's z.uuid() param schema shapes the type; the wrapper passes
- * the caller's string through — validation is the API's job, and a
+ * the caller's string through, validation is the API's job, and a
  * non-uuid surfaces as ApiClientError(400) through unwrap).
  */
 export type GetAppointmentArgs = InferRequestType<GetEndpoint>;
@@ -1116,19 +1116,19 @@ export type GetAppointmentArgs = InferRequestType<GetEndpoint>;
 /** Appointment wrappers: list + single-get + create under /api/v1/appointments. */
 export function appointmentsRoutes(raw: RpcClient) {
   return {
-    /** GET /api/v1/appointments — newest-first, optional branch filter, 200 cap. */
+    /** GET /api/v1/appointments, newest-first, optional branch filter, 200 cap. */
     async list(
       args: { query: { branchId?: string } } = { query: {} }
     ): Promise<AppointmentWithAddons[]> {
       const res = await raw.api.v1.appointments.$get(args);
       return unwrap(res, appointmentWithAddonsSchema.array());
     },
-    /** GET /api/v1/appointments/:id — single record; 404 when unknown. */
+    /** GET /api/v1/appointments/:id, single record; 404 when unknown. */
     async get(args: GetAppointmentArgs): Promise<AppointmentWithAddons> {
       const res = await raw.api.v1.appointments[':id'].$get(args);
       return unwrap(res, appointmentWithAddonsSchema);
     },
-    /** POST /api/v1/appointments — 201 with the created record + add-ons. */
+    /** POST /api/v1/appointments, 201 with the created record + add-ons. */
     async create(json: CreateAppointmentArgs): Promise<AppointmentWithAddons> {
       const res = await raw.api.v1.appointments.$post({ json });
       return unwrap(res, appointmentWithAddonsSchema);
@@ -1137,9 +1137,9 @@ export function appointmentsRoutes(raw: RpcClient) {
 }
 ```
 
-`packages/api-client/src/index.ts` — three edits: (1) the import block gains `import { studioServicesRoutes } from './routes/studio-services.js';`; (2) the `ApiClient` interface gains `studioServices: ReturnType<typeof studioServicesRoutes>;` after the `addonServices` line; (3) the factory's return object gains `studioServices: studioServicesRoutes(raw),` after the `addonServices: addonServicesRoutes(raw),` line.
+`packages/api-client/src/index.ts`, three edits: (1) the import block gains `import { studioServicesRoutes } from './routes/studio-services.js';`; (2) the `ApiClient` interface gains `studioServices: ReturnType<typeof studioServicesRoutes>;` after the `addonServices` line; (3) the factory's return object gains `studioServices: studioServicesRoutes(raw),` after the `addonServices: addonServicesRoutes(raw),` line.
 
-- [ ] **Step 4: Extend the mock** — in `packages/api-client/test/mock-api.ts`, four edits:
+- [ ] **Step 4: Extend the mock**, in `packages/api-client/test/mock-api.ts`, four edits:
 
 (a) The zod import gains the value import (the uuid-shape 400 uses it): `import type { ZodSchema } from 'zod';` becomes `import { z, type ZodSchema } from 'zod';`
 
@@ -1269,7 +1269,7 @@ const STUDIO_SERVICES = [
     });
 ```
 
-- [ ] **Step 5: Mount in the mock's v1 chain** — inside `makeApi`, the `v1` chain gains `.route('/studio-services', studioServices)` directly after `/service-packages` (matching the real API's relative order). The chain becomes:
+- [ ] **Step 5: Mount in the mock's v1 chain**, inside `makeApi`, the `v1` chain gains `.route('/studio-services', studioServices)` directly after `/service-packages` (matching the real API's relative order). The chain becomes:
 
 ```ts
   const v1 = new Hono<MockEnv>()
@@ -1290,7 +1290,7 @@ pnpm --filter @sevendays/api-client test
 pnpm --filter @sevendays/api-client typecheck
 ```
 
-Expected: all green — 6 new loopback tests (by-slug 200 + 404, appointments.get 200 + 404 + 400, studio-services list) plus every pre-existing test unchanged; typecheck green (the `:id`/`:slug` key paths typecheck against the real RPC surface — the drift-kill working).
+Expected: all green, 6 new loopback tests (by-slug 200 + 404, appointments.get 200 + 404 + 400, studio-services list) plus every pre-existing test unchanged; typecheck green (the `:id`/`:slug` key paths typecheck against the real RPC surface, the drift-kill working).
 
 - [ ] **Step 7: Commit**
 
@@ -1312,7 +1312,7 @@ git commit -m "feat(api-client): studioServices.list, servicePackages.bySlug, ap
 **Interfaces:**
 - Consumes: Tasks 1–4 complete and committed.
 
-**Not here:** no `docs/plan.md` checkbox ticks (the M2 API box spans tickets 03 + 04 and stays unticked until #41), no GitHub issue edits, no PR (owner opens it), no ADR — this ticket introduces no new architectural decision (thin reads on the established pattern; the only candidates — the `validatedParam` third member and the `notFound` helper — are applications of the already-recorded ADR-0006/Q4 conventions, not choices).
+**Not here:** no `docs/plan.md` checkbox ticks (the M2 API box spans tickets 03 + 04 and stays unticked until #41), no GitHub issue edits, no PR (owner opens it), no ADR, this ticket introduces no new architectural decision (thin reads on the established pattern; the only candidates, the `validatedParam` third member and the `notFound` helper, are applications of the already-recorded ADR-0006/Q4 conventions, not choices).
 
 - [ ] **Step 1: Repo-wide gate**
 
@@ -1320,7 +1320,7 @@ git commit -m "feat(api-client): studioServices.list, servicePackages.bySlug, ap
 pnpm check && pnpm build
 ```
 
-Expected: lint + format + typecheck + test green across all packages/apps; build green. (`pnpm test` includes the landing/admin no-op test scripts — fine, unchanged from ticket 02.)
+Expected: lint + format + typecheck + test green across all packages/apps; build green. (`pnpm test` includes the landing/admin no-op test scripts, fine, unchanged from ticket 02.)
 
 - [ ] **Step 2: Keep the graph current** (per AGENTS.md)
 
@@ -1328,28 +1328,28 @@ Expected: lint + format + typecheck + test green across all packages/apps; build
 graphify update .
 ```
 
-Expected: AST-only incremental update, no errors (dirty graphify-out files are expected; commit or leave them per what the sibling tickets did — `git status` shows them; leave if the repo convention is to not track them, add only if `git status` shows graphify-out tracked).
+Expected: AST-only incremental update, no errors (dirty graphify-out files are expected; commit or leave them per what the sibling tickets did, `git status` shows them; leave if the repo convention is to not track them, add only if `git status` shows graphify-out tracked).
 
-- [ ] **Step 3: Update `docs/progress.md`** — add one bullet to the landed-work list (match the sibling ticket-02 bullet's style; place it newest-adjacent, i.e. directly after the ticket-02 bullet):
+- [ ] **Step 3: Update `docs/progress.md`**, add one bullet to the landed-work list (match the sibling ticket-02 bullet's style; place it newest-adjacent, i.e. directly after the ticket-02 bullet):
 
 ```markdown
-- **M2 ticket 04 — three read endpoints + client wrappers (#42 → .scratch/m2-booking-flow-tickets/04.md):** `GET /api/v1/studio-services` (active-only with embedded `bookableBranchIds` — a linked-but-inactive service stays invisible), `GET /api/v1/service-packages/:slug` (one active package, assembled by the same `assemblePackageRead` as the list; unknown OR inactive slug → uniform 404 `Package not found.`), `GET /api/v1/appointments/:id` (same `AppointmentWithAddons` shape as the list via the shared `fetchAddonEntries` stitch; unknown id → 404 `Appointment not found.`; public until M4 like the list). `validatedParam` joined the validator family (z.uuid() on `:id` — a non-uuid would be a PG 22P02 500; `:slug` deliberately takes no param schema, opaque text key); `notFound` helper carries the per-entity 404 wordings through the uniform envelope. `packages/api-client`: `studioServices.list()`, `servicePackages.bySlug(slug)`, `appointments.get({ param: { id } })` — typed through the RPC surface, arg types inferred, all through the one `unwrap()` gate; mock mirrors all three endpoints incl. the pinned 404 wordings and the validator 400 envelope; loopback covers 200/404/400 per endpoint. No migration — everything rides migrations 0002–0004. Compose green (7 new integration tests + 6 new loopback tests); full `pnpm check` + `pnpm build` green. NOT landed: generalized service-path intake + typed rejections + `past_datetime` floor (#41) — `docs/plan.md`'s M2 API checkbox stays unticked until then.
+- **M2 ticket 04, three read endpoints + client wrappers (#42 → .scratch/m2-booking-flow-tickets/04.md):** `GET /api/v1/studio-services` (active-only with embedded `bookableBranchIds`, a linked-but-inactive service stays invisible), `GET /api/v1/service-packages/:slug` (one active package, assembled by the same `assemblePackageRead` as the list; unknown OR inactive slug → uniform 404 `Package not found.`), `GET /api/v1/appointments/:id` (same `AppointmentWithAddons` shape as the list via the shared `fetchAddonEntries` stitch; unknown id → 404 `Appointment not found.`; public until M4 like the list). `validatedParam` joined the validator family (z.uuid() on `:id`, a non-uuid would be a PG 22P02 500; `:slug` deliberately takes no param schema, opaque text key); `notFound` helper carries the per-entity 404 wordings through the uniform envelope. `packages/api-client`: `studioServices.list()`, `servicePackages.bySlug(slug)`, `appointments.get({ param: { id } })`, typed through the RPC surface, arg types inferred, all through the one `unwrap()` gate; mock mirrors all three endpoints incl. the pinned 404 wordings and the validator 400 envelope; loopback covers 200/404/400 per endpoint. No migration, everything rides migrations 0002–0004. Compose green (7 new integration tests + 6 new loopback tests); full `pnpm check` + `pnpm build` green. NOT landed: generalized service-path intake + typed rejections + `past_datetime` floor (#41), `docs/plan.md`'s M2 API checkbox stays unticked until then.
 ```
 
 - [ ] **Step 4: Commit**
 
 ```bash
 git add docs/progress.md
-git commit -m "docs: M2 ticket 04 landed — three read endpoints + client wrappers"
+git commit -m "docs: M2 ticket 04 landed, three read endpoints + client wrappers"
 ```
 
-- [ ] **Step 5: Stop here — handoff** (owner pushes/merges; #41 branches from this state). Do **not** tick `docs/plan.md`'s M2 API checkbox (spans tickets 03 + 04; it gets the ✅ emoji only when BOTH have landed — if this ticket merges first, the tick happens at #41's close-out; if #41 merges first, this ticket's close-out ticks it). Do not open a PR unless asked. Issue #42's acceptance-criteria boxes map to Tasks 3+2 (integration), Task 4 (loopback), Tasks 2+3+4 (thin routes) — note that mapping in the PR description when the owner opens it.
+- [ ] **Step 5: Stop here, handoff** (owner pushes/merges; #41 branches from this state). Do **not** tick `docs/plan.md`'s M2 API checkbox (spans tickets 03 + 04; it gets the ✅ emoji only when BOTH have landed, if this ticket merges first, the tick happens at #41's close-out; if #41 merges first, this ticket's close-out ticks it). Do not open a PR unless asked. Issue #42's acceptance-criteria boxes map to Tasks 3+2 (integration), Task 4 (loopback), Tasks 2+3+4 (thin routes), note that mapping in the PR description when the owner opens it.
 
 ---
 
-## Self-Review (executed at plan-writing time — re-run after any edit)
+## Self-Review (executed at plan-writing time, re-run after any edit)
 
 1. **Spec coverage:** the three reads (Tasks 2–3: by-slug + single-get, studio-services list) with `bookableBranchIds` embedded (Task 1 schema → Task 3 service → Task 4 wrapper); uniform JSON 404s (Tasks 2, 4); `AppointmentWithAddons` parity by shared-code extraction (Task 2); client wrappers typed through the RPC gate (Task 4); routes thin over service modules (Tasks 2–3). Acceptance criterion 1 ↔ Tasks 2–3, criterion 2 ↔ Task 4, criterion 3 ↔ Tasks 2–3.
 2. **Placeholder scan:** no TBD/TODO-as-gap/deferred-language in steps; every code step carries full code or exact line-level edits; the mock's POST body is repeated verbatim (not referenced).
-3. **Type consistency:** `studioServiceWithBranchesSchema` / `StudioServiceWithBranches` / `listActiveStudioServicesWithBranches` / `getActivePackageWithInclusionsBySlug` / `getAppointmentWithAddons` / `assemblePackageRead` / `fetchAddonEntries` / `validatedParam` / `notFound` / `GetPackageBySlugArgs` / `GetAppointmentArgs` / `serviceRetired` — each defined once and used identically downstream (grep-verified against this file at write time; re-run `grep -n` per name after any edit).
+3. **Type consistency:** `studioServiceWithBranchesSchema` / `StudioServiceWithBranches` / `listActiveStudioServicesWithBranches` / `getActivePackageWithInclusionsBySlug` / `getAppointmentWithAddons` / `assemblePackageRead` / `fetchAddonEntries` / `validatedParam` / `notFound` / `GetPackageBySlugArgs` / `GetAppointmentArgs` / `serviceRetired`, each defined once and used identically downstream (grep-verified against this file at write time; re-run `grep -n` per name after any edit).
 

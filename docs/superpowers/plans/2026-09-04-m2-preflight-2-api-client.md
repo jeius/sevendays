@@ -1,8 +1,8 @@
-# M2 Pre-flight 2/5 — Shared API client over Hono RPC (#22) Implementation Plan
+# M2 Pre-flight 2/5, Shared API client over Hono RPC (#22) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build `@sevendays/api-client` — the shared, typed, Zod-parsing client factory (`createApiClient({ baseUrl, fetch? })`) over Hono RPC — and make the API's exported `AppType` actually carry its route schema so the drift-kill works.
+**Goal:** Build `@sevendays/api-client`, the shared, typed, Zod-parsing client factory (`createApiClient({ baseUrl, fetch? })`) over Hono RPC, and make the API's exported `AppType` actually carry its route schema so the drift-kill works.
 
 **Architecture:** Two moves. (1) The API's route tree is re-registered in **chained** form (the Hono "larger applications" pattern): Hono merges a route into the parent's type schema only when `app.route()`'s return value is chained onward, so today's statement-style `app.get(...); app.route(...)` leaves `AppType` with an empty schema and `hc<AppType>` degrades to `unknown` members. This was verified by probe on 2026-09-04 against the real repo. (2) A new node-tier package wraps the raw RPC client with per-route wrapper methods (see Ruling below), each a one-liner that runs the response through one shared `unwrap()` gate: non-2xx → `apiErrorSchema` → typed `ApiClientError` (status + parsed details); 2xx → the route's shared `packages/types` schema → typed payload.
 
@@ -15,24 +15,24 @@
 - Node >= 24; pnpm workspace; run repo commands from the repo root unless noted.
 - Work on a feature branch (suggested: `feat/api-client`); never commit to `main`; leave pushing to the user.
 - Do not commit code that fails `pnpm check` (lint + format + typecheck + test).
-- Zod v4 everywhere; external shapes live in `packages/types`, not per-app. `apiErrorSchema` **already exists** (`packages/types/src/api-error.ts`, with tests) — never re-create it.
+- Zod v4 everywhere; external shapes live in `packages/types`, not per-app. `apiErrorSchema` **already exists** (`packages/types/src/api-error.ts`, with tests), never re-create it.
 - All code `async`/`await`; no Promise chains or callbacks.
-- `verbatimModuleSyntax` is on — `import type` for type-only imports is mandatory.
+- `verbatimModuleSyntax` is on, `import type` for type-only imports is mandatory.
 - The API is consumed **type-only**: no runtime imports of `@sevendays/api/app` anywhere in `packages/api-client` (grep-enforced in Task 4).
-- Never commit secrets; this package needs no env at all (its tests are in-memory loopback — no compose db, no `TEST_DATABASE_URL`).
+- Never commit secrets; this package needs no env at all (its tests are in-memory loopback, no compose db, no `TEST_DATABASE_URL`).
 - **Client surface ruling (2026-09-04, pre-plan):** `createApiClient` returns route-tree **wrapper methods** (`client.branches.list()`, `client.appointments.create(input)`) plus the raw client as `client.raw`. "No function-per-endpoint wrapper layer" is enforced as *no parallel hand-written API description*: every wrapper delegates to the raw `hc<AppType>` client (paths, params, and request/response types stay inferred from the API), and each wrapper is a one-liner that only interposes the shared parse/error gate. Call sites never touch `res.json()`; typed data comes out, `ApiClientError` is thrown automatically on non-2xx.
 
 ### Verified pre-plan facts (probed against the real toolchain 2026-09-04)
 
-These were executed, not assumed — trust them:
+These were executed, not assumed, trust them:
 
 1. **Unchained schema → `unknown` client.** With today's statement-style registrations, `hc<AppType>` resolves to `unknown` (Hono's `Client<T>` yields `never` → `UnionToIntersection` → `unknown`). Chaining every registration fixes it. Probe: a local chained mini-app under the **worker tier** (`apps/api`, workers-types present) typechecks `hc<ChainedApp>` and member calls cleanly; the same file with statement-style registrations fails `TS18046: 'rpc' is of type 'unknown'`.
-2. **`validated(schema, 'json' | 'query')` pollutes RPC input.** The union-typed `target` makes zValidator's generic `Target` the union for **every** endpoint, so RPC input types demand `{ json: ..., query: ... }` both (verified: `TS2345 ... Property 'json' is missing`). Overloading `validated()` cannot fix it (`ReturnType<typeof zValidator<'json', S>>` is not a valid instantiation expression — `TS2635`). The verified fix is two functions with the target literal in the body (`validatedJson` / `validatedQuery`).
+2. **`validated(schema, 'json' | 'query')` pollutes RPC input.** The union-typed `target` makes zValidator's generic `Target` the union for **every** endpoint, so RPC input types demand `{ json: ..., query: ... }` both (verified: `TS2345 ... Property 'json' is missing`). Overloading `validated()` cannot fix it (`ReturnType<typeof zValidator<'json', S>>` is not a valid instantiation expression, `TS2635`). The verified fix is two functions with the target literal in the body (`validatedJson` / `validatedQuery`).
 3. **`app.fetch` is not assignable to `typeof fetch`** (`(request: Request, env?, executionCtx?)` vs `(input: string | Request | URL, init?)`). The verified one-line adapter is: `const loopbackFetch: typeof fetch = async (input, init) => app.fetch(new Request(input, init));`
 4. **Loopback runs without a server:** `hc<AppType>(base, { fetch })` with an in-memory Hono app returned 200 + parsed typed JSON + the 404 envelope in 3/3 vitest tests (no network, no workerd).
 5. `ZodParseError` is exported from `zod@4.5.1` (runtime + `tsc` resolved).
 6. `expectTypeOf` deep assertions work against RPC-derived types: `RpcClient['api']['v1']['appointments']['$post']` + `InferRequestType<...>['json']` compile under the node tier (probe file typechecked clean).
-7. **Dates over JSON:** the read schemas use `z.coerce.date()` on `createdAt`/`updatedAt`/`scheduledAt`, so the client gets real `Date` objects from ISO strings — no hand-rolled revivers.
+7. **Dates over JSON:** the read schemas use `z.coerce.date()` on `createdAt`/`updatedAt`/`scheduledAt`, so the client gets real `Date` objects from ISO strings, no hand-rolled revivers.
 
 ---
 
@@ -49,8 +49,8 @@ These were executed, not assumed — trust them:
 - Create (temporary, deleted in Task 1): `apps/api/src/__rpc-shape-probe.ts`
 
 **Interfaces:**
-- Consumes: the current `apps/api/src` tree (all handlers/services unchanged — this task only re-expresses registration).
-- Produces: `AppType` (`typeof app` from `apps/api/src/index.ts`) whose type schema carries the full `/api/v1` route tree — the contract every later task consumes as `import type { AppType } from '@sevendays/api/app'` → `RpcClient = ReturnType<typeof hc<AppType>>` with **live** route members. Also produces `validatedJson(schema)` and `validatedQuery(schema)` (same uniform `{ error, details }` hook as today). Runtime behavior is unchanged: same validators, same handlers, same statuses.
+- Consumes: the current `apps/api/src` tree (all handlers/services unchanged, this task only re-expresses registration).
+- Produces: `AppType` (`typeof app` from `apps/api/src/index.ts`) whose type schema carries the full `/api/v1` route tree, the contract every later task consumes as `import type { AppType } from '@sevendays/api/app'` → `RpcClient = ReturnType<typeof hc<AppType>>` with **live** route members. Also produces `validatedJson(schema)` and `validatedQuery(schema)` (same uniform `{ error, details }` hook as today). Runtime behavior is unchanged: same validators, same handlers, same statuses.
 
 - [ ] **Step 1: Prove the current failure mode (RED evidence)**
 
@@ -60,7 +60,7 @@ Create `apps/api/src/__rpc-shape-probe.ts`:
 // TEMPORARY drift probe (deleted at the end of this task). It exists to prove
 // the exported AppType does NOT carry the route schema today: hc<AppType>
 // degrades to unknown, so member access fails. After the chaining rework this
-// file typechecks green — that green is the task's proof, then the file goes.
+// file typechecks green, that green is the task's proof, then the file goes.
 import { hc } from 'hono/client';
 import type { AppType } from './index.js';
 
@@ -73,7 +73,7 @@ export async function probeBranches(): Promise<number> {
 ```
 
 Run: `pnpm --filter @sevendays/api typecheck`
-Expected: FAIL — `src/__rpc-shape-probe.ts: 'probe' is of type 'unknown'` (TS18046), plus the same for `.api.v1.branches` access. If it unexpectedly passes, stop and re-investigate (the chaining may have already happened); do not write the rework blind.
+Expected: FAIL, `src/__rpc-shape-probe.ts: 'probe' is of type 'unknown'` (TS18046), plus the same for `.api.v1.branches` access. If it unexpectedly passes, stop and re-investigate (the chaining may have already happened); do not write the rework blind.
 
 - [ ] **Step 2: Split `validated()` by target**
 
@@ -89,7 +89,7 @@ import type { ZodSchema } from 'zod';
 // Two functions, not one target-parameterized helper: zValidator's Target must
 // be an exact literal for Hono RPC input inference. The old union signature
 // (`validated(schema, 'json' | 'query')`) typed every endpoint's RPC input as
-// { json: ..., query: ... } regardless of target — verified pre-plan
+// { json: ..., query: ... } regardless of target, verified pre-plan
 // (2026-09-04). The hook body is duplicated: zValidator's Hook generic cannot
 // be referenced as a standalone typed const without losing inference.
 export const validatedJson = <S extends ZodSchema>(schema: S) =>
@@ -136,7 +136,7 @@ import type { ApiEnv } from '../services/db.js';
 
 // Chained registration (ADR-0006 Hono RPC): the route lives in this app's
 // type schema only because the expression is chained. Every registration in
-// the /api/v1 tree must stay chained — a statement-style registration here
+// the /api/v1 tree must stay chained, a statement-style registration here
 // silently drops the route from AppType and breaks the client package (its
 // drift-kill suite is the regression guard).
 export const branches = new Hono<ApiEnv>().get('/', async (c) => {
@@ -152,7 +152,7 @@ import { Hono } from 'hono';
 import type { ApiEnv } from '../services/db.js';
 import { listActivePackagesWithInclusions } from '../services/service-packages.js';
 
-// Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts.
+// Chained registration (ADR-0006 Hono RPC), see routes/branches.ts.
 export const servicePackages = new Hono<ApiEnv>().get('/', async (c) => {
   const db = c.get('db');
   return c.json(await listActivePackagesWithInclusions(db));
@@ -166,7 +166,7 @@ import { Hono } from 'hono';
 import { listActiveAddonServices } from '../services/addon-services.js';
 import type { ApiEnv } from '../services/db.js';
 
-// Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts.
+// Chained registration (ADR-0006 Hono RPC), see routes/branches.ts.
 export const addonServices = new Hono<ApiEnv>().get('/', async (c) => {
   const db = c.get('db');
   return c.json(await listActiveAddonServices(db));
@@ -184,7 +184,7 @@ import type { ApiEnv } from '../services/db.js';
 import { badRequest } from '../services/errors.js';
 import { validatedJson, validatedQuery } from '../services/validator.js';
 
-// Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts.
+// Chained registration (ADR-0006 Hono RPC), see routes/branches.ts.
 export const appointments = new Hono<ApiEnv>()
   .get('/', validatedQuery(z.object({ branchId: z.uuid().optional() })), async (c) => {
     const { branchId } = c.req.valid('query');
@@ -217,7 +217,7 @@ import { servicePackages } from './service-packages.js';
 // Acquisition middleware (candidate D): runs for every /api/v1 request,
 // creates the per-request db handle and stores it in context. A missing
 // DATABASE_URL throws here and is caught by the root onError as the uniform
-// 500 JSON — the acquisition-inside-the-try ruling, now structural instead
+// 500 JSON, the acquisition-inside-the-try ruling, now structural instead
 // of a per-route comment. MUST be registered before the route mounts so it
 // composes with every handler.
 export const acquireDb = async (c: import('hono').Context<ApiEnv>, next: () => Promise<void>) => {
@@ -226,7 +226,7 @@ export const acquireDb = async (c: import('hono').Context<ApiEnv>, next: () => P
 };
 
 // Chained registration (ADR-0006 Hono RPC): each .route() return value feeds
-// the next — the sub-tree lands in v1's schema only through the chain.
+// the next, the sub-tree lands in v1's schema only through the chain.
 export const v1 = new Hono<ApiEnv>()
   .use('*', acquireDb)
   .route('/branches', branches)
@@ -237,7 +237,7 @@ export const v1 = new Hono<ApiEnv>()
 
 - [ ] **Step 4: Chain the root app**
 
-In `apps/api/src/index.ts`, replace the app construction and registration block (keep the existing comment blocks verbatim — they move with the code) so that the former statement sequence becomes one chained expression:
+In `apps/api/src/index.ts`, replace the app construction and registration block (keep the existing comment blocks verbatim, they move with the code) so that the former statement sequence becomes one chained expression:
 
 ```ts
 const app = new Hono<{ Bindings: Env }>()
@@ -245,12 +245,12 @@ const app = new Hono<{ Bindings: Env }>()
   .use('*', cors({ origin: '*' })) // TODO(M6): restrict once domains exist.
 
   // All body/query validation goes through the validated* helpers so failures
-  // carry the uniform { error, details } shape — never raw zValidator.
+  // carry the uniform { error, details } shape, never raw zValidator.
   // See services/validator.ts.
 
-  // Uniform error envelope (candidate D / ADR-0006): every thrown error — from
+  // Uniform error envelope (candidate D / ADR-0006): every thrown error, from
   // the versioned routes, the acquisition middleware (Task 2), or any future
-  // handler — lands here, is logged once (workerd-safe console.error, no new
+  // handler, lands here, is logged once (workerd-safe console.error, no new
   // dependency) with the route that threw it, and returns the single 500 JSON
   // shape. Replaces the per-route try/catch + silent swallow that let deploy
   // blocker #2 ship invisible (M1.5). Health stays mounted outside v1, so a db
@@ -261,7 +261,7 @@ const app = new Hono<{ Bindings: Env }>()
   })
 
   // Uniform 404 envelope (closes the 404 half of the 404/405 ledger item):
-  // every unmounted path — including under /api/v1 — returns the JSON shape,
+  // every unmounted path, including under /api/v1, returns the JSON shape,
   // never Hono's bare plain-text default (which would degrade the M2 api-client's
   // response inference to `unknown`).
   .notFound((c) => c.json({ error: 'Not found.' }, 404))
@@ -270,12 +270,12 @@ const app = new Hono<{ Bindings: Env }>()
   .route('/api/v1', v1);
 ```
 
-`export default app;` and `export type AppType = typeof app;` (both already at file end) stay untouched. The chain is what makes the schema flow — `.use()`, `.onError()`, `.notFound()`, `.get()` and `.route()` all return the app, and the final `.route('/api/v1', v1)` return value is what AppType captures.
+`export default app;` and `export type AppType = typeof app;` (both already at file end) stay untouched. The chain is what makes the schema flow, `.use()`, `.onError()`, `.notFound()`, `.get()` and `.route()` all return the app, and the final `.route('/api/v1', v1)` return value is what AppType captures.
 
-- [ ] **Step 5: GREEN — probe + full API suite**
+- [ ] **Step 5: GREEN, probe + full API suite**
 
 Run: `pnpm --filter @sevendays/api typecheck`
-Expected: exit 0 — the probe file now resolves `hc<AppType>` with live members (`probe.api.v1.branches.$get` typechecks).
+Expected: exit 0, the probe file now resolves `hc<AppType>` with live members (`probe.api.v1.branches.$get` typechecks).
 
 Delete the probe:
 
@@ -284,7 +284,7 @@ rm apps/api/src/__rpc-shape-probe.ts
 ```
 
 Run: `pnpm --filter @sevendays/api test`
-Expected: PASS with a positive count, and **no fewer tests than the current suite** (env 5 + app-type 1 + index 4 + group-children + the compose-backed integration suites — record the number you see; it must be > 0 and not smaller than before this task). The `index.test.ts` assertions (versioned mount, unversioned 404, health) are the regression guard that chaining changed nothing at runtime. Note: the integration suites need the compose db up (`docker compose up -d db`); if the db is unreachable they fail loudly — start it, do not skip.
+Expected: PASS with a positive count, and **no fewer tests than the current suite** (env 5 + app-type 1 + index 4 + group-children + the compose-backed integration suites, record the number you see; it must be > 0 and not smaller than before this task). The `index.test.ts` assertions (versioned mount, unversioned 404, health) are the regression guard that chaining changed nothing at runtime. Note: the integration suites need the compose db up (`docker compose up -d db`); if the db is unreachable they fail loudly, start it, do not skip.
 
 - [ ] **Step 6: Commit**
 
@@ -293,12 +293,12 @@ git add apps/api/src/index.ts apps/api/src/routes/ apps/api/src/services/validat
 git commit -m "feat(api): chain every registration so AppType carries the route schema
 
 - hc<AppType> degraded to unknown members: Hono merges a route into the
-  parent's schema only through chained .route()/.get() return values — the
+  parent's schema only through chained .route()/.get() return values, the
   statement-style registrations left AppType with BlankSchema (probe evidence
   in the pre-plan session, 2026-09-04).
 - validated() split into validatedJson/validatedQuery: the union-typed target
   made zValidator's generic Target 'json' | 'query' for every endpoint,
-  polluting each RPC input with { json, query } (overloads cannot fix it —
+  polluting each RPC input with { json, query } (overloads cannot fix it:
   ReturnType<typeof zValidator<...>> is not a valid instantiation expression).
 - No runtime behavior change: same validators, handlers, and statuses; the
   existing index/group-children/env suites stay green."
@@ -328,10 +328,10 @@ git commit -m "feat(api): chain every registration so AppType carries the route 
 - Consumes: `AppType` from `@sevendays/api/app` (Task 1's chained type; types-only devDependency).
 - Produces (the public surface later tasks and #23/#24 consume):
   - `createApiClient(options: CreateApiClientOptions): ApiClient`
-  - `interface CreateApiClientOptions { baseUrl: string; fetch?: typeof fetch }` — missing/blank `baseUrl` throws at creation.
+  - `interface CreateApiClientOptions { baseUrl: string; fetch?: typeof fetch }`, missing/blank `baseUrl` throws at creation.
   - `type RpcClient = ReturnType<typeof hc<AppType>>` (the raw client; exposed as `client.raw`)
-  - `class ApiClientError extends Error { readonly status: number; readonly details?: unknown }` — thrown on every non-2xx; `details` is the `apiErrorSchema`-parsed envelope.
-  - `unwrap<T>(res: Response, schema: ZodType<T>): Promise<T>` — the single parse gate.
+  - `class ApiClientError extends Error { readonly status: number; readonly details?: unknown }`, thrown on every non-2xx; `details` is the `apiErrorSchema`-parsed envelope.
+  - `unwrap<T>(res: Response, schema: ZodType<T>): Promise<T>`, the single parse gate.
   - Re-exports from the package root: `AppType`, `RpcClient`, `CreateApiClientOptions`, `ApiClientError`, `hc`.
 
 - [ ] **Step 1: Scaffold the package (configs first)**
@@ -377,9 +377,9 @@ Create `packages/api-client/package.json`:
 }
 ```
 
-Notes: **no build script** — the package is source-exported (`types` and `default` both point into `src/`), like `@sevendays/ui`; consumers are all workspace-internal TS. `@sevendays/api` is a **devDependency used with `import type` only** (runtime imports are a Task-4 grep violation). `zod` is a peer+dev dep (same shape as `@sevendays/types` — the client calls `schema.parse` at runtime, so the consuming app supplies zod). `@hono/zod-validator` is dev-only: only Task 3's loopback mock uses it (the real API's validator module is not runtime-importable by rule).
+Notes: **no build script**, the package is source-exported (`types` and `default` both point into `src/`), like `@sevendays/ui`; consumers are all workspace-internal TS. `@sevendays/api` is a **devDependency used with `import type` only** (runtime imports are a Task-4 grep violation). `zod` is a peer+dev dep (same shape as `@sevendays/types`, the client calls `schema.parse` at runtime, so the consuming app supplies zod). `@hono/zod-validator` is dev-only: only Task 3's loopback mock uses it (the real API's validator module is not runtime-importable by rule).
 
-Create `packages/api-client/tsconfig.json` (node tier — **not** the api's worker tier; `@cloudflare/workers-types` and its CF-`Request` variance caused the type friction the node tier avoids):
+Create `packages/api-client/tsconfig.json` (node tier, **not** the api's worker tier; `@cloudflare/workers-types` and its CF-`Request` variance caused the type friction the node tier avoids):
 
 ```json
 {
@@ -415,7 +415,7 @@ Create `packages/api-client/biome.json`:
 }
 ```
 
-Create `packages/api-client/vitest.config.ts` (per-workspace config is **mandatory** — ADR-0003; without it a discovery miss is a silent green via the shared `passWithNoTests`):
+Create `packages/api-client/vitest.config.ts` (per-workspace config is **mandatory**, ADR-0003; without it a discovery miss is a silent green via the shared `passWithNoTests`):
 
 ```ts
 import { baseConfig } from '@sevendays/config/vitest';
@@ -513,7 +513,7 @@ describe('createApiClient', () => {
 });
 ```
 
-Create `packages/api-client/src/app-type.test.ts` (the **drift-kill probe** — acceptance criterion "an API route change re-typechecks the package"):
+Create `packages/api-client/src/app-type.test.ts` (the **drift-kill probe**, acceptance criterion "an API route change re-typechecks the package"):
 
 ```ts
 import type { InferRequestType } from 'hono/client';
@@ -522,7 +522,7 @@ import type { RpcClient } from './client.js';
 
 // Type-level only: proves the type-imported AppType carries a live route
 // surface. A route removed/renamed/unchained in apps/api changes the indexed
-// access below and this suite stops compiling — the drift-kill working.
+// access below and this suite stops compiling, the drift-kill working.
 it('AppType exposes the /api/v1 route surface via RPC', () => {
   type CreateEndpoint = RpcClient['api']['v1']['appointments']['$post'];
   type CreateInput = InferRequestType<CreateEndpoint>['json'];
@@ -533,7 +533,7 @@ it('AppType exposes the /api/v1 route surface via RPC', () => {
 });
 ```
 
-- [ ] **Step 3: Run the suite — verify RED**
+- [ ] **Step 3: Run the suite, verify RED**
 
 Link the workspace first (the new devDependency on `@sevendays/api` needs a pnpm pass):
 
@@ -542,10 +542,10 @@ pnpm install --no-frozen-lockfile
 ```
 
 Run: `pnpm --filter @sevendays/api-client test`
-Expected: FAIL — vitest reports module-not-found for `./unwrap.js` / `./index.js` (the sources do not exist yet). This is RED.
+Expected: FAIL, vitest reports module-not-found for `./unwrap.js` / `./index.js` (the sources do not exist yet). This is RED.
 
 Run: `pnpm --filter @sevendays/api-client typecheck`
-Expected: FAIL (missing modules) — same root cause.
+Expected: FAIL (missing modules), same root cause.
 
 - [ ] **Step 4: Implement the client core**
 
@@ -558,7 +558,7 @@ import type { AppType } from '@sevendays/api/app';
 /** The raw Hono RPC client over the API's exported route type (ADR-0006). */
 export type RpcClient = ReturnType<typeof hc<AppType>>;
 
-/** Factory options: baseUrl is required — no fallback (spec ruling). */
+/** Factory options: baseUrl is required, no fallback (spec ruling). */
 export interface CreateApiClientOptions {
   baseUrl: string;
   fetch?: typeof fetch;
@@ -605,7 +605,7 @@ import { ApiClientError } from './error.js';
 /**
  * The single parsing gate (ADR-0006): every response passes through here.
  * Non-2xx → apiErrorSchema → ApiClientError(status, parsed envelope). A
- * non-2xx body that is not the envelope throws ZodParseError instead — also
+ * non-2xx body that is not the envelope throws ZodParseError instead, also
  * loud (unwrap.test.ts pins the distinction). 2xx → schema.parse → typed
  * payload; a server drifting from the shared schema fails here.
  */
@@ -643,7 +643,7 @@ export interface ApiClient {
 
 /**
  * Build the shared API client (ADR-0006). Fails loudly when baseUrl is
- * missing — a misconfigured deployment never silently calls localhost.
+ * missing, a misconfigured deployment never silently calls localhost.
  * The route groups are thin wrappers over `raw` (the pre-plan surface
  * ruling): each delegates to the RPC client so paths/params/types stay
  * inferred from AppType, and each runs its response through unwrap().
@@ -666,7 +666,7 @@ export type { AppType, CreateApiClientOptions, RpcClient } from './client.js';
 export { ApiClientError } from './error.js';
 ```
 
-The wrapper route modules it imports are created next — create the stub versions NOW (empty group objects, filled in Task 3) so this file compiles:
+The wrapper route modules it imports are created next, create the stub versions NOW (empty group objects, filled in Task 3) so this file compiles:
 
 `packages/api-client/src/routes/branches.ts`:
 
@@ -712,10 +712,10 @@ export function appointmentsRoutes(_raw: RpcClient) {
 }
 ```
 
-- [ ] **Step 5: Run the suite — verify GREEN**
+- [ ] **Step 5: Run the suite, verify GREEN**
 
 Run: `pnpm --filter @sevendays/api-client test`
-Expected: PASS — **9 tests** (unwrap 4 + create 4 + app-type 1) with a visible `Tests  9 passed` line. The app-type probe compiling is itself the subpath-export acceptance check: `RpcClient['api']['v1']['appointments']['$post']` resolving with real input fields proves `import type { AppType } from '@sevendays/api/app'` → chained schema flows.
+Expected: PASS, **9 tests** (unwrap 4 + create 4 + app-type 1) with a visible `Tests  9 passed` line. The app-type probe compiling is itself the subpath-export acceptance check: `RpcClient['api']['v1']['appointments']['$post']` resolving with real input fields proves `import type { AppType } from '@sevendays/api/app'` → chained schema flows.
 
 Run: `pnpm --filter @sevendays/api-client typecheck` → exit 0.
 Run: `pnpm --filter @sevendays/api-client lint` → exit 0.
@@ -724,12 +724,12 @@ Run: `pnpm --filter @sevendays/api-client lint` → exit 0.
 
 ```bash
 git add packages/api-client pnpm-lock.yaml
-git commit -m "feat(api-client): scaffold @sevendays/api-client — createApiClient, unwrap, ApiClientError
+git commit -m "feat(api-client): scaffold @sevendays/api-client, createApiClient, unwrap, ApiClientError
 
 - Node-tier package, source-exported (no build), own vitest config per
   ADR-0003 (per-workspace configs are mandatory on vitest 4).
 - @sevendays/api is a devDependency used types-only (import type AppType
-  from '@sevendays/api/app') — zero runtime imports, grep-enforced in
+  from '@sevendays/api/app'), zero runtime imports, grep-enforced in
   Task 4.
 - unwrap() is the single parsing gate: non-2xx → apiErrorSchema →
   ApiClientError(status, details); 2xx → route schema → typed payload.
@@ -758,12 +758,12 @@ git commit -m "feat(api-client): scaffold @sevendays/api-client — createApiCli
   - `client.servicePackages.list(): Promise<ServicePackageWithInclusions[]>`
   - `client.addonServices.list(): Promise<AddonService[]>`
   - `client.appointments.list(args?: { query: { branchId?: string } }): Promise<AppointmentWithAddons[]>`
-  - `client.appointments.create(json: CreateAppointmentArgs): Promise<AppointmentWithAddons>` where `CreateAppointmentArgs = InferRequestType<RpcClient['api']['v1']['appointments']['$post']>['json']` — the RPC-inferred zod *input* shape (timestamps as ISO strings; `addonServiceIds`/`notes` optional; the server snapshots the price — never caller-supplied).
-  - `toLoopbackFetch(app: { fetch(request: Request): Response | Promise<Response> }): typeof fetch` — the Seam-1 adapter (verified: `app.fetch` alone fails `typeof fetch` contravariance).
+  - `client.appointments.create(json: CreateAppointmentArgs): Promise<AppointmentWithAddons>` where `CreateAppointmentArgs = InferRequestType<RpcClient['api']['v1']['appointments']['$post']>['json']`, the RPC-inferred zod *input* shape (timestamps as ISO strings; `addonServiceIds`/`notes` optional; the server snapshots the price, never caller-supplied).
+  - `toLoopbackFetch(app: { fetch(request: Request): Response | Promise<Response> }): typeof fetch`, the Seam-1 adapter (verified: `app.fetch` alone fails `typeof fetch` contravariance).
 
 - [ ] **Step 1: Build the mock API (the loopback double)**
 
-Create `packages/api-client/test/mock-api.ts` — a chained Hono app mirroring the API's conventions (JSON errors with explicit statuses, uniform envelope, chained registration). It deliberately does **not** import the real API app (the devDependency is types-only); it mirrors the conventions instead (spec Seam 1). It is also not typed against `hc` — only the real `AppType` feeds the client's types; the mock only needs to answer HTTP correctly:
+Create `packages/api-client/test/mock-api.ts`, a chained Hono app mirroring the API's conventions (JSON errors with explicit statuses, uniform envelope, chained registration). It deliberately does **not** import the real API app (the devDependency is types-only); it mirrors the conventions instead (spec Seam 1). It is also not typed against `hc`, only the real `AppType` feeds the client's types; the mock only needs to answer HTTP correctly:
 
 ```ts
 import { zValidator } from '@hono/zod-validator';
@@ -968,7 +968,7 @@ Create `packages/api-client/src/loopback.ts`:
 /**
  * The Seam-1 adapter (verified 2026-09-04): a Hono app's `fetch(request, env?,
  * executionCtx?)` is not assignable to the global `typeof fetch`, so tests
- * wrap it — one allocation, no server, no network, no workerd.
+ * wrap it, one allocation, no server, no network, no workerd.
  */
 export function toLoopbackFetch(app: {
   fetch(request: Request): Response | Promise<Response>;
@@ -1077,7 +1077,7 @@ it('a 400 envelope surfaces as ApiClientError with status + details', async () =
 
 it('a 404 envelope surfaces as ApiClientError through the unwrap gate', async () => {
   // Drive the mock's uniform notFound envelope through the exact gate the
-  // wrappers use — same assertions the $url/raw path would hit.
+  // wrappers use, same assertions the $url/raw path would hit.
   const res = await mockApi.request(`${BASE}api/v1/nope`);
   expect(res.status).toBe(404);
   const err = await unwrap(res, branchSchema.array()).catch((e) => e);
@@ -1103,7 +1103,7 @@ import { createApiClient } from '../src/index.js';
 
 const client = createApiClient({ baseUrl: 'http://localhost:4949/' });
 
-// Type-level only — method REFERENCES (never invoked; expectTypeOf does not
+// Type-level only, method REFERENCES (never invoked; expectTypeOf does not
 // execute). The wrappers' return types flow from the API's AppType via RPC:
 // the acceptance criterion "type-level inference assertions" plus the
 // drift-kill visible at the wrapper level.
@@ -1132,7 +1132,7 @@ it('create input is the RPC-inferred zod input shape', () => {
 - [ ] **Step 3: Run to verify RED**
 
 Run: `pnpm --filter @sevendays/api-client test -- test/loopback.test.ts test/typing.test.ts`
-Expected: FAIL — the stubs are empty objects (`client.branches.list is not a function`), and `typing.test.ts` fails to compile (`.list` has no `.returns` to assert). RED.
+Expected: FAIL, the stubs are empty objects (`client.branches.list is not a function`), and `typing.test.ts` fails to compile (`.list` has no `.returns` to assert). RED.
 
 - [ ] **Step 4: Implement the wrappers**
 
@@ -1147,7 +1147,7 @@ import { unwrap } from '../unwrap.js';
 /** Branch wrappers: GET /api/v1/branches (the only method today). */
 export function branchesRoutes(raw: RpcClient) {
   return {
-    /** GET /api/v1/branches — all branches, ordered by name. */
+    /** GET /api/v1/branches, all branches, ordered by name. */
     async list(): Promise<Branch[]> {
       const res = await raw.api.v1.branches.$get();
       return unwrap(res, branchSchema.array());
@@ -1167,7 +1167,7 @@ import { unwrap } from '../unwrap.js';
 /** Service Package wrappers: GET /api/v1/service-packages (the only method today). */
 export function servicePackagesRoutes(raw: RpcClient) {
   return {
-    /** GET /api/v1/service-packages — active packages with resolved lookups. */
+    /** GET /api/v1/service-packages, active packages with resolved lookups. */
     async list(): Promise<ServicePackageWithInclusions[]> {
       const res = await raw.api.v1['service-packages'].$get();
       return unwrap(res, servicePackageWithInclusionsSchema.array());
@@ -1187,7 +1187,7 @@ import { unwrap } from '../unwrap.js';
 /** Add-on Service wrappers: GET /api/v1/addon-services (the only method today). */
 export function addonServicesRoutes(raw: RpcClient) {
   return {
-    /** GET /api/v1/addon-services — active add-on services. */
+    /** GET /api/v1/addon-services, active add-on services. */
     async list(): Promise<AddonService[]> {
       const res = await raw.api.v1['addon-services'].$get();
       return unwrap(res, addonServiceSchema.array());
@@ -1208,7 +1208,7 @@ import { unwrap } from '../unwrap.js';
 type CreateEndpoint = RpcClient['api']['v1']['appointments']['$post'];
 
 /**
- * Create input as the RPC surface declares it — the zod INPUT side of
+ * Create input as the RPC surface declares it, the zod INPUT side of
  * createAppointmentSchema: timestamps as ISO strings, addonServiceIds and
  * notes optional, and NO price field (the server snapshots the price).
  */
@@ -1217,14 +1217,14 @@ export type CreateAppointmentArgs = InferRequestType<CreateEndpoint>['json'];
 /** Appointment wrappers: list + create under /api/v1/appointments. */
 export function appointmentsRoutes(raw: RpcClient) {
   return {
-    /** GET /api/v1/appointments — newest-first, optional branch filter, 200 cap. */
+    /** GET /api/v1/appointments, newest-first, optional branch filter, 200 cap. */
     async list(args: { query: { branchId?: string } } = { query: {} }): Promise<
       AppointmentWithAddons[]
     > {
       const res = await raw.api.v1.appointments.$get(args);
       return unwrap(res, appointmentWithAddonsSchema.array());
     },
-    /** POST /api/v1/appointments — 201 with the created record + add-ons. */
+    /** POST /api/v1/appointments, 201 with the created record + add-ons. */
     async create(json: CreateAppointmentArgs): Promise<AppointmentWithAddons> {
       const res = await raw.api.v1.appointments.$post({ json });
       return unwrap(res, appointmentWithAddonsSchema);
@@ -1233,15 +1233,15 @@ export function appointmentsRoutes(raw: RpcClient) {
 }
 ```
 
-- [ ] **Step 5: Run everything — verify GREEN**
+- [ ] **Step 5: Run everything, verify GREEN**
 
 Run: `pnpm --filter @sevendays/api-client test`
-Expected: PASS — **19 tests** (9 from Task 2 + loopback 8 + typing 2), a visible `Tests  19 passed` line.
+Expected: PASS, **19 tests** (9 from Task 2 + loopback 8 + typing 2), a visible `Tests  19 passed` line.
 
 Run: `pnpm --filter @sevendays/api-client typecheck` → exit 0 (typing.test.ts's return-type assertions are the type-level half passing at compile time).
 Run: `pnpm --filter @sevendays/api-client lint` → exit 0.
 
-If `typing.test.ts` complains about `toEqualTypeOf` on the wrapper methods whose schemas carry `.default()` fields (input/output duality makes exact equality brittle), switch those assertions to `.toMatchTypeOf<...>()` — do not loosen to `not.toBeUnknown()`.
+If `typing.test.ts` complains about `toEqualTypeOf` on the wrapper methods whose schemas carry `.default()` fields (input/output duality makes exact equality brittle), switch those assertions to `.toMatchTypeOf<...>()`, do not loosen to `not.toBeUnknown()`.
 
 - [ ] **Step 6: Commit**
 
@@ -1251,7 +1251,7 @@ git commit -m "feat(api-client): route-tree wrappers + Seam 1 loopback suite
 
 - One wrapper per resource method (branches/service-packages/addon-services
   list, appointments list+create), each a one-liner delegating to the raw
-  hc<AppType> client and running the response through unwrap() — no
+  hc<AppType> client and running the response through unwrap(), no
   hand-written route descriptions (the pre-plan surface ruling).
 - Seam 1: the injectable fetch is a chained in-memory Hono app mirroring the
   API's conventions (uniform envelopes, explicit statuses); toLoopbackFetch
@@ -1264,7 +1264,7 @@ git commit -m "feat(api-client): route-tree wrappers + Seam 1 loopback suite
 ### Task 4: Full gates, docs, ticket close-out
 
 **Files:**
-- Modify: `docs/plan.md` (M2 pre-flight checkbox 2 — annotate, do not tick)
+- Modify: `docs/plan.md` (M2 pre-flight checkbox 2, annotate, do not tick)
 - Modify: `docs/progress.md` (What Exists + Immediate Next Steps)
 - Read-only verification of Tasks 1–3.
 
@@ -1279,31 +1279,31 @@ pnpm check
 pnpm build
 ```
 
-Expected: both exit 0, and `pnpm check`'s test output shows `@sevendays/api-client` with a **positive test count** (19 tests — never a silent `passWithNoTests`; ADR-0003). The API integration suites need the compose db up.
+Expected: both exit 0, and `pnpm check`'s test output shows `@sevendays/api-client` with a **positive test count** (19 tests, never a silent `passWithNoTests`; ADR-0003). The API integration suites need the compose db up.
 
 - [ ] **Step 2: Grep guards (the standing invariants)**
 
 ```bash
 grep -rn "from '@sevendays/api" packages/api-client/src packages/api-client/test
 ```
-Expected: only `import type` lines (`import type { AppType } from '@sevendays/api/app'`) — zero runtime imports.
+Expected: only `import type` lines (`import type { AppType } from '@sevendays/api/app'`), zero runtime imports.
 
 ```bash
 grep -rn "new Hono<ApiEnv>().get\|new Hono<ApiEnv>().route" apps/api/src
 ```
-Expected: ≥1 hit in each of the /api/v1 tree files (branches, service-packages, addon-services, appointments, v1) — registration stays chained; a statement-style registration here is the regression this greps for. (Root-app chaining is visible in `src/index.ts`: `new Hono<{ Bindings: Env }>()` followed by chained `.use/.onError/.notFound/.get/.route`.)
+Expected: ≥1 hit in each of the /api/v1 tree files (branches, service-packages, addon-services, appointments, v1), registration stays chained; a statement-style registration here is the regression this greps for. (Root-app chaining is visible in `src/index.ts`: `new Hono<{ Bindings: Env }>()` followed by chained `.use/.onError/.notFound/.get/.route`.)
 
 ```bash
 grep -rn "validatedJson\|validatedQuery" apps/api/src | grep -v validator.ts
 ```
-Expected: hits only in `routes/appointments.ts` — no stale `validated(` call sites remain.
+Expected: hits only in `routes/appointments.ts`, no stale `validated(` call sites remain.
 
-- [ ] **Step 3: Annotate docs/plan.md — do not tick the checkbox**
+- [ ] **Step 3: Annotate docs/plan.md, do not tick the checkbox**
 
 In `docs/plan.md`, M2 pre-flight checkbox 2 (the `- [ ] packages/api-client...` line whose audit note ends with `...the remaining open piece is the client package itself.)_`): insert immediately before the closing `)_`:
 
 ```markdown
-2026-09-04: landed in this pre-flight task (#22) as the wrapper-surface client per the pre-plan ruling — route-tree wrapper methods over the raw hc<AppType> client (no parallel hand-typed API description), shared unwrap() gate, typed ApiClientError; tick at #25 close-out after end-to-end verification.
+2026-09-04: landed in this pre-flight task (#22) as the wrapper-surface client per the pre-plan ruling, route-tree wrapper methods over the raw hc<AppType> client (no parallel hand-typed API description), shared unwrap() gate, typed ApiClientError; tick at #25 close-out after end-to-end verification.
 ```
 
 - [ ] **Step 4: Update docs/progress.md**
@@ -1311,19 +1311,19 @@ In `docs/plan.md`, M2 pre-flight checkbox 2 (the `- [ ] packages/api-client...` 
 - Under **What Exists**, add a new bullet:
 
 ```markdown
-- **M2 pre-flight client package (#22, merged via <PR#>):** `@sevendays/api-client` — `createApiClient({ baseUrl, fetch? })` over Hono RPC (`hc<AppType>`; type-only devDependency via the API's `./app` subpath). Client surface: wrapper methods per resource (`client.branches.list()`, `client.servicePackages.list()`, `client.addonServices.list()`, `client.appointments.list()/create()`) over the raw client (`client.raw`) — every response crosses one `unwrap()` gate: 2xx parsed against the shared `packages/types` schemas (real `Date`s via `z.coerce.date`), non-2xx parsed against `apiErrorSchema` and thrown as `ApiClientError` (status + envelope details); missing/blank `baseUrl` throws at creation; injectable fetch (Seam 1) tested loopback against a chained in-memory mock mirroring the API's conventions; own vitest config (ADR-0003). **Type-surface rework rode along (probe evidence 2026-09-04):** Hono merges routes into the parent's type schema only through chained registration — the API's statement-style `app.get(...)`/`app.route(...)` left `AppType`'s schema empty (`hc<AppType>` → `unknown` members), so every registration in the /api/v1 tree was re-expressed chained; and `validated()` split into `validatedJson`/`validatedQuery` because its union-typed target polluted every endpoint's RPC input with `{ json, query }`. `toLoopbackFetch` is the verified `app.fetch` adapter. No API runtime behavior change (existing suites green). #23/#24 wire `API_URL` + React Query on top.
+- **M2 pre-flight client package (#22, merged via <PR#>):** `@sevendays/api-client`, `createApiClient({ baseUrl, fetch? })` over Hono RPC (`hc<AppType>`; type-only devDependency via the API's `./app` subpath). Client surface: wrapper methods per resource (`client.branches.list()`, `client.servicePackages.list()`, `client.addonServices.list()`, `client.appointments.list()/create()`) over the raw client (`client.raw`), every response crosses one `unwrap()` gate: 2xx parsed against the shared `packages/types` schemas (real `Date`s via `z.coerce.date`), non-2xx parsed against `apiErrorSchema` and thrown as `ApiClientError` (status + envelope details); missing/blank `baseUrl` throws at creation; injectable fetch (Seam 1) tested loopback against a chained in-memory mock mirroring the API's conventions; own vitest config (ADR-0003). **Type-surface rework rode along (probe evidence 2026-09-04):** Hono merges routes into the parent's type schema only through chained registration, the API's statement-style `app.get(...)`/`app.route(...)` left `AppType`'s schema empty (`hc<AppType>` → `unknown` members), so every registration in the /api/v1 tree was re-expressed chained; and `validated()` split into `validatedJson`/`validatedQuery` because its union-typed target polluted every endpoint's RPC input with `{ json, query }`. `toLoopbackFetch` is the verified `app.fetch` adapter. No API runtime behavior change (existing suites green). #23/#24 wire `API_URL` + React Query on top.
 ```
 
 - In **Immediate Next Steps**, item 1, replace the sentence
 
 ```markdown
-What remains of the block: the shared API client package (`@sevendays/api-client`, #22), then per-app wiring — `API_URL` env + React Query SSR in landing and admin (#23/#24).
+What remains of the block: the shared API client package (`@sevendays/api-client`, #22), then per-app wiring, `API_URL` env + React Query SSR in landing and admin (#23/#24).
 ```
 
 with:
 
 ```markdown
-The client package (`@sevendays/api-client`) is closed (#22); what remains of the block is per-app wiring — `API_URL` env + React Query SSR in landing and admin (#23/#24, parallelizable), then #25 close-out.
+The client package (`@sevendays/api-client`) is closed (#22); what remains of the block is per-app wiring, `API_URL` env + React Query SSR in landing and admin (#23/#24, parallelizable), then #25 close-out.
 ```
 
 - [ ] **Step 5: Commit**
@@ -1341,7 +1341,7 @@ Comment on #22 with the verification evidence (test counts from `pnpm check`, th
 gh issue close 22 --comment "Verified: <test counts>, drift-kill probe green, grep guards clean. Plan: docs/superpowers/plans/2026-09-04-m2-preflight-2-api-client.md."
 ```
 
-Then hand off to #23/#24 (parallelizable per-app wiring) and #25 (close-out ticks). Do **not** tick the plan.md checkboxes — #25 owns them.
+Then hand off to #23/#24 (parallelizable per-app wiring) and #25 (close-out ticks). Do **not** tick the plan.md checkboxes, #25 owns them.
 
 ---
 
@@ -1349,10 +1349,10 @@ Then hand off to #23/#24 (parallelizable per-app wiring) and #25 (close-out tick
 
 **Spec coverage:**
 - "Thin surface: `createApiClient({ baseUrl, fetch? })` returning the wrapped Hono RPC client" → Task 2 (factory, `client.raw` = `hc<AppType>`); the wrapper-surface ruling is recorded in Global Constraints with its rationale (opt-in parsing on a raw return would violate "every response Zod-parsed"). ✅
-- "Apps call route methods directly — no function-per-endpoint wrapper layer" → Global Constraints: no parallel hand-typed API description; wrappers delegate to the inferred RPC client; drift-kill intact (typing.test.ts). ✅
+- "Apps call route methods directly, no function-per-endpoint wrapper layer" → Global Constraints: no parallel hand-typed API description; wrappers delegate to the inferred RPC client; drift-kill intact (typing.test.ts). ✅
 - "Every response Zod-parsed at runtime… non-2xx → typed `ApiClientError` carrying status + parsed details" → `unwrap()` (Task 2) + wrapper suite (Task 3). `apiErrorSchema` reused from `packages/types`, not re-created. ✅
 - "Missing `baseUrl` fails loudly at client creation (no fallback)" → create.test.ts (missing + blank cases, guard handles absent options object). ✅
-- "Injectable fetch for loopback tests (Seam 1): chained Hono app mirroring the API's conventions as the fetch — no server, no network, no runtime dependency" → `test/mock-api.ts` + `toLoopbackFetch` (verified adapter). ✅
+- "Injectable fetch for loopback tests (Seam 1): chained Hono app mirroring the API's conventions as the fetch, no server, no network, no runtime dependency" → `test/mock-api.ts` + `toLoopbackFetch` (verified adapter). ✅
 - "Own vitest config extending the shared config; positive test count" → Task 2 scaffold + Task 4 gate (explicit count check). ✅
 - "Type-level inference assertions" → `app-type.test.ts` + `typing.test.ts` (both shapes probed to compile; typing tests reference methods without invoking them). ✅
 - "An API route change re-typechecks the package (the drift-kill)" → chained AppType (Task 1) + the indexed-access probe; Task 1's temporary RED probe proves the precondition was genuinely broken. ✅
@@ -1364,6 +1364,6 @@ Then hand off to #23/#24 (parallelizable per-app wiring) and #25 (close-out tick
 **Type consistency:** `RpcClient`, `CreateApiClientOptions`, `ApiClientError`, `unwrap<T>(res, schema)` defined in Task 2 and consumed verbatim in Task 3; wrapper method names in the Interfaces block match the implemented files; `CreateAppointmentArgs` defined once (routes/appointments.ts) and derived identically in `typing.test.ts`; `validatedJson`/`validatedQuery` produced in Task 1 and consumed in Task 1's own route files + grep-checked in Task 4; `MockApi`/`mockApi`/`mockApiBrokenBranches` defined in mock-api.ts and consumed verbatim in loopback.test.ts. ✅
 
 **Known risks (flagged for implementers):**
-- `toEqualTypeOf` on RPC-derived return types can be brittle under zod's input/output duality — the fallback (`toMatchTypeOf`) is stated in Task 3 Step 5.
-- The mock duplicates the `validatedJson` hook body (the real module is not runtime-importable by the type-only rule) — a comment in the file states why.
+- `toEqualTypeOf` on RPC-derived return types can be brittle under zod's input/output duality, the fallback (`toMatchTypeOf`) is stated in Task 3 Step 5.
+- The mock duplicates the `validatedJson` hook body (the real module is not runtime-importable by the type-only rule), a comment in the file states why.
 - If `hc<AppType>` inference strains tsserver as routes grow, the documented escape hatch (precompiled client per ADR-0006) stays out of scope here.
