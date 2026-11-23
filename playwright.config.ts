@@ -12,7 +12,7 @@ import { defineConfig, devices } from '@playwright/test';
 const baseURL = process.env.E2E_BASE_URL;
 if (!baseURL) {
   throw new Error(
-    'E2E_BASE_URL is not set — point it at the deployment under test (e.g. the teaser landing URL). The suites walk deployed environments, not local dev servers, so there is no default.'
+    'E2E_BASE_URL is not set: point it at the deployment under test (e.g. the teaser landing URL). The suites walk deployed environments, not local dev servers, so there is no default.'
   );
 }
 
