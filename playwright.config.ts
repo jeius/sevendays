@@ -1,12 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
 // The Playwright foundation (M6 #189, ADR-0022): one root config,
-// chromium-only, walking DEPLOYED environments — no webServer orchestration
+// chromium-only, walking DEPLOYED environments, no webServer orchestration
 // by design (the #190 production smoke's seven assertions walk teaser/v1;
 // e2e/smoke/env.ts carries their environment contract). firefox/webkit
 // arrive later for smoke breadth only, never for visual baselines. The
 // root package is not a pnpm workspace member, so turbo's `test` task
-// cannot see `test:e2e` — `pnpm check` stays browserless by construction,
+// cannot see `test:e2e`, `pnpm check` stays browserless by construction,
 // and that is the ruling, not an accident.
 // Visual baselines: chromium-only forever (ADR-0022), teaser edition, both themes (#225).
 const baseURL = process.env.E2E_BASE_URL;
