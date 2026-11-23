@@ -1,4 +1,4 @@
-# Media bucket runbook — `sevendays-media` (ADR-0019)
+# Media bucket runbook: `sevendays-media` (ADR-0019)
 
 One-time provisioning for the M5 media pipeline (ticket #136), executed by the
 controller on 2026-09-26 and re-runnable from this document. The bucket is
@@ -6,7 +6,7 @@ edition-shared by construction (ADR-0019 #5): both API Workers
 (`sevendays-api`, `sevendays-v1-api`) bind it, and bucket-level config (CORS,
 lifecycle, r2.dev, the future custom domain) is changed ONCE, deliberately,
 for both editions. At ship, the dedicated account's fresh same-named bucket
-supersedes this sharing for the v1 workers — § Fresh bucket at ship below.
+supersedes this sharing for the v1 workers, § Fresh bucket at ship below.
 
 ## What exists (verified 2026-09-26)
 
@@ -15,13 +15,13 @@ supersedes this sharing for the v1 workers — § Fresh bucket at ship below.
 | Bucket | `sevendays-media` | `pnpm --filter @sevendays/api exec wrangler r2 bucket info sevendays-media` |
 | CORS | PUT + `content-type` + exposed `ETag` for the three admin origins | `… r2 bucket cors list sevendays-media` |
 | Lifecycle | rule `tmp-gc`, prefix `tmp/`, expire after 1 day | `… r2 bucket lifecycle list sevendays-media` |
-| Public dev URL | enabled — base recorded as `MEDIA_PUBLIC_BASE_URL` | `… r2 bucket dev-url get sevendays-media` |
+| Public dev URL | enabled, base recorded as `MEDIA_PUBLIC_BASE_URL` | `… r2 bucket dev-url get sevendays-media` |
 
 The three admin origins (exact match, no trailing slash): `http://localhost:3000`
-(admin dev — `apps/admin` runs `vite dev --port 3000`),
+(admin dev, `apps/admin` runs `vite dev --port 3000`),
 `https://sevendays-admin.pahamajulius.workers.dev` (teaser),
 `https://sevendays-v1-admin.pahamajulius.workers.dev` (v1). Keep this list in
-sync when Worker names or origins change — CORS rule fields map 1:1 to browser
+sync when Worker names or origins change, CORS rule fields map 1:1 to browser
 behavior: `content-type` must be allowed (it is signed into the presigned URL),
 `ETag` is exposed so the browser can verify its upload.
 
@@ -31,7 +31,7 @@ behavior: `content-type` must be allowed (it is signed into the presigned URL),
 # bucket (skip if info above succeeds)
 pnpm --filter @sevendays/api exec wrangler r2 bucket create sevendays-media
 
-# CORS — write the rule JSON to a scratch file, then:
+# CORS, write the rule JSON to a scratch file, then:
 pnpm --filter @sevendays/api exec wrangler r2 bucket cors set sevendays-media --file cors.json
 pnpm --filter @sevendays/api exec wrangler r2 bucket cors list sevendays-media
 
@@ -40,13 +40,13 @@ pnpm --filter @sevendays/api exec wrangler r2 bucket cors list sevendays-media
 pnpm --filter @sevendays/api exec wrangler r2 bucket lifecycle add sevendays-media tmp-gc tmp/ --expire-days 1 -y
 pnpm --filter @sevendays/api exec wrangler r2 bucket lifecycle list sevendays-media
 
-# public reads for admin previews (dev-only, rate-limited — never the
+# public reads for admin previews (dev-only, rate-limited, never the
 # production answer; the M6 custom domain replaces it)
 pnpm --filter @sevendays/api exec wrangler r2 bucket dev-url enable sevendays-media
 pnpm --filter @sevendays/api exec wrangler r2 bucket dev-url get sevendays-media
 ```
 
-## Vars and secrets — where each value lives
+## Vars and secrets: where each value lives
 
 Neither the Workers nor this repo commit per-environment values (the
 `LANDING_ORIGIN` posture). Four values, four homes:
@@ -66,13 +66,13 @@ gh variable set MEDIA_PUBLIC_BASE_URL --env teaser --body "$(pnpm --filter @seve
 # repeat with --env v1
 ```
 
-Local dev (`apps/api/.dev.vars` — gitignored; `apps/api/.dev.vars.example`
+Local dev (`apps/api/.dev.vars`, gitignored; `apps/api/.dev.vars.example`
 documents every key): append the four keys above. Without the S3 pair the
 Worker boots and every route serves; only the presign route fails loudly
-(`MissingR2CredentialsError` → the uniform 500 + log — the
+(`MissingR2CredentialsError` → the uniform 500 + log, the
 `BETTER_AUTH_SECRET` posture, never a silent fallback).
 
-## § Owner handoff — minting the scoped R2 S3 token (owner-operated, ~5 minutes)
+## § Owner handoff: minting the scoped R2 S3 token (owner-operated, ~5 minutes)
 
 The presign endpoint signs upload URLs with an R2 API token scoped to this
 bucket only. No such token exists yet (verified 2026-09-26). To mint it:
@@ -82,7 +82,7 @@ bucket only. No such token exists yet (verified 2026-09-26). To mint it:
 2. Permissions: **Object Read & Write**. Scope: **Apply to specific buckets
    only** → `sevendays-media`. TTL: no expiry (rotate at the M6 account
    handover). Create.
-3. Copy the **Access Key ID** and **Secret Access Key** — the secret is shown
+3. Copy the **Access Key ID** and **Secret Access Key**, the secret is shown
    ONCE, at creation. Treat both as credentials (they grant object writes).
 4. Set them everywhere they are consumed:
 
@@ -103,7 +103,7 @@ gh secret set R2_S3_SECRET_ACCESS_KEY --env v1 --body "<secret-access-key>" -R j
 # append R2_S3_ACCESS_KEY_ID=… and R2_S3_SECRET_ACCESS_KEY=… to apps/api/.dev.vars
 ```
 
-5. Prove it live (no deploy needed — the secrets are read per request):
+5. Prove it live (no deploy needed, the secrets are read per request):
 
 ```bash
 cd apps/api
@@ -115,25 +115,25 @@ pnpm test -- media-live
 ```
 
 Expected: `3 passed` (the round-trip promote, the swapped-Content-Type 403,
-the over-cap delete-and-400 — see § Live round-trip verify).
+the over-cap delete-and-400, see § Live round-trip verify).
 
 ## § Live round-trip verify
 
 `apps/api/test/media-live.test.ts` runs the REAL presign + commit service code
 against the REAL bucket. It is **not a CI gate**: the file skips (3 skipped)
 unless `LIVE_MEDIA_VERIFY=1` AND all three credential vars are set, so `pnpm
-check` never needs — never touches — the bucket. It proves, live:
+check` never needs, never touches, the bucket. It proves, live:
 
 - presign → PUT with the minted Content-Type → `commitUpload` HEAD-verifies,
   promotes to the immutable final key, deletes the staging key;
 - a PUT with a swapped Content-Type fails the signature (403
-  `SignatureDoesNotMatch` — Content-Type is signed in);
+  `SignatureDoesNotMatch`, Content-Type is signed in);
 - an object over the 10 MiB cap is deleted from the bucket and answered
   400-shaped with field details.
 
 ## § Fresh bucket at ship (docs/ship-provisioning-runbook.md A4 + B1–B4)
 
-The dedicated ship account gets its own `sevendays-media` — bucket names are
+The dedicated ship account gets its own `sevendays-media`, bucket names are
 per-account (the dev account's bucket above is untouched), and the v1 api's
 `wrangler.toml` binding names `sevendays-media`, so the name carries.
 Recreate, in order (placeholders per the ship runbook):
@@ -141,7 +141,7 @@ Recreate, in order (placeholders per the ship runbook):
 ```bash
 export CLOUDFLARE_API_TOKEN="<ship-token>" CLOUDFLARE_ACCOUNT_ID="<account-id>"
 pnpm --filter @sevendays/api exec wrangler r2 bucket create sevendays-media
-# CORS — same rule shape as above, the ship account's three admin origins:
+# CORS, same rule shape as above, the ship account's three admin origins:
 #   http://localhost:3000
 #   https://sevendays-v1-admin.<subdomain>.workers.dev   (pre-domain window)
 #   https://admin.<domain>                                (production)
@@ -151,11 +151,11 @@ pnpm --filter @sevendays/api exec wrangler r2 bucket dev-url enable sevendays-me
 ```
 
 Then re-run § Owner handoff against the ship account: the fresh S3 token
-pair (Object Read & Write, scoped to `sevendays-media` only, no TTL) — the
+pair (Object Read & Write, scoped to `sevendays-media` only, no TTL), the
 rotated pair of the at-ship accounting. Seal it in the `v1` GitHub
 environment (A5) and on `sevendays-v1-api` (A6).
 
-Media copies across once, scripted — `apps/api/scripts/ship-media-copy.mjs`,
+Media copies across once, scripted, `apps/api/scripts/ship-media-copy.mjs`,
 the ship runbook's B1: every committed object listed from the dev bucket and
 re-PUT into the fresh one with its content-type and immutable cache-control
 preserved; `tmp/` never copies. The objects' `cacheControl` then carries the
@@ -163,9 +163,9 @@ custom domain's edge caching.
 
 The custom domain + the flip (the ship runbook's B2–B4, correcting this
 section's earlier both-environments claim): attach `media.<domain>` to the
-fresh bucket (same-account zone — ADR-0019 #4; R2 has no bucket-move), flip
+fresh bucket (same-account zone, ADR-0019 #4; R2 has no bucket-move), flip
 `MEDIA_PUBLIC_BASE_URL` in the **`v1` GitHub environment only** to
 `https://media.<domain>`, redeploy, verify with the production smoke, and
 only then disable the fresh bucket's r2.dev URL. The dev bucket's r2.dev URL
-STAYS ENABLED — the teaser reads it. Read-time URL resolution only: no
+STAYS ENABLED, the teaser reads it. Read-time URL resolution only: no
 migration, no key rewrite.
