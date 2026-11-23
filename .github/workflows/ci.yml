@@ -2,8 +2,8 @@ name: CI
 
 # CI is the first of ADR-0015's two locks: it runs on main and on the v1
 # branch (the v1 triggers are dormant until the seed creates the branch, and
-# the typed cascade then fails any incomplete booking cut). The second lock —
-# the branch-keyed continuous deploy — lives in the deploy jobs below.
+# the typed cascade then fails any incomplete booking cut). The second lock
+# the branch-keyed continuous deploy, lives in the deploy jobs below.
 on:
   push:
     branches: [main, v1]
@@ -49,7 +49,7 @@ jobs:
         run: pnpm build:packages
 
       # The api-client resolves AppType through @sevendays/api's ./app export,
-      # whose types point at the built dist/index.d.ts — so apps/api must be
+      # whose types point at the built dist/index.d.ts, so apps/api must be
       # built before anything that typechecks the client.
       - name: Build apps/api
         run: pnpm --filter @sevendays/api build
@@ -62,13 +62,13 @@ jobs:
 
   # ADR-0015's second lock: the branch-keyed continuous deploy. Each leg is
   # gated on the same push's check job (needs:), fires only on its branch's
-  # push, and draws its secrets from its own GitHub environment — the teaser
+  # push, and draws its secrets from its own GitHub environment, the teaser
   # (main, the owner's booking-bearing deployment) and v1 (the private
   # booking-free deploy, dormant until the seed lands). The legs never share
   # a Worker target, a token, or a DATABASE_URL: the --name flags pin the six
   # targets and the environment scopes do the isolation. When M6 provisions
   # the dedicated accounts, the v1 leg rotates by swapping the v1
-  # environment's secret values (token + DATABASE_URL + API_URL var) — no
+  # environment's secret values (token + DATABASE_URL + API_URL var), no
   # workflow edit.
   deploy-teaser:
     name: Deploy teaser (main)
@@ -140,7 +140,7 @@ jobs:
         working-directory: apps/api
         run: |
           if [ -z "$R2_S3_ACCESS_KEY_ID" ] || [ -z "$R2_S3_SECRET_ACCESS_KEY" ]; then
-            echo '::notice::R2 S3-token secrets missing from the teaser GitHub environment — presign stays loudly unavailable (docs/media-bucket-runbook.md § Owner handoff)'
+            echo '::notice::R2 S3-token secrets missing from the teaser GitHub environment, presign stays loudly unavailable (docs/media-bucket-runbook.md § Owner handoff)'
             exit 0
           fi
           printf '%s' "$R2_S3_ACCESS_KEY_ID" | pnpm exec wrangler secret put R2_S3_ACCESS_KEY_ID --name sevendays-api
@@ -150,7 +150,7 @@ jobs:
         working-directory: apps/api
         run: |
           if [ -z "$SENTRY_DSN" ]; then
-            echo '::notice::SENTRY_DSN secret missing from the teaser GitHub environment — Sentry stays no-op on the api (one project "sevendays", M6 #184)'
+            echo '::notice::SENTRY_DSN secret missing from the teaser GitHub environment, Sentry stays no-op on the api (one project "sevendays", M6 #184)'
             exit 0
           fi
           printf '%s' "$SENTRY_DSN" | pnpm exec wrangler secret put SENTRY_DSN --name sevendays-api
@@ -176,7 +176,7 @@ jobs:
         working-directory: apps/admin
         run: |
           if [ -z "$CF_ANALYTICS_READ_TOKEN" ]; then
-            echo '::notice::CF_ANALYTICS_READ_TOKEN missing from the teaser GitHub environment — the CF-sourced widgets (System Health, Storage & Media) render their curated not-configured state (M6 #186/#187)'
+            echo '::notice::CF_ANALYTICS_READ_TOKEN missing from the teaser GitHub environment, the CF-sourced widgets (System Health, Storage & Media) render their curated not-configured state (M6 #186/#187)'
             exit 0
           fi
           printf '%s' "$CF_ANALYTICS_READ_TOKEN" | pnpm exec wrangler secret put CF_ANALYTICS_READ_TOKEN --name sevendays-admin
@@ -184,7 +184,7 @@ jobs:
             printf '%s' "$POSTHOG_PERSONAL_API_KEY" | pnpm exec wrangler secret put POSTHOG_PERSONAL_API_KEY --name sevendays-admin
             printf '%s' "$POSTHOG_PROJECT_ID" | pnpm exec wrangler secret put POSTHOG_PROJECT_ID --name sevendays-admin
           else
-            echo '::notice::PostHog pair missing from the teaser GitHub environment — Traffic renders its curated not-configured state (M6 #187; POSTHOG_LANDING_HOSTS is already a deploy var)'
+            echo '::notice::PostHog pair missing from the teaser GitHub environment, Traffic renders its curated not-configured state (M6 #187; POSTHOG_LANDING_HOSTS is already a deploy var)'
           fi
 
   deploy-v1:
@@ -256,7 +256,7 @@ jobs:
         working-directory: apps/api
         run: |
           if [ -z "$R2_S3_ACCESS_KEY_ID" ] || [ -z "$R2_S3_SECRET_ACCESS_KEY" ]; then
-            echo '::notice::R2 S3-token secrets missing from the v1 GitHub environment — presign stays loudly unavailable (docs/media-bucket-runbook.md § Owner handoff)'
+            echo '::notice::R2 S3-token secrets missing from the v1 GitHub environment, presign stays loudly unavailable (docs/media-bucket-runbook.md § Owner handoff)'
             exit 0
           fi
           printf '%s' "$R2_S3_ACCESS_KEY_ID" | pnpm exec wrangler secret put R2_S3_ACCESS_KEY_ID --name sevendays-v1-api
@@ -266,7 +266,7 @@ jobs:
         working-directory: apps/api
         run: |
           if [ -z "$SENTRY_DSN" ]; then
-            echo '::notice::SENTRY_DSN secret missing from the v1 GitHub environment — Sentry stays no-op on the api (one project "sevendays", M6 #184)'
+            echo '::notice::SENTRY_DSN secret missing from the v1 GitHub environment, Sentry stays no-op on the api (one project "sevendays", M6 #184)'
             exit 0
           fi
           printf '%s' "$SENTRY_DSN" | pnpm exec wrangler secret put SENTRY_DSN --name sevendays-v1-api
@@ -292,7 +292,7 @@ jobs:
         working-directory: apps/admin
         run: |
           if [ -z "$CF_ANALYTICS_READ_TOKEN" ]; then
-            echo '::notice::CF_ANALYTICS_READ_TOKEN missing from the v1 GitHub environment — the CF-sourced widgets (System Health, Storage & Media) render their curated not-configured state (M6 #186/#187)'
+            echo '::notice::CF_ANALYTICS_READ_TOKEN missing from the v1 GitHub environment, the CF-sourced widgets (System Health, Storage & Media) render their curated not-configured state (M6 #186/#187)'
             exit 0
           fi
           printf '%s' "$CF_ANALYTICS_READ_TOKEN" | pnpm exec wrangler secret put CF_ANALYTICS_READ_TOKEN --name sevendays-v1-admin
@@ -300,5 +300,5 @@ jobs:
             printf '%s' "$POSTHOG_PERSONAL_API_KEY" | pnpm exec wrangler secret put POSTHOG_PERSONAL_API_KEY --name sevendays-v1-admin
             printf '%s' "$POSTHOG_PROJECT_ID" | pnpm exec wrangler secret put POSTHOG_PROJECT_ID --name sevendays-v1-admin
           else
-            echo '::notice::PostHog pair missing from the v1 GitHub environment — Traffic renders its curated not-configured state (M6 #187; POSTHOG_LANDING_HOSTS is already a deploy var)'
+            echo '::notice::PostHog pair missing from the v1 GitHub environment, Traffic renders its curated not-configured state (M6 #187; POSTHOG_LANDING_HOSTS is already a deploy var)'
           fi
