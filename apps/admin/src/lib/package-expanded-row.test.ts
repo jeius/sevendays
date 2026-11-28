@@ -188,8 +188,7 @@ describe('expandedRowModel (the seeded Basic Package, whole)', () => {
       ],
     });
     expect(expandedRowModel(basic)).toEqual({
-      description:
-        'Entry graduation portrait package, 1 framed 8x10 Toga plus wallet-size prints.',
+      description: 'Entry graduation portrait package, 1 framed 8x10 Toga plus wallet-size prints.',
       durationLine: null,
       frameChips: ['Frame 1'],
       inclusionLines: [
