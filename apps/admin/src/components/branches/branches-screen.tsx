@@ -548,7 +548,7 @@ export function BranchesScreen({ focus }: { focus: string | undefined }) {
                             {row.acceptsWalkIns ? (
                               <Badge variant='secondary'>Walk-in friendly</Badge>
                             ) : (
-                              <span className='text-muted-foreground'>—</span>
+                              <span className='text-muted-foreground'>By appointment</span>
                             )}
                           </TableCell>
                           <TableCell className='text-right' onClick={(e) => e.stopPropagation()}>
@@ -799,7 +799,7 @@ export function BranchesScreen({ focus }: { focus: string | undefined }) {
               </p>
             ) : null}
             {coverStatus.phase === 'bound' ? (
-              <p className='text-muted-foreground text-xs'>Cover ready — save to bind it.</p>
+              <p className='text-muted-foreground text-xs'>Cover ready: save to bind it.</p>
             ) : null}
             {coverStatus.phase === 'failed' ? (
               <p className='text-destructive text-xs'>Upload failed: {coverStatus.message}</p>

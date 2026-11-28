@@ -89,10 +89,10 @@ function sessionWhen(at: Date): string {
   return formatUtc(at.toISOString());
 }
 
-/** The UA string trims to 48 chars + ellipsis; a missing one renders the em-dash. */
+/** The UA string trims to 48 chars + ellipsis; a missing one renders the hyphen placeholder. */
 function userAgentLine(userAgent: string | null): string {
   if (userAgent === null || userAgent === '') {
-    return '—';
+    return '-';
   }
   return userAgent.length > 48 ? `${userAgent.slice(0, 48)}…` : userAgent;
 }
@@ -477,7 +477,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
                         </TableCell>
                         <TableCell className='text-right'>
                           {row.isSelf ? (
-                            <span className='text-muted-foreground'>—</span>
+                            <span className='text-muted-foreground'>-</span>
                           ) : (
                             <div className='flex items-center justify-end gap-1'>
                               <GuardedRowAction
@@ -576,7 +576,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
                                         expires {sessionWhen(session.expiresAt)}
                                       </span>
                                       <span className='text-muted-foreground text-xs'>
-                                        {session.ipAddress ?? '—'}
+                                        {session.ipAddress ?? '-'}
                                       </span>
                                       <span className='text-muted-foreground text-xs'>
                                         {userAgentLine(session.userAgent)}
@@ -688,7 +688,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
             </Select>
             {createRole === 'admin' ? (
               <p className='text-muted-foreground text-xs'>
-                Owners hold user management and the Audit Log — grant only when the account should
+                Owners hold user management and the Audit Log; grant only when the account should
                 manage the team.
               </p>
             ) : null}
@@ -703,7 +703,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
               onChange={(event) => setCreatePassword(event.target.value)}
             />
             <p className='text-muted-foreground text-xs'>
-              At least 12 characters. Hand the password over in person — it is not emailed.
+              At least 12 characters. Hand the password over in person; it is not emailed.
             </p>
           </Field>
           {createError ? (
@@ -726,7 +726,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
           <DialogHeader>
             <DialogTitle>Set a new temporary password</DialogTitle>
             <DialogDescription>
-              At least 12 characters. Hand the password over in person — it is not emailed.
+              At least 12 characters. Hand the password over in person; it is not emailed.
             </DialogDescription>
           </DialogHeader>
           <div className='space-y-3'>

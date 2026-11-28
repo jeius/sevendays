@@ -747,7 +747,7 @@ function CategoryRail({
         <Collapsible open={railOpen} onOpenChange={setRailOpen}>
           <CollapsibleTrigger
             className='flex w-full items-center gap-2 rounded-md px-2 py-2 text-left'
-            aria-label={`Categories — current filter: ${railFilterName}`}
+            aria-label={`Categories (current filter: ${railFilterName})`}
           >
             <span className='text-muted-foreground text-xs font-medium tracking-wide uppercase'>
               Categories

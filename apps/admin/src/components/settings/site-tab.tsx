@@ -361,7 +361,7 @@ export function SiteTab() {
             </p>
           ) : null}
           {logoStatus.phase === 'bound' ? (
-            <p className='text-muted-foreground text-xs'>Logo ready — save to bind it.</p>
+            <p className='text-muted-foreground text-xs'>Logo ready: save to bind it.</p>
           ) : null}
           {logoStatus.phase === 'failed' ? (
             <p className='text-destructive text-xs'>Upload failed: {logoStatus.message}</p>

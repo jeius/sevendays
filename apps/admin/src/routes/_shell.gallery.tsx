@@ -31,7 +31,7 @@ function GalleryPage() {
     <>
       <PageHeader
         title='Gallery'
-        subline='The /about portfolio — upload in batches, organize by category.'
+        subline='The /about portfolio: upload in batches, organize by category.'
         actions={
           // The label/htmlFor pair opens the screen's hidden input — the id
           // is this file's one coupling point (zero route logic). The label

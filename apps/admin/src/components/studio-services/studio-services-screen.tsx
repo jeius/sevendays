@@ -814,7 +814,7 @@ export function StudioServicesScreen() {
               </div>
             )}
             <FieldDescription>
-              {editorState.hasPrice ? 'Stored as centavos.' : 'No price — bookable on inquiry.'}
+              {editorState.hasPrice ? 'Stored as centavos.' : 'No price: bookable on inquiry.'}
             </FieldDescription>
             {fieldErrors.price ? (
               <p className='text-destructive text-xs'>{fieldErrors.price}</p>
@@ -899,7 +899,7 @@ export function StudioServicesScreen() {
               </p>
             ) : null}
             {coverStatus.phase === 'bound' ? (
-              <p className='text-muted-foreground text-xs'>Cover ready — save to bind it.</p>
+              <p className='text-muted-foreground text-xs'>Cover ready: save to bind it.</p>
             ) : null}
             {coverStatus.phase === 'failed' ? (
               <p className='text-destructive text-xs'>Upload failed: {coverStatus.message}</p>

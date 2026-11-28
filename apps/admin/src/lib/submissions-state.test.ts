@@ -67,7 +67,7 @@ describe('acceptEditStateFromSubmission + validateAcceptEdit + buildAcceptPayloa
     expect(validateAcceptEdit({ quote: base.quote, person: 'x'.repeat(81) }).person).toBeDefined();
     // The min-error copy is the landing form's pinned pair, verbatim.
     expect(validateAcceptEdit({ quote: 'x'.repeat(19), person: 'Maria D.' }).quote).toBe(
-      'Tell us a little more — at least 20 characters.'
+      'Tell us a little more: at least 20 characters.'
     );
     expect(validateAcceptEdit({ quote: base.quote, person: 'x' }).person).toBe(
       'Your name needs at least 2 characters.'

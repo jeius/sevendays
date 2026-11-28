@@ -200,7 +200,7 @@ function InclusionEditorRow({
                   The options list ACTIVE sizes only; the explicit render still
                   resolves a deactivated CURRENT value's code. */}
               <SelectValue>
-                {(value: string | null) => printSizes.find((ps) => ps.id === value)?.code ?? '—'}
+                {(value: string | null) => printSizes.find((ps) => ps.id === value)?.code ?? '-'}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -843,7 +843,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
                   </div>
                 )}
                 <FieldDescription>
-                  {state.hasPrice ? PESO_HELPER : 'No price — bookable on inquiry.'}
+                  {state.hasPrice ? PESO_HELPER : 'No price: bookable on inquiry.'}
                 </FieldDescription>
                 {fieldErrors?.price ? (
                   <p className='text-destructive text-xs'>{fieldErrors.price}</p>
@@ -954,7 +954,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
                 </p>
               ) : null}
               {uploadStatus.phase === 'bound' ? (
-                <p className='text-muted-foreground text-xs'>Cover ready — save to bind it.</p>
+                <p className='text-muted-foreground text-xs'>Cover ready: save to bind it.</p>
               ) : null}
               {uploadStatus.phase === 'failed' ? (
                 <p className='text-destructive text-xs'>Upload failed: {uploadStatus.message}</p>

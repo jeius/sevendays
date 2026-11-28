@@ -82,7 +82,7 @@ describe('PANEL_CONFIRM_META (the two confirms’ copy + the #304 polarity)', ()
     expect(PANEL_CONFIRM_META.reject).toEqual({
       title: 'Reject this submission?',
       description:
-        'The submission stays on record as rejected — nothing publishes, and the sender is never told.',
+        'The submission stays on record as rejected; nothing publishes, and the sender is never told.',
       confirmLabel: 'Reject',
       busyLabel: REJECTING_LABEL,
       confirmVariant: 'destructive',

@@ -45,10 +45,10 @@ export function acceptEditStateFromSubmission(row: TestimonialSubmission): Accep
 // The min-error copy is the landing form's pinned TODO(owner-copy) pair,
 // verbatim (#216) — one product, one line. The max lines are this tab's
 // TODO(owner-copy) proposals — ratify at the variants round.
-const QUOTE_MIN_ERROR = 'Tell us a little more — at least 20 characters.';
+const QUOTE_MIN_ERROR = 'Tell us a little more: at least 20 characters.';
 const PERSON_MIN_ERROR = 'Your name needs at least 2 characters.';
-const QUOTE_MAX_ERROR = 'That’s a little long — at most 600 characters.';
-const PERSON_MAX_ERROR = 'That name is a little long — at most 80 characters.';
+const QUOTE_MAX_ERROR = 'That’s a little long: at most 600 characters.';
+const PERSON_MAX_ERROR = 'That name is a little long: at most 80 characters.';
 
 /** Validates the TRIMMED text against the wire bounds (the API re-verifies — a staff edit that breaks a bound is a 400, never a silent trim). */
 export function validateAcceptEdit(state: AcceptEditState): {

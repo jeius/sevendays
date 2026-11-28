@@ -15,7 +15,7 @@ export function RelationBadges({
   mutedNames?: ReadonlySet<string>;
 }) {
   if (names.length === 0) {
-    return <span className='text-muted-foreground'>—</span>;
+    return <span className='text-muted-foreground'>-</span>;
   }
   return (
     <div className='flex flex-wrap gap-1'>

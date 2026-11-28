@@ -162,7 +162,7 @@ export function AuditLogScreen({ search }: { search: AuditLogSearch }) {
     <div className='space-y-6'>
       <PageHeader
         title='Audit Log'
-        subline='Who changed what, when — every CMS write, newest first.'
+        subline='Who changed what, when: every CMS write, newest first.'
       />
 
       <div className='flex flex-wrap items-end gap-3'>
@@ -223,7 +223,7 @@ export function AuditLogScreen({ search }: { search: AuditLogSearch }) {
         <p className='text-muted-foreground text-sm'>
           {hasActiveFilters(search)
             ? 'No audit rows match these filters.'
-            : 'No audit rows yet — they start with the first CMS write.'}
+            : 'No audit rows yet; they start with the first CMS write.'}
         </p>
       ) : data !== null && data.rows.length > 0 ? (
         <Table>
@@ -250,7 +250,7 @@ export function AuditLogScreen({ search }: { search: AuditLogSearch }) {
                 </TableCell>
                 <TableCell>{AUDIT_ENTITY_LABELS[row.entity]}</TableCell>
                 <TableCell className='max-w-72 truncate'>
-                  {row.summary ?? <span className='text-muted-foreground'>—</span>}
+                  {row.summary ?? <span className='text-muted-foreground'>-</span>}
                 </TableCell>
               </TableRow>
             ))}

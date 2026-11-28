@@ -39,7 +39,7 @@ export function TrendChart({
     <ChartContainer
       config={config}
       className={className}
-      aria-label={`${ariaLabel} — latest ${String(data.at(-1)?.value ?? 0)}, peak ${String(Math.max(...data.map((datum) => datum.value)))}`}
+      aria-label={`${ariaLabel}: latest ${String(data.at(-1)?.value ?? 0)}, peak ${String(Math.max(...data.map((datum) => datum.value)))}`}
     >
       {variant === 'bars' ? (
         <BarChart data={data} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>

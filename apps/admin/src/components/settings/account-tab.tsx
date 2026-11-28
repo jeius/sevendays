@@ -187,7 +187,7 @@ export function AccountTab({ user }: { user: AccountUser }) {
           <h2 className='text-sm font-semibold'>Sessions</h2>
           <p className='text-muted-foreground text-sm'>
             {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
-            Signs this account out of every session, on every device — including this one.
+            Signs this account out of every session, on every device, including this one.
           </p>
           <Button
             type='button'

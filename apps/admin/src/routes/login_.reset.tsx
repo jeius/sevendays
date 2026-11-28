@@ -121,7 +121,7 @@ function ResetPasswordPage() {
               {failure && (
                 <p role='alert' className='text-destructive text-sm'>
                   {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
-                  Could not reset the password — the link may have expired. Request a new one.
+                  Could not reset the password: the link may have expired. Request a new one.
                 </p>
               )}
               <Button type='submit' className='w-full' disabled={submitting} aria-busy={submitting}>

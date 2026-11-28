@@ -758,7 +758,7 @@ export function AddonsScreen() {
               </div>
             )}
             <FieldDescription>
-              {editorState.hasPrice ? 'Stored as centavos.' : 'No price — bookable on inquiry.'}
+              {editorState.hasPrice ? 'Stored as centavos.' : 'No price: bookable on inquiry.'}
             </FieldDescription>
             {fieldErrors.price ? (
               <p className='text-destructive text-xs'>{fieldErrors.price}</p>

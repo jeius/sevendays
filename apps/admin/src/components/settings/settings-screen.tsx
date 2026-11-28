@@ -14,7 +14,7 @@ import { UsersTab } from '#/components/settings/users-tab';
 const TAB_SUBLINES: Record<'account' | 'users' | 'site', string> = {
   account: 'Your account and security.',
   users: 'The studio’s staff accounts.',
-  site: 'The site’s words and marks — editable without a deploy.',
+  site: 'The site’s words and marks, editable without a deploy.',
 };
 
 export function SettingsScreen({ user }: { user: AccountUser }) {

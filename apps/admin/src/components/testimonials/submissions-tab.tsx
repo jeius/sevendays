@@ -276,7 +276,7 @@ export function SubmissionsTab() {
       {acceptingRow ? (
         <LightEntityEditor
           title='Accept submission'
-          description='Fix or trim the words first if needed — accepting publishes it as a testimonial at the end of the list.'
+          description='Fix or trim the words first if needed; accepting publishes it as a testimonial at the end of the list.'
           open={acceptingId === acceptingRow.id}
           onOpenChange={(next) => {
             if (!next) {
@@ -315,7 +315,7 @@ export function SubmissionsTab() {
       {rejectRow ? (
         <GuardedConfirm
           title='Reject this submission?'
-          description='The submission stays on record as rejected — nothing publishes, and the sender is never told.'
+          description='The submission stays on record as rejected; nothing publishes, and the sender is never told.'
           confirmLabel='Reject'
           busyLabel={REJECTING_LABEL}
           pending={reject.isPending}

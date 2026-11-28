@@ -129,7 +129,7 @@ function LoginPage() {
             Internal tool
           </p>
           <p className='text-2xl leading-snug font-semibold text-white'>
-            The studio's appointments, catalog, and branches — behind one door.
+            The studio's appointments, catalog, and branches sit behind one door.
           </p>
           <p className='text-sm text-brand-200'>Staff sign-in only.</p>
         </div>
