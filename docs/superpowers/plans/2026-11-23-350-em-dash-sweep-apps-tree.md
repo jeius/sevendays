@@ -59,12 +59,12 @@
 - **Floors do not move.** Every suite's file/test count is identical before and after (pins edit in place; nothing adds or removes a test). A count that differs at any gate means something else drifted: stop and reconcile.
 - **fix mode rewrites exactly one shape** (space, U+2014, space → `, `), per #349. Unspaced dashes, line-end dashes, decorative separators, and the ` , `-class artifacts are hand classes (Task 4). En dashes are never touched.
 - **Test DB:** db- and api-suite runs and the final `pnpm check` prefix `TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test` (start the container first if down: `docker start sevendays-test-db-5433`).
-- **Per-task gates:** the touched app's `test -- --run` AND `typecheck` both green before each task's commit. Final gate: `pnpm fix` then `TEST_DATABASE_URL=... pnpm check` green at the repo root. Do not commit code that fails it for the packages/apps touched.
-- **Biome:** touched files pass `pnpm exec biome check <files>` per task; `pnpm lint:root` is pre-existing red at main and is NOT a gate (ruling #349-R3); sweep-shortened lines' format drift heals in Task 5's `pnpm fix`.
+- **Per-task gates:** the touched app's `test -- --run` AND `typecheck` both green before each task's commit. Final gate: the three apps' scoped fixes (`pnpm --filter @sevendays/landing fix && pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/api fix`) then `TEST_DATABASE_URL=... pnpm check` green at the repo root. **NO blanket `pnpm fix`** (ruling inherited from the #353 plan: root-level `fix:root` biome write auto-fixes pre-existing useSortedClasses findings in `apps/admin`, unrelated churn inside the sweep diff; every touched file lives under `apps/**`, which the packages' own fix scripts cover). Do not commit code that fails it for the packages/apps touched.
+- **Biome:** touched files pass `pnpm exec biome check <files>` per task; `pnpm lint:root` is pre-existing red at main and is NOT a gate (ruling #349-R3); sweep-shortened lines' format drift heals in Task 5's scoped per-package fixes.
 - Checklist ticks in `docs/*.md` use `- [✅]`, never plain `[x]`.
 - Commits follow the repo's commit-work convention, each referencing #350. Prefixes: `chore(copy):` (Tasks 1-3), `chore(sweep):` (Task 4), `docs(progress):` + `chore(graphify):` (Task 5).
 - Run from the repo root of the branch checkout. The sweep script reads `git ls-files` from cwd.
-- **This plan's own prose is em-dash-free** (the house style going forward); its before-blocks necessarily quote em dashes: those are sweep-input evidence, byte-exact by law, and #352's doc sweep must not "fix" them (they are quoted identifiers under #351's citation law).
+- **This plan's own prose is em-dash-free** (the house style going forward); its before-blocks necessarily quote em dashes: they are sweep-input evidence, byte-exact by law. Post-#352 disposition (flagged in the PR body for #354): #352's landed ruling sweeps historical plan files wholesale with quoted strings taking the mechanical comma, so this file is sweepable once #350's execution lands, or the plans tree is scoped out of the gate; until then it is the one expected dash-carrying docs file on main.
 
 ---
 
@@ -214,7 +214,7 @@ After:
               : 'Not scheduled yet'}
 ```
 
-(Identical render when scheduled; the empty case reads the real word without a dangling `(PHT)`. Biome may re-wrap the expression; `pnpm fix` in Task 5 heals any drift.)
+(Identical render when scheduled; the empty case reads the real word without a dangling `(PHT)`. Biome may re-wrap the expression; Task 5's scoped fixes heal any drift.)
 
 - [ ] **Step 3: The landing pins.** In `booking-read.test.ts` (titles quote the glyph; assertions pin it):
 
@@ -721,7 +721,7 @@ Expected: api 34 files / 482 passed + 3 skipped; landing 19 files / 152; admin 3
 - Modify: `docs/progress.md` (one entry, em-dash-free prose)
 - Generated: `graphify-out/**` (via `graphify update .`)
 
-- [ ] **Step 1: Heal formatting.** `pnpm fix` (turbo fix + `fix:root` biome write): the sweep shortened lines by one character per replacement; any biome format drift lands here, including the Task 1 summary-rail re-wrap.
+- [ ] **Step 1: Heal formatting, scoped.** The three apps' own fix scripts only (`pnpm --filter @sevendays/landing fix && pnpm --filter @sevendays/admin fix && pnpm --filter @sevendays/api fix`): the sweep shortened lines by one character per replacement, and any biome format drift lands here, including the Task 1 summary-rail re-wrap. NO blanket `pnpm fix` and no `fix:root` (the #353 ruling: root biome's write pass would auto-fix pre-existing useSortedClasses findings in `apps/admin`, unrelated churn inside the sweep diff). If a package fix touches files outside this ticket's diff, revert those files before continuing (`git checkout -- <file>`).
 
 - [ ] **Step 2: The full gate.** With the test container up:
 
@@ -732,7 +732,7 @@ TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5433/sevendays_test pnp
 
 Expected: green across lint + format + typecheck + test for every workspace member, every floor identical to the pre-flight record: api 34 files / 482 passed + 3 skipped; types 18 files / 197; api-client 5 files / 45; landing 19 files / 152; admin 34 files / 364; db 4 files / 30 passed + 0 skipped (with-var). Any count drift: stop and reconcile (nothing in this plan adds or removes a test).
 
-- [ ] **Step 3: The progress.md entry.** Append at the end of `docs/progress.md` (matching the house entry format; the heading deliberately carries no em dash):
+- [ ] **Step 3: The progress.md entry.** Append at the then-current end of `docs/progress.md` (matching the house entry format; the heading deliberately carries no em dash; siblings #352/#353 landed after this branch was cut, so main's progress.md has grown: keep both entries in merge order, the #352 precedent):
 
 ```md
 ## 2026-11-23 #350: the apps tree de-dashed (landing + admin + api)
@@ -747,6 +747,7 @@ Handover polish item 1 (spec #348) second leg: the whole apps tree is em-dash-fr
 ```bash
 git add docs/progress.md && git commit -m "docs(progress): the #350 apps-sweep line"
 git add graphify-out && git commit -m "chore(graphify): graph update for #350"
+git fetch origin && git merge origin/main
 git push -u origin em-dash-sweep-apps
 gh pr create --title "Handover polish: sweep the apps tree (#350)" \
   --body-file <(cat <<'EOF'
@@ -758,10 +759,14 @@ Closes #350. Spec #348 item 1, second leg.
 
 **Owner flag:** every hand-rewritten string is the PROPOSED wording pinned in the plan (docs/superpowers/plans/2026-11-23-350-em-dash-sweep-apps-tree.md), awaiting ratification here per the #349 precedent. Edit any string and the owning task's gates + pins/echoes re-run before merge.
 
+**#354 disposition flag:** this plan file's before-blocks carry their quoted em dashes byte-exact by law (sweep-input evidence); it is the one expected dash-carrying docs file at merge time. Per #352's landed interpretation it is sweepable wholesale once #350's execution lands, or the plans tree is scoped out of the CI gate; #354's plan picks one.
+
 Floors unchanged: api 34 files / 482+3sk, landing 19 / 152, admin 34 / 364, types 18 / 197, api-client 5 / 45, db 4 / 30 (with-var). En dashes preserved (23 across 17 files). Live DB rows untouched (Q5). Post-merge: the visual suite may drift on copy-bearing shots (expected: services; possibly home/about outside the masked regions) and is re-baselined per the #346 procedure.
 EOF
 )
 ```
+
+(The `git merge origin/main` before the push reconciles the siblings' landed docs sweeps: they touched no apps files, so conflicts are progress.md/graphify-only; resolve keeping both progress entries in merge order. If main has moved further, re-run the scoped check and the full gate after the merge.)
 
 The PR body carries the owner flag verbatim; #350 closes on merge per the house pattern, with the acceptance criteria ticked in the issue at close.
 
@@ -777,4 +782,5 @@ The PR body carries the owner flag verbatim; #350 closes on merge per the house 
 - Counts re-derived from live probes, not memory: 2271 occurrences / 333 files (git ls-files + grep, 2026-11-23); class split 2133 spaced (incl. 3 double-space) + 109 line-end + 25 quoted glyphs + 4 spans = 2271; 53 hand-removed spaced (52 copy + 1 JSDoc) + 25 Task-1/2 glyph tokens + ≈2080 fix replacements + 109 + 4 = 2271; en dashes 23 across 17 files; floors live-run at plan time in the worktree (landing 19/152, admin 34/364, types 18/197, api-client 5/45, db 4/30 with-var, api 482 passed + 3 skipped with-var; the api without-var boot failure was observed, hence the pre-flight's with-var law).
 - Boundary check: no test mocks added or changed; every pin edit quotes the constant's real value through its real assertion (`toEqual`/`toBe`/`toContain`/`stringContaining` as found in the tree); the two verify-script checks that read changed copy are dispositioned explicitly (the booking-wizard fragment survives; the content-pages aria-labels are untouched).
 - The unanswered-at-plan-time owner ratification is disclosed in three places (Global Constraints, the progress entry, the PR body) rather than silently assumed, per the #349 precedent.
+- Post-append amendments: (1) the format heal is the three apps' scoped `fix` scripts, not the blanket `pnpm fix` (#349's Task-4 shape), inheriting the #353 plan's ruling that root biome's write pass auto-fixes pre-existing `apps/admin` findings — the sweep diff stays sweep-only; (2) the Global Constraints' plan-file disposition line was rewritten after siblings #352/#353 EXECUTED+MERGED (`b46108b`, `62eb630`) mid-writing: the plan file is the one expected dash-carrying docs file at merge time, sweepable per #352's landed wholesale interpretation or scoped out at #354 — flagged in the PR body, not resolved unilaterally here; (3) Task 5 gains the merge-main-first reconciliation and the progress.md append-order care.
 - Scope-fence reconciliation: the "both apps" vs `apps/api` wording conflict is recorded in Branch law with the four facts that settle it (the #349 fence, the census arithmetic, the absence of another api ticket, the AC's own api clause).
