@@ -1,9 +1,9 @@
 import type { StudioServiceWithBranches } from '@sevendays/types';
 
 // The studio-service card photography (#333, spec #330 §6). The map is the
-// M2 stand-in set moved VERBATIM from home-cards.tsx — the body unchanged,
+// M2 stand-in set moved VERBATIM from home-cards.tsx, the body unchanged,
 // the role demoted: these name-matched photos are the DOCUMENTED NO-COVER
-// FALLBACK (owner ruling at charting, map #324 — the home stays photo-led
+// FALLBACK (owner ruling at charting, map #324, the home stays photo-led
 // with zero admin work: every service always renders a photo).
 export function serviceBackground(name: string): string {
   const n = name.toLowerCase();
@@ -15,10 +15,10 @@ export function serviceBackground(name: string): string {
 }
 
 // The one precedence helper both service cards consume: the resolved cover
-// URL when the API answered one (#331's spine), else the stand-in. `??` —
+// URL when the API answered one (#331's spine), else the stand-in. `??`:
 // a null cover (born-null rows) and an absent field both fall back; the
 // seam pins the law. The card treatment is identical either way (the
-// photo IS the card — tints, scrim, alt='', lazy).
+// photo IS the card, tints, scrim, alt='', lazy).
 export function serviceImage(
   service: Pick<StudioServiceWithBranches, 'name' | 'coverImageUrl'>
 ): string {

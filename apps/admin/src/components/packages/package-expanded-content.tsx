@@ -1,9 +1,9 @@
 // The packages expanded row's content (M7 #219, spec § the packages
-// expanded row): the whole answer — the full description, a duration
+// expanded row): the whole answer, the full description, a duration
 // line (durationMinutes renders nowhere else in the table), frames as a
 // chip row (frame numbers), and inclusions as bullet points (label +
 // print size + attires). Pure rendering over the unchanged
-// ServicePackageRead — zero API work. ONE composition serves both
+// ServicePackageRead, zero API work. ONE composition serves both
 // postures (the desktop ExpandPanel and the mobile stacked reveal), so
 // the two never drift; every string comes from the lib seam
 // (package-expanded-row.ts), pinned by its suite.
@@ -16,7 +16,7 @@ export function PackageExpandedContent({ row }: { row: ServicePackageRead }) {
   const { description, durationLine, frameChips, inclusionLines } = expandedRowModel(row);
   return (
     <div className='space-y-2.5'>
-      {/* The description is the panel's primary content — foreground in
+      {/* The description is the panel's primary content, foreground in
           both postures (the desktop panel's muted wrapper is overridden
           by the explicit class; ratified foreground at the 2026-10-17
           variants round). */}

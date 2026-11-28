@@ -13,11 +13,11 @@ import { isAppleUserAgent, mapsHrefFor } from '../lib/branch-maps';
 import { CoverPanel } from './cover-panel';
 
 // The branch card (/branches) on the ruled language (#164 Round 4): the
-// #214 cover as a 16:9 strip atop the card (the CoverPanel law — null
+// #214 cover as a 16:9 strip atop the card (the CoverPanel law, null
 // renders the ink→petrol placeholder), the walk-in badge as an icon tooltip
 // beside the name, the phone as a mono tel: link, CTAs under a hairline.
 //
-// The v1 arm — a single solid-primary "Call {branch}" with Phone, ZERO
+// The v1 arm, a single solid-primary "Call {branch}" with Phone, ZERO
 // book words on the page — is THE rendered shape on this edition (the
 // pick-time transform applied; the main arm's variant split is a
 // main-only shape, never a runtime branch in this codebase (the #97
@@ -67,7 +67,7 @@ export function BranchCard({ branch }: { branch: BranchRead }) {
             Call {branch.name}
           </a>
           {/* #273 (OWNER-RULED): Open in Maps opens the pasted link in a
-              new tab — Apple devices prefer the Apple link when set, else
+              new tab, Apple devices prefer the Apple link when set, else
               the Google link; cards without links render nothing. The
               device flag is effect-driven (SSR renders the Google base). */}
           {mapsHref ? (
@@ -91,12 +91,12 @@ export function BranchCard({ branch }: { branch: BranchRead }) {
 }
 
 // The walk-in indicator, OWNER-RULED Round 4: the text badge recomposes as
-// an ICON with the shared tooltip — hover opens on fine pointers, TAP
+// an ICON with the shared tooltip, hover opens on fine pointers, TAP
 // toggles on coarse ones (a controlled Tooltip: Base UI's hover alone
 // doesn't fire reliably on touch). Both state texts survive verbatim in
 // the tooltip copy and the trigger's aria-label. Branches-page-local BY
 // DESIGN: the booking wizard's step keeps the text WalkInBadge (M7 leaves
-// v2's booking surfaces untouched — the divergence is deliberate, and the
+// v2's booking surfaces untouched, the divergence is deliberate, and the
 // v1 pick drops the negative tooltip's "or book online" clause there).
 function WalkInIndicator({ acceptsWalkIns }: { acceptsWalkIns: boolean }) {
   const [open, setOpen] = useState(false);
@@ -126,9 +126,7 @@ function WalkInIndicator({ acceptsWalkIns }: { acceptsWalkIns: boolean }) {
         />
         <TooltipContent className='max-w-56'>
           <p>
-            {acceptsWalkIns
-              ? 'Walk-ins welcome — come by anytime.'
-              : 'By appointment — call ahead.'}
+            {acceptsWalkIns ? 'Walk-ins welcome: come by anytime.' : 'By appointment: call ahead.'}
           </p>
         </TooltipContent>
       </Tooltip>

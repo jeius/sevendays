@@ -17,13 +17,13 @@ const withLogo: SiteSettings = {
 };
 
 describe('brandLockup (#322 bug A: the login lockup reads site settings)', () => {
-  it('carries the logo URL when set — the <img src> both surfaces render', () => {
+  it('carries the logo URL when set, the <img src> both surfaces render', () => {
     const lockup = brandLockup(withLogo);
     expect(lockup.logoImageUrl).toBe(LOGO_URL);
     expect(lockup.brandName).toBe('Sevendays Studio');
   });
 
-  it('null raw (query pending or failed) resolves the defaults — the monogram fallback, never a throw', () => {
+  it('null raw (query pending or failed) resolves the defaults, the monogram fallback, never a throw', () => {
     const lockup = brandLockup(null);
     expect(lockup.logoImageUrl).toBeNull();
     expect(lockup.brandName).toBe(SITE_SETTINGS_DEFAULTS.brandName);
@@ -33,7 +33,7 @@ describe('brandLockup (#322 bug A: the login lockup reads site settings)', () =>
     expect(brandLockup(undefined)).toEqual(brandLockup(null));
   });
 
-  it('honors resolveSiteSettings defaults per field — set logo + null brandName resolves both', () => {
+  it('honors resolveSiteSettings defaults per field, set logo + null brandName resolves both', () => {
     const lockup = brandLockup({
       ...EMPTY_SITE_SETTINGS,
       brandName: null,
@@ -45,18 +45,18 @@ describe('brandLockup (#322 bug A: the login lockup reads site settings)', () =>
 });
 
 describe('the lockup geometry/fit vocabulary (#322 bug B: the rail sliver)', () => {
-  it('pins the brand row rail posture — column, tightened gap, no horizontal padding', () => {
+  it('pins the brand row rail posture, column, tightened gap, no horizontal padding', () => {
     expect(BRAND_ROW_RAIL_CLASSES).toContain('group-data-[collapsible=icon]:flex-col');
     expect(BRAND_ROW_RAIL_CLASSES).toContain('group-data-[collapsible=icon]:gap-2');
     expect(BRAND_ROW_RAIL_CLASSES).toContain('group-data-[collapsible=icon]:px-0');
   });
 
-  it('pins the chip geometry guard — never shrinks, steps to size-8 in the rail', () => {
+  it('pins the chip geometry guard, never shrinks, steps to size-8 in the rail', () => {
     expect(LOGO_CHIP_GEOMETRY_CLASSES).toContain('shrink-0');
     expect(LOGO_CHIP_GEOMETRY_CLASSES).toContain('group-data-[collapsible=icon]:size-8');
   });
 
-  it('pins the fit ruling — bare contain, no padding (owner 2026-11-18), never cover', () => {
+  it('pins the fit ruling, bare contain, no padding (owner 2026-11-18), never cover', () => {
     // toBe pins the WHOLE string: object-contain, no p- utility, nothing else.
     expect(LOGO_IMG_CLASSES).toBe('size-full object-contain');
   });

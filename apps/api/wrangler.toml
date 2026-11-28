@@ -1,35 +1,35 @@
 name = "sevendays-v1-api"
 # The Sentry wrap (M6 #184): worker.ts wraps index.ts's Hono app in
-# withSentry — the only @sentry/cloudflare import in the api.
+# withSentry, the only @sentry/cloudflare import in the api.
 main = "src/worker.ts"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
-# M8 #285 (ADR-0026): region placement — the api worker executes in the DB's
+# M8 #285 (ADR-0026): region placement, the api worker executes in the DB's
 # metro (Supabase ap-southeast-1, Singapore) instead of the visitor's colo.
 # Region mode (targeted), NOT smart mode: smart only considers colos the
-# worker has already run at (MNL/CEB + the CI-runner colos — SIN is not among
+# worker has already run at (MNL/CEB + the CI-runner colos, SIN is not among
 # them, and admin-only volume would starve its analyzer). The frontends stay
 # at the edge; the service-binding hop forwards to this worker (ADR-0016).
 [placement]
 region = "aws:ap-southeast-1"
 
 # Media pipeline (ADR-0019, M5 ticket 02): the sevendays-media bucket and the
-# Images binding. The bucket itself is provisioned once (controller/owner —
+# Images binding. The bucket itself is provisioned once (controller/owner,
 # docs/media-bucket-runbook.md); a missing bucket fails `wrangler deploy`.
 [[r2_buckets]]
 binding = "MEDIA_BUCKET"
 bucket_name = "sevendays-media"
 
 # Cloudflare Images binding (ADR-0019 #6): admin thumbnails transform bytes
-# straight from the R2 binding — no public read path needed. wrangler
-# 4.127.1's config schema accepts ONLY `binding` (+ `remote`) on [images] —
+# straight from the R2 binding, no public read path needed. wrangler
+# 4.127.1's config schema accepts ONLY `binding` (+ `remote`) on [images];
 # no cache block (the research sketch's `[images.cache]` predates this schema).
 [images]
 binding = "IMAGES"
 
 # Testimonial submissions (M7 #216, spec § the public testimonial form):
-# the Workers Rate Limiting binding's FIRST USER — the public POST's per-IP
+# the Workers Rate Limiting binding's FIRST USER, the public POST's per-IP
 # gate. 5 per 60s: the binding's simple mode supports only 10s/60s windows
 # (probed against wrangler 4.127.1's config schema), so the spec's "~5 per
 # 10 min" reconciles to a 5-per-minute burst cap (owner-ratified
@@ -40,7 +40,7 @@ name = "RATE_LIMITER"
 namespace_id = "1001"
 simple = { limit = 5, period = 60 }
 
-# Workers Logs (M6 #183, spec § logging): the Application Log's sink —
+# Workers Logs (M6 #183, spec § logging): the Application Log's sink:
 # `wrangler tail` is the live viewer; 3-day retention accepted as v1's bar
 # (Logpush stays off, paid-only). No head_sampling_rate: v1 traffic is far
 # under any cap, every line rides.
@@ -50,18 +50,18 @@ enabled = true
 # Secrets (set via `wrangler secret put <NAME>`, never committed):
 #   DATABASE_URL
 #   BETTER_AUTH_SECRET
-#   SENTRY_DSN   (M6 #184 — live; CI-synced from the GitHub environment, skip-notice when unset)
+#   SENTRY_DSN   (M6 #184, live; CI-synced from the GitHub environment, skip-notice when unset)
 #   POSTHOG_API_KEY
-#   R2_S3_ACCESS_KEY_ID      (M5 media — OPTIONAL env; owner-minted per the
+#   R2_S3_ACCESS_KEY_ID      (M5 media, OPTIONAL env; owner-minted per the
 #                             runbook's § Owner handoff; the presign route
 #                             owns the loud missing-credential failure)
-#   R2_S3_SECRET_ACCESS_KEY  (M5 media — same)
+#   R2_S3_SECRET_ACCESS_KEY  (M5 media, same)
 # Per-environment plain values (never committed; passed to `wrangler deploy
 # --var` by CI from the GitHub environment, `.dev.vars` locally):
-#   CLOUDFLARE_ACCOUNT_ID    (M5 media — presign endpoint host)
-#   MEDIA_PUBLIC_BASE_URL    (M5 media — r2.dev base now, custom domain at M6)
-#   SENTRY_RELEASE           (M6 #184 — the deployed git SHA)
-#   ENVIRONMENT              (M6 #184 — the committed default is dev; CI
+#   CLOUDFLARE_ACCOUNT_ID    (M5 media, presign endpoint host)
+#   MEDIA_PUBLIC_BASE_URL    (M5 media, r2.dev base now, custom domain at M6)
+#   SENTRY_RELEASE           (M6 #184, the deployed git SHA)
+#   ENVIRONMENT              (M6 #184, the committed default is dev; CI
 #                             passes the deploy leg's environment)
 
 [vars]

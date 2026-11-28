@@ -9,7 +9,7 @@ import { validatedJson } from '../services/validator.js';
 
 // The singleton full-object PUT (M7 #215) behind the admin root's one
 // requireSession (401 structurally precedes this validator). The
-// admin_mutation line carries entityId null — the order-PUT law: the
+// admin_mutation line carries entityId null, the order-PUT law: the
 // singleton is family-grain on the wire (the read carries no id); the
 // DURABLE audit row inside the save carries the real row id.
 export const adminSiteSettings = new Hono<ApiEnv>().put(

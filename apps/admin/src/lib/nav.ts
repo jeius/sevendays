@@ -1,9 +1,9 @@
 // The shell's nav taxonomy (#59 ruling, extracted from admin-sidebar.tsx
 // at #188 so the owner-visibility law is testable): navGroups is data,
-// visibleNavGroups is the role filter. Owner-only entries — Audit Log
+// visibleNavGroups is the role filter. Owner-only entries, Audit Log
 // (M6 #188: the who/what/when record is person-level by the standing
 // rule "aggregates are shared; anything person-level is owner-scoped")
-// — render for role === 'admin' alone (ADR-0018's BetterAuth mapping:
+// render for role === 'admin' alone (ADR-0018's BetterAuth mapping:
 // the owner holds the admin plugin's 'admin' literal; 'staff' and null
 // both fail; the role column is nullable).
 import type { LucideIcon } from 'lucide-react';
@@ -45,7 +45,7 @@ export interface NavGroup {
 }
 
 // The ruled taxonomy (#59), icons carried from the prototype unchanged.
-// Overview carries the Analytics dashboard (#186) and — owner-only — the
+// Overview carries the Analytics dashboard (#186) and, owner-only, the
 // Audit Log (#188, beside Analytics); the appointments stub is absent here
 // (the #169 ruling, recurring at the taxonomy's new home); Catalog and
 // Studio carry the live CMS surfaces. #208: FROZEN read-only —
@@ -53,7 +53,7 @@ export interface NavGroup {
 // the filtered path's fresh arrays share the item objects), so a mutating
 // caller would corrupt the module state every render reads; frozen data
 // throws on mutation instead (modules run strict). No caller mutates
-// today — the freeze makes that permanent and loud. The lucide icon
+// today, the freeze makes that permanent and loud. The lucide icon
 // values stay unfrozen: shared singletons, not ours to freeze.
 const taxonomy: NavGroup[] = [
   {

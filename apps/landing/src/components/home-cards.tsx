@@ -7,10 +7,10 @@ import { serviceImage } from '../lib/service-image';
 // The ruled card system (#111 Track 2, variant D build target), reduced to
 // its surviving member at M7 #223: the service card. (The package-cover
 // card, chip cluster, +K popover, and BookNow helper retired with the #223
-// home redesign — featured packages render as D2 plates now.) Card titles
+// home redesign, featured packages render as D2 plates now.) Card titles
 // are SANS per the D reaction; serif stays at page h1/h2.
 
-// The ruled service treatment: the photo IS the card — full-image
+// The ruled service treatment: the photo IS the card, full-image
 // background, ink gradient for legibility, system mechanics kept (1-line
 // title, fixed height, one affordance, deep link preserved).
 export function ServiceImageCard({ service }: { service: StudioServiceWithBranches }) {
@@ -20,8 +20,8 @@ export function ServiceImageCard({ service }: { service: StudioServiceWithBranch
       aria-label={`Call us about ${service.name}`}
       className='group border-line-soft relative block h-64 overflow-hidden rounded-xl border shadow-sm focus-visible:ring-brand-focus-ring focus-visible:ring-3 focus-visible:outline-none'
     >
-      {/* #333: the stored cover renders first — the serviceBackground
-          stand-ins are the documented no-cover fallback (owner ruling —
+      {/* #333: the stored cover renders first, the serviceBackground
+          stand-ins are the documented no-cover fallback (owner ruling:
           the home stays photo-led with zero admin work). The treatment
           below is identical either way: the photo IS the card. */}
       <img
@@ -34,7 +34,7 @@ export function ServiceImageCard({ service }: { service: StudioServiceWithBranch
       {/* Owner ruling (#111, variant D reaction): tints so the labels stay
           legible even when the photo's color matches the text. Two layers:
           a uniform ink wash dims the whole image, then a bottom-heavy ink
-          scrim anchors the text zone — stacked worst case (pure-white
+          scrim anchors the text zone, stacked worst case (pure-white
           photo) still leaves the label area ≈ ink, i.e. the measured
           white-on-ink 18.64:1 pair, never below AA in the text band. */}
       <div className='bg-brand-ink/35 absolute inset-0' aria-hidden='true' />

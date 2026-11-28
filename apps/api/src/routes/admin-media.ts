@@ -10,10 +10,10 @@ import { validatedJson } from '../services/validator.js';
 // declarable (the schema has no such field); the commit is the size gate.
 // Failure map: validator 400 (unsupported type, with field details) |
 // MissingR2CredentialsError → the curated 503 via the root onError (#155:
-// leak-safe detail channel — the loud message stays in the error event).
-// Mounted behind the admin root's requireSession — see routes/admin.ts.
+// leak-safe detail channel, the loud message stays in the error event).
+// Mounted behind the admin root's requireSession, see routes/admin.ts.
 // M6 #183: presign FAILURES log a media_failure event (successful presigns
-// stay quiet — the highest-frequency admin call); the throw still rides to
+// stay quiet, the highest-frequency admin call); the throw still rides to
 // onError for the curated 503 + the error event.
 export const adminMedia = new Hono<ApiEnv>().post(
   '/presign',

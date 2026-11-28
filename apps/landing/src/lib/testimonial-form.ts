@@ -6,7 +6,7 @@ import {
 } from '@sevendays/types';
 
 // The share-your-story form seam (M7 #216, the landing lib-seam pattern):
-// the public form's whole brain as pure functions — the bounds mirror the
+// the public form's whole brain as pure functions, the bounds mirror the
 // API schema by IMPORT (packages/types owns the numbers; the textarea
 // maxLength, the counter, and this gate can never drift from the server),
 // validation trims first (the payload sends trimmed values), and the
@@ -30,14 +30,14 @@ export const FORM_BOUNDS = {
   personMax: TESTIMONIAL_PERSON_MAX,
 } as const;
 
-// TODO(owner-copy): the two min lines — pinned in the #216 plan, ratify
+// TODO(owner-copy): the two min lines, pinned in the #216 plan, ratify
 // in-round at the next owner touch (the house's draft-copy convention).
-export const QUOTE_TOO_SHORT_LINE = 'Tell us a little more — at least 20 characters.';
+export const QUOTE_TOO_SHORT_LINE = 'Tell us a little more: at least 20 characters.';
 export const PERSON_TOO_SHORT_LINE = 'Your name needs at least 2 characters.';
 
 // The owner-ratified catch-all (2026-10-14): bounds validate inline, so
 // this line is the rare network/API-failure state.
-export const GENERIC_SEND_FAILURE_LINE = "Your story didn't send — please try again.";
+export const GENERIC_SEND_FAILURE_LINE = "Your story didn't send, please try again.";
 
 export type TestimonialFormErrors = { quote?: string; person?: string };
 

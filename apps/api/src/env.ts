@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // The Worker's runtime env, Zod-parsed once per request (the binding object is
-// per-request under workerd) — a missing or malformed var fails loudly here
+// per-request under workerd), a missing or malformed var fails loudly here
 // instead of surfacing as a mid-request failure. DATABASE_URL is the pooled
 // Supabase connection (ADR-0007).
 //
@@ -10,9 +10,9 @@ import { z } from 'zod';
 //   secret failure, so only gated routes care.
 // - The R2 S3-token pair (M5 #136): the presign service owns the missing-
 //   credential failure (MissingR2CredentialsError), so a deploy made before
-//   the owner's token mint serves everything except presign — never a silent
+//   the owner's token mint serves everything except presign, never a silent
 //   fallback there either.
-// - The Sentry trio (M6 #184): all three OPTIONAL — a deploy without them
+// - The Sentry trio (M6 #184): all three OPTIONAL, a deploy without them
 //   serves everything (Sentry stays disabled, captures no-op), the same
 //   no-op-without-DSN posture the frontends codified. SENTRY_DSN is a Worker
 //   secret; SENTRY_RELEASE (the deployed git SHA) and ENVIRONMENT
@@ -20,14 +20,14 @@ import { z } from 'zod';
 //   [vars] default is dev.
 //
 // MEDIA_BUCKET/IMAGES are REQUIRED bindings (they deploy with wrangler.toml
-// once the sevendays-media bucket exists — docs/media-bucket-runbook.md), and
+// once the sevendays-media bucket exists, docs/media-bucket-runbook.md), and
 // CLOUDFLARE_ACCOUNT_ID/MEDIA_PUBLIC_BASE_URL are REQUIRED per-environment
 // values (CI passes them at deploy; the DATABASE_URL posture applies). The
 // z.custom object check makes a binding's absence a parse failure instead of
 // a mid-route TypeError. The ambient generated global in
 // worker-configuration.d.ts stays no longer load-bearing anywhere (the
 // R2Bucket/ImagesBinding types come from @cloudflare/workers-types).
-// RATE_LIMITER (M7 #216) is the rate-limit binding — same required-binding
+// RATE_LIMITER (M7 #216) is the rate-limit binding, same required-binding
 // posture, `wrangler dev` simulates it locally.
 export const envSchema = z.object({
   DATABASE_URL: z.url(),

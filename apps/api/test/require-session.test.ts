@@ -13,8 +13,8 @@ import { truncateAll } from './helpers/truncate.js';
 const url = process.env.TEST_DATABASE_URL as string;
 const db = createTestDb(url);
 
-// The middleware's semantics are proven on a scratch app — acquireDb +
-// requireSession + a probe route — because the gate is route-independent
+// The middleware's semantics are proven on a scratch app, acquireDb +
+// requireSession + a probe route, because the gate is route-independent
 // (M5 mounts CMS routes behind it). Deliberately free of booking-path
 // strings so the v1 pick carries this file (the audit-token discipline);
 // the gated-list application tests live in the dedicated suite.
@@ -58,7 +58,7 @@ describe('requireSession (scratch app, real Postgres)', () => {
   it('returns 401 for an expired session (expires_at moved to the past)', async () => {
     const { token } = await signUpSession(url, 'expired@sevendays.test');
     // The stored row carries the BARE token; the harvested value is signed
-    // (#119's verbatim-storage finding) — strip to the token segment to hit
+    // (#119's verbatim-storage finding), strip to the token segment to hit
     // the row, keep presenting the signed form to the middleware.
     await db
       .update(sessionTable)
@@ -82,12 +82,12 @@ describe('requireSession (scratch app, real Postgres)', () => {
     expect(await res.json()).toEqual({ userId });
   });
 
-  it('throws (500) when BETTER_AUTH_SECRET is missing — no silent allow', async () => {
+  it('throws (500) when BETTER_AUTH_SECRET is missing, no silent allow', async () => {
     const { token } = await signUpSession(url, 'secretless@sevendays.test');
     const { BETTER_AUTH_SECRET: _omit, ...envWithoutSecret } = testEnv(url);
     const res = await scratch.request('/protected', { headers: bearer(token) }, envWithoutSecret);
     // The scratch app mounts no onError (the root app's uniform-500 envelope
-    // is error-seam.test.ts's coverage) — the bare 500 proves the throw.
+    // is error-seam.test.ts's coverage), the bare 500 proves the throw.
     expect(res.status).toBe(500);
   });
 });

@@ -1,13 +1,13 @@
 // The packages table screen (M5 #139): the consolidated-format table over
-// live ServicePackageRead rows — ruled by #131 and ported element-for-element
+// live ServicePackageRead rows, ruled by #131 and ported element-for-element
 // from the composition of record (branch prototype/131-admin-cms-compositions,
 // screens/packages.tsx, rounds 1–9). The prototype's local fixture state is
 // replaced by the Task 2 seams: `adminPackageQueries.all()` for the list,
 // Task 3's `buildRowFlipPayload` driving the optimistic activate/deactivate
 // flips through the result-valued `saveAdminPackageUpdate` server fn (a flip
-// re-PUTs the full read with ONLY `isActive` changed — media untouched).
+// re-PUTs the full read with ONLY `isActive` changed, media untouched).
 // `durationMinutes`, `frames`, and resolved `inclusions` render in the
-// expanded row (#219) — the editor edits them, the table answers them.
+// expanded row (#219), the editor edits them, the table answers them.
 import type { ServicePackageRead } from '@sevendays/types';
 import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
@@ -58,22 +58,22 @@ interface FlipInput {
   isActive: boolean;
 }
 
-/** The pending posture's fixed four rows — stable keys, never reordered. */
+/** The pending posture's fixed four rows, stable keys, never reordered. */
 const PENDING_ROW_KEYS = ['row-1', 'row-2', 'row-3', 'row-4'];
 
 export function PackagesTable({ focus }: { focus: string | undefined }) {
   const { data: packages, isPending, isError, refetch } = useQuery(adminPackageQueries.all());
-  // M9 #316: the ?focus= landing — scroll + highlight the matched row
+  // M9 #316: the ?focus= landing, scroll + highlight the matched row
   // (data-row-id below on both postures), once data has arrived.
   useFocusLanding(focus, packages !== undefined);
   const queryClient = useQueryClient();
-  // T3: controlled disclosure — one expanded row at a time (id or null).
+  // T3: controlled disclosure, one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  // Deep-linkable in the prototype frame pass; here a plain selection —
+  // Deep-linkable in the prototype frame pass; here a plain selection:
   // ?confirm=<id> died with the prototype's search params.
   const [confirmId, setConfirmId] = useState<string | null>(null);
   // The toolbar segment (#218) + the pending-guarded delete (the #213
-  // route; a package with any Appointment ever is blocked — the dialog
+  // route; a package with any Appointment ever is blocked, the dialog
   // answers with the blockers in-body).
   const [segment, setSegment] = useState<StatusSegment>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -103,7 +103,7 @@ export function PackagesTable({ focus }: { focus: string | undefined }) {
 
   const flip = useMutation({
     // Result-valued fn (Task 2's seam): ok:false converts to a throw so the
-    // optimistic handlers below own rollback + the error toast — the API's
+    // optimistic handlers below own rollback + the error toast, the API's
     // 400 field details have no inline slot in the table (no fields here),
     // so a conflict surfaces as its message.
     mutationFn: async ({ row, isActive }: FlipInput) => {
@@ -140,12 +140,12 @@ export function PackagesTable({ focus }: { focus: string | undefined }) {
     setExpandedId((prev) => (prev === id ? null : id));
   }
 
-  // A2 (prototype): the only anchor-rendered action in the table — the
+  // A2 (prototype): the only anchor-rendered action in the table, the
   // app-level `a { color: var(--brand-700) }` rule (unlayered, so it beats
   // the layered utilities) paints anchor-rendered buttons brand. The
   // important foreground classes restore the ghost default here without
   // touching the global rule. Retargeted from the prototype's search-param
-  // screen switch to the real editor route (Task 6's — link lands first).
+  // screen switch to the real editor route (Task 6's, link lands first).
   function editButton(row: ServicePackageRead) {
     return (
       <Button
@@ -224,7 +224,7 @@ export function PackagesTable({ focus }: { focus: string | undefined }) {
                   <TableHead className='w-14'>Cover</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead className='text-right'>Price</TableHead>
-                  {/* T2: the Actions header renders empty — the icons carry
+                  {/* T2: the Actions header renders empty, the icons carry
                     their own labels. */}
                   <TableHead className='text-right' />
                 </TableRow>
@@ -234,7 +234,7 @@ export function PackagesTable({ focus }: { focus: string | undefined }) {
                   const expanded = expandedId === row.id;
                   return (
                     <Fragment key={row.id}>
-                      {/* N3: whole-row click toggles expansion — the actions
+                      {/* N3: whole-row click toggles expansion, the actions
                         cell stops propagation so icon clicks never toggle;
                         the chevron stays the keyboard/AT toggle. */}
                       <ExpandRow
@@ -259,9 +259,9 @@ export function PackagesTable({ focus }: { focus: string | undefined }) {
                         <TableCell className='cursor-pointer'>
                           <div className='space-y-0.5'>
                             {/* P1: Featured is a primary badge beside the
-                              name. Round 4: the dot LEADS the line — the
+                              name. Round 4: the dot LEADS the line, the
                               lookups-attires reference pattern (dot first,
-                              then name) — so it never strands on its own
+                              then name), so it never strands on its own
                               line when the description hides. A3: the name
                               truncates when the column is squeezed and the
                               tooltip carries the full text. */}
@@ -281,10 +281,10 @@ export function PackagesTable({ focus }: { focus: string | undefined }) {
                             </div>
                             {/* T1: description under the identity; the slug
                               is gone from the table entirely (P2). N2: while
-                              expanded the reveal carries the full text — the
+                              expanded the reveal carries the full text, the
                               truncated line hides. A1: the line indents by
-                              the dot (size-2.5) + its gap-2 — 4.5 spacing
-                              steps — so the text aligns with the name above
+                              the dot (size-2.5) + its gap-2, 4.5 spacing
+                              steps, so the text aligns with the name above
                               it. */}
                             {expanded ? null : (
                               <div className='flex min-w-0 items-center pl-4.5'>
@@ -310,7 +310,7 @@ export function PackagesTable({ focus }: { focus: string | undefined }) {
                           />
                         </TableCell>
                       </ExpandRow>
-                      {/* T3 desktop reveal (#219): the whole answer —
+                      {/* T3 desktop reveal (#219): the whole answer:
                           description, duration, frames, inclusions. */}
                       <ExpandPanel open={expanded} colSpan={4}>
                         <PackageExpandedContent row={row} />
@@ -355,7 +355,7 @@ export function PackagesTable({ focus }: { focus: string | undefined }) {
                     )}
                   </button>
                   {/* B1 (#219): the mobile reveal renders the SAME
-                      composition as the desktop panel — one component,
+                      composition as the desktop panel, one component,
                       never drift. The dedup still hides line 2 while
                       expanded. */}
                   <Collapse open={expanded}>

@@ -1,10 +1,10 @@
 // The Submissions tab (M7 #218 over #216's moderation endpoints): the
-// pending queue on the Testimonials screen — a stop on an existing screen,
+// pending queue on the Testimonials screen, a stop on an existing screen,
 // not a new place to remember. Pending-guarded accept-with-edit (the
 // accept sheet rides LightEntityEditor's async Save contract, saveLabel
-// 'Accept' — the shell's busy 'Saving…' per #218's Task 7 note (a)),
+// 'Accept', the shell's busy 'Saving…' per #218's Task 7 note (a)),
 // reject-retains (GuardedConfirm), and
-// delete-any-status (DeleteGuardDialog — a submission references nothing,
+// delete-any-status (DeleteGuardDialog, a submission references nothing,
 // so blockers never arrive). The tab's own status segment defaults to
 // Pending: the queue IS the work. The list renders newest-first as the API
 // serves it; no reordering exists here.
@@ -46,7 +46,7 @@ import {
   validateAcceptEdit,
 } from '#/lib/submissions-state';
 
-/** The pending posture's fixed four rows — stable keys, never reordered. */
+/** The pending posture's fixed four rows, stable keys, never reordered. */
 const PENDING_ROW_KEYS = ['row-1', 'row-2', 'row-3', 'row-4'];
 
 export function SubmissionsTab() {
@@ -57,17 +57,17 @@ export function SubmissionsTab() {
     refetch,
   } = useQuery(adminTestimonialSubmissionQueries.all());
   const queryClient = useQueryClient();
-  // Pending leads — the moderation queue's default view.
+  // Pending leads, the moderation queue's default view.
   const [segment, setSegment] = useState<SubmissionSegment>('pending');
-  // The three actions' targets (one dialog/sheet at a time — uuid ids never
+  // The three actions' targets (one dialog/sheet at a time, uuid ids never
   // collide).
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const [rejectId, setRejectId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The accept sheet's field state + inline errors (the async Save contract
-  // holds the sheet open on a failed accept — state intact, retry safe).
-  // The empty seed only holds between mounts — opening a row re-seeds.
+  // holds the sheet open on a failed accept, state intact, retry safe).
+  // The empty seed only holds between mounts, opening a row re-seeds.
   const [acceptState, setAcceptState] = useState<AcceptEditState>({ quote: '', person: '' });
   const [acceptErrors, setAcceptErrors] = useState<{ quote?: string; person?: string }>({});
   const quoteId = useId();
@@ -185,7 +185,7 @@ export function SubmissionsTab() {
         />
       ) : isPending || !submissions ? (
         // Pending posture: skeleton rows echoing the queue's anatomy (quote
-        // + person, badge, actions) — first load only.
+        // + person, badge, actions), first load only.
         <Card className='rounded-lg'>
           <CardContent className='space-y-4'>
             {PENDING_ROW_KEYS.map((key) => (
@@ -276,7 +276,7 @@ export function SubmissionsTab() {
       {acceptingRow ? (
         <LightEntityEditor
           title='Accept submission'
-          description='Fix or trim the words first if needed — accepting publishes it as a testimonial at the end of the list.'
+          description='Fix or trim the words first if needed; accepting publishes it as a testimonial at the end of the list.'
           open={acceptingId === acceptingRow.id}
           onOpenChange={(next) => {
             if (!next) {
@@ -315,7 +315,7 @@ export function SubmissionsTab() {
       {rejectRow ? (
         <GuardedConfirm
           title='Reject this submission?'
-          description='The submission stays on record as rejected — nothing publishes, and the sender is never told.'
+          description='The submission stays on record as rejected; nothing publishes, and the sender is never told.'
           confirmLabel='Reject'
           busyLabel={REJECTING_LABEL}
           pending={reject.isPending}

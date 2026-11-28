@@ -11,7 +11,7 @@ import { inclusionPhrase } from './inclusions-list';
 import { PhotoViewer } from './photo-viewer';
 
 // The package detail on the ruled D2 split language (#164 Round 3): the
-// cover as a full plate half (untouched photo — the CoverPanel law renders
+// cover as a full plate half (untouched photo, the CoverPanel law renders
 // the ink→petrol placeholder when the row has no cover), a light panel carrying
 // name, peso, duration, description, and THE one primary affordance —
 // the v1 arm's solid-primary "Call us" + Phone (the CTA law; main's
@@ -22,9 +22,9 @@ export function PackageDetail({ pkg }: { pkg: ServicePackageRead }) {
   const price = peso(pkg.priceCents);
   // The cover zoom (#336 D4): the lone-image variant opens at the one
   // slide; a coverless package maps to zero slides (the seam's law) and
-  // renders no affordance at all — the placeholder is inert.
+  // renders no affordance at all, the placeholder is inert.
   const [viewerOpen, setViewerOpen] = useState(false);
-  // A stable slides reference (the library's documented pitfall — the
+  // A stable slides reference (the library's documented pitfall, the
   // detail re-renders on query refetches while the viewer is open).
   const slides = useMemo(() => coverSlides(pkg), [pkg]);
 
@@ -39,7 +39,7 @@ export function PackageDetail({ pkg }: { pkg: ServicePackageRead }) {
       </Link>
       <div className='mt-6 grid overflow-hidden rounded-xl border border-line-soft bg-card shadow-sm md:grid-cols-5'>
         <div className='relative min-h-64 md:col-span-3 md:min-h-[26rem]'>
-          {/* The zoom affordance exists ONLY when the row carries a photo —
+          {/* The zoom affordance exists ONLY when the row carries a photo:
               the initials placeholder is not a photograph and does not zoom
               (D4). The button is the positioning box (CoverPanel's absolute
               classes anchor to it); the ring is inset (the grid's
@@ -109,8 +109,8 @@ export function PackageDetail({ pkg }: { pkg: ServicePackageRead }) {
 
 // The detail's spec sheet (#164 Round 3 owner ruling: "a proper separation
 // of the inclusions by specifying the framed, prints, and privileges"):
-// one column per kind — framed pictures nested per frame (ADR-0009's
-// structure made visible), prints, privileges — with mono headers, counts,
+// one column per kind, framed pictures nested per frame (ADR-0009's
+// structure made visible), prints, privileges, with mono headers, counts,
 // hairline rules, and the shared phrase format. Empty groups collapse; a
 // package with no inclusions at all renders nothing (the plate above
 // already carries the pitch).

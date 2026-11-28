@@ -7,8 +7,8 @@ import { Phone } from 'lucide-react';
 import { NAV_LINKS } from '../lib/nav';
 import { MobileNav } from './mobile-nav';
 
-// Site chrome — the ruled pass C "Sticky ink bar" (#164 Round 1, owner
-// endorsed; built M7 #223): the ink band goes sticky and glassy — 90% ink
+// Site chrome, the ruled pass C "Sticky ink bar" (#164 Round 1, owner
+// endorsed; built M7 #223): the ink band goes sticky and glassy, 90% ink
 // + backdrop-blur so scrolling content reads softly beneath it, the
 // white/10 hairline keeping the glass legible on bright photos. The
 // incumbent wordmark (serif name + mono kicker) carries, desktop-only

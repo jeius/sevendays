@@ -13,20 +13,20 @@ import { useTruncated } from '../lib/use-truncated';
 import { CoverPanel } from './cover-panel';
 import { Reveal } from './reveal';
 
-// The packages index, OWNER-RULED index A "the plates" (#164 Round 3 — "I
+// The packages index, OWNER-RULED index A "the plates" (#164 Round 3, "I
 // love the index A"; the losing ledger variant stays on the prototype
-// branch forever): a 2-column grid of cover-led compact plates — the D2
+// branch forever): a 2-column grid of cover-led compact plates, the D2
 // image treatment scaled down. The catalog laws compose here: the index is
-// a SHOWCASE (no booking CTA — M3), the whole plate clicks through to the
-// detail, and an unpriced row renders NO price (the #163 law — peso(null)
+// a SHOWCASE (no booking CTA, M3), the whole plate clicks through to the
+// detail, and an unpriced row renders NO price (the #163 law, peso(null)
 // leaves the slot empty).
 //
 // The description treatment (Round 3's refinement chain, owner-ruled):
 // clamped to two lines at a pinned two-line floor (uniform plate sizes);
-// desktop reveals the FULL description in the shared Tier-1 tooltip — and
+// desktop reveals the FULL description in the shared Tier-1 tooltip, and
 // ONLY when the text actually truncates (the measured gate: a fitting
 // description gets no tooltip and no help cursor); mobile taps the
-// description to expand IN PLACE (the plate grows in normal flow — never
+// description to expand IN PLACE (the plate grows in normal flow, never
 // an inner scrollview; the tap never navigates).
 export function CatalogPlates({ strip }: { strip: ServicePackageRead[] }) {
   return (
@@ -46,7 +46,7 @@ function CatalogPlate({ pkg }: { pkg: ServicePackageRead }) {
   const [expanded, setExpanded] = useState(false);
   const { ref: descRef, truncated } = useTruncated<HTMLParagraphElement>();
   const description = (
-    // biome-ignore lint/a11y/useKeyWithClickEvents: the tap-to-expand affordance is coarse-pointer-only by ruling (touch); keyboard users follow the link and read the full description on the detail page — a key handler here would double-fire navigation.
+    // biome-ignore lint/a11y/useKeyWithClickEvents: the tap-to-expand affordance is coarse-pointer-only by ruling (touch); keyboard users follow the link and read the full description on the detail page, a key handler here would double-fire navigation.
     <p
       ref={descRef}
       onClick={(e) => {

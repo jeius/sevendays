@@ -12,18 +12,18 @@ import { Phone } from 'lucide-react';
 import { NAV_LINKS } from '../lib/nav';
 import { footerContactFor, socialLinksFor } from '../lib/site-chrome';
 
-// Site chrome, the ink band — the page's one dark frame, wearing the ruled
+// Site chrome, the ink band, the page's one dark frame, wearing the ruled
 // redesign (#164 Round 1; built M7 #223): the wordmark consumes the
 // settings brand (name + mono kicker, md+), the footer carries the
 // 3-branch contact truth read live from the API (tel: links + walk-in
 // lines), the settings socials and brand contact block, and the outline
-// call affordance (Phone icon — the CTA law; outline weight is the law on
-// this surface). Deliberately NO booking CTA — the footer is identical
+// call affordance (Phone icon, the CTA law; outline weight is the law on
+// this surface). Deliberately NO booking CTA, the footer is identical
 // pre/post v1-scrub (M3 ruling).
 const LINK_ON_INK =
   'font-mono text-brand-300 text-xs uppercase tracking-[0.14em] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring';
 
-// T9 (#275): the footer's brand glyphs — the socialLinksFor key resolves to
+// T9 (#275): the footer's brand glyphs, the socialLinksFor key resolves to
 // its shared currentColor component (the gmail glyph is addressed directly
 // at its anchor below).
 const SOCIAL_ICONS = {
@@ -56,7 +56,7 @@ export function SiteFooter({
             <span className='flex items-baseline gap-2.5'>
               <span className='font-bold font-serif text-xl text-white'>{settings.brandName}</span>
               {/* The Round-1 ruling: the header's kicker treatment in the
-                  footer too — desktop-only (md+). */}
+                  footer too, desktop-only (md+). */}
               <span className='hidden font-mono text-[10px] text-brand-300 uppercase tracking-[0.18em] md:inline'>
                 {settings.brandTagline}
               </span>
@@ -102,10 +102,10 @@ export function SiteFooter({
             ))}
           </div>
         )}
-        {/* T9 (#275): the socials band dissolved — the cluster rides the copyright
+        {/* T9 (#275): the socials band dissolved, the cluster rides the copyright
             row (© left, cluster right from sm+; stacked left-aligned below sm).
             The icons are currentColor glyphs now: brand-300 at rest, white on
-            hover — the on-ink link vocabulary. */}
+            hover, the on-ink link vocabulary. */}
         <div className='mt-6 flex flex-col gap-2 border-white/20 border-t pt-4 sm:flex-row sm:items-center sm:justify-between'>
           <p className='text-white/70 text-xs'>
             © 2026 {settings.brandName} {settings.brandTagline}

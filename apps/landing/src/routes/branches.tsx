@@ -29,21 +29,21 @@ export const Route = createFileRoute('/branches')({
 });
 
 function BranchesPage() {
-  // The ?empty=1 judging aid (M7 #223) — DEV-gated, never ships.
+  // The ?empty=1 judging aid (M7 #223), DEV-gated, never ships.
   const isEmpty = isEmptyJudgingParam(import.meta.env.DEV, useLocation().searchStr);
   const { data: branches } = useSuspenseQuery(branchQueries.all());
   const { settings } = Route.useLoaderData();
 
   if (isEmpty || branches.length === 0) {
     // The ruled no-branches line (#164 Round 5's copy) + the Back-to-home
-    // outline CTA — a branchless read reads as deliberate, not broken.
+    // outline CTA, a branchless read reads as deliberate, not broken.
     return (
       <div className='mx-auto max-w-5xl px-6 py-12'>
         <h1 className='font-bold font-serif text-4xl text-brand-ink dark:text-foreground'>
           {settings.branchesTitle}
         </h1>
         <p className='text-muted-foreground mt-6'>
-          Our branches are being set up — check back soon.
+          Our branches are being set up, so check back soon.
         </p>
         <Link
           to='/'

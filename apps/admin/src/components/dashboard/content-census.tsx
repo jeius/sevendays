@@ -1,5 +1,5 @@
 // Content (#186): entity counts (active rows) + last-updated (max
-// updated_at over ALL rows — a deactivation is an update) per family.
+// updated_at over ALL rows, a deactivation is an update) per family.
 // Point-in-time, windowless, staleTime 5m.
 import { useQuery } from '@tanstack/react-query';
 

@@ -21,7 +21,7 @@ import { storyParagraphs } from '../lib/story-paragraphs';
 export const Route = createFileRoute('/about')({
   // SSR-prefetched like every route: a fresh page load renders current data
   // (the M5 "immediately" rule); default staleTime refetches per visit. The
-  // settings ensure never throws (#215's law — the head + copy degrade to
+  // settings ensure never throws (#215's law, the head + copy degrade to
   // code defaults).
   loader: async ({ context: { queryClient } }) => {
     await Promise.all([
@@ -44,7 +44,7 @@ export const Route = createFileRoute('/about')({
 
 function AboutPage() {
   // The ?empty=1 judging aid (M7 #223): DEV-gated. The about empties are
-  // in-page sections — the Round-5 ruling keeps them CTA-less.
+  // in-page sections, the Round-5 ruling keeps them CTA-less.
   const isEmpty = isEmptyJudgingParam(import.meta.env.DEV, useLocation().searchStr);
   const { settings } = Route.useLoaderData();
   const { data: gallery } = useSuspenseQuery(galleryQueries.all());
@@ -54,7 +54,7 @@ function AboutPage() {
   // A refetch can empty the selected category mid-session; clamp to All.
   const activeId = tabs.some((tab) => tab.id === selected) ? selected : ALL_TAB_ID;
   const photos = photosForTab(gallery, activeId);
-  // The spec's ruling: the story is plain multi-paragraph text — newlines
+  // The spec's ruling: the story is plain multi-paragraph text, newlines
   // are paragraphs, rich text stays parked (the seam trims + drops
   // empties; the born-empty default renders the coming-soon line).
   const paragraphs = storyParagraphs(settings.aboutStory);
@@ -85,8 +85,8 @@ function AboutPage() {
         )}
       </section>
 
-      {/* The portfolio — the artifact leads: the shared mosaic wall over
-          the LIVE read (home + about speak one wall — #223 built it; the
+      {/* The portfolio, the artifact leads: the shared mosaic wall over
+          the LIVE read (home + about speak one wall, #223 built it; the
           captions render here per the Round-4 ruling and #214's wire), All
           first, tabs derived (#142's behavior; the CDP-asserted seams
           data-gallery-tabs / data-portfolio-grid stand). */}
@@ -100,7 +100,7 @@ function AboutPage() {
           <p className='mt-4 text-muted-foreground'>Portfolio coming soon.</p>
         ) : (
           <>
-            {/* biome-ignore lint/a11y/useSemanticElements: AR4's ruled hand-rolled tab row — a fieldset would drag in form semantics; the group + aria-pressed buttons are the composition the CDP script asserts */}
+            {/* biome-ignore lint/a11y/useSemanticElements: AR4's ruled hand-rolled tab row, a fieldset would drag in form semantics; the group + aria-pressed buttons are the composition the CDP script asserts */}
             <div
               role='group'
               aria-label='Portfolio categories'
@@ -131,7 +131,7 @@ function AboutPage() {
         )}
       </section>
 
-      {/* Kind words — the full set as the quote wall (#164 Round 4): a
+      {/* Kind words, the full set as the quote wall (#164 Round 4): a
           two-column serif read with mono attributions, then the
           submissions CTA closing the page. */}
       <section className='mx-auto mt-12 max-w-5xl border-line-soft border-t px-6 pt-12 pb-12'>
@@ -155,14 +155,14 @@ function AboutPage() {
           </div>
         )}
         {/* The submissions CTA (M7 #216, the #164 Round-4-ruled card): the
-            only door to /share-your-story — v1's only public write surface. */}
+            only door to /share-your-story, v1's only public write surface. */}
         <div className='mt-10 flex flex-col items-start justify-between gap-4 rounded-xl border border-line-soft bg-card p-6 shadow-sm sm:flex-row sm:items-center'>
           <div>
             <h3 className='font-semibold font-serif text-brand-ink text-xl dark:text-foreground'>
               Shot with us recently?
             </h3>
             <p className='mt-1 text-muted-foreground text-sm'>
-              Share a few words about your session — we'd love to hear it.
+              Share a few words about your session! We'd love to hear it.
             </p>
           </div>
           <Link

@@ -1,6 +1,6 @@
 // The dashboard's query-contract tests (#186): the spec's staleTimes
 // (system 60s, content 5m), revalidate-on-focus stated explicitly, and
-// window-keyed cache identity. Asserts the OPTIONS objects only — the
+// window-keyed cache identity. Asserts the OPTIONS objects only, the
 // server fns are never invoked from a plain-node test (the RPC wrapper
 // needs request context; module import is safe, spike-proven).
 import { describe, expect, it } from 'vitest';

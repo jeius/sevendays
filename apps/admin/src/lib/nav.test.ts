@@ -1,8 +1,8 @@
 // The owner-visibility law, lib-seam-pinned (#188, ADR-0018): the nav's
-// owner-only entries — Audit Log, person-level by the standing rule —
+// owner-only entries, Audit Log, person-level by the standing rule;
 // render for role === 'admin' alone ('staff' and null both fail; the
 // column is nullable in the user table). Plain-node over the extracted
-// taxonomy (the data was inline in admin-sidebar.tsx since #139 — the
+// taxonomy (the data was inline in admin-sidebar.tsx since #139, the
 // extraction makes the law testable).
 import { describe, expect, it } from 'vitest';
 
@@ -14,7 +14,7 @@ describe('visibleNavGroups (the ADR-0018 gate)', () => {
     expect(overview?.items.map((item) => item.to)).toEqual(['/', '/audit-log']);
   });
 
-  it('staff (role staff) see no Audit Log entry anywhere — Analytics unaffected', () => {
+  it('staff (role staff) see no Audit Log entry anywhere, Analytics unaffected', () => {
     const items = visibleNavGroups('staff').flatMap((group) => group.items);
     expect(items.some((item) => item.to === '/audit-log')).toBe(false);
     expect(items.some((item) => item.to === '/')).toBe(true);
@@ -41,7 +41,7 @@ describe('visibleNavGroups (the ADR-0018 gate)', () => {
     );
   });
 
-  it('the taxonomy is frozen read-only — the admin path hands back the same array, and mutation throws (#208)', () => {
+  it('the taxonomy is frozen read-only, the admin path hands back the same array, and mutation throws (#208)', () => {
     expect(visibleNavGroups('admin')).toBe(navGroups); // the by-reference fast path
     expect(Object.isFrozen(navGroups)).toBe(true);
     for (const group of navGroups) {

@@ -20,7 +20,7 @@ export const branchQueries = {
 };
 
 export const siteSettingsQueries = {
-  /** The singleton's resolved read (M7 #223) — the chrome's copy source. */
+  /** The singleton's resolved read (M7 #223), the chrome's copy source. */
   all: () =>
     queryOptions({
       queryKey: ['site-settings'],
@@ -66,7 +66,7 @@ export const addonServiceQueries = {
 
 export const galleryQueries = {
   /**
-   * The assembled public gallery read (#138). Default staleTime — every
+   * The assembled public gallery read (#138). Default staleTime, every
    * fresh page load re-reads through the loader's ensureQueryData (the M5
    * "immediately" rule: freshness is a fresh-page-load property; no cache
    * layer). Tab filtering is client state over this single payload.

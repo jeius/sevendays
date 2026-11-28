@@ -1,10 +1,10 @@
 // The admin write model's failure contract (M5 #137): the resolved-union
 // precedent of services/appointments.ts and commitUpload, made uniform for
-// every entity mutation — a service RESOLVES a typed failure and the thin
+// every entity mutation, a service RESOLVES a typed failure and the thin
 // route maps it (not_found → 404, conflict/invalid → 400 with field
 // details). Status vocabulary {400, 401, 404, 500}; no 409 anywhere: every
-// uniqueness collision — the deterministic pre-check AND the PG 23505 race
-// backstop — resolves through `conflict` with the exact payload field named.
+// uniqueness collision, the deterministic pre-check AND the PG 23505 race
+// backstop, resolves through `conflict` with the exact payload field named.
 
 export type AdminDetail = { path: string[]; message: string };
 
@@ -38,7 +38,7 @@ export function invalidRefs(message: string, details: AdminDetail[]): AdminWrite
 /**
  * Map a failed write to the conflict failure when the driver rejected it as
  * a PG unique violation whose constraint is in the caller's map; null for
- * anything else (rethrow territory — the root onError owns the uniform 500).
+ * anything else (rethrow territory, the root onError owns the uniform 500).
  * Drizzle wraps driver errors: the PG message sits on err.cause (the
  * appointments CHECK precedent). The deterministic pre-check in each service
  * is the PRIMARY conflict path; this mapper is the race backstop that keeps
@@ -62,7 +62,7 @@ export function uniqueViolation(
  * Run one write with the 23505 backstop armed: the write's unique clashes
  * resolve to the conflict failure, everything else propagates (the root
  * onError owns it). The write itself throws only on driver errors or the
- * no-row guard — validation happens BEFORE it.
+ * no-row guard, validation happens BEFORE it.
  */
 export async function guardUnique<T>(
   constraints: Record<string, string>,
@@ -79,7 +79,7 @@ export async function guardUnique<T>(
 
 /**
  * Thrown INSIDE a transaction to force the rollback: drizzle commits when the
- * callback RESOLVES — a failure value returned mid-transaction would commit
+ * callback RESOLVES, a failure value returned mid-transaction would commit
  * the rows already written (the atomic-save trap). Caught by the save's
  * caller and mapped back into the same union. Not for the simple entities
  * (their checks run before any write); the atomic package save is the user.

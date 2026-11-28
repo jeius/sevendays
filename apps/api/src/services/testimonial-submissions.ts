@@ -10,7 +10,7 @@ import type { AdminWriteFailure, AdminWriteResult } from './admin-shared.js';
 import { type AuditActor, writeAuditRow } from './audit.js';
 
 // The testimonial-submissions seam (M7 #216, spec § the public testimonial
-// form): the only public write surface, HOLDING AT THE API — the public
+// form): the only public write surface, HOLDING AT THE API, the public
 // POST inserts pending and nothing the public writes ever renders; a
 // Testimonial exists only after staff accept (appended at the END of
 // render order via the shared nextTestimonialPosition max+1), reject
@@ -21,7 +21,7 @@ import { type AuditActor, writeAuditRow } from './audit.js';
 
 type SubmissionRow = typeof testimonialSubmissions.$inferSelect;
 
-/** The public write: insert as pending. No audit row — the Audit Log
+/** The public write: insert as pending. No audit row, the Audit Log
  * records committed STAFF mutations (an AuditActor requires a session);
  * the rate-limit gate and the honeypot discard live at the route. */
 export async function createTestimonialSubmission(
@@ -33,7 +33,7 @@ export async function createTestimonialSubmission(
   return row;
 }
 
-/** The moderation queue: every row, newest-first — the Submissions tab's
+/** The moderation queue: every row, newest-first, the Submissions tab's
  * whole data (M7 #218 renders it); no status filter at the wire. */
 export async function listAdminTestimonialSubmissions(db: Database): Promise<SubmissionRow[]> {
   return db
@@ -42,7 +42,7 @@ export async function listAdminTestimonialSubmissions(db: Database): Promise<Sub
     .orderBy(desc(testimonialSubmissions.createdAt), desc(testimonialSubmissions.id));
 }
 
-// pending is the only transitionable state — a repeat accept would
+// pending is the only transitionable state, a repeat accept would
 // double-create a Testimonial; the 400 names the current status.
 function nonPending(
   action: 'accepted' | 'rejected',
@@ -59,7 +59,7 @@ function nonPending(
 /**
  * Accept-with-edit: absent edit keys keep the stored text; present keys
  * were bounds-validated at the route. The Testimonial insert, the status
- * flip, and the audit row share ONE transaction — the position computes
+ * flip, and the audit row share ONE transaction, the position computes
  * BEFORE it (the createAdminTestimonial precedent: single-writer admin,
  * race accepted). ONE audit row per REQUEST (the gallery-photo commit
  * precedent: the request's primary entity is the submission; the created
@@ -101,7 +101,7 @@ export async function acceptTestimonialSubmission(
   return { ok: true, row };
 }
 
-/** Reject: retains the row (the audit trail, re-submission spotting) — the
+/** Reject: retains the row (the audit trail, re-submission spotting), the
  * write is the status flip + its audit row, nothing else. */
 export async function rejectTestimonialSubmission(
   db: Database,
@@ -133,7 +133,7 @@ export async function rejectTestimonialSubmission(
   return { ok: true, row };
 }
 
-/** Delete regardless of status (a submission references nothing — no guard
+/** Delete regardless of status (a submission references nothing, no guard
  * service; this is a moderation endpoint, not one of the nine). */
 export async function deleteTestimonialSubmission(
   db: Database,

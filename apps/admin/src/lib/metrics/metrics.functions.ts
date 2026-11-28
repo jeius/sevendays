@@ -1,11 +1,11 @@
 // The metrics seam's server functions (#186, ADR-0023): the CF GraphQL
-// client and the DB probes live ADMIN-SIDE — the api stays domain-pure,
+// client and the DB probes live ADMIN-SIDE, the api stays domain-pure,
 // no metrics route joins /api/v1. Behind the seam's OWN session gate (the
 // CMS write-fns discipline: server fns are directly callable, so they
-// gate themselves — the ensureSession semantics hoisted into the seam).
+// gate themselves, the ensureSession semantics hoisted into the seam).
 // Results are plain-object unions so the RPC boundary serializes them
 // without the #155 class-erasure problem. Sentry span per the house rule
-// (no-op when Sentry is uninitialized — dev without VITE_SENTRY_DSN).
+// (no-op when Sentry is uninitialized, dev without VITE_SENTRY_DSN).
 import { startSpan } from '@sentry/tanstackstart-react';
 import { createDbClient } from '@sevendays/db';
 import { createServerFn } from '@tanstack/react-start';

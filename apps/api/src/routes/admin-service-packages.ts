@@ -14,7 +14,7 @@ import type { ApiEnv } from '../services/db.js';
 import { badRequest, notFound } from '../services/errors.js';
 import { validatedJson, validatedParam } from '../services/validator.js';
 
-// Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts. The
+// Chained registration (ADR-0006 Hono RPC), see routes/branches.ts. The
 // atomic save rides the gate (routes/admin.ts's ONE requireSession); POST
 // generates the slug, PUT accepts the advanced slug field. Both return the
 // canonical servicePackageRead shape (coverImageUrl resolved, no raw key).

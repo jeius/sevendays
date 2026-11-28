@@ -1,5 +1,5 @@
-// The dashboard's query factories (#186): staleTime per the spec — system
-// 60s, content 5m, traffic 5m, storage 10m — revalidate on focus stated explicitly (the router's
+// The dashboard's query factories (#186): staleTime per the spec, system
+// 60s, content 5m, traffic 5m, storage 10m, revalidate on focus stated explicitly (the router's
 // QueryClient leaves it on; the spec rules it, the factories say it), no
 // polling. Manual refresh invalidates the ['metrics'] prefix. No
 // server-side cache exists anywhere (single-viewer admin).

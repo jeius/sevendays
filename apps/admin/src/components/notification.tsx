@@ -1,17 +1,17 @@
 // The Notification (M9 #314, ADR-0028): the admin chrome's derived view
-// over the pending-submissions queue — the badge IS the pending count, the
+// over the pending-submissions queue, the badge IS the pending count, the
 // panel lists the submissions themselves with confirm-guarded Accept and
 // Reject, and an item leaves only by moderation (no dismiss, no mark-read,
-// no per-staff state — the derived ruling's absences ARE the model). The
+// no per-staff state, the derived ruling's absences ARE the model). The
 // query is the #288 factory at topbar scope (the topbar renders on every
 // shell screen): the same ['admin', 'testimonial-submissions'] key the
-// Submissions tab reads — one shared cache entry, so badge and tab update
+// Submissions tab reads, one shared cache entry, so badge and tab update
 // together by construction; freshness rides the seam's own contracts
 // (window focus, staleness-bound refetch, the moderation mutations) plus a
 // refetch on panel-open (D4). Anatomy: Variant C per #304 (dense list +
-// initials), ported from prototype/bell-panel-variants — values and
+// initials), ported from prototype/bell-panel-variants, values and
 // rulings, never the branch; the accept dialog's confirm takes the primary
-// fill (confirmVariant, the #304 owner reaction — accept publishes, it
+// fill (confirmVariant, the #304 owner reaction, accept publishes, it
 // doesn't destroy).
 import type { TestimonialSubmission } from '@sevendays/types';
 import { Button } from '@sevendays/ui/components/button';
@@ -51,7 +51,7 @@ import {
 } from '#/lib/notification-state';
 import { filterSubmissions, submittedOn } from '#/lib/submissions-state';
 
-/** The first-load skeleton's fixed rows — stable keys, the tab's posture. */
+/** The first-load skeleton's fixed rows, stable keys, the tab's posture. */
 const PENDING_SKELETON_KEYS = ['sk-1', 'sk-2', 'sk-3'];
 
 export function Notification() {
@@ -62,7 +62,7 @@ export function Notification() {
     refetch,
   } = useQuery(adminTestimonialSubmissionQueries.all());
   const queryClient = useQueryClient();
-  // Controlled open — the refetch-on-open law (D4) rides onOpenChange:
+  // Controlled open, the refetch-on-open law (D4) rides onOpenChange:
   // what is examined is fresh. 60-second polling is the written-down v2
   // fence, NOT built (ADR-0028).
   const [open, setOpen] = useState(false);
@@ -78,7 +78,7 @@ export function Notification() {
   };
 
   // Accept-as-is: the panel has no edit surface, so the payload carries
-  // no keys — absent keys keep the submission's stored text (the accept
+  // no keys, absent keys keep the submission's stored text (the accept
   // schema's own clause). Pending-guarded by construction (the panel
   // lists only pending rows); failure keeps the dialog + toasts (retry
   // safe, the #218 hold law).
@@ -128,7 +128,7 @@ export function Notification() {
   );
 
   return (
-    // One provider over the whole surface — the trigger's hint and the
+    // One provider over the whole surface, the trigger's hint and the
     // rows' action hints (context flows through the popover's portal).
     <TooltipProvider>
       <Popover
@@ -141,10 +141,10 @@ export function Notification() {
         }}
       >
         <Tooltip>
-          {/* The trigger composes both primitives on one element — the
+          {/* The trigger composes both primitives on one element, the
               Base UI chain: TooltipTrigger → PopoverTrigger → Button
               (outermost first, the house render-prop idiom). The count
-              rides the accessible name; the visual badge is aria-hidden —
+              rides the accessible name; the visual badge is aria-hidden:
               one atomic status, no competing live region (D2). */}
           <TooltipTrigger
             render={
@@ -177,14 +177,14 @@ export function Notification() {
         </Tooltip>
         <PopoverContent align='end' className='w-[400px] p-0'>
           {/* The workbar header (D2): uppercase-muted title + the count.
-              While the first read is in flight there is no number to show
-              — the header renders without one rather than a lying 0. */}
+              While the first read is in flight there is no number to show;
+              the header renders without one rather than a lying 0. */}
           <div className='text-muted-foreground flex items-center justify-between border-b px-4 py-2.5'>
             <p className='text-[11px] font-medium tracking-wide uppercase'>Pending submissions</p>
             <p className='text-xs'>{submissions === undefined ? null : count}</p>
           </div>
           {isError ? (
-            // The house failed-read posture (#155) — the panel never
+            // The house failed-read posture (#155), the panel never
             // fakes the empty line over a failed read; the footer
             // persists.
             <div className='px-4 py-6'>
@@ -197,7 +197,7 @@ export function Notification() {
             </div>
           ) : isPending || !submissions ? (
             // First-load posture: skeleton rows echoing the dense row
-            // anatomy — the tab's own posture, scaled to the panel.
+            // anatomy, the tab's own posture, scaled to the panel.
             <div className='max-h-[380px] space-y-3.5 overflow-y-auto p-4'>
               {PENDING_SKELETON_KEYS.map((key) => (
                 <div key={key} className='flex items-start gap-3'>
@@ -236,7 +236,7 @@ export function Notification() {
                       </div>
                     </div>
                     <div className='flex shrink-0 gap-1'>
-                      {/* Icon-only actions — the vocabulary law's icon
+                      {/* Icon-only actions, the vocabulary law's icon
                           half: the spinner takes the icon's place,
                           aria-busy carries state; the hover hints name
                           them for sighted users, the aria-label stays the
@@ -284,8 +284,8 @@ export function Notification() {
               })}
             </div>
           )}
-          {/* The footer rides EVERY state (D2): the full vocabulary —
-              accept-with-edit, delete — stays one click away in the tab.
+          {/* The footer rides EVERY state (D2): the full vocabulary:
+              accept-with-edit, delete, stays one click away in the tab.
               The click closes the popover so the landing screen isn't
               overlaid. */}
           <div className='border-t p-2'>

@@ -17,9 +17,9 @@ The Branches page — every primary call-to-action funnels there; each Branch ca
 _Avoid_: contact page
 
 **Deactivated (Service Package)**:
-A package that must not appear anywhere on the landing site — not in listings, not reachable by direct URL.
+A package that must not appear anywhere on the landing site, not in listings, not reachable by direct URL.
 _Avoid_: sold out
 
 **Unpriced**:
-A catalog item whose price is deliberately unset (null) — it stays fully bookable, and nothing renders where its price would be: no placeholder, no inquire line, no CTA change. A booking with any Unpriced part shows no total. Set from the CMS by unchecking Priced.
+A catalog item whose price is deliberately unset (null), it stays fully bookable, and nothing renders where its price would be: no placeholder, no inquire line, no CTA change. A booking with any Unpriced part shows no total. Set from the CMS by unchecking Priced.
 _Avoid_: free (that is a ₱0 price), inquire-only

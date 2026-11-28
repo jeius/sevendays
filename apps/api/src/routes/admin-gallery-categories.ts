@@ -19,8 +19,8 @@ import type { ApiEnv } from '../services/db.js';
 import { badRequest, notFound } from '../services/errors.js';
 import { validatedJson, validatedParam } from '../services/validator.js';
 
-// Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts. PUT
-// /order is registered BEFORE /:id — static before param, so the order PUT
+// Chained registration (ADR-0006 Hono RPC), see routes/branches.ts. PUT
+// /order is registered BEFORE /:id, static before param, so the order PUT
 // can never be captured by the uuid-validated /:id route (an 'order' id
 // would otherwise die in validatedParam as a 400).
 export const adminGalleryCategories = new Hono<ApiEnv>()

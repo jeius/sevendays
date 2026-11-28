@@ -1,11 +1,11 @@
 import type { SiteSettings } from '@sevendays/types';
 import { bannerFor } from '../lib/site-chrome';
 
-// The settings-driven announcement banner (M7 #223 — the #215 Site tab's
+// The settings-driven announcement banner (M7 #223, the #215 Site tab's
 // banner fields worn by the landing chrome): a slim wash strip ABOVE the
-// sticky bar, scrolling away with the page — quiet by the thesis. The gate
+// sticky bar, scrolling away with the page, quiet by the thesis. The gate
 // law lives in bannerFor: off or untitled renders NOTHING (never a broken
-// strip). Composition owner-ratified as rendered, 2026-10-20 (#223 round —
+// strip). Composition owner-ratified as rendered, 2026-10-20 (#223 round:
 // no prototype precedent; the weight and placement stand).
 export function AnnouncementBanner({ settings }: { settings: SiteSettings }) {
   const banner = bannerFor(settings);

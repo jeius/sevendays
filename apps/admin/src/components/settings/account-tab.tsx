@@ -1,8 +1,8 @@
-// The Account tab (M7 #221): every staff member manages themselves —
+// The Account tab (M7 #221): every staff member manages themselves:
 // read-only identity, editable display name, change-password (verifies the
 // current password server-side through BetterAuth's own endpoint),
 // sign-out-of-all-sessions. All three actions ride the browser authClient
-// (same-origin /api/auth, cookies ride themselves — the login form's
+// (same-origin /api/auth, cookies ride themselves, the login form's
 // posture); no server fns, no API surface.
 import { Button } from '@sevendays/ui/components/button';
 import { Card, CardContent } from '@sevendays/ui/components/card';
@@ -64,7 +64,7 @@ export function AccountTab({ user }: { user: AccountUser }) {
     });
     setSavingPassword(false);
     if (error) {
-      // BetterAuth answers a generic failure for a wrong current password —
+      // BetterAuth answers a generic failure for a wrong current password:
       // one line, never which field.
       setPasswordError('Could not change the password. Check the current password and try again.');
       return;
@@ -83,7 +83,7 @@ export function AccountTab({ user }: { user: AccountUser }) {
       toast.error('Could not sign out.');
       return;
     }
-    await navigate({ href: '/login' }); // every session — including this one — is gone
+    await navigate({ href: '/login' }); // every session, including this one, is gone
   }
 
   return (
@@ -187,7 +187,7 @@ export function AccountTab({ user }: { user: AccountUser }) {
           <h2 className='text-sm font-semibold'>Sessions</h2>
           <p className='text-muted-foreground text-sm'>
             {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
-            Signs this account out of every session, on every device — including this one.
+            Signs this account out of every session, on every device, including this one.
           </p>
           <Button
             type='button'

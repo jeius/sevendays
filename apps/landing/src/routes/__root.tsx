@@ -24,10 +24,10 @@ export interface RouterContext {
 export const Route = createRootRouteWithContext<RouterContext>()({
   // The chrome's reads (M7 #223): site settings + the branch truth the
   // footer carries, ensured once per entry (the root loader does not re-run
-  // on client navigations — fresh per page load, the M5 freshness rule).
+  // on client navigations, fresh per page load, the M5 freshness rule).
   // NEVER-THROWING by construction (allSettled): a dead settings/branches
   // read degrades the chrome to code defaults and an empty branch block;
-  // pages whose own loaders are healthy never inherit a chrome failure —
+  // pages whose own loaders are healthy never inherit a chrome failure;
   // and a failing page still renders its error surface inside a working
   // chrome.
   loader: async ({ context: { queryClient } }) => {
@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   // The never-broken law (#215): a failed or missing read renders the
-  // defaults — a born-empty row and a dead API render the same chrome.
+  // defaults, a born-empty row and a dead API render the same chrome.
   const { data: settings } = useQuery(siteSettingsQueries.all());
   const { data: branches } = useQuery(branchQueries.all());
   const resolved = settings ?? SITE_SETTINGS_DEFAULTS;

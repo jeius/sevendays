@@ -1,13 +1,13 @@
 // Ship-day media copy (M6 #191): lists every committed object in the
 // source account's sevendays-media bucket and re-PUTs it into the
-// destination account's same-named bucket (R2 has no bucket-move —
+// destination account's same-named bucket (R2 has no bucket-move,
 // ADR-0019 #4). The committed-object contract (src/services/media.ts):
 // final objects are Content-Type image/jpeg with Cache-Control public,
 // max-age=31536000, immutable; tmp/ staging never copies (its lifecycle
 // rule expires it). aws4fetch here mirrors media.ts's own client
-// construction (service s3, region auto — required by the signer, ignored
+// construction (service s3, region auto, required by the signer, ignored
 // by R2), riding the api's pinned dependency. Owner tooling, run from the
-// runbook — never CI; every input is an exported env value (no .env file
+// runbook, never CI; every input is an exported env value (no .env file
 // is read).
 import { AwsClient } from 'aws4fetch';
 
@@ -17,7 +17,7 @@ function required(name) {
   const value = process.env[name];
   if (!value) {
     throw new Error(
-      `${name} is not set. The ship runbook exports it before running this script — see docs/ship-provisioning-runbook.md.`
+      `${name} is not set. The ship runbook exports it before running this script: see docs/ship-provisioning-runbook.md.`
     );
   }
   return value;
@@ -41,7 +41,7 @@ const bucket = process.env.R2_BUCKET ?? 'sevendays-media';
 const sourceBase = `https://${required('SOURCE_R2_ACCOUNT_ID')}.r2.cloudflarestorage.com/${bucket}`;
 const destBase = `https://${required('DEST_R2_ACCOUNT_ID')}.r2.cloudflarestorage.com/${bucket}`;
 
-// Minimal XML scrape (owner tooling — no XML dependency): S3 v2 list
+// Minimal XML scrape (owner tooling, no XML dependency): S3 v2 list
 // responses are flat <Contents><Key>..</Key><Size>..</Size></Contents>
 // documents, paginated by continuation token.
 async function listAll() {

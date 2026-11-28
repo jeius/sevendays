@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 // module so the home mosaic and the (#224) catalog index share the one
 // motion grammar.
 // The e2e visual seam (#255): every wrapper carries `data-reveal`, and
-// `data-shown` flips with the state — inert DOM hooks (zero pixel
+// `data-shown` flips with the state, inert DOM hooks (zero pixel
 // impact) that the visual spec's reveal-complete wait targets under the
 // tall-viewport capture law (e2e/README.md).
 export function Reveal({
@@ -17,7 +17,7 @@ export function Reveal({
 }: {
   children: React.ReactNode;
   delay?: number;
-  /** Grid-span classes land here — the reveal div IS the grid child. */
+  /** Grid-span classes land here, the reveal div IS the grid child. */
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);

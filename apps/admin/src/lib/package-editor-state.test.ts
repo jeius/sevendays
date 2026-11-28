@@ -237,7 +237,7 @@ describe('input mappers', () => {
     expect(durationFromInput('45')).toBe(45);
   });
 
-  it('durationFromInput maps a non-integer to null — the schema demands a positive int, the catalog has no durations (TDD #143 sweep)', () => {
+  it('durationFromInput maps a non-integer to null, the schema demands a positive int, the catalog has no durations (TDD #143 sweep)', () => {
     expect(durationFromInput('45.5')).toBeNull();
     expect(durationFromInput('45.0')).toBe(45);
   });
@@ -390,7 +390,7 @@ describe('unpriced packages (ADR-0020)', () => {
     expect(buildUpdatePayload(state, []).priceCents).toBeNull();
   });
 
-  it('create defaults unchecked (owner ruling 2026-10-12) — the fresh payload saves null', () => {
+  it('create defaults unchecked (owner ruling 2026-10-12), the fresh payload saves null', () => {
     expect(newEditorState().hasPrice).toBe(false);
     expect(buildCreatePayload(newEditorState(), []).priceCents).toBeNull();
   });
@@ -405,25 +405,25 @@ describe('unpriced packages (ADR-0020)', () => {
     expect(errors.price).toBe('Enter a price of zero or more.');
   });
 
-  it('unchecked skips the price rules entirely — an empty entry is a valid unpriced save', () => {
+  it('unchecked skips the price rules entirely, an empty entry is a valid unpriced save', () => {
     const errors = validateEditorState({ ...newEditorState(), name: 'n', description: 'd' });
     expect(errors.price).toBeUndefined();
   });
 
-  it('the table flip payload carries row.priceCents verbatim — null stays null', () => {
+  it('the table flip payload carries row.priceCents verbatim, null stays null', () => {
     expect(buildRowFlipPayload({ ...read(), priceCents: null }, false).priceCents).toBeNull();
   });
 });
 
 describe('isEditorStateDirty (the dirty-gate seam, #242)', () => {
-  it('a state equals its baseline structurally — two fromRead passes over one read are clean, not reference-equal', () => {
+  it('a state equals its baseline structurally, two fromRead passes over one read are clean, not reference-equal', () => {
     const packageRead = read();
     expect(
       isEditorStateDirty(editorStateFromRead(packageRead), editorStateFromRead(packageRead))
     ).toBe(false);
   });
 
-  it('the create-mode initial state is clean against a second newEditorState instance — the unpriced NaN encoding equals itself (Object.is)', () => {
+  it('the create-mode initial state is clean against a second newEditorState instance, the unpriced NaN encoding equals itself (Object.is)', () => {
     expect(isEditorStateDirty(newEditorState(), newEditorState())).toBe(false);
   });
 
@@ -477,11 +477,11 @@ describe('isEditorStateDirty (the dirty-gate seam, #242)', () => {
     expect(isEditorStateDirty({ ...base, inclusions: [...base.inclusions, print] }, base)).toBe(
       true
     );
-    // read() carries exactly one inclusion — removing it leaves none.
+    // read() carries exactly one inclusion, removing it leaves none.
     expect(isEditorStateDirty({ ...base, inclusions: [] }, base)).toBe(true);
   });
 
-  it('a reordered inclusion reads dirty — array order IS position (#137)', () => {
+  it('a reordered inclusion reads dirty, array order IS position (#137)', () => {
     const base = editorStateFromRead(read());
     const second: EditorInclusion = {
       key: crypto.randomUUID(),
@@ -495,15 +495,15 @@ describe('isEditorStateDirty (the dirty-gate seam, #242)', () => {
     const baseline = { ...base, inclusions: [...base.inclusions, second] };
     expect(isEditorStateDirty(baseline, baseline)).toBe(false);
     // Indexed element reads type `T | undefined` here (noUncheckedIndexedAccess,
-    // ruled in the #220 suite) — the reversal goes through the copied array.
+    // ruled in the #220 suite), the reversal goes through the copied array.
     expect(
       isEditorStateDirty({ ...baseline, inclusions: [...baseline.inclusions].reverse() }, baseline)
     ).toBe(true);
   });
 
-  it('an attire uncheck+recheck (same membership, new selection order) reads dirty — the safe direction, never the reverse', () => {
+  it('an attire uncheck+recheck (same membership, new selection order) reads dirty, the safe direction, never the reverse', () => {
     const base = editorStateFromRead(read());
-    // read() carries exactly one inclusion — map it, never index it
+    // read() carries exactly one inclusion, map it, never index it
     // (noUncheckedIndexedAccess, ruled in the #220 suite).
     const withTwo: PackageEditorState = {
       ...base,

@@ -1,10 +1,10 @@
 // The PostHog HogQL half of the metrics seam (#187, ADR-0023): four
-// pinned documents (pure builders — never ad-hoc concatenation at call
+// pinned documents (pure builders, never ad-hoc concatenation at call
 // sites), landing-scoped by the $host allowlist (the admin's own events
 // stay captured but never join Traffic), one request per document over
 // the Query API (POST {host}/api/projects/{id}/query/, Bearer personal
 // key, HogQLQuery kind, a name for query_log). The blocking response is
-// parallel columns/results arrays — zipped here. Failure mapping is the
+// parallel columns/results arrays, zipped here. Failure mapping is the
 // #155 class: resolve unavailable, one log-only line, never a throw.
 // Dialect fallbacks (quantileTDigest; objects-rows) live in the plan's
 // Global Constraints and are live-probe-gated only.
@@ -80,7 +80,7 @@ export function pageviewSeriesQuery(
   ].join('\n');
 }
 
-// Window-total uniques are their own document — summing daily uniques
+// Window-total uniques are their own document, summing daily uniques
 // would double-count visitors seen on multiple days.
 export function windowTotalsQuery(
   range: { since: string; until: string },
@@ -139,7 +139,7 @@ export function normalizeHogqlTimestamp(raw: unknown): string | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
 }
 
-// #208: the count munges route through this guard too — a non-finite
+// #208: the count munges route through this guard too, a non-finite
 // aggregate resolves to the ruled 0 (a count is zero when unknown; the
 // ?? 0 on missing already said so); the vitals keep null (a measurement
 // is absent, not zero).

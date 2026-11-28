@@ -1,10 +1,10 @@
 // /login/reset (M7 #221): the far end of the emailed token link. BetterAuth's
 // GET /api/auth/reset-password/:token 302s here with ?token=VALID_TOKEN (or
 // ?error=INVALID_TOKEN) after validating; the form POSTs the new password
-// through authClient.resetPassword — a success revokes every session
+// through authClient.resetPassword, a success revokes every session
 // (revokeSessionsOnPasswordReset) and bounces to /login?reset=1. A minimal
 // standalone card on the wash canvas (both themes; the login band stays on
-// /login — this page is one purpose, one form). The submit button rides the
+// /login, this page is one purpose, one form). The submit button rides the
 // one pending vocabulary (#218's, the #242 deferred-minor rider): disabled +
 // aria-busy + the spinner prefix + the "Resetting…" swap while submitting.
 import { Button } from '@sevendays/ui/components/button';
@@ -56,7 +56,7 @@ function ResetPasswordPage() {
       setFailure(true);
       return;
     }
-    // Every session was just revoked (revokeSessionsOnPasswordReset) —
+    // Every session was just revoked (revokeSessionsOnPasswordReset),
     // straight to the door with the success line.
     await navigate({ href: '/login?reset=1' });
   };
@@ -121,7 +121,7 @@ function ResetPasswordPage() {
               {failure && (
                 <p role='alert' className='text-destructive text-sm'>
                   {/* Owner-ratified verbatim, 2026-10-19 (#221 round). */}
-                  Could not reset the password — the link may have expired. Request a new one.
+                  Could not reset the password: the link may have expired. Request a new one.
                 </p>
               )}
               <Button type='submit' className='w-full' disabled={submitting} aria-busy={submitting}>

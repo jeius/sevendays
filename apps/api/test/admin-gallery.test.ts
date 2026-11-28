@@ -99,7 +99,7 @@ describe('gallery categories admin CRUD', () => {
     expect(await res.json()).toEqual({ error: 'Gallery category not found.' });
   });
 
-  it('PUT /order full-replace renumbers 1..N in payload order — deactivated rows included', async () => {
+  it('PUT /order full-replace renumbers 1..N in payload order, deactivated rows included', async () => {
     const res = await authed(
       'PUT',
       '/api/v1/admin/gallery-categories/order',
@@ -227,7 +227,7 @@ describe('testimonials admin CRUD', () => {
   it('PUT /order with a DUPLICATE id → 400 naming the duplicate, positions untouched', async () => {
     // #137 T7 minor: the third arm of checkCompleteOrder. A payload listing
     // every row exactly once EXCEPT one row twice answers exactly one
-    // duplicate detail — and the write never runs.
+    // duplicate detail, and the write never runs.
     const res = await authed(
       'PUT',
       '/api/v1/admin/testimonials/order',
@@ -254,7 +254,7 @@ describe('testimonials admin CRUD', () => {
       .select({ position: testimonials.position })
       .from(testimonials)
       .where(eq(testimonials.id, ids.testimonialB));
-    expect(rows[0]?.position).toBe(2); // the fixture position — untouched
+    expect(rows[0]?.position).toBe(2); // the fixture position, untouched
   });
 
   it('anonymous POST with a validation-bait body → the 401 envelope BEFORE validation', async () => {
@@ -276,7 +276,7 @@ describe('gallery photos admin CRUD', () => {
   const STAGING = 'tmp/00000000-0000-4000-8000-000000000000.jpg';
   const PHOTO_A_KEY = 'gallery/aaaaaaaa-0000-4000-8000-000000000001.jpg';
 
-  it('GET / lists ALL rows including the deactivated one — photoUrl resolved, NO raw key anywhere', async () => {
+  it('GET / lists ALL rows including the deactivated one, photoUrl resolved, NO raw key anywhere', async () => {
     const res = await authed(
       'GET',
       '/api/v1/admin/gallery-photos',
@@ -358,7 +358,7 @@ describe('gallery photos admin CRUD', () => {
     expect(stub.putCalls).toEqual([]);
   });
 
-  it('PUT metadata is full-object — null clears title/categoryId and isActive flips', async () => {
+  it('PUT metadata is full-object, null clears title/categoryId and isActive flips', async () => {
     const res = await authed(
       'PUT',
       `/api/v1/admin/gallery-photos/${ids.photoA}`,
@@ -376,7 +376,7 @@ describe('gallery photos admin CRUD', () => {
     expect(body.isActive).toBe(false);
   });
 
-  it('PUT with a new r2Key replaces the photo — new final key in the row, the OLD object deleted after', async () => {
+  it('PUT with a new r2Key replaces the photo, new final key in the row, the OLD object deleted after', async () => {
     const stub = stubCommitBucket({ [STAGING]: { size: 1024, contentType: 'image/jpeg' } });
     const res = await app.request(
       `/api/v1/admin/gallery-photos/${ids.photoA}`,
@@ -402,7 +402,7 @@ describe('gallery photos admin CRUD', () => {
     expect(stub.deleteCalls).toEqual([STAGING, PHOTO_A_KEY]);
   });
 
-  it('PUT /order full-replace renumbers — the deactivated photo is renumbered too', async () => {
+  it('PUT /order full-replace renumbers, the deactivated photo is renumbered too', async () => {
     const res = await authed(
       'PUT',
       '/api/v1/admin/gallery-photos/order',
@@ -461,7 +461,7 @@ describe('gallery photos admin CRUD', () => {
   });
 });
 
-describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => {
+describe('audit rows (M6 #185, one per committed mutation, tx-gated)', () => {
   const rows = async () => db.select().from(auditLog);
 
   it('category POST → one create row with the name; a duplicate-name 400 records nothing', async () => {
@@ -480,7 +480,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
       '/api/v1/admin/gallery-categories',
       'audit-cat-b@sevendays.test',
       {
-        name: 'Weddings', // fixture name — the uniqueness collision
+        name: 'Weddings', // fixture name, the uniqueness collision
       }
     );
     expect(dup.status).toBe(400);
@@ -495,7 +495,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
     });
   });
 
-  it('the three order PUTs → one reorder row each (entityId null, summary null — the family, not a row); an incomplete payload records nothing', async () => {
+  it('the three order PUTs → one reorder row each (entityId null, summary null, the family, not a row); an incomplete payload records nothing', async () => {
     const cats = await authed(
       'PUT',
       '/api/v1/admin/gallery-categories/order',

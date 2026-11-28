@@ -1,7 +1,7 @@
-// Admin-local Tier 2 (spec #94): the sticky top bar — sidebar collapse
+// Admin-local Tier 2 (spec #94): the sticky top bar, sidebar collapse
 // trigger, search, notifications (#59 variant A). The bell is live since
 // M9 #314: the Notification, a derived view over the pending-submissions
-// queue (ADR-0028). The Input is live since M9 #315: Global Search — the
+// queue (ADR-0028). The Input is live since M9 #315: Global Search, the
 // typing surface of the inline dropdown (fuse.js engine seam + cmdk
 // headless); the IA is unchanged.
 

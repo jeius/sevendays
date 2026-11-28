@@ -5,7 +5,7 @@ import { asc, eq } from 'drizzle-orm';
 
 /**
  * The public testimonials read (#138): active rows in position order, the
- * projection stripped to the public shape (id, quote, person — no position,
+ * projection stripped to the public shape (id, quote, person, no position,
  * no activity flag, no timestamps). Array order is the render order.
  */
 export async function listActiveTestimonials(db: Database): Promise<PublicTestimonial[]> {

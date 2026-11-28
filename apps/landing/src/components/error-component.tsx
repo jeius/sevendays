@@ -3,9 +3,9 @@ import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
 
 // Branded global error surface (#164 Round 1; the ink-field family member
-// per #223 — ink + logo + a way forward). Dependency-free by contract:
+// per #223, ink + logo + a way forward). Dependency-free by contract:
 // when this renders, the API may be the thing that failed, so no fetched
-// content, no photos — ink, type, and the reload button only. The dev-only
+// content, no photos, ink, type, and the reload button only. The dev-only
 // error line stays (import.meta.env.DEV never ships). Copy owner-ratified
 // as rendered, 2026-10-20 (#223 round); the CTA icon/weight stands as
 // fenced (the round's explicit ratification of the Task-2 deferred minor).
@@ -19,7 +19,7 @@ export function ErrorComponent({ error }: { error: Error }) {
           Something went wrong.
         </h1>
         <p className='max-w-xl text-brand-200'>
-          An unexpected error interrupted the page. Try again — or reach the studio directly and
+          An unexpected error interrupted the page. Try again, or reach the studio directly and
           we'll take it from there.
         </p>
         <div className='flex flex-wrap gap-3'>

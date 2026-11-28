@@ -7,7 +7,7 @@ import type { ZodSchema } from 'zod';
 // Two functions, not one target-parameterized helper: zValidator's Target must
 // be an exact literal for Hono RPC input inference. The old union signature
 // (`validated(schema, 'json' | 'query')`) typed every endpoint's RPC input as
-// { json: ..., query: ... } regardless of target — verified pre-plan
+// { json: ..., query: ... } regardless of target, verified pre-plan
 // (2026-09-04). The hook body is duplicated: zValidator's Hook generic cannot
 // be referenced as a standalone typed const without losing inference.
 export const validatedJson = <S extends ZodSchema>(schema: S) =>
@@ -43,7 +43,7 @@ export const validatedQuery = <S extends ZodSchema>(schema: S) =>
   });
 
 // Third member (M2 ticket 04): path params. Same literal-target rationale as
-// above — zValidator's Target must be an exact literal for Hono RPC input
+// above, zValidator's Target must be an exact literal for Hono RPC input
 // inference. Pre-plan spike (hono 4.13.5 + @hono/zod-validator 0.4.x): a
 // generic validatedParam keeps c.req.valid('param') typed and the chained
 // ':id' route infers { param: { id: string } } through hc<AppType>.

@@ -1,26 +1,26 @@
-# /public/photos — PROTOTYPE stand-ins (#111)
+# /public/photos, PROTOTYPE stand-ins (#111)
 
 **These are stand-in images for the UI-remediation prototype pass (ticket #111,
 branch `prototype/98-landing-remediation`). They are NOT the real studio
 portfolio.** M5 replaces every file here with the owner-supplied photos served
 from R2; the owner's real studio photos supersede these the moment they are
-supplied (the ticket's intake step was pending when the prototype ran — the
+supplied (the ticket's intake step was pending when the prototype ran, the
 documented fallback applies: free-license stock matching the petrol/ink
 atmosphere).
 
 ## Brand assets + owner photos (NOT stand-ins)
 
-- `cover_photo.jpg` — owner-supplied studio photo (photographer + Canon
+- `cover_photo.jpg`, owner-supplied studio photo (photographer + Canon
   DSLR, studio logo burned in). Now the HERO image on every variant.
 
-- `sd.png` — the official SD monogram, rendered in the chrome (header +
+- `sd.png`, the official SD monogram, rendered in the chrome (header +
   footer wordmark chip) per the 2026-09-16 ruling. Ship a properly sized
   export at build time; the 2048px `logo.png` full lockup stays here as
   the source art.
 
 ## Source & license
 
-All images from Unsplash (https://unsplash.com/license — free for commercial
+All images from Unsplash (https://unsplash.com/license, free for commercial
 and noncommercial use, no permission needed, attribution appreciated but not
 required). Source photo IDs (prefix `https://unsplash.com/photos/`):
 
@@ -39,7 +39,7 @@ required). Source photo IDs (prefix `https://unsplash.com/photos/`):
 | `service-recovery.jpg` | ServiceCard full-image bg (variant D) | `1461360370896-922624d12aa1` |
 | `service-framing.jpg` | ServiceCard full-image bg (variant D) | `1518481852452-9415b262eba4` |
 | `service-id.jpg` | ServiceCard full-image bg (variant D) | `1590086782957-93c06ef21604` |
-| `service-printing.jpg` | ServiceCard full-image bg (variant D) — weakest match (desk/bulletins), swap first | `1562564055-71e051d33c19` |
+| `service-printing.jpg` | ServiceCard full-image bg (variant D), weakest match (desk/bulletins), swap first | `1562564055-71e051d33c19` |
 
 Photos were chosen to match the fixed atmosphere (#90): ink/petrol-led, moody
 light. People depicted are stock models, not clients or staff.

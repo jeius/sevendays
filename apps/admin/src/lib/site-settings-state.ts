@@ -2,12 +2,12 @@ import type { SaveSiteSettingsInput, SiteSettings } from '@sevendays/types';
 import { z } from 'zod';
 
 // The site-settings editor seam (M7 #215, the light-entity-state pattern):
-// the whole Site tab is one full-object editor over the singleton — state
+// the whole Site tab is one full-object editor over the singleton, state
 // in (strings; '' = unset), the tri-state logo key, and the two
 // client-side format pre-flights mirroring the API schema (the 400's
 // field details land inline through fieldErrorsFromDetails).
 
-/** The 24 free-text fields, in wire order — the keyed list both builders walk. */
+/** The 24 free-text fields, in wire order, the keyed list both builders walk. */
 const TEXT_FIELDS = [
   'brandName',
   'brandTagline',
@@ -76,7 +76,7 @@ export interface SiteSettingsEditorState {
 }
 
 /** `#215 seam: read → editor state`. Nulls become ''; `logoImageKey`
- * starts `undefined` — a read never echoes keys, so the logo is unchanged
+ * starts `undefined`, a read never echoes keys, so the logo is unchanged
  * until the editor says otherwise. */
 export function siteSettingsStateFromRead(read: SiteSettings): SiteSettingsEditorState {
   const state = {
@@ -110,7 +110,7 @@ export function buildSiteSettingsSavePayload(
 }
 
 /** The two format pre-flights the API schema enforces (socials are URLs,
- * contact is an email) — surfaced inline BEFORE the save; everything else
+ * contact is an email), surfaced inline BEFORE the save; everything else
  * (length caps) the API owns, its 400 details landing via
  * fieldErrorsFromDetails. */
 export function validateSiteSettingsState(state: SiteSettingsEditorState): SiteSettingsFieldErrors {

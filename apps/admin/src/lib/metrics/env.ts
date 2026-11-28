@@ -1,11 +1,11 @@
 // The metrics seam's env reader + result vocabulary (#186, ADR-0023;
 // extended at #187 for the audience half). Tolerant by design: an unset
 // source is null and its widgets render the curated "Analytics source
-// not configured." state — never a thrown env error (the inverted #155).
-// #187 adds the r2 group (the storage queries' bucket — the deployment-
+// not configured." state, never a thrown env error (the inverted #155).
+// #187 adds the r2 group (the storage queries' bucket, the deployment-
 // identity class, owner-reviewable at PR like #186's script trio) and
 // grows posthog with the region host + the landing-host allowlist ($host
-// = location.host, port included — the filter is load-bearing: without
+// = location.host, port included, the filter is load-bearing: without
 // it the admin's own events would mix into Traffic).
 export type MetricsResult<T> =
   | { ok: true; data: T }
@@ -18,7 +18,7 @@ export type CfAnalyticsConfig = {
 };
 
 // Consumed by #187's Storage & Media section; shares the CF token +
-// account reads with the workers group but nulls independently — a
+// account reads with the workers group but nulls independently, a
 // missing bucket degrades Storage & Media alone.
 export type R2AnalyticsConfig = {
   token: string;

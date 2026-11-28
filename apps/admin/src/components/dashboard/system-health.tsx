@@ -1,9 +1,9 @@
 // System Health (#186): the owner-ratified hierarchy-led composition
-// (Task 5, 2026-10-06) — ONE primary metric big (the api's request trend,
+// (Task 5, 2026-10-06), ONE primary metric big (the api's request trend,
 // a LINE: requests are a trend over time, chart-design rule 2), the rate
 // and CPU stats compact beside it, the DB-probe stats + the Sentry
 // link-out below, then the per-frontend error widgets (#178, errors as
-// BARS — discrete counts). One workers query (shared cache) + one probes
+// BARS, discrete counts). One workers query (shared cache) + one probes
 // query; every card folds to its curated state; the page never 500s.
 import { useQuery } from '@tanstack/react-query';
 import type { MetricsWindow, WorkerSeries } from '#/lib/metrics/cf';

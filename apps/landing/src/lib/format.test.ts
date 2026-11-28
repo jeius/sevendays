@@ -16,7 +16,7 @@ describe('peso', () => {
 });
 
 describe('the unpriced money laws (ADR-0020)', () => {
-  it('peso(null) is null — JSX renders nothing, the no-price law enforced at the formatter', () => {
+  it('peso(null) is null, JSX renders nothing, the no-price law enforced at the formatter', () => {
     expect(peso(null)).toBeNull();
   });
 
@@ -25,12 +25,12 @@ describe('the unpriced money laws (ADR-0020)', () => {
     expect(labeledPrice('Makeup', 12000)).toBe('Makeup · ₱120.00');
   });
 
-  it('priceSuffix is empty when unpriced — the footer CTAs drop the suffix with no dangling separator', () => {
+  it('priceSuffix is empty when unpriced, the footer CTAs drop the suffix with no dangling separator', () => {
     expect(priceSuffix(null)).toBe('');
     expect(priceSuffix(108000)).toBe(' · ₱1,080.00');
   });
 
-  it('bookAriaLabel drops the price parenthetical when unpriced — the ₱0 aria leak-fix', () => {
+  it('bookAriaLabel drops the price parenthetical when unpriced, the ₱0 aria leak-fix', () => {
     expect(bookAriaLabel('Portraits & ID Photo', null)).toBe('Book Portraits & ID Photo');
     expect(bookAriaLabel('Portraits & ID Photo', 50000)).toBe('Book Portraits & ID Photo (₱500)');
   });

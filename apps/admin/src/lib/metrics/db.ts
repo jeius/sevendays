@@ -1,7 +1,7 @@
 // The DB half of the metrics seam (#186): result-union wrappers over
 // packages/db's probe module. The exec passed in is the per-request
 // drizzle client's bound execute (metrics.functions constructs the client
-// per call — ADR-0011, the auth.ts pattern; never module scope). A probe
+// per call, ADR-0011, the auth.ts pattern; never module scope). A probe
 // failure resolves unavailable with one log-only loud line (#155).
 import type { ContentCensus, SystemProbes } from '@sevendays/db';
 import { runContentCensus, runSystemProbes } from '@sevendays/db';

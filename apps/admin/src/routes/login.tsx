@@ -1,15 +1,15 @@
-// /login — the staff front door (M4 spec § Login UI + shell gate): public,
+// /login, the staff front door (M4 spec § Login UI + shell gate): public,
 // outside the _shell layout, so the gate never runs for it. The composition
 // is the owner-ruled hybrid (2026-09-22 variants pass, prototype branch
 // prototype/120-login-variants): variant B's split ink band at lg+, variant
-// C's ink canvas with petrol glow below lg — one component, the card
+// C's ink canvas with petrol glow below lg, one component, the card
 // identical in both. Credential failures render ONE generic line (no
 // which-field signal); the redirect round-trip consumes the gate's preserved
 // aimed URL through the open-redirect guard.
 // Both submit buttons ride the one pending vocabulary (#218's, completed by
 // the M7 post-flight #242): disabled + aria-busy + the spinner prefix + the
 // "Signing in…" / "Sending…" swap while `submitting` holds.
-// #322: the AdminLockup consumes site settings (the brand-lockup seam) —
+// #322: the AdminLockup consumes site settings (the brand-lockup seam):
 // server-primed by this route's loader, the SD monogram as fallback.
 
 import { Button } from '@sevendays/ui/components/button';
@@ -29,7 +29,7 @@ import { SENDING_LABEL, SIGNING_IN_LABEL } from '#/lib/save-contract';
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),
-  // TanStack's default search serializer JSON-round-trips values: ?reset=1 arrives as the NUMBER 1 — accept both, normalize to string (live-proof finding, #221).
+  // TanStack's default search serializer JSON-round-trips values: ?reset=1 arrives as the NUMBER 1, accept both, normalize to string (live-proof finding, #221).
   reset: z
     .union([z.string(), z.number()])
     .transform((v) => String(v))
@@ -50,7 +50,7 @@ export const Route = createFileRoute('/login')({
   component: LoginPage,
 });
 
-// Open-redirect guard: the aimed URL only ever navigates same-origin — a
+// Open-redirect guard: the aimed URL only ever navigates same-origin, a
 // relative path, never protocol-relative, never absolute.
 function safeRedirect(target: string | undefined): string {
   if (target && target.startsWith('/') && !target.startsWith('//')) {
@@ -59,7 +59,7 @@ function safeRedirect(target: string | undefined): string {
   return '/';
 }
 
-// #322: the lockup reads site settings — the same seam the sidebar's brand
+// #322: the lockup reads site settings, the same seam the sidebar's brand
 // block rides (the logo when set, the SD monogram fallback when not, the
 // resolved brand name). Built in M4 pre-CMS, it stayed hardcoded when the
 // M7 redesign wired the rest of the chrome.
@@ -103,8 +103,8 @@ function LoginPage() {
     setFailure(false);
     const { error } = await authClient.signIn.email({ email, password });
     if (error) {
-      // Generic by design (AC): one fixed line for ANY failure — wrong
-      // credentials, throttling, network — never a which-field signal.
+      // Generic by design (AC): one fixed line for ANY failure, wrong
+      // credentials, throttling, network, never a which-field signal.
       setFailure(true);
       setSubmitting(false);
       return;
@@ -114,14 +114,14 @@ function LoginPage() {
 
   return (
     // Below lg (variant C): the whole canvas is ink with the glow behind the
-    // card. At lg+ (variant B): a two-column split — the ink band left, the
+    // card. At lg+ (variant B): a two-column split, the ink band left, the
     // wash panel (lg:bg-background) centering the card right.
     <main className='bg-brand-ink relative flex min-h-svh flex-col items-center justify-center gap-8 overflow-hidden p-6 lg:grid lg:grid-cols-[1.1fr_1fr] lg:p-0'>
       <div
         aria-hidden='true'
         className='bg-brand-deep/60 absolute -top-40 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full blur-3xl lg:left-[18%]'
       />
-      {/* The band — variant B's left column, lg+ only */}
+      {/* The band, variant B's left column, lg+ only */}
       <section className='relative hidden w-full flex-col justify-between gap-16 p-14 lg:flex'>
         <AdminLockup />
         <div className='max-w-md space-y-4 pb-8'>
@@ -129,12 +129,12 @@ function LoginPage() {
             Internal tool
           </p>
           <p className='text-2xl leading-snug font-semibold text-white'>
-            The studio's appointments, catalog, and branches — behind one door.
+            The studio's appointments, catalog, and branches sit behind one door.
           </p>
           <p className='text-sm text-brand-200'>Staff sign-in only.</p>
         </div>
       </section>
-      {/* The form column — centered on ink (C) / on wash (B) */}
+      {/* The form column, centered on ink (C) / on wash (B) */}
       <section className='relative flex w-full flex-col items-center justify-center gap-8 p-6 lg:min-h-svh lg:bg-background'>
         <div className='lg:hidden'>
           <AdminLockup />
@@ -164,9 +164,9 @@ function LoginPage() {
             )}
           </CardHeader>
           <CardContent>
-            {/* The forgot-password toggle (M7 #221): one card, two modes — the
+            {/* The forgot-password toggle (M7 #221): one card, two modes, the
                 anti-enumeration law is ONE generic line for every outcome (unknown
-                email, limiter 429, send failure — BetterAuth already answers 200
+                email, limiter 429, send failure, BetterAuth already answers 200
                 identically for the miss; the UI matches). */}
             {mode === 'forgot' ? (
               <form
@@ -178,7 +178,7 @@ function LoginPage() {
                     email,
                     redirectTo: `${window.location.origin}/login/reset`,
                   });
-                  setSent(true); // every outcome — see the anti-enumeration note above
+                  setSent(true); // every outcome, see the anti-enumeration note above
                   setSubmitting(false);
                 }}
               >

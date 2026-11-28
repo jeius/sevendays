@@ -1,12 +1,12 @@
 // #187: the landing's provider alone captures pageviews and Core Web
-// Vitals — 'history_change' catches the initial load AND TanStack
+// Vitals, 'history_change' catches the initial load AND TanStack
 // Router's SPA navigations (they flow through the history API), and
 // web_vitals autocapture emits $web_vitals with $web_vitals_<NAME>_value
 // (LCP/CLS/FCP/INP). The admin's provider deliberately stays
 // pageview/vitals-off: Traffic is landing-scoped by the host allowlist,
 // and the admin's own events never join it. Options grep-proven against
 // the installed posthog-js 1.422.5 / @posthog/types 1.407.1.
-// #187 ledger note: the flip implicitly enables $pageleave too — the SDK
+// #187 ledger note: the flip implicitly enables $pageleave too, the SDK
 // default capture_pageleave 'if_capture_pageview' keys on pageviews being
 // on. An event class beyond pageviews + web vitals, landing-scoped by the
 // same host allowlist; mute explicitly with capture_pageleave: false if

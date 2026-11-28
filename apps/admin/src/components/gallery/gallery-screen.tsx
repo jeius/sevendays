@@ -1,19 +1,19 @@
 // The gallery screen (M5 #141, Task 7): the category rail as the inline
-// panel (create/rename/drag-reorder/deactivate — AR-4), the batch upload
+// panel (create/rename/drag-reorder/deactivate, AR-4), the batch upload
 // tray (AR-3) wired to Task 6's pool, the sortable card grid, and the
-// photo editor — ruled by #131 and ported element-for-element from the
+// photo editor, ruled by #131 and ported element-for-element from the
 // composition of record (branch prototype/131-admin-cms-compositions,
 // screens/gallery.tsx), with the prototype's fixture state replaced by the
 // task seams: `adminGalleryQueries.categories()/photos()`, the Task 3 save
 // fns, Task 4's state seam (payload builders + reorder helpers +
 // `titleFromFileName`), and Task 6's `runBatchUpload` pool. GL1: card
-// actions are hover/tap overlays; GL2: NO status dot — the dimmed card IS
+// actions are hover/tap overlays; GL2: NO status dot, the dimmed card IS
 // the deactivated state; GL3: the WHOLE card is the drag handle
-// (Pointer-8px / Touch-300ms / keyboard — AR-7) and the order PUT fires on
+// (Pointer-8px / Touch-300ms / keyboard, AR-7) and the order PUT fires on
 // drop with snapshot restore (AR-9). Thumbs ride the Task 5 gated proxy
 // (AR-1); raw photoUrl never reaches the UI.
 // The M7 post-flight #243 refinements: the cards label by the #214
-// caption law (photoCardLabel — caption leads, title the fallback), the
+// caption law (photoCardLabel, caption leads, title the fallback), the
 // empty-category state instructs (drag to add, below the label), and the
 // editor's Title vocabulary is Name (placeholder included).
 import {
@@ -135,7 +135,7 @@ type CategorySaveInput =
   | { mode: 'rename'; row: GalleryCategory; name: string }
   | { mode: 'flip'; row: GalleryCategory; isActive: boolean };
 
-/** The pending posture's fixed keys — stable, never reordered. */
+/** The pending posture's fixed keys, stable, never reordered. */
 const PENDING_RAIL_KEYS = ['rail-1', 'rail-2', 'rail-3', 'rail-4'];
 const PENDING_CARD_KEYS = [
   'card-1',
@@ -148,7 +148,7 @@ const PENDING_CARD_KEYS = [
   'card-8',
 ];
 
-/** The prototype's rail entry classes — selected accent, muted otherwise. */
+/** The prototype's rail entry classes, selected accent, muted otherwise. */
 function railEntryClass(selected: boolean): string {
   return `flex shrink-0 items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm whitespace-nowrap transition-colors ${
     selected
@@ -191,10 +191,10 @@ function trayProgressValue(status: BatchItemStatus | undefined): number | null {
 
 /**
  * One grid tile of the sortable photo grid. GL3: the WHOLE card is the drag
- * handle — attributes + listeners live on the Card, activated only past the
+ * handle, attributes + listeners live on the Card, activated only past the
  * sensor constraints (Pointer 8px, Touch 300ms long-press), so clicks and
  * scroll still work; NO touch-none here (it would kill mobile scrolling).
- * GL2: deactivated = the dimmed card only — no status dot.
+ * GL2: deactivated = the dimmed card only, no status dot.
  */
 function SortablePhotoCard({
   photo,
@@ -232,10 +232,10 @@ function SortablePhotoCard({
     >
       {/* The Task 5 thumb proxy (AR-1): the browser <img> cannot hold the
           Bearer session, so the gated by-id route is reached through the
-          admin server-route proxy — never the raw photoUrl. M8 #287: the
+          admin server-route proxy, never the raw photoUrl. M8 #287: the
           URL is the versioned builder's (?v=<updatedAt epoch ms>) so a
           warm grid serves from the browser cache with zero requests, and
-          a replace's bumped timestamp changes the URL — structural
+          a replace's bumped timestamp changes the URL, structural
           invalidation, no eviction machinery. */}
       <div className='bg-muted relative aspect-[4/3]'>
         <img
@@ -249,7 +249,7 @@ function SortablePhotoCard({
         <span className='bg-background/90 absolute top-2 left-2 rounded-md px-1.5 py-0.5 font-mono text-xs tabular-nums'>
           #{photo.position}
         </span>
-        {/* GL1: icon actions overlaid top-right — hover on desktop, tap
+        {/* GL1: icon actions overlaid top-right, hover on desktop, tap
             (selected-card state) on touch. Each button stops propagation so
             a click on it never toggles the card's selected state. */}
         <div
@@ -329,7 +329,7 @@ function SortablePhotoCard({
 }
 
 /**
- * One category rail entry — filter button + the rail's own mini-actions
+ * One category rail entry, filter button + the rail's own mini-actions
  * (rename / the active flip, AR-4), drag-reorderable. Deactivated renders
  * `opacity-60` and stays filterable/renamable (staff-visible truth).
  */
@@ -414,7 +414,7 @@ function SortableCategoryEntry({
       className={cn(
         'group/rail-entry flex w-full shrink-0 items-center gap-1',
         isDragging && 'z-10 bg-card shadow-sm',
-        // AR-4: dimmed, never hidden — still filterable/renamable.
+        // AR-4: dimmed, never hidden, still filterable/renamable.
         !category.isActive && 'opacity-60'
       )}
     >
@@ -429,7 +429,7 @@ function SortableCategoryEntry({
         <span className='min-w-0 flex-1 truncate text-left'>{category.name}</span>
         <span className='text-muted-foreground font-normal'>({count})</span>
       </button>
-      {/* The rail's own mini-actions — hover/focus-revealed on desktop;
+      {/* The rail's own mini-actions, hover/focus-revealed on desktop;
           touch has no hover, so they stay visible on mobile. */}
       <div
         className={cn(
@@ -490,10 +490,10 @@ function SortableCategoryEntry({
 }
 
 /**
- * The upload tray (AR-3): one row per staged file — filename, progress bar,
+ * The upload tray (AR-3): one row per staged file, filename, progress bar,
  * the pinned status copy; `Retry` per transient-failed row, `Retry failed`
  * for all of them, `Done` clears the settled tray. Permanent failures
- * (pre-check / server 400) carry NO Retry — the file itself is the problem.
+ * (pre-check / server 400) carry NO Retry, the file itself is the problem.
  */
 function UploadTray({
   items,
@@ -571,14 +571,14 @@ function UploadTray({
 }
 
 /**
- * The category rail — the inline panel (AR-4). `All photos` is FIXED FIRST
+ * The category rail, the inline panel (AR-4). `All photos` is FIXED FIRST
  * and sits OUTSIDE the sortable ids; the categories drag-reorder under the
  * same sensors as the grid (vertical drag; rectSortingStrategy computes the
  * transforms from real rects). One create affordance at the end.
  *
- * The mobile posture (owner-ruled 2026-11-15, #294 round 2 — no horizontal
+ * The mobile posture (owner-ruled 2026-11-15, #294 round 2, no horizontal
  * scrolling): below md (<768px) the card is a collapsible disclosure, EXPANDED by
- * default — a summary row (Categories · the current filter + a chevron)
+ * default, a summary row (Categories · the current filter + a chevron)
  * collapses/reopens the same vertical list the desktop rail renders;
  * picking a filter collapses it, and management actions
  * (create/rename/flips/delete) never do.
@@ -738,16 +738,16 @@ function CategoryRail({
     <Card className='shrink-0 rounded-lg lg:w-[220px]'>
       {/* The card must STRETCH below lg (#294): a fit-content width here let
           the nowrap entries + the mobile-visible mini-actions push the card
-          past the viewport — the page overflowed instead of the list
+          past the viewport, the page overflowed instead of the list
           scrolling. Below md (<768px) the card is the collapsible disclosure
-          (expanded by default — owner ruling 2026-11-15: no horizontal
+          (expanded by default, owner ruling 2026-11-15: no horizontal
           scrolling); the 768–1023 band renders the plain full-width vertical
           rail; above lg the fixed lg:w-[220px] column governs, no disclosure. */}
       {isMobile ? (
         <Collapsible open={railOpen} onOpenChange={setRailOpen}>
           <CollapsibleTrigger
             className='flex w-full items-center gap-2 rounded-md px-2 py-2 text-left'
-            aria-label={`Categories — current filter: ${railFilterName}`}
+            aria-label={`Categories (current filter: ${railFilterName})`}
           >
             <span className='text-muted-foreground text-xs font-medium tracking-wide uppercase'>
               Categories
@@ -774,7 +774,7 @@ function CategoryRail({
 
 /**
  * The gallery screen: rail + inline category panel, upload tray, sortable
- * card grid, photo editor. All state lives here — the route renders only
+ * card grid, photo editor. All state lives here, the route renders only
  * the PageHeader and this component (its `Upload photos` label opens THIS
  * file's hidden input by id).
  */
@@ -791,7 +791,7 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
     isError: photosError,
     refetch: refetchPhotos,
   } = useQuery(adminGalleryQueries.photos());
-  // M9 #316: the ?focus= landing — scroll + highlight the matched card
+  // M9 #316: the ?focus= landing, scroll + highlight the matched card
   // (data-row-id on the grid card below), once BOTH reads have arrived.
   useFocusLanding(focus, photos !== undefined && categories !== undefined);
   const queryClient = useQueryClient();
@@ -806,7 +806,7 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
   // expanded-actions card at a time.
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   // The photo editor: edit-only (photos are created by upload); the async
-  // Save contract owns the flow (#218) — a held save keeps the sheet open
+  // Save contract owns the flow (#218), a held save keeps the sheet open
   // over the intact parent-held state; onOpenChange(false) clears both.
   const [editing, setEditing] = useState<{ row: GalleryPhoto } | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -842,7 +842,7 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
   const categoryIdId = useId();
   const activeId = useId();
 
-  // GL3 sensors (AR-7): the whole card is the handle — pointer needs an 8px
+  // GL3 sensors (AR-7): the whole card is the handle, pointer needs an 8px
   // move (wider than the editor rows' 4px because the handle IS the card),
   // touch needs a 300ms long-press (8px tolerance) so vertical scroll never
   // starts a drag; keyboard stays for a11y. Shared by the rail and the grid.
@@ -856,7 +856,7 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
 
   // Single-card flips: optimistic on the photos cache (cancel + snapshot +
   // REPLACE the one row's isActive; rollback + toast on error; invalidate
-  // either way) — the branches screen's posture.
+  // either way), the branches screen's posture.
   const photoFlip = useMutation({
     mutationFn: async ({ row, isActive }: { row: GalleryPhoto; isActive: boolean }) => {
       const result = await saveAdminGalleryPhotoUpdate({
@@ -911,7 +911,7 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
     },
   });
 
-  // The card grid's order PUT on drop (AR-9): optimistic — Task 4's
+  // The card grid's order PUT on drop (AR-9): optimistic, Task 4's
   // slot-swap over the filtered view produces the COMPLETE global id list;
   // the cache array is REPLACE-d in that order (never a push into an
   // aliased read row); a failure restores the snapshot + toasts.
@@ -992,7 +992,7 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
   });
 
   // The rail's inline saves: create / rename / flip through the two result-
-  // valued fns — NON-optimistic, the rail has no inline Field slot, so every
+  // valued fns, NON-optimistic, the rail has no inline Field slot, so every
   // category 400 is toast-carried and the inline affordance keeps its value.
   const categorySave = useMutation({
     mutationFn: async (input: CategorySaveInput) => {
@@ -1032,13 +1032,13 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
       toast.error(result.message);
     },
     onError: (error) => {
-      // Not an API failure (serialization, session loss) — loud toast.
+      // Not an API failure (serialization, session loss), loud toast.
       toast.error(error.message);
     },
   });
 
   // The pending-guarded category delete (#218): a deleted category holds no
-  // photos — the API's guard guarantees it — so only the categories cache
+  // photos, the API's guard guarantees it, so only the categories cache
   // invalidates.
   const removeCategory = useMutation({
     mutationFn: async (row: GalleryCategory) => {
@@ -1061,7 +1061,7 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
   });
 
   // Editor saves: NON-optimistic; await the full-object PUT, resolve true
-  // on ok. No inline Field slot — every photo 400 is toast-carried.
+  // on ok. No inline Field slot, every photo 400 is toast-carried.
   const photoSave = useMutation({
     mutationFn: async (input: { row: GalleryPhoto; state: PhotoEditorState }) => {
       return saveAdminGalleryPhotoUpdate({
@@ -1091,12 +1091,12 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
 
   // --- Upload wiring (Task 6's pool) ---
 
-  // The cancel wire (#220): one AbortController per pool RUN — the picker,
+  // The cancel wire (#220): one AbortController per pool RUN, the picker,
   // a drop, a per-row Retry, and Retry failed each start their own run;
   // Cancel aborts every live one. Settled runs remove themselves.
   const activeRuns = useRef(new Set<AbortController>());
 
-  // `presignAdminCoverUpload` is the #139-historical name — its schema
+  // `presignAdminCoverUpload` is the #139-historical name, its schema
   // already carries `purpose: 'gallery-photo'` (the pool sends it); the
   // result union converts to a throw, the pool's `transient` class.
   async function presign(req: MediaPresignRequest): Promise<MediaPresignResponse> {
@@ -1135,14 +1135,14 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
           commit,
           onStatus: (itemId, status) => {
             // The Task-6 review's throwing-onStatus minor, consumer side: this
-            // tap is a pure setState + one invalidate — it cannot throw, so the
+            // tap is a pure setState + one invalidate, it cannot throw, so the
             // pool's settlement guarantee holds for this wiring.
             setTrayStatuses((prev) => {
               const next = new Map(prev);
               next.set(itemId, status);
               return next;
             });
-            // Every done invalidates — the row becomes a real card ("only
+            // Every done invalidates, the row becomes a real card ("only
             // committed files become savable", structurally).
             if (status.phase === 'done') {
               queryClient.invalidateQueries({ queryKey: adminGalleryQueries.photos().queryKey });
@@ -1168,7 +1168,7 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
   // The ONE enqueue path (#220): the picker and the drop zone both land
   // here, over the Task-1 seam, so the two can never drift (AR-11: the
   // category is the open rail filter at enqueue; title from file name;
-  // caption null — pre-commit metadata editing is ruled out).
+  // caption null, pre-commit metadata editing is ruled out).
   function enqueueFiles(files: File[]) {
     if (files.length === 0) {
       return;
@@ -1244,13 +1244,13 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
   // The leave-guard predicate (#220): ONE seam answers both the router
   // blocker and the browser beforeunload (they can never disagree), and
   // the tray's visibility law reads the same module. `undefined` counts
-  // as unsettled — an item enqueued the pool has not reported yet.
+  // as unsettled, an item enqueued the pool has not reported yet.
   const hasUnsettled = hasUnsettledUploads(trayItems, trayStatuses);
   const trayVisible = trayIsVisible(trayItems, trayStatuses);
 
   // useBlocker (1.170.41, probed): the object-opts form with
   // withResolver:true registers ONE history block answering BOTH
-  // navigation classes — a router navigation awaits the resolver (Stay
+  // navigation classes, a router navigation awaits the resolver (Stay
   // resets, Leave anyway proceeds), and enableBeforeUnload feeds the same
   // registration's native beforeunload prompt. The callbacks are
   // stabilized on hasUnsettled so the effect re-subscribes only when
@@ -1363,7 +1363,7 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
   }
 
   if (categoriesError || photosError) {
-    // Error posture (#155): either read failed — Retry re-runs both.
+    // Error posture (#155): either read failed, Retry re-runs both.
     return (
       <section className='space-y-4'>
         <QueryErrorState
@@ -1410,7 +1410,7 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
 
   // --- Derived (post-narrowing) ---
 
-  // The reads arrive in list order — (position, id) is the display order.
+  // The reads arrive in list order, (position, id) is the display order.
   const inCategory = filter === 'all' ? photos : photos.filter((p) => p.categoryId === filter);
   const visiblePhotos = filterByStatusSegment(inCategory, segment);
   const filterName =
@@ -1427,10 +1427,10 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
 
   return (
     <section className='space-y-4'>
-      {/* The hidden input + its ref live in the SCREEN — the route's
+      {/* The hidden input + its ref live in the SCREEN, the route's
           `Upload photos` label opens it by id (no route logic). The
           picker is JPG-only (#170, ruling #165 Q7 a): accept matches
-          the pre-check's gate — the package editor's cover input is
+          the pre-check's gate, the package editor's cover input is
           the reference. The pre-check stays the courtesy gate; the
           server re-verifies (#136). */}
       <input
@@ -1489,11 +1489,11 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
             />
           ) : null}
 
-          {/* The drop zone (#220): the grid column — the ruled surface ("onto
+          {/* The drop zone (#220): the grid column, the ruled surface ("onto
               the gallery grid"), covering both the populated grid and the
               category empty state. Only Files-carrying drags arm it (the
               Task-1 gate); dnd-kit's pointer drags never do. */}
-          {/* biome-ignore lint/a11y/noStaticElementInteractions: the HTML5 drop target is pointer-only by nature — the keyboard upload path stays the hidden input behind the "Upload photos" button (the picker law) */}
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: the HTML5 drop target is pointer-only by nature, the keyboard upload path stays the hidden input behind the "Upload photos" button (the picker law) */}
           <div
             className='relative'
             onDragEnter={onFileDragEnter}
@@ -1512,7 +1512,7 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
                 </EmptyState>
               ) : (
                 // Owner-ratified 2026-11-12 (#243 round): the label stays,
-                // the drag instruction joins below it — the drop zone covers
+                // the drag instruction joins below it, the drop zone covers
                 // this empty state (#220), so the instruction is truthful.
                 <EmptyState line='No photos in this category yet.'>
                   <p className='text-muted-foreground text-sm'>
@@ -1586,7 +1586,7 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
           }}
           onSave={handleEditorSave}
         >
-          {/* Thumb preview — the same gated proxy (AR-1), the same versioned
+          {/* Thumb preview, the same gated proxy (AR-1), the same versioned
               builder (#287). */}
           <div className='bg-muted relative aspect-[4/3] w-28 overflow-hidden rounded-md'>
             <img
@@ -1626,7 +1626,7 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
               }
             >
               <SelectTrigger id={categoryIdId} aria-label='Category' className='w-full'>
-                {/* N5: render the item LABEL — Base UI's SelectValue falls
+                {/* N5: render the item LABEL, Base UI's SelectValue falls
                     through to the raw value when no items prop is given, so
                     the label is resolved explicitly; 'Uncategorized' stands
                     in for the null categoryId. */}
@@ -1728,12 +1728,12 @@ export function GalleryScreen({ focus }: { focus: string | undefined }) {
 
       {/* The leaving-mid-upload guard (#220): GuardedConfirm over the
           router blocker. "Leave anyway" aborts every active run THEN
-          proceeds — leaving is never a leak (nothing canceled is promoted;
+          proceeds, leaving is never a leak (nothing canceled is promoted;
           a commit already in flight completes and stands). The blocker's
           promise settles once: proceed() resolves synchronously from the
           confirm click, before Base UI's action-close can reach reset(),
           so the status guard in onOpenChange is belt-and-suspenders both
-          ways. pending is always false — leaving is instant; 'Leaving…'
+          ways. pending is always false, leaving is instant; 'Leaving…'
           never renders. */}
       <GuardedConfirm
         title='Leave while uploading?'

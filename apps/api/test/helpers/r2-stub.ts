@@ -1,7 +1,7 @@
 // Recording R2Bucket stub for the write tests that ride the commit contract
 // (#137): the Map-backed shape of services/media.test.ts's stubBucket as a
 // shared helper. head/get feed commitUpload's verify, put records the
-// promote (key + options), delete records deletions — assertions run
+// promote (key + options), delete records deletions, assertions run
 // against the recorded calls, so promote/delete semantics are pinned
 // without a mock's looseness.
 export function stubCommitBucket(

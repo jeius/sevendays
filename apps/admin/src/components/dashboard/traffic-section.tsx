@@ -1,6 +1,6 @@
 // Traffic (#187): the dashboard's audience half, landing-scoped by the
 // host allowlist (the admin's own events never join these numbers).
-// Hierarchy-led per the owner's #186 ruling — one primary metric big per
+// Hierarchy-led per the owner's #186 ruling, one primary metric big per
 // card, trends as LINE; the lists are lists, not charts. One query for
 // the whole section; every card folds to its curated state; the page
 // never 500s.

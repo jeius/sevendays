@@ -23,27 +23,27 @@ export type CoverUploadStatus =
 /**
  * `#143 seam: the presign → upload → bind loop`. The full path, in order:
  *
- * 1. Client pre-checks BEFORE any network call — type must be allowed for
+ * 1. Client pre-checks BEFORE any network call, type must be allowed for
  *    the purpose (site-logo: JPG or PNG, #246; else image/jpeg), size
  *    ≤ 10 MiB. The commit re-verifies server-side (#136's contract); the
  *    client check is courtesy, never trusted.
  * 2. `presigning` → the injected `presign` fn (the component wires the
  *    admin server fn in) with `{ purpose, contentType: <the purpose's allowed type> }`
- *    (the caller's purpose — 'package-cover' by default, 'branch-cover'
+ *    (the caller's purpose, 'package-cover' by default, 'branch-cover'
  *    from the branch editor since M7 #214).
- * 3. `uploading` — XHR PUT (fetch has no upload progress — the spec's XHR
+ * 3. `uploading`, XHR PUT (fetch has no upload progress, the spec's XHR
  *    ruling) with `Content-Type: the file's type`; progress events map to
  *    `{ sent, total }`; a non-2xx response fails with the status code.
- * 4. `bound` with `stagingKey` (the presigned `key` — it rides the NEXT
+ * 4. `bound` with `stagingKey` (the presigned `key`, it rides the NEXT
  *    atomic package save, whose commit is the real verify/promote gate)
  *    and a local `previewUrl`.
  *
- * Settlement: every failure emits `failed` through `onStatus` first — the
+ * Settlement: every failure emits `failed` through `onStatus` first, the
  * machine never stalls. The promise RESOLVES on pre-check/presign/non-2xx
  * failures (the HTTP-level story is fully told by the machine) and
  * REJECTS only on XHR `error`/`abort` (network anomaly / cancellation).
  *
- * The `previewUrl` object URL is revoked by the CALLER — the editor
+ * The `previewUrl` object URL is revoked by the CALLER, the editor
  * revokes on replace/unmount.
  */
 export async function uploadCover(
@@ -53,8 +53,8 @@ export async function uploadCover(
   purpose: MediaPurpose = 'package-cover'
 ): Promise<void> {
   // (1) Courtesy pre-checks, before any network call. The commit is the
-  // real gate — these are never trusted server-side (#136). #246: allowed
-  // types are per-purpose — the site-logo purpose also accepts PNG (owner
+  // real gate, these are never trusted server-side (#136). #246: allowed
+  // types are per-purpose, the site-logo purpose also accepts PNG (owner
   // ruling 2026-11-13); every other purpose stays JPG-only (#170).
   const allowedTypes = purpose === 'site-logo' ? ['image/jpeg', 'image/png'] : ['image/jpeg'];
   if (!allowedTypes.includes(file.type)) {
@@ -72,7 +72,7 @@ export async function uploadCover(
     return;
   }
 
-  // (2) Presign through the injected seam — the server assigns the key;
+  // (2) Presign through the injected seam, the server assigns the key;
   // the client never supplies key text (ADR-0019).
   onStatus({ phase: 'presigning' });
   let stagingKey: string;
@@ -93,7 +93,7 @@ export async function uploadCover(
     return;
   }
 
-  // (3) Browser-direct XHR PUT — the one by-design browser call; fetch has
+  // (3) Browser-direct XHR PUT, the one by-design browser call; fetch has
   // no upload progress, so the XHR ruling stands.
   await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -104,7 +104,7 @@ export async function uploadCover(
     };
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
-        // (4) Bound — the staging key rides the NEXT atomic save; the
+        // (4) Bound, the staging key rides the NEXT atomic save; the
         // object URL is the caller's to revoke (replace/unmount).
         onStatus({
           phase: 'bound',

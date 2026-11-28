@@ -16,9 +16,9 @@ import { serviceImage } from '../lib/service-image';
 import { useTruncated } from '../lib/use-truncated';
 
 // The studio-service row (/services), OWNER-RULED Round 3: the cover image
-// IS the card — full-bleed themed background (since #333 the serviceImage
+// IS the card, full-bleed themed background (since #333 the serviceImage
 // precedence both service surfaces share: the stored cover first, the
-// serviceBackground stand-ins as the documented no-cover fallback — owner
+// serviceBackground stand-ins as the documented no-cover fallback, owner
 // ruling, the home stays photo-led with zero admin work), the two-layer
 // ink wash + bottom scrim keeping every text zone at the measured
 // white-on-ink AA pair (#111's law), content anchored bottom, and the CTA
@@ -31,7 +31,7 @@ import { useTruncated } from '../lib/use-truncated';
 // The description behaves like the packages plates (owner ruling): TWO-line
 // clamp + tap-to-expand on mobile (coarse pointers, in-flow growth, never a
 // scrollview), ONE line on desktop with the full text in the shared Tier-1
-// tooltip — which opens ONLY when the line actually truncates (the
+// tooltip, which opens ONLY when the line actually truncates (the
 // useTruncated gate).
 export function ServiceCard({
   service,
@@ -44,7 +44,7 @@ export function ServiceCard({
   const [expanded, setExpanded] = useState(false);
   const { ref: descRef, truncated } = useTruncated<HTMLParagraphElement>();
   const description = (
-    // biome-ignore lint/a11y/useKeyWithClickEvents: the tap-to-expand affordance is coarse-pointer-only by ruling (touch); keyboard users see the branch chips and the booking flow carries the full text — a key handler here would double-fire navigation.
+    // biome-ignore lint/a11y/useKeyWithClickEvents: the tap-to-expand affordance is coarse-pointer-only by ruling (touch); keyboard users see the branch chips and the booking flow carries the full text, a key handler here would double-fire navigation.
     <p
       ref={descRef}
       onClick={(e) => {

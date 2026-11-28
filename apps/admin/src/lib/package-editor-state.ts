@@ -1,6 +1,6 @@
 // The package editor's pure seam (M5 #139): editor state ↔ the atomic save
-// payload. Everything here is a plain function over plain data — no React,
-// no network — so #143's lib-seam suite can pin state → payload (frames/
+// payload. Everything here is a plain function over plain data, no React,
+// no network, so #143's lib-seam suite can pin state → payload (frames/
 // inclusions ordering), validation, and conflict → field-error mapping
 // without rendering a component. Array order IS position: frames[] and
 // inclusions[] serialize in array order and the server renumbers from it
@@ -16,7 +16,7 @@ import type {
 /**
  * One inclusion row as the editor holds it. `#143 seam: the editor row shape`.
  *
- * - `key` is a client-only React key — existing rows carry their inclusion
+ * - `key` is a client-only React key, existing rows carry their inclusion
  *   uuid, new rows a `crypto.randomUUID()`. It never rides a payload.
  * - `quantityInput`/`description` stay RAW: the empty-string-is-null mapping
  *   lives in the builders, so a cleared field never becomes a silent 0.
@@ -39,7 +39,7 @@ export interface EditorInclusion {
  *
  * - `durationInput` is a raw input string ('' = null after the builder).
  * - `priceCents` is the mapped centavos number (input × 100 at the
- *   component); `NaN` encodes an unparseable OR absent entry — absent when
+ *   component); `NaN` encodes an unparseable OR absent entry, absent when
  *   `hasPrice` is false (ADR-0020: unchecked saves null) and after either
  *   checkbox flip (the re-entry contract).
  * - `coverImageKey` is the three-state media encoding: `undefined` =
@@ -49,7 +49,7 @@ export interface EditorInclusion {
 export interface PackageEditorState {
   name: string;
   description: string;
-  /** ADR-0020: false = unpriced — the payload saves null and the entry is discarded. */
+  /** ADR-0020: false = unpriced, the payload saves null and the entry is discarded. */
   hasPrice: boolean;
   priceCents: number;
   durationInput: string;
@@ -77,7 +77,7 @@ export interface InclusionFieldErrors {
 /**
  * `validateEditorState`'s result. `#143 seam: the editor-error shape`.
  * Valid ⇔ no name/description/price string AND an empty `inclusions`
- * record. `printSizeId` is reserved for server-side conflict mapping —
+ * record. `printSizeId` is reserved for server-side conflict mapping;
  * the schema's superRefines never reject on it client-side.
  */
 export interface EditorFieldErrors {
@@ -89,7 +89,7 @@ export interface EditorFieldErrors {
 
 /**
  * `#143 seam: quantity mapping`. Empty → null (the schema's
- * positive-int-or-null). A non-empty input keeps its Number — a `0`/`NaN`
+ * positive-int-or-null). A non-empty input keeps its Number, a `0`/`NaN`
  * quantity is a VALIDATION error, never a silent null.
  */
 export function quantityFromInput(input: string): number | null {
@@ -98,7 +98,7 @@ export function quantityFromInput(input: string): number | null {
 
 /**
  * `#143 seam: duration mapping`. Empty / `NaN` / `<= 0` / non-integer →
- * null — the schema demands a positive int and the catalog specifies no
+ * null, the schema demands a positive int and the catalog specifies no
  * durations, so a meaningless duration is simply absent (unlike quantity,
  * which must surface as a validation error).
  */
@@ -122,7 +122,7 @@ export function tokenFor(existing: string | null): string {
  * frames array order; framed_picture inclusions map the resolved `frameId`
  * uuid to `frameToken`; `quantityInput`/`durationInput` are the raw-string
  * views of the nullable numbers (null → ''); `coverImageKey` starts
- * `undefined` (a read never echoes keys, so there is nothing to echo —
+ * `undefined` (a read never echoes keys, so there is nothing to echo;
  * the cover is unchanged until the editor says otherwise).
  */
 export function editorStateFromRead(read: ServicePackageRead): PackageEditorState {
@@ -175,7 +175,7 @@ export function newEditorState(): PackageEditorState {
 // One row → one payload inclusion, shared by both builders. Array order is
 // the position (#137): rows serialize in state order; attireIds re-pin to
 // the attires LOOKUP's array order (filtered to membership) so junction
-// positions are deterministic — the server renumbers from array order.
+// positions are deterministic, the server renumbers from array order.
 function inclusionFromEditor(
   row: EditorInclusion,
   attires: readonly Attire[]
@@ -184,7 +184,7 @@ function inclusionFromEditor(
     kind: row.kind,
     quantity: quantityFromInput(row.quantityInput),
     printSizeId: row.printSizeId,
-    // Only framed_picture carries a frameId — other kinds omit the key
+    // Only framed_picture carries a frameId, other kinds omit the key
     // entirely (the schema's "only framed_picture inclusions carry a
     // frameId" rule).
     ...(row.kind === 'framed_picture' ? { frameId: row.frameToken } : {}),
@@ -213,7 +213,7 @@ function basePayloadFields(state: PackageEditorState, attires: readonly Attire[]
  * `durationFromInput`; frames map to `{ id: token }` in ARRAY ORDER;
  * inclusions in ARRAY ORDER with `frameId` only on framed_picture rows;
  * attireIds pinned to the passed attires lookup's array order filtered to
- * membership (callers pass the lookup in — junction positions become
+ * membership (callers pass the lookup in, junction positions become
  * deterministic). `coverImageKey` is included ONLY when the state carries
  * a fresh staging key string.
  */
@@ -247,12 +247,12 @@ export function buildUpdatePayload(
 /**
  * `#143 seam: read → flip payload`. The table's deactivate/reactivate:
  * the READ re-shaped back into the full-object update payload with ONLY
- * `isActive` flipped — frames echo their uuids as tokens, inclusions map
+ * `isActive` flipped, frames echo their uuids as tokens, inclusions map
  * their resolved `printSize.id`/`attires[].id` back to ids in resolved
  * order, `slug` from the read.
  *
  * `coverImageKey` is deliberately ABSENT: the absence is what makes a
- * flip never re-verify or clobber media — the cover is untouched by the
+ * flip never re-verify or clobber media, the cover is untouched by the
  * put (#137's three-state encoding; the read never echoes keys anyway).
  */
 export function buildRowFlipPayload(
@@ -280,7 +280,7 @@ export function buildRowFlipPayload(
 }
 
 /**
- * `#143 seam: editor-side validation` — mirrors the save schema's rules in
+ * `#143 seam: editor-side validation`, mirrors the save schema's rules in
  * client order for inline row marking (AQ-5): name/description min-1
  * (trimmed); a parseable price ≥ 0 (`NaN` fails); every framed_picture/
  * print needs ≥ 1 attireIds; every framed_picture needs a frameToken;
@@ -315,7 +315,7 @@ export function validateEditorState(state: PackageEditorState): EditorFieldError
         rowErrors.frameToken = 'framed pictures need a frame';
       } else if (!state.frames.some((frame) => frame.token === row.frameToken)) {
         // Schema parity (#137's refinePackageSave): a token that no longer
-        // references frames[] would 400 server-side — flag it inline with
+        // references frames[] would 400 server-side, flag it inline with
         // the same message (the remedy is identical: pick a listed frame).
         rowErrors.frameToken = 'framed pictures need a frame';
       }
@@ -338,16 +338,16 @@ export function validateEditorState(state: PackageEditorState): EditorFieldError
 
 /**
  * `#242 seam: the dirty gate`. Structural comparison of the live state
- * against its save baseline — the Save affordance's clean-form gate
+ * against its save baseline, the Save affordance's clean-form gate
  * (owner ruling 2026-11-08: both modes; re-baseline on a successful edit
- * save; a failed save never touches the baseline — retry-safe, the #218
+ * save; a failed save never touches the baseline, retry-safe, the #218
  * hold law). The baseline is a SNAPSHOT of the state (the hydrate for
  * edit, newEditorState() for create, the just-saved state after a
  * successful edit save), so row `key`s and frame tokens compare
  * identity-stable. `priceCents` compares via Object.is so the unpriced
  * `NaN` encoding equals itself; `coverImageKey` compares by its
  * three-state encoding (a bind or a clear is a real change). Inclusions
- * compare IN ARRAY ORDER — position is data (#137) — and `attireIds` in
+ * compare IN ARRAY ORDER, position is data (#137), and `attireIds` in
  * array order too: an uncheck+recheck of the same attire (same
  * membership, new order) reads dirty, the safe direction (the builders
  * re-pin order anyway; the gate may open on a no-op save, never block a
@@ -379,7 +379,7 @@ export function isEditorStateDirty(
   return current.inclusions.some((row, index) => {
     const other = baseline.inclusions[index];
     if (other === undefined) {
-      // Unreachable — the lengths were checked equal above; noUncheckedIndexedAccess only.
+      // Unreachable, the lengths were checked equal above; noUncheckedIndexedAccess only.
       return true;
     }
     return (
@@ -399,8 +399,8 @@ export function isEditorStateDirty(
  * `#143 seam: conflicts → field-error mapping`. Defensively narrows the
  * API's 400 `details` (the `AdminDetail` shape from #137's admin-shared.ts:
  * `Array<{ path: string[]; message: string }>`) into a flat
- * `Record<firstPathSegment, message>`. ANYTHING non-conforming — not an
- * array, an entry missing `path`/`message`, an empty path — returns `{}`
+ * `Record<firstPathSegment, message>`. ANYTHING non-conforming, not an
+ * array, an entry missing `path`/`message`, an empty path, returns `{}`
  * and the caller toasts the message instead. Later entries for the same
  * segment overwrite earlier ones.
  */
@@ -418,8 +418,8 @@ export function conflictFieldErrors(details: unknown): Record<string, string> {
   return record;
 }
 
-/** `#143 seam: the price helper copy` — owner-ratified; never re-inline it. */
+/** `#143 seam: the price helper copy`, owner-ratified; never re-inline it. */
 export const PESO_HELPER = 'Stored as centavos.';
 
-/** `#143 seam: the duration helper copy` — owner-ratified; never re-inline it. */
+/** `#143 seam: the duration helper copy`, owner-ratified; never re-inline it. */
 export const DURATION_HELPER = 'Optional';

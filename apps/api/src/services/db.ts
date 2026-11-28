@@ -8,17 +8,17 @@ import type { SessionData } from './auth.js';
 // handle lives in Hono variables, set once by the acquisition middleware on
 // /api/v1 and read by every route handler. Bindings are the Zod-validated
 // Env from src/env.ts. `session` is set ONLY by requireSession (M4 ticket
-// 04) — optional so ungated routes don't carry a lying type. `logger` is set
-// by requestLogging at the ROOT (M6 #183) — required, because the middleware
+// 04), optional so ungated routes don't carry a lying type. `logger` is set
+// by requestLogging at the ROOT (M6 #183), required, because the middleware
 // precedes every route including /health; requestId is set by the same root
-// middleware (#185 — the audit rows read it).
+// middleware (#185, the audit rows read it).
 export type ApiEnv = {
   Bindings: Env;
   Variables: { db: Database; session?: SessionData; logger: RequestLogger; requestId: string };
 };
 
 /**
- * The API's db handle (ADR-0007): the pooled DATABASE_URL — Workers cannot
+ * The API's db handle (ADR-0007): the pooled DATABASE_URL, Workers cannot
  * open raw TCP; prepare:false is required under transaction pooling.
  * Created fresh per request: workerd scopes I/O objects to the request that
  * created them, so a client memoized per isolate throws "Cannot perform I/O
@@ -34,7 +34,7 @@ export type ApiEnv = {
 export function createApiDb(connectionString: string): Database {
   if (!connectionString) {
     throw new TypeError(
-      'DATABASE_URL is not set — the Worker needs the pooled connection secret per ADR-0007.'
+      'DATABASE_URL is not set: the Worker needs the pooled connection secret per ADR-0007.'
     );
   }
   return createDbClient(connectionString);

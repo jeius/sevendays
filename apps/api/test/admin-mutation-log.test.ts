@@ -80,10 +80,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('admin_mutation events (M6 #183 — one per committed CMS write)', () => {
+describe('admin_mutation events (M6 #183, one per committed CMS write)', () => {
   it('POST branches → exactly one line: ruled keys, entity, entityId = the created row, actorId = the session owner', async () => {
     const lines = captureLines();
-    // ONE session for both the POST and the actorId assertion — the event's
+    // ONE session for both the POST and the actorId assertion, the event's
     // actor is whoever made the call.
     const { token, userId } = await signUpSession(url, 'mut-branch@sevendays.test');
     const res = await app.request(
@@ -145,10 +145,10 @@ describe('admin_mutation events (M6 #183 — one per committed CMS write)', () =
     expect(putLines[0]?.route).toBe('/api/v1/admin/branches/:id');
   });
 
-  it("a 400 (duplicate name) emits NO mutation line — only the write model's successes record", async () => {
+  it("a 400 (duplicate name) emits NO mutation line, only the write model's successes record", async () => {
     const lines = captureLines();
     const res = await authed('POST', '/api/v1/admin/branches', 'mut-dup@sevendays.test', {
-      name: 'Test Branch A', // fixture name — the uniqueness collision
+      name: 'Test Branch A', // fixture name, the uniqueness collision
       address: 'X St',
       phone: '+63 900 000 000',
     });
@@ -194,7 +194,7 @@ describe('admin_mutation events (M6 #183 — one per committed CMS write)', () =
     expect(matrixLines[0]?.route).toBe('/api/v1/admin/studio-services/:id/branches');
   });
 
-  it('the studio-service update PUT emits the updated row id — the sibling-routers convention, pinned (#208)', async () => {
+  it('the studio-service update PUT emits the updated row id, the sibling-routers convention, pinned (#208)', async () => {
     const lines = captureLines();
     const created = await authed(
       'POST',
@@ -283,7 +283,7 @@ describe('admin_mutation events (M6 #183 — one per committed CMS write)', () =
     expect(orderLines[0]?.entityId).toBeNull();
   });
 
-  it('PUT site-settings → one line: entity site-settings, entityId null (the singleton is family-grain on the wire — the order-PUT law)', async () => {
+  it('PUT site-settings → one line: entity site-settings, entityId null (the singleton is family-grain on the wire, the order-PUT law)', async () => {
     const lines = captureLines();
     const res = await authed('PUT', '/api/v1/admin/site-settings', 'mut-site@sevendays.test', {
       brandName: 'Sevendays Studio',
@@ -352,7 +352,7 @@ describe('admin_mutation events (M6 #183 — one per committed CMS write)', () =
     expect(submissionLines).toHaveLength(1);
     expect(submissionLines[0]?.entityId).toBe(id);
     expect(submissionLines[0]?.route).toBe('/api/v1/admin/testimonial-submissions/:id/accept');
-    // The public POST emits NO mutation line — only the staff accept does.
+    // The public POST emits NO mutation line, only the staff accept does.
     expect(mutations(lines)).toHaveLength(1);
   });
 

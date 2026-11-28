@@ -18,7 +18,7 @@ import { groupChildren } from './group-children.js';
 import { resolveMediaUrl } from './media.js';
 
 // The junction-row projection both reads select (attire id + name keyed by
-// inclusionId) — a projected shape, not a table row type.
+// inclusionId), a projected shape, not a table row type.
 type JunctionRow = { inclusionId: string; id: string; name: string };
 
 type MediaEnv = Pick<Env, 'MEDIA_PUBLIC_BASE_URL'>;
@@ -28,13 +28,13 @@ type MediaEnv = Pick<Env, 'MEDIA_PUBLIC_BASE_URL'>;
  * by-slug getter must emit the identical ServicePackageWithInclusions shape,
  * so the stitch lives in ONE function both call. The print-size lookup map
  * is assembly (it joins fetched values, not rows), so it moved here with
- * the stitch — fetching (which queries, which ordering) stays in the
+ * the stitch, fetching (which queries, which ordering) stays in the
  * callers. Callers deliver rows in their pinned orders (inclusions by
- * (position, id), junctions by (position, id), frames by frameNumber — the
+ * (position, id), junctions by (position, id), frames by frameNumber, the
  * position keys are live since #137/#138; assembly never re-sorts, the
  * groupChildren contract). Exported for #137's admin reads: the admin
  * assembles the FULL composition (no activity filter) through this same
- * stitch — callers own the ordering, so the admin passes (position, id)-
+ * stitch, callers own the ordering, so the admin passes (position, id)-
  * ordered rows.
  */
 export function assemblePackageRead(
@@ -78,7 +78,7 @@ export function assemblePackageRead(
 
 /**
  * The wire rename (ADR-0019, #138's swap): the public read strips the raw
- * object key and resolves the absolute URL — a null key stays null (the
+ * object key and resolves the absolute URL, a null key stays null (the
  * placeholder posture on the landing). Same projection as #137's admin
  * `toRead`, kept module-local here so the public service never imports from
  * the admin module (self-contained for the v1 split's transformed surface).
@@ -89,21 +89,21 @@ function toPublicRead(row: ServicePackageWithInclusions, env: MediaEnv): Service
 }
 
 /**
- * The five reads + stitch scoped to the given package rows — the public
+ * The five reads + stitch scoped to the given package rows, the public
  * composition with the M5 trim rules (#138) and the (position, id) ordering
  * keys the atomic save maintains:
  * - inclusions order (position, id); the junction query joins attires with
- *   `isActive = true` and orders (position, id) — a deactivated attire
+ *   `isActive = true` and orders (position, id), a deactivated attire
  *   trims from its inclusion's list while the inclusion still renders
  *   (groupChildren defaults the emptied group to []).
  * - print sizes fetch ACTIVE-only for the referenced set; any inclusion
  *   whose non-null printSizeId misses the active set is dropped BEFORE the
- *   stitch — a deactivated print size hides its referencing inclusion
+ *   stitch, a deactivated print size hides its referencing inclusion
  *   entirely (privileges carry printSizeId null and never hide).
  * - a package whose inclusions all trim away still lists (its inclusion
  *   array is simply empty).
- * The admin's fetchComposition (#137) is the full-composition counterpart —
- * no activity filter, no trim — never merge the two.
+ * The admin's fetchComposition (#137) is the full-composition counterpart:
+ * no activity filter, no trim, never merge the two.
  */
 async function fetchPublicComposition(
   db: Database,
@@ -129,7 +129,7 @@ async function fetchPublicComposition(
       : [];
 
   // The trim rule (print sizes): only active sizes resolve, so an inclusion
-  // referencing a deactivated size drops here — before the stitch, so the
+  // referencing a deactivated size drops here, before the stitch, so the
   // junction query never even sees its id.
   const activePrintSizeIds = new Set(printSizeRows.map((s) => s.id));
   const inclusionRowsTrimmed = inclusionRows.filter(
@@ -197,7 +197,7 @@ export async function listActivePackagesWithInclusions(
  * One ACTIVE package by slug under the M5 read contract (#138): the same
  * trim rules, ordering, and resolved coverImageUrl as the list, assembled
  * by the same composition. Unknown slug OR inactive package → null (the
- * route turns it into the uniform 404 — deactivated is invisible on the
+ * route turns it into the uniform 404, deactivated is invisible on the
  * public surface). The single-slug fetch re-uses the list's exact
  * composition scoped to one package id, so ordering and projection stay
  * identical by construction.

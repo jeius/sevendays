@@ -1,8 +1,8 @@
 // The lockout law (M7 #221, spec "confirmed at the live re-ask"): no
-// self-delete, no self-ban, the last ACTIVE owner protected from both —
+// self-delete, no self-ban, the last ACTIVE owner protected from both;
 // one pure module shared by the server fns (fresh-list, authoritative) and
 // the UI affordances (query-list, presentational). "Active" = banned !==
-// true (an expired-ban edge counts as banned here — accepted + noted).
+// true (an expired-ban edge counts as banned here, accepted + noted).
 import { describe, expect, it } from 'vitest';
 import { type AdminUserSummary, banRefusal, deleteRefusal } from './users-guards';
 
@@ -23,7 +23,7 @@ const staff = (id: string): AdminUserSummary => ({
   banReason: null,
 });
 
-describe('deleteRefusal (M7 #221 — the lockout law)', () => {
+describe('deleteRefusal (M7 #221, the lockout law)', () => {
   it('refuses deleting yourself', () => {
     const me = owner('me');
     expect(deleteRefusal('me', me, [me, staff('s1')])).toEqual([
@@ -46,7 +46,7 @@ describe('deleteRefusal (M7 #221 — the lockout law)', () => {
     expect(deleteRefusal('a', s, [a, b, s])).toEqual([]);
   });
 
-  it('allows deleting an owner who is the only one left but already banned — and a banned co-owner', () => {
+  it('allows deleting an owner who is the only one left but already banned, and a banned co-owner', () => {
     const bannedOnly = owner('x', true);
     expect(deleteRefusal('other', bannedOnly, [bannedOnly, staff('s1')])).toEqual([]);
     const activeA = owner('a');
@@ -55,7 +55,7 @@ describe('deleteRefusal (M7 #221 — the lockout law)', () => {
   });
 });
 
-describe('banRefusal (M7 #221 — the same law, the ban side)', () => {
+describe('banRefusal (M7 #221, the same law, the ban side)', () => {
   it('refuses banning yourself', () => {
     const me = owner('me');
     expect(banRefusal('me', me, [me, staff('s1')])).toEqual(['You cannot ban your own account.']);

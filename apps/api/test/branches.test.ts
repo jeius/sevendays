@@ -31,7 +31,7 @@ describe('GET /api/v1/branches', () => {
   });
 
   it('resolves coverImageUrl for a covered branch; bare rows carry null; the raw key never appears (M7 #214)', async () => {
-    // Direct db-state seeding (the #212 precedent) — the guard reads rows,
+    // Direct db-state seeding (the #212 precedent), the guard reads rows,
     // not API history. A FINAL key shape, as the commit pipeline stores it.
     await db
       .update(branches)
@@ -52,7 +52,7 @@ describe('GET /api/v1/branches', () => {
 
 describe('the branches read under the CMS (#138)', () => {
   it('excludes deactivated rows while active rows keep their full shape', async () => {
-    // Deactivate through the real CMS path — the isActive flip via PUT.
+    // Deactivate through the real CMS path, the isActive flip via PUT.
     const { token } = await signUpSession(url, 'branches-flip@sevendays.test');
     const put = await app.request(
       `/api/v1/admin/branches/${ids.branchB}`,
@@ -81,7 +81,7 @@ describe('the branches read under the CMS (#138)', () => {
     }[];
     expect(body).toHaveLength(1);
     expect(body[0]?.id).toBe(ids.branchA);
-    // The walk-in badge / phone data survive for active branches — the
+    // The walk-in badge / phone data survive for active branches, the
     // change is the filter, nothing else.
     expect(body[0]?.phone).toBe('+63 900 000 001');
     expect(body[0]?.acceptsWalkIns).toBe(false);

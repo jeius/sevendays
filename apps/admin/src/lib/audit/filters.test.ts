@@ -1,5 +1,5 @@
 // The Audit Log viewer's pure-seam contract (#188): tolerant search-param
-// parsing (invalid values drop — a stale shared URL never 500s a visit),
+// parsing (invalid values drop, a stale shared URL never 500s a visit),
 // UTC day windows, page math, the label maps, and the wire→row parse
 // through the landed auditLogRowSchema. Plain-node, no DOM (the admin
 // lib-seam pattern).
@@ -17,7 +17,7 @@ import {
   parseAuditWireRows,
 } from './filters';
 
-describe('auditLogSearchSchema (tolerant parse — invalid drops, never throws)', () => {
+describe('auditLogSearchSchema (tolerant parse, invalid drops, never throws)', () => {
   it('an empty search parses to the defaults (page 1, no filters)', () => {
     expect(auditLogSearchSchema.parse({})).toEqual({
       page: 1,
@@ -43,7 +43,7 @@ describe('auditLogSearchSchema (tolerant parse — invalid drops, never throws)'
     });
     expect(parsed.entity).toBe('service-package');
     expect(parsed.action).toBe('deactivate');
-    // Assert on the PARSED OUTPUT (z.object strips/rejects silently) — an
+    // Assert on the PARSED OUTPUT (z.object strips/rejects silently), an
     // unknown enum value is absent, and the rest of the search survives.
     const dropped = auditLogSearchSchema.parse({
       entity: 'not-an-entity',
@@ -62,8 +62,8 @@ describe('auditLogSearchSchema (tolerant parse — invalid drops, never throws)'
   });
 });
 
-describe('auditDateWindow (UTC day boundaries — the display clock is UTC)', () => {
-  it('from/to bracket their days — to is inclusive-day, exclusive-instant', () => {
+describe('auditDateWindow (UTC day boundaries, the display clock is UTC)', () => {
+  it('from/to bracket their days, to is inclusive-day, exclusive-instant', () => {
     expect(auditDateWindow({ page: 1, from: '2026-10-01', to: '2026-10-06' })).toEqual({
       start: '2026-10-01T00:00:00.000Z',
       endExclusive: '2026-10-07T00:00:00.000Z',

@@ -1,6 +1,6 @@
 import type { PublicTestimonial } from '@sevendays/types';
 
-// Home testimonial pagination (#164 Round 2, owner-ruled): 3 per page — a
+// Home testimonial pagination (#164 Round 2, owner-ruled): 3 per page, a
 // pull-quote lead + a 2-item side rail on every page. Non-looping (the UI
 // disables the ends). Page ids derive from each page's first item: the
 // page-change reveal keys on them, so every flip re-runs the animation.

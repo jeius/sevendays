@@ -6,7 +6,7 @@ import type { TestDb } from './db.js';
 
 /**
  * The truncate list is derived, not hand-kept (candidate C spec): every
- * public table exported by packages/db's schema barrel — `is(v, PgTable)`
+ * public table exported by packages/db's schema barrel, `is(v, PgTable)`
  * and default-schema only. A new table added by a future migration is
  * truncated automatically once the schema barrel exports it; the mirror
  * drift the integration-test ADR (0008) warned about is structurally
@@ -27,7 +27,7 @@ export function publicTableNames(): string[] {
 
 export async function truncateAll(db: TestDb): Promise<void> {
   // Identifiers are quoted because the derived list now contains Postgres
-  // reserved words (BetterAuth's `user` table — 42601 unquoted).
+  // reserved words (BetterAuth's `user` table, 42601 unquoted).
   await db.execute(
     sql.raw(
       `TRUNCATE ${publicTableNames()
