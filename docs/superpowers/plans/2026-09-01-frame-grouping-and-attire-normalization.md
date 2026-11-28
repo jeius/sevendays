@@ -1,19 +1,19 @@
-# Frame Grouping & Attire Normalization — Implementation Plan
+# Frame Grouping & Attire Normalization, Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Two folded schema revisions on one migration `0001`, both grill-settled with the owner on 2026-09-01: (a) frame identity via a `frames` table with `package_inclusions.frame_id`; (b) attire normalization — atomic `attires` rows (4: Toga, Filipiniana, Executive, Uniform) with a `package_inclusion_attires` junction replacing the combined-name rows and the `package_inclusions.attire_id` column.
+**Goal:** Two folded schema revisions on one migration `0001`, both grill-settled with the owner on 2026-09-01: (a) frame identity via a `frames` table with `package_inclusions.frame_id`; (b) attire normalization, atomic `attires` rows (4: Toga, Filipiniana, Executive, Uniform) with a `package_inclusion_attires` junction replacing the combined-name rows and the `package_inclusions.attire_id` column.
 
 **Architecture:** `frames(id, service_package_id FK, frame_number)` unique per pair; `package_inclusions` gains `frame_id` (nullable, framed pictures only) and **loses** `attire_id`; new junction `package_inclusion_attires(id, inclusion_id FK, attire_id FK)` unique per pair carrying every picture inclusion's attire set (≥1 enforced for framed_picture/print; privileges 0..N). Seed upserts frames idempotently (ids stable), junction-rebuilds with inclusions, and resolves attire sets by splitting structured catalog arrays. Verify adds frames-count, frame-partition, and attire-signature checks. Zod: `PackageInclusion` read shape gains `frameId` + `attireIds: uuid[]` (attire links leave the row shape); ADR-0009 revised in place (owner-sanctioned, once) to supersede the combined-form decision and record the frames deferral→decision.
 
 **Tech Stack:** Drizzle ORM ^0.45.2 (pg-core, relations), Zod ^4.5.1 (v4 top-level formats, superRefine), tsx ^4.23.13 scripts, postgres-js client (`prepare: false`).
 
-**Spec:** Grill decisions 2026-09-01 (owner-confirmed in-session): frames = catalog templates; shape (1) frames+frame_id; unlabeled frames numbered in listed order; `framed_picture` kind retained; attire = atomic rows + junction; `PackageInclusion` never 0 attire **except privileges (0..N)**; catalog.ts keeps verbatim `catalogLine` but structured `attireNames` arrays; ADR-0009 revised in place (owner granted, just this once — no ADR-0010); folded into M1.3 pre-PR with a scoped glm review. Catalog semantics: `docs/catalog.md` line 8. Doc responsibilities: `apps/api/CONTEXT.md` owns Frame + Attire glossary entries; `docs/catalog.md` stays verbatim.
+**Spec:** Grill decisions 2026-09-01 (owner-confirmed in-session): frames = catalog templates; shape (1) frames+frame_id; unlabeled frames numbered in listed order; `framed_picture` kind retained; attire = atomic rows + junction; `PackageInclusion` never 0 attire **except privileges (0..N)**; catalog.ts keeps verbatim `catalogLine` but structured `attireNames` arrays; ADR-0009 revised in place (owner granted, just this once, no ADR-0010); folded into M1.3 pre-PR with a scoped glm review. Catalog semantics: `docs/catalog.md` line 8. Doc responsibilities: `apps/api/CONTEXT.md` owns Frame + Attire glossary entries; `docs/catalog.md` stays verbatim.
 
 ## Global Constraints
 
-- **Additive migration only, one migration `0001`.** `0000` is applied and frozen — Task 2 generates a single `0001_*.sql` covering frames + junction + the `attire_id` drop; never hand-edit `packages/db/migrations/**`; drizzle journal rows go 1 → 2 after apply.
-- **Dropping `attire_id` is safe:** `package_inclusions` is live-seeded, but the seed rebuilds inclusions delete-then-insert every run — the Task 3 reseed repopulates everything through the junction; no data preservation needed beyond rerunning `db:seed`.
+- **Additive migration only, one migration `0001`.** `0000` is applied and frozen, Task 2 generates a single `0001_*.sql` covering frames + junction + the `attire_id` drop; never hand-edit `packages/db/migrations/**`; drizzle journal rows go 1 → 2 after apply.
+- **Dropping `attire_id` is safe:** `package_inclusions` is live-seeded, but the seed rebuilds inclusions delete-then-insert every run, the Task 3 reseed repopulates everything through the junction; no data preservation needed beyond rerunning `db:seed`.
 - **Live DB caution:** Tasks 2–4 touch the live session-mode connection. `node --env-file=.env scripts/check-env.mjs` must print `GATE: PASS` before each; env values never printed; drizzle-kit output redirected to a log, tail-only quoting.
 - **Seed is re-runnable:** frames upsert by `(service_package_id, frame_number)`; inclusions delete-then-insert per package; junction rows inserted fresh with their inclusion (no separate rebuild needed).
 - **Secret safety:** never print any connection string; never touch `.env`/`.dev.vars` contents.
@@ -21,7 +21,7 @@
 - **Fresh-clone bootstrap precedes typecheck/tests:** `pnpm install && pnpm build:packages` before any workspace gate.
 - **Commit conventions:** unscoped conventional subjects, bullet bodies when wordy; each task commits on `feat/m1.3-provision-migrate-seed`.
 - **Zod v4 style:** top-level `z.uuid()`; `superRefine` for the cross-field attire rule on the create shape; `safeParse` in tests; no `noUncheckedIndexedAccess` violations (guard destructures, no `!`).
-- **Attire order canonicalization:** combined attire arrays follow the catalog's own attire-list order — Toga, Filipiniana, Executive, Uniform (`Filipiniana/Executive`, `Executive/Uniform`, `Filipiniana/Executive/Uniform`) — both in catalog.ts arrays and in any signature/canonical rendering; never alphabetize.
+- **Attire order canonicalization:** combined attire arrays follow the catalog's own attire-list order, Toga, Filipiniana, Executive, Uniform (`Filipiniana/Executive`, `Executive/Uniform`, `Filipiniana/Executive/Uniform`), both in catalog.ts arrays and in any signature/canonical rendering; never alphabetize.
 
 ---
 
@@ -46,20 +46,20 @@ apps/api/CONTEXT.md                              (mod)  Frame glossary entry + A
 docs/progress.md                                 (mod)  M1.3 bullet extension
 ```
 
-Task map: 1 — Zod: frames schemas + inclusion reshape (TDD); 2 — Drizzle: frames + junction + migration 0001 + live apply; 3 — seed: catalog restructure + frames/junction seeding (live reseed ×2); 4 — verify: frames + attire checks (live verify); 5 — ADR-0009 revision + glossary + progress + full gate.
+Task map: 1, Zod: frames schemas + inclusion reshape (TDD); 2, Drizzle: frames + junction + migration 0001 + live apply; 3, seed: catalog restructure + frames/junction seeding (live reseed ×2); 4, verify: frames + attire checks (live verify); 5, ADR-0009 revision + glossary + progress + full gate.
 
 ---
 
-### Task 1: Zod — frames schemas + inclusion reshape (TDD)
+### Task 1: Zod, frames schemas + inclusion reshape (TDD)
 
 **Files:**
 - Create: `packages/types/src/frames.ts`, `packages/types/src/frames.test.ts`
 - Modify: `packages/types/src/inclusion.ts`, `packages/types/src/inclusion.test.ts`, `packages/types/src/index.ts`
 
 **Interfaces:**
-- Produces: `frameSchema` (row: `id`, `servicePackageId`, `frameNumber` int ≥1), `createFrameSchema` (create: `servicePackageId` + `frameNumber`), types `PackageFrame`, `CreateFrameInput`. `packageInclusionSchema` (read): `frameId: z.uuid().nullable()`, `attireIds: z.array(z.uuid())` (0..N — the ≥1 rule is kind-dependent, enforced on the create shape only) — attire linkage leaves the row shape; `attireId`-style single refs are gone. `createPackageInclusionSchema` (create): `.extend({ frameId: z.uuid().nullable().optional(), attireIds: z.array(z.uuid()).optional() })` + `superRefine`: when `kind` is `framed_picture` or `print`, `attireIds` must exist with `length ≥ 1`; when `privilege`, `attireIds` may be 0..N. Types `PackageInclusion`, `CreatePackageInclusionInput` re-inferred.
+- Produces: `frameSchema` (row: `id`, `servicePackageId`, `frameNumber` int ≥1), `createFrameSchema` (create: `servicePackageId` + `frameNumber`), types `PackageFrame`, `CreateFrameInput`. `packageInclusionSchema` (read): `frameId: z.uuid().nullable()`, `attireIds: z.array(z.uuid())` (0..N, the ≥1 rule is kind-dependent, enforced on the create shape only), attire linkage leaves the row shape; `attireId`-style single refs are gone. `createPackageInclusionSchema` (create): `.extend({ frameId: z.uuid().nullable().optional(), attireIds: z.array(z.uuid()).optional() })` + `superRefine`: when `kind` is `framed_picture` or `print`, `attireIds` must exist with `length ≥ 1`; when `privilege`, `attireIds` may be 0..N. Types `PackageInclusion`, `CreatePackageInclusionInput` re-inferred.
 
-- [ ] **Step 1: Write the failing tests** — create `packages/types/src/frames.test.ts` with exactly:
+- [ ] **Step 1: Write the failing tests**, create `packages/types/src/frames.test.ts` with exactly:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -102,7 +102,7 @@ describe('createFrameSchema', () => {
 });
 ```
 
-- [ ] **Step 2: RED** — `pnpm --filter @sevendays/types test -- frames` → FAIL: cannot resolve `./frames.js`.
+- [ ] **Step 2: RED**, `pnpm --filter @sevendays/types test -- frames` → FAIL: cannot resolve `./frames.js`.
 
 - [ ] **Step 3: Write `packages/types/src/frames.ts`** with exactly:
 
@@ -134,18 +134,18 @@ export const packageInclusionSchema = z.object({
   id: z.uuid(),
   kind: packageInclusionKindSchema,
   // Framed pictures and prints carry a count; privileges (wardrobe/accessory
-  // usage, High-Resolution soft copies) are quantityless — null by design.
+  // usage, High-Resolution soft copies) are quantityless, null by design.
   quantity: z.number().int().positive().nullable(),
   // Structural finish rule (no finish column): framed_picture rows are
-  // laminated, print rows are loose — the kind decides, not data.
+  // laminated, print rows are loose, the kind decides, not data.
   printSizeId: z.uuid().nullable(),
   // Attire context lives in the package_inclusion_attires junction (ADR-0009
-  // revision): the read shape carries the resolved id array (0..N — the ≥1
+  // revision): the read shape carries the resolved id array (0..N, the ≥1
   // rule for picture inclusions is kind-dependent and enforced on the create
   // shape, not here).
   attireIds: z.array(z.uuid()),
   // Frame identity (ADR-0009 revision): which catalog frame this framed
-  // picture belongs to — null for prints and privileges. Required-nullable
+  // picture belongs to, null for prints and privileges. Required-nullable
   // on the row shape; optional+nullable on the create shape.
   frameId: z.uuid().nullable(),
   description: z.string().min(1).nullable(),
@@ -176,9 +176,9 @@ export const createPackageInclusionSchema = packageInclusionSchema
 export type CreatePackageInclusionInput = z.infer<typeof createPackageInclusionSchema>;
 ```
 
-- [ ] **Step 5: Update `packages/types/src/inclusion.test.ts`** — rework fixtures: every `framed_picture`/`print` fixture gains `attireIds: [UUID]` and (framed only) `frameId: UUID`; every `privilege` fixture gains `attireIds: []` and `frameId: null`. Add tests: (a) read-shape parse of a framed_picture with `attireIds: []` SUCCEEDS (read is 0..N; the ≥1 rule is create-only — execution correction, plan originally said FAILS); (b) create-shape parse of `{ kind: 'framed_picture', quantity: 1, printSizeId: UUID }` with no `attireIds` key FAILS with the custom message path `['attireIds']`; (c) create-shape parse of the same plus `attireIds: [UUID]` (frameId omitted) SUCCEEDS; (d) create-shape privilege with no `attireIds` key SUCCEEDS. Also update `packages/types/src/package.test.ts`'s with-inclusions fixture (framed gains `attireIds: [UUID]` + `frameId: UUID`; privilege gains `attireIds: []` + `frameId: null`).
+- [ ] **Step 5: Update `packages/types/src/inclusion.test.ts`**, rework fixtures: every `framed_picture`/`print` fixture gains `attireIds: [UUID]` and (framed only) `frameId: UUID`; every `privilege` fixture gains `attireIds: []` and `frameId: null`. Add tests: (a) read-shape parse of a framed_picture with `attireIds: []` SUCCEEDS (read is 0..N; the ≥1 rule is create-only, execution correction, plan originally said FAILS); (b) create-shape parse of `{ kind: 'framed_picture', quantity: 1, printSizeId: UUID }` with no `attireIds` key FAILS with the custom message path `['attireIds']`; (c) create-shape parse of the same plus `attireIds: [UUID]` (frameId omitted) SUCCEEDS; (d) create-shape privilege with no `attireIds` key SUCCEEDS. Also update `packages/types/src/package.test.ts`'s with-inclusions fixture (framed gains `attireIds: [UUID]` + `frameId: UUID`; privilege gains `attireIds: []` + `frameId: null`).
 
-- [ ] **Step 6: GREEN + barrel** — `pnpm --filter @sevendays/types test` → all pass; add `export * from './frames.js';` to `packages/types/src/index.ts` (between `branch.js` and `inclusion.js`); `pnpm --filter @sevendays/types build` succeeds.
+- [ ] **Step 6: GREEN + barrel**, `pnpm --filter @sevendays/types test` → all pass; add `export * from './frames.js';` to `packages/types/src/index.ts` (between `branch.js` and `inclusion.js`); `pnpm --filter @sevendays/types build` succeeds.
 
 - [ ] **Step 7: Commit**
 
@@ -189,7 +189,7 @@ git commit -m "feat(types): frame schemas, junction-backed attireIds, kind-aware
 
 ---
 
-### Task 2: Drizzle — frames + junction, migration 0001, live apply
+### Task 2: Drizzle, frames + junction, migration 0001, live apply
 
 **Files:**
 - Create: `packages/db/src/schema/frames.ts`, `packages/db/src/schema/package-inclusion-attires.ts`
@@ -197,7 +197,7 @@ git commit -m "feat(types): frame schemas, junction-backed attireIds, kind-aware
 - Create (generated): `packages/db/migrations/0001_*.sql` + snapshot + journal
 
 **Interfaces:**
-- Produces: `frames` table (as planned: uuid pk, `service_package_id` notNull FK, `frame_number` int notNull, timestamps; `frames_pair_unique` on `(service_package_id, frame_number)`; `frames_service_package_id_idx`). `packageInclusionAttires` table: `id uuid pk defaultRandom`, `inclusion_id uuid notNull fk→package_inclusions.id` (onDelete cascade — junction rows are children of inclusions), `attire_id uuid notNull fk→attires.id`, timestamps; unique `package_inclusion_attires_pair_unique` on `(inclusion_id, attire_id)`; index on `inclusion_id` (the pair unique already covers inclusion_id lookups — include the explicit index only if drizzle's unique doesn't create one; prefer the unique alone, add the FK index for `attire_id`). `package_inclusions`: ADD `frame_id uuid null fk→frames.id` + `package_inclusions_frame_id_idx`; DROP `attire_id` + `package_inclusions_attire_id_idx`. Relations: `framesRelations` (one servicePackage, many inclusions); `packageInclusionsRelations`: remove `attire`, add `frame` + `attireLinks: many(packageInclusionAttires)`; `packageInclusionAttiresRelations`: one inclusion, one attire.
+- Produces: `frames` table (as planned: uuid pk, `service_package_id` notNull FK, `frame_number` int notNull, timestamps; `frames_pair_unique` on `(service_package_id, frame_number)`; `frames_service_package_id_idx`). `packageInclusionAttires` table: `id uuid pk defaultRandom`, `inclusion_id uuid notNull fk→package_inclusions.id` (onDelete cascade, junction rows are children of inclusions), `attire_id uuid notNull fk→attires.id`, timestamps; unique `package_inclusion_attires_pair_unique` on `(inclusion_id, attire_id)`; index on `inclusion_id` (the pair unique already covers inclusion_id lookups, include the explicit index only if drizzle's unique doesn't create one; prefer the unique alone, add the FK index for `attire_id`). `package_inclusions`: ADD `frame_id uuid null fk→frames.id` + `package_inclusions_frame_id_idx`; DROP `attire_id` + `package_inclusions_attire_id_idx`. Relations: `framesRelations` (one servicePackage, many inclusions); `packageInclusionsRelations`: remove `attire`, add `frame` + `attireLinks: many(packageInclusionAttires)`; `packageInclusionAttiresRelations`: one inclusion, one attire.
 
 - [ ] **Step 1: Write `packages/db/src/schema/frames.ts`** with exactly:
 
@@ -237,7 +237,7 @@ import { packageInclusions } from './package-inclusions.js';
 // Attire context per inclusion (ADR-0009 revision): replaces the single
 // attire_id column and the combined-name attire rows. One row per
 // (inclusion, attire) pair; combined contexts like Filipiniana/Executive are
-// two rows in catalog attire order. Children of inclusions — cascade delete.
+// two rows in catalog attire order. Children of inclusions, cascade delete.
 export const packageInclusionAttires = pgTable(
   'package_inclusion_attires',
   {
@@ -257,7 +257,7 @@ export const packageInclusionAttires = pgTable(
 );
 ```
 
-- [ ] **Step 3: Modify `packages/db/src/schema/package-inclusions.ts`** — remove the `attires` import; add `frames` import; replace the `attireId` column block with:
+- [ ] **Step 3: Modify `packages/db/src/schema/package-inclusions.ts`**, remove the `attires` import; add `frames` import; replace the `attireId` column block with:
 
 ```ts
     // frameId (ADR-0009 revision): set on framed_picture rows only; prints
@@ -267,7 +267,7 @@ export const packageInclusionAttires = pgTable(
 
   and in the third-callback array replace the `package_inclusions_attire_id_idx` line with `index('package_inclusions_frame_id_idx').on(table.frameId),`.
 
-- [ ] **Step 4: Modify `packages/db/src/schema/relations.ts`** — imports gain `frames`, `packageInclusionAttires`; drop `attires`-based relation only (attires import stays if still referenced elsewhere in the file — check; after the change it is not). Add:
+- [ ] **Step 4: Modify `packages/db/src/schema/relations.ts`**, imports gain `frames`, `packageInclusionAttires`; drop `attires`-based relation only (attires import stays if still referenced elsewhere in the file, check; after the change it is not). Add:
 
 ```ts
 export const framesRelations = relations(frames, ({ one, many }) => ({
@@ -300,17 +300,17 @@ export const packageInclusionAttiresRelations = relations(packageInclusionAttire
   attireLinks: many(packageInclusionAttires),
 ```
 
-  (keep the `attires` import — `packageInclusionAttiresRelations` uses it).
+  (keep the `attires` import, `packageInclusionAttiresRelations` uses it).
 
-- [ ] **Step 5: Barrel** — `packages/db/src/schema/index.ts` gains `export * from './frames.js';` (between `branches.js` and `package-inclusions.js`) and `export * from './package-inclusion-attires.js';` (after `package-inclusions.js`).
+- [ ] **Step 5: Barrel**, `packages/db/src/schema/index.ts` gains `export * from './frames.js';` (between `branches.js` and `package-inclusions.js`) and `export * from './package-inclusion-attires.js';` (after `package-inclusions.js`).
 
-- [ ] **Step 6: Build + typecheck** — `pnpm install && pnpm build:packages && pnpm --filter @sevendays/db build && pnpm --filter @sevendays/db typecheck` — all clean.
+- [ ] **Step 6: Build + typecheck**, `pnpm install && pnpm build:packages && pnpm --filter @sevendays/db build && pnpm --filter @sevendays/db typecheck`, all clean.
 
-- [ ] **Step 7: Generate migration 0001** — from `packages/db`: `node --env-file=.env scripts/check-env.mjs` (GATE: PASS); then `pnpm --filter @sevendays/db db:generate > /tmp/frames-attire-generate.log 2>&1; tail -n 12 /tmp/frames-attire-generate.log` (sandbox fallback: gitignored in-repo log path; never quote URL lines). Expected statements: `CREATE TABLE "frames"`, `CREATE TABLE "package_inclusion_attires"`, `ALTER TABLE "package_inclusions" ADD COLUMN "frame_id"`, `ALTER TABLE "package_inclusions" DROP COLUMN "attire_id"`, DROP of the old attire_id index, ADD `frames_pair_unique` + `package_inclusion_attires_pair_unique`, CREATE INDEX ×3 (frames_service_package_id, package_inclusions_frame_id, package_inclusion_attires_attire_id). If drizzle proposes anything beyond these (unexpected drops/renames), STOP — BLOCKED, additive scope only (the attire_id drop is expected and sanctioned).
+- [ ] **Step 7: Generate migration 0001**, from `packages/db`: `node --env-file=.env scripts/check-env.mjs` (GATE: PASS); then `pnpm --filter @sevendays/db db:generate > /tmp/frames-attire-generate.log 2>&1; tail -n 12 /tmp/frames-attire-generate.log` (sandbox fallback: gitignored in-repo log path; never quote URL lines). Expected statements: `CREATE TABLE "frames"`, `CREATE TABLE "package_inclusion_attires"`, `ALTER TABLE "package_inclusions" ADD COLUMN "frame_id"`, `ALTER TABLE "package_inclusions" DROP COLUMN "attire_id"`, DROP of the old attire_id index, ADD `frames_pair_unique` + `package_inclusion_attires_pair_unique`, CREATE INDEX ×3 (frames_service_package_id, package_inclusions_frame_id, package_inclusion_attires_attire_id). If drizzle proposes anything beyond these (unexpected drops/renames), STOP, BLOCKED, additive scope only (the attire_id drop is expected and sanctioned).
 
-- [ ] **Step 8: Verify the generated SQL** — grep the 0001 file for the expected statements; confirm `frame_id` has no NOT NULL; confirm no `DROP TABLE`; `git status --short packages/db/migrations` = new 0001 files + journal/snapshot updates only.
+- [ ] **Step 8: Verify the generated SQL**, grep the 0001 file for the expected statements; confirm `frame_id` has no NOT NULL; confirm no `DROP TABLE`; `git status --short packages/db/migrations` = new 0001 files + journal/snapshot updates only.
 
-- [ ] **Step 9: Live apply** — `pnpm --filter @sevendays/db db:migrate > /tmp/frames-attire-migrate.log 2>&1; tail -n 10 …` then `node --env-file=.env scripts/db-state.mjs` — `public tables:` now lists 10 entries (adds `frames`, `package_inclusion_attires`); journal `drizzle.__drizzle_migrations`. Quote outputs.
+- [ ] **Step 9: Live apply**, `pnpm --filter @sevendays/db db:migrate > /tmp/frames-attire-migrate.log 2>&1; tail -n 10 …` then `node --env-file=.env scripts/db-state.mjs`, `public tables:` now lists 10 entries (adds `frames`, `package_inclusion_attires`); journal `drizzle.__drizzle_migrations`. Quote outputs.
 
 - [ ] **Step 10: Commit**
 
@@ -324,20 +324,20 @@ git commit -m "feat(db): frames table and attire junction replace combined-name 
 
 ---
 
-### Task 3: Seed — catalog restructure + frames/junction seeding
+### Task 3: Seed, catalog restructure + frames/junction seeding
 
 **Files:**
 - Modify: `packages/db/scripts/catalog.ts`, `packages/db/scripts/seed.ts`
 
 **Interfaces:**
-- Produces: `attireSeeds` = 4 atomic rows `[{ name: 'Toga' }, { name: 'Filipiniana' }, { name: 'Executive' }, { name: 'Uniform' }]`; `PackageSeed.framedPictures` entries `{ frameNumber, printSizeCode, attireNames: string[], catalogLine }`; `PackageSeed.prints` entries `{ quantity, printSizeCode, attireNames: string[], catalogLine }`; `privilegeSeeds` entries `{ description, attireNames: string[] }` (Executive grant `['Executive']`, others `[]`); `inclusionSignatures(pkg)` now emits `attireNames` joined with `/` in catalog order (privileges with no attires render `-`), signature format `kind|quantity|printSizeCode|attireNames-joined` / `privilege|0|<joined or ->|<description>` — byte-identical to the M1.3 verify expectations for every current line (the join reproduces the original strings). Seed imports `frames` and `packageInclusionAttires` from the barrel.
+- Produces: `attireSeeds` = 4 atomic rows `[{ name: 'Toga' }, { name: 'Filipiniana' }, { name: 'Executive' }, { name: 'Uniform' }]`; `PackageSeed.framedPictures` entries `{ frameNumber, printSizeCode, attireNames: string[], catalogLine }`; `PackageSeed.prints` entries `{ quantity, printSizeCode, attireNames: string[], catalogLine }`; `privilegeSeeds` entries `{ description, attireNames: string[] }` (Executive grant `['Executive']`, others `[]`); `inclusionSignatures(pkg)` now emits `attireNames` joined with `/` in catalog order (privileges with no attires render `-`), signature format `kind|quantity|printSizeCode|attireNames-joined` / `privilege|0|<joined or ->|<description>`, byte-identical to the M1.3 verify expectations for every current line (the join reproduces the original strings). Seed imports `frames` and `packageInclusionAttires` from the barrel.
 
-- [ ] **Step 1: Restructure `catalog.ts`** — (a) `attireSeeds` → the 4 atomic rows (keep the comment noting combined forms are now junction-composed per the ADR-0009 revision); (b) add `frameNumber: number` to every `framedPictures` entry and convert `attireName: 'X'` → `attireNames: ['X']`, combined → arrays following catalog order, e.g. `'Filipiniana/Executive'` → `['Filipiniana', 'Executive']`, `'Executive/Uniform'` → `['Executive', 'Uniform']`, `'Filipiniana/Executive/Uniform'` → `['Filipiniana', 'Executive', 'Uniform']`; (c) same conversion for `prints`; (d) `privilegeSeeds` → `{ description, attireNames }` with `['Executive']` for the Executive grant, `[]` for the other five; (e) frameNumber mapping (all 23): Basic 1×[1]; A 1×[1]; B [1],[2]; C 1×[1]; D [1],[2]; E [1],[2],[3]; F [1],[2],[3]; G [1],[2]; H [1],[2],[3]; CP-1 [1],[2],[3]; CP-2 [1],[2] — in each package's existing framedPictures order; (f) update `inclusionSignatures` to join `attireNames` with `'/'` (and `-` when empty) so every signature string stays byte-identical to the pre-change verify output; (g) update the header comment block (phones note stays).
+- [ ] **Step 1: Restructure `catalog.ts`**, (a) `attireSeeds` → the 4 atomic rows (keep the comment noting combined forms are now junction-composed per the ADR-0009 revision); (b) add `frameNumber: number` to every `framedPictures` entry and convert `attireName: 'X'` → `attireNames: ['X']`, combined → arrays following catalog order, e.g. `'Filipiniana/Executive'` → `['Filipiniana', 'Executive']`, `'Executive/Uniform'` → `['Executive', 'Uniform']`, `'Filipiniana/Executive/Uniform'` → `['Filipiniana', 'Executive', 'Uniform']`; (c) same conversion for `prints`; (d) `privilegeSeeds` → `{ description, attireNames }` with `['Executive']` for the Executive grant, `[]` for the other five; (e) frameNumber mapping (all 23): Basic 1×[1]; A 1×[1]; B [1],[2]; C 1×[1]; D [1],[2]; E [1],[2],[3]; F [1],[2],[3]; G [1],[2]; H [1],[2],[3]; CP-1 [1],[2],[3]; CP-2 [1],[2], in each package's existing framedPictures order; (f) update `inclusionSignatures` to join `attireNames` with `'/'` (and `-` when empty) so every signature string stays byte-identical to the pre-change verify output; (g) update the header comment block (phones note stays).
 
-- [ ] **Step 2: Modify `seed.ts`** — imports gain `frames`, `packageInclusionAttires`; the attire lookup map becomes `attireId: Map<string, string>` built from the 4 atomic rows. Frame upsert block (inside the package loop, before the inclusion rebuild):
+- [ ] **Step 2: Modify `seed.ts`**, imports gain `frames`, `packageInclusionAttires`; the attire lookup map becomes `attireId: Map<string, string>` built from the 4 atomic rows. Frame upsert block (inside the package loop, before the inclusion rebuild):
 
 ```ts
-      // Frames — upsert per (package, frameNumber); reseed keeps ids stable
+      // Frames, upsert per (package, frameNumber); reseed keeps ids stable
       // for unchanged frames so CMS references survive (ADR-0009 revision).
       const frameId = new Map<number, string>();
       for (const fp of pkg.framedPictures) {
@@ -395,11 +395,11 @@ git commit -m "feat(db): frames table and attire junction replace combined-name 
 
   (cursor-walk works because `[...framedValues, ...printValues, ...privilegeValues]` preserves source order; the returning order matches the values order. If Biome/lint flags the shadowed name `attireId`, rename the map to `attireIdMap` everywhere.)
 
-- [ ] **Step 3: Attire upsert order** — the attires upsert loop stays (now 4 rows, onConflictDoNothing); no other lookup changes.
+- [ ] **Step 3: Attire upsert order**, the attires upsert loop stays (now 4 rows, onConflictDoNothing); no other lookup changes.
 
-- [ ] **Step 4: Gate + reseed (live, twice)** — `node --env-file=.env scripts/check-env.mjs` (GATE: PASS); `pnpm --filter @sevendays/db db:seed` → `[ok] seeded: …` unchanged; run again → identical (idempotent across frames upsert + junction rebuild).
+- [ ] **Step 4: Gate + reseed (live, twice)**, `node --env-file=.env scripts/check-env.mjs` (GATE: PASS); `pnpm --filter @sevendays/db db:seed` → `[ok] seeded: …` unchanged; run again → identical (idempotent across frames upsert + junction rebuild).
 
-- [ ] **Step 5: Biome + typecheck + build** — `pnpm exec biome check --write packages/db/scripts && pnpm --filter @sevendays/db typecheck && pnpm --filter @sevendays/db build` — clean.
+- [ ] **Step 5: Biome + typecheck + build**, `pnpm exec biome check --write packages/db/scripts && pnpm --filter @sevendays/db typecheck && pnpm --filter @sevendays/db build`, clean.
 
 - [ ] **Step 6: Commit**
 
@@ -410,7 +410,7 @@ git commit -m "feat(db): seed atomic attires, frames, and inclusion-attire junct
 
 ---
 
-### Task 4: Verify — frames + attire-aware read-back
+### Task 4: Verify, frames + attire-aware read-back
 
 **Files:**
 - Modify: `packages/db/scripts/verify-seed.ts`
@@ -418,7 +418,7 @@ git commit -m "feat(db): seed atomic attires, frames, and inclusion-attire junct
 **Interfaces:**
 - Produces: `[ok] frames: 23/23`; per-package frame-partition lines; per-package attire-junction check; signature comparison unchanged in format (Task 3 kept signatures byte-identical).
 
-- [ ] **Step 1: Frames count check** — import `frames`; after the attires check add:
+- [ ] **Step 1: Frames count check**, import `frames`; after the attires check add:
 
 ```ts
 const frameRows = await db.select().from(frames);
@@ -428,7 +428,7 @@ frameRows.length === expectedFrameCount
   : fail(`frames: ${frameRows.length} != ${expectedFrameCount}`);
 ```
 
-- [ ] **Step 2: Rework the inclusion select** — the per-package rows select loses `attireName` (column dropped); instead select `id: packageInclusions.id` and fetch junction rows:
+- [ ] **Step 2: Rework the inclusion select**, the per-package rows select loses `attireName` (column dropped); instead select `id: packageInclusions.id` and fetch junction rows:
 
 ```ts
   const rows = await db
@@ -458,9 +458,9 @@ frameRows.length === expectedFrameCount
   }
 ```
 
-  (junction fetch can be hoisted above the package loop — one query total — since attire names are global; the plan leaves it per-loop for diff minimality; hoist if the reviewer prefers.)
+  (junction fetch can be hoisted above the package loop, one query total, since attire names are global; the plan leaves it per-loop for diff minimality; hoist if the reviewer prefers.)
 
-- [ ] **Step 3: Signature comparison** — actual signature per row becomes:
+- [ ] **Step 3: Signature comparison**, actual signature per row becomes:
 
 ```ts
   const actual = rows
@@ -475,7 +475,7 @@ frameRows.length === expectedFrameCount
 
   (junction insertion order preserves catalog order, so the join reproduces `'Filipiniana/Executive'` etc. exactly; lengths still enforced by the `expected.length !== actual.length` guard; the existing first-diff failure block stays.)
 
-- [ ] **Step 4: Frame partition + attire-completeness checks** — inside the per-package loop after the signature block:
+- [ ] **Step 4: Frame partition + attire-completeness checks**, inside the per-package loop after the signature block:
 
 ```ts
   // Frame partition (ADR-0009 revision): every framed_picture row references
@@ -499,9 +499,9 @@ frameRows.length === expectedFrameCount
     : fail(`${seed.name}: ${barePictures.length} picture inclusions have no attire`);
 ```
 
-- [ ] **Step 5: Biome + typecheck** — `pnpm exec biome check --write packages/db/scripts/verify-seed.ts && pnpm --filter @sevendays/db typecheck` — clean.
+- [ ] **Step 5: Biome + typecheck**, `pnpm exec biome check --write packages/db/scripts/verify-seed.ts && pnpm --filter @sevendays/db typecheck`, clean.
 
-- [ ] **Step 6: Live verify** — `pnpm --filter @sevendays/db db:verify-seed` → `[ok] frames: 23/23`, 11× frames/partition lines, 11× attire-completeness lines, all inclusion comparisons pass, `VERIFY: PASSED`. Quote the new block + final line.
+- [ ] **Step 6: Live verify**, `pnpm --filter @sevendays/db db:verify-seed` → `[ok] frames: 23/23`, 11× frames/partition lines, 11× attire-completeness lines, all inclusion comparisons pass, `VERIFY: PASSED`. Quote the new block + final line.
 
 - [ ] **Step 7: Commit**
 
@@ -517,13 +517,13 @@ git commit -m "feat(db): verify frames, frame partition, and junction attire com
 **Files:**
 - Modify: `docs/adr/0009-normalized-catalog-lookups.md`, `apps/api/CONTEXT.md`, `docs/progress.md`
 
-- [ ] **Step 1: Revise ADR-0009 in place** (owner-sanctioned, this once): Decision paragraph — replace the lookup clause with: "`print_sizes` and `attires` as lookup tables (unique `code` / `name`; attires are atomic — Toga, Filipiniana, Executive, Uniform — with combined contexts composed per inclusion through the `package_inclusion_attires` junction, ordered by the catalog's attire list)". Replace the kind/clause sentence's `nullable FK references to the two lookups` with `nullable FK to print sizes, attire context via the junction, and a nullable frame reference`. Alternatives — the last bullet ("Splitting combined attires… deferred") is replaced by: "**Splitting combined attires into a junction** — adopted on 2026-09-01 revision: `package_inclusions.attire_id` + combined-name rows were a known simplification; with the customize-package flow (M1.4) needing per-attire selection and the frames work touching the same migration window, the junction replaced both the column and the combined rows in the same additive migration. The original deferral reasoning stands for the pre-revision window." Consequences — replace the final bullet with: "Combined attire contexts are junction-composed; the catalog's attire order (Toga, Filipiniana, Executive, Uniform) is the canonical rendering order — never alphabetize." Add at the top of Consequences: "**Amended 2026-09-01** (owner-sanctioned single revision): frames table + attire junction added by the frame-grouping work; see the Decision and Alternatives for what changed." Keep Status Accepted, date 2026-08-31; add `**Amended:** 2026-09-01` under the date.
+- [ ] **Step 1: Revise ADR-0009 in place** (owner-sanctioned, this once): Decision paragraph, replace the lookup clause with: "`print_sizes` and `attires` as lookup tables (unique `code` / `name`; attires are atomic, Toga, Filipiniana, Executive, Uniform, with combined contexts composed per inclusion through the `package_inclusion_attires` junction, ordered by the catalog's attire list)". Replace the kind/clause sentence's `nullable FK references to the two lookups` with `nullable FK to print sizes, attire context via the junction, and a nullable frame reference`. Alternatives, the last bullet ("Splitting combined attires… deferred") is replaced by: "**Splitting combined attires into a junction**, adopted on 2026-09-01 revision: `package_inclusions.attire_id` + combined-name rows were a known simplification; with the customize-package flow (M1.4) needing per-attire selection and the frames work touching the same migration window, the junction replaced both the column and the combined rows in the same additive migration. The original deferral reasoning stands for the pre-revision window." Consequences, replace the final bullet with: "Combined attire contexts are junction-composed; the catalog's attire order (Toga, Filipiniana, Executive, Uniform) is the canonical rendering order, never alphabetize." Add at the top of Consequences: "**Amended 2026-09-01** (owner-sanctioned single revision): frames table + attire junction added by the frame-grouping work; see the Decision and Alternatives for what changed." Keep Status Accepted, date 2026-08-31; add `**Amended:** 2026-09-01` under the date.
 
-- [ ] **Step 2: Glossary** — `apps/api/CONTEXT.md`: (a) update **Attire**: "The wardrobe context a framed picture or print is shot in — stored atomically (Toga, Filipiniana, Executive, Uniform); combined contexts like Filipiniana/Executive are inclusions linked to multiple Attire rows in catalog order."; (b) add **Frame** (alphabetical): "**Frame** — One physical frame bundled with a Service Package, numbered per package (catalog "Frame 1/2/3"; unlabeled frames number in listed order). A frame holds one or more framed pictures; today every catalog frame holds exactly one. Distinct from loose picture Inclusions."
+- [ ] **Step 2: Glossary**, `apps/api/CONTEXT.md`: (a) update **Attire**: "The wardrobe context a framed picture or print is shot in, stored atomically (Toga, Filipiniana, Executive, Uniform); combined contexts like Filipiniana/Executive are inclusions linked to multiple Attire rows in catalog order."; (b) add **Frame** (alphabetical): "**Frame**, One physical frame bundled with a Service Package, numbered per package (catalog "Frame 1/2/3"; unlabeled frames number in listed order). A frame holds one or more framed pictures; today every catalog frame holds exactly one. Distinct from loose picture Inclusions."
 
-- [ ] **Step 3: progress.md** — extend the M1.3 What-Exists bullet: "Frame grouping and attire normalization landed on top (revised ADR-0009, migration 0001): a `frames` table seeds 23 frames across the 11 packages, `package_inclusions.frame_id` links framed pictures to frames, and the `package_inclusion_attires` junction replaces combined-name attire rows with atomic attires (Toga, Filipiniana, Executive, Uniform)."
+- [ ] **Step 3: progress.md**, extend the M1.3 What-Exists bullet: "Frame grouping and attire normalization landed on top (revised ADR-0009, migration 0001): a `frames` table seeds 23 frames across the 11 packages, `package_inclusions.frame_id` links framed pictures to frames, and the `package_inclusion_attires` junction replaces combined-name attire rows with atomic attires (Toga, Filipiniana, Executive, Uniform)."
 
-- [ ] **Step 4: Full gate** — `pnpm check && pnpm build` — green; quote task counts.
+- [ ] **Step 4: Full gate**, `pnpm check && pnpm build`, green; quote task counts.
 
 - [ ] **Step 5: Commit**
 

@@ -1,15 +1,15 @@
-# Deepen the Appointment Intake Module — Implementation Plan
+# Deepen the Appointment Intake Module, Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Deepen the Appointment intake module behind its unchanged interface — one transaction wraps reference resolution and both inserts, rejection failures carry their byte-identical user-facing message inside the module, the appointments route logs before the uniform 500, and the duplicated 13-column projection collapses to one constant — proven by a compose rollback test and a one-shot live probe over the Supabase transaction-mode pooler.
+**Goal:** Deepen the Appointment intake module behind its unchanged interface, one transaction wraps reference resolution and both inserts, rejection failures carry their byte-identical user-facing message inside the module, the appointments route logs before the uniform 500, and the duplicated 13-column projection collapses to one constant, proven by a compose rollback test and a one-shot live probe over the Supabase transaction-mode pooler.
 
 **Architecture:** No new modules. `createAppointment(db, input)` keeps its exact signature; internally the body becomes one `db.transaction(...)` (drizzle → postgres.js `sql.begin`) covering the three reference reads and both inserts. The failure variant of `CreateAppointmentResult` gains `message: string` (wording moved from the route's `REASON_MESSAGES` map into the module); the route's failure branch becomes `badRequest(c, result.message)` and its catch blocks gain `console.error` before `internalError(c)`. The projection literal shared by create (`returning`) and list (`select`) becomes one module-level constant. ADR-0011 untouched: the route still creates the per-request client; the transaction lives inside one request.
 
 **Tech Stack:** Hono ^4.6, Drizzle ORM ^0.45.2 (`db.transaction` on the postgres-js driver), postgres.js ^3.4.9 (`sql.begin`, `reserve()`), Zod v4 via `@sevendays/types`, vitest ^4.1.11 (node env, per-workspace configs per ADR-0003), docker compose (postgres:17) for integration tests, Node >= 24 (native `--env-file`).
 
 **Spec:** `docs/specs/2026-09-02-deepen-appointment-intake-spec.md` (authoritative; GitHub issue **#13**). Two rulings recorded when this plan was written (2026-09-02, owner-answered):
-1. **Seam 3 probe target = the live transaction-mode pooler** — `DATABASE_URL` from `apps/api/.dev.vars` (port **6543**), the exact pool the deployed Worker books over. The spec's parenthetical "(the session-pooler URL used for migrations)" is a mislabel; transactions are trivially supported under session pooling, so a 5432 probe proves nothing. The probe script refuses non-6543/non-remote URLs.
+1. **Seam 3 probe target = the live transaction-mode pooler**, `DATABASE_URL` from `apps/api/.dev.vars` (port **6543**), the exact pool the deployed Worker books over. The spec's parenthetical "(the session-pooler URL used for migrations)" is a mislabel; transactions are trivially supported under session pooling, so a 5432 probe proves nothing. The probe script refuses non-6543/non-remote URLs.
 2. **Branch base = `docs/architecture-review-specs`** (not main): `git switch docs/architecture-review-specs && git switch -c feat/deepen-appointment-intake`. The spec file (commit `c972df8`) travels with the implementation branch.
 
 ## Global Constraints
@@ -20,12 +20,12 @@
 - **Confirmation gate (spec):** the "insert txn" ledger item closes only when **both** the compose suite is green **and** the live probe PASSes. Compose-green alone does not close it. If the live probe fails, STOP before the module-transaction task and record the outcome per the spec's fallback (transaction decision reopens).
 - **Secrets:** connection strings never enter chat, tickets, logs, or the repo. The probe prints derived facts (port, PASS/FAIL) only, following `scripts/check-env.mjs` precedent. Probe URL comes from gitignored `apps/api/.dev.vars` via `node --env-file`.
 - **Real Postgres only (ADR-0008):** no db mocks. `packages/db` tests are guarded with `describe.skipIf(!TEST_DATABASE_URL)` (pattern: `src/verify-appointment-row.test.ts`); `apps/api` global setup fails loud when the db is unreachable.
-- **`prepare: false` everywhere** (ADR-0007) — already set in `createDbClient`; test/probe clients set it explicitly.
+- **`prepare: false` everywhere** (ADR-0007), already set in `createDbClient`; test/probe clients set it explicitly.
 - **`TEST_DATABASE_URL` is plumbed already:** job-level in `.github/workflows/ci.yml` (line 30), in turbo `globalPassThroughEnv`. Locally export it for direct `pnpm --filter` test runs (Task 0).
 - **Fresh-clone bootstrap precedes gates:** `pnpm install && pnpm build:packages` before typecheck/tests anywhere (packages resolve from `dist/`).
 - **Biome-clean commits (M1.3 ruling):** `pnpm exec biome check --write <touched files>` before every commit; biome scripts call the `biome` bin, never pnpx.
-- **No stale-comment scope creep:** the only comment rewrite is the db client STUB block (Task 3) — the spec's own tiny commit.
-- **Commit conventions:** unscoped conventional subjects (`feat:`, `test:`, `docs:`, `chore:`), wordy bullet bodies; commit locally on `feat/deepen-appointment-intake` only — the user commits/pushes final state.
+- **No stale-comment scope creep:** the only comment rewrite is the db client STUB block (Task 3), the spec's own tiny commit.
+- **Commit conventions:** unscoped conventional subjects (`feat:`, `test:`, `docs:`, `chore:`), wordy bullet bodies; commit locally on `feat/deepen-appointment-intake` only, the user commits/pushes final state.
 - **Type hygiene:** no `!` non-null assertions (`noUncheckedIndexedAccess`); guard destructures (`rows[0]?.n`); `async`/`await` only.
 - **Vitest gotcha (ADR-0003):** after touching either vitest workspace, run that workspace's suite directly and confirm the test count is >0 and includes the new tests (shared `passWithNoTests` turns a discovery miss into silent green).
 
@@ -44,7 +44,7 @@ docs/adr/0007-database-connection-topology.md      (mod)  Amended line + Consequ
 docs/progress.md                                   (mod)  insert-txn closure, log-before-500 partial closure, details:{reason} ruling, last-updated line
 ```
 
-Task map: 0 — branch + env bootstrap → 1 — probe script (commit) → 2 — run probe live + ADR-0007 amendment + probe-outcome ledger line (commit; **confirmation gate part 1**) → 3 — STUB comment chore commit + compose transaction test (commit) → 4 — module deepening TDD (commit; **confirmation gate part 2**) → 5 — log-before-500 (commit) → 6 — Known Gaps finalization + issue #13 evidence (commit) → 7 — full gate + handoff.
+Task map: 0, branch + env bootstrap → 1, probe script (commit) → 2, run probe live + ADR-0007 amendment + probe-outcome ledger line (commit; **confirmation gate part 1**) → 3, STUB comment chore commit + compose transaction test (commit) → 4, module deepening TDD (commit; **confirmation gate part 2**) → 5, log-before-500 (commit) → 6, Known Gaps finalization + issue #13 evidence (commit) → 7, full gate + handoff.
 
 ---
 
@@ -81,7 +81,7 @@ pnpm --filter @sevendays/api test
 pnpm --filter @sevendays/db test
 ```
 
-Expected: all green (api: 21 integration tests + 4 index tests, guarded suites included; db: migrate + verify-appointment-row suites; skipped-if-unreachable guards must NOT swallow the suites — the printed counts must be >0 per ADR-0003).
+Expected: all green (api: 21 integration tests + 4 index tests, guarded suites included; db: migrate + verify-appointment-row suites; skipped-if-unreachable guards must NOT swallow the suites, the printed counts must be >0 per ADR-0003).
 
 ---
 
@@ -92,41 +92,41 @@ Expected: all green (api: 21 integration tests + 4 index tests, guarded suites i
 
 **Interfaces:**
 - Consumes: `DATABASE_URL` env var (the transaction-mode pooler URL from `apps/api/.dev.vars`).
-- Produces: exit 0 + `PROBE: PASS` line, or exit 1 + `PROBE: FAIL` line — the fact Task 2 records in ADR-0007. Script is one-shot CLI, never imported by app code.
+- Produces: exit 0 + `PROBE: PASS` line, or exit 1 + `PROBE: FAIL` line, the fact Task 2 records in ADR-0007. Script is one-shot CLI, never imported by app code.
 
 - [ ] **Step 1: Write the script**
 
 ```javascript
-// One-shot live probe (intake spec, Seam 3): proves explicit transactions —
-// BEGIN / ROLLBACK / COMMIT via postgres.js — work through Supabase's
+// One-shot live probe (intake spec, Seam 3): proves explicit transactions,
+// BEGIN / ROLLBACK / COMMIT via postgres.js, work through Supabase's
 // TRANSACTION-MODE pooler (port 6543), the exact pool the deployed Worker
 // books appointments over (ADR-0007). Every query the API has ever sent was
 // autocommit; a module-internal transaction is the first multi-statement
 // window, so pooler behavior must be proven before the intake module relies
 // on it. Runs once per the spec's confirmation gate; not a test suite.
 //
-// Prints derived facts only (port, PASS/FAIL lines) — never the connection
+// Prints derived facts only (port, PASS/FAIL lines), never the connection
 // string (scripts/check-env.mjs precedent). Run from packages/db/:
 //   node --env-file=../../apps/api/.dev.vars scripts/probe-pooler-transaction.mjs
 //
-// If this FAILS: the spec's fallback applies — the transaction decision
+// If this FAILS: the spec's fallback applies, the transaction decision
 // reopens; record the outcome in ADR-0007 + progress.md either way.
 import postgres from 'postgres';
 
 const url = process.env.DATABASE_URL;
 if (!url) {
-  console.error('DATABASE_URL is not set — run with --env-file pointing at apps/api/.dev.vars');
+  console.error('DATABASE_URL is not set, run with --env-file pointing at apps/api/.dev.vars');
   process.exit(1);
 }
 const parsed = new URL(url);
 const port = parsed.port || '5432';
 if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
-  console.error('refusing: DATABASE_URL is localhost — this probe targets the LIVE transaction-mode pooler');
+  console.error('refusing: DATABASE_URL is localhost, this probe targets the LIVE transaction-mode pooler');
   process.exit(1);
 }
 if (port !== '6543') {
   console.error(
-    `refusing: port ${port} is not the transaction-mode pooler (6543) — ` +
+    `refusing: port ${port} is not the transaction-mode pooler (6543), ` +
       'check-env.mjs maps the URLs: .dev.vars DATABASE_URL = transaction pooler, packages/db/.env DATABASE_MIGRATE_URL = session pooler'
   );
   process.exit(1);
@@ -140,7 +140,7 @@ const check = (label, ok) => {
 };
 
 try {
-  // Leg 1 — manual BEGIN/ROLLBACK on a pinned connection (reserve() checks
+  // Leg 1, manual BEGIN/ROLLBACK on a pinned connection (reserve() checks
   // out one connection for all three statements, so the temp table is
   // visible throughout): insert, fail mid-transaction, roll back, assert
   // the row never landed.
@@ -162,7 +162,7 @@ try {
     a.release();
   }
 
-  // Leg 2 — sql.begin (the exact primitive drizzle's db.transaction calls):
+  // Leg 2, sql.begin (the exact primitive drizzle's db.transaction calls):
   // a throwing callback must reject begin AND roll the insert back.
   const b = await sql.reserve();
   try {
@@ -184,7 +184,7 @@ try {
     b.release();
   }
 
-  // Leg 3 — commit sanity: the same primitive must also COMMIT a clean
+  // Leg 3, commit sanity: the same primitive must also COMMIT a clean
   // callback over the pooler (compose proves commit on a direct connection;
   // this proves it under transaction pooling).
   const c = await sql.reserve();
@@ -206,8 +206,8 @@ try {
 
 console.log(
   failures === 0
-    ? 'PROBE: PASS — explicit transactions work over the transaction-mode pooler'
-    : 'PROBE: FAIL — the transaction decision reopens (spec fallback); record the outcome in ADR-0007 + progress.md'
+    ? 'PROBE: PASS, explicit transactions work over the transaction-mode pooler'
+    : 'PROBE: FAIL, the transaction decision reopens (spec fallback); record the outcome in ADR-0007 + progress.md'
 );
 process.exit(failures === 0 ? 0 : 1);
 ```
@@ -225,10 +225,10 @@ git commit -m "feat(db): add live transaction-mode pooler probe script
 
 One-shot Seam 3 probe for the intake-deepening spec (issue #13): proves
 BEGIN/ROLLBACK/COMMIT over postgres.js work through Supabase's transaction-mode
-pooler (port 6543) — the pool the deployed Worker books over, where every query
+pooler (port 6543), the pool the deployed Worker books over, where every query
 so far has been autocommit. Three legs on pinned connections: manual
 begin/rollback, sql.begin throwing-callback rollback, sql.begin commit sanity.
-Derived-facts output only (port, PASS/FAIL — never the connection string, per
+Derived-facts output only (port, PASS/FAIL, never the connection string, per
 the check-env.mjs precedent). Owner ruling 2026-09-02: the probe targets the
 transaction-mode pooler, not the session-mode migration URL."
 ```
@@ -248,22 +248,22 @@ transaction-mode pooler, not the session-mode migration URL."
 - [ ] **Step 1: Run the probe once, live**
 
 Run (from `packages/db/`): `node --env-file=../../apps/api/.dev.vars scripts/probe-pooler-transaction.mjs`
-Expected: three `[PASS]` lines + `PROBE: PASS`, exit 0. The script never prints the URL — verify the output you paste anywhere is free of secrets.
+Expected: three `[PASS]` lines + `PROBE: PASS`, exit 0. The script never prints the URL, verify the output you paste anywhere is free of secrets.
 
-**⚠ If it FAILS:** STOP. Do not start Task 4. Write the failure outcome into ADR-0007 + progress.md (same edit slots as below, flipped wording) and surface to the owner — per the spec, the transaction decision reopens (fallback: transaction around the two inserts only, or revisit ADR-0007).
+**⚠ If it FAILS:** STOP. Do not start Task 4. Write the failure outcome into ADR-0007 + progress.md (same edit slots as below, flipped wording) and surface to the owner, per the spec, the transaction decision reopens (fallback: transaction around the two inserts only, or revisit ADR-0007).
 
 - [ ] **Step 2: Amend ADR-0007 with the probe outcome**
 
 Directly under the `# Database connection topology` title, add:
 
 ```markdown
-**Amended:** 2026-09-02 — explicit transactions verified live over the transaction-mode pooler (Seam 3 probe of the intake-deepening spec, issue #13): manual BEGIN/ROLLBACK and postgres.js `sql.begin` rollback + commit legs all PASS on the port-6543 URL the deployed Worker uses. The appointment-intake write (and M3's later capacity check-then-insert) may run one module-internal transaction per request. `prepare: false` remains the hard requirement.
+**Amended:** 2026-09-02, explicit transactions verified live over the transaction-mode pooler (Seam 3 probe of the intake-deepening spec, issue #13): manual BEGIN/ROLLBACK and postgres.js `sql.begin` rollback + commit legs all PASS on the port-6543 URL the deployed Worker uses. The appointment-intake write (and M3's later capacity check-then-insert) may run one module-internal transaction per request. `prepare: false` remains the hard requirement.
 ```
 
 As the first bullet under `## Consequences`, add:
 
 ```markdown
-- Explicit transactions over the transaction-mode pooler are verified working (2026-09-02 probe: rollback + commit legs PASS; derived-facts output only). Under transaction pooling a transaction pins one pooled connection for its duration — keep statements per transaction small (the intake path is five), and `prepare: false` is still required.
+- Explicit transactions over the transaction-mode pooler are verified working (2026-09-02 probe: rollback + commit legs PASS; derived-facts output only). Under transaction pooling a transaction pins one pooled connection for its duration, keep statements per transaction small (the intake path is five), and `prepare: false` is still required.
 ```
 
 - [ ] **Step 3: Record the probe outcome in progress.md Known Gaps**
@@ -271,7 +271,7 @@ As the first bullet under `## Consequences`, add:
 Insert as a new bullet after the `- **log-before-500 is now load-bearing for M2:** ...` bullet:
 
 ```markdown
-- **Live transaction-pooler probe PASSed (2026-09-02, intake spec Seam 3):** `packages/db/scripts/probe-pooler-transaction.mjs` proved manual BEGIN/ROLLBACK and postgres.js `sql.begin` rollback + commit over the transaction-mode pooler (port 6543) — recorded in ADR-0007's amendment. The intake module's transactional rewrite lands on `feat/deepen-appointment-intake`; the "insert txn" item closes when the compose rollback test (Seam 2) is green alongside this probe (the spec's confirmation gate).
+- **Live transaction-pooler probe PASSed (2026-09-02, intake spec Seam 3):** `packages/db/scripts/probe-pooler-transaction.mjs` proved manual BEGIN/ROLLBACK and postgres.js `sql.begin` rollback + commit over the transaction-mode pooler (port 6543), recorded in ADR-0007's amendment. The intake module's transactional rewrite lands on `feat/deepen-appointment-intake`; the "insert txn" item closes when the compose rollback test (Seam 2) is green alongside this probe (the spec's confirmation gate).
 ```
 
 - [ ] **Step 4: Commit**
@@ -300,9 +300,9 @@ on this probe alone."
 
 **Interfaces:**
 - Consumes: `createDbClient` (unchanged), `TEST_DATABASE_URL` (compose/CI), `db.transaction` (drizzle 0.45.2 postgres-js driver), `db.$client` (raw postgres.js handle, typed `$client: TClient` in driver.d.ts).
-- Produces: pinned evidence that the client layer rolls back on a throwing callback and commits on a clean one — the semantics `createAppointment`'s transaction relies on.
+- Produces: pinned evidence that the client layer rolls back on a throwing callback and commits on a clean one, the semantics `createAppointment`'s transaction relies on.
 
-- [ ] **Step 1: Chore commit — fix the stale STUB comment**
+- [ ] **Step 1: Chore commit, fix the stale STUB comment**
 
 In `packages/db/src/client.ts`, replace lines 5–13's doc block:
 
@@ -324,7 +324,7 @@ with:
 ```typescript
 /**
  * The one db client (ADR-0007): `prepare: false` is required under Supabase
- * transaction-mode pooling. Callers pass the URL their runtime owns — the
+ * transaction-mode pooling. Callers pass the URL their runtime owns, the
  * deployed Worker its pooled `DATABASE_URL` secret (per-request, ADR-0011),
  * test harnesses `TEST_DATABASE_URL` (compose/CI).
  *
@@ -339,7 +339,7 @@ git add packages/db/src/client.ts
 git commit -m "chore(db): replace the stale 'no live database' STUB comment
 
 The client has run against the live Supabase database since M1.3 (migrations
-0000+0001 applied, catalog seeded + verified) — the pre-M1.3 STUB block was
+0000+0001 applied, catalog seeded + verified), the pre-M1.3 STUB block was
 AI-navigability rot. Rides along per the intake spec's housekeeping note; zero
 code change."
 ```
@@ -356,7 +356,7 @@ import { createDbClient, type Database } from './client.js';
 // Seam 2 of the intake spec: pin the rollback/commit semantics the
 // createAppointment transaction relies on, at the db-client layer, over real
 // Postgres (ADR-0008). The live-pooler twin is the one-shot
-// scripts/probe-pooler-transaction.mjs — workerd/pooler behavior does not
+// scripts/probe-pooler-transaction.mjs, workerd/pooler behavior does not
 // surface in Node-env compose tests (the M1.5 lesson).
 const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL;
 
@@ -403,12 +403,12 @@ describe.skipIf(!TEST_DATABASE_URL)('db client transactions (compose, ADR-0008)'
 });
 ```
 
-Note: this suite is guarded (`skipIf`), not fail-loud — `packages/db`'s vitest config has no global setup; the same pattern as `src/verify-appointment-row.test.ts`. CI always has `TEST_DATABASE_URL`, so the proof runs there every push.
+Note: this suite is guarded (`skipIf`), not fail-loud, `packages/db`'s vitest config has no global setup; the same pattern as `src/verify-appointment-row.test.ts`. CI always has `TEST_DATABASE_URL`, so the proof runs there every push.
 
 - [ ] **Step 3: Run it green (the "failure" it pins is db-side, so it can land before the module change)**
 
 Run: `pnpm --filter @sevendays/db test`
-Expected: PASS — 2 new tests in the new file; total count >0 with both new test names visible in the output (ADR-0003 check).
+Expected: PASS, 2 new tests in the new file; total count >0 with both new test names visible in the output (ADR-0003 check).
 
 - [ ] **Step 4: Lint + typecheck + commit**
 
@@ -419,7 +419,7 @@ git add packages/db/src/client-transaction.test.ts
 git commit -m "test(db): pin drizzle transaction rollback/commit over compose
 
 Seam 2 of the intake-deepening spec: open a transaction on the db client,
-insert into a scratch table, throw mid-transaction, assert the row is absent —
+insert into a scratch table, throw mid-transaction, assert the row is absent,
 plus the clean-commit twin. Uses a real scratch table (not TEMP) because
 statements traverse a pool and a temp table is only visible on its creating
 connection. Guarded on TEST_DATABASE_URL like the other db-package suites (CI
@@ -480,7 +480,7 @@ with:
 (d) Append this describe block at the end of the file:
 
 ```typescript
-// Seam 1 of the intake spec — the module's interface is the only place
+// Seam 1 of the intake spec, the module's interface is the only place
 // intake behavior is proven: rejection failures carry the module-owned
 // message, and the happy path commits record + junction rows in one
 // transaction. Complements the HTTP-level tests above (route = one call to
@@ -535,7 +535,7 @@ describe('createAppointment module seam', () => {
 - [ ] **Step 2: Run to verify the expected red**
 
 Run: `pnpm --filter @sevendays/api test`
-Expected: the module-seam `toEqual` assertions FAIL — `CreateAppointmentResult` has no `message` property today (`{ ok: false, reason: 'branch' }` mismatches). The two strengthened HTTP assertions (b)/(c) already PASS (byte-identical requirement). Everything else stays green.
+Expected: the module-seam `toEqual` assertions FAIL, `CreateAppointmentResult` has no `message` property today (`{ ok: false, reason: 'branch' }` mismatches). The two strengthened HTTP assertions (b)/(c) already PASS (byte-identical requirement). Everything else stays green.
 
 - [ ] **Step 3: Implement the module deepening**
 
@@ -567,7 +567,7 @@ function fail(reason: CreateReason): CreateAppointmentResult {
 (b) Below that, hoist the shared projection (currently duplicated at the top of `createAppointment`'s insert and inside `listAppointments`):
 
 ```typescript
-// The one Appointment projection (13 columns) — create's `.returning()` and
+// The one Appointment projection (13 columns), create's `.returning()` and
 // the list read select the same shape, so a column change lands here once.
 const appointmentProjection = {
   id: appointments.id,
@@ -593,13 +593,13 @@ const appointmentProjection = {
  * Resolve the referenced rows and persist the Appointment with booking-time
  * price snapshots (M1.4). One transaction wraps reference resolution and both
  * inserts (Appointment + add-on junction rows), so a failure anywhere leaves
- * nothing behind — and M3's Slot capacity check-then-insert can later join
+ * nothing behind, and M3's Slot capacity check-then-insert can later join
  * this same transaction (ADR-0005). Reference resolution is validation: a
  * rejection returns a typed failure whose `message` is the caller-facing
  * wording (module-owned; the route forwards it verbatim). The client never
- * supplies a price — snapshots come from the resolved rows. ADR-0011
+ * supplies a price, snapshots come from the resolved rows. ADR-0011
  * untouched: `db` is the per-request handle; the transaction lives inside
- * this one request (verified over the live pooler — ADR-0007 amendment).
+ * this one request (verified over the live pooler, ADR-0007 amendment).
  */
 export async function createAppointment(
   db: Database,
@@ -692,7 +692,7 @@ export async function createAppointment(
 - [ ] **Step 4: Run to green**
 
 Run: `pnpm --filter @sevendays/api test && pnpm --filter @sevendays/api typecheck`
-Expected: all tests PASS — the new module-seam tests green, every pre-existing test untouched and green (byte-identical messages/shape), typecheck clean. Confirm the printed count grew by 2 over Task 0's baseline.
+Expected: all tests PASS, the new module-seam tests green, every pre-existing test untouched and green (byte-identical messages/shape), typecheck clean. Confirm the printed count grew by 2 over Task 0's baseline.
 
 - [ ] **Step 5: Lint + commit**
 
@@ -703,12 +703,12 @@ git commit -m "feat(api): transactional appointment intake with module-owned wor
 
 The intake module deepens behind its unchanged interface (intake spec, issue
 #13): one db.transaction wraps reference resolution (Branch, Service Package,
-Add-on Services) and both inserts — Appointment + junction rows — closing the
+Add-on Services) and both inserts, Appointment + junction rows, closing the
 partial-write window and the deactivate-between-read-and-insert TOCTOU, and
 giving M3's capacity check-then-insert a transaction to join. The five
 reference rejections now return typed failures carrying their user-facing
 message (byte-identical to the route's old REASON_MESSAGES map, which is
-deleted — the route's failure branch is one badRequest(c, result.message));
+deleted, the route's failure branch is one badRequest(c, result.message));
 reason stays in the type as the discriminated failure tests assert on and the
 forward-compat hook for details:{reason}. The 13-column Appointment projection
 collapses to one module constant shared by create's returning and the list
@@ -726,12 +726,12 @@ the pooler; ADR-0011 is untouched."
 - Modify: `apps/api/src/routes/appointments.ts` (both catch blocks)
 
 **Interfaces:**
-- Consumes: nothing new — `console.error` (no `noConsole` rule in any biome tier config; M6's Loglayer+Pino will replace it).
+- Consumes: nothing new, `console.error` (no `noConsole` rule in any biome tier config; M6's Loglayer+Pino will replace it).
 - Produces: log-before-500 on create + list handlers; the other three routes untouched (candidate D generalizes).
 
 - [ ] **Step 1: Add the logging**
 
-In `apps/api/src/routes/appointments.ts` — GET handler catch, replace:
+In `apps/api/src/routes/appointments.ts`, GET handler catch, replace:
 
 ```typescript
     } catch {
@@ -745,7 +745,7 @@ with:
     } catch (error) {
       // Log before the uniform 500 (progress.md M2 item): the blocker-#2 class
       // of failure was invisible until wrangler tail. console.error is the
-      // stopgap — M6 swaps in Loglayer + Pino; candidate D generalizes this
+      // stopgap, M6 swaps in Loglayer + Pino; candidate D generalizes this
       // into middleware for the other routes.
       console.error('[appointments] list failed:', error);
       return internalError(c);
@@ -773,7 +773,7 @@ with:
 - [ ] **Step 2: Verify**
 
 Run: `pnpm --filter @sevendays/api test && pnpm --filter @sevendays/api typecheck && pnpm --filter @sevendays/api lint`
-Expected: green (no behavioral change to any test — errors still surface as the uniform 500).
+Expected: green (no behavioral change to any test, errors still surface as the uniform 500).
 
 - [ ] **Step 3: Commit**
 
@@ -783,7 +783,7 @@ git add apps/api/src/routes/appointments.ts
 git commit -m "feat(api): log errors before the uniform 500 on the appointments route
 
 Both handlers (create, list) log the caught error via console.error before
-returning the uniform 500 — the exact silence that hid deploy blocker #2
+returning the uniform 500, the exact silence that hid deploy blocker #2
 (369d4c8) until wrangler tail + temporary instrumentation surfaced it, marked
 load-bearing for M2 in progress.md. Appointments only: the other three routes'
 silent catches are candidate D's middleware seam (spec: generalize after the
@@ -808,19 +808,19 @@ Loglayer + Pino."
 (a) Replace the Task-2 probe bullet with the closed form:
 
 ```markdown
-- **Appointment intake write is transactional (candidate A landed, 2026-09-02):** `createAppointment` resolves references and writes the Appointment + add-on junction rows inside one module-internal transaction (drizzle `db.transaction` → postgres.js `sql.begin`). Confirmed both ways per the spec's gate: compose rollback/commit proofs in `packages/db/src/client-transaction.test.ts` (Seam 2) and the live one-shot probe over the transaction-mode pooler, `packages/db/scripts/probe-pooler-transaction.mjs` (Seam 3, PASS — ADR-0007 amendment). **Insert-txn item closed.** Rejection wording moved into the module (failure variant carries `message`; route forwards verbatim); the 13-column projection is one constant. M3's capacity check-then-insert can join this transaction.
+- **Appointment intake write is transactional (candidate A landed, 2026-09-02):** `createAppointment` resolves references and writes the Appointment + add-on junction rows inside one module-internal transaction (drizzle `db.transaction` → postgres.js `sql.begin`). Confirmed both ways per the spec's gate: compose rollback/commit proofs in `packages/db/src/client-transaction.test.ts` (Seam 2) and the live one-shot probe over the transaction-mode pooler, `packages/db/scripts/probe-pooler-transaction.mjs` (Seam 3, PASS, ADR-0007 amendment). **Insert-txn item closed.** Rejection wording moved into the module (failure variant carries `message`; route forwards verbatim); the 13-column projection is one constant. M3's capacity check-then-insert can join this transaction.
 ```
 
 (b) Replace the `- **log-before-500 is now load-bearing for M2:** ...` bullet with:
 
 ```markdown
-- **log-before-500: appointments route done (2026-09-02), generalization open (candidate D):** both `/api/v1/appointments` handlers log the caught error (`console.error` stopgap; M6 = Loglayer + Pino) before the uniform 500 — the blocker-#2 class of failure can no longer be silent on the booking path. The Branches/Service Packages/Add-on Services routes still swallow errors; the intake spec hands generalization to candidate D (one acquisition/error seam via middleware).
+- **log-before-500: appointments route done (2026-09-02), generalization open (candidate D):** both `/api/v1/appointments` handlers log the caught error (`console.error` stopgap; M6 = Loglayer + Pino) before the uniform 500, the blocker-#2 class of failure can no longer be silent on the booking path. The Branches/Service Packages/Add-on Services routes still swallow errors; the intake spec hands generalization to candidate D (one acquisition/error seam via middleware).
 ```
 
 (c) Add this ruling bullet to Known Gaps:
 
 ```markdown
-- **Ruling (2026-09-02, intake spec):** M2+ may add `details: { reason }` to 400 error payloads if the admin UI needs machine-readable reasons — adding later is backward-compatible; the module's typed `reason` is already the hook.
+- **Ruling (2026-09-02, intake spec):** M2+ may add `details: { reason }` to 400 error payloads if the admin UI needs machine-readable reasons, adding later is backward-compatible; the module's typed `reason` is already the hook.
 ```
 
 (d) Update the `_Last updated:_` line's parenthetical to lead with: `(2026-09-02 intake deepening (candidate A) landed; prior: M1.5 exit gate verified ...)`.
@@ -830,15 +830,15 @@ Loglayer + Pino."
 ```bash
 gh issue comment 13 --body "Implemented on \`feat/deepen-appointment-intake\` (forked from docs/architecture-review-specs per owner ruling).
 
-- Seam 2: \`packages/db/src/client-transaction.test.ts\` — rollback-on-throw + clean-commit pinned over compose Postgres 17.
-- Seam 3: \`packages/db/scripts/probe-pooler-transaction.mjs\` ran once against the live transaction-mode pooler (port 6543): 3/3 legs PASS (paste the [PASS]/PROBE lines from your run — no secrets in the output). ADR-0007 amended.
+- Seam 2: \`packages/db/src/client-transaction.test.ts\`, rollback-on-throw + clean-commit pinned over compose Postgres 17.
+- Seam 3: \`packages/db/scripts/probe-pooler-transaction.mjs\` ran once against the live transaction-mode pooler (port 6543): 3/3 legs PASS (paste the [PASS]/PROBE lines from your run, no secrets in the output). ADR-0007 amended.
 - Module: transaction wraps reference resolution + both inserts; failures carry module-owned messages (byte-identical); projection is one constant; route logs before the 500. Compose suite green with pre-existing assertions untouched.
 - Confirmation gate: compose green + probe PASS → insert-txn closed; log-before-500 partially closed (appointments only; candidate D generalizes). Details in progress.md Known Gaps.
 
 Commits: <fill the 5-6 hashes from git log>"
 ```
 
-(Run `git log --oneline -8` first and paste the real hashes — never leave the placeholder.)
+(Run `git log --oneline -8` first and paste the real hashes, never leave the placeholder.)
 
 - [ ] **Step 3: Commit the docs**
 
@@ -848,13 +848,13 @@ git add docs/progress.md
 git commit -m "docs: close intake-spec Known Gaps in progress.md
 
 Insert-txn item closed (confirmation gate met: compose Seam 2 + live Seam 3
-probe, ADR-0007 amendment); log-before-500 marked partially closed —
+probe, ADR-0007 amendment); log-before-500 marked partially closed;
 appointments route only, candidate D generalizes; one-line ruling recorded:
 M2+ may add details:{reason} to 400s if the admin UI needs machine-readable
 reasons. Issue #13 carries the run evidence."
 ```
 
-(Note: `biome check` may not cover `docs/` — the `|| true` keeps the step honest either way; formatting rules for markdown come from the repo's format script if configured.)
+(Note: `biome check` may not cover `docs/`, the `|| true` keeps the step honest either way; formatting rules for markdown come from the repo's format script if configured.)
 
 ---
 
@@ -878,12 +878,12 @@ Confirm each: transaction wraps resolution + both inserts (Task 4) · typed fail
 
 - [ ] **Step 4: Hand off**
 
-Report to the owner: branch, commit list, probe output lines, test-count deltas, and that issue #13 carries the evidence — the user reviews, then commits/pushes/opens the PR themselves. On PR, tick the spec's tracking note and mention candidate D's now-mechanical follow-up (middleware acquisition/error seam).
+Report to the owner: branch, commit list, probe output lines, test-count deltas, and that issue #13 carries the evidence, the user reviews, then commits/pushes/opens the PR themselves. On PR, tick the spec's tracking note and mention candidate D's now-mechanical follow-up (middleware acquisition/error seam).
 
 ---
 
 ## Self-Review (recorded at plan time)
 
 - **Spec coverage:** all Solution bullets → Tasks 4–5; all three Testing seams → Tasks 1–3; both docs obligations + the ruling → Tasks 2/6; stale-comment commit → Task 3 Step 1; confirmation gate + fallback → Task 2 Step 1 (STOP hook) + Task 6 wording; Out-of-Scope items (details extension, other routes, stitch, M3, schema) appear in no task.
-- **Placeholder scan:** none — every code step carries full file content or exact replacement snippets; the only fill-in is the real commit hashes in the issue comment, with the command to get them.
+- **Placeholder scan:** none, every code step carries full file content or exact replacement snippets; the only fill-in is the real commit hashes in the issue comment, with the command to get them.
 - **Type consistency:** `CreateReason`/`fail`/`appointmentProjection`/`message` names identical across Task 4's snippets; route references `result.message` only; Task 3's `db.$client`/`db.transaction` usage matches drizzle 0.45.2's typed `$client: TClient` and `transaction(cb)` signatures verified in `node_modules` at plan time.

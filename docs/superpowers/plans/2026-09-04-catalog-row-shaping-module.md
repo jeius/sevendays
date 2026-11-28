@@ -1,10 +1,10 @@
-# Catalog Row-Shaping Module — Implementation Plan
+# Catalog Row-Shaping Module, Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** One pure row-shaping module in `packages/db` — `buildInclusionRowValues`, `buildJunctionPairs`, `buildFrameRowValues`, `assertAllKnownAttires` — becomes the single source of catalog row shapes, adopted by the seeder, the API test fixtures, and a schema-derived truncate helper in the same change, with the seed's verified output unchanged and the integration suites' asserted shapes intact.
+**Goal:** One pure row-shaping module in `packages/db`, `buildInclusionRowValues`, `buildJunctionPairs`, `buildFrameRowValues`, `assertAllKnownAttires`, becomes the single source of catalog row shapes, adopted by the seeder, the API test fixtures, and a schema-derived truncate helper in the same change, with the seed's verified output unchanged and the integration suites' asserted shapes intact.
 
-**Architecture:** New `packages/db/src/catalog-rows.ts` exports four pure functions from catalog-style entries + resolved id lookups to typed insert-row values and junction pairs — per-Kind field rules, combined-attire decomposition in catalog order, frame attachment. No I/O, no client creation, no transactions: it never writes, it only shapes. Consumers keep their own write strategies — the seeder keeps its one-transaction natural-key upsert flow with per-package inclusion rebuild; the fixtures keep plain inserts capturing returned ids; the truncate helper derives its table list from the exported Drizzle schema (`is` + `Table` + `getTableConfig`) instead of a hand-named array. Opt-in subpath export `@sevendays/db/catalog-rows` (precedent: `./migrate`); the main entry keeps exporting schema + client only.
+**Architecture:** New `packages/db/src/catalog-rows.ts` exports four pure functions from catalog-style entries + resolved id lookups to typed insert-row values and junction pairs, per-Kind field rules, combined-attire decomposition in catalog order, frame attachment. No I/O, no client creation, no transactions: it never writes, it only shapes. Consumers keep their own write strategies, the seeder keeps its one-transaction natural-key upsert flow with per-package inclusion rebuild; the fixtures keep plain inserts capturing returned ids; the truncate helper derives its table list from the exported Drizzle schema (`is` + `Table` + `getTableConfig`) instead of a hand-named array. Opt-in subpath export `@sevendays/db/catalog-rows` (precedent: `./migrate`); the main entry keeps exporting schema + client only.
 
 **Tech Stack:** TypeScript 6 (strict, `noUncheckedIndexedAccess`), Drizzle ORM 0.45 (schema objects, `$inferInsert`, `is`/`Table`/`getTableConfig` introspection), vitest 4 per-workspace configs (ADR-0003), Biome 2.x, pnpm 11 + Turborepo, docker compose postgres:17 for the integration siblings, `gh` CLI for issue #15 evidence.
 
@@ -16,18 +16,18 @@
 - **Builders are pure (spec):** no I/O, no client creation, no transactions inside `catalog-rows.ts`; it never writes, it only shapes. Upsert-vs-insert stays with the caller.
 - **Main entry unchanged (spec):** `@sevendays/db` main keeps exporting schema + client only (`migrate` already rides its own subpath). Builders ride the new opt-in `./catalog-rows` subpath. `packages/db/src/index.ts` is not modified in this plan.
 - **Unknown attire names fail loudly (spec ruling, pinned by test):** `assertAllKnownAttires` throws naming the offender; `buildJunctionPairs` re-checks per pair as a backstop. Never a silent skip.
-- **Fixture dataset stays minimal and synthetic (ADR-0008):** same branches, packages, attires, add-ons. Builder output canonicalizes picture-inclusion `description` to `null` (seed parity) — the current fixture-invented picture descriptions (`'Framed picture'`, `'2R print x4'`, `'2x2 print x5'`) are asserted nowhere (verified: only `addon-services.test.ts` asserts descriptions, and those are add-on rows) and disappear. The privilege description `'High Resolution soft copies'` is fixture-authored, stays.
+- **Fixture dataset stays minimal and synthetic (ADR-0008):** same branches, packages, attires, add-ons. Builder output canonicalizes picture-inclusion `description` to `null` (seed parity), the current fixture-invented picture descriptions (`'Framed picture'`, `'2R print x4'`, `'2x2 print x5'`) are asserted nowhere (verified: only `addon-services.test.ts` asserts descriptions, and those are add-on rows) and disappear. The privilege description `'High Resolution soft copies'` is fixture-authored, stays.
 - **Fixture junction inserts stay one statement per row** in the builder's order: the junction has no position column, so render order falls back to `created_at`; a single batch INSERT shares `now()` and would tie on the id coin flip (the M1.4 plan's Task 4 finding, preserved in the fixtures file's own comment). The builder owns the order; the per-row statements preserve it.
-- **Wire byte-identical:** no route edits, no `packages/types` edits, no `apps/api/src/` edits. Every existing api test passes with **zero assertion edits** (audit command in Task 5 Step 2 — diff of the four existing test files against `main` must be empty).
+- **Wire byte-identical:** no route edits, no `packages/types` edits, no `apps/api/src/` edits. Every existing api test passes with **zero assertion edits** (audit command in Task 5 Step 2, diff of the four existing test files against `main` must be empty).
 - **Catalog transcription and verify script untouched (spec):** `packages/db/scripts/catalog.ts` and `packages/db/scripts/verify-seed.ts` are not modified. TODO(seed) phones, 8R/8x10, package contents out of scope. No schema or migration changes (the junction position column stays a future decision). Rehearsal/verify gate scripts stay standalone.
 - **Accepted wording change:** the seeder's unknown-attire error changes from `seed: unknown attire X for PKG` to the module's `Unknown attire name: X` (the assert runs per package inside the loop, so the failure still localizes to the package being seeded). No test or verify tooling greps that message.
 - **Baselines (verified 2026-09-04):** `pnpm --filter @sevendays/db test` = **8 tests (1 passed, 7 skipped without `TEST_DATABASE_URL`)**; `pnpm --filter @sevendays/api test` = **30 passed / 6 files** (compose db up). After this plan: db = **24 tests (16 passed, 8 skipped without `TEST_DATABASE_URL`)**; api = **32 passed / 7 files** (2 new truncate pins). Every gate compares against these.
 - **Bootstrap precedes gates:** `pnpm install && pnpm build:packages` (packages resolve from `dist/`). Re-run `pnpm build:packages` after Task 1 lands the subpath export, so `apps/api` resolves `@sevendays/db/catalog-rows` from `dist/`.
 - **Compose db for the api suite (ADR-0008):** `docker compose up -d db` first. `apps/api/test/global-setup.ts` already defaults `TEST_DATABASE_URL` to the compose db, so no export is needed locally; do **not** export a wrong value (auth fails loud: `password authentication failed for user "postgres"`).
-- **Vitest gotcha (ADR-0003):** run each touched workspace's suite directly and confirm the printed counts — shared `passWithNoTests` turns a discovery miss into silent green.
+- **Vitest gotcha (ADR-0003):** run each touched workspace's suite directly and confirm the printed counts, shared `passWithNoTests` turns a discovery miss into silent green.
 - **Biome-clean commits:** `pnpm exec biome check --write <touched files>` before every commit; biome scripts call the `biome` bin, never pnpx.
-- **Commit conventions:** unscoped conventional subjects (`feat:`, `refactor:`, `docs:`), wordy bullet bodies; commit locally on `feat/catalog-row-shaping-module` only — the user pushes and opens the PR.
-- **Type hygiene:** no `!` non-null assertions (guard indexed access — `noUncheckedIndexedAccess` makes `array[i]` possibly-undefined; the plan's code guards it); `async`/`await` only.
+- **Commit conventions:** unscoped conventional subjects (`feat:`, `refactor:`, `docs:`), wordy bullet bodies; commit locally on `feat/catalog-row-shaping-module` only, the user pushes and opens the PR.
+- **Type hygiene:** no `!` non-null assertions (guard indexed access, `noUncheckedIndexedAccess` makes `array[i]` possibly-undefined; the plan's code guards it); `async`/`await` only.
 
 ---
 
@@ -44,9 +44,9 @@ apps/api/test/helpers/fixtures.ts       (mod)  inclusion/junction shaping → bu
 docs/progress.md                        (mod)  candidate-C landed line in Known Gaps; Last-updated line
 ```
 
-No other files change: no `apps/api/src/`, no `packages/types`, no schema, no migrations, no CI (the workflow's service container + job-level `TEST_DATABASE_URL` already cover the derived truncate list end to end — the spec's "CI's first-run-green compose path").
+No other files change: no `apps/api/src/`, no `packages/types`, no schema, no migrations, no CI (the workflow's service container + job-level `TEST_DATABASE_URL` already cover the derived truncate list end to end, the spec's "CI's first-run-green compose path").
 
-Task map: 0 — branch + environment bootstrap + baselines → 1 — builders TDD (incl. `assertAllKnownAttires`) + subpath export (commit) → 2 — derived truncate helper (commit) → 3 — fixtures adoption (commit) → 4 — seeder adoption + live proof (commit) → 5 — full gates (commit) → 6 — progress.md + issue #15 evidence (commit).
+Task map: 0, branch + environment bootstrap + baselines → 1, builders TDD (incl. `assertAllKnownAttires`) + subpath export (commit) → 2, derived truncate helper (commit) → 3, fixtures adoption (commit) → 4, seeder adoption + live proof (commit) → 5, full gates (commit) → 6, progress.md + issue #15 evidence (commit).
 
 ---
 ### Task 0: Branch and environment bootstrap
@@ -74,16 +74,16 @@ docker compose up -d db
 docker compose ps   # db healthy (pg_isready passing)
 ```
 
-Expected: install clean; `dist/` built for `packages/db` + `packages/config`. No `TEST_DATABASE_URL` export needed — `apps/api/test/global-setup.ts` defaults to the compose db.
+Expected: install clean; `dist/` built for `packages/db` + `packages/config`. No `TEST_DATABASE_URL` export needed, `apps/api/test/global-setup.ts` defaults to the compose db.
 
-- [✅] **Step 3: Baseline green — record the counts**
+- [✅] **Step 3: Baseline green, record the counts**
 
 ```bash
 pnpm --filter @sevendays/db test 2>&1 | grep -E "Test Files|Tests "
 pnpm --filter @sevendays/api test 2>&1 | grep -E "Test Files|Tests "
 ```
 
-Expected: db = 1 passed / 7 skipped (8 total); api = 30 passed / 6 files. **Record both totals** — every later gate compares against them (after Task 1: db 16 passed + 8 skipped / 24 total; after Task 2: api 32 / 7 files; after Tasks 3–4: unchanged 32 / 7 with zero assertion edits).
+Expected: db = 1 passed / 7 skipped (8 total); api = 30 passed / 6 files. **Record both totals**, every later gate compares against them (after Task 1: db 16 passed + 8 skipped / 24 total; after Task 2: api 32 / 7 files; after Tasks 3–4: unchanged 32 / 7 with zero assertion edits).
 
 ---
 
@@ -151,10 +151,10 @@ export function assertAllKnownAttires(input: {
 ```
 
 Contract notes the implementer must honor (these ARE the module's docs):
-- **Per-Kind field rules** (ADR-0009): `framed_picture` → `quantity: 1`, `printSizeId` from the code lookup (unknown code → throw `Unknown print size code: X`), `frameId` required non-null (throw `framed_picture entry is missing frameId`), `description: null`; `print` → `quantity` from the entry, `printSizeId` from the code lookup, `frameId: null`, `description: null`; `privilege` → `quantity: null`, `printSizeId: null`, `frameId: null`, `description` from the entry. `createdAt`/`updatedAt`/`id` are DB defaults — never set.
-- **Junction decomposition in catalog order**: for entry `i` in `entries` order, one pair per name in that entry's `attireNames` array order — `Filipiniana/Executive` becomes two pairs, Filipiniana first. The returned array's order across all entries is entries-then-names; the caller preserves it (fixtures: one INSERT per pair; seeder: batch INSERT, junction order not load-bearing there because the rebuild's read-back re-sorts canonically).
+- **Per-Kind field rules** (ADR-0009): `framed_picture` → `quantity: 1`, `printSizeId` from the code lookup (unknown code → throw `Unknown print size code: X`), `frameId` required non-null (throw `framed_picture entry is missing frameId`), `description: null`; `print` → `quantity` from the entry, `printSizeId` from the code lookup, `frameId: null`, `description: null`; `privilege` → `quantity: null`, `printSizeId: null`, `frameId: null`, `description` from the entry. `createdAt`/`updatedAt`/`id` are DB defaults, never set.
+- **Junction decomposition in catalog order**: for entry `i` in `entries` order, one pair per name in that entry's `attireNames` array order, `Filipiniana/Executive` becomes two pairs, Filipiniana first. The returned array's order across all entries is entries-then-names; the caller preserves it (fixtures: one INSERT per pair; seeder: batch INSERT, junction order not load-bearing there because the rebuild's read-back re-sorts canonically).
 - **Unknown attire name** → throw `Unknown attire name: X` (loud, never skip).
-- **Purity**: no I/O, no client creation, no transactions. A `switch (entry.kind)` is exhaustive over `InclusionEntry` — do not widen with a default branch.
+- **Purity**: no I/O, no client creation, no transactions. A `switch (entry.kind)` is exhaustive over `InclusionEntry`, do not widen with a default branch.
 
 - [✅] **Step 1: Write the failing tests**
 
@@ -169,7 +169,7 @@ import {
   buildJunctionPairs,
 } from './catalog-rows.js';
 
-// Synthetic lookups — the builders are data-agnostic (spec: they shape real
+// Synthetic lookups, the builders are data-agnostic (spec: they shape real
 // catalog entries and minimal test data identically).
 const printSizeId = new Map([
   ['2R', 'ps-2r'],
@@ -267,7 +267,7 @@ describe('buildInclusionRowValues', () => {
     expect(rows.map((r) => r.kind)).toEqual(['print', 'privilege', 'framed_picture']);
   });
 
-  it('sets only the six shape fields — id/createdAt/updatedAt stay DB defaults', () => {
+  it('sets only the six shape fields, id/createdAt/updatedAt stay DB defaults', () => {
     const rows = buildInclusionRowValues({
       servicePackageId: 'pkg-1',
       entries: [
@@ -417,7 +417,7 @@ Plus the `runIf` live probe (append after the last `describe` block in the same 
 
 ```typescript
 // Live probe (ADR-0008 pattern: skipped unless a reachable test db is
-// configured) — proves the builders' values insert cleanly against the real
+// configured), proves the builders' values insert cleanly against the real
 // schema, i.e. the shapes match the tables, not just the type signatures.
 // package_inclusions.service_package_id is a NOT-NULL FK, so the probe
 // inserts a real parent service package first and rolls the whole thing
@@ -506,7 +506,7 @@ describe.runIf(process.env.TEST_DATABASE_URL)('live insert-compatibility', async
 ```
 
 > **Amended during execution (2026-09-04, controller ruling on implementer finding):** drizzle's
-> `db.transaction` COMMITs on success — there is no rollback-on-success primitive — so the probe as written
+> `db.transaction` COMMITs on success, there is no rollback-on-success primitive, so the probe as written
 > above leaves `BuilderProbe%` rows behind and a second run dies on `attires_name_unique`. The landed probe
 > (see `packages/db/src/catalog-rows.test.ts`) drops the transaction and **pre-cleans** any committed probe rows
 > first (five FK-safe deletes on `name LIKE 'BuilderProbe%'`: junction → inclusions → frames →
@@ -519,7 +519,7 @@ describe.runIf(process.env.TEST_DATABASE_URL)('live insert-compatibility', async
 pnpm --filter @sevendays/db exec vitest run src/catalog-rows.test.ts 2>&1 | tail -5
 ```
 
-Expected: FAIL — cannot resolve `./catalog-rows.js` (module not yet created).
+Expected: FAIL, cannot resolve `./catalog-rows.js` (module not yet created).
 
 - [✅] **Step 3: Write the module**
 
@@ -531,7 +531,7 @@ Create `packages/db/src/catalog-rows.ts`:
  * functions from catalog-style entries plus resolved id lookups to typed row
  * values and junction pairs. What an Inclusion row needs per Kind, how
  * combined Attire contexts decompose into junction pairs in catalog order,
- * how Frames attach — nothing about HOW or WHEN rows are written: no I/O, no
+ * how Frames attach, nothing about HOW or WHEN rows are written: no I/O, no
  * client creation, no transactions. The seeder (upsert-and-rebuild) and the
  * API test fixtures (plain inserts) are its two write adapters.
  *
@@ -539,7 +539,7 @@ Create `packages/db/src/catalog-rows.ts`:
  * resolved, frameId required, description null; print → entry quantity,
  * printSizeId resolved, frameId null, description null; privilege →
  * quantity/printSizeId/frameId null, description carried. Junction pairs
- * decompose an entry's attireNames in array order — 'Filipiniana/Executive'
+ * decompose an entry's attireNames in array order, 'Filipiniana/Executive'
  * is two pairs, Filipiniana first (the canonical catalog attire order, never
  * alphabetized). Unknown names fail loudly, never skip.
  */
@@ -719,7 +719,7 @@ pnpm --filter @sevendays/db test 2>&1 | grep -E "Test Files|Tests "
 pnpm build:packages                  # apps/api resolves @sevendays/db/catalog-rows from dist/
 ```
 
-Expected: db suite = **16 passed / 8 skipped** (24 total — 8 pre-existing + 16 new) without `TEST_DATABASE_URL`.
+Expected: db suite = **16 passed / 8 skipped** (24 total, 8 pre-existing + 16 new) without `TEST_DATABASE_URL`.
 
 ```bash
 git add packages/db/src/catalog-rows.ts packages/db/src/catalog-rows.test.ts packages/db/package.json
@@ -729,7 +729,7 @@ git commit -m "feat: add the catalog row-shaping module as an opt-in db subpath
   assertAllKnownAttires: pure entry+lookup → row-values shapers, the one
   source of per-Kind field rules, combined-attire junction decomposition in
   catalog order, and frame attachment (candidate C spec)
-- no I/O, no client, no transactions — the seeder and the api fixtures stay
+- no I/O, no client, no transactions, the seeder and the api fixtures stay
   separate write adapters (upsert-vs-insert is a real behavioral fork)
 - unknown attire names and print size codes fail loudly, pinned by tests
 - opt-in @sevendays/db/catalog-rows subpath (./migrate precedent); the main
@@ -747,13 +747,13 @@ git commit -m "feat: add the catalog row-shaping module as an opt-in db subpath
 
 **Interfaces:**
 - Consumes: `is`, `sql` from `drizzle-orm`; `PgTable`, `getTableConfig` from `drizzle-orm/pg-core`; the schema barrel via the `@sevendays/db` main entry (it re-exports `./schema/index.js`).
-- Produces (Tasks 3–5 + `global-setup.ts` keep calling): `truncateAll(db: TestDb): Promise<void>` — signature unchanged — plus the new exported `publicTableNames(): string[]`.
+- Produces (Tasks 3–5 + `global-setup.ts` keep calling): `truncateAll(db: TestDb): Promise<void>`, signature unchanged, plus the new exported `publicTableNames(): string[]`.
 
-Background facts (verified on drizzle-orm 0.45.2 in this repo — statically in the `.d.ts` files and at runtime via `import('drizzle-orm/pg-core')`):
-- `is(value, Table)` is the exported runtime type-guard (`drizzle-orm/entity.js`, re-exported from the root barrel — `index.js` does `export * from "./entity.js"`); `Table` (the dialect-neutral base class) exports from the root barrel too.
-- **`PgTable` exports only from `drizzle-orm/pg-core`** (the root barrel does not re-export dialect classes — runtime-verified: `typeof PgTable === 'function'`, `typeof getTableConfig === 'function'`). `getTableConfig<TTable extends PgTable>(table)` returns `{ columns, indexes, foreignKeys, checks, primaryKeys, uniqueConstraints, name, schema }` and is re-exported from `drizzle-orm/pg-core`'s index (`export * from "./utils.js"`).
+Background facts (verified on drizzle-orm 0.45.2 in this repo, statically in the `.d.ts` files and at runtime via `import('drizzle-orm/pg-core')`):
+- `is(value, Table)` is the exported runtime type-guard (`drizzle-orm/entity.js`, re-exported from the root barrel, `index.js` does `export * from "./entity.js"`); `Table` (the dialect-neutral base class) exports from the root barrel too.
+- **`PgTable` exports only from `drizzle-orm/pg-core`** (the root barrel does not re-export dialect classes, runtime-verified: `typeof PgTable === 'function'`, `typeof getTableConfig === 'function'`). `getTableConfig<TTable extends PgTable>(table)` returns `{ columns, indexes, foreignKeys, checks, primaryKeys, uniqueConstraints, name, schema }` and is re-exported from `drizzle-orm/pg-core`'s index (`export * from "./utils.js"`).
 - **Narrow with `PgTable`, not root `Table`**: `getTableConfig`'s parameter is constrained to `PgTable`, so `is(v, Table)` narrowing would not typecheck the `getTableConfig(v)` call. `is()` walks the prototype chain comparing `entityKind`, so `is(v, PgTable)` matches exactly the pg table instances in the barrel.
-- The barrel's non-table exports (the `relations` objects, the `packageInclusionKindEnum` builder) fail the `is(v, PgTable)` guard. `getTableConfig(...).schema` is `undefined` for all ten public tables (default schema) — that filter excludes any future namespaced table (e.g. BetterAuth's).
+- The barrel's non-table exports (the `relations` objects, the `packageInclusionKindEnum` builder) fail the `is(v, PgTable)` guard. `getTableConfig(...).schema` is `undefined` for all ten public tables (default schema), that filter excludes any future namespaced table (e.g. BetterAuth's).
 
 - [✅] **Step 1: Write the failing tests**
 
@@ -798,7 +798,7 @@ describe('publicTableNames', () => {
 pnpm --filter @sevendays/api exec vitest run test/helpers/truncate.test.ts 2>&1 | tail -5
 ```
 
-Expected: FAIL — `publicTableNames` does not exist in `./truncate.js` (import error).
+Expected: FAIL, `publicTableNames` does not exist in `./truncate.js` (import error).
 
 - [✅] **Step 3: Replace the hand-named list with the derived one**
 
@@ -812,7 +812,7 @@ import type { TestDb } from './db.js';
 
 /**
  * The truncate list is derived, not hand-kept (candidate C spec): every
- * public table exported by packages/db's schema barrel — `is(v, PgTable)`
+ * public table exported by packages/db's schema barrel, `is(v, PgTable)`
  * and default-schema only. A new table added by a future migration is
  * truncated automatically once the schema barrel exports it; the mirror
  * drift the integration-test ADR (0008) warned about is structurally
@@ -856,7 +856,7 @@ git add apps/api/test/helpers/truncate.ts apps/api/test/helpers/truncate.test.ts
 git commit -m "test: derive the truncate table list from the exported db schema
 
 - publicTableNames() walks the @sevendays/db schema barrel with is(v, Table)
-  + getTableConfig, default-schema only — a table added by a future migration
+  + getTableConfig, default-schema only, a table added by a future migration
   is truncated automatically instead of leaking state between test files
   (the drift ADR-0008 warned about; candidate C spec, user story 3)
 - two pins: the derived list equals a fresh barrel walk, and the ten public
@@ -870,11 +870,11 @@ git commit -m "test: derive the truncate table list from the exported db schema
 
 **Files:**
 - Modify: `apps/api/test/helpers/fixtures.ts`
-- Test: `apps/api/test/service-packages.test.ts` (unchanged — the behavior-preservation seam)
+- Test: `apps/api/test/service-packages.test.ts` (unchanged, the behavior-preservation seam)
 
 **Interfaces:**
 - Consumes (from Task 1, via `@sevendays/db/catalog-rows`, resolving from `packages/db/dist/` after `pnpm build:packages`): `buildInclusionRowValues`, `buildJunctionPairs`, type `InclusionEntry`.
-- Produces: `loadFixtures(db: TestDb): Promise<FixtureIds>` — same signature, same `FixtureIds` shape, same dataset, same insertion sequence (junction per-row statements preserved for the `created_at` render-order invariant).
+- Produces: `loadFixtures(db: TestDb): Promise<FixtureIds>`, same signature, same `FixtureIds` shape, same dataset, same insertion sequence (junction per-row statements preserved for the `created_at` render-order invariant).
 
 - [✅] **Step 1: Add the builder imports**
 
@@ -892,12 +892,12 @@ import {
 
 - [✅] **Step 2: Replace the inclusion + junction section**
 
-Replace everything from `const [inclusionFramedPicture] = await db` (fixtures.ts line ~151) through the last `packageInclusionAttires` insert (line ~217, the `inclusionPrint2x2`/`attireToga` one) — i.e. the five inclusion inserts and the four junction inserts — with:
+Replace everything from `const [inclusionFramedPicture] = await db` (fixtures.ts line ~151) through the last `packageInclusionAttires` insert (line ~217, the `inclusionPrint2x2`/`attireToga` one), i.e. the five inclusion inserts and the four junction inserts, with:
 
 ```typescript
   // Inclusion + junction shaping goes through the db builders (candidate C):
   // one source for per-Kind fields and attire decomposition. Ids are still
-  // captured per row — the stitch read orders junction rows by created_at,
+  // captured per row, the stitch read orders junction rows by created_at,
   // and autocommit gives each insert its own timestamp.
   const printSizeIdMap = new Map([
     ['2R', printSize2R.id],
@@ -965,7 +965,7 @@ Replace everything from `const [inclusionFramedPicture] = await db` (fixtures.ts
     .returning({ id: packageInclusions.id });
 
   // One row per statement (not one batch): the junction has no position
-  // column, so render order falls back to insertion order via created_at —
+  // column, so render order falls back to insertion order via created_at:
   // rows written in a single INSERT share now() and would tie on an
   // (id-ordered) coin flip (Task 4 finding). Distinct statements give each
   // row a distinct timestamp, preserving catalog attire order
@@ -991,10 +991,10 @@ Replace everything from `const [inclusionFramedPicture] = await db` (fixtures.ts
 ```
 
 What changed vs. the old block, and why each is safe:
-- **Picture-inclusion `description` values disappear** (`'Framed picture'`, `'2R print x4'`, `'2x2 print x5'`, `'2R print x2'` → canonical `null`): asserted nowhere (verified — only `addon-services.test.ts` asserts descriptions, all add-on rows). The privilege keeps its fixture-authored `'High Resolution soft copies'`.
-- **Junction pair order matches the old hand-written statements for the combined package** (framed → [Filipiniana, Executive], print-2R → [Toga], print-2x2 → [Toga]) — the per-row statements preserve the created_at ordering the catalog-read test asserts (`['Filipiniana', 'Executive']`).
+- **Picture-inclusion `description` values disappear** (`'Framed picture'`, `'2R print x4'`, `'2x2 print x5'`, `'2R print x2'` → canonical `null`): asserted nowhere (verified, only `addon-services.test.ts` asserts descriptions, all add-on rows). The privilege keeps its fixture-authored `'High Resolution soft copies'`.
+- **Junction pair order matches the old hand-written statements for the combined package** (framed → [Filipiniana, Executive], print-2R → [Toga], print-2x2 → [Toga]), the per-row statements preserve the created_at ordering the catalog-read test asserts (`['Filipiniana', 'Executive']`).
   > **Amended during execution (2026-09-04, controller ruling on Task 3 review finding):** the simple package's
-  > `simple → [Toga]` pair is a **dataset delta, not preservation** — the old fixtures inserted exactly four
+  > `simple → [Toga]` pair is a **dataset delta, not preservation**, the old fixtures inserted exactly four
   > junction rows and never linked the simple print. The delta is accepted: the old omission was a hand-rolled
   > inconsistency (the combined prints carry attire contexts; the simple print did not), the builder output is
   > canonical, and no assertion touches the simple package's attires. The commit message's "insertion sequence
@@ -1009,7 +1009,7 @@ pnpm --filter @sevendays/api test 2>&1 | grep -E "Test Files|Tests "
 git diff --stat -- apps/api/test/service-packages.test.ts apps/api/test/appointments.test.ts apps/api/test/branches.test.ts apps/api/test/addon-services.test.ts
 ```
 
-Expected: **32 passed / 7 files** — same as after Task 2 — and the diff output is **empty**: `service-packages.test.ts` (attire order `['Filipiniana', 'Executive']`, privilege attires `[]`, `printSize` null on privileges, frames `[1]`), `appointments.test.ts`, `branches.test.ts`, `addon-services.test.ts` all pass **without a single assertion change**. That is the fixtures-adoption proof.
+Expected: **32 passed / 7 files**, same as after Task 2, and the diff output is **empty**: `service-packages.test.ts` (attire order `['Filipiniana', 'Executive']`, privilege attires `[]`, `printSize` null on privileges, frames `[1]`), `appointments.test.ts`, `branches.test.ts`, `addon-services.test.ts` all pass **without a single assertion change**. That is the fixtures-adoption proof.
 
 - [✅] **Step 4: Commit**
 
@@ -1024,7 +1024,7 @@ git commit -m "refactor: shape the api fixture inclusions and junction pairs via
   (ADR-0008 minimal fixtures preserved)
 - picture-inclusion descriptions canonicalize to null (seed parity); the old
   invented strings were asserted nowhere
-- junction pairs still insert one statement per row in builder order — the
+- junction pairs still insert one statement per row in builder order, the
   created_at render-order invariant (no position column) is preserved
 - integration suites pass with zero assertion edits (wire byte-identical)"
 ```
@@ -1034,11 +1034,11 @@ git commit -m "refactor: shape the api fixture inclusions and junction pairs via
 
 **Files:**
 - Modify: `packages/db/scripts/seed.ts`
-- Test: `packages/db/scripts/verify-seed.ts` (unchanged — the behavior-preservation seam, run live)
+- Test: `packages/db/scripts/verify-seed.ts` (unchanged, the behavior-preservation seam, run live)
 
 **Interfaces:**
-- Consumes (from Task 1): `buildInclusionRowValues`, `buildJunctionPairs`, `buildFrameRowValues`, `assertAllKnownAttires`, and types `InclusionEntry`/`PictureEntry` — imported from `'../src/catalog-rows.js'` (scripts are in-workspace; same pattern as `seed.ts` importing `../src/index.js`).
-- Produces: the same seeded rows — proven by `db:verify-seed` PASSED on the live database after a re-run.
+- Consumes (from Task 1): `buildInclusionRowValues`, `buildJunctionPairs`, `buildFrameRowValues`, `assertAllKnownAttires`, and types `InclusionEntry`/`PictureEntry`, imported from `'../src/catalog-rows.js'` (scripts are in-workspace; same pattern as `seed.ts` importing `../src/index.js`).
+- Produces: the same seeded rows, proven by `db:verify-seed` PASSED on the live database after a re-run.
 
 - [✅] **Step 1: Rewire the seeder's shaping to the builders**
 
@@ -1058,13 +1058,13 @@ import {
 } from '../src/catalog-rows.js';
 ```
 
-2. Replace the frame upsert's values line (inside the `for (const fp of pkg.framedPictures)` loop, lines ~105–112) — the `values({...})` literal becomes:
+2. Replace the frame upsert's values line (inside the `for (const fp of pkg.framedPictures)` loop, lines ~105–112), the `values({...})` literal becomes:
 
 ```typescript
           .values(...buildFrameRowValues({ servicePackageId: row.id, frameNumbers: [fp.frameNumber] }))
 ```
 
-(The upsert/returning/frameId.set mechanics stay exactly as they are — the builder only shapes the values.)
+(The upsert/returning/frameId.set mechanics stay exactly as they are, the builder only shapes the values.)
 
 3. Replace the inclusion + junction shaping block (lines ~123–182) with:
 
@@ -1125,11 +1125,11 @@ import {
 ```
 
 Transcription notes:
-- `printSizeIdMap` is the existing `printSizeId` Map (rename avoided — keep the seeder's existing names: it is `printSizeId` at line 56; use it as-is).
-- The old hand-rolled cursor walk (`pictureCursor`/`privilegeCursor`, lines 156–182) is **deleted** — `buildJunctionPairs` replaces it. The `kind` field is no longer needed from `.returning()` but keeping it is harmless; keep the projection as-is to minimize diff noise.
+- `printSizeIdMap` is the existing `printSizeId` Map (rename avoided, keep the seeder's existing names: it is `printSizeId` at line 56; use it as-is).
+- The old hand-rolled cursor walk (`pictureCursor`/`privilegeCursor`, lines 156–182) is **deleted**, `buildJunctionPairs` replaces it. The `kind` field is no longer needed from `.returning()` but keeping it is harmless; keep the projection as-is to minimize diff noise.
 - The `InclusionKind` import is **not** needed; only `InclusionEntry`, `PictureEntry`, `PrivilegeEntry` types plus the four functions.
 - `attireNames: [...x.attireNames]` spreads the `readonly` seed tuples into `string[]` (the `as const` catalog arrays are readonly; the entry types want mutable arrays).
-- The per-package framing above sits inside the existing `for (const pkg of packageSeeds)` loop; the print-size/attire lookup Maps (`printSizeId`, `attireIdMap`) are built before the loop (lines 54–57) — unchanged.
+- The per-package framing above sits inside the existing `for (const pkg of packageSeeds)` loop; the print-size/attire lookup Maps (`printSizeId`, `attireIdMap`) are built before the loop (lines 54–57), unchanged.
 
 4. Note the error-wording change (accepted, Global Constraints): unknown attire now throws `Unknown attire name: X` from `assertAllKnownAttires`/`buildJunctionPairs` instead of `seed: unknown attire X for PKG`. The assert runs per package inside the loop, so the failure still localizes.
 
@@ -1142,11 +1142,11 @@ pnpm --filter @sevendays/db typecheck   # biome --write may reorder imports; re-
 pnpm --filter @sevendays/db test 2>&1 | grep -E "Test Files|Tests "
 ```
 
-Expected: all green; db suite still **16 passed / 8 skipped** (24 total). (The seed script is not in the vitest include path — `src/**/*.test.ts` — so the count is unchanged; this gate is against accidental breakage.)
+Expected: all green; db suite still **16 passed / 8 skipped** (24 total). (The seed script is not in the vitest include path, `src/**/*.test.ts`, so the count is unchanged; this gate is against accidental breakage.)
 
-- [✅] **Step 3: Live proof — re-run the seed and verify against the catalog document**
+- [✅] **Step 3: Live proof, re-run the seed and verify against the catalog document**
 
-The compose db is a test db — the seed rides the **live Supabase** URL from `packages/db/.env` (`DATABASE_MIGRATE_URL`, session-mode pooler per ADR-0007; the script reads it via `--env-file=.env`). This is the spec's behavior-preservation proof: the verified seed keeps its exact behavior.
+The compose db is a test db, the seed rides the **live Supabase** URL from `packages/db/.env` (`DATABASE_MIGRATE_URL`, session-mode pooler per ADR-0007; the script reads it via `--env-file=.env`). This is the spec's behavior-preservation proof: the verified seed keeps its exact behavior.
 
 ```bash
 pnpm --filter @sevendays/db db:seed
@@ -1154,7 +1154,7 @@ pnpm --filter @sevendays/db db:seed     # second run: idempotency stays proven
 pnpm --filter @sevendays/db db:verify-seed
 ```
 
-Expected: first seed `[ok] seeded: 3 branches, 6 print sizes, 4 attires, 2 add-on services, 11 packages with frames and inclusions`; second run identical (no duplicate rows); `db:verify-seed` prints its PASSED summary — all 11 packages line-for-line against `docs/catalog.md`, exit 0. **If the live DB is unreachable from this environment, stop and flag the gap in the PR description and progress.md — do not claim the proof.**
+Expected: first seed `[ok] seeded: 3 branches, 6 print sizes, 4 attires, 2 add-on services, 11 packages with frames and inclusions`; second run identical (no duplicate rows); `db:verify-seed` prints its PASSED summary, all 11 packages line-for-line against `docs/catalog.md`, exit 0. **If the live DB is unreachable from this environment, stop and flag the gap in the PR description and progress.md, do not claim the proof.**
 
 - [✅] **Step 4: Commit**
 
@@ -1166,7 +1166,7 @@ git commit -m "refactor: shape seed inclusions, junction pairs, and frames via t
   per-package inclusion rebuild; only the shaping moves to catalog-rows
 - the hand-rolled junction cursor walk (picture/privilege cursors) is
   replaced by buildJunctionPairs over the returning ids in entries order
-- assertAllKnownAttires runs per package before any insert — unknown
+- assertAllKnownAttires runs per package before any insert, unknown
   attire names fail loudly with the module's pinned message
 - behavior preservation proven live: db:seed re-run twice, db:verify-seed
   PASSED line-for-line against docs/catalog.md"
@@ -1174,7 +1174,7 @@ git commit -m "refactor: shape seed inclusions, junction pairs, and frames via t
 
 ---
 
-### Task 5: Full gates — every consumer proven together
+### Task 5: Full gates, every consumer proven together
 
 **Files:** none (verification only).
 
@@ -1185,7 +1185,7 @@ pnpm check   # lint + format + typecheck + test, all workspaces
 pnpm build
 ```
 
-Expected: all green. Test totals: db **24 total (16 passed / 8 skipped without `TEST_DATABASE_URL`)**, api **32 / 7 files**, shared-types untouched. If the api count moved, an assertion was edited — find and revert it.
+Expected: all green. Test totals: db **24 total (16 passed / 8 skipped without `TEST_DATABASE_URL`)**, api **32 / 7 files**, shared-types untouched. If the api count moved, an assertion was edited, find and revert it.
 
 - [✅] **Step 2: Zero-assertion-edit audit**
 
@@ -1193,7 +1193,7 @@ Expected: all green. Test totals: db **24 total (16 passed / 8 skipped without `
 git diff main...HEAD --stat -- 'apps/api/test/service-packages.test.ts' 'apps/api/test/appointments.test.ts' 'apps/api/test/branches.test.ts' 'apps/api/test/addon-services.test.ts'
 ```
 
-Expected: **no output** — not a single existing test file changed. (The new `truncate.test.ts` is additive.)
+Expected: **no output**, not a single existing test file changed. (The new `truncate.test.ts` is additive.)
 
 - [✅] **Step 3: Diff-shape audit (the spec's one-diff review story)**
 
@@ -1202,7 +1202,7 @@ git diff main...HEAD -- packages/db/scripts/seed.ts | grep -cE "^-.*attireNames"
 grep -rn "kind: 'framed_picture'" apps/api/test/helpers/fixtures.ts packages/db/scripts/seed.ts | wc -l
 ```
 
-Expected: the seeder diff removes all hand-shaped `attireNames` consumption; exactly **one** occurrence of `kind: 'framed_picture'` remains across both write adapters (inside each file's entries array) — the shape rules now live in `catalog-rows.ts` alone.
+Expected: the seeder diff removes all hand-shaped `attireNames` consumption; exactly **one** occurrence of `kind: 'framed_picture'` remains across both write adapters (inside each file's entries array), the shape rules now live in `catalog-rows.ts` alone.
 
 - [✅] **Step 4: Confirm the branch state**
 
@@ -1211,7 +1211,7 @@ git status --short        # expect clean tree
 git log --oneline main..HEAD
 ```
 
-Expected: 4 commits (Task 1 builders, Task 2 truncate, Task 3 fixtures, Task 4 seeder) — 5 if a fixup commit was needed. Do **not** push — the user pushes and opens the PR. Task 6 adds the docs commit on top.
+Expected: 4 commits (Task 1 builders, Task 2 truncate, Task 3 fixtures, Task 4 seeder), 5 if a fixup commit was needed. Do **not** push, the user pushes and opens the PR. Task 6 adds the docs commit on top.
 
 ---
 
@@ -1226,15 +1226,15 @@ Add to **Known Gaps / Not Yet Done** (after the candidate-B landed bullet, match
 
 ```markdown
 - **Catalog row-shaping module extracted (candidate C landed, 2026-09-04):** `packages/db/src/catalog-rows.ts`
-  owns catalog row shapes — `buildInclusionRowValues` (per-Kind fields), `buildJunctionPairs` (combined-attire
+  owns catalog row shapes, `buildInclusionRowValues` (per-Kind fields), `buildJunctionPairs` (combined-attire
   decomposition in catalog order, unknown names throw), `buildFrameRowValues`, `assertAllKnownAttires`; opt-in
   subpath `@sevendays/db/catalog-rows` (main entry still schema + client only). Three consumers adopted in the
   same change: the seeder (upsert/rebuild flow intact), the api fixtures (minimal synthetic dataset intact; per-row
   junction statements preserve the created_at render-order invariant), and the truncate helper (table list now
-  derived from the schema barrel via `is(v, PgTable)` + `getTableConfig`, default-schema only — a future table is
+  derived from the schema barrel via `is(v, PgTable)` + `getTableConfig`, default-schema only, a future table is
   truncated automatically). Behavior preserved: integration suites 32/32 with zero assertion edits; `db:seed`
   re-run twice + `db:verify-seed` PASSED line-for-line. 15 builder unit tests + live insert-compatibility probe
-  (TEST_DATABASE_URL-gated, transaction-rolled-back). M2 catalog-write routes (next) call the builders — shape
+  (TEST_DATABASE_URL-gated, transaction-rolled-back). M2 catalog-write routes (next) call the builders, shape
   parity with the seed by construction.
 ```
 
@@ -1247,10 +1247,10 @@ _Last updated: 2026-09-04 (catalog row-shaping module (candidate C) landed on fe
 - [✅] **Step 2: Close the loop on issue #15**
 
 ```bash
-gh issue comment 15 --body "Implementation plan: docs/superpowers/plans/2026-09-04-catalog-row-shaping-module.md. Landed on feat/catalog-row-shaping-module — builders in packages/db/src/catalog-rows.ts (opt-in ./catalog-rows subpath), three consumers adopted in the same change (seeder, api fixtures, schema-derived truncate list). Proofs: 15 builder unit tests + TEST_DATABASE_URL-gated live insert probe; api integration suites 32/32 with zero assertion edits; db:seed re-run idempotent + db:verify-seed PASSED line-for-line against docs/catalog.md. pnpm check + pnpm build green."
+gh issue comment 15 --body "Implementation plan: docs/superpowers/plans/2026-09-04-catalog-row-shaping-module.md. Landed on feat/catalog-row-shaping-module, builders in packages/db/src/catalog-rows.ts (opt-in ./catalog-rows subpath), three consumers adopted in the same change (seeder, api fixtures, schema-derived truncate list). Proofs: 15 builder unit tests + TEST_DATABASE_URL-gated live insert probe; api integration suites 32/32 with zero assertion edits; db:seed re-run idempotent + db:verify-seed PASSED line-for-line against docs/catalog.md. pnpm check + pnpm build green."
 ```
 
-(Leave the issue open — the user closes it when the PR merges, matching the #13/#14 flow.)
+(Leave the issue open, the user closes it when the PR merges, matching the #13/#14 flow.)
 
 - [✅] **Step 3: Commit the ledger update**
 

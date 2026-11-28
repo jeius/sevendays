@@ -1,10 +1,10 @@
-# Acquisition / Error Seam — Implementation Plan
+# Acquisition / Error Seam, Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** One Hono seam — an acquisition middleware scoped to `/api/v1/*`, a root `onError` that logs once and returns the uniform 500 JSON, and a root `notFound` that returns the uniform 404 JSON — replaces the per-route try/catch + self-acquisition + swallow cross-section across all four API routes, so every current and future route is db-free-at-the-top and every thrown error (including a missing `DATABASE_URL`) lands in the Worker logs with its route.
+**Goal:** One Hono seam, an acquisition middleware scoped to `/api/v1/*`, a root `onError` that logs once and returns the uniform 500 JSON, and a root `notFound` that returns the uniform 404 JSON, replaces the per-route try/catch + self-acquisition + swallow cross-section across all four API routes, so every current and future route is db-free-at-the-top and every thrown error (including a missing `DATABASE_URL`) lands in the Worker logs with its route.
 
-**Architecture:** The policy moves into Hono's own structure, where it holds by construction instead of convention. `routes/v1.ts` becomes an `ApiEnv` subapp (`Bindings: Env; Variables: { db: Database }`) and mounts one `acquireDb` middleware (`v1.use('*', ...)`) that calls `createApiDb(c.env.DATABASE_URL)` and `c.set('db', ...)`; route handlers drop their `try/catch` and `createApiDb` calls and read `c.get('db')`. `index.ts` gains a root `onError` (logs `console.error(\`[api] ${method} ${path} failed:\`, err)` then `internalError(c)`) and a root `notFound` (uniform JSON 404). Errors thrown from handlers **or** the acquisition middleware propagate to the root `onError` by Hono's composition rules; the root `notFound` catches both top-level and `/api/v1/*` misses. `app.get('/health')` stays mounted on the root app, outside `v1`, so it never runs the acquisition middleware — uptime probes stay db-independent. ADR-0011 is preserved exactly (one per-request client) and only relocated into the middleware.
+**Architecture:** The policy moves into Hono's own structure, where it holds by construction instead of convention. `routes/v1.ts` becomes an `ApiEnv` subapp (`Bindings: Env; Variables: { db: Database }`) and mounts one `acquireDb` middleware (`v1.use('*', ...)`) that calls `createApiDb(c.env.DATABASE_URL)` and `c.set('db', ...)`; route handlers drop their `try/catch` and `createApiDb` calls and read `c.get('db')`. `index.ts` gains a root `onError` (logs `console.error(\`[api] ${method} ${path} failed:\`, err)` then `internalError(c)`) and a root `notFound` (uniform JSON 404). Errors thrown from handlers **or** the acquisition middleware propagate to the root `onError` by Hono's composition rules; the root `notFound` catches both top-level and `/api/v1/*` misses. `app.get('/health')` stays mounted on the root app, outside `v1`, so it never runs the acquisition middleware, uptime probes stay db-independent. ADR-0011 is preserved exactly (one per-request client) and only relocated into the middleware.
 
 **Tech Stack:** TypeScript 6 (strict, `noUncheckedIndexedAccess`), Hono 4 (`onError` / `notFound` / `MiddlewareHandler` / `c.set` / `c.get`), vitest 4 per-workspace config (ADR-0003), Biome 2.x, pnpm 11 + Turborepo, docker compose postgres:17 for the integration suite (ADR-0008), `gh` CLI for issue #16 evidence.
 
@@ -12,22 +12,22 @@
 
 ## Global Constraints
 
-- **Two committed increments, each independently testable (plan structure):** Task 1 ships the envelope — root `onError` + `notFound` — and proves the uniform 404 (the 404 half of the 404/405 ledger item) with the four routes still byte-identical. Task 2 moves acquisition into `v1.use('*')`, deletes every route's `try/catch` + `createApiDb` + inline log lines, and routes read `c.get('db')` — proving the 500 + log policy closes "log-before-500" fully (candidate D). Reviewers can reject Task 2 (route-layer churn) while approving Task 1 (envelope), or vice-versa.
-- **`onError` + `notFound` live on the ROOT app (`index.ts`), not on `v1` (probe-verified):** a root `onError` catches thrown errors from `v1`'s middleware and handlers (Hono propagates up); a root `notFound` catches **both** `/nope` (top-level) and `/api/v1/unknown` (prefix-matched, no route) — the latter is the spec's "unknown path under the API returns uniform JSON 404." Mounting `notFound` only on `v1` would leave `/nope` as Hono's bare plain-text 404, which the api-client ADR (ADR-0006) forbids. The acquisition **middleware** is scoped to `v1` only.
-- **Middleware registration order is load-bearing (probe-verified):** `v1.use('*', acquireDb)` MUST be called **before** `v1.route('/branches', branches)` etc. A middleware registered after the routes does not compose (Hono matches the route first and skips the late middleware) — the handler's `c.get('db')` would be `undefined`. Routes are mounted first in the current `v1.ts`; Task 2 must reorder so `use('*')` precedes every `route(...)`.
-- **Health stays db-free (probe-verified):** `/health` is mounted on the root app, never inside `v1`, so the acquisition middleware never runs for it. A request with `DATABASE_URL: ''` to `/health` still returns 200 — the uptime probe never depends on the database.
-- **`Env` binding type untouched; a new Hono app type is added (spec ruling):** the ambient `Env` interface (`worker-configuration.d.ts`) and env bindings/secrets are NOT modified. The plan adds `ApiEnv` (`{ Bindings: Env; Variables: { db: Database } }`) — a Hono app-level generic for the db variable, co-located with `createApiDb` in `services/db.ts`. Mixed generics are fine (probe-verified): current route files (`Hono<{ Bindings: Env }>`) mount cleanly under an `ApiEnv` parent, so Task 1's parent wiring compiles before the routes are migrated.
-- **No `packages/types` changes, no success-path wire changes (spec):** the 500 body `{ error: 'Internal server error.' }` and 404 body `{ error: 'Not found.' }` already conform to `apiErrorSchema` (the shared uniform shape); statuses and 2xx payloads are unchanged. `errors.ts` keeps both `badRequest` (routes use it) and `internalError` (only `onError` uses it after Task 2 — routes stop importing it). `createApiDb` is still used, just by the middleware instead of the routes.
-- **Supersedes #13's inline logging (spec):** the appointments route's `console.error('[appointments] ... failed:', error)` + `internalError(c)` lines (landed by the intake spec) are removed in Task 2 — one logging point in `onError`, no double-logging. The intake module's transactional write and typed (`ok: false`) failures are untouched; this plan touches only the route layer.
-- **405 is deferred (spec + Out of Scope):** Hono has no built-in method-mismatch surface; a correct 405 needs per-route method-set knowledge that belongs to the M2 pre-flight restructure. The seam test asserts `POST /api/v1/branches` (a GET-only route) returns **404** (current, accepted behavior) — locking the deferral so a future change can't silently regress it, without claiming 405 works. The 404/405 ledger item is split: 404 closed here, 405 pointed at the M2 pre-flight.
+- **Two committed increments, each independently testable (plan structure):** Task 1 ships the envelope, root `onError` + `notFound`, and proves the uniform 404 (the 404 half of the 404/405 ledger item) with the four routes still byte-identical. Task 2 moves acquisition into `v1.use('*')`, deletes every route's `try/catch` + `createApiDb` + inline log lines, and routes read `c.get('db')`, proving the 500 + log policy closes "log-before-500" fully (candidate D). Reviewers can reject Task 2 (route-layer churn) while approving Task 1 (envelope), or vice-versa.
+- **`onError` + `notFound` live on the ROOT app (`index.ts`), not on `v1` (probe-verified):** a root `onError` catches thrown errors from `v1`'s middleware and handlers (Hono propagates up); a root `notFound` catches **both** `/nope` (top-level) and `/api/v1/unknown` (prefix-matched, no route), the latter is the spec's "unknown path under the API returns uniform JSON 404." Mounting `notFound` only on `v1` would leave `/nope` as Hono's bare plain-text 404, which the api-client ADR (ADR-0006) forbids. The acquisition **middleware** is scoped to `v1` only.
+- **Middleware registration order is load-bearing (probe-verified):** `v1.use('*', acquireDb)` MUST be called **before** `v1.route('/branches', branches)` etc. A middleware registered after the routes does not compose (Hono matches the route first and skips the late middleware), the handler's `c.get('db')` would be `undefined`. Routes are mounted first in the current `v1.ts`; Task 2 must reorder so `use('*')` precedes every `route(...)`.
+- **Health stays db-free (probe-verified):** `/health` is mounted on the root app, never inside `v1`, so the acquisition middleware never runs for it. A request with `DATABASE_URL: ''` to `/health` still returns 200, the uptime probe never depends on the database.
+- **`Env` binding type untouched; a new Hono app type is added (spec ruling):** the ambient `Env` interface (`worker-configuration.d.ts`) and env bindings/secrets are NOT modified. The plan adds `ApiEnv` (`{ Bindings: Env; Variables: { db: Database } }`), a Hono app-level generic for the db variable, co-located with `createApiDb` in `services/db.ts`. Mixed generics are fine (probe-verified): current route files (`Hono<{ Bindings: Env }>`) mount cleanly under an `ApiEnv` parent, so Task 1's parent wiring compiles before the routes are migrated.
+- **No `packages/types` changes, no success-path wire changes (spec):** the 500 body `{ error: 'Internal server error.' }` and 404 body `{ error: 'Not found.' }` already conform to `apiErrorSchema` (the shared uniform shape); statuses and 2xx payloads are unchanged. `errors.ts` keeps both `badRequest` (routes use it) and `internalError` (only `onError` uses it after Task 2, routes stop importing it). `createApiDb` is still used, just by the middleware instead of the routes.
+- **Supersedes #13's inline logging (spec):** the appointments route's `console.error('[appointments] ... failed:', error)` + `internalError(c)` lines (landed by the intake spec) are removed in Task 2, one logging point in `onError`, no double-logging. The intake module's transactional write and typed (`ok: false`) failures are untouched; this plan touches only the route layer.
+- **405 is deferred (spec + Out of Scope):** Hono has no built-in method-mismatch surface; a correct 405 needs per-route method-set knowledge that belongs to the M2 pre-flight restructure. The seam test asserts `POST /api/v1/branches` (a GET-only route) returns **404** (current, accepted behavior), locking the deferral so a future change can't silently regress it, without claiming 405 works. The 404/405 ledger item is split: 404 closed here, 405 pointed at the M2 pre-flight.
 - **Existing integration suites pass unchanged (ADR-0008):** all endpoint behavior is preserved; the appointments suite's 500-path expectations carry over (the uniform 500 is now produced by `onError`, not the route's catch). `pnpm --filter @sevendays/api test` must stay **32 existing tests, zero assertion edits**; the new seam file is additive.
 - **Baselines (verified 2026-09-04):** `pnpm --filter @sevendays/api test` = **32 passed / 7 files** (compose db up; `apps/api/test/helpers/truncate.ts` is the 7th file). After this plan: **38 passed / 8 files** (6 additive seam tests; see Task 1 + Task 2 test steps). `pnpm check` (lint + format + typecheck + test) and `pnpm build` green on the branch.
-- **Compose db for the api suite (ADR-0008):** `docker compose up -d db` first. `apps/api/test/global-setup.ts` defaults `TEST_DATABASE_URL` to the compose db, so no export needed locally; do **not** export a wrong value (auth fails loud). For the forced-500 seam tests, pass a deliberately unreachable `DATABASE_URL` inline to `app.request(...)` (a refused-port URL — postgres.js refuses in ~4–10ms, probe-verified) — never touch the real compose URL.
-- **Vitest gotcha (ADR-0003):** run the api workspace's suite directly (`pnpm --filter @sevendays/api test`) and confirm the printed file + test counts — shared `passWithNoTests` turns a discovery miss into silent green.
+- **Compose db for the api suite (ADR-0008):** `docker compose up -d db` first. `apps/api/test/global-setup.ts` defaults `TEST_DATABASE_URL` to the compose db, so no export needed locally; do **not** export a wrong value (auth fails loud). For the forced-500 seam tests, pass a deliberately unreachable `DATABASE_URL` inline to `app.request(...)` (a refused-port URL, postgres.js refuses in ~4–10ms, probe-verified), never touch the real compose URL.
+- **Vitest gotcha (ADR-0003):** run the api workspace's suite directly (`pnpm --filter @sevendays/api test`) and confirm the printed file + test counts, shared `passWithNoTests` turns a discovery miss into silent green.
 - **Biome-clean commits:** `pnpm --filter @sevendays/api exec biome check --write <touched files>` before every commit; biome scripts call the `biome` bin, never pnpx.
-- **Commit conventions:** unscoped conventional subjects (`feat:`/`refactor:`/`docs:`), wordy bullet bodies; commit locally on `feat/acquisition-error-seam` only — the user pushes and opens the PR.
+- **Commit conventions:** unscoped conventional subjects (`feat:`/`refactor:`/`docs:`), wordy bullet bodies; commit locally on `feat/acquisition-error-seam` only, the user pushes and opens the PR.
 - **Type hygiene:** no `!` non-null assertions (`c.get('db')` is typed `Database` via `ApiEnv`; guard with the generic, not `!`); `async`/`await` only.
-- **ADR-0011 amendment (Task 3):** add a one-line Consequences note that the per-request client is now created in the acquisition middleware (`v1.use('*')`) instead of inside each route handler — same per-request semantics, relocated; no behavior change.
+- **ADR-0011 amendment (Task 3):** add a one-line Consequences note that the per-request client is now created in the acquisition middleware (`v1.use('*')`) instead of inside each route handler, same per-request semantics, relocated; no behavior change.
 
 ---
 
@@ -48,7 +48,7 @@ docs/progress.md                    (mod)  close log-before-500 fully; 404/405 s
 
 No other files change: no `packages/types`, no `packages/db`, no schema/migrations, no env/secret handling (ADR-0007 URLs untouched), no CI.
 
-Task map: 0 — branch + environment bootstrap + baselines → 1 — envelope (`onError`/`notFound`) + 404 seam tests (commit) → 2 — acquisition middleware + route delegation + remove catches/logs + 500+log tests (commit) → 3 — ADR-0011 amendment + progress.md + issue #16 evidence (commit) → 4 — full gate sweep (commit, biome-tidy final).
+Task map: 0, branch + environment bootstrap + baselines → 1, envelope (`onError`/`notFound`) + 404 seam tests (commit) → 2, acquisition middleware + route delegation + remove catches/logs + 500+log tests (commit) → 3, ADR-0011 amendment + progress.md + issue #16 evidence (commit) → 4, full gate sweep (commit, biome-tidy final).
 
 ---
 
@@ -77,19 +77,19 @@ docker compose up -d db
 docker compose ps   # db healthy (pg_isready passing)
 ```
 
-Expected: install clean; `dist/` built for `packages/db` + `packages/config`. No `TEST_DATABASE_URL` export needed — `apps/api/test/global-setup.ts` defaults to the compose db.
+Expected: install clean; `dist/` built for `packages/db` + `packages/config`. No `TEST_DATABASE_URL` export needed, `apps/api/test/global-setup.ts` defaults to the compose db.
 
-- [ ] **Step 3: Baseline green — record the counts**
+- [ ] **Step 3: Baseline green, record the counts**
 
 ```bash
 pnpm --filter @sevendays/api test 2>&1 | grep -E "Test Files|Tests "
 ```
 
-Expected: **32 passed / 7 files**. Record this total — every later gate compares against it (after Task 1: 35 / 8; after Task 2: 38 / 8; zero existing assertions edited).
+Expected: **32 passed / 7 files**. Record this total, every later gate compares against it (after Task 1: 35 / 8; after Task 2: 38 / 8; zero existing assertions edited).
 
 ---
 
-### Task 1: The error envelope — root `onError` + `notFound`, and the uniform 404 (route layer unchanged)
+### Task 1: The error envelope, root `onError` + `notFound`, and the uniform 404 (route layer unchanged)
 
 **Files:**
 - Modify: `apps/api/src/index.ts`
@@ -97,7 +97,7 @@ Expected: **32 passed / 7 files**. Record this total — every later gate compar
 
 **Interfaces:**
 - Consumes: `internalError` from `services/errors.ts` (unchanged signature `internalError(c: Context)` → 500 JSON).
-- Produces: the envelope contract the Task 2 middleware + routes depend on — `onError` returns `internalError(c)`; `notFound` returns `c.json({ error: 'Not found.' }, 404)`. Task 2's `acquireDb` only needs `c.set('db', createApiDb(c.env.DATABASE_URL))`; the routes only need `c.get('db')`.
+- Produces: the envelope contract the Task 2 middleware + routes depend on, `onError` returns `internalError(c)`; `notFound` returns `c.json({ error: 'Not found.' }, 404)`. Task 2's `acquireDb` only needs `c.set('db', createApiDb(c.env.DATABASE_URL))`; the routes only need `c.get('db')`.
 
 - [ ] **Step 1: Write the failing seam tests (404 envelope + db-free health)**
 
@@ -108,8 +108,8 @@ import app from '../src/index.js';
 
 const url = process.env.TEST_DATABASE_URL as string;
 
-// 404 half of the 404/405 ledger item: every unmounted path — top-level
-// and under /api/v1 — returns the uniform JSON envelope, never Hono's
+// 404 half of the 404/405 ledger item: every unmounted path, top-level
+// and under /api/v1, returns the uniform JSON envelope, never Hono's
 // bare plain-text default (which would degrade the M2 api-client to `unknown`).
 describe('uniform 404 envelope', () => {
   it('returns uniform JSON 404 for an unknown path under /api/v1', async () => {
@@ -143,7 +143,7 @@ describe('GET /health', () => {
 pnpm --filter @sevendays/api exec vitest run test/error-seam.test.ts
 ```
 
-Expected: FAIL — `/api/v1/unknown` and `/nope` return Hono's default 404 (plain text, `res.json()` throws or body is not `{ error: 'Not found.' }`); `/health` already 200 (that assertion may pass, the 404s fail). The suite exits non-zero.
+Expected: FAIL, `/api/v1/unknown` and `/nope` return Hono's default 404 (plain text, `res.json()` throws or body is not `{ error: 'Not found.' }`); `/health` already 200 (that assertion may pass, the 404s fail). The suite exits non-zero.
 
 - [ ] **Step 3: Add `onError` + `notFound` to the root app**
 
@@ -160,9 +160,9 @@ const app = new Hono<{ Bindings: Env }>();
 app.use('*', logger());
 app.use('*', cors({ origin: '*' })); // TODO(M6): restrict once domains exist.
 
-// Uniform error envelope (candidate D / ADR-0006): every thrown error — from
+// Uniform error envelope (candidate D / ADR-0006): every thrown error, from
 // the versioned routes, the acquisition middleware (Task 2), or any future
-// handler — lands here, is logged once (workerd-safe console.error, no new
+// handler, lands here, is logged once (workerd-safe console.error, no new
 // dependency) with the route that threw it, and returns the single 500 JSON
 // shape. Replaces the per-route try/catch + silent swallow that let deploy
 // blocker #2 ship invisible (M1.5). Health stays mounted outside v1, so a db
@@ -173,7 +173,7 @@ app.onError((error, c) => {
 });
 
 // Uniform 404 envelope (closes the 404 half of the 404/405 ledger item):
-// every unmounted path — including under /api/v1 — returns the JSON shape,
+// every unmounted path, including under /api/v1, returns the JSON shape,
 // never Hono's bare plain-text default (which would degrade the M2 api-client's
 // response inference to `unknown`).
 app.notFound((c) => c.json({ error: 'Not found.' }, 404));
@@ -200,7 +200,7 @@ pnpm --filter @sevendays/api typecheck
 pnpm --filter @sevendays/api exec biome check --write src/index.ts test/error-seam.test.ts
 ```
 
-Expected: typecheck clean; biome clean (the `--write` may reorder imports — re-run typecheck after if it touched imports).
+Expected: typecheck clean; biome clean (the `--write` may reorder imports, re-run typecheck after if it touched imports).
 
 - [ ] **Step 6: Commit**
 
@@ -212,7 +212,7 @@ git commit -m "feat: uniform 500/404 error envelope on the API root app
   route and returns the single 500 JSON shape; replaces the per-route
   try/catch + silent swallow that hid deploy blocker #2 (M1.5)
 - root notFound returns uniform JSON 404 for every unmounted path,
-  including under /api/v1 — closes the 404 half of the 404/405 ledger
+  including under /api/v1, closes the 404 half of the 404/405 ledger
   item (the api-client ADR forbids bare not-found)
 - /health stays mounted outside v1, so it never depends on the database
 - additive seam tests: uniform 404 (top-level + /api/v1) and db-free health
@@ -222,7 +222,7 @@ git commit -m "feat: uniform 500/404 error envelope on the API root app
 
 ---
 
-### Task 2: Acquisition middleware + route delegation — close "log-before-500" fully
+### Task 2: Acquisition middleware + route delegation, close "log-before-500" fully
 
 **Files:**
 - Modify: `apps/api/src/services/db.ts` (add `ApiEnv` type)
@@ -254,7 +254,7 @@ export type ApiEnv = {
 };
 
 /**
- * The API's db handle (ADR-0007): the pooled DATABASE_URL — Workers cannot
+ * The API's db handle (ADR-0007): the pooled DATABASE_URL, Workers cannot
  * open raw TCP; prepare:false is required under transaction pooling.
  * Created fresh per request: workerd scopes I/O objects to the request that
  * created them, so a client memoized per isolate throws "Cannot perform I/O
@@ -270,7 +270,7 @@ export type ApiEnv = {
 export function createApiDb(connectionString: string): Database {
   if (!connectionString) {
     throw new TypeError(
-      'DATABASE_URL is not set — the Worker needs the pooled connection secret per ADR-0007.'
+      'DATABASE_URL is not set, the Worker needs the pooled connection secret per ADR-0007.'
     );
   }
   return createDbClient(connectionString);
@@ -292,7 +292,7 @@ import { servicePackages } from './service-packages.js';
 // Acquisition middleware (candidate D): runs for every /api/v1 request,
 // creates the per-request db handle and stores it in context. A missing
 // DATABASE_URL throws here and is caught by the root onError as the uniform
-// 500 JSON — the acquisition-inside-the-try ruling, now structural instead
+// 500 JSON, the acquisition-inside-the-try ruling, now structural instead
 // of a per-route comment. MUST be registered before the route mounts so it
 // composes with every handler.
 export const acquireDb = async (c: import('hono').Context<ApiEnv>, next: () => Promise<void>) => {
@@ -356,7 +356,7 @@ addonServices.get('/', async (c) => {
 });
 ```
 
-- [ ] **Step 6: Migrate `appointments.ts` — drop both catches + the log-before-500 lines (supersedes #13)**
+- [ ] **Step 6: Migrate `appointments.ts`, drop both catches + the log-before-500 lines (supersedes #13)**
 
 ```ts
 // apps/api/src/routes/appointments.ts
@@ -397,7 +397,7 @@ appointments.post('/', validated(createAppointmentSchema, 'json'), async (c) => 
 ```ts
 // append to apps/api/test/error-seam.test.ts
 // 500 + log policy (closes "log-before-500" fully, user stories 2 + 6):
-// every thrown error — from the acquisition middleware or a handler — reaches
+// every thrown error, from the acquisition middleware or a handler, reaches
 // the root onError, which logs it once with the route and returns the uniform
 // 500. Two distinct paths are proven over real Postgres via the in-app
 // request style: a missing DATABASE_URL (middleware throws on acquisition) and
@@ -431,7 +431,7 @@ describe('uniform 500 envelope + logging', () => {
 // 405 deferral (spec Out of Scope): Hono has no built-in method-mismatch
 // surface, so a GET-only route hit with POST returns 404 (not 405) today.
 // Lock the current behavior so a future M2-pre-flight change can't silently
-// regress it — 405 belongs beside that restructure, not here.
+// regress it, 405 belongs beside that restructure, not here.
 describe('method mismatch (405 deferred)', () => {
   it('returns 404 for POST on a GET-only route', async () => {
     const res = await app.request('/api/v1/branches', { method: 'POST' }, { DATABASE_URL: url });
@@ -448,7 +448,7 @@ pnpm --filter @sevendays/api exec vitest run test/error-seam.test.ts
 pnpm --filter @sevendays/api test 2>&1 | grep -E "Test Files|Tests "
 ```
 
-Expected: seam file **6 passed** (3 from Task 1 + 3 new); full api suite **38 passed / 8 files**. The 32 pre-existing tests are unchanged — confirm zero assertion edits (Step 10).
+Expected: seam file **6 passed** (3 from Task 1 + 3 new); full api suite **38 passed / 8 files**. The 32 pre-existing tests are unchanged, confirm zero assertion edits (Step 10).
 
 - [ ] **Step 9: Typecheck + lint the touched files**
 
@@ -460,7 +460,7 @@ pnpm --filter @sevendays/api exec biome check --write \
   src/routes/appointments.ts test/error-seam.test.ts
 ```
 
-Expected: typecheck clean (`c.get('db')` is `Database` via `ApiEnv`; the `acquireDb` `Context<ApiEnv>` param compiles — if the inline `import('hono').Context` form is awkward, import `type { Context } from 'hono'` at top of `v1.ts` instead). Biome clean.
+Expected: typecheck clean (`c.get('db')` is `Database` via `ApiEnv`; the `acquireDb` `Context<ApiEnv>` param compiles, if the inline `import('hono').Context` form is awkward, import `type { Context } from 'hono'` at top of `v1.ts` instead). Biome clean.
 
 - [ ] **Step 10: Zero-assertion-edit audit**
 
@@ -472,7 +472,7 @@ git diff main...HEAD --stat -- \
   'apps/api/test/addon-services.test.ts'
 ```
 
-Expected: **no output** — not a single existing test file changed. (The new file is additive; `index.test.ts` is untouched and still green.)
+Expected: **no output**, not a single existing test file changed. (The new file is additive; `index.test.ts` is untouched and still green.)
 
 - [ ] **Step 11: Commit**
 
@@ -487,7 +487,7 @@ git commit -m "refactor: move db acquisition into /api/v1 middleware, routes rea
   (v1.use('*'), registered before the route mounts) creates the
   per-request client and c.set('db'); routes drop createApiDb + try/catch
 - appointments route loses its log-before-500 lines and both catches
-  (supersedes #13) — every thrown error now reaches the root onError,
+  (supersedes #13), every thrown error now reaches the root onError,
   which logs once with the route and returns the uniform 500
 - closes 'log-before-500' fully (candidate D, issue #16): the invisible
   failure class is structurally impossible, not fixed on one route
@@ -506,7 +506,7 @@ git commit -m "refactor: move db acquisition into /api/v1 middleware, routes rea
 - Modify: `docs/adr/0011-per-request-db-client.md`
 - Modify: `docs/progress.md`
 
-- [ ] **Step 1: Amend ADR-0011 — note the relocation (no behavior change)**
+- [ ] **Step 1: Amend ADR-0011, note the relocation (no behavior change)**
 
 Append one bullet to the **Consequences** section of `docs/adr/0011-per-request-db-client.md`:
 
@@ -514,8 +514,8 @@ Append one bullet to the **Consequences** section of `docs/adr/0011-per-request-
 - **Relocated into the acquisition middleware (candidate D, 2026-09-04):** the
   per-request `createApiDb` call now lives in one `v1.use('*')` middleware
   (set into Hono context as `db`) instead of being repeated inside each route
-  handler. Same per-request semantics — one client per request, request-scoped
-  sockets reclaimed at request end — only the call site moved. Routes read
+  handler. Same per-request semantics, one client per request, request-scoped
+  sockets reclaimed at request end, only the call site moved. Routes read
   `c.get('db')`; a missing `DATABASE_URL` throws in the middleware and is
   caught by the root `onError` as the uniform 500.
 ```
@@ -536,30 +536,30 @@ Replace the current candidate-D "log-before-500" bullet (line ~72):
   from all four routes. One `v1.use('*')` middleware creates the db handle and
   `c.set('db')`; one root `onError` logs every thrown error with its route and
   returns the uniform 500 JSON; the appointments route's inline log-before-500
-  lines (from #13) are deleted — one logging point, no double-logging. The
+  lines (from #13) are deleted, one logging point, no double-logging. The
   M1.5 invisible-failure class is now structurally impossible, not fixed on one
   route. 404/405 item split: **404 closed** here (root `notFound` returns uniform
   JSON for every unmount, including `/api/v1/*`); **405 deferred** to the M2
-  pre-flight restructure (Hono has no built-in method-mismatch surface — it
+  pre-flight restructure (Hono has no built-in method-mismatch surface, it
   needs per-route method-set knowledge that belongs beside the typed-response
   conventions of that restructure). Per-route acquisition comments (the
   ADR-0011 rationale pasted 3×, the acquisition-inside-the-try ruling) are now
-  obsolete — their ruling has a structural home in the middleware.
+  obsolete, their ruling has a structural home in the middleware.
 ```
 
 Add a candidate-D landed bullet to **Known Gaps / Not Yet Done** (after the candidate-C landed bullet), matching house style:
 
 ```markdown
-- **Acquisition/error seam extracted (candidate D landed, 2026-09-04):** `apps/api/src/routes/v1.ts` is an `ApiEnv` subapp with one `acquireDb` middleware (`v1.use('*')`, before the route mounts) that creates the per-request client and `c.set('db')`; `index.ts` gains a root `onError` (logs once via `console.error` with the route, returns uniform 500 JSON) and a root `notFound` (uniform JSON 404 for every unmount incl. `/api/v1/*`); `ApiEnv` (`{ Bindings: Env; Variables: { db: Database } }`) lives in `services/db.ts` beside `createApiDb`. All four routes drop `createApiDb` + `try/catch` and read `c.get('db')`; the appointments route's log-before-500 lines (from #13) are gone. Closes "log-before-500" fully; 404 half of 404/405 closed, 405 deferred to the M2 pre-flight. Proofs: 6 additive seam tests (uniform 404 top-level + /api/v1, db-free /health, 500+log x2 over real Postgres — missing URL + refused-connection query); api integration suites **38 passed / 8 files** with **zero assertion edits** to the 32 pre-existing tests. ADR-0011 amended (relocation note, no behavior change).
+- **Acquisition/error seam extracted (candidate D landed, 2026-09-04):** `apps/api/src/routes/v1.ts` is an `ApiEnv` subapp with one `acquireDb` middleware (`v1.use('*')`, before the route mounts) that creates the per-request client and `c.set('db')`; `index.ts` gains a root `onError` (logs once via `console.error` with the route, returns uniform 500 JSON) and a root `notFound` (uniform JSON 404 for every unmount incl. `/api/v1/*`); `ApiEnv` (`{ Bindings: Env; Variables: { db: Database } }`) lives in `services/db.ts` beside `createApiDb`. All four routes drop `createApiDb` + `try/catch` and read `c.get('db')`; the appointments route's log-before-500 lines (from #13) are gone. Closes "log-before-500" fully; 404 half of 404/405 closed, 405 deferred to the M2 pre-flight. Proofs: 6 additive seam tests (uniform 404 top-level + /api/v1, db-free /health, 500+log x2 over real Postgres, missing URL + refused-connection query); api integration suites **38 passed / 8 files** with **zero assertion edits** to the 32 pre-existing tests. ADR-0011 amended (relocation note, no behavior change).
 ```
 
 - [ ] **Step 3: Close the loop on issue #16**
 
 ```bash
-gh issue comment 16 --body "Implementation plan: docs/superpowers/plans/2026-09-02-acquisition-error-seam.md. Landed on feat/acquisition-error-seam — one v1.use('*') acquisition middleware + root onError (log + uniform 500) + root notFound (uniform 404); all four routes drop createApiDb + try/catch and read c.get('db'); appointments log-before-500 lines removed (supersedes #13). Proofs: 6 additive seam tests (404 envelope top-level + /api/v1, db-free /health, 500+log x2 over real Postgres) + api integration suites 38/8 with zero assertion edits to the 32 pre-existing tests. ADR-0011 amended (relocation note). pnpm check + pnpm build green."
+gh issue comment 16 --body "Implementation plan: docs/superpowers/plans/2026-09-02-acquisition-error-seam.md. Landed on feat/acquisition-error-seam, one v1.use('*') acquisition middleware + root onError (log + uniform 500) + root notFound (uniform 404); all four routes drop createApiDb + try/catch and read c.get('db'); appointments log-before-500 lines removed (supersedes #13). Proofs: 6 additive seam tests (404 envelope top-level + /api/v1, db-free /health, 500+log x2 over real Postgres) + api integration suites 38/8 with zero assertion edits to the 32 pre-existing tests. ADR-0011 amended (relocation note). pnpm check + pnpm build green."
 ```
 
-(Leave the issue open — the user closes it when the PR merges, matching the #13/#14/#15 flow.)
+(Leave the issue open, the user closes it when the PR merges, matching the #13/#14/#15 flow.)
 
 - [ ] **Step 4: Commit the docs**
 
@@ -569,7 +569,7 @@ git commit -m "docs: record the acquisition/error seam (candidate D) in the ledg
 
 - progress.md: close 'log-before-500' fully; split 404/405 (404 done,
   405 -> M2 pre-flight); per-route acquisition comments now obsolete
-- ADR-0011: one-line relocation note — per-request client moved into the
+- ADR-0011: one-line relocation note, per-request client moved into the
   acquisition middleware, same per-request semantics, no behavior change
 - candidate-D landed bullet + Last-updated line"
 ```
@@ -596,23 +596,23 @@ git status --short        # expect clean tree
 git log --oneline main..HEAD
 ```
 
-Expected: 4 commits (Task 1 envelope, Task 2 route-layer migration, Task 3 docs+ADR, and this gate commit only if a fixup was needed). Do **not** push — the user pushes and opens the PR.
+Expected: 4 commits (Task 1 envelope, Task 2 route-layer migration, Task 3 docs+ADR, and this gate commit only if a fixup was needed). Do **not** push, the user pushes and opens the PR.
 
 ---
 
 ## Self-Review
 
-**1. Spec coverage** — mapped to spec sections:
-- *Problem Statement* (copy-paste policy erosion, invisible failure class): closed by Task 2 (one middleware + `onError`, routes have zero try/catch) — verified by the 500+log tests.
+**1. Spec coverage**, mapped to spec sections:
+- *Problem Statement* (copy-paste policy erosion, invisible failure class): closed by Task 2 (one middleware + `onError`, routes have zero try/catch), verified by the 500+log tests.
 - *Solution* (middleware + `onError` + `notFound`, routes shrink to essence): Tasks 1–2 implement exactly this; route files show validate/call/return with no acquisition or catch.
-- *User Stories* 1 (future routes get the policy free), 2 (every error logged with route), 3 (404 in uniform shape for the api-client), 4 (rationale in one middleware), 5 (health db-free), 6 (policy exercised once via HTTP seam), 7 (seam in canonical Hono shape for the M2 restructure), 8 (route PRs free of try/catch) — all delivered: 1/7/8 by structure; 2 by `onError` log test; 3 by 404 test; 4 by `acquireDb` docstring; 5 by `/health` test; 6 by the single seam file.
+- *User Stories* 1 (future routes get the policy free), 2 (every error logged with route), 3 (404 in uniform shape for the api-client), 4 (rationale in one middleware), 5 (health db-free), 6 (policy exercised once via HTTP seam), 7 (seam in canonical Hono shape for the M2 restructure), 8 (route PRs free of try/catch), all delivered: 1/7/8 by structure; 2 by `onError` log test; 3 by 404 test; 4 by `acquireDb` docstring; 5 by `/health` test; 6 by the single seam file.
 - *Implementation Decisions*: middleware+error handler ✓ (Tasks 1–2); not-found joins envelope now, 405 deferred ✓ (Task 2 405 test + progress.md split); health db-free ✓ (mounted outside v1); supersedes #13 inline logging ✓ (Task 2 deletes the lines); env types untouched ✓ (only `ApiEnv` Hono generic added); no shared-types/wire changes ✓ (bodies already conform to `apiErrorSchema`).
 - *Testing Decisions*: HTTP-external behavior only ✓; seam tested once over real Postgres ✓; existing suites pass unchanged ✓ (zero-assertion-edit audit); prior art carried ✓.
 - *Out of Scope*: 405 ✓ deferred; env consolidation/app-type export ✓ untouched; structured logging ✓ not added; rate limiting/CORS ✓ untouched; intake/stitch/catalog modules ✓ untouched (routes only).
-- *Further Notes*: ordering with A (lands after #13) — #13 already merged, this removes its inline lines ✓; ledger hygiene ✓ (Task 3).
+- *Further Notes*: ordering with A (lands after #13), #13 already merged, this removes its inline lines ✓; ledger hygiene ✓ (Task 3).
 
-**2. Placeholder scan** — no TBD/TODO/“implement later” in task steps; every step has concrete code or a verified command. The only prose caveats are the probe-verified notes (middleware-order load-bearing, 405 deferred) which are real constraints, not placeholders.
+**2. Placeholder scan**, no TBD/TODO/“implement later” in task steps; every step has concrete code or a verified command. The only prose caveats are the probe-verified notes (middleware-order load-bearing, 405 deferred) which are real constraints, not placeholders.
 
-**3. Type consistency** — `ApiEnv` defined once in `services/db.ts`, imported by `v1.ts` and all four route files; `acquireDb` sets `db: Database` and every handler reads `c.get('db'): Database`; `onError` uses `internalError(c)` and `notFound` returns `c.json({ error: 'Not found.' }, 404)` — names match across Tasks 1/2/3. `createApiDb` signature unchanged (`connectionString: string`): `Database`). No renamed symbols between tasks.
+**3. Type consistency**, `ApiEnv` defined once in `services/db.ts`, imported by `v1.ts` and all four route files; `acquireDb` sets `db: Database` and every handler reads `c.get('db'): Database`; `onError` uses `internalError(c)` and `notFound` returns `c.json({ error: 'Not found.' }, 404)`, names match across Tasks 1/2/3. `createApiDb` signature unchanged (`connectionString: string`): `Database`). No renamed symbols between tasks.
 
 **4. Probe-backed claims** (all run against this repo before writing the plan): root `onError` catches `v1` middleware/handler throws; root `notFound` catches `/nope` and `/api/v1/unknown`; `/health` with `DATABASE_URL: ''` stays 200 and never runs acquisition; middleware registered after routes does NOT compose (reorder enforced in Task 2 Step 2); missing-URL → `createApiDb` throws `TypeError` → 500+log; a refused-connection query throws in ~4–10ms (fast enough for the handler-throw test); `Hono<{ Bindings: Env }>` subapps mount cleanly under an `ApiEnv` parent (tsc clean) so Task 1 compiles before routes migrate; `tsc --noEmit` on the planned shapes passes. Baseline api suite = 32/7 (measured).

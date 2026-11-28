@@ -1,20 +1,20 @@
-# Product Requirements — Sevendays
+# Product Requirements: Sevendays
 
 ## Problem
 
 Sevendays is a photography studio with 3 branches. The company previously only accepted scheduled appointments for shoots, but some branches now also accept walk-ins. The company needs:
 
 1. A public landing site to showcase packages, services, and credibility, with appointment booking as the primary conversion action.
-2. An internal admin site to manage that content and view/manage scheduled appointments — built to absorb future feature demands from the business, not just cover today's needs.
+2. An internal admin site to manage that content and view/manage scheduled appointments, built to absorb future feature demands from the business, not just cover today's needs.
 
 ## Users
 
-- **Customers** — browse packages/services, pick a branch, book an appointment. No account required for v1 (booking is a guest flow).
-- **Admin/staff** — log in to the admin dashboard to manage appointments and edit site content. No distinction between roles in v1 (see "Future" below). _(Annotated 2026-11-14: ADR-0018, 2026-09-24, later split staff into owner + staff — user management is owner-only (the Users tab, M7 #221), content surfaces stay all-staff; the original line stands as the pre-M4 record.)_
+- **Customers**, browse packages/services, pick a branch, book an appointment. No account required for v1 (booking is a guest flow).
+- **Admin/staff**, log in to the admin dashboard to manage appointments and edit site content. No distinction between roles in v1 (see "Future" below). _(Annotated 2026-11-14: ADR-0018, 2026-09-24, later split staff into owner + staff, user management is owner-only (the Users tab, M7 #221), content surfaces stay all-staff; the original line stands as the pre-M4 record.)_
 
 ## V1 Scope (must-have)
 
-> _Delivery annotation (2026-09-22): "V1" below is the **product** v1 — the complete system this PRD describes. **Delivery** is versioned separately (owner rulings 2026-09-09/10, issue #62; `docs/specs/2026-09-11-delivery-versions-spec.md`, issue #76; ADR-0015): the free handover artifact "v1" is booking-free (landing + admin auth + CMS + the v1 production slice), while the booking flow and the appointments dashboard deliver as paid v2. The scope items below predate that split — read them through it._
+> _Delivery annotation (2026-09-22): "V1" below is the **product** v1, the complete system this PRD describes. **Delivery** is versioned separately (owner rulings 2026-09-09/10, issue #62; `docs/specs/2026-09-11-delivery-versions-spec.md`, issue #76; ADR-0015): the free handover artifact "v1" is booking-free (landing + admin auth + CMS + the v1 production slice), while the booking flow and the appointments dashboard deliver as paid v2. The scope items below predate that split, read them through it._
 
 ### Landing site (`apps/landing`)
 
@@ -54,7 +54,7 @@ These are **not** built in v1, but the admin data model and permissions should n
 
 - Walk-in queue/tracking per branch (distinct from scheduled appointments).
 - Staff/photographer-level scheduling (assigning a specific photographer to a booking).
-- Per-branch admin roles (today: any authenticated admin can see/edit everything). _(Annotated 2026-11-14: superseded in part by ADR-0018's owner/staff split — "any authenticated admin" is the pre-M4 record; per-branch roles remain future.)_
+- Per-branch admin roles (today: any authenticated admin can see/edit everything). _(Annotated 2026-11-14: superseded in part by ADR-0018's owner/staff split, "any authenticated admin" is the pre-M4 record; per-branch roles remain future.)_
 - Customer accounts / booking history / rescheduling by the customer themselves.
 - SMS notifications (only email via Resend in v1).
 

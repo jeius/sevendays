@@ -1,86 +1,86 @@
-# M6 Ticket 03 — The Audit Log's Write Side Implementation Plan
+# M6 Ticket 03, The Audit Log's Write Side Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Per repo AGENTS.md, tick completed boxes with the ✅ emoji (`- [✅]`), never plain `[x]`.
 
-**Goal:** The durable who/what/when record of CMS writes — the **Audit Log's write side** (`apps/api/CONTEXT.md` ## Observability, glossary term already landed with #175) — becomes executable code: a schema-born `audit_log` table whose rows are written **inside the mutation's own transaction**, one row per committed mutation *request* (a matrix full-replace and the atomic package save are each ONE row), across the nine entity routers plus the media commit. Fields: `occurredAt`, `actorId`, `actorEmail` (snapshotted at write), `entity`, `entityId`, `action` (create | update | deactivate | reorder), `summary` (name/slug, readable without joins), `requestId` (correlates the #183 Application Log's middleware-minted id). No before/after blobs. Only committed mutations record — a failed validation never opens a transaction; a mid-transaction failure rolls the row back with the write.
+**Goal:** The durable who/what/when record of CMS writes, the **Audit Log's write side** (`apps/api/CONTEXT.md` ## Observability, glossary term already landed with #175), becomes executable code: a schema-born `audit_log` table whose rows are written **inside the mutation's own transaction**, one row per committed mutation *request* (a matrix full-replace and the atomic package save are each ONE row), across the nine entity routers plus the media commit. Fields: `occurredAt`, `actorId`, `actorEmail` (snapshotted at write), `entity`, `entityId`, `action` (create | update | deactivate | reorder), `summary` (name/slug, readable without joins), `requestId` (correlates the #183 Application Log's middleware-minted id). No before/after blobs. Only committed mutations record, a failed validation never opens a transaction; a mid-transaction failure rolls the row back with the write.
 
-**Architecture:** Seven tasks: (1) `packages/db` — the `audit_log` table (schema file + generated migration 0008 + live apply + barrel export + the truncate-list pin, TDD'd through the derived truncate test); (2) `packages/types` — the audit vocabulary (the action/entity enums + the row schema) with contract tests; (3) `apps/api` — the audit module (`auditActor` + `writeAuditRow` + the spike-proven tx type), the `requestId` promoted into Hono Variables, and rows on the four simple families (branches, print-sizes, attires, addon-services) whose writes gain the transaction wrap; (4) studio-services CRUD + the two matrix full-replaces (audit inside the existing transactions); (5) the gallery families (categories, testimonials, photos — the media commit's row rides the photo persists) + the three order PUTs (reorder rows, `entityId` null); (6) the atomic package save (request-grain, the mid-tx rollback proof); (7) full gates + docs rotation + PR/merge + the v1 pick (pre-ruled PICK clean) + ledger row + issue close. No route, wire shape, or response changes anywhere — the write model's external behavior is byte-identical; the only observable additions are the table and its rows.
+**Architecture:** Seven tasks: (1) `packages/db`, the `audit_log` table (schema file + generated migration 0008 + live apply + barrel export + the truncate-list pin, TDD'd through the derived truncate test); (2) `packages/types`, the audit vocabulary (the action/entity enums + the row schema) with contract tests; (3) `apps/api`, the audit module (`auditActor` + `writeAuditRow` + the spike-proven tx type), the `requestId` promoted into Hono Variables, and rows on the four simple families (branches, print-sizes, attires, addon-services) whose writes gain the transaction wrap; (4) studio-services CRUD + the two matrix full-replaces (audit inside the existing transactions); (5) the gallery families (categories, testimonials, photos, the media commit's row rides the photo persists) + the three order PUTs (reorder rows, `entityId` null); (6) the atomic package save (request-grain, the mid-tx rollback proof); (7) full gates + docs rotation + PR/merge + the v1 pick (pre-ruled PICK clean) + ledger row + issue close. No route, wire shape, or response changes anywhere, the write model's external behavior is byte-identical; the only observable additions are the table and its rows.
 
-**Tech Stack:** drizzle-orm `0.45.2` + drizzle-kit `0.31.10` (installed — `pnpm --filter @sevendays/db list drizzle-orm drizzle-kit --depth 0`), zod `4.5.1`, hono `4.13.5`, vitest 4, pnpm + Turborepo, `gh` CLI. **Zero new dependencies.**
+**Tech Stack:** drizzle-orm `0.45.2` + drizzle-kit `0.31.10` (installed, `pnpm --filter @sevendays/db list drizzle-orm drizzle-kit --depth 0`), zod `4.5.1`, hono `4.13.5`, vitest 4, pnpm + Turborepo, `gh` CLI. **Zero new dependencies.**
 
-**Spec:** Implements ticket [#185 "M6 ticket 03: the Audit Log's write side — the transactional record"](https://github.com/jeius/sevendays/issues/185) (label `ready-for-agent`; blocked-by #183 — CLOSED 2026-10-05, unblocked), whose parent is the M6 spec `docs/specs/2026-10-05-m6-production-hardening-observability-spec.md` (issue #182 — § The Audit Log is this ticket's section; § Testing Decisions names the audit-row suites; § v1-pick classes pre-rule the payload PICK clean). Key recon facts (2026-10-06, main `94fe41e`, compose db up + healthy, tree clean outside the expected graphify-out dirt):
+**Spec:** Implements ticket [#185 "M6 ticket 03: the Audit Log's write side, the transactional record"](https://github.com/jeius/sevendays/issues/185) (label `ready-for-agent`; blocked-by #183, CLOSED 2026-10-05, unblocked), whose parent is the M6 spec `docs/specs/2026-10-05-m6-production-hardening-observability-spec.md` (issue #182, § The Audit Log is this ticket's section; § Testing Decisions names the audit-row suites; § v1-pick classes pre-rule the payload PICK clean). Key recon facts (2026-10-06, main `94fe41e`, compose db up + healthy, tree clean outside the expected graphify-out dirt):
 
-- **The mutation surface is exactly the #183 twin's 23 handler sites across nine routers** (`grep -n "logAdminMutation" apps/api/src/routes/*.ts` → 23 emit sites + 9 imports): branches/print-sizes/attires/addon-services/service-packages each POST `/` + PUT `/:id`; gallery-photos, gallery-categories, testimonials add `PUT /order`; studio-services adds `PUT /:id/branches` + `PUT /:id/addons`. No DELETE routes exist. Every audit write lands in the SERVICE (inside the transaction), not the route — the routes only build the actor context.
-- **The transaction map (the load-bearing recon):** the two matrix full-replaces (`setStudioServiceBranchMatrix` / `setStudioServiceAddonMatrix` in `services/admin-entities.ts`), the three order PUTs (`setGalleryCategoryOrder` / `setTestimonialOrder` / `setGalleryPhotoOrder` in `services/admin-gallery.ts`), and the atomic package save (`runPackageSave` in `services/admin-packages.ts`) already run inside `db.transaction(...)` — the audit insert joins those bodies as their LAST statement. The simple creates/updates (branches, print-sizes, attires, addon-services, studio-services, gallery categories, testimonials, gallery photos) are **single autocommit statements today** — each gains a `db.transaction` wrap so the audit row rides the write's own commit/rollback (the spec's ruling: "the transaction is the gate"). `guardUnique` wrappers compose cleanly around the new transactions (a 23505 inside the tx rolls the audit insert back with the write; the mapper still resolves the 400).
-- **The requestId seam exists but is not in context Variables:** `observability/request-context.ts`'s `requestLogging` (root-mounted before `/api/v1` in `src/index.ts`) mints `crypto.randomUUID()`, echoes it as `X-Request-Id`, and binds it to the child logger — but nothing `c.set`s it. This ticket adds `c.set('requestId', requestId)` + `requestId: string` to `RootEnv.Variables` (`observability/logger.ts`) and `ApiEnv.Variables` (`services/db.ts`), so `auditActor(c)` reads the SAME value the Application Log's lines and the response header carry — the correlation the spec rules.
-- **The actor:** `requireSession` (the admin root's ONE gate, `routes/admin.ts:23`) sets `c.get('session')` — BetterAuth's `SessionData`, `{ session, user }` with `user.id` and `user.email` (the `user.email` column is `notNull` in `packages/db/src/schema/auth.ts`). `updateBranchSchema` & co. carry `isActive: z.boolean().default(true)` (photo update requires it — `z.boolean()` no default): **post-validation `input.isActive` is always a boolean**, so the deactivate rule reads it directly.
-- **There is no standalone media-commit route** — `commitUpload` (`services/media.ts:100`) is bucket I/O only (HEAD → caps → promote → delete staging; no DB write), embedded in the gallery-photo persist (`commitStagingKey`) and the package-cover persist (`resolveCover`). The ticket's "plus the media commit" therefore means: the media-commit-carrying persists are in scope and their rows ARE the media commit's rows (the #183 ephemeral twin resolved it identically — `test/admin-mutation-log.test.ts`'s photo-commit test emits the `gallery-photo` mutation line). A dedicated `entity: 'media'` row does not exist and must not be invented.
-- **The tx-handle type is spike-proven** (2026-10-06, `apps/api` typecheck, spike file deleted after): `type AuditTx = Parameters<Parameters<Database['transaction']>[0]>[0]` resolves to the REAL drizzle transaction object — `.insert(<schema table>).values(...).returning()` typechecks against it with the inferred row shape, and a negative control (`toEqualTypeOf<number>()`) failed with the structural mismatch error, proving the assertions enforce (the type did not collapse to `any`).
-- **The truncate helper is barrel-derived:** `test/helpers/truncate.ts` walks `packages/db`'s schema barrel, so `audit_log` joins truncation automatically once exported — but `test/helpers/truncate.test.ts` pins the explicit 21-table list ("migrations 0000-0007") and must grow to 22 (Task 1, TDD entry point). Test isolation is preserved: `beforeEach` truncates `audit_log` with everything else.
-- **The write-model failure contract is resolve-typed, never thrown** (`services/admin-shared.ts`): `{ ok: false, reason, message, details }` — the new tests assert resolved failures (400/404) and empty tables, never `.rejects`. `AdminSaveError` is the one throw-inside-a-transaction channel (the package save's rollback mechanism) — Task 6's mid-tx test leans on it exactly as the existing rollback test does (`test/admin-packages.test.ts:352`).
-- **Baselines (live, 2026-10-06, compose db up):** `apps/api` = **27 files passed + 1 skipped (28) / 323 passed + 3 skipped** (AGENTS.md floors confirmed; the "close timed out after 10000ms" vitest-4 exit noise is pre-existing — judge the Test Files/Tests lines only). `packages/types` = **13 files / 112 tests**. `pnpm check` 35/35 turbo tasks. After this ticket: **api 27 files + 1 skipped / 338 passed + 3 skipped** (+4 Task 3, +3 Task 4, +5 Task 5, +3 Task 6 — no new api test FILES), **types 14 files / 118 tests** (+6 in Task 2's new file — six `it` blocks; the plan's original +4 was a miscount, corrected at execution). v1's api floor after the pick: 25 files + 1 skipped / **272** passed + 3 skipped expected (257 + the 15 booking-free audit tests — executor reconciles actuals). If any gate count differs, reconcile before proceeding — do not loosen assertions.
-- **Sibling fences (spec § Sequencing; `docs/plan.md` M6 block):** this ticket owns **M6 checkbox 4's write side ONLY — the box stays `- [ ]` until #188 (the owner-scoped viewer screen) lands it**; Task 7 annotates the box with the partial landing and leaves it unticked. NOT here, regardless of temptation: the Audit Log viewer screen, its nav entry, any admin/landing file at all, or **any read path for audit rows** (#188 — no GET route, no api-client wrapper, no server fn lands in #185); the metrics seam / dashboard / CF-GraphQL / PostHog (#186/#187); the smoke (#190); the runbook (#191); appointments/email/booking seams (outside the admin root; auth events are ruled out of the Audit Log's frame); `packages/api-client` (the wire is unchanged — no type drift to absorb); any new env var, secret, or binding (the audit write side is env-free); `worker-configuration.d.ts`; `packages/db/src/schema/relations.ts` (no FKs → no relations entries); the seed (the table is born empty — `packages/db/scripts/*` untouched); any ADR (the schema-based ruling is the spec's own — #175's closed fork + the landed glossary terms record it; this ticket implements, it does not fork); `observability/events.ts`'s emitter bodies beyond the one type alias (Task 3).
+- **The mutation surface is exactly the #183 twin's 23 handler sites across nine routers** (`grep -n "logAdminMutation" apps/api/src/routes/*.ts` → 23 emit sites + 9 imports): branches/print-sizes/attires/addon-services/service-packages each POST `/` + PUT `/:id`; gallery-photos, gallery-categories, testimonials add `PUT /order`; studio-services adds `PUT /:id/branches` + `PUT /:id/addons`. No DELETE routes exist. Every audit write lands in the SERVICE (inside the transaction), not the route, the routes only build the actor context.
+- **The transaction map (the load-bearing recon):** the two matrix full-replaces (`setStudioServiceBranchMatrix` / `setStudioServiceAddonMatrix` in `services/admin-entities.ts`), the three order PUTs (`setGalleryCategoryOrder` / `setTestimonialOrder` / `setGalleryPhotoOrder` in `services/admin-gallery.ts`), and the atomic package save (`runPackageSave` in `services/admin-packages.ts`) already run inside `db.transaction(...)`, the audit insert joins those bodies as their LAST statement. The simple creates/updates (branches, print-sizes, attires, addon-services, studio-services, gallery categories, testimonials, gallery photos) are **single autocommit statements today**, each gains a `db.transaction` wrap so the audit row rides the write's own commit/rollback (the spec's ruling: "the transaction is the gate"). `guardUnique` wrappers compose cleanly around the new transactions (a 23505 inside the tx rolls the audit insert back with the write; the mapper still resolves the 400).
+- **The requestId seam exists but is not in context Variables:** `observability/request-context.ts`'s `requestLogging` (root-mounted before `/api/v1` in `src/index.ts`) mints `crypto.randomUUID()`, echoes it as `X-Request-Id`, and binds it to the child logger, but nothing `c.set`s it. This ticket adds `c.set('requestId', requestId)` + `requestId: string` to `RootEnv.Variables` (`observability/logger.ts`) and `ApiEnv.Variables` (`services/db.ts`), so `auditActor(c)` reads the SAME value the Application Log's lines and the response header carry, the correlation the spec rules.
+- **The actor:** `requireSession` (the admin root's ONE gate, `routes/admin.ts:23`) sets `c.get('session')`, BetterAuth's `SessionData`, `{ session, user }` with `user.id` and `user.email` (the `user.email` column is `notNull` in `packages/db/src/schema/auth.ts`). `updateBranchSchema` & co. carry `isActive: z.boolean().default(true)` (photo update requires it, `z.boolean()` no default): **post-validation `input.isActive` is always a boolean**, so the deactivate rule reads it directly.
+- **There is no standalone media-commit route**, `commitUpload` (`services/media.ts:100`) is bucket I/O only (HEAD → caps → promote → delete staging; no DB write), embedded in the gallery-photo persist (`commitStagingKey`) and the package-cover persist (`resolveCover`). The ticket's "plus the media commit" therefore means: the media-commit-carrying persists are in scope and their rows ARE the media commit's rows (the #183 ephemeral twin resolved it identically, `test/admin-mutation-log.test.ts`'s photo-commit test emits the `gallery-photo` mutation line). A dedicated `entity: 'media'` row does not exist and must not be invented.
+- **The tx-handle type is spike-proven** (2026-10-06, `apps/api` typecheck, spike file deleted after): `type AuditTx = Parameters<Parameters<Database['transaction']>[0]>[0]` resolves to the REAL drizzle transaction object, `.insert(<schema table>).values(...).returning()` typechecks against it with the inferred row shape, and a negative control (`toEqualTypeOf<number>()`) failed with the structural mismatch error, proving the assertions enforce (the type did not collapse to `any`).
+- **The truncate helper is barrel-derived:** `test/helpers/truncate.ts` walks `packages/db`'s schema barrel, so `audit_log` joins truncation automatically once exported, but `test/helpers/truncate.test.ts` pins the explicit 21-table list ("migrations 0000-0007") and must grow to 22 (Task 1, TDD entry point). Test isolation is preserved: `beforeEach` truncates `audit_log` with everything else.
+- **The write-model failure contract is resolve-typed, never thrown** (`services/admin-shared.ts`): `{ ok: false, reason, message, details }`, the new tests assert resolved failures (400/404) and empty tables, never `.rejects`. `AdminSaveError` is the one throw-inside-a-transaction channel (the package save's rollback mechanism), Task 6's mid-tx test leans on it exactly as the existing rollback test does (`test/admin-packages.test.ts:352`).
+- **Baselines (live, 2026-10-06, compose db up):** `apps/api` = **27 files passed + 1 skipped (28) / 323 passed + 3 skipped** (AGENTS.md floors confirmed; the "close timed out after 10000ms" vitest-4 exit noise is pre-existing, judge the Test Files/Tests lines only). `packages/types` = **13 files / 112 tests**. `pnpm check` 35/35 turbo tasks. After this ticket: **api 27 files + 1 skipped / 338 passed + 3 skipped** (+4 Task 3, +3 Task 4, +5 Task 5, +3 Task 6, no new api test FILES), **types 14 files / 118 tests** (+6 in Task 2's new file, six `it` blocks; the plan's original +4 was a miscount, corrected at execution). v1's api floor after the pick: 25 files + 1 skipped / **272** passed + 3 skipped expected (257 + the 15 booking-free audit tests, executor reconciles actuals). If any gate count differs, reconcile before proceeding, do not loosen assertions.
+- **Sibling fences (spec § Sequencing; `docs/plan.md` M6 block):** this ticket owns **M6 checkbox 4's write side ONLY, the box stays `- [ ]` until #188 (the owner-scoped viewer screen) lands it**; Task 7 annotates the box with the partial landing and leaves it unticked. NOT here, regardless of temptation: the Audit Log viewer screen, its nav entry, any admin/landing file at all, or **any read path for audit rows** (#188, no GET route, no api-client wrapper, no server fn lands in #185); the metrics seam / dashboard / CF-GraphQL / PostHog (#186/#187); the smoke (#190); the runbook (#191); appointments/email/booking seams (outside the admin root; auth events are ruled out of the Audit Log's frame); `packages/api-client` (the wire is unchanged, no type drift to absorb); any new env var, secret, or binding (the audit write side is env-free); `worker-configuration.d.ts`; `packages/db/src/schema/relations.ts` (no FKs → no relations entries); the seed (the table is born empty, `packages/db/scripts/*` untouched); any ADR (the schema-based ruling is the spec's own, #175's closed fork + the landed glossary terms record it; this ticket implements, it does not fork); `observability/events.ts`'s emitter bodies beyond the one type alias (Task 3).
 
 ## Global Constraints
 
-- **Branch & baseline:** `feat/185-audit-log-write-side` off main `94fe41e` (plain checkout — single linear ticket, no worktree needed). This plan file is the branch's first commit. Commit messages follow the repo's `type(scope): … (#185)` squash style; every commit below is pinned verbatim. Evidence (test output, the migration SQL read) lands in gitignored `.superpowers/sdd/2026-10-06-185-audit-log-write-side/`.
-- **Gates (repo AGENTS.md, verbatim duties):** no manifest changes exist in this ticket — no `pnpm install` is owed. **After every `packages/db` or `packages/types` source change, run `pnpm build:packages` before any api typecheck/test run** (the api resolves both packages from built `dist/`; the test helpers import `@sevendays/db` and `@sevendays/db/migrate` the same way). Every task commits only with `pnpm check` green for the packages it touched (api + types tests need the compose db up: `docker compose up -d db` first). Biome canonical form via `pnpm --filter @sevendays/api fix` / `--filter @sevendays/types fix` / `--filter @sevendays/db fix` before committing — accept its rewrites. Never commit secrets. Tick checklist boxes with `- [✅]`, never `[x]` (this plan file and `docs/plan.md` alike). Run `graphify update .` at close (code was modified; `graphify-out/graph.json` exists).
-- **Live-DB gate (binding, from the M5 precedent):** the one `db:migrate` run against live Supabase (Task 1) requires `DATABASE_MIGRATE_URL` (session-mode pooler, port 5432) in gitignored `packages/db/.env`. Verify first with `node packages/db/scripts/check-env.mjs` (expect `GATE: PASS`); never paste a connection string into chat, a commit, the PR body, or the evidence dir. The compose TEST database needs no manual migrate — `apps/api/test/global-setup.ts` applies pending migrations before every suite run.
-- **Migration discipline (house rule, binding):** migrations are generated via `pnpm --filter @sevendays/db db:generate` and NEVER hand-edited in `packages/db/migrations`. Drizzle-kit names the file itself (`0008_<slug>.sql` — record the actual name in the Task 1 commit body and Task 7's progress note). After generating, read the emitted SQL against the shape pinned in Task 1: if drizzle emits something materially different (a different constraint form, extra statements), STOP and report — do not edit the file to match the plan. The table is born EMPTY on a live DB with no backfill concerns — there is deliberately no two-migration backfill variant in this ticket.
-- **The row contract (spec-verbatim, binding):** table `audit_log`, one row per committed mutation REQUEST — a matrix full-replace and the atomic package save are each one row, never one per affected DB row. Fields exactly: `id` (uuid PK), `occurredAt` (timestamptz, `defaultNow()`), `actorId` (text — BetterAuth user id), `actorEmail` (text — snapshotted at write; the durable "who" even if the staff email later changes), `entity` (text — one of the nine names), `entityId` (text, NULLABLE — null for the family-level order PUTs, matching the #183 twin's `entityId: null` ruling), `action` (text — `create` | `update` | `deactivate` | `reorder`, the spec-pinned enum), `summary` (text, nullable), `requestId` (text — the #183 middleware-minted id; equals the served `X-Request-Id` and every Application Log line of the same request). **No before/after blobs. No FKs by design** — the record outlives both the actor (`actorId` unconstrained) and the row it names (`entityId` is polymorphic across nine families). One index only: `audit_log_occurred_at_idx` on `occurred_at` (the viewer's newest-first sort; #188 may add filter indexes if it needs them). Retention unbounded — no prune job.
-- **The write-placement law (binding):** `writeAuditRow(tx, ...)` is called as the LAST statement of the mutation's transaction body, over the transaction's own `tx` handle — never a fresh `db` handle, never at the route layer after the fact. A write that cannot commit its audit row must not commit at all (an audit-insert failure aborts the whole transaction — correct and intentional). Failed validations resolve BEFORE any transaction opens and record nothing; the 401 path never reaches a service.
-- **Vocabulary pins (agent rulings, owner-reviewable at PR — the spec pins the enum and the field set but not these mappings):** (a) `action` computation — POST → `create`; entity PUT → `current.isActive && input.isActive === false ? 'deactivate' : 'update'` (reactivation and edits of already-deactivated rows are `update`; a row born deactivated via POST `isActive: false` is still `create`); matrix PUTs → `update`; order PUTs → `reorder` with `entityId` null AND `summary` null (the family, not a row). (b) `summary` per entity — branch: `name`; print-size: `code`; attire: `name`; addon-service: `name`; studio-service: `name` (matrices included — the service row's name); service-package: `input.name`; gallery-category: `name`; testimonial: `person`; gallery-photo: `row.title ?? row.r2Key` (the immutable final key — a stable, join-free identifier for untitled photos). (c) table name `audit_log` singular with drizzle symbol `auditLog` (it names the log, the glossary term; BetterAuth's generated `user`/`session` already seat singular names in the barrel). (d) the types' `entityId` is `z.uuid().nullable()` (every domain id is a uuid; `actorId` stays free-text).
-- **`packages/types` is the vocabulary's home (ticket-ruled):** the row's types land in `packages/types/src/audit.ts` (the action + entity enums, the row schema), exported from the barrel. `apps/api`'s `AdminMutationEntity` (observability/events.ts) becomes a type alias of the canonical `AuditEntity` — one list, no drift between the ephemeral and durable records.
-- **The requestId correlation is structural:** `auditActor(c)` reads `c.get('requestId')` (set by `requestLogging` BEFORE `next()`), so the row's `requestId` equals the `X-Request-Id` header and the Application Log's lines by construction — asserted in the Task 3 and Task 6 tests via `res.headers.get('x-request-id')`.
-- **PII stance (binding):** `actorEmail` in the audit TABLE is the spec's own ruling (the snapshot is the durable "who") — it is NOT a license for the Application Log: `logAdminMutation` and every other event class stay email-free (#183's enumerated schemas, unchanged). No raw request body, no IP/UA/referrer lands in any audit field; `summary` carries only the name/slug-class literals pinned above.
-- **Copy pins are semantic, formatting is biome's:** every fenced file/comment/code block below lands verbatim in content; the package `fix` scripts then normalize quoting/ordering/import order to house style — accept the rewrite, commit the result.
-- **Scope fence (verbatim):** Tasks 1–6 edit only: `packages/db/src/schema/audit-log.ts` (create), `packages/db/src/schema/index.ts` (one export line), `packages/db/migrations/0008_*.sql` + `meta/_journal.json` (generated), `packages/types/src/audit.ts` + `audit.test.ts` (create), `packages/types/src/index.ts` (one export line), `apps/api/src/observability/request-context.ts` + `logger.ts` + `events.ts`, `apps/api/src/services/db.ts` (the ApiEnv Variables line), `apps/api/src/services/audit.ts` (create), `apps/api/src/services/admin-entities.ts` + `admin-gallery.ts` + `admin-packages.ts`, `apps/api/src/routes/admin-branches.ts` + `admin-print-sizes.ts` + `admin-attires.ts` + `admin-addon-services.ts` + `admin-studio-services.ts` + `admin-gallery-categories.ts` + `admin-testimonials.ts` + `gallery-photos.ts` + `admin-service-packages.ts`, `apps/api/test/helpers/truncate.test.ts`, `apps/api/test/admin-entities.test.ts` + `admin-studio-services.test.ts` + `admin-gallery.test.ts` + `admin-packages.test.ts`. Task 7 rotates `docs/plan.md` (M6 box 4 — ANNOTATED, not ticked), `docs/progress.md`, `AGENTS.md` (floors line + status bullet), and `docs/agents/v1-picks.md` (ledger row, post-merge). NOT here: everything in the header's sibling-fences bullet.
+- **Branch & baseline:** `feat/185-audit-log-write-side` off main `94fe41e` (plain checkout, single linear ticket, no worktree needed). This plan file is the branch's first commit. Commit messages follow the repo's `type(scope): … (#185)` squash style; every commit below is pinned verbatim. Evidence (test output, the migration SQL read) lands in gitignored `.superpowers/sdd/2026-10-06-185-audit-log-write-side/`.
+- **Gates (repo AGENTS.md, verbatim duties):** no manifest changes exist in this ticket, no `pnpm install` is owed. **After every `packages/db` or `packages/types` source change, run `pnpm build:packages` before any api typecheck/test run** (the api resolves both packages from built `dist/`; the test helpers import `@sevendays/db` and `@sevendays/db/migrate` the same way). Every task commits only with `pnpm check` green for the packages it touched (api + types tests need the compose db up: `docker compose up -d db` first). Biome canonical form via `pnpm --filter @sevendays/api fix` / `--filter @sevendays/types fix` / `--filter @sevendays/db fix` before committing, accept its rewrites. Never commit secrets. Tick checklist boxes with `- [✅]`, never `[x]` (this plan file and `docs/plan.md` alike). Run `graphify update .` at close (code was modified; `graphify-out/graph.json` exists).
+- **Live-DB gate (binding, from the M5 precedent):** the one `db:migrate` run against live Supabase (Task 1) requires `DATABASE_MIGRATE_URL` (session-mode pooler, port 5432) in gitignored `packages/db/.env`. Verify first with `node packages/db/scripts/check-env.mjs` (expect `GATE: PASS`); never paste a connection string into chat, a commit, the PR body, or the evidence dir. The compose TEST database needs no manual migrate, `apps/api/test/global-setup.ts` applies pending migrations before every suite run.
+- **Migration discipline (house rule, binding):** migrations are generated via `pnpm --filter @sevendays/db db:generate` and NEVER hand-edited in `packages/db/migrations`. Drizzle-kit names the file itself (`0008_<slug>.sql`, record the actual name in the Task 1 commit body and Task 7's progress note). After generating, read the emitted SQL against the shape pinned in Task 1: if drizzle emits something materially different (a different constraint form, extra statements), STOP and report, do not edit the file to match the plan. The table is born EMPTY on a live DB with no backfill concerns, there is deliberately no two-migration backfill variant in this ticket.
+- **The row contract (spec-verbatim, binding):** table `audit_log`, one row per committed mutation REQUEST, a matrix full-replace and the atomic package save are each one row, never one per affected DB row. Fields exactly: `id` (uuid PK), `occurredAt` (timestamptz, `defaultNow()`), `actorId` (text, BetterAuth user id), `actorEmail` (text, snapshotted at write; the durable "who" even if the staff email later changes), `entity` (text, one of the nine names), `entityId` (text, NULLABLE, null for the family-level order PUTs, matching the #183 twin's `entityId: null` ruling), `action` (text, `create` | `update` | `deactivate` | `reorder`, the spec-pinned enum), `summary` (text, nullable), `requestId` (text, the #183 middleware-minted id; equals the served `X-Request-Id` and every Application Log line of the same request). **No before/after blobs. No FKs by design**, the record outlives both the actor (`actorId` unconstrained) and the row it names (`entityId` is polymorphic across nine families). One index only: `audit_log_occurred_at_idx` on `occurred_at` (the viewer's newest-first sort; #188 may add filter indexes if it needs them). Retention unbounded, no prune job.
+- **The write-placement law (binding):** `writeAuditRow(tx, ...)` is called as the LAST statement of the mutation's transaction body, over the transaction's own `tx` handle, never a fresh `db` handle, never at the route layer after the fact. A write that cannot commit its audit row must not commit at all (an audit-insert failure aborts the whole transaction, correct and intentional). Failed validations resolve BEFORE any transaction opens and record nothing; the 401 path never reaches a service.
+- **Vocabulary pins (agent rulings, owner-reviewable at PR, the spec pins the enum and the field set but not these mappings):** (a) `action` computation, POST → `create`; entity PUT → `current.isActive && input.isActive === false ? 'deactivate' : 'update'` (reactivation and edits of already-deactivated rows are `update`; a row born deactivated via POST `isActive: false` is still `create`); matrix PUTs → `update`; order PUTs → `reorder` with `entityId` null AND `summary` null (the family, not a row). (b) `summary` per entity, branch: `name`; print-size: `code`; attire: `name`; addon-service: `name`; studio-service: `name` (matrices included, the service row's name); service-package: `input.name`; gallery-category: `name`; testimonial: `person`; gallery-photo: `row.title ?? row.r2Key` (the immutable final key, a stable, join-free identifier for untitled photos). (c) table name `audit_log` singular with drizzle symbol `auditLog` (it names the log, the glossary term; BetterAuth's generated `user`/`session` already seat singular names in the barrel). (d) the types' `entityId` is `z.uuid().nullable()` (every domain id is a uuid; `actorId` stays free-text).
+- **`packages/types` is the vocabulary's home (ticket-ruled):** the row's types land in `packages/types/src/audit.ts` (the action + entity enums, the row schema), exported from the barrel. `apps/api`'s `AdminMutationEntity` (observability/events.ts) becomes a type alias of the canonical `AuditEntity`, one list, no drift between the ephemeral and durable records.
+- **The requestId correlation is structural:** `auditActor(c)` reads `c.get('requestId')` (set by `requestLogging` BEFORE `next()`), so the row's `requestId` equals the `X-Request-Id` header and the Application Log's lines by construction, asserted in the Task 3 and Task 6 tests via `res.headers.get('x-request-id')`.
+- **PII stance (binding):** `actorEmail` in the audit TABLE is the spec's own ruling (the snapshot is the durable "who"), it is NOT a license for the Application Log: `logAdminMutation` and every other event class stay email-free (#183's enumerated schemas, unchanged). No raw request body, no IP/UA/referrer lands in any audit field; `summary` carries only the name/slug-class literals pinned above.
+- **Copy pins are semantic, formatting is biome's:** every fenced file/comment/code block below lands verbatim in content; the package `fix` scripts then normalize quoting/ordering/import order to house style, accept the rewrite, commit the result.
+- **Scope fence (verbatim):** Tasks 1–6 edit only: `packages/db/src/schema/audit-log.ts` (create), `packages/db/src/schema/index.ts` (one export line), `packages/db/migrations/0008_*.sql` + `meta/_journal.json` (generated), `packages/types/src/audit.ts` + `audit.test.ts` (create), `packages/types/src/index.ts` (one export line), `apps/api/src/observability/request-context.ts` + `logger.ts` + `events.ts`, `apps/api/src/services/db.ts` (the ApiEnv Variables line), `apps/api/src/services/audit.ts` (create), `apps/api/src/services/admin-entities.ts` + `admin-gallery.ts` + `admin-packages.ts`, `apps/api/src/routes/admin-branches.ts` + `admin-print-sizes.ts` + `admin-attires.ts` + `admin-addon-services.ts` + `admin-studio-services.ts` + `admin-gallery-categories.ts` + `admin-testimonials.ts` + `gallery-photos.ts` + `admin-service-packages.ts`, `apps/api/test/helpers/truncate.test.ts`, `apps/api/test/admin-entities.test.ts` + `admin-studio-services.test.ts` + `admin-gallery.test.ts` + `admin-packages.test.ts`. Task 7 rotates `docs/plan.md` (M6 box 4, ANNOTATED, not ticked), `docs/progress.md`, `AGENTS.md` (floors line + status bullet), and `docs/agents/v1-picks.md` (ledger row, post-merge). NOT here: everything in the header's sibling-fences bullet.
 
 ## File Structure
 
 ```text
 packages/
   db/
-    src/schema/audit-log.ts                 # create (Task 1) — the audit_log table
-    src/schema/index.ts                     # modify (Task 1) — export the new module
+    src/schema/audit-log.ts                 # create (Task 1), the audit_log table
+    src/schema/index.ts                     # modify (Task 1), export the new module
     migrations/0008_*.sql + meta/           # generated (Task 1)
   types/
-    src/audit.ts                            # create (Task 2) — enums + row schema
-    src/audit.test.ts                       # create (Task 2) — contract tests
-    src/index.ts                            # modify (Task 2) — one export line
+    src/audit.ts                            # create (Task 2), enums + row schema
+    src/audit.test.ts                       # create (Task 2), contract tests
+    src/index.ts                            # modify (Task 2), one export line
 apps/api/
   src/
     observability/
-      request-context.ts                    # modify (Task 3) — c.set('requestId', …)
-      logger.ts                             # modify (Task 3) — RootEnv gains requestId
-      events.ts                             # modify (Task 3) — AdminMutationEntity = AuditEntity
+      request-context.ts                    # modify (Task 3), c.set('requestId', …)
+      logger.ts                             # modify (Task 3), RootEnv gains requestId
+      events.ts                             # modify (Task 3), AdminMutationEntity = AuditEntity
     services/
-      db.ts                                 # modify (Task 3) — ApiEnv gains requestId
-      audit.ts                              # create (Task 3) — auditActor + writeAuditRow + AuditTx
-      admin-entities.ts                     # modify (Tasks 3+4) — 8 simple fns + studio CRUD + 2 matrices
-      admin-gallery.ts                      # modify (Task 5) — 9 fns incl. the 3 order PUTs
-      admin-packages.ts                     # modify (Task 6) — the atomic save's audit ride
+      db.ts                                 # modify (Task 3), ApiEnv gains requestId
+      audit.ts                              # create (Task 3), auditActor + writeAuditRow + AuditTx
+      admin-entities.ts                     # modify (Tasks 3+4), 8 simple fns + studio CRUD + 2 matrices
+      admin-gallery.ts                      # modify (Task 5), 9 fns incl. the 3 order PUTs
+      admin-packages.ts                     # modify (Task 6), the atomic save's audit ride
     routes/
-      admin-branches.ts                     # modify (Task 3) — auditActor at 2 sites
-      admin-print-sizes.ts                  # modify (Task 3) — 2 sites
-      admin-attires.ts                      # modify (Task 3) — 2 sites
-      admin-addon-services.ts               # modify (Task 3) — 2 sites
-      admin-studio-services.ts              # modify (Task 4) — 4 sites
-      gallery-photos.ts                     # modify (Task 5) — 3 sites
-      admin-gallery-categories.ts           # modify (Task 5) — 3 sites
-      admin-testimonials.ts                 # modify (Task 5) — 3 sites
-      admin-service-packages.ts             # modify (Task 6) — 2 sites
+      admin-branches.ts                     # modify (Task 3), auditActor at 2 sites
+      admin-print-sizes.ts                  # modify (Task 3), 2 sites
+      admin-attires.ts                      # modify (Task 3), 2 sites
+      admin-addon-services.ts               # modify (Task 3), 2 sites
+      admin-studio-services.ts              # modify (Task 4), 4 sites
+      gallery-photos.ts                     # modify (Task 5), 3 sites
+      admin-gallery-categories.ts           # modify (Task 5), 3 sites
+      admin-testimonials.ts                 # modify (Task 5), 3 sites
+      admin-service-packages.ts             # modify (Task 6), 2 sites
   test/
-    helpers/truncate.test.ts                # modify (Task 1) — 21 → 22 tables
-    admin-entities.test.ts                  # modify (Task 3) — +4 audit tests
-    admin-studio-services.test.ts           # modify (Task 4) — +3
-    admin-gallery.test.ts                   # modify (Task 5) — +5
-    admin-packages.test.ts                  # modify (Task 6) — +3
+    helpers/truncate.test.ts                # modify (Task 1), 21 → 22 tables
+    admin-entities.test.ts                  # modify (Task 3), +4 audit tests
+    admin-studio-services.test.ts           # modify (Task 4), +3
+    admin-gallery.test.ts                   # modify (Task 5), +5
+    admin-packages.test.ts                  # modify (Task 6), +3
 ```
 
 ---
 
-### Task 1: `packages/db` — the `audit_log` table, migration 0008, live apply (TDD through the truncate pin)
+### Task 1: `packages/db`, the `audit_log` table, migration 0008, live apply (TDD through the truncate pin)
 
 **Files:**
 - Modify (test-first): `apps/api/test/helpers/truncate.test.ts`
@@ -96,7 +96,7 @@ apps/api/
 
 - [ ] **Step 1: Write the failing truncate pin**
 
-In `apps/api/test/helpers/truncate.test.ts`, change the second test to expect the new table (the list is `.sort()`ed — `audit_log` lands AFTER `attires`: ASCII sort orders `attires` < `audit_log`; the example order below is the actual sort output, corrected by controller ruling during execution):
+In `apps/api/test/helpers/truncate.test.ts`, change the second test to expect the new table (the list is `.sort()`ed, `audit_log` lands AFTER `attires`: ASCII sort orders `attires` < `audit_log`; the example order below is the actual sort output, corrected by controller ruling during execution):
 
 ```ts
   it('still truncates exactly the twenty-two known public tables (migrations 0000-0008)', () => {
@@ -130,7 +130,7 @@ In `apps/api/test/helpers/truncate.test.ts`, change the second test to expect th
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `pnpm build:packages && pnpm --filter @sevendays/api exec vitest run test/helpers/truncate.test.ts`
-Expected: FAIL — `publicTableNames()` returns the 21-entry list without `audit_log` (the barrel walk finds no such table). If the run instead fails on db reachability, start the compose db (`docker compose up -d db`) and rerun.
+Expected: FAIL, `publicTableNames()` returns the 21-entry list without `audit_log` (the barrel walk finds no such table). If the run instead fails on db reachability, start the compose db (`docker compose up -d db`) and rerun.
 
 - [ ] **Step 3: Create the schema file and export it**
 
@@ -139,19 +139,19 @@ Create `packages/db/src/schema/audit-log.ts`:
 ```ts
 import { index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
-// The Audit Log (M6 #185, glossary — apps/api/CONTEXT.md ## Observability):
-// the durable who/what/when of every committed CMS write — ONE row per
+// The Audit Log (M6 #185, glossary, apps/api/CONTEXT.md ## Observability):
+// the durable who/what/when of every committed CMS write, ONE row per
 // mutation REQUEST (a matrix full-replace and the atomic package save are
 // each one row), written INSIDE the mutation's own transaction so the row
 // exists exactly when the write committed and never otherwise: failed
 // validations resolve before any transaction opens, and a mid-transaction
 // throw rolls the row back with the write. actorEmail is snapshotted at
 // write (the durable "who" even after a staff email changes). No FKs by
-// design — the record outlives both the actor and the row it names
+// design, the record outlives both the actor and the row it names
 // (entityId is polymorphic across the nine entity families, null for the
 // family-level order PUTs). No before/after blobs (diffing is v2-if-ever).
 // Retention unbounded: a 3-branch studio writes rows per week, not per
-// minute (the spec's ruling — no prune job, no export in M6).
+// minute (the spec's ruling, no prune job, no export in M6).
 export const auditLog = pgTable(
   'audit_log',
   {
@@ -169,7 +169,7 @@ export const auditLog = pgTable(
 );
 ```
 
-In `packages/db/src/schema/index.ts`, add the export in alphabetical position (BEFORE `auth.js` — `audit-log.js` sorts first; corrected by controller ruling during execution):
+In `packages/db/src/schema/index.ts`, add the export in alphabetical position (BEFORE `auth.js`, `audit-log.js` sorts first; corrected by controller ruling during execution):
 
 ```ts
 export * from './audit-log.js';
@@ -195,26 +195,26 @@ CREATE TABLE "audit_log" (
 CREATE INDEX "audit_log_occurred_at_idx" ON "audit_log" USING btree ("occurred_at");
 ```
 
-If drizzle emits something materially different, STOP and report — do not edit the file.
+If drizzle emits something materially different, STOP and report, do not edit the file.
 
 - [ ] **Step 5: Apply to the live DB (owner-env gate)**
 
 Run: `node packages/db/scripts/check-env.mjs` (expect `GATE: PASS`), then `pnpm --filter @sevendays/db db:migrate`.
-Expected: migration 0008 applied to live Supabase (the table is born empty — nothing else changes there). The compose test db needs nothing: the api's global-setup migrates it on the next suite run.
+Expected: migration 0008 applied to live Supabase (the table is born empty, nothing else changes there). The compose test db needs nothing: the api's global-setup migrates it on the next suite run.
 
 - [ ] **Step 6: Run the truncate pin to verify it passes**
 
 Run: `pnpm build:packages && pnpm --filter @sevendays/api exec vitest run test/helpers/truncate.test.ts`
-Expected: PASS (2 tests) — the derived list now carries `audit_log`, and global-setup applied 0008 to the compose db before the run.
+Expected: PASS (2 tests), the derived list now carries `audit_log`, and global-setup applied 0008 to the compose db before the run.
 
 - [ ] **Step 7: Commit**
 
 ```bash
 git add packages/db/src/schema packages/db/migrations apps/api/test/helpers/truncate.test.ts
-git commit -m "feat(db): the audit_log table — migration 0008 + barrel + truncate pin (#185)"
+git commit -m "feat(db): the audit_log table, migration 0008 + barrel + truncate pin (#185)"
 ```
 
-### Task 2: `packages/types` — the audit vocabulary + contract tests (TDD)
+### Task 2: `packages/types`, the audit vocabulary + contract tests (TDD)
 
 **Files:**
 - Create (test-first): `packages/types/src/audit.test.ts`
@@ -225,7 +225,7 @@ git commit -m "feat(db): the audit_log table — migration 0008 + barrel + trunc
 - Consumes: Task 1's column contract (the schema mirrors the table exactly).
 - Produces (what Tasks 3–6 + #188 rely on): `auditActionSchema: ZodEnum` over `'create' | 'update' | 'deactivate' | 'reorder'` + `type AuditAction`; `auditEntitySchema` over the nine names (`'branch' | 'print-size' | 'gallery-photo' | 'attire' | 'addon-service' | 'studio-service' | 'service-package' | 'gallery-category' | 'testimonial'`) + `type AuditEntity`; `auditLogRowSchema` (the full row: `id` uuid, `occurredAt` coerced date, `actorId`/`actorEmail` non-empty strings, `entity`/`action` the enums, `entityId` uuid-or-null, `summary` string-or-null, `requestId` non-empty string) + `type AuditLogRow`.
 
-**Not here:** any wire/route schema (no API route serves these rows in #185 — #188 consumes them); `apps/api`'s events.ts (Task 3); the drizzle side (Task 1, done).
+**Not here:** any wire/route schema (no API route serves these rows in #185, #188 consumes them); `apps/api`'s events.ts (Task 3); the drizzle side (Task 1, done).
 
 - [ ] **Step 1: Write the failing contract tests**
 
@@ -238,7 +238,7 @@ import { auditActionSchema, auditEntitySchema, auditLogRowSchema } from './audit
 // The Audit Log row's contract (M6 #185, spec § The Audit Log): the enum
 // vocabulary is the spec's own pin; the row schema mirrors packages/db's
 // audit_log table 1:1 so #188's reads parse what the write side stores.
-// Assertions run on PARSED OUTPUT (zod strips unknown keys — the strip is
+// Assertions run on PARSED OUTPUT (zod strips unknown keys, the strip is
 // proven by the output's key set, never by expecting a throw).
 
 const fullRow = {
@@ -260,7 +260,7 @@ describe('auditActionSchema', () => {
     }
   });
 
-  it('rejects anything else — delete is not in the vocabulary', () => {
+  it('rejects anything else, delete is not in the vocabulary', () => {
     expect(auditActionSchema.safeParse('delete').success).toBe(false);
   });
 });
@@ -317,7 +317,7 @@ describe('auditLogRowSchema', () => {
 - [ ] **Step 2: Run to verify it fails**
 
 Run: `pnpm --filter @sevendays/types test`
-Expected: FAIL — `Cannot find module './audit.js'` (or the runner's equivalent for a missing import).
+Expected: FAIL, `Cannot find module './audit.js'` (or the runner's equivalent for a missing import).
 
 - [ ] **Step 3: Create the schema module and export it**
 
@@ -330,7 +330,7 @@ import { z } from 'zod';
 // who/what/when of a committed CMS write. The action enum is the spec's
 // pin (create | update | deactivate | reorder); the entity names are the
 // nine admin-router segments (the same vocabulary the Application Log's
-// admin_mutation events carry — one list, canonicalized here). This schema
+// admin_mutation events carry, one list, canonicalized here). This schema
 // mirrors packages/db's audit_log table 1:1: the write side inserts rows
 // that satisfy it, and the #188 viewer parses rows through it. No
 // before/after fields exist anywhere in the contract (v2-if-ever).
@@ -367,7 +367,7 @@ export const auditLogRowSchema = z.object({
 export type AuditLogRow = z.infer<typeof auditLogRowSchema>;
 ```
 
-In `packages/types/src/index.ts`, add the export in alphabetical position (BETWEEN `attire.js` AND `branch.js` — `audit` sorts after `attire`, before `branch`; the plan's original "first line" was wrong, corrected by controller ruling during execution):
+In `packages/types/src/index.ts`, add the export in alphabetical position (BETWEEN `attire.js` AND `branch.js`, `audit` sorts after `attire`, before `branch`; the plan's original "first line" was wrong, corrected by controller ruling during execution):
 
 ```ts
 export * from './audit.js';
@@ -376,36 +376,36 @@ export * from './audit.js';
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `pnpm --filter @sevendays/types test && pnpm --filter @sevendays/types typecheck`
-Expected: PASS — **14 files / 118 tests** (13/112 + this file's 6). Then `pnpm build:packages` (the api consumes the enums from `dist/` starting Task 3).
+Expected: PASS, **14 files / 118 tests** (13/112 + this file's 6). Then `pnpm build:packages` (the api consumes the enums from `dist/` starting Task 3).
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add packages/types/src
-git commit -m "feat(types): the audit vocabulary — action/entity enums + the row schema (#185)"
+git commit -m "feat(types): the audit vocabulary, action/entity enums + the row schema (#185)"
 ```
 
-### Task 3: `apps/api` — the audit module, requestId in Variables, rows on the four simple families (TDD)
+### Task 3: `apps/api`, the audit module, requestId in Variables, rows on the four simple families (TDD)
 
 **Files:**
 - Modify (test-first): `apps/api/test/admin-entities.test.ts`
 - Create: `apps/api/src/services/audit.ts`
 - Modify: `apps/api/src/observability/request-context.ts`, `apps/api/src/observability/logger.ts`, `apps/api/src/observability/events.ts`, `apps/api/src/services/db.ts`
-- Modify: `apps/api/src/services/admin-entities.ts` (branches, print-sizes, attires, addon-services — 8 functions)
+- Modify: `apps/api/src/services/admin-entities.ts` (branches, print-sizes, attires, addon-services, 8 functions)
 - Modify: `apps/api/src/routes/admin-branches.ts`, `admin-print-sizes.ts`, `admin-attires.ts`, `admin-addon-services.ts` (8 call sites)
 
 **Interfaces:**
 - Consumes: Task 1's `auditLog` table; Task 2's `AuditAction`/`AuditEntity`; the #183 seams (`requestLogging`, `c.get('session')`, `c.get('logger')`).
-- Produces (what Tasks 4–6 rely on, exact signatures): from `services/audit.ts` — `type AuditActor = { actorId: string; actorEmail: string; requestId: string }`, `type AuditWrite = { entity: AuditEntity; entityId: string | null; action: AuditAction; summary: string | null }`, `type AuditTx = Parameters<Parameters<Database['transaction']>[0]>[0]`, `auditActor(c: Context<ApiEnv>): AuditActor`, `writeAuditRow(tx: AuditTx, actor: AuditActor, entry: AuditWrite): Promise<void>`. Service signature convention for the whole ticket: **the `AuditActor` param sits second, after `db` (or after `env` where a service carries one), before ids/inputs** — `createAdminBranch(db, audit, input)`, `updateAdminBranch(db, audit, id, input)`. Context growth: `RootEnv['Variables']` and `ApiEnv['Variables']` each gain `requestId: string`.
+- Produces (what Tasks 4–6 rely on, exact signatures): from `services/audit.ts`, `type AuditActor = { actorId: string; actorEmail: string; requestId: string }`, `type AuditWrite = { entity: AuditEntity; entityId: string | null; action: AuditAction; summary: string | null }`, `type AuditTx = Parameters<Parameters<Database['transaction']>[0]>[0]`, `auditActor(c: Context<ApiEnv>): AuditActor`, `writeAuditRow(tx: AuditTx, actor: AuditActor, entry: AuditWrite): Promise<void>`. Service signature convention for the whole ticket: **the `AuditActor` param sits second, after `db` (or after `env` where a service carries one), before ids/inputs**, `createAdminBranch(db, audit, input)`, `updateAdminBranch(db, audit, id, input)`. Context growth: `RootEnv['Variables']` and `ApiEnv['Variables']` each gain `requestId: string`.
 
 **Not here:** studio-services/matrices (Task 4); the gallery families (Task 5); the package save (Task 6); any read path for audit rows.
 
 - [ ] **Step 1: Write the failing tests**
 
-In `apps/api/test/admin-entities.test.ts`: extend the import from `@sevendays/db` to include `auditLog`, extend the vitest import to include `vi`, and append this describe block at the end of the file (the `app`/`db`/`url`/`testEnv`/`bearer`/`signUpSession` bindings are the file's existing ones; `authed` does NOT exist in this file — copy it verbatim from `test/admin-mutation-log.test.ts`'s `authed` helper, the sibling pattern):
+In `apps/api/test/admin-entities.test.ts`: extend the import from `@sevendays/db` to include `auditLog`, extend the vitest import to include `vi`, and append this describe block at the end of the file (the `app`/`db`/`url`/`testEnv`/`bearer`/`signUpSession` bindings are the file's existing ones; `authed` does NOT exist in this file, copy it verbatim from `test/admin-mutation-log.test.ts`'s `authed` helper, the sibling pattern):
 
 ```ts
-describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => {
+describe('audit rows (M6 #185, one per committed mutation, tx-gated)', () => {
   const rows = async () => db.select().from(auditLog);
 
   it('POST branches → exactly one row with the ruled fields; requestId = the served X-Request-Id AND the admin_mutation line (the Application Log correlation)', async () => {
@@ -484,7 +484,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
 
   it('failed writes record nothing: a 400 (duplicate name), a 404 (unknown id), and a 401 (anonymous) each leave the table empty', async () => {
     const dup = await authed('POST', '/api/v1/admin/branches', 'audit-dup-a@sevendays.test', {
-      name: 'Test Branch A', // fixture name — the uniqueness collision
+      name: 'Test Branch A', // fixture name, the uniqueness collision
       address: 'X St',
       phone: '+63 900 000 000',
     });
@@ -538,7 +538,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
 - [ ] **Step 2: Run to verify they fail**
 
 Run: `pnpm --filter @sevendays/api exec vitest run test/admin-entities.test.ts`
-Expected: FAIL — the four new tests find zero audit rows (`expected 1, received 0` class); the file's existing tests keep passing.
+Expected: FAIL, the four new tests find zero audit rows (`expected 1, received 0` class); the file's existing tests keep passing.
 
 - [ ] **Step 3: Promote requestId into context Variables**
 
@@ -551,7 +551,7 @@ export const requestLogging: MiddlewareHandler<RootEnv> = async (c, next) => {
   c.set('logger', createRequestLogger(requestId));
 ```
 
-Append to the file-head comment block: ` #185's audit rows read this same value from Variables — the durable record correlates with the ephemeral lines and the header by construction.`
+Append to the file-head comment block: ` #185's audit rows read this same value from Variables, the durable record correlates with the ephemeral lines and the header by construction.`
 
 In `apps/api/src/observability/logger.ts`, grow `RootEnv`:
 
@@ -562,7 +562,7 @@ export type RootEnv = {
 };
 ```
 
-In `apps/api/src/services/db.ts`, grow `ApiEnv` (and extend the comment's `logger` sentence with: `; requestId is set by the same root middleware (#185 — the audit rows read it)`):
+In `apps/api/src/services/db.ts`, grow `ApiEnv` (and extend the comment's `logger` sentence with: `; requestId is set by the same root middleware (#185, the audit rows read it)`):
 
 ```ts
 export type ApiEnv = {
@@ -582,14 +582,14 @@ import type { Context } from 'hono';
 import type { ApiEnv } from './db.js';
 
 // The Audit Log's write side (M6 #185, spec § The Audit Log): the durable
-// who/what/when of every committed CMS write — ONE row per mutation
+// who/what/when of every committed CMS write, ONE row per mutation
 // REQUEST (a matrix full-replace and the atomic package save are each one
 // row), written INSIDE the mutation's own transaction so the row exists
 // exactly when the write committed and never otherwise: failed validations
 // resolve before any transaction opens, and a mid-transaction throw rolls
 // the row back with the write. The Application Log's admin_mutation event
 // is the ephemeral twin (same requestId, emitted at the route); this table
-// is the durable record — the standing split (#183).
+// is the durable record, the standing split (#183).
 
 /** The request-scoped facts every audit row carries (built at the route). */
 export type AuditActor = {
@@ -608,13 +608,13 @@ export type AuditWrite = {
 
 // The tx handle every audit insert rides, extracted from the db client's
 // own transaction signature so it cannot drift (spike-proven 2026-10-06:
-// the extraction yields the real drizzle transaction object — insert +
+// the extraction yields the real drizzle transaction object, insert +
 // returning infer against it, and a negative type control failed).
 export type AuditTx = Parameters<Parameters<Database['transaction']>[0]>[0];
 
 /**
  * Build the AuditActor from the request context. Throws when the session
- * is absent — unreachable behind the admin root's requireSession
+ * is absent, unreachable behind the admin root's requireSession
  * (routes/admin.ts), and a loud failure beats a silently anonymous row.
  * actorEmail is the snapshot source the spec names (BetterAuth's user row).
  */
@@ -622,7 +622,7 @@ export function auditActor(c: Context<ApiEnv>): AuditActor {
   const session = c.get('session');
   if (!session) {
     throw new Error(
-      'auditActor: no session in context — the admin root gate must precede every audit write'
+      'auditActor: no session in context, the admin root gate must precede every audit write'
     );
   }
   return {
@@ -633,7 +633,7 @@ export function auditActor(c: Context<ApiEnv>): AuditActor {
 }
 
 /**
- * The one insert every audit row rides — the LAST statement of the
+ * The one insert every audit row rides, the LAST statement of the
  * mutation's transaction body, over that transaction's own tx handle
  * (never a fresh db handle: the row must commit or roll back WITH the
  * write it records).
@@ -663,11 +663,11 @@ In `apps/api/src/observability/events.ts`: add `import type { AuditEntity } from
 export type AdminMutationEntity = AuditEntity;
 ```
 
-(Comment note rides the alias: `// #185 canonicalized the list in packages/types — the ephemeral events and the durable rows share one vocabulary.` The emitter body is untouched.)
+(Comment note rides the alias: `// #185 canonicalized the list in packages/types, the ephemeral events and the durable rows share one vocabulary.` The emitter body is untouched.)
 
-- [ ] **Step 6: The four families' services — wrap each write in its transaction + audit row**
+- [ ] **Step 6: The four families' services, wrap each write in its transaction + audit row**
 
-In `apps/api/src/services/admin-entities.ts`: add `import type { AuditAction } from '@sevendays/types';` and `import { type AuditActor, writeAuditRow } from './audit.js';`, then replace the eight functions. Branches (the pattern-setting pair — every other family is this shape with its table/unique/summary swapped):
+In `apps/api/src/services/admin-entities.ts`: add `import type { AuditAction } from '@sevendays/types';` and `import { type AuditActor, writeAuditRow } from './audit.js';`, then replace the eight functions. Branches (the pattern-setting pair, every other family is this shape with its table/unique/summary swapped):
 
 ```ts
 export function createAdminBranch(
@@ -706,7 +706,7 @@ export async function updateAdminBranch(
       .limit(1);
     if (clash) return conflict('name');
   }
-  // M6 #185: deactivation is a RULING on the flip — only true→false is
+  // M6 #185: deactivation is a RULING on the flip, only true→false is
   // 'deactivate'; reactivation and edits of deactivated rows are 'update'.
   const action: AuditAction = current.isActive && input.isActive === false ? 'deactivate' : 'update';
   return guardUnique(BRANCH_UNIQUE, () =>
@@ -909,9 +909,9 @@ export async function updateAdminAddonService(
 }
 ```
 
-Also extend the file-head comment with: ` M6 #185: every write now opens a transaction whose LAST statement is its audit row — the row commits exactly when the write does (the spec's transaction-is-the-gate ruling).`
+Also extend the file-head comment with: ` M6 #185: every write now opens a transaction whose LAST statement is its audit row, the row commits exactly when the write does (the spec's transaction-is-the-gate ruling).`
 
-- [ ] **Step 7: The four route files — build the actor at each call site**
+- [ ] **Step 7: The four route files, build the actor at each call site**
 
 In `apps/api/src/routes/admin-branches.ts`: add `import { auditActor } from '../services/audit.js';` and change the two service calls:
 
@@ -924,12 +924,12 @@ In `apps/api/src/routes/admin-branches.ts`: add `import { auditActor } from '../
       const result = await updateAdminBranch(c.get('db'), auditActor(c), id, c.req.valid('json'));
 ```
 
-The same two-line shape lands in `admin-print-sizes.ts` (`createAdminPrintSize(c.get('db'), auditActor(c), …)` / `updateAdminPrintSize(c.get('db'), auditActor(c), id, …)`), `admin-attires.ts` (`createAdminAttire` / `updateAdminAttire`), and `admin-addon-services.ts` (`createAdminAddonService` / `updateAdminAddonService`) — each file gains the `auditActor` import and passes it as the second service argument at its POST and PUT sites. The `logAdminMutation` lines stay exactly where they are (the ephemeral twin keeps firing at the route; the durable row rides the transaction).
+The same two-line shape lands in `admin-print-sizes.ts` (`createAdminPrintSize(c.get('db'), auditActor(c), …)` / `updateAdminPrintSize(c.get('db'), auditActor(c), id, …)`), `admin-attires.ts` (`createAdminAttire` / `updateAdminAttire`), and `admin-addon-services.ts` (`createAdminAddonService` / `updateAdminAddonService`), each file gains the `auditActor` import and passes it as the second service argument at its POST and PUT sites. The `logAdminMutation` lines stay exactly where they are (the ephemeral twin keeps firing at the route; the durable row rides the transaction).
 
 - [ ] **Step 8: Run the suite to verify the new tests pass**
 
 Run: `pnpm --filter @sevendays/api exec vitest run test/admin-entities.test.ts`
-Expected: PASS — the file's existing tests plus the 4 new ones.
+Expected: PASS, the file's existing tests plus the 4 new ones.
 
 - [ ] **Step 9: Full api suite (regression sweep) + fix + commit**
 
@@ -941,7 +941,7 @@ git add apps/api/src apps/api/test/admin-entities.test.ts
 git commit -m "feat(api): the audit module + requestId in context + rows on the four simple families (#185)"
 ```
 
-### Task 4: `apps/api` — studio-services CRUD rows + the two matrix full-replaces (TDD)
+### Task 4: `apps/api`, studio-services CRUD rows + the two matrix full-replaces (TDD)
 
 **Files:**
 - Modify (test-first): `apps/api/test/admin-studio-services.test.ts`
@@ -949,7 +949,7 @@ git commit -m "feat(api): the audit module + requestId in context + rows on the 
 
 **Interfaces:**
 - Consumes: Task 3's `AuditActor`/`writeAuditRow` + the second-param convention.
-- Produces: `createAdminStudioService(db, audit, input)`, `updateAdminStudioService(db, audit, id, input)`, `setStudioServiceBranchMatrix(db, audit, id, branchIds)`, `setStudioServiceAddonMatrix(db, audit, id, addonServiceIds)` — return types unchanged.
+- Produces: `createAdminStudioService(db, audit, input)`, `updateAdminStudioService(db, audit, id, input)`, `setStudioServiceBranchMatrix(db, audit, id, branchIds)`, `setStudioServiceAddonMatrix(db, audit, id, addonServiceIds)`, return types unchanged.
 
 **Not here:** the gallery families (Task 5); the package save (Task 6).
 
@@ -958,7 +958,7 @@ git commit -m "feat(api): the audit module + requestId in context + rows on the 
 In `apps/api/test/admin-studio-services.test.ts`: extend the `@sevendays/db` import to include `auditLog`, and append:
 
 ```ts
-describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => {
+describe('audit rows (M6 #185, one per committed mutation, tx-gated)', () => {
   const rows = async () => db.select().from(auditLog);
 
   it('POST → one create row with the service name; the actor is the caller', async () => {
@@ -1030,7 +1030,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
 - [ ] **Step 2: Run to verify they fail**
 
 Run: `pnpm --filter @sevendays/api exec vitest run test/admin-studio-services.test.ts`
-Expected: FAIL — zero audit rows on all three new tests.
+Expected: FAIL, zero audit rows on all three new tests.
 
 - [ ] **Step 3: The studio-service CRUD joins the transaction pattern**
 
@@ -1106,7 +1106,7 @@ export async function updateAdminStudioService(
 }
 ```
 
-- [ ] **Step 4: The two matrices — the audit row joins the EXISTING transaction as its last statement**
+- [ ] **Step 4: The two matrices, the audit row joins the EXISTING transaction as its last statement**
 
 In `setStudioServiceBranchMatrix`, add the `audit` param and the write at the end of the transaction body (the pre-checks and the `service` row read stay untouched above it):
 
@@ -1137,7 +1137,7 @@ export async function setStudioServiceBranchMatrix(
         .insert(branchStudioServices)
         .values(toAdd.map((branchId) => ({ studioServiceId: id, branchId })));
     }
-    // M6 #185: ONE row per matrix REQUEST (request-grain) — the junction
+    // M6 #185: ONE row per matrix REQUEST (request-grain), the junction
     // churn is the write; the row records the save, not the row count.
     await writeAuditRow(tx, audit, {
       entity: 'studio-service',
@@ -1148,7 +1148,7 @@ export async function setStudioServiceBranchMatrix(
   });
 ```
 
-The same two edits land in `setStudioServiceAddonMatrix` — signature `(db: Database, audit: AuditActor, id: string, addonServiceIds: string[])` and the identical trailing write inside its transaction (`service.name` is that function's own pre-read).
+The same two edits land in `setStudioServiceAddonMatrix`, signature `(db: Database, audit: AuditActor, id: string, addonServiceIds: string[])` and the identical trailing write inside its transaction (`service.name` is that function's own pre-read).
 
 - [ ] **Step 5: The route's four call sites**
 
@@ -1173,7 +1173,7 @@ In `apps/api/src/routes/admin-studio-services.ts`: add `import { auditActor } fr
 - [ ] **Step 6: Run the suite, then the full api sweep + commit**
 
 Run: `pnpm --filter @sevendays/api exec vitest run test/admin-studio-services.test.ts`
-Expected: PASS — existing tests + the 3 new ones (the matrix round-trip/unknown-id/deactivation-blind tests keep passing: their assertions query junction tables, not audit rows).
+Expected: PASS, existing tests + the 3 new ones (the matrix round-trip/unknown-id/deactivation-blind tests keep passing: their assertions query junction tables, not audit rows).
 
 Run: `pnpm --filter @sevendays/api fix && pnpm --filter @sevendays/api test`
 Expected: **27 files passed + 1 skipped / 330 passed + 3 skipped** (327 + 3).
@@ -1183,7 +1183,7 @@ git add apps/api/src apps/api/test/admin-studio-services.test.ts
 git commit -m "feat(api): audit rows on studio-services + the two matrices (#185)"
 ```
 
-### Task 5: `apps/api` — the gallery families, the three order PUTs, the media-commit row (TDD)
+### Task 5: `apps/api`, the gallery families, the three order PUTs, the media-commit row (TDD)
 
 **Files:**
 - Modify (test-first): `apps/api/test/admin-gallery.test.ts`
@@ -1191,16 +1191,16 @@ git commit -m "feat(api): audit rows on studio-services + the two matrices (#185
 
 **Interfaces:**
 - Consumes: Task 3's `AuditActor`/`writeAuditRow`/`AuditAction`.
-- Produces: `createAdminGalleryCategory(db, audit, input)`, `updateAdminGalleryCategory(db, audit, id, input)`, `setGalleryCategoryOrder(db, audit, categoryIds)`, `createAdminTestimonial(db, audit, input)`, `updateAdminTestimonial(db, audit, id, input)` (gains a pre-read of `current` — behavior unchanged, the not_found arm preserved), `setTestimonialOrder(db, audit, testimonialIds)`, `createAdminGalleryPhoto(db, env, audit, input, log?)`, `updateAdminGalleryPhoto(db, env, audit, id, input, log?)`, `setGalleryPhotoOrder(db, env, audit, photoIds)` — return types unchanged.
+- Produces: `createAdminGalleryCategory(db, audit, input)`, `updateAdminGalleryCategory(db, audit, id, input)`, `setGalleryCategoryOrder(db, audit, categoryIds)`, `createAdminTestimonial(db, audit, input)`, `updateAdminTestimonial(db, audit, id, input)` (gains a pre-read of `current`, behavior unchanged, the not_found arm preserved), `setTestimonialOrder(db, audit, testimonialIds)`, `createAdminGalleryPhoto(db, env, audit, input, log?)`, `updateAdminGalleryPhoto(db, env, audit, id, input, log?)`, `setGalleryPhotoOrder(db, env, audit, photoIds)`, return types unchanged.
 
-**Not here:** the package save (Task 6); any change to `commitStagingKey`/`commitUpload` (bucket I/O stays outside transactions — the audit row rides the DB persist that follows it).
+**Not here:** the package save (Task 6); any change to `commitStagingKey`/`commitUpload` (bucket I/O stays outside transactions, the audit row rides the DB persist that follows it).
 
 - [ ] **Step 1: Write the failing tests**
 
 In `apps/api/test/admin-gallery.test.ts`: extend the `@sevendays/db` import to include `auditLog`, and append:
 
 ```ts
-describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => {
+describe('audit rows (M6 #185, one per committed mutation, tx-gated)', () => {
   const rows = async () => db.select().from(auditLog);
 
   it('category POST → one create row with the name; a duplicate-name 400 records nothing', async () => {
@@ -1210,7 +1210,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
     expect(res.status).toBe(201);
     const { id } = (await res.json()) as { id: string };
     const dup = await authed('POST', '/api/v1/admin/gallery-categories', 'audit-cat-b@sevendays.test', {
-      name: 'Weddings', // fixture name — the uniqueness collision
+      name: 'Weddings', // fixture name, the uniqueness collision
     });
     expect(dup.status).toBe(400);
     const all = await rows();
@@ -1224,7 +1224,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
     });
   });
 
-  it('the three order PUTs → one reorder row each (entityId null, summary null — the family, not a row); an incomplete payload records nothing', async () => {
+  it('the three order PUTs → one reorder row each (entityId null, summary null, the family, not a row); an incomplete payload records nothing', async () => {
     const cats = await authed(
       'PUT',
       '/api/v1/admin/gallery-categories/order',
@@ -1350,13 +1350,13 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
 - [ ] **Step 2: Run to verify they fail**
 
 Run: `pnpm --filter @sevendays/api exec vitest run test/admin-gallery.test.ts`
-Expected: FAIL — zero audit rows on all five new tests.
+Expected: FAIL, zero audit rows on all five new tests.
 
 - [ ] **Step 3: The gallery services join the pattern**
 
 In `apps/api/src/services/admin-gallery.ts`: add `import type { AuditAction } from '@sevendays/types';` and `import { type AuditActor, writeAuditRow } from './audit.js';`, then make the nine edits.
 
-Categories — create and update (the branches shape with `CATEGORY_UNIQUE`, summary `name`):
+Categories, create and update (the branches shape with `CATEGORY_UNIQUE`, summary `name`):
 
 ```ts
 export async function createAdminGalleryCategory(
@@ -1420,7 +1420,7 @@ export async function updateAdminGalleryCategory(
 }
 ```
 
-The three order PUTs — the write lands at the end of the EXISTING transaction (shown for categories; testimonials and photos take the identical trailing write with their own `entity`):
+The three order PUTs, the write lands at the end of the EXISTING transaction (shown for categories; testimonials and photos take the identical trailing write with their own `entity`):
 
 ```ts
 export async function setGalleryCategoryOrder(
@@ -1428,7 +1428,7 @@ export async function setGalleryCategoryOrder(
   audit: AuditActor,
   categoryIds: string[]
   // The order service never returns not_found (it reads first, checks, then
-  // writes) — the declared union carries only the invalid arm, so the thin
+  // writes), the declared union carries only the invalid arm, so the thin
   // route's `!result.ok` narrows to badRequest without a 404 branch.
 ): Promise<{ ok: true; row: CategoryRow[] } | AdminWriteFailure> {
   const rows = await db.select().from(galleryCategories);
@@ -1441,7 +1441,7 @@ export async function setGalleryCategoryOrder(
         .set({ position: index + 1, updatedAt: new Date() })
         .where(eq(galleryCategories.id, categoryId));
     }
-    // M6 #185: reorder is family-level — entityId AND summary are null
+    // M6 #185: reorder is family-level, entityId AND summary are null
     // (the #183 twin's entityId ruling, carried to the durable record).
     await writeAuditRow(tx, audit, {
       entity: 'gallery-category',
@@ -1456,7 +1456,7 @@ export async function setGalleryCategoryOrder(
 
 (`setTestimonialOrder(db, audit, testimonialIds)` and `setGalleryPhotoOrder(db, env, audit, photoIds)` take the same trailing write with `entity: 'testimonial'` / `entity: 'gallery-photo'` inside their existing loops' transactions.)
 
-Testimonials — create, and update with its new pre-read:
+Testimonials, create, and update with its new pre-read:
 
 ```ts
 export async function createAdminTestimonial(
@@ -1487,7 +1487,7 @@ export async function updateAdminTestimonial(
   id: string,
   input: UpdateTestimonialInput
 ): Promise<AdminWriteResult<TestimonialRow>> {
-  // M6 #185: the pre-read joins the other entities' pattern — the
+  // M6 #185: the pre-read joins the other entities' pattern, the
   // deactivate ruling needs the BEFORE state; the not_found arm keeps its
   // current meaning (no row → no write, no audit row).
   const [current] = await db.select().from(testimonials).where(eq(testimonials.id, id)).limit(1);
@@ -1511,7 +1511,7 @@ export async function updateAdminTestimonial(
 }
 ```
 
-Photos — create and update (bucket I/O stays BEFORE the transaction; the after-commit old-key delete stays AFTER it):
+Photos, create and update (bucket I/O stays BEFORE the transaction; the after-commit old-key delete stays AFTER it):
 
 ```ts
 export async function createAdminGalleryPhoto(
@@ -1521,7 +1521,7 @@ export async function createAdminGalleryPhoto(
   input: CreateGalleryPhotoInput,
   log?: RequestLogger
 ): Promise<AdminCreateResult<GalleryPhoto>> {
-  // Category existence FIRST — an invalid payload must not touch the bucket
+  // Category existence FIRST, an invalid payload must not touch the bucket
   // (a commit would promote the object and orphan it on the 400).
   if (input.categoryId !== undefined && input.categoryId !== null) {
     const failure = await assertCategoryExists(db, input.categoryId);
@@ -1544,7 +1544,7 @@ export async function createAdminGalleryPhoto(
     if (!row) throw new Error('insert gallery_photos: no row returned');
     // M6 #185 (the media commit's row): the commit promoted the object
     // before this transaction; THIS row is the durable record of the whole
-    // request. Untitled photos fall back to the immutable final key — a
+    // request. Untitled photos fall back to the immutable final key, a
     // stable, join-free identifier.
     await writeAuditRow(tx, audit, {
       entity: 'gallery-photo',
@@ -1599,7 +1599,7 @@ export async function updateAdminGalleryPhoto(
     });
     return updated;
   });
-  // Keys are immutable — replace is new key + row update + old-key delete,
+  // Keys are immutable, replace is new key + row update + old-key delete,
   // the old object deleted only AFTER the update (and its audit row) committed.
   if (finalKey !== current.r2Key) {
     await env.MEDIA_BUCKET.delete(current.r2Key);
@@ -1610,7 +1610,7 @@ export async function updateAdminGalleryPhoto(
 
 Also extend the file-head comment with: ` M6 #185: every persist's transaction ends with its audit row; position reads and bucket I/O stay outside the transactions.`
 
-- [ ] **Step 4: The three route files — nine call sites**
+- [ ] **Step 4: The three route files, nine call sites**
 
 Each file gains `import { auditActor } from '../services/audit.js';` and passes the actor second (after `c.env` for the photo routes):
 
@@ -1672,7 +1672,7 @@ Each file gains `import { auditActor } from '../services/audit.js';` and passes 
 - [ ] **Step 5: Run the suite, then the full api sweep + commit**
 
 Run: `pnpm --filter @sevendays/api exec vitest run test/admin-gallery.test.ts`
-Expected: PASS — existing tests + the 5 new ones (the photo POST/PUT/order tests' existing assertions query `galleryPhotos`, unaffected by audit rows; the truncate between tests wipes them).
+Expected: PASS, existing tests + the 5 new ones (the photo POST/PUT/order tests' existing assertions query `galleryPhotos`, unaffected by audit rows; the truncate between tests wipes them).
 
 Run: `pnpm --filter @sevendays/api fix && pnpm --filter @sevendays/api test`
 Expected: **27 files passed + 1 skipped / 335 passed + 3 skipped** (330 + 5).
@@ -1682,7 +1682,7 @@ git add apps/api/src apps/api/test/admin-gallery.test.ts
 git commit -m "feat(api): audit rows on the gallery families + the three order PUTs + the media commit (#185)"
 ```
 
-### Task 6: `apps/api` — the atomic package save's audit row (TDD)
+### Task 6: `apps/api`, the atomic package save's audit row (TDD)
 
 **Files:**
 - Modify (test-first): `apps/api/test/admin-packages.test.ts`
@@ -1690,7 +1690,7 @@ git commit -m "feat(api): audit rows on the gallery families + the three order P
 
 **Interfaces:**
 - Consumes: Task 3's `AuditActor`/`writeAuditRow`/`AuditAction`.
-- Produces: `createAdminPackage(db, env, audit, input, log?)`, `updateAdminPackage(db, env, audit, id, input, log?)` — return types unchanged; `runPackageSave`'s private `args` gains `audit: AuditActor`.
+- Produces: `createAdminPackage(db, env, audit, input, log?)`, `updateAdminPackage(db, env, audit, id, input, log?)`, return types unchanged; `runPackageSave`'s private `args` gains `audit: AuditActor`.
 
 **Not here:** any read path; `resolveCover`/bucket hygiene (the after-commit old-cover delete stays outside the transaction, after the audit row commits).
 
@@ -1699,10 +1699,10 @@ git commit -m "feat(api): audit rows on the gallery families + the three order P
 In `apps/api/test/admin-packages.test.ts`: extend the `@sevendays/db` import to include `auditLog`, and append:
 
 ```ts
-describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => {
+describe('audit rows (M6 #185, one per committed mutation, tx-gated)', () => {
   const rows = async () => db.select().from(auditLog);
 
-  it('the atomic save POST → exactly ONE row (request-grain — frames, inclusions, junctions are one committed request); requestId = the served X-Request-Id', async () => {
+  it('the atomic save POST → exactly ONE row (request-grain, frames, inclusions, junctions are one committed request); requestId = the served X-Request-Id', async () => {
     const { token } = await signUpSession(url, 'audit-pkg@sevendays.test');
     const res = await app.request(
       '/api/v1/admin/service-packages',
@@ -1773,7 +1773,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
       .select({ name: servicePackages.name })
       .from(servicePackages)
       .where(eq(servicePackages.id, ids.packageCombined));
-    expect(name[0]?.name).toBe('Combined Package'); // the rename rolled back — and nothing recorded it
+    expect(name[0]?.name).toBe('Combined Package'); // the rename rolled back, and nothing recorded it
   });
 });
 ```
@@ -1781,7 +1781,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
 - [ ] **Step 2: Run to verify they fail**
 
 Run: `pnpm --filter @sevendays/api exec vitest run test/admin-packages.test.ts`
-Expected: FAIL — zero audit rows on all three new tests.
+Expected: FAIL, zero audit rows on all three new tests.
 
 - [ ] **Step 3: Thread the actor through the save and write the row as the transaction's last statement**
 
@@ -1813,16 +1813,16 @@ async function runPackageSave(
           wasActive = current.isActive;
 ```
 
-(3) the transaction's tail — replace the closing of the junction insert and the `return` with:
+(3) the transaction's tail, replace the closing of the junction insert and the `return` with:
 
 ```ts
         if (junctionPairs.length > 0) {
           await tx.insert(packageInclusionAttires).values(junctionPairs);
         }
-        // M6 #185: the atomic save is ONE committed request — entity row,
+        // M6 #185: the atomic save is ONE committed request, entity row,
         // children, and this audit row commit together or not at all (an
         // AdminSaveError above has already rolled everything back, row
-        // included — the mid-tx test's gate).
+        // included, the mid-tx test's gate).
         const action: AuditAction =
           args.updateId === null
             ? 'create'
@@ -1873,7 +1873,7 @@ export async function updateAdminPackage(
 
 with `runPackageSave(db, env, { audit, input, slug: input.slug, finalKey: cover.finalKey, updateId: id })` as its call (the function bodies are otherwise untouched).
 
-Also extend the file-head comment with: ` M6 #185: the save's transaction now ends with its audit row — one per REQUEST (the spec's request-grain ruling).`
+Also extend the file-head comment with: ` M6 #185: the save's transaction now ends with its audit row, one per REQUEST (the spec's request-grain ruling).`
 
 - [ ] **Step 4: The route's two call sites**
 
@@ -1903,20 +1903,20 @@ In `apps/api/src/routes/admin-service-packages.ts`: add `import { auditActor } f
 - [ ] **Step 5: Run the suite, then the full api sweep + commit**
 
 Run: `pnpm --filter @sevendays/api exec vitest run test/admin-packages.test.ts`
-Expected: PASS — existing tests (incl. the original rollback and no-partial-junctions tests, which keep proving the write-side semantics) + the 3 new ones.
+Expected: PASS, existing tests (incl. the original rollback and no-partial-junctions tests, which keep proving the write-side semantics) + the 3 new ones.
 
 Run: `pnpm --filter @sevendays/api fix && pnpm --filter @sevendays/api test`
-Expected: **27 files passed + 1 skipped / 338 passed + 3 skipped** (335 + 3 — the ticket's final api floor).
+Expected: **27 files passed + 1 skipped / 338 passed + 3 skipped** (335 + 3, the ticket's final api floor).
 
 ```bash
 git add apps/api/src apps/api/test/admin-packages.test.ts
-git commit -m "feat(api): audit rows on the atomic package save — request-grain, rollback-gated (#185)"
+git commit -m "feat(api): audit rows on the atomic package save, request-grain, rollback-gated (#185)"
 ```
 
 ### Task 7: Gates, docs rotation, PR/merge, the v1 pick, ledger, issue close
 
 **Files:**
-- Modify: `docs/plan.md` (M6 box 4 — ANNOTATED, not ticked), `docs/progress.md`, `AGENTS.md` (floors line + status bullet), `docs/agents/v1-picks.md` (ledger row, post-merge)
+- Modify: `docs/plan.md` (M6 box 4, ANNOTATED, not ticked), `docs/progress.md`, `AGENTS.md` (floors line + status bullet), `docs/agents/v1-picks.md` (ledger row, post-merge)
 
 **Interfaces:**
 - Consumes: Tasks 1–6 merged on the branch.
@@ -1927,37 +1927,37 @@ git commit -m "feat(api): audit rows on the atomic package save — request-grai
 - [ ] **Step 1: Full repo gates**
 
 Run: `docker compose up -d db`, then `pnpm check` then `pnpm build`.
-Expected: check 35/35 turbo tasks; build green. The api floor line: **27 files passed + 1 skipped / 338 passed + 3 skipped**; types **14 files / 118 tests**; api-client **5 files / 33 tests**, landing **9 files / 73 tests**, admin **7 files / 59 tests**, db unchanged — all untouched by this ticket. If any count differs, reconcile before proceeding — do not loosen assertions.
+Expected: check 35/35 turbo tasks; build green. The api floor line: **27 files passed + 1 skipped / 338 passed + 3 skipped**; types **14 files / 118 tests**; api-client **5 files / 33 tests**, landing **9 files / 73 tests**, admin **7 files / 59 tests**, db unchanged, all untouched by this ticket. If any count differs, reconcile before proceeding, do not loosen assertions.
 
 - [ ] **Step 2: Rotate the docs**
 
-(a) `docs/plan.md`, Milestone 6 block — box 4 is **SHARED with #188** (its text names the screen): it stays `- [ ]` and gains a partial-landing annotation. Change
+(a) `docs/plan.md`, Milestone 6 block, box 4 is **SHARED with #188** (its text names the screen): it stays `- [ ]` and gains a partial-landing annotation. Change
 
 ```markdown
-- [ ] The mutation **Audit Log** — schema-based, written in the mutation's transaction (the nine entity routers + media commit, request-grain, lean fields), with the owner-scoped Audit Log screen in the admin
+- [ ] The mutation **Audit Log**, schema-based, written in the mutation's transaction (the nine entity routers + media commit, request-grain, lean fields), with the owner-scoped Audit Log screen in the admin
 ```
 
 to
 
 ```markdown
-- [ ] The mutation **Audit Log** — schema-based, written in the mutation's transaction (the nine entity routers + media commit, request-grain, lean fields), with the owner-scoped Audit Log screen in the admin _(write side landed 2026-10-06 via #185 — the `audit_log` table (migration 0008) + transactional rows across the nine routers and the media commit, request-grain, requestId-correlated to the Application Log, +15 api tests +6 types tests; the box stays unticked until the owner screen lands at #188)_
+- [ ] The mutation **Audit Log**, schema-based, written in the mutation's transaction (the nine entity routers + media commit, request-grain, lean fields), with the owner-scoped Audit Log screen in the admin _(write side landed 2026-10-06 via #185, the `audit_log` table (migration 0008) + transactional rows across the nine routers and the media commit, request-grain, requestId-correlated to the Application Log, +15 api tests +6 types tests; the box stays unticked until the owner screen lands at #188)_
 ```
 
-(b) `docs/progress.md` — three edits. First, the dated entry at the very top (after the `# Progress` heading's blank line):
+(b) `docs/progress.md`, three edits. First, the dated entry at the very top (after the `# Progress` heading's blank line):
 
 ```markdown
-2026-10-06 — #185, M6 ticket 03, the Audit Log's write side, landed: the durable who/what/when of every committed CMS write — a schema-born `audit_log` table (migration 0008, one `occurred_at` index, no FKs by design, unbounded retention) whose rows are written INSIDE the mutation's own transaction, one row per committed mutation REQUEST (the two matrix full-replaces and the atomic package save are each one row), across the nine entity routers plus the media commit (the commit rides the gallery-photo/package persists — its row IS the entity row, the #183 twin's resolution carried to the durable record). Fields per the spec: `occurredAt`, `actorId`, `actorEmail` snapshotted at write, `entity`, `entityId` (null on the family-level order PUTs), `action` (create | update | deactivate | reorder — deactivate only on the true→false flip), `summary` (name/code/person; photos fall back to the immutable final key; null on reorders), `requestId` equal to the served `X-Request-Id` and the Application Log's lines by construction (`requestLogging` now `c.set`s the id; RootEnv/ApiEnv carry it). The simple families' writes gained the transaction wrap (they were single autocommit statements); the transactional seams (matrices, order PUTs, package save) took the row as their body's last statement. Failed validations record nothing (they resolve before any tx opens); mid-transaction failures roll the row back with the write (the AdminSaveError path, test-pinned). The vocabulary is canonical in `packages/types` (`auditActionSchema`/`auditEntitySchema`/`auditLogRowSchema`; `AdminMutationEntity` is now an alias of `AuditEntity`). Gates: api 27 files + 1 skipped / 338 passed + 3 skipped (+15: entities 4, studio 3, gallery 5, packages 3), types 13→14 files / 112→118, `pnpm check` 35/35, `pnpm build` 7/7. NOT landed: any read path — the owner-scoped viewer screen (filters by entity/actor/action/date, pagination, the nav entry) is #188's, which this close unblocks.
+2026-10-06, #185, M6 ticket 03, the Audit Log's write side, landed: the durable who/what/when of every committed CMS write, a schema-born `audit_log` table (migration 0008, one `occurred_at` index, no FKs by design, unbounded retention) whose rows are written INSIDE the mutation's own transaction, one row per committed mutation REQUEST (the two matrix full-replaces and the atomic package save are each one row), across the nine entity routers plus the media commit (the commit rides the gallery-photo/package persists, its row IS the entity row, the #183 twin's resolution carried to the durable record). Fields per the spec: `occurredAt`, `actorId`, `actorEmail` snapshotted at write, `entity`, `entityId` (null on the family-level order PUTs), `action` (create | update | deactivate | reorder, deactivate only on the true→false flip), `summary` (name/code/person; photos fall back to the immutable final key; null on reorders), `requestId` equal to the served `X-Request-Id` and the Application Log's lines by construction (`requestLogging` now `c.set`s the id; RootEnv/ApiEnv carry it). The simple families' writes gained the transaction wrap (they were single autocommit statements); the transactional seams (matrices, order PUTs, package save) took the row as their body's last statement. Failed validations record nothing (they resolve before any tx opens); mid-transaction failures roll the row back with the write (the AdminSaveError path, test-pinned). The vocabulary is canonical in `packages/types` (`auditActionSchema`/`auditEntitySchema`/`auditLogRowSchema`; `AdminMutationEntity` is now an alias of `AuditEntity`). Gates: api 27 files + 1 skipped / 338 passed + 3 skipped (+15: entities 4, studio 3, gallery 5, packages 3), types 13→14 files / 112→118, `pnpm check` 35/35, `pnpm build` 7/7. NOT landed: any read path, the owner-scoped viewer screen (filters by entity/actor/action/date, pagination, the nav entry) is #188's, which this close unblocks.
 ```
 
 Second, in the Known Gaps list, update the Application Log bullet's tail: replace `Sentry (#184) and the Audit Log (#185) ride next off the same seams.` with `The Audit Log's write side followed (M6 #185); its viewer is #188's.` and add this bullet directly below it:
 
 ```markdown
-- The api's **Audit Log write side** is live (M6 #185, 2026-10-06): one `audit_log` row per committed admin mutation REQUEST — written inside the mutation's own transaction (create/update/deactivate/reorder; the actor email snapshotted; `requestId` correlated to the Application Log and the served `X-Request-Id`) across the nine entity routers plus the media commit; failed validations and mid-transaction failures record nothing. The owner-scoped viewer screen (filters, pagination, nav entry) is #188's; **no read path exists yet**.
+- The api's **Audit Log write side** is live (M6 #185, 2026-10-06): one `audit_log` row per committed admin mutation REQUEST, written inside the mutation's own transaction (create/update/deactivate/reorder; the actor email snapshotted; `requestId` correlated to the Application Log and the served `X-Request-Id`) across the nine entity routers plus the media commit; failed validations and mid-transaction failures record nothing. The owner-scoped viewer screen (filters, pagination, nav entry) is #188's; **no read path exists yet**.
 ```
 
-Third, in "Immediate Next Steps" item 1, replace `then #184/#185 (now unblocked off #183), #187 off #186, #188 off #185,` with `then #187 off #186, #188 (now unblocked off #185 — the write side landed 2026-10-06),` (and if the sentence still lists #184/#185 as takeable frontier members, drop them — both landed).
+Third, in "Immediate Next Steps" item 1, replace `then #184/#185 (now unblocked off #183), #187 off #186, #188 off #185,` with `then #187 off #186, #188 (now unblocked off #185, the write side landed 2026-10-06),` (and if the sentence still lists #184/#185 as takeable frontier members, drop them, both landed).
 
-(c) `AGENTS.md` — two edits. In the "Current status of `pnpm test`" section, change `Floors: api 27 files passed + 1 skipped (28) / 323 passed + 3 skipped; api-client 5 files / 33 tests.` to `Floors: api 27 files passed + 1 skipped (28) / 338 passed + 3 skipped; api-client 5 files / 33 tests.` And append this sentence to the end of the "The DB is provisioned, the catalog is seeded, and auth is wired in." bullet (after the Sentry sentence): ` The Audit Log's write side is live (M6 #185): one audit_log row per committed admin mutation request, written inside the mutation's transaction (create/update/deactivate/reorder, the actor email snapshotted at write, requestId correlated to the Application Log) across the nine entity routers plus the media commit — failed validations and rolled-back transactions record nothing; the owner viewer screen is #188's.`
+(c) `AGENTS.md`, two edits. In the "Current status of `pnpm test`" section, change `Floors: api 27 files passed + 1 skipped (28) / 323 passed + 3 skipped; api-client 5 files / 33 tests.` to `Floors: api 27 files passed + 1 skipped (28) / 338 passed + 3 skipped; api-client 5 files / 33 tests.` And append this sentence to the end of the "The DB is provisioned, the catalog is seeded, and auth is wired in." bullet (after the Sentry sentence): ` The Audit Log's write side is live (M6 #185): one audit_log row per committed admin mutation request, written inside the mutation's transaction (create/update/deactivate/reorder, the actor email snapshotted at write, requestId correlated to the Application Log) across the nine entity routers plus the media commit, failed validations and rolled-back transactions record nothing; the owner viewer screen is #188's.`
 
 - [ ] **Step 3: graphify + commit**
 
@@ -1965,21 +1965,21 @@ Run: `graphify update .` then commit:
 
 ```bash
 git add docs/plan.md docs/progress.md AGENTS.md graphify-out
-git commit -m "docs: #185 — M6 box 4 annotated (the screen rides #188), progress + AGENTS rotation (#185)"
+git commit -m "docs: #185, M6 box 4 annotated (the screen rides #188), progress + AGENTS rotation (#185)"
 ```
 
 - [ ] **Step 4: PR, review, squash-merge**
 
 ```bash
 git push -u origin feat/185-audit-log-write-side
-gh pr create --base main --title "feat(api): the Audit Log's write side — the transactional record (#185)" --body-file - <<'EOF'
+gh pr create --base main --title "feat(api): the Audit Log's write side, the transactional record (#185)" --body-file - <<'EOF'
 ## What
 
-Implements #185 (M6 ticket 03) — § The Audit Log of the M6 spec (#182): the durable who/what/when of every committed CMS write.
+Implements #185 (M6 ticket 03), § The Audit Log of the M6 spec (#182): the durable who/what/when of every committed CMS write.
 
 - The `audit_log` table (generated migration 0008; one occurred_at index; no FKs by design; unbounded retention) + the vocabulary canonicalized in `packages/types` (action/entity enums + the row schema; `AdminMutationEntity` is now an alias).
-- One row per committed mutation REQUEST, written INSIDE the mutation's own transaction as its last statement — across the nine entity routers plus the media commit (the commit rides the gallery-photo/package persists; its row is the entity row). The simple families' writes gained the transaction wrap; the matrices, order PUTs, and the atomic package save took the row into their existing transactions.
-- Fields per the spec: occurredAt, actorId, actorEmail (snapshotted), entity, entityId (null on reorders), action (create|update|deactivate|reorder — deactivate only on the true→false flip), summary (name/code/person; photos fall back to the final key), requestId — structurally equal to the served X-Request-Id and the Application Log's admin_mutation lines (requestLogging now sets the id into context).
+- One row per committed mutation REQUEST, written INSIDE the mutation's own transaction as its last statement, across the nine entity routers plus the media commit (the commit rides the gallery-photo/package persists; its row is the entity row). The simple families' writes gained the transaction wrap; the matrices, order PUTs, and the atomic package save took the row into their existing transactions.
+- Fields per the spec: occurredAt, actorId, actorEmail (snapshotted), entity, entityId (null on reorders), action (create|update|deactivate|reorder, deactivate only on the true→false flip), summary (name/code/person; photos fall back to the final key), requestId, structurally equal to the served X-Request-Id and the Application Log's admin_mutation lines (requestLogging now sets the id into context).
 - Failed validations record nothing (they resolve before any tx opens); mid-transaction failures roll the row back with the write (the AdminSaveError path, test-pinned).
 - No route, wire shape, or response changed anywhere. api 27 files + 1 skipped / 323→338 passed + 3 skipped (+15); types 13→14 files / 112→118 tests (+6); pnpm check 35/35, build green.
 
@@ -1987,28 +1987,28 @@ The owner-scoped viewer screen is #188 (now unblocked). The M6 roadmap box stays
 EOF
 ```
 
-After CI green on the PR (the repo's check workflow), squash-merge via the GitHub UI or `gh pr merge --squash --delete-branch`. The squash commit title: `feat(api): the Audit Log's write side — the transactional record (#185) (#PR_NUMBER)`.
+After CI green on the PR (the repo's check workflow), squash-merge via the GitHub UI or `gh pr merge --squash --delete-branch`. The squash commit title: `feat(api): the Audit Log's write side, the transactional record (#185) (#PR_NUMBER)`.
 
 - [ ] **Step 5: The v1 pick (per `docs/agents/v1-picks.md`)**
 
-Classification (pre-ruled by the spec's v1-pick ledger: "Audit Log (table + transactional writes + owner screen) | **PICK clean** — the client's operating record from day 1; both editions by construction"; this ticket lands the table + writes, all booking-free):
-- **PICK clean** — every code path: `packages/db/src/schema/audit-log.ts` + `schema/index.ts` + migration 0008 (carried WITHOUT re-migrate — the #118 precedent: editions share the live DB, already migrated from main), `packages/types/src/audit.ts` + `audit.test.ts` + `index.ts`, all `apps/api` src edits (observability plumbing, audit module, services, routes), and all four extended api test files + the truncate pin (admin routes are session-gated on both editions; nothing touches appointments/resend).
-- **Main-only, dropped** — `docs/plan.md`, `docs/progress.md`, `AGENTS.md` (content-dropped — v1's client-safe rewrite carries neither edited sentence, the #145/#146 ruling recurring), the plan file, and `graphify-out`.
+Classification (pre-ruled by the spec's v1-pick ledger: "Audit Log (table + transactional writes + owner screen) | **PICK clean**, the client's operating record from day 1; both editions by construction"; this ticket lands the table + writes, all booking-free):
+- **PICK clean**, every code path: `packages/db/src/schema/audit-log.ts` + `schema/index.ts` + migration 0008 (carried WITHOUT re-migrate, the #118 precedent: editions share the live DB, already migrated from main), `packages/types/src/audit.ts` + `audit.test.ts` + `index.ts`, all `apps/api` src edits (observability plumbing, audit module, services, routes), and all four extended api test files + the truncate pin (admin routes are session-gated on both editions; nothing touches appointments/resend).
+- **Main-only, dropped**, `docs/plan.md`, `docs/progress.md`, `AGENTS.md` (content-dropped, v1's client-safe rewrite carries neither edited sentence, the #145/#146 ruling recurring), the plan file, and `graphify-out`.
 
-Follow the runbook's pick procedure (branch off v1, apply the clean paths, drop the main-only list, run the locks: frozen install + `pnpm build:packages && pnpm --filter @sevendays/api build` + `pnpm check` 35/35 + `pnpm build` + the audit), push v1, confirm the CI run's `check` + `Deploy v1 (private)` legs succeed with `Deploy teaser (main)` skipped. Note in the pick evidence: v1's api floor becomes **25 files + 1 skipped / 272 passed + 3 skipped** expected (257 + the 15 audit tests — all booking-free); reconcile against v1's actual suite before recording.
+Follow the runbook's pick procedure (branch off v1, apply the clean paths, drop the main-only list, run the locks: frozen install + `pnpm build:packages && pnpm --filter @sevendays/api build` + `pnpm check` 35/35 + `pnpm build` + the audit), push v1, confirm the CI run's `check` + `Deploy v1 (private)` legs succeed with `Deploy teaser (main)` skipped. Note in the pick evidence: v1's api floor becomes **25 files + 1 skipped / 272 passed + 3 skipped** expected (257 + the 15 audit tests, all booking-free); reconcile against v1's actual suite before recording.
 
 - [ ] **Step 6: Ledger + issue close**
 
-Append one row to `docs/agents/v1-picks.md`'s ledger table (the established format) with the actual SHAs: date 2026-10-06, issue #185, main squash SHA, class per the runbook's vocabulary (expected `split` mechanically — the PICK-clean code core plus the docs-class main-only drops; the spec's pre-ruling stays PICK clean and the row says so), v1 pick SHA, and the description naming: the audit_log table + migration 0008 + the types vocabulary + the transactional rows across the nine routers and the media commit + the requestId context plumbing; the classifier counts (v1-paths vs main-only); the locks' results; the CI run numbers. Commit the ledger row to main:
+Append one row to `docs/agents/v1-picks.md`'s ledger table (the established format) with the actual SHAs: date 2026-10-06, issue #185, main squash SHA, class per the runbook's vocabulary (expected `split` mechanically, the PICK-clean code core plus the docs-class main-only drops; the spec's pre-ruling stays PICK clean and the row says so), v1 pick SHA, and the description naming: the audit_log table + migration 0008 + the types vocabulary + the transactional rows across the nine routers and the media commit + the requestId context plumbing; the classifier counts (v1-paths vs main-only); the locks' results; the CI run numbers. Commit the ledger row to main:
 
 ```bash
 git checkout main && git pull && git add docs/agents/v1-picks.md
-git commit -m "docs(v1-picks): #185 ledger row — the Audit Log write side picked clean (#185)"
+git commit -m "docs(v1-picks): #185 ledger row, the Audit Log write side picked clean (#185)"
 git push
 ```
 
 Then close the issue:
 
 ```bash
-gh issue close 185 --comment "Landed via #<PR_NUMBER> (main) + the v1 pick <v1_SHA>. api 27 files / 338 passed + 3 skipped on main (types 14/118); pnpm check 35/35 + pnpm build green. The M6 roadmap box stays unticked until #188 (the owner viewer screen — now unblocked; it reads the rows this ticket writes)."
+gh issue close 185 --comment "Landed via #<PR_NUMBER> (main) + the v1 pick <v1_SHA>. api 27 files / 338 passed + 3 skipped on main (types 14/118); pnpm check 35/35 + pnpm build green. The M6 roadmap box stays unticked until #188 (the owner viewer screen, now unblocked; it reads the rows this ticket writes)."
 ```

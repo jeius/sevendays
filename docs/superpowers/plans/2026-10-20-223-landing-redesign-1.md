@@ -1,84 +1,84 @@
-# M7 Ticket 12 — The Landing Redesign I: Chrome, Home, States, Settings Consumption Implementation Plan
+# M7 Ticket 12, The Landing Redesign I: Chrome, Home, States, Settings Consumption Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Per repo AGENTS.md, tick completed boxes with the ✅ emoji (`- [✅]`), never plain `[x]`. **Tasks 2, 3, and 4 are UI-bearing and load the installed UI/UX skill set at execution time** (`prototype` + `ui-ux-pro-max`, plus `ui-styling` as relevant — AGENTS.md rule, spec #94 amendment): Task 2 composes the glass chrome + the banner + the global NotFound/Error, Task 3 the ruled home composition (mosaic, D2 plates, marquee/stepper, paginated testimonials, the skeleton grammar), Task 4 the whole-page empty states. **Task 5 renders the round for owner reaction in BOTH themes (light judged first) — the ticket's fourth AC — and is the only controller interaction inside the build**; everything else runs to the gates.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Per repo AGENTS.md, tick completed boxes with the ✅ emoji (`- [✅]`), never plain `[x]`. **Tasks 2, 3, and 4 are UI-bearing and load the installed UI/UX skill set at execution time** (`prototype` + `ui-ux-pro-max`, plus `ui-styling` as relevant, AGENTS.md rule, spec #94 amendment): Task 2 composes the glass chrome + the banner + the global NotFound/Error, Task 3 the ruled home composition (mosaic, D2 plates, marquee/stepper, paginated testimonials, the skeleton grammar), Task 4 the whole-page empty states. **Task 5 renders the round for owner reaction in BOTH themes (light judged first), the ticket's fourth AC, and is the only controller interaction inside the build**; everything else runs to the gates.
 
-**Goal:** Build the landing redesign's first half on the #164-ruled direction — *"the proof is the page"* (ticket #223, spec § *The landing redesign*, mined from the throwaway prototype branch `prototype/164-landing-redesign` @ `b050334` per the M3 precedent: nothing merges, the build mines its values and rulings): **the chrome** — pass C "sticky ink bar" (ink at 90% + backdrop-blur, white/10 hairline, the hero tucks under it on home, the incumbent wordmark serif name + mono kicker desktop-only in header AND footer, the footer carrying the 3-branch contact truth read live from the API, the mobile menu animated on Base UI's native transition contract); **the branded global NotFound/Error** at `__root` (white body, no logo, ink serif headline, `min-h-full`; the two route-level `notFound()` overrides removed; dark NotFound returns the ink field); **home** — the ruled composition end to end (hero under the glass bar → the live-read mosaic gallery in the deterministic 2×2/2×1 rhythm with viewport reveals and no title-captions → featured packages as **D2 light split plates** (cover 60% untouched via the CoverPanel law + light panel: serif name, mono peso-or-nothing per the unpriced law, dotted inclusions, primary ticks between plates) → the full-bleed three-copy looping services marquee (hover-pause; mobile = the JS transform stepper, centered cards, 3.5s interval, drag-with-snap) → paginated testimonials (3/page, lead + side rail, page-change reveal) → the emphasis strip), one voice per section (kickers retire; serif headings carry); **the states** — the skeleton grammar as home's route pendingComponent (structure-only silhouettes + the brand-tinted sweep) and the ruled whole-page empty lines with Back-to-home CTAs, judgeable via the DEV-gated `?empty=1`; and **site-settings consumption stitched where this ticket lands the slots** — hero copy, the announcement banner, home section kickers, social links, the footer contact block, the wordmark/logo — code defaults when unset, on the landing chrome plus the one admin rider (the sidebar wordmark/logo — the plan.md box's "admin sidebar" clause). What does NOT change (map ruling 5): the petrol/ink oklch token layer, the wash+cards+bands atmosphere, the typeface trio, shadcn/Base-UI primitives, WCAG AA.
+**Goal:** Build the landing redesign's first half on the #164-ruled direction, *"the proof is the page"* (ticket #223, spec § *The landing redesign*, mined from the throwaway prototype branch `prototype/164-landing-redesign` @ `b050334` per the M3 precedent: nothing merges, the build mines its values and rulings): **the chrome**, pass C "sticky ink bar" (ink at 90% + backdrop-blur, white/10 hairline, the hero tucks under it on home, the incumbent wordmark serif name + mono kicker desktop-only in header AND footer, the footer carrying the 3-branch contact truth read live from the API, the mobile menu animated on Base UI's native transition contract); **the branded global NotFound/Error** at `__root` (white body, no logo, ink serif headline, `min-h-full`; the two route-level `notFound()` overrides removed; dark NotFound returns the ink field); **home**, the ruled composition end to end (hero under the glass bar → the live-read mosaic gallery in the deterministic 2×2/2×1 rhythm with viewport reveals and no title-captions → featured packages as **D2 light split plates** (cover 60% untouched via the CoverPanel law + light panel: serif name, mono peso-or-nothing per the unpriced law, dotted inclusions, primary ticks between plates) → the full-bleed three-copy looping services marquee (hover-pause; mobile = the JS transform stepper, centered cards, 3.5s interval, drag-with-snap) → paginated testimonials (3/page, lead + side rail, page-change reveal) → the emphasis strip), one voice per section (kickers retire; serif headings carry); **the states**, the skeleton grammar as home's route pendingComponent (structure-only silhouettes + the brand-tinted sweep) and the ruled whole-page empty lines with Back-to-home CTAs, judgeable via the DEV-gated `?empty=1`; and **site-settings consumption stitched where this ticket lands the slots**, hero copy, the announcement banner, home section kickers, social links, the footer contact block, the wordmark/logo, code defaults when unset, on the landing chrome plus the one admin rider (the sidebar wordmark/logo, the plan.md box's "admin sidebar" clause). What does NOT change (map ruling 5): the petrol/ink oklch token layer, the wash+cards+bands atmosphere, the typeface trio, shadcn/Base-UI primitives, WCAG AA.
 
-**Architecture:** Six tasks over three packages: (1) `apps/landing` + `packages/types` — the pure seams TDD (`lib/mosaic.ts` span rhythm, `lib/home-testimonials.ts` pagination, `lib/site-chrome.ts` banner/social/contact shaping, `lib/empty-override.ts` the DEV-gated judging param, `lib/featured.ts` gains `isFeatured` so the settings kicker can override the featured heading without touching the fallback switch) + the one types delta (`SITE_SETTINGS_DEFAULTS.kickerGallery` retires its stand-in suffix — the ruled gallery heading is "The work"); (2) the chrome — the settings read path (`getSiteSettings` server fn resolving through `resolveSiteSettings`, `siteSettingsQueries`, the root loader's never-throwing `allSettled` ensure of settings + branches), the header/footer/banner/mobile-nav compositions, the global NotFound/Error at `__root`, the two `notFoundComponent` overrides removed, the `.nav-panel` CSS, and the admin sidebar rider; (3) home — `Reveal` + `MosaicPhotoGrid` + `FeaturedPlates` (D2 alone; the losing variants stay on the prototype branch forever) + the `HomeImageLed` rewrite + `HomeSkeleton` + the marquee/reveal keyframes and the `.skeleton-grammar` sweep CSS + the `home-copy.ts` stand-in retirement; (4) the states — whole-page empties with Back-to-home CTAs on packages/branches + the `?empty=1` judging; (5) the owner-reacted variants round, both themes (the copy ratifier — every `TODO(owner-copy)` this plan carries settles there); (6) gates + docs rotation (both shared plan.md boxes get DATED NOT-TICKED annotations — they span #223+#224) + the PR + the v1 pick + `graphify update .`.
+**Architecture:** Six tasks over three packages: (1) `apps/landing` + `packages/types`, the pure seams TDD (`lib/mosaic.ts` span rhythm, `lib/home-testimonials.ts` pagination, `lib/site-chrome.ts` banner/social/contact shaping, `lib/empty-override.ts` the DEV-gated judging param, `lib/featured.ts` gains `isFeatured` so the settings kicker can override the featured heading without touching the fallback switch) + the one types delta (`SITE_SETTINGS_DEFAULTS.kickerGallery` retires its stand-in suffix, the ruled gallery heading is "The work"); (2) the chrome, the settings read path (`getSiteSettings` server fn resolving through `resolveSiteSettings`, `siteSettingsQueries`, the root loader's never-throwing `allSettled` ensure of settings + branches), the header/footer/banner/mobile-nav compositions, the global NotFound/Error at `__root`, the two `notFoundComponent` overrides removed, the `.nav-panel` CSS, and the admin sidebar rider; (3) home, `Reveal` + `MosaicPhotoGrid` + `FeaturedPlates` (D2 alone; the losing variants stay on the prototype branch forever) + the `HomeImageLed` rewrite + `HomeSkeleton` + the marquee/reveal keyframes and the `.skeleton-grammar` sweep CSS + the `home-copy.ts` stand-in retirement; (4) the states, whole-page empties with Back-to-home CTAs on packages/branches + the `?empty=1` judging; (5) the owner-reacted variants round, both themes (the copy ratifier, every `TODO(owner-copy)` this plan carries settles there); (6) gates + docs rotation (both shared plan.md boxes get DATED NOT-TICKED annotations, they span #223+#224) + the PR + the v1 pick + `graphify update .`.
 
-**Tech Stack:** zero new dependencies, zero manifest changes (`pnpm-lock.yaml` untouched, `pnpm install` never runs — lucide's `CalendarPlus`/`Phone`/`ChevronLeft`/`ChevronRight` all already imported by the codebase or the mined prototype, `Skeleton`/`Collapsible`/`Tooltip` on disk in `packages/ui` — 22 primitives, `data-slot='skeleton'` verified). TanStack Start + TanStack Router + TanStack Query over `@sevendays/api-client` (the site-settings wrapper `siteSettings.get()` exists since #215 — grep-verified in `packages/api-client/src/routes/site-settings.ts`); `setupRouterSsrQueryIntegration` wraps the whole tree incl. the shell in `QueryClientProvider` (`router.tsx:33` — useQuery inside `RootDocument` is sound), app-wide `staleTime: 60_000`. Tailwind v4 CSS-first; the sweep CSS rides the existing `--color-brand-300` bridge (`packages/ui/src/tokens.css:219`, verified). Dark mode is #217's production `.dark` block in `packages/ui` — this ticket adds NO tokens and NO app-local dark CSS; both themes render from one class set (`dark:` variants on the ruled NotFound ink field excepted — the ruled behavior). vitest 4.1.11 plain-node lib-seam tests on landing; `pnpm --filter @sevendays/landing build` (vite build — exists) joins Tasks 2–4's gates per the #218 execution ruling (route module graphs gain imports). pnpm + Turborepo, `gh` CLI.
+**Tech Stack:** zero new dependencies, zero manifest changes (`pnpm-lock.yaml` untouched, `pnpm install` never runs, lucide's `CalendarPlus`/`Phone`/`ChevronLeft`/`ChevronRight` all already imported by the codebase or the mined prototype, `Skeleton`/`Collapsible`/`Tooltip` on disk in `packages/ui`, 22 primitives, `data-slot='skeleton'` verified). TanStack Start + TanStack Router + TanStack Query over `@sevendays/api-client` (the site-settings wrapper `siteSettings.get()` exists since #215, grep-verified in `packages/api-client/src/routes/site-settings.ts`); `setupRouterSsrQueryIntegration` wraps the whole tree incl. the shell in `QueryClientProvider` (`router.tsx:33`, useQuery inside `RootDocument` is sound), app-wide `staleTime: 60_000`. Tailwind v4 CSS-first; the sweep CSS rides the existing `--color-brand-300` bridge (`packages/ui/src/tokens.css:219`, verified). Dark mode is #217's production `.dark` block in `packages/ui`, this ticket adds NO tokens and NO app-local dark CSS; both themes render from one class set (`dark:` variants on the ruled NotFound ink field excepted, the ruled behavior). vitest 4.1.11 plain-node lib-seam tests on landing; `pnpm --filter @sevendays/landing build` (vite build, exists) joins Tasks 2–4's gates per the #218 execution ruling (route module graphs gain imports). pnpm + Turborepo, `gh` CLI.
 
-**Spec:** Implements ticket [#223 "M7 ticket 12: the landing redesign I — chrome, home, states, settings consumption"](https://github.com/jeius/sevendays/issues/223), whose parent is the M7 spec `docs/specs/2026-10-02-m7-experience-cms-maturation-spec.md` (issue #172 — § *The landing redesign* pins the ruled surfaces verbatim from the #164 resolution; § *Settings made real* pins "unset fields fall back to today's hardcoded defaults — the settings row is born-empty; defaults live in code" and "both apps consume via the SSR query pattern"; § *Testing Decisions* names "the ruled empty lines, the site-settings defaults seam" as landing lib-seam payload; § *v1-pick classes* pre-rules the payload **"PICK with transformed-surface conflicts"** — v1 keeps its booking-off direction inside the new structure). The four acceptance criteria, verbatim: Chrome + NotFound/Error + home per the ruled direction, both editions both themes · The skeleton grammar + empty lines live; empty states judgeable on a branch · Site-settings consumption with code defaults (both apps' chrome conventions) · Owner-reacted rendered variants per surface (light judged first, dark counterpart). Key recon facts (2026-10-20, main `63e2b71` — post-#221; every file below read whole this session, the prototype files read at `.worktrees/164-landing-redesign` @ `b050334`):
+**Spec:** Implements ticket [#223 "M7 ticket 12: the landing redesign I, chrome, home, states, settings consumption"](https://github.com/jeius/sevendays/issues/223), whose parent is the M7 spec `docs/specs/2026-10-02-m7-experience-cms-maturation-spec.md` (issue #172, § *The landing redesign* pins the ruled surfaces verbatim from the #164 resolution; § *Settings made real* pins "unset fields fall back to today's hardcoded defaults, the settings row is born-empty; defaults live in code" and "both apps consume via the SSR query pattern"; § *Testing Decisions* names "the ruled empty lines, the site-settings defaults seam" as landing lib-seam payload; § *v1-pick classes* pre-rules the payload **"PICK with transformed-surface conflicts"**, v1 keeps its booking-off direction inside the new structure). The four acceptance criteria, verbatim: Chrome + NotFound/Error + home per the ruled direction, both editions both themes · The skeleton grammar + empty lines live; empty states judgeable on a branch · Site-settings consumption with code defaults (both apps' chrome conventions) · Owner-reacted rendered variants per surface (light judged first, dark counterpart). Key recon facts (2026-10-20, main `63e2b71`, post-#221; every file below read whole this session, the prototype files read at `.worktrees/164-landing-redesign` @ `b050334`):
 
-- **The prototype is the source of truth for every ruled value.** The verbatim record: `.scratch/2026-09-30-164-rulings.md` (all six rounds, every owner quote) + `.scratch/164-resolution.md`. This plan's fenced blocks are the prototype's code ADAPTED to main (edition law: the `?v`/`?p`/`?t` prototype machinery and `lib/prototype-standins.ts` NEVER merge — main renders its arm only; `pesoOrNull` → main's already-null-safe `peso()`; the D2 cover half swaps the prototype's raw `img` for the M5-ruled `CoverPanel` so a null cover renders the placeholder, per the spec's states bullet "the muted CoverPanel placeholder (today's, unchanged)"). The losing featured variants (A rate-card, B editorial index, C plate+lineup, D1 ink panel) and the parallax stay on the prototype branch — only D2 builds.
-- **The chrome today:** static (non-sticky) `bg-brand-ink` header, `py-4`, mark `size-10`, kicker `sm:inline`, ThemeToggle (#217) between CTA and MobileNav; footer = wordmark + nav + outline CTA, NO branch truth, NO socials/contact; MobileNav = Base UI Collapsible, no animation. The ruled deltas: `sticky top-0 z-20 border-white/10 border-b bg-brand-ink/90 backdrop-blur-md`, `py-2.5`, mark `size-9`, kicker/footer kicker `md:inline` (desktop-only ruling), toggle `size-9` (keeps the bar at 56px = `py-2.5` + 36px mark — the `-mt-14` hero tuck matches it), the mobile panel animated via `.nav-panel` + data-attr styling on the Base UI collapsible (the library stamps `data-open`/`data-closed`/`data-starting-style` and keeps the panel mounted through exit — verified in the prototype's round-6 fix), the trigger rotating 90° through the Menu/X morph.
-- **Home today is the #111 composition** (`components/home-image-led.tsx`): stand-in gallery (`GALLERY_STANDINS` masonry), `PackageCoverCard` featured grid, `ServiceImageCard` grid, `TESTIMONIALS_PLACEHOLDER` presented as real, kicker-over-heading pairs. ALL of it dies: the loader gains `galleryQueries.all()` + `testimonialQueries.all()` (the M5-ruled reads — live since #142), `MosaicPhotoGrid` renders the live gallery (captions OFF on home — ruled; captions render on about's wall, #224's), testimonials render the real rows paginated. `home-copy.ts` keeps only `HERO_PHOTO`/`HERO_PHOTO_ALT` (the copy moves to settings consumption; `HERO_BLURB`'s default already lives in `SITE_SETTINGS_DEFAULTS.homeDescription`). `home-cards.tsx` keeps `ServiceImageCard` + `serviceBackground` only — `PackageCoverCard`/`ChipCluster`/`packageChips`/`BookNow` are home-featured-only (grep-verified zero other importers) and die with the rewrite; the marquee reuses `ServiceImageCard` unchanged (its Book chip's icon treatment rides #224's service-cards ruling — fenced).
-- **The CTA law, main arm, THIS ticket's sites only:** Book now CTAs carry `CalendarPlus` (header, mobile panel, hero); call affordances carry `Phone` (footer "Call or visit a branch", NotFound + Error ditto). The v1 arm (Call us solid primary, zero book words) is **pick-time transform on the v1 branch** — no runtime variant machinery merges (the class ledger's "PICK with transformed-surface conflicts"; `?v` previewed the shapes, the toggle never merges).
-- **The settings path:** the api-client wrapper exists; the landing gets `getSiteSettings` (server fn, `startSpan`-wrapped, resolving through `resolveSiteSettings` — consumers never see nulls) + `siteSettingsQueries.all()`. The root route gains a loader: `Promise.allSettled` over the settings + branches ensures — **the chrome never throws** (a failed read renders defaults; the page's own loaders still own their error surfaces). `RootDocument` reads both via `useQuery` and passes `data ?? SITE_SETTINGS_DEFAULTS` / `data ?? []` down. The wordmark renders `brandName`/`brandTagline`/`logoImageUrl ?? '/photos/sd.png'`; the banner renders `bannerFor()`'s shape (off or untitled → nothing); the footer renders the branch truth (`branch.name`/`branch.phone` → `tel:`/`acceptsWalkIns` → "Walk-ins welcome"/"By appointment" — field names verified in `packages/types/src/branch.ts`), the socials (mono text labels, unset hides — lucide has no TikTok glyph; the round may rule brand SVGs later), and the contact block (`footerContactFor`). **One admin rider** (the plan.md box's "…in landing header/footer + admin sidebar" clause): `_shell.tsx` gains a guarded `siteSettingsQuery` ensure and `AdminSidebar`'s header block renders `brandName` + the logo chip (`logoImageUrl ? img : the 7d monogram`) over `resolveSiteSettings(raw ?? EMPTY_SITE_SETTINGS)` — the admin's existing `siteSettingsQuery`/`getSiteSettings` (`lib/cms-queries.ts:100`, `lib/api.functions.ts:19`) serve it. Document titles are NOT here — #224 owns `<title>`/meta per its AC.
-- **The states:** home's skeleton composes fresh on the ruled grammar (the prototype's `skeletons.ts` has packages/detail/services/branches/about silhouettes — all #224 surfaces; home has none there — #223 owns the system CSS + the home silhouette + the pendingComponent wiring, #224 adds the per-surface skeletons with their surfaces). `pendingComponent` shows on client navigations only (first loads are server-rendered — the M5 freshness rule; TanStack shows it past `defaultPendingMs` while loaders run — the prototype's "devtools throttling while clicking between pages" is the judging method). Whole-page empty lines: packages keeps the M5 line + gains the Back-to-home outline CTA; branches GAINS an empty state (none exists today — `branches.map` renders nothing) with the prototype's line "Our branches are being set up — check back soon." + the CTA. The `?empty=1` judging aid is **DEV-gated** (`isEmptyJudgingParam(import.meta.env.DEV, useLocation().searchStr)` — the raw-string accessor (execution ruling 2026-10-20: `.search` is the parsed object on the installed router-core 1.171.x; `.searchStr` is the raw string) — production answers false, so the aid never ships; raw URL read because route search validation strips unknown params). About's in-page empties stay untouched (#224). Home's in-page empties: the featured collapse law stands (`packages.length > 0` gates the section, unchanged); the gallery section renders the ruled "Portfolio coming soon." line when the live read has zero photos (the shared wall's law — conservative extension, unrated); zero services collapses the services section entirely (the featured-collapse precedent, unrated); zero testimonials renders the prototype's "Client words are on their way — check back soon."
-- **Sibling fences (the tickets' own bodies; NOT here regardless of temptation):** **the catalog plates index, the D2 package detail + framed/prints/privileges spec sheet, image-backed service rows, branch cover strips + walk-in tooltips + variant-split CTAs, /share-your-story wearing the redesign, page titles/descriptions driving h1 + SEO meta, the unpriced law re-verification at those sites, the CTA-law sweep on those surfaces** — ALL #224; **/about's redesign** (mosaic portfolio wall with captions, quote wall, the settings story/title) — #224; **the per-surface skeletons for packages/detail/services/branches/about** — #224 (they echo #224 surfaces); **document `<title>`/meta consumption** — #224; **the M7 close-out box, the exit reflection scenario, visual regression** — #225; **any new token or `packages/ui` change** (ruled: none — the redesign re-weights the existing system); **any booking-surface file beyond the `booking.$id.tsx` `notFoundComponent` prop removal** (the wizard/confirmation are v2's and unchanged); **stand-in imagery or stand-in content of any kind** — the 18 StockSnap files and the stand-in seams live on the prototype branch only; main renders the live catalog as-is (the content gaps are owner-owned, recorded in the #164 resolution).
-- **The `docs/plan.md` boxes (Task 6):** the redesign box (`docs/plan.md:174` — "- [ ] Landing — the redesign build…") and the consumption box (`docs/plan.md:175` — "- [ ] Both apps — site settings consumed…") BOTH span #223+#224 — each gets a DATED NOT-TICKED annotation naming what landed and what stays #224's (the #216/#221 shared-box precedent). Nothing ticks; the milestone Verify box stays #225's.
-- **Baselines (live, run this session on main `63e2b71`):** types 18 files / 170 tests; landing 10 files / 92 tests; admin 26 files / 254 tests. After Task 1: landing **14 files / 115 tests** (+4 new files — `mosaic.test.ts` +4, `home-testimonials.test.ts` +4, `site-chrome.test.ts` +9, `empty-override.test.ts` +4, `featured.test.ts` +2); types stays 18/170 (in-place literal edits only); admin stays 26/254 (the rider adds no suite — the resolution it uses is types-tested). Tasks 2–5 add no suite counts (component-side). (Executor reconciles actuals; if any gate count differs, reconcile before proceeding — do not loosen assertions.)
+- **The prototype is the source of truth for every ruled value.** The verbatim record: `.scratch/2026-09-30-164-rulings.md` (all six rounds, every owner quote) + `.scratch/164-resolution.md`. This plan's fenced blocks are the prototype's code ADAPTED to main (edition law: the `?v`/`?p`/`?t` prototype machinery and `lib/prototype-standins.ts` NEVER merge, main renders its arm only; `pesoOrNull` → main's already-null-safe `peso()`; the D2 cover half swaps the prototype's raw `img` for the M5-ruled `CoverPanel` so a null cover renders the placeholder, per the spec's states bullet "the muted CoverPanel placeholder (today's, unchanged)"). The losing featured variants (A rate-card, B editorial index, C plate+lineup, D1 ink panel) and the parallax stay on the prototype branch, only D2 builds.
+- **The chrome today:** static (non-sticky) `bg-brand-ink` header, `py-4`, mark `size-10`, kicker `sm:inline`, ThemeToggle (#217) between CTA and MobileNav; footer = wordmark + nav + outline CTA, NO branch truth, NO socials/contact; MobileNav = Base UI Collapsible, no animation. The ruled deltas: `sticky top-0 z-20 border-white/10 border-b bg-brand-ink/90 backdrop-blur-md`, `py-2.5`, mark `size-9`, kicker/footer kicker `md:inline` (desktop-only ruling), toggle `size-9` (keeps the bar at 56px = `py-2.5` + 36px mark, the `-mt-14` hero tuck matches it), the mobile panel animated via `.nav-panel` + data-attr styling on the Base UI collapsible (the library stamps `data-open`/`data-closed`/`data-starting-style` and keeps the panel mounted through exit, verified in the prototype's round-6 fix), the trigger rotating 90° through the Menu/X morph.
+- **Home today is the #111 composition** (`components/home-image-led.tsx`): stand-in gallery (`GALLERY_STANDINS` masonry), `PackageCoverCard` featured grid, `ServiceImageCard` grid, `TESTIMONIALS_PLACEHOLDER` presented as real, kicker-over-heading pairs. ALL of it dies: the loader gains `galleryQueries.all()` + `testimonialQueries.all()` (the M5-ruled reads, live since #142), `MosaicPhotoGrid` renders the live gallery (captions OFF on home, ruled; captions render on about's wall, #224's), testimonials render the real rows paginated. `home-copy.ts` keeps only `HERO_PHOTO`/`HERO_PHOTO_ALT` (the copy moves to settings consumption; `HERO_BLURB`'s default already lives in `SITE_SETTINGS_DEFAULTS.homeDescription`). `home-cards.tsx` keeps `ServiceImageCard` + `serviceBackground` only, `PackageCoverCard`/`ChipCluster`/`packageChips`/`BookNow` are home-featured-only (grep-verified zero other importers) and die with the rewrite; the marquee reuses `ServiceImageCard` unchanged (its Book chip's icon treatment rides #224's service-cards ruling, fenced).
+- **The CTA law, main arm, THIS ticket's sites only:** Book now CTAs carry `CalendarPlus` (header, mobile panel, hero); call affordances carry `Phone` (footer "Call or visit a branch", NotFound + Error ditto). The v1 arm (Call us solid primary, zero book words) is **pick-time transform on the v1 branch**, no runtime variant machinery merges (the class ledger's "PICK with transformed-surface conflicts"; `?v` previewed the shapes, the toggle never merges).
+- **The settings path:** the api-client wrapper exists; the landing gets `getSiteSettings` (server fn, `startSpan`-wrapped, resolving through `resolveSiteSettings`, consumers never see nulls) + `siteSettingsQueries.all()`. The root route gains a loader: `Promise.allSettled` over the settings + branches ensures, **the chrome never throws** (a failed read renders defaults; the page's own loaders still own their error surfaces). `RootDocument` reads both via `useQuery` and passes `data ?? SITE_SETTINGS_DEFAULTS` / `data ?? []` down. The wordmark renders `brandName`/`brandTagline`/`logoImageUrl ?? '/photos/sd.png'`; the banner renders `bannerFor()`'s shape (off or untitled → nothing); the footer renders the branch truth (`branch.name`/`branch.phone` → `tel:`/`acceptsWalkIns` → "Walk-ins welcome"/"By appointment", field names verified in `packages/types/src/branch.ts`), the socials (mono text labels, unset hides, lucide has no TikTok glyph; the round may rule brand SVGs later), and the contact block (`footerContactFor`). **One admin rider** (the plan.md box's "…in landing header/footer + admin sidebar" clause): `_shell.tsx` gains a guarded `siteSettingsQuery` ensure and `AdminSidebar`'s header block renders `brandName` + the logo chip (`logoImageUrl ? img : the 7d monogram`) over `resolveSiteSettings(raw ?? EMPTY_SITE_SETTINGS)`, the admin's existing `siteSettingsQuery`/`getSiteSettings` (`lib/cms-queries.ts:100`, `lib/api.functions.ts:19`) serve it. Document titles are NOT here, #224 owns `<title>`/meta per its AC.
+- **The states:** home's skeleton composes fresh on the ruled grammar (the prototype's `skeletons.ts` has packages/detail/services/branches/about silhouettes, all #224 surfaces; home has none there, #223 owns the system CSS + the home silhouette + the pendingComponent wiring, #224 adds the per-surface skeletons with their surfaces). `pendingComponent` shows on client navigations only (first loads are server-rendered, the M5 freshness rule; TanStack shows it past `defaultPendingMs` while loaders run, the prototype's "devtools throttling while clicking between pages" is the judging method). Whole-page empty lines: packages keeps the M5 line + gains the Back-to-home outline CTA; branches GAINS an empty state (none exists today, `branches.map` renders nothing) with the prototype's line "Our branches are being set up, check back soon." + the CTA. The `?empty=1` judging aid is **DEV-gated** (`isEmptyJudgingParam(import.meta.env.DEV, useLocation().searchStr)`, the raw-string accessor (execution ruling 2026-10-20: `.search` is the parsed object on the installed router-core 1.171.x; `.searchStr` is the raw string), production answers false, so the aid never ships; raw URL read because route search validation strips unknown params). About's in-page empties stay untouched (#224). Home's in-page empties: the featured collapse law stands (`packages.length > 0` gates the section, unchanged); the gallery section renders the ruled "Portfolio coming soon." line when the live read has zero photos (the shared wall's law, conservative extension, unrated); zero services collapses the services section entirely (the featured-collapse precedent, unrated); zero testimonials renders the prototype's "Client words are on their way, check back soon."
+- **Sibling fences (the tickets' own bodies; NOT here regardless of temptation):** **the catalog plates index, the D2 package detail + framed/prints/privileges spec sheet, image-backed service rows, branch cover strips + walk-in tooltips + variant-split CTAs, /share-your-story wearing the redesign, page titles/descriptions driving h1 + SEO meta, the unpriced law re-verification at those sites, the CTA-law sweep on those surfaces**, ALL #224; **/about's redesign** (mosaic portfolio wall with captions, quote wall, the settings story/title), #224; **the per-surface skeletons for packages/detail/services/branches/about**, #224 (they echo #224 surfaces); **document `<title>`/meta consumption**, #224; **the M7 close-out box, the exit reflection scenario, visual regression**, #225; **any new token or `packages/ui` change** (ruled: none, the redesign re-weights the existing system); **any booking-surface file beyond the `booking.$id.tsx` `notFoundComponent` prop removal** (the wizard/confirmation are v2's and unchanged); **stand-in imagery or stand-in content of any kind**, the 18 StockSnap files and the stand-in seams live on the prototype branch only; main renders the live catalog as-is (the content gaps are owner-owned, recorded in the #164 resolution).
+- **The `docs/plan.md` boxes (Task 6):** the redesign box (`docs/plan.md:174`, "- [ ] Landing, the redesign build…") and the consumption box (`docs/plan.md:175`, "- [ ] Both apps, site settings consumed…") BOTH span #223+#224, each gets a DATED NOT-TICKED annotation naming what landed and what stays #224's (the #216/#221 shared-box precedent). Nothing ticks; the milestone Verify box stays #225's.
+- **Baselines (live, run this session on main `63e2b71`):** types 18 files / 170 tests; landing 10 files / 92 tests; admin 26 files / 254 tests. After Task 1: landing **14 files / 115 tests** (+4 new files, `mosaic.test.ts` +4, `home-testimonials.test.ts` +4, `site-chrome.test.ts` +9, `empty-override.test.ts` +4, `featured.test.ts` +2); types stays 18/170 (in-place literal edits only); admin stays 26/254 (the rider adds no suite, the resolution it uses is types-tested). Tasks 2–5 add no suite counts (component-side). (Executor reconciles actuals; if any gate count differs, reconcile before proceeding, do not loosen assertions.)
 
 ## Global Constraints
 
-- **Branch & baseline:** `feat/223-landing-redesign-1` off main `63e2b71` (plain checkout — single linear ticket, no worktree needed). This plan file is the branch's first commit. Commit messages follow the repo's `type(scope): … (#223)` squash style; every commit below is pinned verbatim. Evidence (test red/green output, grep-gate output, the round's captures and rulings) lands in gitignored `.superpowers/sdd/2026-10-20-223-landing-redesign-1/`.
-- **Gates (repo AGENTS.md, verbatim duties):** **zero manifest changes — `pnpm-lock.yaml` is untouched and `pnpm install` never runs.** `@sevendays/types` resolves through its built `dist/` (its package exports point there — verified), so **Task 1 runs `pnpm --filter @sevendays/types build` after the default edit and before the landing suite** (the landing's seams import `EMPTY_SITE_SETTINGS` from the package at runtime — a stale dist would test the old default). Task 1 then runs `pnpm --filter @sevendays/landing fix` then `pnpm --filter @sevendays/types fix` BEFORE committing (accept the rewrites) → each package's `test -- --run` → `typecheck`. Tasks 2–4 run `pnpm --filter @sevendays/landing fix` → `test -- --run` → `typecheck` → **`build`** (the #218 execution ruling: the production build joins the per-task checks whenever a route's module graph gains an import — every one of these tasks adds one); Task 2 additionally runs the same four for `@sevendays/admin` (the rider touches `_shell.tsx` + `admin-sidebar.tsx`). Never stage `graphify-out/` churn. Tick checklist boxes with `- [✅]`, never `[x]` (this plan file, `docs/plan.md`, and issue bodies alike). Run `graphify update .` at close (Task 6 — code was modified).
-- **The edition law (binding):** main renders its arm only. NO `?v`/`?p`/`?t` machinery, no runtime variant reads, no `prototype-standins`, no stand-in imagery — none of the prototype's judging seams merge. The v1 arm (Call us solid primary, zero book words, hero call-forward) is a pick-time transform on the `v1` branch per the class ledger; this plan lands zero v1-conditional code.
-- **The theme law (binding, #217's ramp):** every new surface uses semantic tokens + tailwind utilities only — no new tokens, no `packages/ui` change, no app-local `.dark` CSS; both themes render from the same classes with two ruled exceptions: NotFound's body (`bg-white dark:bg-brand-ink` — dark returns the ink field, the ruled behavior) and the text sweeps already carried in components (`dark:text-foreground` pairs on `text-brand-ink` lines — the #164 prototype's 12-file sweep pattern). The round verifies dark, never a second class set. If a retune lands interactive text on off-token palette classes, re-measure contrast first (≥ 4.5 for text — `scripts/measure-theme-pairs.mjs` is the harness; do not edit its recorded tables without re-running it).
-- **The settings law (binding):** the chrome renders `resolveSiteSettings` output ONLY (the server fn resolves; components never see raw nulls); a missing or failed read renders `SITE_SETTINGS_DEFAULTS` (the never-broken law — a born-empty row and a dead API render the same chrome); the root loader NEVER throws (`Promise.allSettled` — a chrome read must not take down pages whose own loaders are healthy); defaults never ride the wire (#215's law — only `kickerGallery`'s default changes, in `packages/types`, same-commit with its pinned test edit).
+- **Branch & baseline:** `feat/223-landing-redesign-1` off main `63e2b71` (plain checkout, single linear ticket, no worktree needed). This plan file is the branch's first commit. Commit messages follow the repo's `type(scope): … (#223)` squash style; every commit below is pinned verbatim. Evidence (test red/green output, grep-gate output, the round's captures and rulings) lands in gitignored `.superpowers/sdd/2026-10-20-223-landing-redesign-1/`.
+- **Gates (repo AGENTS.md, verbatim duties):** **zero manifest changes, `pnpm-lock.yaml` is untouched and `pnpm install` never runs.** `@sevendays/types` resolves through its built `dist/` (its package exports point there, verified), so **Task 1 runs `pnpm --filter @sevendays/types build` after the default edit and before the landing suite** (the landing's seams import `EMPTY_SITE_SETTINGS` from the package at runtime, a stale dist would test the old default). Task 1 then runs `pnpm --filter @sevendays/landing fix` then `pnpm --filter @sevendays/types fix` BEFORE committing (accept the rewrites) → each package's `test -- --run` → `typecheck`. Tasks 2–4 run `pnpm --filter @sevendays/landing fix` → `test -- --run` → `typecheck` → **`build`** (the #218 execution ruling: the production build joins the per-task checks whenever a route's module graph gains an import, every one of these tasks adds one); Task 2 additionally runs the same four for `@sevendays/admin` (the rider touches `_shell.tsx` + `admin-sidebar.tsx`). Never stage `graphify-out/` churn. Tick checklist boxes with `- [✅]`, never `[x]` (this plan file, `docs/plan.md`, and issue bodies alike). Run `graphify update .` at close (Task 6, code was modified).
+- **The edition law (binding):** main renders its arm only. NO `?v`/`?p`/`?t` machinery, no runtime variant reads, no `prototype-standins`, no stand-in imagery, none of the prototype's judging seams merge. The v1 arm (Call us solid primary, zero book words, hero call-forward) is a pick-time transform on the `v1` branch per the class ledger; this plan lands zero v1-conditional code.
+- **The theme law (binding, #217's ramp):** every new surface uses semantic tokens + tailwind utilities only, no new tokens, no `packages/ui` change, no app-local `.dark` CSS; both themes render from the same classes with two ruled exceptions: NotFound's body (`bg-white dark:bg-brand-ink`, dark returns the ink field, the ruled behavior) and the text sweeps already carried in components (`dark:text-foreground` pairs on `text-brand-ink` lines, the #164 prototype's 12-file sweep pattern). The round verifies dark, never a second class set. If a retune lands interactive text on off-token palette classes, re-measure contrast first (≥ 4.5 for text, `scripts/measure-theme-pairs.mjs` is the harness; do not edit its recorded tables without re-running it).
+- **The settings law (binding):** the chrome renders `resolveSiteSettings` output ONLY (the server fn resolves; components never see raw nulls); a missing or failed read renders `SITE_SETTINGS_DEFAULTS` (the never-broken law, a born-empty row and a dead API render the same chrome); the root loader NEVER throws (`Promise.allSettled`, a chrome read must not take down pages whose own loaders are healthy); defaults never ride the wire (#215's law, only `kickerGallery`'s default changes, in `packages/types`, same-commit with its pinned test edit).
 - **The CTA law (binding, this ticket's sites):** every Book-now CTA this plan lands carries `CalendarPlus` (`size-4`, `aria-hidden`); every call affordance carries `Phone`. Footer/NotFound/Error CTAs keep outline weight. No other CTA changes (fenced to #224).
-- **The CoverPanel law (binding):** every cover render site this plan lands (the D2 plate's photo half) uses `CoverPanel` — img on `coverImageUrl`, today's placeholder verbatim on null (M5's rule for home-featured surfaces; the prototype's raw `img` is corrected at the mining boundary).
+- **The CoverPanel law (binding):** every cover render site this plan lands (the D2 plate's photo half) uses `CoverPanel`, img on `coverImageUrl`, today's placeholder verbatim on null (M5's rule for home-featured surfaces; the prototype's raw `img` is corrected at the mining boundary).
 - **The unpriced law (binding, #212):** `peso(priceCents)` already renders `null` → nothing; no redesigned site reintroduces a ₱0, a placeholder, or an inquire line. The D2 plate's mono price line renders nothing for unpriced rows.
-- **The states law (binding):** skeletons are structure-only silhouettes on the shared Tier-1 `Skeleton` primitive, wired as `pendingComponent` (client navigations only — no suspense-fallback spinners anywhere); the sweep rides `.skeleton-grammar` (reduced-motion off). Whole-page empty lines carry the Back-to-home outline CTA; `?empty=1` answers false in production builds by construction. First loads stay server-rendered (the M5 freshness rule — no route gains `preloadStaleTime` games).
-- **The copy law:** every string the executor must produce lands verbatim in this plan's fenced blocks. Unrated owner-facing copy carries the house `TODO(owner-copy)` marker per the on-disk convention — Task 5's round ratifies or retunes; markers retire as ruled; if copy retunes, the code changes in the same commit (no suite pins component-side strings; the ONE suite-pinned literal this ticket touches is `SITE_SETTINGS_DEFAULTS.kickerGallery` in `packages/types` — a retune there lands in the same commit as its test edit).
-- **The motion law (from the rulings):** one motion grammar — the `Reveal` fade-and-rise (700ms ease-out, staggered per column, `prefers-reduced-motion` shows immediately), the marquee (45s linear, hover-pause, reduced-motion = manual on mobile / none on desktop), the stepper (3.5s interval, 500ms ease-out steps, reduced-motion = instant steps still on the interval — auto-scroll is the owner's explicit ask), the nav panel (200ms ease-out, reduced-motion instant), the testimonial page-change reveal (500ms, reduced-motion swaps to a plain fade via `motion-safe:`), the skeleton sweep (1.4s, reduced-motion off), the plate hover zoom (`duration-700 group-hover:scale-[1.02]`, reduced-motion none). Nothing else animates.
-- **Scope fence (verbatim):** Task 1 edits only `packages/types/src/{site-settings.ts (one literal), site-settings.test.ts (one literal)}` + `apps/landing/src/lib/{mosaic.ts (new), mosaic.test.ts (new), home-testimonials.ts (new), home-testimonials.test.ts (new), site-chrome.ts (new), site-chrome.test.ts (new), empty-override.ts (new), empty-override.test.ts (new), featured.ts, featured.test.ts}`. Task 2 edits only `apps/landing/src/{lib/api.functions.ts, lib/queries.ts, components/site-header.tsx, components/site-footer.tsx, components/mobile-nav.tsx, components/announcement-banner.tsx (new), components/not-found.tsx (new), components/error-component.tsx (new), routes/__root.tsx, styles.css, routes/packages/$slug.tsx (prop removal), routes/booking.$id.tsx (prop removal)}` + `apps/admin/src/{routes/_shell.tsx, components/admin-sidebar.tsx}`. Task 3 edits only `apps/landing/src/{components/reveal.tsx (new), components/mosaic-photo-grid.tsx (new), components/featured-plates.tsx (new), components/home-image-led.tsx, components/home-cards.tsx, components/home-copy.ts, components/skeletons.tsx (new), routes/index.tsx, styles.css}`. Task 4 edits only `apps/landing/src/{routes/packages/index.tsx, routes/branches.tsx}`. Task 5 edits only copy/classes in the files Tasks 1–4 landed + writes evidence. Task 6 rotates `docs/plan.md`, `docs/progress.md`, `AGENTS.md`, `graphify-out/`, `docs/agents/v1-picks.md` (post-merge), and works the PR/pick/issues — nothing else. NOT here: everything in the header's sibling-fences bullet.
+- **The states law (binding):** skeletons are structure-only silhouettes on the shared Tier-1 `Skeleton` primitive, wired as `pendingComponent` (client navigations only, no suspense-fallback spinners anywhere); the sweep rides `.skeleton-grammar` (reduced-motion off). Whole-page empty lines carry the Back-to-home outline CTA; `?empty=1` answers false in production builds by construction. First loads stay server-rendered (the M5 freshness rule, no route gains `preloadStaleTime` games).
+- **The copy law:** every string the executor must produce lands verbatim in this plan's fenced blocks. Unrated owner-facing copy carries the house `TODO(owner-copy)` marker per the on-disk convention, Task 5's round ratifies or retunes; markers retire as ruled; if copy retunes, the code changes in the same commit (no suite pins component-side strings; the ONE suite-pinned literal this ticket touches is `SITE_SETTINGS_DEFAULTS.kickerGallery` in `packages/types`, a retune there lands in the same commit as its test edit).
+- **The motion law (from the rulings):** one motion grammar, the `Reveal` fade-and-rise (700ms ease-out, staggered per column, `prefers-reduced-motion` shows immediately), the marquee (45s linear, hover-pause, reduced-motion = manual on mobile / none on desktop), the stepper (3.5s interval, 500ms ease-out steps, reduced-motion = instant steps still on the interval, auto-scroll is the owner's explicit ask), the nav panel (200ms ease-out, reduced-motion instant), the testimonial page-change reveal (500ms, reduced-motion swaps to a plain fade via `motion-safe:`), the skeleton sweep (1.4s, reduced-motion off), the plate hover zoom (`duration-700 group-hover:scale-[1.02]`, reduced-motion none). Nothing else animates.
+- **Scope fence (verbatim):** Task 1 edits only `packages/types/src/{site-settings.ts (one literal), site-settings.test.ts (one literal)}` + `apps/landing/src/lib/{mosaic.ts (new), mosaic.test.ts (new), home-testimonials.ts (new), home-testimonials.test.ts (new), site-chrome.ts (new), site-chrome.test.ts (new), empty-override.ts (new), empty-override.test.ts (new), featured.ts, featured.test.ts}`. Task 2 edits only `apps/landing/src/{lib/api.functions.ts, lib/queries.ts, components/site-header.tsx, components/site-footer.tsx, components/mobile-nav.tsx, components/announcement-banner.tsx (new), components/not-found.tsx (new), components/error-component.tsx (new), routes/__root.tsx, styles.css, routes/packages/$slug.tsx (prop removal), routes/booking.$id.tsx (prop removal)}` + `apps/admin/src/{routes/_shell.tsx, components/admin-sidebar.tsx}`. Task 3 edits only `apps/landing/src/{components/reveal.tsx (new), components/mosaic-photo-grid.tsx (new), components/featured-plates.tsx (new), components/home-image-led.tsx, components/home-cards.tsx, components/home-copy.ts, components/skeletons.tsx (new), routes/index.tsx, styles.css}`. Task 4 edits only `apps/landing/src/{routes/packages/index.tsx, routes/branches.tsx}`. Task 5 edits only copy/classes in the files Tasks 1–4 landed + writes evidence. Task 6 rotates `docs/plan.md`, `docs/progress.md`, `AGENTS.md`, `graphify-out/`, `docs/agents/v1-picks.md` (post-merge), and works the PR/pick/issues, nothing else. NOT here: everything in the header's sibling-fences bullet.
 
 ## File Structure
 
 ```text
 packages/types/src/
-  site-settings.ts             # modify (T1) — kickerGallery default 'The work — stand-in portfolio' → 'The work'
-  site-settings.test.ts        # modify (T1) — the same literal in the DEFAULTS verbatim pin
+  site-settings.ts             # modify (T1), kickerGallery default 'The work, stand-in portfolio' → 'The work'
+  site-settings.test.ts        # modify (T1), the same literal in the DEFAULTS verbatim pin
 apps/landing/src/lib/
-  mosaic.ts                    # new (T1) — spanFor: the deterministic 2×2/2×1 rhythm
-  mosaic.test.ts               # new (T1) — +4 its
-  home-testimonials.ts         # new (T1) — paginateTestimonials (3/page, lead + side rail)
-  home-testimonials.test.ts    # new (T1) — +4 its
-  site-chrome.ts               # new (T1) — bannerFor / socialLinksFor / footerContactFor
-  site-chrome.test.ts          # new (T1) — +9 its
-  empty-override.ts            # new (T1) — isEmptyJudgingParam (DEV-gated ?empty=1)
-  empty-override.test.ts       # new (T1) — +4 its
-  featured.ts                  # modify (T1) — the selector's return gains isFeatured
-  featured.test.ts             # modify (T1) — +2 its
-  api.functions.ts             # modify (T2) — getSiteSettings (resolveSiteSettings at the boundary)
-  queries.ts                   # modify (T2) — siteSettingsQueries
+  mosaic.ts                    # new (T1), spanFor: the deterministic 2×2/2×1 rhythm
+  mosaic.test.ts               # new (T1), +4 its
+  home-testimonials.ts         # new (T1), paginateTestimonials (3/page, lead + side rail)
+  home-testimonials.test.ts    # new (T1), +4 its
+  site-chrome.ts               # new (T1), bannerFor / socialLinksFor / footerContactFor
+  site-chrome.test.ts          # new (T1), +9 its
+  empty-override.ts            # new (T1), isEmptyJudgingParam (DEV-gated ?empty=1)
+  empty-override.test.ts       # new (T1), +4 its
+  featured.ts                  # modify (T1), the selector's return gains isFeatured
+  featured.test.ts             # modify (T1), +2 its
+  api.functions.ts             # modify (T2), getSiteSettings (resolveSiteSettings at the boundary)
+  queries.ts                   # modify (T2), siteSettingsQueries
 apps/landing/src/components/
-  site-header.tsx              # modify (T2) — the sticky glass ink bar + settings wordmark
-  site-footer.tsx              # modify (T2) — branch truth + socials + contact + settings wordmark
-  mobile-nav.tsx               # modify (T2) — the animated panel + CalendarPlus CTA
-  announcement-banner.tsx      # new (T2) — the settings banner (off/untitled → nothing)
-  not-found.tsx                # new (T2) — the branded global 404
-  error-component.tsx          # new (T2) — the branded error surface
-  reveal.tsx                   # new (T3) — the shared viewport reveal
-  mosaic-photo-grid.tsx        # new (T3) — the shared mosaic wall (captions optional)
-  featured-plates.tsx          # new (T3) — D2 light split plates, alone
-  home-image-led.tsx           # modify (T3) — the ruled home composition
-  home-cards.tsx               # modify (T3) — keeps ServiceImageCard + serviceBackground only
-  home-copy.ts                 # modify (T3) — keeps HERO_PHOTO/HERO_PHOTO_ALT only
-  skeletons.tsx                # new (T3) — HomeSkeleton (the grammar's first silhouette)
+  site-header.tsx              # modify (T2), the sticky glass ink bar + settings wordmark
+  site-footer.tsx              # modify (T2), branch truth + socials + contact + settings wordmark
+  mobile-nav.tsx               # modify (T2), the animated panel + CalendarPlus CTA
+  announcement-banner.tsx      # new (T2), the settings banner (off/untitled → nothing)
+  not-found.tsx                # new (T2), the branded global 404
+  error-component.tsx          # new (T2), the branded error surface
+  reveal.tsx                   # new (T3), the shared viewport reveal
+  mosaic-photo-grid.tsx        # new (T3), the shared mosaic wall (captions optional)
+  featured-plates.tsx          # new (T3), D2 light split plates, alone
+  home-image-led.tsx           # modify (T3), the ruled home composition
+  home-cards.tsx               # modify (T3), keeps ServiceImageCard + serviceBackground only
+  home-copy.ts                 # modify (T3), keeps HERO_PHOTO/HERO_PHOTO_ALT only
+  skeletons.tsx                # new (T3), HomeSkeleton (the grammar's first silhouette)
 apps/landing/src/routes/
-  __root.tsx                   # modify (T2) — chrome loader + banner + global NotFound/Error
-  packages/$slug.tsx           # modify (T2) — notFoundComponent override removed
-  booking.$id.tsx              # modify (T2) — notFoundComponent override removed
-  index.tsx                    # modify (T3) — the four-read loader + pendingComponent
-  packages/index.tsx           # modify (T4) — Back-to-home CTA + ?empty judging
-  branches.tsx                 # modify (T4) — the empty state + Back-to-home + ?empty judging
-apps/landing/src/styles.css    # modify (T2+T3) — .nav-panel (T2); marquee/reveal keyframes + .skeleton-grammar sweep (T3)
+  __root.tsx                   # modify (T2), chrome loader + banner + global NotFound/Error
+  packages/$slug.tsx           # modify (T2), notFoundComponent override removed
+  booking.$id.tsx              # modify (T2), notFoundComponent override removed
+  index.tsx                    # modify (T3), the four-read loader + pendingComponent
+  packages/index.tsx           # modify (T4), Back-to-home CTA + ?empty judging
+  branches.tsx                 # modify (T4), the empty state + Back-to-home + ?empty judging
+apps/landing/src/styles.css    # modify (T2+T3), .nav-panel (T2); marquee/reveal keyframes + .skeleton-grammar sweep (T3)
 apps/admin/src/
-  routes/_shell.tsx            # modify (T2) — the guarded site-settings ensure
-  components/admin-sidebar.tsx # modify (T2) — brandName + logo chip over resolveSiteSettings
+  routes/_shell.tsx            # modify (T2), the guarded site-settings ensure
+  components/admin-sidebar.tsx # modify (T2), brandName + logo chip over resolveSiteSettings
 docs/plan.md docs/progress.md AGENTS.md graphify-out/ docs/agents/v1-picks.md  # T6
 ```
 
@@ -97,7 +97,7 @@ Every composition Task 2–4 renders reads through these seams; they land first,
 - Produces (what Tasks 2–4 consume): `spanFor(i: number): string` (grid-span classes); `TESTIMONIAL_PAGE_SIZE` + `paginateTestimonials(items: PublicTestimonial[], pageSize?): { id: string; items: PublicTestimonial[] }[]`; `bannerFor(settings: SiteSettings): { title: string; body: string | null } | null`, `socialLinksFor(settings: SiteSettings): SocialLink[]`, `footerContactFor(settings: SiteSettings): { email: string | null; phone: string | null } | null`; `isEmptyJudgingParam(dev: boolean, search: string): boolean`; `selectFeaturedPackages` returning `{ heading, isFeatured, packages }`.
 - Consumes: `PublicTestimonial`, `SiteSettings` from `@sevendays/types`.
 
-**Not here:** any component; any route; the banner/footer/header compositions (Task 2); pagination STATE (page clamping lives in the component — the seam is the pure chunking).
+**Not here:** any component; any route; the banner/footer/header compositions (Task 2); pagination STATE (page clamping lives in the component, the seam is the pure chunking).
 
 - [ ] **Step 1: Write the four failing test files**
 
@@ -105,13 +105,13 @@ Every composition Task 2–4 renders reads through these seams; they land first,
 
 ```ts
 // The mosaic wall's deterministic span rhythm (#164 Round 2, owner-ruled:
-// "some photos have 2x2 or 1x2 size") — every 7th tile runs large, every
+// "some photos have 2x2 or 1x2 size"), every 7th tile runs large, every
 // 7th+3 runs wide, singles around, repeating. Pinned so a future "tune the
 // rhythm" edit moves the seam and the suite together.
 import { describe, expect, it } from 'vitest';
 import { spanFor } from './mosaic';
 
-describe('spanFor (M7 #223 — the #164-ruled rhythm)', () => {
+describe('spanFor (M7 #223, the #164-ruled rhythm)', () => {
   it('every 7th tile runs 2×2 (i = 0, 7, 14 …)', () => {
     expect(spanFor(0)).toBe('col-span-2 row-span-2');
     expect(spanFor(7)).toBe('col-span-2 row-span-2');
@@ -131,7 +131,7 @@ describe('spanFor (M7 #223 — the #164-ruled rhythm)', () => {
     expect(spanFor(9)).toBe('');
   });
 
-  it('the rhythm is unbounded — large indices keep cycling (the wall never runs out of window)', () => {
+  it('the rhythm is unbounded, large indices keep cycling (the wall never runs out of window)', () => {
     expect(spanFor(21)).toBe('col-span-2 row-span-2');
     expect(spanFor(24)).toBe('col-span-2');
     expect(spanFor(100)).toBe('');
@@ -142,7 +142,7 @@ describe('spanFor (M7 #223 — the #164-ruled rhythm)', () => {
 `apps/landing/src/lib/home-testimonials.test.ts` (new file):
 
 ```ts
-// Home testimonial pagination (#164 Round 2, owner-ruled: 3 per page — a
+// Home testimonial pagination (#164 Round 2, owner-ruled: 3 per page, a
 // pull-quote lead + a 2-item side rail; non-looping, the UI disables the
 // ends). The seam is the pure chunking; page STATE is the component's.
 import type { PublicTestimonial } from '@sevendays/types';
@@ -160,10 +160,10 @@ function t(): PublicTestimonial {
 }
 ```
 
-*(The wire is the three-field `{ id, quote, person }` — `packages/types/src/testimonial.ts`'s `publicTestimonialSchema`, read whole this session; position/isActive never ride the public read.)*
+*(The wire is the three-field `{ id, quote, person }`, `packages/types/src/testimonial.ts`'s `publicTestimonialSchema`, read whole this session; position/isActive never ride the public read.)*
 
 ```ts
-describe('paginateTestimonials (M7 #223 — 3 per page, lead + side rail)', () => {
+describe('paginateTestimonials (M7 #223, 3 per page, lead + side rail)', () => {
   it('zero testimonials → zero pages (the component renders the coming-soon line)', () => {
     expect(paginateTestimonials([])).toEqual([]);
   });
@@ -199,7 +199,7 @@ describe('paginateTestimonials (M7 #223 — 3 per page, lead + side rail)', () =
 // the RESOLVED settings. The banner gates are the law: off or untitled
 // renders NOTHING (never a broken strip); unset socials hide; the contact
 // block renders only what the studio set. Fixtures here are hand-built
-// resolved shapes (resolveSiteSettings is types-tested — #215).
+// resolved shapes (resolveSiteSettings is types-tested, #215).
 import type { SiteSettings } from '@sevendays/types';
 import { EMPTY_SITE_SETTINGS } from '@sevendays/types';
 import { describe, expect, it } from 'vitest';
@@ -210,7 +210,7 @@ const ON = {
   bannerIsActive: true,
 } as SiteSettings;
 
-describe('bannerFor (M7 #223 — off or untitled renders nothing)', () => {
+describe('bannerFor (M7 #223, off or untitled renders nothing)', () => {
   it('inactive banner → null even when title/body are set', () => {
     expect(
       bannerFor({ ...ON, bannerIsActive: false, bannerTitle: 'News', bannerBody: 'Body' })
@@ -236,7 +236,7 @@ describe('bannerFor (M7 #223 — off or untitled renders nothing)', () => {
   });
 });
 
-describe('socialLinksFor (M7 #223 — unset links hide, order fixed)', () => {
+describe('socialLinksFor (M7 #223, unset links hide, order fixed)', () => {
   it('nothing set → empty row (the footer renders no social line)', () => {
     expect(socialLinksFor(EMPTY_SITE_SETTINGS)).toEqual([]);
   });
@@ -254,7 +254,7 @@ describe('socialLinksFor (M7 #223 — unset links hide, order fixed)', () => {
   });
 });
 
-describe('footerContactFor (M7 #223 — renders only what the studio set)', () => {
+describe('footerContactFor (M7 #223, renders only what the studio set)', () => {
   it('nothing set → null (no contact block)', () => {
     expect(footerContactFor(EMPTY_SITE_SETTINGS)).toBeNull();
   });
@@ -284,11 +284,11 @@ describe('footerContactFor (M7 #223 — renders only what the studio set)', () =
 // The empty-states judging aid (#164 Round 5's mechanism, built DEV-gated):
 // ?empty=1 forces the ruled whole-page empty lines so the round judges them
 // without emptying the live catalog. Production builds answer false by
-// construction — the aid never ships.
+// construction, the aid never ships.
 import { describe, expect, it } from 'vitest';
 import { isEmptyJudgingParam } from './empty-override';
 
-describe('isEmptyJudgingParam (M7 #223 — DEV-gated)', () => {
+describe('isEmptyJudgingParam (M7 #223, DEV-gated)', () => {
   it('dev + ?empty=1 → true (the judging path)', () => {
     expect(isEmptyJudgingParam(true, '?empty=1')).toBe(true);
   });
@@ -324,11 +324,11 @@ In `apps/landing/src/lib/featured.test.ts`, inside the existing top describe (af
   });
 ```
 
-*(Place the two its beside their paths' existing its inside the file's describe blocks — the fixture vocabulary `pkg()`/`BASIC`/`C` is the file's own.)*
+*(Place the two its beside their paths' existing its inside the file's describe blocks, the fixture vocabulary `pkg()`/`BASIC`/`C` is the file's own.)*
 
 - [ ] **Step 3: Run red**
 
-`pnpm --filter @sevendays/landing test -- --run` — the 4 new files' its fail (modules don't exist); the featured extension fails (`isFeatured` absent). Capture the red output to the evidence dir.
+`pnpm --filter @sevendays/landing test -- --run`, the 4 new files' its fail (modules don't exist); the featured extension fails (`isFeatured` absent). Capture the red output to the evidence dir.
 
 - [ ] **Step 4: Implement the seams**
 
@@ -337,7 +337,7 @@ In `apps/landing/src/lib/featured.test.ts`, inside the existing top describe (af
 ```ts
 // The mosaic wall's deterministic span rhythm (#164 Round 2, owner-ruled):
 // every 7th tile runs large (2×2), every 7th+3 runs wide (2×1), the rest
-// are singles — over fixed row heights with dense packing, so the wall
+// are singles, over fixed row heights with dense packing, so the wall
 // stays balanced while a few photos run large. Pure: the grid component
 // maps indices through this and the seam pins the rhythm.
 export function spanFor(i: number): string {
@@ -350,7 +350,7 @@ export function spanFor(i: number): string {
 ```ts
 import type { PublicTestimonial } from '@sevendays/types';
 
-// Home testimonial pagination (#164 Round 2, owner-ruled): 3 per page — a
+// Home testimonial pagination (#164 Round 2, owner-ruled): 3 per page, a
 // pull-quote lead + a 2-item side rail on every page. Non-looping (the UI
 // disables the ends). Page ids derive from each page's first item: the
 // page-change reveal keys on them, so every flip re-runs the animation.
@@ -375,7 +375,7 @@ export function paginateTestimonials(
 import type { SiteSettings } from '@sevendays/types';
 
 // The chrome's site-settings consumption seams (M7 #223): pure shapers over
-// the RESOLVED settings (the server fn applies resolveSiteSettings — these
+// the RESOLVED settings (the server fn applies resolveSiteSettings, these
 // never see a raw null-default mix). Three laws live here: the banner
 // renders NOTHING when off or untitled (never a broken strip); unset
 // social links hide (the row collapses when all are unset); the contact
@@ -423,21 +423,21 @@ export function footerContactFor(
 // owner round judges them without emptying the live catalog. The URL is
 // read RAW (route search validation strips unknown params); `dev` is the
 // caller's `import.meta.env.DEV` so production builds answer false by
-// construction — the aid never ships.
+// construction, the aid never ships.
 export function isEmptyJudgingParam(dev: boolean, search: string): boolean {
   if (!dev) return false;
   return new URLSearchParams(search).get('empty') === '1';
 }
 ```
 
-In `apps/landing/src/lib/featured.ts`: extend the return type of `selectFeaturedPackages` to `{ heading: string; isFeatured: boolean; packages: ServicePackageRead[] }` and the two returns — the featured path gains `isFeatured: true,`, the fallback path `isFeatured: false,`. The heading switch itself is UNTOUCHED (the M5-ruled behavior; home composes `isFeatured ? settings.kickerPackages : heading`).
+In `apps/landing/src/lib/featured.ts`: extend the return type of `selectFeaturedPackages` to `{ heading: string; isFeatured: boolean; packages: ServicePackageRead[] }` and the two returns, the featured path gains `isFeatured: true,`, the fallback path `isFeatured: false,`. The heading switch itself is UNTOUCHED (the M5-ruled behavior; home composes `isFeatured ? settings.kickerPackages : heading`).
 
 - [ ] **Step 5: The types default delta (same-commit pair)**
 
 In `packages/types/src/site-settings.ts`, in `SITE_SETTINGS_DEFAULTS`, replace the line
 
 ```ts
-  kickerGallery: 'The work — stand-in portfolio',
+  kickerGallery: 'The work, stand-in portfolio',
 ```
 
 with
@@ -446,20 +446,20 @@ with
   kickerGallery: 'The work',
 ```
 
-In `packages/types/src/site-settings.test.ts` line 120, inside the `SITE_SETTINGS_DEFAULTS pins today's landing literals verbatim` `it`, replace the same literal `kickerGallery: 'The work — stand-in portfolio',` with `kickerGallery: 'The work',`. **These two edits land in the same commit.** (Why: the default IS the rendered-when-unset copy; the ruled home's gallery heading is "The work" — one voice per section — and the wall renders the real gallery now, so the stand-in suffix dies with the stand-ins. The other three kicker defaults already equal their ruled headings; `homeTitle`/`homeDescription` already equal the incumbent hero copy the prototype kept. Update the file's header comment's "the four kickers from home-copy's KICKERS" phrase to "the four kickers from the ruled one-voice section headings (#223)" — one line.)
+In `packages/types/src/site-settings.test.ts` line 120, inside the `SITE_SETTINGS_DEFAULTS pins today's landing literals verbatim` `it`, replace the same literal `kickerGallery: 'The work, stand-in portfolio',` with `kickerGallery: 'The work',`. **These two edits land in the same commit.** (Why: the default IS the rendered-when-unset copy; the ruled home's gallery heading is "The work", one voice per section, and the wall renders the real gallery now, so the stand-in suffix dies with the stand-ins. The other three kicker defaults already equal their ruled headings; `homeTitle`/`homeDescription` already equal the incumbent hero copy the prototype kept. Update the file's header comment's "the four kickers from home-copy's KICKERS" phrase to "the four kickers from the ruled one-voice section headings (#223)", one line.)
 
 - [ ] **Step 6: Green + gates + commit**
 
-`pnpm --filter @sevendays/types build` FIRST (the landing consumes the package through its `dist/` — the new default must be in the build before the landing suite reads it), then `pnpm --filter @sevendays/landing test -- --run` — **14 files / 115 tests** (92 + 23). `pnpm --filter @sevendays/types test -- --run` — **18 files / 170 tests** (unchanged counts; the literal edit must keep the DEFAULTS pin green). Then `pnpm --filter @sevendays/landing fix` → `pnpm --filter @sevendays/types fix` → re-run both suites → `pnpm --filter @sevendays/landing typecheck` → `pnpm --filter @sevendays/types typecheck`. Commit:
+`pnpm --filter @sevendays/types build` FIRST (the landing consumes the package through its `dist/`, the new default must be in the build before the landing suite reads it), then `pnpm --filter @sevendays/landing test -- --run`, **14 files / 115 tests** (92 + 23). `pnpm --filter @sevendays/types test -- --run`, **18 files / 170 tests** (unchanged counts; the literal edit must keep the DEFAULTS pin green). Then `pnpm --filter @sevendays/landing fix` → `pnpm --filter @sevendays/types fix` → re-run both suites → `pnpm --filter @sevendays/landing typecheck` → `pnpm --filter @sevendays/types typecheck`. Commit:
 
 ```bash
 git add packages/types/src/site-settings.ts packages/types/src/site-settings.test.ts apps/landing/src/lib/mosaic.ts apps/landing/src/lib/mosaic.test.ts apps/landing/src/lib/home-testimonials.ts apps/landing/src/lib/home-testimonials.test.ts apps/landing/src/lib/site-chrome.ts apps/landing/src/lib/site-chrome.test.ts apps/landing/src/lib/empty-override.ts apps/landing/src/lib/empty-override.test.ts apps/landing/src/lib/featured.ts apps/landing/src/lib/featured.test.ts
 git commit -m "feat(landing): the redesign I seams - mosaic rhythm, testimonial pagination, chrome settings shapers, the DEV-gated empty judging, isFeatured (#223)"
 ```
 
-### Task 2: The chrome — settings read path, glass bar, footer truth, banner, global NotFound/Error, the admin rider (UI-bearing)
+### Task 2: The chrome, settings read path, glass bar, footer truth, banner, global NotFound/Error, the admin rider (UI-bearing)
 
-**Load the installed UI/UX skill set at execution time** (`prototype` + `ui-ux-pro-max`, plus `ui-styling` as relevant — AGENTS.md rule) before composing. The fenced compositions below are the #164-ruled values adapted to main (the skill set's pass retunes what Task 5's round rules; the ruled literals — `bg-brand-ink/90 backdrop-blur-md`, the white/10 hairline, `md:inline` kicker, `py-2.5`/`size-9` bar — are owner-ruled, not suggestions).
+**Load the installed UI/UX skill set at execution time** (`prototype` + `ui-ux-pro-max`, plus `ui-styling` as relevant, AGENTS.md rule) before composing. The fenced compositions below are the #164-ruled values adapted to main (the skill set's pass retunes what Task 5's round rules; the ruled literals, `bg-brand-ink/90 backdrop-blur-md`, the white/10 hairline, `md:inline` kicker, `py-2.5`/`size-9` bar, are owner-ruled, not suggestions).
 
 **Files:**
 - Modify: `apps/landing/src/lib/api.functions.ts`, `apps/landing/src/lib/queries.ts`, `apps/landing/src/components/{site-header,site-footer,mobile-nav}.tsx`, `apps/landing/src/routes/__root.tsx`, `apps/landing/src/styles.css`, `apps/landing/src/routes/packages/$slug.tsx`, `apps/landing/src/routes/booking.$id.tsx`
@@ -474,13 +474,13 @@ git commit -m "feat(landing): the redesign I seams - mosaic rhythm, testimonial 
 
 - [ ] **Step 1: The settings read path**
 
-(a) In `apps/landing/src/lib/api.functions.ts`, add the server fn (after `getTestimonials`, before `createAppointment` — biome orders by its own fix pass; imports: `resolveSiteSettings` joins the `@sevendays/types` import):
+(a) In `apps/landing/src/lib/api.functions.ts`, add the server fn (after `getTestimonials`, before `createAppointment`, biome orders by its own fix pass; imports: `resolveSiteSettings` joins the `@sevendays/types` import):
 
 ```ts
 /**
- * The resolved site-settings read (M7 #223 — the chrome + home copy
+ * The resolved site-settings read (M7 #223, the chrome + home copy
  * source). resolveSiteSettings applies at the boundary: consumers never
- * see the born-empty null mix — unset fields are today's defaults (#215's
+ * see the born-empty null mix, unset fields are today's defaults (#215's
  * one-fallback law, never per-app fallbacks).
  */
 export const getSiteSettings = createServerFn().handler(async () => {
@@ -494,7 +494,7 @@ export const getSiteSettings = createServerFn().handler(async () => {
 
 ```ts
 export const siteSettingsQueries = {
-  /** The singleton's resolved read (M7 #223) — the chrome's copy source. */
+  /** The singleton's resolved read (M7 #223), the chrome's copy source. */
   all: () =>
     queryOptions({
       queryKey: ['site-settings'],
@@ -505,7 +505,7 @@ export const siteSettingsQueries = {
 
 (with `getSiteSettings` joining the `./api.functions` import block).
 
-- [ ] **Step 2: `components/site-header.tsx` — the sticky glass ink bar (full rewrite)**
+- [ ] **Step 2: `components/site-header.tsx`, the sticky glass ink bar (full rewrite)**
 
 ```tsx
 import type { SiteSettings } from '@sevendays/types';
@@ -517,8 +517,8 @@ import { CalendarPlus } from 'lucide-react';
 import { NAV_LINKS } from '../lib/nav';
 import { MobileNav } from './mobile-nav';
 
-// Site chrome — the ruled pass C "Sticky ink bar" (#164 Round 1, owner
-// endorsed; built M7 #223): the ink band goes sticky and glassy — 90% ink
+// Site chrome, the ruled pass C "Sticky ink bar" (#164 Round 1, owner
+// endorsed; built M7 #223): the ink band goes sticky and glassy, 90% ink
 // + backdrop-blur so scrolling content reads softly beneath it, the
 // white/10 hairline keeping the glass legible on bright photos. The
 // incumbent wordmark (serif name + mono kicker) carries, desktop-only
@@ -526,7 +526,7 @@ import { MobileNav } from './mobile-nav';
 // sets one, the incumbent sd.png otherwise; name/tagline from the Site
 // tab, code defaults when unset). Link treatment stays #111's ruled B
 // (brand-200 rest 13.94:1, white hover/current, petrol tick). CTA law,
-// main arm: Book now carries CalendarPlus — the v1 arm's Call-us swap is a
+// main arm: Book now carries CalendarPlus, the v1 arm's Call-us swap is a
 // pick-time transform, never in this codebase.
 export function SiteHeader({ settings }: { settings: SiteSettings }) {
   return (
@@ -584,7 +584,7 @@ export function SiteHeader({ settings }: { settings: SiteSettings }) {
 }
 ```
 
-- [ ] **Step 3: `components/mobile-nav.tsx` — the animated panel (full rewrite)**
+- [ ] **Step 3: `components/mobile-nav.tsx`, the animated panel (full rewrite)**
 
 ```tsx
 import { buttonVariants } from '@sevendays/ui/components/button';
@@ -599,14 +599,14 @@ import { CalendarPlus, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import type { NAV_LINKS } from '../lib/nav';
 
-// Mobile chrome — panel B treatment (#111 ruled) wearing #164's ruled
+// Mobile chrome, panel B treatment (#111 ruled) wearing #164's ruled
 // animation, rebuilt on Base UI's NATIVE transition contract (the Round-6
 // fix: the library stamps data-open / data-closed / data-starting-style on
-// the panel and keeps it mounted through the exit transition itself —
+// the panel and keeps it mounted through the exit transition itself;
 // .nav-panel in styles.css styles those states; custom mount/unmount state
 // classes fought the library and lost). The trigger rotates 90° through
 // the Menu/X morph; reduced motion = instant; the panel unmounts when
-// closed again — no a11y residue. CTA law: Book now carries CalendarPlus.
+// closed again, no a11y residue. CTA law: Book now carries CalendarPlus.
 // Hidden at md+ where the desktop nav lives.
 export function MobileNav({ links }: { links: typeof NAV_LINKS }) {
   const [open, setOpen] = useState(false);
@@ -661,11 +661,11 @@ export function MobileNav({ links }: { links: typeof NAV_LINKS }) {
 import type { SiteSettings } from '@sevendays/types';
 import { bannerFor } from '../lib/site-chrome';
 
-// The settings-driven announcement banner (M7 #223 — the #215 Site tab's
+// The settings-driven announcement banner (M7 #223, the #215 Site tab's
 // banner fields worn by the landing chrome): a slim wash strip ABOVE the
-// sticky bar, scrolling away with the page — quiet by the thesis. The gate
+// sticky bar, scrolling away with the page, quiet by the thesis. The gate
 // law lives in bannerFor: off or untitled renders NOTHING (never a broken
-// strip). Unrated composition (no prototype precedent — settings post-date
+// strip). Unrated composition (no prototype precedent, settings post-date
 // the arc); the variants round ratifies.
 export function AnnouncementBanner({ settings }: { settings: SiteSettings }) {
   const banner = bannerFor(settings);
@@ -685,7 +685,7 @@ In `apps/landing/src/styles.css`, append at the file's end (after the existing `
 
 ```css
 /* #164 Round 4 scope rider (owner ruling), built M7 #223: the mobile menu
-   panel animates on Base UI's native transition contract — the library
+   panel animates on Base UI's native transition contract, the library
    stamps data-open / data-closed / data-starting-style / data-ending-style
    on the panel and keeps it mounted through the exit transition itself.
    Closed = lifted and transparent; opening drops it in; closing lifts it
@@ -710,7 +710,7 @@ In `apps/landing/src/styles.css`, append at the file's end (after the existing `
 }
 ```
 
-- [ ] **Step 5: `components/site-footer.tsx` — the contact truth (full rewrite)**
+- [ ] **Step 5: `components/site-footer.tsx`, the contact truth (full rewrite)**
 
 ```tsx
 import type { BranchRead, SiteSettings } from '@sevendays/types';
@@ -721,13 +721,13 @@ import { Phone } from 'lucide-react';
 import { NAV_LINKS } from '../lib/nav';
 import { footerContactFor, socialLinksFor } from '../lib/site-chrome';
 
-// Site chrome, the ink band — the page's one dark frame, wearing the ruled
+// Site chrome, the ink band, the page's one dark frame, wearing the ruled
 // redesign (#164 Round 1; built M7 #223): the wordmark consumes the
 // settings brand (name + mono kicker, md+), the footer carries the
 // 3-branch contact truth read live from the API (tel: links + walk-in
 // lines), the settings socials and brand contact block, and the outline
-// call affordance (Phone icon — the CTA law; outline weight is the law on
-// this surface). Deliberately NO booking CTA — the footer is identical
+// call affordance (Phone icon, the CTA law; outline weight is the law on
+// this surface). Deliberately NO booking CTA, the footer is identical
 // pre/post v1-scrub (M3 ruling).
 const LINK_ON_INK =
   'font-mono text-brand-300 text-xs uppercase tracking-[0.14em] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-focus-ring';
@@ -756,7 +756,7 @@ export function SiteFooter({
             <span className='flex items-baseline gap-2.5'>
               <span className='font-bold font-serif text-xl text-white'>{settings.brandName}</span>
               {/* The Round-1 ruling: the header's kicker treatment in the
-                  footer too — desktop-only (md+). */}
+                  footer too, desktop-only (md+). */}
               <span className='hidden font-mono text-[10px] text-brand-300 uppercase tracking-[0.18em] md:inline'>
                 {settings.brandTagline}
               </span>
@@ -834,7 +834,7 @@ export function SiteFooter({
 }
 ```
 
-*(Socials render as mono text labels — lucide carries no TikTok glyph and mixed icon/text rows read worse than one consistent register. Unrated; the round may rule brand SVGs.)*
+*(Socials render as mono text labels, lucide carries no TikTok glyph and mixed icon/text rows read worse than one consistent register. Unrated; the round may rule brand SVGs.)*
 
 - [ ] **Step 6: `components/not-found.tsx` + `components/error-component.tsx` (new)**
 
@@ -844,19 +844,19 @@ import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
 import { Phone } from 'lucide-react';
 
-// Branded global 404 (#164 Round 1, owner-ruled: white body, no logo — the
+// Branded global 404 (#164 Round 1, owner-ruled: white body, no logo, the
 // earlier ink field left a light band above the footer on tall desktop
 // viewports, so min-h-full makes the white own the page's full stretch
-// between header and footer; dark returns the ink field — the ruled
+// between header and footer; dark returns the ink field, the ruled
 // pre-light look). GLOBAL at __root (M7 #223): the two route-level
-// notFound() overrides are gone — unknown routes AND unknown/inactive
-// slugs/ids all wear this one surface. Copy is the prototype's DRAFT —
+// notFound() overrides are gone, unknown routes AND unknown/inactive
+// slugs/ids all wear this one surface. Copy is the prototype's DRAFT:
 // TODO(owner-copy), the round ratifies.
 export function NotFound() {
   return (
     <div className='min-h-full bg-white dark:bg-brand-ink'>
       <div className='mx-auto flex max-w-5xl flex-col items-start gap-6 px-6 py-24 md:py-32'>
-        {/* TODO(owner-copy): headline + body — the prototype drafts, the round ratifies. */}
+        {/* TODO(owner-copy): headline + body, the prototype drafts, the round ratifies. */}
         <h1 className='max-w-2xl font-bold font-serif text-4xl text-brand-ink md:text-5xl dark:text-foreground'>
           This page never developed.
         </h1>
@@ -897,22 +897,22 @@ import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
 
 // Branded global error surface (#164 Round 1; the ink-field family member
-// per #223 — ink + logo + a way forward). Dependency-free by contract:
+// per #223, ink + logo + a way forward). Dependency-free by contract:
 // when this renders, the API may be the thing that failed, so no fetched
-// content, no photos — ink, type, and the reload button only. The dev-only
+// content, no photos, ink, type, and the reload button only. The dev-only
 // error line stays (import.meta.env.DEV never ships). Copy is the
-// prototype's DRAFT — TODO(owner-copy), the round ratifies.
+// prototype's DRAFT, TODO(owner-copy), the round ratifies.
 export function ErrorComponent({ error }: { error: Error }) {
   return (
     <div className='bg-brand-ink'>
       <div className='mx-auto flex max-w-5xl flex-col items-start gap-6 px-6 py-24 md:py-32'>
         <img src='/photos/sd.png' alt='' aria-hidden='true' className='size-12 rounded-md' />
-        {/* TODO(owner-copy): headline + body — the prototype drafts, the round ratifies. */}
+        {/* TODO(owner-copy): headline + body, the prototype drafts, the round ratifies. */}
         <h1 className='max-w-2xl font-bold font-serif text-4xl text-white md:text-5xl'>
           Something went wrong.
         </h1>
         <p className='max-w-xl text-brand-200'>
-          An unexpected error interrupted the page. Try again — or reach the studio directly and
+          An unexpected error interrupted the page. Try again, or reach the studio directly and
           we'll take it from there.
         </p>
         <div className='flex flex-wrap gap-3'>
@@ -947,7 +947,7 @@ export function ErrorComponent({ error }: { error: Error }) {
 }
 ```
 
-- [ ] **Step 7: `routes/__root.tsx` — the chrome loader + the global wiring (full rewrite of the route def + RootDocument)**
+- [ ] **Step 7: `routes/__root.tsx`, the chrome loader + the global wiring (full rewrite of the route def + RootDocument)**
 
 The `head` block is UNCHANGED from today (document titles ride #224). Everything else:
 
@@ -978,10 +978,10 @@ export interface RouterContext {
 export const Route = createRootRouteWithContext<RouterContext>()({
   // The chrome's reads (M7 #223): site settings + the branch truth the
   // footer carries, ensured once per entry (the root loader does not re-run
-  // on client navigations — fresh per page load, the M5 freshness rule).
+  // on client navigations, fresh per page load, the M5 freshness rule).
   // NEVER-THROWING by construction (allSettled): a dead settings/branches
   // read degrades the chrome to code defaults and an empty branch block;
-  // pages whose own loaders are healthy never inherit a chrome failure —
+  // pages whose own loaders are healthy never inherit a chrome failure,
   // and a failing page still renders its error surface inside a working
   // chrome.
   loader: async ({ context: { queryClient } }) => {
@@ -1022,7 +1022,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   // The never-broken law (#215): a failed or missing read renders the
-  // defaults — a born-empty row and a dead API render the same chrome.
+  // defaults, a born-empty row and a dead API render the same chrome.
   const { data: settings } = useQuery(siteSettingsQueries.all());
   const { data: branches } = useQuery(branchQueries.all());
   const resolved = settings ?? SITE_SETTINGS_DEFAULTS;
@@ -1068,35 +1068,35 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 - [ ] **Step 8: Remove the two route-level `notFoundComponent` overrides**
 
-(a) `apps/landing/src/routes/packages/$slug.tsx` — delete the whole `notFoundComponent: () => (…)` prop and its comment; the now-unused `buttonVariants`/`Link`/`cn` imports and the `PackageDetail` section wrapper stay only if still referenced (the detail component keeps `PackageCard` — biome's fix flags the dead imports; delete them). Replace the loader-catch comment with:
+(a) `apps/landing/src/routes/packages/$slug.tsx`, delete the whole `notFoundComponent: () => (…)` prop and its comment; the now-unused `buttonVariants`/`Link`/`cn` imports and the `PackageDetail` section wrapper stay only if still referenced (the detail component keeps `PackageCard`, biome's fix flags the dead imports; delete them). Replace the loader-catch comment with:
 
 ```ts
-    // Unknown/inactive slug → the router's notFound() — the ROOT's global
+    // Unknown/inactive slug → the router's notFound(), the ROOT's global
     // NotFound answers (M7 #223; the route-level override is gone).
 ```
 
-(b) `apps/landing/src/routes/booking.$id.tsx` — delete the `notFoundComponent: () => (…)` prop and its comment block the same way (the component body's own imports stay — the confirmation card uses them; only what the deleted block alone used goes). The `toNotFoundError` loader seam stays UNTOUCHED (it is the 404→notFound() mapping; only the rendering surface moved to the root).
+(b) `apps/landing/src/routes/booking.$id.tsx`, delete the `notFoundComponent: () => (…)` prop and its comment block the same way (the component body's own imports stay, the confirmation card uses them; only what the deleted block alone used goes). The `toNotFoundError` loader seam stays UNTOUCHED (it is the 404→notFound() mapping; only the rendering surface moved to the root).
 
-- [ ] **Step 9: The admin rider — the sidebar brand block**
+- [ ] **Step 9: The admin rider, the sidebar brand block**
 
-(a) `apps/admin/src/routes/_shell.tsx` — add a loader beside `beforeLoad` (import `siteSettingsQuery` from `#/lib/cms-queries`):
+(a) `apps/admin/src/routes/_shell.tsx`, add a loader beside `beforeLoad` (import `siteSettingsQuery` from `#/lib/cms-queries`):
 
 ```ts
   // M7 #223 (the plan.md consumption box's "admin sidebar" clause): the
   // shell ensures the settings read so the sidebar's brand renders
-  // server-side. Guarded — a failed read renders the default wordmark and
+  // server-side. Guarded, a failed read renders the default wordmark and
   // never blocks the session gate.
   loader: async ({ context: { queryClient } }) => {
     await queryClient.ensureQueryData(siteSettingsQuery.all()).catch(() => undefined);
   },
 ```
 
-(b) `apps/admin/src/components/admin-sidebar.tsx` — inside `AdminSidebar`, above the return (imports: `useQuery` from `@tanstack/react-query`; `EMPTY_SITE_SETTINGS` + `resolveSiteSettings` from `@sevendays/types`; `siteSettingsQuery` from `#/lib/cms-queries`):
+(b) `apps/admin/src/components/admin-sidebar.tsx`, inside `AdminSidebar`, above the return (imports: `useQuery` from `@tanstack/react-query`; `EMPTY_SITE_SETTINGS` + `resolveSiteSettings` from `@sevendays/types`; `siteSettingsQuery` from `#/lib/cms-queries`):
 
 ```ts
-  // M7 #223: the brand block consumes site settings — the studio's name
+  // M7 #223: the brand block consumes site settings, the studio's name
   // and logo (when set) ride the sidebar; the 7d monogram is the fallback.
-  // The "Admin" kicker stays fixed — it names the tool, not the brand.
+  // The "Admin" kicker stays fixed, it names the tool, not the brand.
   const { data: rawSettings } = useQuery(siteSettingsQuery.all());
   const settings = resolveSiteSettings(rawSettings ?? EMPTY_SITE_SETTINGS);
 ```
@@ -1139,7 +1139,7 @@ git add apps/landing/src/lib/api.functions.ts apps/landing/src/lib/queries.ts ap
 git commit -m "feat(landing): the ruled chrome - sticky glass ink bar, the footer contact truth, the animated menu, the settings banner, the global NotFound/Error, the admin sidebar brand (#223)"
 ```
 
-### Task 3: Home — the ruled composition + the skeleton grammar (UI-bearing)
+### Task 3: Home, the ruled composition + the skeleton grammar (UI-bearing)
 
 **Load the installed UI/UX skill set at execution time** (same set as Task 2). The compositions below mine the prototype's Round-2-closed rulings verbatim (owner: "all goods", 2026-10-01), adapted: `pesoOrNull` → main's null-safe `peso`, the D2 cover half → `CoverPanel`, the variant branches deleted, the settings copy consumed, the pagination through Task 1's seam.
 
@@ -1148,12 +1148,12 @@ git commit -m "feat(landing): the ruled chrome - sticky glass ink bar, the foote
 - Modify: `apps/landing/src/components/{home-image-led,home-cards,home-copy}.tsx`… (`home-copy.ts` is `.ts`), `apps/landing/src/routes/index.tsx`, `apps/landing/src/styles.css`
 
 **Interfaces:**
-- Produces: `Reveal({ children, delay?, className? })` (the shared viewport-reveal wrapper); `MosaicPhotoGrid({ photos, captions? })` (the shared wall — about's portfolio reuses it at #224); `FeaturedPlates({ heading, strip })` (the D2 section); `HomeImageLed({ settings, packages, services, gallery, testimonials })`; `HomeSkeleton`.
+- Produces: `Reveal({ children, delay?, className? })` (the shared viewport-reveal wrapper); `MosaicPhotoGrid({ photos, captions? })` (the shared wall, about's portfolio reuses it at #224); `FeaturedPlates({ heading, strip })` (the D2 section); `HomeImageLed({ settings, packages, services, gallery, testimonials })`; `HomeSkeleton`.
 - Consumes: Task 1's `spanFor`/`paginateTestimonials`; Task 2's resolved `SiteSettings`; `ServiceImageCard` + `serviceBackground` from `home-cards.tsx`; `CoverPanel`; `HERO_PHOTO`/`HERO_PHOTO_ALT`.
 
 **Not here:** captions ON (about's wall, #224); the catalog/service/branch surfaces (#224); any change to `ServiceImageCard` itself; the empty-state routes (Task 4); new tokens.
 
-- [ ] **Step 1: `components/reveal.tsx` (new — the one motion grammar)**
+- [ ] **Step 1: `components/reveal.tsx` (new, the one motion grammar)**
 
 ```tsx
 import { cn } from 'cn';
@@ -1171,7 +1171,7 @@ export function Reveal({
 }: {
   children: React.ReactNode;
   delay?: number;
-  /** Grid-span classes land here — the reveal div IS the grid child. */
+  /** Grid-span classes land here, the reveal div IS the grid child. */
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -1213,7 +1213,7 @@ export function Reveal({
 }
 ```
 
-- [ ] **Step 2: `components/mosaic-photo-grid.tsx` (new — the shared wall)**
+- [ ] **Step 2: `components/mosaic-photo-grid.tsx` (new, the shared wall)**
 
 ```tsx
 import type { PublicGalleryPhoto } from '@sevendays/types';
@@ -1224,7 +1224,7 @@ import { Reveal } from './reveal';
 // The mosaic photo wall (#164 Round 2, owner-ruled): fixed row heights, the
 // deterministic 2×2/2×1 span rhythm (Task 1's seam), dense packing, and the
 // shared viewport reveal staggered per column. Shared by the home gallery
-// strip now and (#224) the about portfolio — the two surfaces speak one
+// strip now and (#224) the about portfolio, the two surfaces speak one
 // wall. Home ruled title-captions OFF; about renders them when present.
 const ROW_HEIGHTS = 'auto-rows-[9rem] md:auto-rows-[11rem]';
 
@@ -1260,9 +1260,9 @@ export function MosaicPhotoGrid({
 }
 ```
 
-*(Caption source is `photo.caption` — #214's ruled public-wire caption field; `title` stays the alt-text fallback, exactly as about's wall renders today.)*
+*(Caption source is `photo.caption`, #214's ruled public-wire caption field; `title` stays the alt-text fallback, exactly as about's wall renders today.)*
 
-- [ ] **Step 3: `components/featured-plates.tsx` (new — D2 alone)**
+- [ ] **Step 3: `components/featured-plates.tsx` (new, D2 alone)**
 
 ```tsx
 import type { ResolvedPackageInclusion, ServicePackageRead } from '@sevendays/types';
@@ -1271,14 +1271,14 @@ import { cn } from 'cn';
 import { peso } from '../lib/format';
 import { CoverPanel } from './cover-panel';
 
-// The featured strip, OWNER-RULED D2 "light split plate" (#164 Round 2 —
+// The featured strip, OWNER-RULED D2 "light split plate" (#164 Round 2,
 // "I think I'll go with D2"): the cover is 60% of the plate at natural
-// quality (no overlay touches it — the CoverPanel law renders the muted
+// quality (no overlay touches it, the CoverPanel law renders the muted
 // placeholder when a row has no cover), the light panel carries serif
-// name, mono peso (nothing when unpriced — the #163 law), a subline, and
+// name, mono peso (nothing when unpriced, the #163 law), a subline, and
 // dotted inclusion lines; short PRIMARY ticks separate the plates. The
 // losing variants (rate card, editorial index, plate+lineup, ink panel,
-// the retired parallax) stay on the prototype branch — nothing merges.
+// the retired parallax) stay on the prototype branch, nothing merges.
 
 function subline(p: ServicePackageRead): string {
   const mins = p.durationMinutes;
@@ -1288,7 +1288,7 @@ function subline(p: ServicePackageRead): string {
     .join(' · ');
 }
 
-/** The inclusion phrase — the InclusionsList format (the data composes the
+/** The inclusion phrase, the InclusionsList format (the data composes the
  * line: kind/quantity/printSize/description/attires; there is no name). */
 function inclusionLine(inc: ResolvedPackageInclusion): string {
   return [
@@ -1349,7 +1349,7 @@ export function FeaturedPlates({
                   <h3 className='font-semibold font-serif text-2xl text-brand-ink dark:text-foreground'>
                     {p.name}
                   </h3>
-                  {/* The unpriced law: peso(null) renders nothing — no
+                  {/* The unpriced law: peso(null) renders nothing, no
                       placeholder, no inquire line, the panel reflows. */}
                   <p className='font-mono text-brand-700 text-sm dark:text-brand-300'>
                     {peso(p.priceCents)}
@@ -1382,7 +1382,7 @@ export function FeaturedPlates({
 }
 ```
 
-- [ ] **Step 4: `components/home-image-led.tsx` — the ruled composition (full rewrite)**
+- [ ] **Step 4: `components/home-image-led.tsx`, the ruled composition (full rewrite)**
 
 ```tsx
 import type {
@@ -1406,14 +1406,14 @@ import { MosaicPhotoGrid } from './mosaic-photo-grid';
 
 // The ruled home composition (#164 Round 2, closed "all goods" 2026-10-01;
 // built M7 #223), one voice per section (kickers retired; serif headings
-// carry — the settings kicker fields drive the heading TEXT now, defaults
-// in code). Slot map: 1 hero under the glass bar (-mt-14 — the photo reads
+// carry, the settings kicker fields drive the heading TEXT now, defaults
+// in code). Slot map: 1 hero under the glass bar (-mt-14, the photo reads
 // through the bar) → 2 the LIVE mosaic gallery (no title-captions on home)
 // → 3 featured as D2 light split plates → 4 the full-bleed 3-copy services
 // marquee (desktop) / JS transform stepper (mobile) → 5 REAL testimonials,
 // paginated 3/page with a page-change reveal → 6 the #92 emphasis strip.
 // The copy consumes site settings end to end (hero title/blurb, eyebrow,
-// the four section headings) — defaults when unset.
+// the four section headings), defaults when unset.
 const SIDES_COUNT = 2;
 
 export function HomeImageLed({
@@ -1430,14 +1430,14 @@ export function HomeImageLed({
   testimonials: PublicTestimonial[];
 }) {
   const selection = selectFeaturedPackages(packages);
-  // SiteSettings keeps nullability at the type level — coalesce to the
+  // SiteSettings keeps nullability at the type level, coalesce to the
   // selection's own ruled heading (byte-identical to the #215 default).
-  // (Execution ruling 2026-10-20: the bare ternary typechecks dark — the
+  // (Execution ruling 2026-10-20: the bare ternary typechecks dark, the
   // kicker keys are string | null at the type level; the coalesce is
   // runtime-neutral since FEATURED_HEADING === the kicker default.)
   const featuredHeading =
     selection.isFeatured ? (settings.kickerPackages ?? selection.heading) : selection.heading;
-  // Round 2 owner ruling: paginated testimonials — 3 per page (a
+  // Round 2 owner ruling: paginated testimonials, 3 per page (a
   // pull-quote lead + side rail on every page), non-looping.
   const pages = paginateTestimonials(testimonials);
   const [page, setPage] = useState(0);
@@ -1446,12 +1446,12 @@ export function HomeImageLed({
   const lead = current[0];
   const sides = current.slice(1, SIDES_COUNT + 1);
   // OWNER-RULED: the services carousel on MOBILE is a JS transform stepper
-  // — each card CENTERED in the viewport, one card per 3.5s interval, drag
+  //, each card CENTERED in the viewport, one card per 3.5s interval, drag
   // with snap-to-nearest on release, wrapping seamlessly through the
   // identical loop copies. Scroll-snap + programmatic smooth scrolling
   // proved browser-fragile twice in the arc, so NO native scrolling is
   // involved: the track moves by transform, the container never scrolls.
-  // DESKTOP keeps the pure CSS marquee — the md: animation overrides the
+  // DESKTOP keeps the pure CSS marquee, the md: animation overrides the
   // inline transform, and every stepper path early-returns at md. Reduced
   // motion = instant steps, still on the interval (auto-scroll is the
   // owner's explicit ask).
@@ -1482,7 +1482,7 @@ export function HomeImageLed({
       vIndex.current += 1;
       apply(true);
       if (vIndex.current >= count) {
-        // Slid into the identical first loop copy — normalize silently
+        // Slid into the identical first loop copy, normalize silently
         // once the transition has settled (identical pixels, invisible).
         window.setTimeout(() => {
           vIndex.current -= count;
@@ -1545,9 +1545,9 @@ export function HomeImageLed({
 
   return (
     <div>
-      {/* 1 — Hero under the glass bar: the photo reads through the ruled
+      {/* 1, Hero under the glass bar: the photo reads through the ruled
           chrome (-mt-14 = the 56px bar). Copy consumes settings (title,
-          blurb, brand eyebrow) — the incumbent photo and CTAs stand. */}
+          blurb, brand eyebrow), the incumbent photo and CTAs stand. */}
       <section className='relative isolate overflow-hidden bg-brand-ink -mt-14'>
         <img
           src={HERO_PHOTO}
@@ -1590,7 +1590,7 @@ export function HomeImageLed({
         </div>
       </section>
 
-      {/* 2 — Gallery: the LIVE read's mosaic wall — no title-captions on
+      {/* 2, Gallery: the LIVE read's mosaic wall, no title-captions on
           home (ruled; captions render on about's wall, #224). */}
       <section className='border-line-soft border-b' data-strip='gallery'>
         <div className='mx-auto max-w-5xl px-6 py-16'>
@@ -1600,7 +1600,7 @@ export function HomeImageLed({
           {gallery.photos.length > 0 ? (
             <MosaicPhotoGrid photos={gallery.photos} />
           ) : (
-            // The shared wall's ruled line (about's placeholder law) — a
+            // The shared wall's ruled line (about's placeholder law), a
             // zero-photo read still reads as deliberate.
             <p className='text-muted-foreground mt-8'>Portfolio coming soon.</p>
           )}
@@ -1613,11 +1613,11 @@ export function HomeImageLed({
         </div>
       </section>
 
-      {/* 3 — Featured packages: the ruled D2 plates. The M5 empty-state
+      {/* 3, Featured packages: the ruled D2 plates. The M5 empty-state
           rule stands: zero ACTIVE packages collapse the strip ENTIRELY. */}
       {packages.length > 0 && <FeaturedPlates heading={featuredHeading} strip={selection.packages} />}
 
-      {/* 4 — Services: the full-bleed 3-copy marquee (desktop) — the track
+      {/* 4, Services: the full-bleed 3-copy marquee (desktop), the track
           holds the list three times so -33.3333% is one copy-width (two
           full copies always remain behind the loop point on any screen);
           hover pauses; the edge mask fades the cards at the viewport. A
@@ -1674,7 +1674,7 @@ export function HomeImageLed({
         </section>
       )}
 
-      {/* 5 — Testimonials: REAL client words (the audit's stand-in gap
+      {/* 5, Testimonials: REAL client words (the audit's stand-in gap
           closes), paginated with a page-change reveal. */}
       <section className='border-line-soft border-y bg-wash-b' data-strip='testimonials'>
         <div className='mx-auto max-w-5xl px-6 py-16'>
@@ -1757,19 +1757,19 @@ export function HomeImageLed({
                 to='/about'
                 className='text-brand-700 hover:text-brand-800 mt-6 inline-block text-sm font-medium underline underline-offset-4 dark:text-brand-300 dark:hover:text-brand-200'
               >
-                More kind words — and share your own
+                More kind words, and share your own
               </Link>
             </>
           ) : (
-            // The ruled empty line — real rows arrive with the CMS.
+            // The ruled empty line, real rows arrive with the CMS.
             <p className='text-muted-foreground mt-6'>
-              Client words are on their way — check back soon.
+              Client words are on their way, check back soon.
             </p>
           )}
         </div>
       </section>
 
-      {/* 6 — Emphasis strip: the ratified #92 gray-light band. */}
+      {/* 6, Emphasis strip: the ratified #92 gray-light band. */}
       <section className='border-line-soft border-t bg-brand-gray-light' data-strip='call-visit'>
         <div className='mx-auto flex max-w-5xl flex-col items-start justify-between gap-4 px-6 py-8 md:flex-row md:items-center'>
           <div>
@@ -1777,7 +1777,7 @@ export function HomeImageLed({
               Not sure which session fits?
             </h2>
             <p className='text-brand-700 mt-1 text-sm dark:text-brand-400'>
-              Call or visit a branch — we will help you choose.
+              Call or visit a branch, we will help you choose.
             </p>
           </div>
           <Link
@@ -1798,19 +1798,19 @@ export function HomeImageLed({
 
 - [ ] **Step 5: The supporting deltas**
 
-(a) `apps/landing/src/components/home-cards.tsx` — DELETE `PackageCoverCard`, `ChipCluster`, `packageChips`, `privilegeLabel`, and the `BookNow` helper (home-featured-only; grep-verified zero other importers); KEEP `ServiceImageCard` + `serviceBackground` + the module's header comment trimmed to describe them. The `Popover` imports and `CoverPanel` import die with the deletions (biome's fix flags them).
+(a) `apps/landing/src/components/home-cards.tsx`, DELETE `PackageCoverCard`, `ChipCluster`, `packageChips`, `privilegeLabel`, and the `BookNow` helper (home-featured-only; grep-verified zero other importers); KEEP `ServiceImageCard` + `serviceBackground` + the module's header comment trimmed to describe them. The `Popover` imports and `CoverPanel` import die with the deletions (biome's fix flags them).
 
-(b) `apps/landing/src/components/home-copy.ts` — reduce to the two hero constants + a comment noting where copy lives now:
+(b) `apps/landing/src/components/home-copy.ts`, reduce to the two hero constants + a comment noting where copy lives now:
 
 ```ts
 // Home copy (M7 #223): every word the home page renders now consumes site
-// settings (hero title/blurb, the four section headings) — defaults in
+// settings (hero title/blurb, the four section headings), defaults in
 // code at SITE_SETTINGS_DEFAULTS (#215); the stand-in gallery and the
 // placeholder testimonials are RETIRED with the ruled redesign (the live
 // reads render; content gaps are owner-owned per the #164 resolution).
 export const HERO_PHOTO = '/photos/cover_photo.jpg';
 export const HERO_PHOTO_ALT =
-  'Photographer holding a Canon DSLR by the studio window — the studio’s own photo';
+  'Photographer holding a Canon DSLR by the studio window, the studio’s own photo';
 ```
 
 (c) `apps/landing/src/routes/index.tsx` (full rewrite):
@@ -1845,7 +1845,7 @@ export const Route = createFileRoute('/')({
     ]);
   },
   component: HomePage,
-  // The skeleton grammar (#164 Round 5): client navigations only — first
+  // The skeleton grammar (#164 Round 5): client navigations only, first
   // loads are server-rendered (the M5 freshness rule); judge by throttling
   // in devtools while clicking between pages.
   pendingComponent: HomeSkeleton,
@@ -1870,7 +1870,7 @@ function HomePage() {
 }
 ```
 
-(d) `apps/landing/src/components/skeletons.tsx` (new — the grammar's first silhouette):
+(d) `apps/landing/src/components/skeletons.tsx` (new, the grammar's first silhouette):
 
 ```tsx
 import { Skeleton } from '@sevendays/ui/components/skeleton';
@@ -1879,7 +1879,7 @@ import { spanFor } from '../lib/mosaic';
 
 // The skeleton grammar (#164 Round 5, owner-ruled: "emphasize the loading
 // skeletons a little bit" → the brand-tinted sweep): structure-only
-// silhouettes per surface on the shared Tier-1 skeleton primitive — no
+// silhouettes per surface on the shared Tier-1 skeleton primitive, no
 // per-element spinners, first loads server-rendered; these render as route
 // pendingComponents on client navigations. The .skeleton-grammar wrapper
 // (styles.css) rides the sweep over every skeleton inside it. Home is
@@ -1934,7 +1934,7 @@ export function HomeSkeleton() {
 Append to `apps/landing/src/styles.css` (after Task 2's `.nav-panel` block):
 
 ```css
-/* #164 Round 2 (owner ruling), built M7 #223: the services marquee — the
+/* #164 Round 2 (owner ruling), built M7 #223: the services marquee, the
    track holds the card list THREE times, so -33.3333% is one copy-width
    (a seamless loop that stays filled on any viewport: two full copies
    always remain behind the window, whatever the screen width). */
@@ -1948,7 +1948,7 @@ Append to `apps/landing/src/styles.css` (after Task 2's `.nav-panel` block):
 }
 
 /* #164 Round 2 (owner ruling), built M7 #223: the testimonial page-change
-   reveal — a quick fade-and-rise, run per page via the keyed grid. */
+   reveal, a quick fade-and-rise, run per page via the keyed grid. */
 @keyframes reveal {
   from {
     opacity: 0;
@@ -1960,7 +1960,7 @@ Append to `apps/landing/src/styles.css` (after Task 2's `.nav-panel` block):
   }
 }
 
-/* #164 Round 5 (owner ruling), built M7 #223: emphasized skeletons — a
+/* #164 Round 5 (owner ruling), built M7 #223: emphasized skeletons, a
    brand-tinted sweep rides over the shared pulse inside .skeleton-grammar
    layouts. */
 .skeleton-grammar [data-slot="skeleton"] {
@@ -2000,32 +2000,32 @@ Append to `apps/landing/src/styles.css` (after Task 2's `.nav-panel` block):
 
 - [ ] **Step 7: Gates + commit**
 
-`pnpm --filter @sevendays/landing fix` → `test -- --run` (**14 files / 115 tests** — `featured.test.ts` may need its strip-selection it updated if it referenced `PackageCoverCard`-era helpers; reconcile, never loosen) → `typecheck` → `build`. Commit:
+`pnpm --filter @sevendays/landing fix` → `test -- --run` (**14 files / 115 tests**, `featured.test.ts` may need its strip-selection it updated if it referenced `PackageCoverCard`-era helpers; reconcile, never loosen) → `typecheck` → `build`. Commit:
 
 ```bash
 git add apps/landing/src/components/reveal.tsx apps/landing/src/components/mosaic-photo-grid.tsx apps/landing/src/components/featured-plates.tsx apps/landing/src/components/skeletons.tsx apps/landing/src/components/home-image-led.tsx apps/landing/src/components/home-cards.tsx apps/landing/src/components/home-copy.ts apps/landing/src/routes/index.tsx apps/landing/src/styles.css
 git commit -m "feat(landing): the ruled home - hero under the glass bar, the live mosaic, D2 plates, the marquee + stepper, paginated real testimonials, the skeleton grammar (#223)"
 ```
 
-### Task 4: The states — whole-page empty lines + Back-to-home CTAs + the DEV-gated judging (UI-bearing)
+### Task 4: The states, whole-page empty lines + Back-to-home CTAs + the DEV-gated judging (UI-bearing)
 
-**Load the installed UI/UX skill set at execution time** (same set). These are the ruled Round-5 shapes: the whole-page empty lines gain their Back-to-home outline CTAs (owner: "Can you add a CTA to go back to home?"), and the `?empty=1` param makes them judgeable. The FILLED compositions of both routes stay exactly as they are — their redesign is #224's, fenced.
+**Load the installed UI/UX skill set at execution time** (same set). These are the ruled Round-5 shapes: the whole-page empty lines gain their Back-to-home outline CTAs (owner: "Can you add a CTA to go back to home?"), and the `?empty=1` param makes them judgeable. The FILLED compositions of both routes stay exactly as they are, their redesign is #224's, fenced.
 
 **Files:**
 - Modify: `apps/landing/src/routes/packages/index.tsx`, `apps/landing/src/routes/branches.tsx`
 
 **Interfaces:** consumes Task 1's `isEmptyJudgingParam`. Produces: nothing (route-local JSX).
 
-**Not here:** about's in-page empties (#224 — they stay CTA-less per the ruling: "the about empties are in-page sections and stay CTA-less"); home's in-page empties (landed with the composition in Task 3); any change to the filled packages/branches surfaces (#224); any production-reachable override (the gate is `import.meta.env.DEV`-fed).
+**Not here:** about's in-page empties (#224, they stay CTA-less per the ruling: "the about empties are in-page sections and stay CTA-less"); home's in-page empties (landed with the composition in Task 3); any change to the filled packages/branches surfaces (#224); any production-reachable override (the gate is `import.meta.env.DEV`-fed).
 
-- [ ] **Step 1: `routes/packages/index.tsx` — the empty line gains its CTA + the judging gate**
+- [ ] **Step 1: `routes/packages/index.tsx`, the empty line gains its CTA + the judging gate**
 
 Imports gain `buttonVariants` (`@sevendays/ui/components/button`), `Link` + `useLocation` (`@tanstack/react-router`), `cn` (`cn`), and `isEmptyJudgingParam` (`../../lib/empty-override`). The component becomes (the filled branch UNCHANGED from today):
 
 ```tsx
 function PackagesPage() {
   // The ?empty=1 judging aid (M7 #223, #164 Round 5's mechanism): DEV-gated
-  // — production builds answer false by construction, so the aid never
+  //, production builds answer false by construction, so the aid never
   // ships. The hooks run unconditionally (rules of hooks); the gate
   // renders after them.
   const isEmpty = isEmptyJudgingParam(import.meta.env.DEV, useLocation().searchStr);
@@ -2039,9 +2039,9 @@ function PackagesPage() {
     return (
       <div className='mx-auto max-w-5xl px-6 py-12'>
         <h1 className='font-bold font-serif text-4xl text-foreground'>Packages</h1>
-        {/* TODO(owner-copy): packages empty-state line — the round ratifies. */}
+        {/* TODO(owner-copy): packages empty-state line, the round ratifies. */}
         <p className='text-muted-foreground mt-6'>
-          No packages to show right now — check back soon.
+          No packages to show right now, check back soon.
         </p>
         <Link
           to='/'
@@ -2057,30 +2057,30 @@ function PackagesPage() {
   }
 
   return (
-    /* …today's filled composition, unchanged — the plates index is #224's… */
+    /* …today's filled composition, unchanged, the plates index is #224's… */
   );
 }
 ```
 
-- [ ] **Step 2: `routes/branches.tsx` — the route GAINS an empty state + the judging gate**
+- [ ] **Step 2: `routes/branches.tsx`, the route GAINS an empty state + the judging gate**
 
 Branches renders nothing today when the read is empty (`branches.map` over zero rows). Same imports as Step 1 (paths one level up: `../lib/empty-override`), and the component becomes (the filled branch UNCHANGED):
 
 ```tsx
 function BranchesPage() {
-  // The ?empty=1 judging aid (M7 #223) — DEV-gated, never ships.
+  // The ?empty=1 judging aid (M7 #223), DEV-gated, never ships.
   const isEmpty = isEmptyJudgingParam(import.meta.env.DEV, useLocation().searchStr);
   const { data: branches } = useSuspenseQuery(branchQueries.all());
 
   if (isEmpty || branches.length === 0) {
     // The ruled no-branches line (#164 Round 5's copy) + the Back-to-home
-    // outline CTA — a branchless read reads as deliberate, not broken.
+    // outline CTA, a branchless read reads as deliberate, not broken.
     return (
       <div className='mx-auto max-w-5xl px-6 py-12'>
         <h1 className='font-bold font-serif text-4xl text-foreground'>Branches</h1>
-        {/* TODO(owner-copy): the no-branches line — the round ratifies. */}
+        {/* TODO(owner-copy): the no-branches line, the round ratifies. */}
         <p className='text-muted-foreground mt-6'>
-          Our branches are being set up — check back soon.
+          Our branches are being set up, check back soon.
         </p>
         <Link
           to='/'
@@ -2096,7 +2096,7 @@ function BranchesPage() {
   }
 
   return (
-    /* …today's filled composition, unchanged — the cover strips are #224's… */
+    /* …today's filled composition, unchanged, the cover strips are #224's… */
   );
 }
 ```
@@ -2112,37 +2112,37 @@ git commit -m "feat(landing): the ruled whole-page empty lines - Back-to-home CT
 
 ### Task 5: The owner-reacted variants round, both themes (controller interaction)
 
-The ticket's fourth AC: "Owner-reacted rendered variants per surface (light judged first, dark counterpart in the same round per #162)." The round is the design gate for every `TODO(owner-copy)` string this plan carries (NotFound/Error headline + body, the branches/packages empty lines, the banner composition) and the first live look at every composition Tasks 2–4 landed. The #164 rounds already ruled the direction — this round verifies the BUILD against those rulings and rules the genuinely new compositions (the banner, the settings-driven chrome, the HomeSkeleton).
+The ticket's fourth AC: "Owner-reacted rendered variants per surface (light judged first, dark counterpart in the same round per #162)." The round is the design gate for every `TODO(owner-copy)` string this plan carries (NotFound/Error headline + body, the branches/packages empty lines, the banner composition) and the first live look at every composition Tasks 2–4 landed. The #164 rounds already ruled the direction, this round verifies the BUILD against those rulings and rules the genuinely new compositions (the banner, the settings-driven chrome, the HomeSkeleton).
 
 **Files:**
 - Modify (only if the round retunes): the files Tasks 1–4 landed (copy/classes)
 - Write: the evidence dir `.superpowers/sdd/2026-10-20-223-landing-redesign-1/` (captures, the rulings)
 
-**Interfaces:** none new — string/class-level retunes and evidence only.
+**Interfaces:** none new, string/class-level retunes and evidence only.
 
-**Not here:** re-litigating ruled values (the glass percentage, the span rhythm, D2, the marquee mechanics — #164 closed those; the round judges the build's fidelity and the new compositions only); the milestone-level Verify box (#225); any suite change beyond a copy-retune's same-commit test edit (`kickerGallery` default retunes edit `site-settings.test.ts` in the same commit).
+**Not here:** re-litigating ruled values (the glass percentage, the span rhythm, D2, the marquee mechanics, #164 closed those; the round judges the build's fidelity and the new compositions only); the milestone-level Verify box (#225); any suite change beyond a copy-retune's same-commit test edit (`kickerGallery` default retunes edit `site-settings.test.ts` in the same commit).
 
 - [ ] **Step 1: Seed the states and capture both themes**
 
-Run the dev stack (`pnpm dev` — the API up; the landing on :3000, the admin on its port). Judging setup: through the ADMIN's Site tab (the dev owner account), SAVE a temporary announcement banner (title + body, active ON) — that is the banner's judging state; after the round, set it back (off) and save. Capture, in BOTH themes (the header toggle; light judged first per #162):
+Run the dev stack (`pnpm dev`, the API up; the landing on :3000, the admin on its port). Judging setup: through the ADMIN's Site tab (the dev owner account), SAVE a temporary announcement banner (title + body, active ON), that is the banner's judging state; after the round, set it back (off) and save. Capture, in BOTH themes (the header toggle; light judged first per #162):
 
-1. **Chrome** — the landing at rest (the glass bar over the hero), scrolled (sticky + blur over content, the wordmark desktop-only behavior at 390×844 vs desktop), the mobile menu opening/closing (the slide+fade, the trigger rotation), the footer whole (wordmark + kicker, the 3-branch contact truth live from the API, socials — temporarily set one social in the same Site-tab save if socials should judge populated, the contact block, the © line).
-2. **The banner** — on (the temporary save) in both themes; then off (reverted) proving "off renders nothing."
-3. **Home** — the full page desktop (hero under the glass bar, mosaic reveals on scroll, D2 plates with the petrol ticks, the marquee running + hover-pause, testimonials pagination with the page-change reveal, the emphasis strip) and at 390×844 (the stepper auto-advancing + drag-with-snap, the mosaic, the menu). Verify an UNPRICED row renders nothing where its price would be (if the dev catalog has none, toggle one row's Priced off in the CMS for the capture — the #212 law re-verified on the new surface, then revert).
-4. **The skeleton grammar** — devtools network throttling (Slow 3G) while client-navigating to home (nav wordmark → /packages → Back to home): the HomeSkeleton with the brand-tinted sweep renders during the pending window.
-5. **NotFound** — a bogus URL (`/nope`) light (white body, no logo) + dark (the ink field returns). **Error** — stop the API worker (`ctrl-c` the api process), reload a data page: the ink-field Error surface with Try again, inside the still-rendering chrome; restart the API after.
-6. **The empty states** — `/packages?empty=1` and `/branches?empty=1` (the DEV gate answers true on the dev stack) in both themes.
-7. **The admin rider** — the sidebar with the temporary brandName/logo save (the same Site-tab round), then reverted.
+1. **Chrome**, the landing at rest (the glass bar over the hero), scrolled (sticky + blur over content, the wordmark desktop-only behavior at 390×844 vs desktop), the mobile menu opening/closing (the slide+fade, the trigger rotation), the footer whole (wordmark + kicker, the 3-branch contact truth live from the API, socials, temporarily set one social in the same Site-tab save if socials should judge populated, the contact block, the © line).
+2. **The banner**, on (the temporary save) in both themes; then off (reverted) proving "off renders nothing."
+3. **Home**, the full page desktop (hero under the glass bar, mosaic reveals on scroll, D2 plates with the petrol ticks, the marquee running + hover-pause, testimonials pagination with the page-change reveal, the emphasis strip) and at 390×844 (the stepper auto-advancing + drag-with-snap, the mosaic, the menu). Verify an UNPRICED row renders nothing where its price would be (if the dev catalog has none, toggle one row's Priced off in the CMS for the capture, the #212 law re-verified on the new surface, then revert).
+4. **The skeleton grammar**, devtools network throttling (Slow 3G) while client-navigating to home (nav wordmark → /packages → Back to home): the HomeSkeleton with the brand-tinted sweep renders during the pending window.
+5. **NotFound**, a bogus URL (`/nope`) light (white body, no logo) + dark (the ink field returns). **Error**, stop the API worker (`ctrl-c` the api process), reload a data page: the ink-field Error surface with Try again, inside the still-rendering chrome; restart the API after.
+6. **The empty states**, `/packages?empty=1` and `/branches?empty=1` (the DEV gate answers true on the dev stack) in both themes.
+7. **The admin rider**, the sidebar with the temporary brandName/logo save (the same Site-tab round), then reverted.
 
 Save every capture to the evidence dir with a one-line narration of what it proves.
 
 - [ ] **Step 2: The owner reacts; record + apply the rulings**
 
-Present the captures (light first, dark in the same round). Record the rulings verbatim in the evidence dir. Then apply: (a) copy retunes edit the pinned strings in place and retire their `TODO(owner-copy)` markers (each replaced by the dated house note, or surviving verbatim where the owner defers); a `kickerGallery`-default retune lands in the SAME commit as its `site-settings.test.ts` edit; (b) composition retunes (the banner's band weight, the footer's socials register, the skeleton's density) edit the components in place; (c) if a retune lands interactive text on off-token palette classes, re-measure contrast first (≥ 4.5 for text — `scripts/measure-theme-pairs.mjs`; never edit its recorded tables without re-running).
+Present the captures (light first, dark in the same round). Record the rulings verbatim in the evidence dir. Then apply: (a) copy retunes edit the pinned strings in place and retire their `TODO(owner-copy)` markers (each replaced by the dated house note, or surviving verbatim where the owner defers); a `kickerGallery`-default retune lands in the SAME commit as its `site-settings.test.ts` edit; (b) composition retunes (the banner's band weight, the footer's socials register, the skeleton's density) edit the components in place; (c) if a retune lands interactive text on off-token palette classes, re-measure contrast first (≥ 4.5 for text, `scripts/measure-theme-pairs.mjs`; never edit its recorded tables without re-running).
 
 - [ ] **Step 3: Cleanup + gates + commit**
 
-Revert the judging saves (the banner off; any toggled unpriced row back; the socials/contact if set temporarily) THROUGH THE ADMIN — the reverted state is itself a final capture ("off renders nothing" twice). `pnpm --filter @sevendays/landing fix` → `test -- --run` → `typecheck` → `build`; if the types default retuned, also `pnpm --filter @sevendays/types test -- --run`. Commit (skip if the round changed nothing — fold the evidence into Task 6):
+Revert the judging saves (the banner off; any toggled unpriced row back; the socials/contact if set temporarily) THROUGH THE ADMIN, the reverted state is itself a final capture ("off renders nothing" twice). `pnpm --filter @sevendays/landing fix` → `test -- --run` → `typecheck` → `build`; if the types default retuned, also `pnpm --filter @sevendays/types test -- --run`. Commit (skip if the round changed nothing, fold the evidence into Task 6):
 
 ```bash
 git add apps/landing/src packages/types/src
@@ -2157,47 +2157,47 @@ git commit -m "chore(landing): the redesign I variants round settled - copy and 
 
 **Interfaces:** none.
 
-**Not here:** ticking either shared plan.md box (they span #223+#224 — annotations only, the #216/#221 shared-box precedent); the milestone Verify box (#225); the v1 cherry-pick EXECUTION (#225 executes the picks; this task lands the triage ledger row only, per the runbook).
+**Not here:** ticking either shared plan.md box (they span #223+#224, annotations only, the #216/#221 shared-box precedent); the milestone Verify box (#225); the v1 cherry-pick EXECUTION (#225 executes the picks; this task lands the triage ledger row only, per the runbook).
 
 - [ ] **Step 1: The full gate sweep**
 
-`pnpm --filter @sevendays/landing fix` → `test -- --run` (**14 files / 115 tests**, or the Task 5-retuned counts) → `typecheck` → `build`; `pnpm --filter @sevendays/types test -- --run` + `typecheck` (**18 files / 170 tests**); `pnpm --filter @sevendays/admin test -- --run` + `typecheck` (**26 files / 254 tests**). Reconcile any drift before proceeding — never loosen assertions.
+`pnpm --filter @sevendays/landing fix` → `test -- --run` (**14 files / 115 tests**, or the Task 5-retuned counts) → `typecheck` → `build`; `pnpm --filter @sevendays/types test -- --run` + `typecheck` (**18 files / 170 tests**); `pnpm --filter @sevendays/admin test -- --run` + `typecheck` (**26 files / 254 tests**). Reconcile any drift before proceeding, never loosen assertions.
 
-- [ ] **Step 2: `docs/plan.md` — two DATED NOT-TICKED annotations + one errata**
+- [ ] **Step 2: `docs/plan.md`, two DATED NOT-TICKED annotations + one errata**
 
-(a) The redesign box (`- [ ] Landing — the redesign build (#164's ruled direction…`) — append inside the line, after "the ruled empty lines":
-
-```text
- _(2026-10-XX, #223: Part I landed — the ruled chrome (the sticky glass ink bar at 90% + blur, the hero tucked under it, the animated mobile menu on Base UI's native transition contract, the footer's live 3-branch contact truth), the branded global NotFound/Error at __root with both route-level notFound() overrides removed (dark NotFound = the ink field), the ruled home end to end (the live mosaic in the 2×2/2×1 rhythm with reveals, D2 light-split featured plates under the CoverPanel + unpriced laws, the full-bleed 3-copy marquee + the mobile JS stepper, paginated real testimonials with the page-change reveal, one-voice headings from the settings kickers), the skeleton grammar (home's pendingComponent + the brand-tinted sweep) and the whole-page empty lines with Back-to-home CTAs behind the DEV-gated ?empty=1; the catalog plates/detail spec sheet/services rows/branch strips + their per-surface skeletons, the CTA-law sweep on those surfaces, and the page-titles consumption stay #224's — the box ticks when both land.)_
-```
-
-(b) The consumption box (`- [ ] Both apps — site settings consumed: brand chrome…`) — append inside the line, after "stitched where the redesign lands the slots":
+(a) The redesign box (`- [ ] Landing, the redesign build (#164's ruled direction…`), append inside the line, after "the ruled empty lines":
 
 ```text
- _(2026-10-XX, #223: the chrome half landed — the landing header/footer wordmark + logo chip, the announcement banner (off/untitled renders nothing), the footer socials + brand contact block, the hero copy and the home section kickers (the kickerGallery default re-pinned to the ruled "The work"), and the admin sidebar's brand block, all over resolveSiteSettings with code defaults and a never-throwing root loader; page titles/descriptions driving h1 + SEO meta + the About story stay #224's — the box ticks when both land.)_
+ _(2026-10-XX, #223: Part I landed, the ruled chrome (the sticky glass ink bar at 90% + blur, the hero tucked under it, the animated mobile menu on Base UI's native transition contract, the footer's live 3-branch contact truth), the branded global NotFound/Error at __root with both route-level notFound() overrides removed (dark NotFound = the ink field), the ruled home end to end (the live mosaic in the 2×2/2×1 rhythm with reveals, D2 light-split featured plates under the CoverPanel + unpriced laws, the full-bleed 3-copy marquee + the mobile JS stepper, paginated real testimonials with the page-change reveal, one-voice headings from the settings kickers), the skeleton grammar (home's pendingComponent + the brand-tinted sweep) and the whole-page empty lines with Back-to-home CTAs behind the DEV-gated ?empty=1; the catalog plates/detail spec sheet/services rows/branch strips + their per-surface skeletons, the CTA-law sweep on those surfaces, and the page-titles consumption stay #224's, the box ticks when both land.)_
 ```
 
-(c) Errata in the ✅'d unpriced box's dated annotation: its "the redesign tickets #222/#223 re-verify the law on the new surfaces" names the wrong pair — correct to "#223/#224" (#222 is the sending-domain ticket; the re-verification sites are the redesign surfaces). One word-pair edit, no other change.
+(b) The consumption box (`- [ ] Both apps, site settings consumed: brand chrome…`), append inside the line, after "stitched where the redesign lands the slots":
 
-(Fill the XX with the actual date. Both annotations explicitly fence #224's remainder so no executor ticks early — the shared-checkbox discipline.)
+```text
+ _(2026-10-XX, #223: the chrome half landed, the landing header/footer wordmark + logo chip, the announcement banner (off/untitled renders nothing), the footer socials + brand contact block, the hero copy and the home section kickers (the kickerGallery default re-pinned to the ruled "The work"), and the admin sidebar's brand block, all over resolveSiteSettings with code defaults and a never-throwing root loader; page titles/descriptions driving h1 + SEO meta + the About story stay #224's, the box ticks when both land.)_
+```
+
+(c) Errata in the ✅'d unpriced box's dated annotation: its "the redesign tickets #222/#223 re-verify the law on the new surfaces" names the wrong pair, correct to "#223/#224" (#222 is the sending-domain ticket; the re-verification sites are the redesign surfaces). One word-pair edit, no other change.
+
+(Fill the XX with the actual date. Both annotations explicitly fence #224's remainder so no executor ticks early, the shared-checkbox discipline.)
 
 - [ ] **Step 3: `docs/progress.md` + `AGENTS.md`**
 
-(a) `docs/progress.md` — append the entry: the ticket, the date, what landed (chrome/home/states/consumption per the two annotations), the round's outcome (rulings applied, TODOs retired), the gate counts, the live-verification notes (throttled skeleton, bogus-URL NotFound, stopped-API Error, ?empty judging).
+(a) `docs/progress.md`, append the entry: the ticket, the date, what landed (chrome/home/states/consumption per the two annotations), the round's outcome (rulings applied, TODOs retired), the gate counts, the live-verification notes (throttled skeleton, bogus-URL NotFound, stopped-API Error, ?empty judging).
 
-(b) `AGENTS.md` — two edits. First, the landing suite line in *Current status of `pnpm test`* gains the seam class: extend the landing sentence with "…(+ #223's five redesign-I seams — the mosaic rhythm, testimonial pagination, the chrome settings shapers, the DEV-gated empty judging, isFeatured — 14 files / 115 tests)". Second, the site-settings paragraph's closing clause "both apps' chrome consumption rides the redesign tickets" becomes "both apps' chrome consumption is live since the redesign ticket #223 (the landing chrome + admin sidebar; page titles + the About story ride #224)".
+(b) `AGENTS.md`, two edits. First, the landing suite line in *Current status of `pnpm test`* gains the seam class: extend the landing sentence with "…(+ #223's five redesign-I seams, the mosaic rhythm, testimonial pagination, the chrome settings shapers, the DEV-gated empty judging, isFeatured, 14 files / 115 tests)". Second, the site-settings paragraph's closing clause "both apps' chrome consumption rides the redesign tickets" becomes "both apps' chrome consumption is live since the redesign ticket #223 (the landing chrome + admin sidebar; page titles + the About story ride #224)".
 
 - [ ] **Step 4: The PR**
 
-Push the branch, open the PR against main (title: `The landing redesign I — chrome, home, states, settings consumption (#223)`), body: the four ACs each with the evidence pointer (captures dir, gate output), the fenced sibling-fences list from this plan's header, and the note that both shared plan.md boxes carry DATED NOT-TICKED annotations. Squash-merge with `feat(landing): the redesign I — chrome, home, states, settings consumption (#223)`.
+Push the branch, open the PR against main (title: `The landing redesign I, chrome, home, states, settings consumption (#223)`), body: the four ACs each with the evidence pointer (captures dir, gate output), the fenced sibling-fences list from this plan's header, and the note that both shared plan.md boxes carry DATED NOT-TICKED annotations. Squash-merge with `feat(landing): the redesign I, chrome, home, states, settings consumption (#223)`.
 
-- [ ] **Step 5: Post-merge — the v1-pick ledger row, the issue, graphify**
+- [ ] **Step 5: Post-merge, the v1-pick ledger row, the issue, graphify**
 
-(a) Per the runbook (`docs/agents/v1-picks.md`, main-only): triage the merged PR — the spec's class table pre-rules it **"PICK with transformed-surface conflicts"**. Land the ledger row recording: PICK, with the ruled v1 transforms at pick time (the header/mobile/hero Book-now CTAs become the solid-primary "Call us" with the Phone icon — zero book words; the footer/NotFound/Error CTAs keep outline weight; the banner/socials/contact/kickers/skeleton grammar/marquee/stepper/empties pick clean; the D2 plates and mosaic pick as-is) — then commit `docs(v1-picks): #226 ledger row - the #223 pick (redesign I: chrome + home + states + settings consumption; transforms fenced, locks + audit green)` (adjust the PR number to the actual one).
+(a) Per the runbook (`docs/agents/v1-picks.md`, main-only): triage the merged PR, the spec's class table pre-rules it **"PICK with transformed-surface conflicts"**. Land the ledger row recording: PICK, with the ruled v1 transforms at pick time (the header/mobile/hero Book-now CTAs become the solid-primary "Call us" with the Phone icon, zero book words; the footer/NotFound/Error CTAs keep outline weight; the banner/socials/contact/kickers/skeleton grammar/marquee/stepper/empties pick clean; the D2 plates and mosaic pick as-is), then commit `docs(v1-picks): #226 ledger row - the #223 pick (redesign I: chrome + home + states + settings consumption; transforms fenced, locks + audit green)` (adjust the PR number to the actual one).
 
 (b) Issue #223: tick all four AC boxes `- [✅]`, add the closing comment (what landed, the round's rulings, the #224 fence).
 
-(c) `graphify update .` (code was modified) — commit the graph churn separately per the repo's habit (`chore(graphify): post-#223 graph update`), never staging unrelated files.
+(c) `graphify update .` (code was modified), commit the graph churn separately per the repo's habit (`chore(graphify): post-#223 graph update`), never staging unrelated files.
 
 ---
 
@@ -2205,7 +2205,7 @@ Push the branch, open the PR against main (title: `The landing redesign I — ch
 
 - [ ] Every fenced code block compiled as-written or adapted with the named deltas (no placeholder prose left in code).
 - [ ] The two plan.md boxes carry DATED NOT-TICKED annotations; neither is ticked; the milestone Verify box is untouched.
-- [ ] `grep -rn "prototype-standins\|readPrototypeVariant\|?v=" apps/landing/src` returns nothing (the edition law — no variant machinery merged).
+- [ ] `grep -rn "prototype-standins\|readPrototypeVariant\|?v=" apps/landing/src` returns nothing (the edition law, no variant machinery merged).
 - [ ] `grep -rn "GALLERY_STANDINS\|TESTIMONIALS_PLACEHOLDER\|KICKERS" apps/landing/src` returns nothing (the stand-ins are dead).
 - [ ] `grep -rn "notFoundComponent" apps/landing/src/routes/` returns only `__root.tsx`.
 - [ ] Both themes captured for every round surface; the dark NotFound shows the ink field.

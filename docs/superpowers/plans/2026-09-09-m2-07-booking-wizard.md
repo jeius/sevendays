@@ -1,39 +1,39 @@
-# M2 Ticket 07 — Booking Wizard `/book` (prototype variant C) — Implementation Plan
+# M2 Ticket 07, Booking Wizard `/book` (prototype variant C), Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** The guest booking flow lands on `/book` as one route with client-side steps, one question per screen (prototype variant C): branch → offering (Service Packages grid first, Studio Services bookable at that branch below) → conditional add-ons → date/time (PHT note, placeholder hour chips) → contact → POST → redirect to `/booking/:id` — with deep-link prefill/filtering, a sticky live-total rail, inline past-pick hints, and typed API rejection cards (GitHub issue #45, parent spec #37).
+**Goal:** The guest booking flow lands on `/book` as one route with client-side steps, one question per screen (prototype variant C): branch → offering (Service Packages grid first, Studio Services bookable at that branch below) → conditional add-ons → date/time (PHT note, placeholder hour chips) → contact → POST → redirect to `/booking/:id`, with deep-link prefill/filtering, a sticky live-total rail, inline past-pick hints, and typed API rejection cards (GitHub issue #45, parent spec #37).
 
-**Architecture:** The wizard's logic is a pure lib (`src/lib/booking.ts`): step transitions, deep-link prefill validation, branch filtering, add-on applicability, totals, the PH wall-clock → instant conversion, and API-rejection mapping are pure functions with lib-seam vitest tests; a thin `useBookingWizard` hook only wires them to React state (untested — the CDP scenario owns behavior). The add-ons step needs the applicability matrix client-side, which no read exposes yet — Task 1 extends `GET /api/v1/studio-services` with `applicableAddonServiceIds` (active-only) exactly mirroring the ticket-04 `bookableBranchIds` stitch. The route composes the four reads via the established queries/loader pattern; success navigates to `/booking/:id` by `href` string (that route is #46 — typed navigation lands there).
+**Architecture:** The wizard's logic is a pure lib (`src/lib/booking.ts`): step transitions, deep-link prefill validation, branch filtering, add-on applicability, totals, the PH wall-clock → instant conversion, and API-rejection mapping are pure functions with lib-seam vitest tests; a thin `useBookingWizard` hook only wires them to React state (untested, the CDP scenario owns behavior). The add-ons step needs the applicability matrix client-side, which no read exposes yet, Task 1 extends `GET /api/v1/studio-services` with `applicableAddonServiceIds` (active-only) exactly mirroring the ticket-04 `bookableBranchIds` stitch. The route composes the four reads via the established queries/loader pattern; success navigates to `/booking/:id` by `href` string (that route is #46, typed navigation lands there).
 
 **Tech Stack:** TanStack Start/Router 1.170.x (file routes via `tsr generate`, `validateSearch` + `Route.useSearch`, loaders + `useSuspenseQuery` SSR pattern), @tanstack/react-query 5.102.x, `@sevendays/api-client` (Hono RPC + `unwrap()` gate), Zod 4.5.1 shared schemas via `@sevendays/types`, Tailwind v4 (CSS-first, `packages/ui` tokens), Vitest 4 lib-seam suite (mocked clock), raw-CDP Node scenarios for page checks.
 
-**Spec:** `docs/specs/2026-09-07-m2-booking-flow-spec.md` (§ Booking form variant C rulings, § API surface, § Testing Decisions) + ticket `.scratch/m2-booking-flow-tickets/07.md` (= GitHub issue #45, parent #37). The plan argues from the spec; executors read both. The prototype (`prototype/booking-form-33` branch — `apps/landing/src/lib/prototype-booking-data.ts` + `apps/landing/src/routes/prototype/booking.tsx`) is the owner-ratified behavioral contract its § was distilled from; its stubs (Studio Service entities, name-keyed applicability map, simulated `past_datetime` floor, in-prototype confirmation card, `packagePriceCents`) all die here — everything is re-derived against the real schema.
+**Spec:** `docs/specs/2026-09-07-m2-booking-flow-spec.md` (§ Booking form variant C rulings, § API surface, § Testing Decisions) + ticket `.scratch/m2-booking-flow-tickets/07.md` (= GitHub issue #45, parent #37). The plan argues from the spec; executors read both. The prototype (`prototype/booking-form-33` branch, `apps/landing/src/lib/prototype-booking-data.ts` + `apps/landing/src/routes/prototype/booking.tsx`) is the owner-ratified behavioral contract its § was distilled from; its stubs (Studio Service entities, name-keyed applicability map, simulated `past_datetime` floor, in-prototype confirmation card, `packagePriceCents`) all die here, everything is re-derived against the real schema.
 
 ## Global Constraints
 
 - **Feature branch only:** all work on `feat/m2-07-booking-wizard`, branched from up-to-date `main`. Never commit directly to `main`; the owner pushes/merges.
-- **Scope fence (siblings share the roadmap):** ticket 07 delivers the `/book` route + wizard, the pure booking lib, the studio-services applicability embed, the typed-Link sweep of the six `/book` anchors, and the CDP harness extension. NOT here: the `/booking/:id` page (#46 — success navigates by `href` string; the URL 404s until #46, which is the expected state); the Resend email (#47); real slot logic/availability (M3 per ADR-0005 — the hour chips are the placeholder grid); any visual design pass (M2's bar is data-complete, visually-rough); admin/CMS/auth; any seed, migration, or `packages/db` change; any new env var.
-- **`docs/plan.md`'s "Booking form (prototype variant C — …)" checkbox (in the red-penciled Milestone 2 booking-flow block) is THIS ticket alone** — Task 6 ticks it with the ✅ emoji only after Tasks 1–5 are committed. The neighboring checkboxes — schema (ticked), confirmation page, Resend integration, end-to-end email verify — are siblings': none may be touched. GitHub issue #45's acceptance boxes stay owner-ticked — note the criterion→task mapping in the PR description, don't edit the issue.
-- **Spec amendment carried by this plan (veto-flag in the PR):** `GET /api/v1/studio-services` gains `applicableAddonServiceIds` (active-only, junction-read). The spec's § API surface pinned the read with `bookableBranchIds` only, but the variant-C ruling ("add-ons step shows only when the offering has applicable add-ons — services matrix-gated") requires the matrix client-side, and the intake's `addon_not_applicable` rejection alone cannot render that conditional step. This mirrors the ticket-04 embed pattern one junction over; if the owner vetoes, the add-ons step cannot matrix-gate and the step's visibility rule goes back to clarify.
-- **Copy is pinned (prototype = owner-ratified artifact from the wayfinder #33 rounds), verbatim everywhere it appears:** the five step questions `Where would you like to book?` / `What are you booking?` / `Any add-ons? (optional)` / `When? (Philippine time)` / `Last — your details`; the PHT note `All times are Philippine time (PHT, UTC+8). Bookings in the past are rejected.`; the past-pick hint `That time has already passed — pick a later slot.`; the add-ons affordances `Continue · {peso(total)}` and `Skip — no add-ons` (Skip shows only when nothing is selected); the empty-add-ons line `No add-ons apply to this booking.`; the offering-step section labels `Service Packages` and `Studio Services at {branchName}` plus the no-branch prompt `Choose a branch first — services are bookable per branch.`; the rail title `Your booking`; the confirm button `Confirm booking · {peso(total)}` with submitting state `Booking…`; the rejection card title `We couldn't complete that booking` with the mono `API reason: {message}` line; contact placeholders `Full name` / `Email` / `Phone (+63…)` / `Notes (optional — tell the studio anything useful)`. The only invented line is the `service_inactive` rejection copy — derived from the ratified `package_inactive` pattern as `That service isn't available right now. Please pick another one.` (veto-flagged at PR review, same mechanism as ticket-06's blurb).
-- **The rejection contract is the prototype's, promoted:** friendly copy keyed by `RejectionReason` (`REJECTION_COPY`), with the reason derived from the API's module-owned wire message (`{ error: <message> }` — the typed reason does NOT ride the wire; the route forwards the message verbatim). The message→reason map matches the intake module's `REJECTION_MESSAGES` wordings (verbatim, below); unmatched messages fall to `unknown`. The card renders the friendly copy and the raw API message as the mono line.
-- **The API owns the past-datetime floor; the form owns the hint.** Submit performs NO client-side clock check (the prototype's simulated floor dies): the inline hint renders the moment the picked instant is at or before now, and the API's typed `past_datetime` card covers the race. PHT framing needs no tz arithmetic — PH is fixed UTC+8, so the instant comparison is plain `getTime() <= now`.
-- **`peso` is the existing `src/lib/format.ts` helper — reused, not redefined.** Pinned outputs on this repo's Node 26 toolchain (ICU-complete, probed live 2026-09-08): `peso(150000)` = `₱1,500.00`, `peso(12000)` = `₱120.00`, `peso(6000)` = `₱60.00`, `peso(90000)` = `₱900.00`. If a pinned literal fails on an executor's machine, the fix is a full-ICU Node environment — never edit the expectation.
-- **`phDateTime` joins `format.ts` this ticket** (the wizard's rail/contact summary need it; #46's read-back reuses it). Implementation verbatim from the prototype: `new Date(iso).toLocaleString('en-PH', { timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short' })`. Pinned outputs (probed live 2026-09-09, Node v26.7.0, full ICU): `phDateTime('2026-12-25T09:30:00+08:00')` = `Dec 25, 2026, 9:30 AM` and `phDateTime('2026-01-05T18:00:00.000Z')` = `Jan 6, 2026, 2:00 AM` (the UTC-midnight rollover case — it proves the timezone conversion, not just formatting). Same full-ICU fix path as `peso`.
-- **The placeholder slot grid is pinned:** `TIME_SLOTS` = `['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00']` (hourly 09:00–18:00, from the prototype; ADR-0005's M3 availability replaces it). The date input's `min` is today's PH wall-clock date via the prototype's expression — extracted as the pure `phDateInputMin(now)` for testability.
-- **Deep-link grammar is spec-pinned and shape-only:** `/book?branch=&package=&service=` — ids, all optional. `validateSearch` parses with `z.string().min(1).optional()` per param (NEVER uuid-strict — a malformed param must not error the route). Prefill validates ids against the reads and silently drops unknown ones (stale deep links prefill nothing — they never show a rejection card). A deep-linked service filters the branch step to its `bookableBranchIds` before anything is chosen; the wizard always STARTS at step 1 (deep links seed answers, not the step).
-- **Client-side catalog values are forbidden** — every rendered name/price/id derives from the live reads (the ticket-05 review Critical is the precedent). The only constants this plan pins are the spec/prototype-owned ones above (`TIME_SLOTS`, copy, pinned format outputs).
-- **Landing unit tests exist ONLY at the lib seam** (spec § Testing Decisions 5: no permanent page/unit harness in M2). This plan adds exactly one new test file (`src/lib/booking.test.ts`, 30 tests) plus extends `src/lib/format.test.ts` (+2); the suite goes 15 → 47. Page behavior is verified by the Task 5 CDP scenarios plus the milestone's end-to-end verification. Do not add route-level vitest suites. Mocked-clock pattern is the api suites' (prior art `apps/api/test/appointments.test.ts:464`): `vi.useFakeTimers({ toFake: ['Date'] })` + `vi.setSystemTime(...)` — Date only, so driver timers stay real; every new test derives dates relative to `now`, never hard-coded future dates.
-- **API integration tests for Task 1** run in the compose harness (ADR-0008): `TEST_DATABASE_URL`, `truncateAll` + `loadFixtures` in `beforeEach` (prior art `apps/api/test/studio-services.test.ts`). The fixtures already carry the applicability rows this test needs — MakeUp→portrait service, retired add-on→studio service (the inactive link proves the active-only filter). No fixture changes.
-- **Versions pinned (resolved from the workspace lock 2026-09-09):** `@tanstack/react-router` 1.170.33 → `@tanstack/router-core` 1.171.28, `@tanstack/react-start` 1.168.50, `zod` 4.5.1. Spiked against the installed types: `validateSearch` option (`router-core/dist/esm/route.d.ts:251`) and `navigate({ href })` (`link.d.ts:94` — "used instead of `to` to navigate to a fully built href"). `createServerFn` handlers always receive the options object — `.validator((input) => input)` + `handler(async ({ data }) => ...)`, callers pass `{ data }` (ticket-05 ruling, start 1.170.x).
-- **Untyped navigation to the confirmation page:** `/booking/:id` doesn't exist until #46 — submit success calls `navigate({ href: \`/booking/${record.id}\` })` carrying the convert-comment (`Typed navigate({ to: '/booking/$id' }) lands with ticket #46.`), mirroring the plain-anchor ruling. Do NOT register a stub route.
+- **Scope fence (siblings share the roadmap):** ticket 07 delivers the `/book` route + wizard, the pure booking lib, the studio-services applicability embed, the typed-Link sweep of the six `/book` anchors, and the CDP harness extension. NOT here: the `/booking/:id` page (#46, success navigates by `href` string; the URL 404s until #46, which is the expected state); the Resend email (#47); real slot logic/availability (M3 per ADR-0005, the hour chips are the placeholder grid); any visual design pass (M2's bar is data-complete, visually-rough); admin/CMS/auth; any seed, migration, or `packages/db` change; any new env var.
+- **`docs/plan.md`'s "Booking form (prototype variant C, …)" checkbox (in the red-penciled Milestone 2 booking-flow block) is THIS ticket alone**, Task 6 ticks it with the ✅ emoji only after Tasks 1–5 are committed. The neighboring checkboxes, schema (ticked), confirmation page, Resend integration, end-to-end email verify, are siblings': none may be touched. GitHub issue #45's acceptance boxes stay owner-ticked, note the criterion→task mapping in the PR description, don't edit the issue.
+- **Spec amendment carried by this plan (veto-flag in the PR):** `GET /api/v1/studio-services` gains `applicableAddonServiceIds` (active-only, junction-read). The spec's § API surface pinned the read with `bookableBranchIds` only, but the variant-C ruling ("add-ons step shows only when the offering has applicable add-ons, services matrix-gated") requires the matrix client-side, and the intake's `addon_not_applicable` rejection alone cannot render that conditional step. This mirrors the ticket-04 embed pattern one junction over; if the owner vetoes, the add-ons step cannot matrix-gate and the step's visibility rule goes back to clarify.
+- **Copy is pinned (prototype = owner-ratified artifact from the wayfinder #33 rounds), verbatim everywhere it appears:** the five step questions `Where would you like to book?` / `What are you booking?` / `Any add-ons? (optional)` / `When? (Philippine time)` / `Last, your details`; the PHT note `All times are Philippine time (PHT, UTC+8). Bookings in the past are rejected.`; the past-pick hint `That time has already passed, pick a later slot.`; the add-ons affordances `Continue · {peso(total)}` and `Skip, no add-ons` (Skip shows only when nothing is selected); the empty-add-ons line `No add-ons apply to this booking.`; the offering-step section labels `Service Packages` and `Studio Services at {branchName}` plus the no-branch prompt `Choose a branch first, services are bookable per branch.`; the rail title `Your booking`; the confirm button `Confirm booking · {peso(total)}` with submitting state `Booking…`; the rejection card title `We couldn't complete that booking` with the mono `API reason: {message}` line; contact placeholders `Full name` / `Email` / `Phone (+63…)` / `Notes (optional, tell the studio anything useful)`. The only invented line is the `service_inactive` rejection copy, derived from the ratified `package_inactive` pattern as `That service isn't available right now. Please pick another one.` (veto-flagged at PR review, same mechanism as ticket-06's blurb).
+- **The rejection contract is the prototype's, promoted:** friendly copy keyed by `RejectionReason` (`REJECTION_COPY`), with the reason derived from the API's module-owned wire message (`{ error: <message> }`, the typed reason does NOT ride the wire; the route forwards the message verbatim). The message→reason map matches the intake module's `REJECTION_MESSAGES` wordings (verbatim, below); unmatched messages fall to `unknown`. The card renders the friendly copy and the raw API message as the mono line.
+- **The API owns the past-datetime floor; the form owns the hint.** Submit performs NO client-side clock check (the prototype's simulated floor dies): the inline hint renders the moment the picked instant is at or before now, and the API's typed `past_datetime` card covers the race. PHT framing needs no tz arithmetic, PH is fixed UTC+8, so the instant comparison is plain `getTime() <= now`.
+- **`peso` is the existing `src/lib/format.ts` helper, reused, not redefined.** Pinned outputs on this repo's Node 26 toolchain (ICU-complete, probed live 2026-09-08): `peso(150000)` = `₱1,500.00`, `peso(12000)` = `₱120.00`, `peso(6000)` = `₱60.00`, `peso(90000)` = `₱900.00`. If a pinned literal fails on an executor's machine, the fix is a full-ICU Node environment, never edit the expectation.
+- **`phDateTime` joins `format.ts` this ticket** (the wizard's rail/contact summary need it; #46's read-back reuses it). Implementation verbatim from the prototype: `new Date(iso).toLocaleString('en-PH', { timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short' })`. Pinned outputs (probed live 2026-09-09, Node v26.7.0, full ICU): `phDateTime('2026-12-25T09:30:00+08:00')` = `Dec 25, 2026, 9:30 AM` and `phDateTime('2026-01-05T18:00:00.000Z')` = `Jan 6, 2026, 2:00 AM` (the UTC-midnight rollover case, it proves the timezone conversion, not just formatting). Same full-ICU fix path as `peso`.
+- **The placeholder slot grid is pinned:** `TIME_SLOTS` = `['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00']` (hourly 09:00–18:00, from the prototype; ADR-0005's M3 availability replaces it). The date input's `min` is today's PH wall-clock date via the prototype's expression, extracted as the pure `phDateInputMin(now)` for testability.
+- **Deep-link grammar is spec-pinned and shape-only:** `/book?branch=&package=&service=`, ids, all optional. `validateSearch` parses with `z.string().min(1).optional()` per param (NEVER uuid-strict, a malformed param must not error the route). Prefill validates ids against the reads and silently drops unknown ones (stale deep links prefill nothing, they never show a rejection card). A deep-linked service filters the branch step to its `bookableBranchIds` before anything is chosen; the wizard always STARTS at step 1 (deep links seed answers, not the step).
+- **Client-side catalog values are forbidden**, every rendered name/price/id derives from the live reads (the ticket-05 review Critical is the precedent). The only constants this plan pins are the spec/prototype-owned ones above (`TIME_SLOTS`, copy, pinned format outputs).
+- **Landing unit tests exist ONLY at the lib seam** (spec § Testing Decisions 5: no permanent page/unit harness in M2). This plan adds exactly one new test file (`src/lib/booking.test.ts`, 30 tests) plus extends `src/lib/format.test.ts` (+2); the suite goes 15 → 47. Page behavior is verified by the Task 5 CDP scenarios plus the milestone's end-to-end verification. Do not add route-level vitest suites. Mocked-clock pattern is the api suites' (prior art `apps/api/test/appointments.test.ts:464`): `vi.useFakeTimers({ toFake: ['Date'] })` + `vi.setSystemTime(...)`, Date only, so driver timers stay real; every new test derives dates relative to `now`, never hard-coded future dates.
+- **API integration tests for Task 1** run in the compose harness (ADR-0008): `TEST_DATABASE_URL`, `truncateAll` + `loadFixtures` in `beforeEach` (prior art `apps/api/test/studio-services.test.ts`). The fixtures already carry the applicability rows this test needs, MakeUp→portrait service, retired add-on→studio service (the inactive link proves the active-only filter). No fixture changes.
+- **Versions pinned (resolved from the workspace lock 2026-09-09):** `@tanstack/react-router` 1.170.33 → `@tanstack/router-core` 1.171.28, `@tanstack/react-start` 1.168.50, `zod` 4.5.1. Spiked against the installed types: `validateSearch` option (`router-core/dist/esm/route.d.ts:251`) and `navigate({ href })` (`link.d.ts:94`, "used instead of `to` to navigate to a fully built href"). `createServerFn` handlers always receive the options object, `.validator((input) => input)` + `handler(async ({ data }) => ...)`, callers pass `{ data }` (ticket-05 ruling, start 1.170.x).
+- **Untyped navigation to the confirmation page:** `/booking/:id` doesn't exist until #46, submit success calls `navigate({ href: \`/booking/${record.id}\` })` carrying the convert-comment (`Typed navigate({ to: '/booking/$id' }) lands with ticket #46.`), mirroring the plain-anchor ruling. Do NOT register a stub route.
 - **Typed-Link sweep fence:** exactly six `/book` plain anchors convert (mechanically enumerated 2026-09-09): `src/routes/index.tsx:35` (hero), `src/components/site-header.tsx:25` (Book now), and the four template-literal anchors in `package-card.tsx`, `branch-card.tsx`, `service-card.tsx`, `service-teaser-item.tsx`. The nav's other plain anchors (`/packages` `/services` `/branches` `/about`) and the not-found page's `/packages` anchor (its "dependency-free" comment is a standing ruling) are NOT in scope.
 - **Sentry spans on the new server function** (`.cursorrules`): wrap the handler body in `startSpan({ name: 'POST /api/v1/appointments' }, ...)` (named import, per the repo Biome rule) exactly like the existing server fns; `getAddonServices` gets `GET /api/v1/addon-services`.
 - **Biome-clean commits:** `pnpm exec biome check --write <files>` on every created/modified code file before committing (project `fix` scripts call the `biome` bin; `apps/landing/biome.json` covers `scripts/**` too).
 - **`noUncheckedIndexedAccess` is on:** index access in new code is guarded (`if (!row) ...`), never `!`.
-- **CDP harness requirements (verification-only):** Chrome/Chromium with `--remote-debugging-port=9222`, `pnpm --filter @sevendays/api dev` (port 8787, seeded compose db), and the landing dev server (port 3000, `API_URL` set in `apps/landing/.env.local`). Scenarios are committed (owner ruling 2026-09-08: tickets 06–10 extend the same harness) and take URLs from `LANDING_VERIFY_URL` / `API_VERIFY_URL` (defaults `http://localhost:3000` / `http://127.0.0.1:8787`). Failures name the failing check and exit 1. Expectations are re-derived from the live API — never hard-coded. `booking-wizard.mjs` is READ-ONLY over the data (its submit check drives a past-date booking the API rejects — no row is written); `booking-e2e.mjs` (Task 6) WRITES bookings by design and runs at verification time only.
-- **Commit style:** scoped conventional subjects (`feat(api):`, `feat(types):`, `feat(landing):`, `test(landing):`, `docs:`), bullet bodies when wordy; one commit per task. (Ticket-06's plan said "unscoped" while its own commits were scoped — fixed at source here; scoped is the house truth.)
+- **CDP harness requirements (verification-only):** Chrome/Chromium with `--remote-debugging-port=9222`, `pnpm --filter @sevendays/api dev` (port 8787, seeded compose db), and the landing dev server (port 3000, `API_URL` set in `apps/landing/.env.local`). Scenarios are committed (owner ruling 2026-09-08: tickets 06–10 extend the same harness) and take URLs from `LANDING_VERIFY_URL` / `API_VERIFY_URL` (defaults `http://localhost:3000` / `http://127.0.0.1:8787`). Failures name the failing check and exit 1. Expectations are re-derived from the live API, never hard-coded. `booking-wizard.mjs` is READ-ONLY over the data (its submit check drives a past-date booking the API rejects, no row is written); `booking-e2e.mjs` (Task 6) WRITES bookings by design and runs at verification time only.
+- **Commit style:** scoped conventional subjects (`feat(api):`, `feat(types):`, `feat(landing):`, `test(landing):`, `docs:`), bullet bodies when wordy; one commit per task. (Ticket-06's plan said "unscoped" while its own commits were scoped, fixed at source here; scoped is the house truth.)
 
 ---
 
@@ -50,10 +50,10 @@ apps/landing/src/lib/format.ts                     (mod, Task 2) + phDateTime
 apps/landing/src/lib/format.test.ts                (mod, Task 2) phDateTime pinned outputs (3 → 5 tests)
 apps/landing/src/lib/booking.ts                    (new, Task 3) pure wizard logic + thin useBookingWizard hook
 apps/landing/src/lib/booking.test.ts               (new, Task 3) 30 lib-seam tests (mocked clock)
-apps/landing/src/routes/book.tsx                   (new, Task 4) /book — variant C one-question-per-screen
+apps/landing/src/routes/book.tsx                   (new, Task 4) /book, variant C one-question-per-screen
 apps/landing/src/components/booking/rejection-card.tsx (new, Task 4) typed rejection card
 apps/landing/src/components/booking/summary-rail.tsx   (new, Task 4) sticky "Your booking" rail
-apps/landing/src/routeTree.gen.ts                  (regen, Task 4) via pnpm generate-routes — never hand-edited
+apps/landing/src/routeTree.gen.ts                  (regen, Task 4) via pnpm generate-routes, never hand-edited
 apps/landing/src/components/package-card.tsx       (mod, Task 4) typed Link sweep
 apps/landing/src/components/branch-card.tsx        (mod, Task 4) typed Link sweep
 apps/landing/src/components/service-card.tsx       (mod, Task 4) typed Link sweep
@@ -77,14 +77,14 @@ Component rule (inherited from ticket 05): pages compose the shared components; 
 - Modify: `packages/types/src/studio-service.ts`, `packages/types/src/studio-service.test.ts`, `apps/api/src/services/studio-services.ts`, `apps/api/test/studio-services.test.ts`
 
 **Interfaces:**
-- Consumes: `studioServiceAddonServices` junction + `addonServices` table (`@sevendays/db`), `groupChildren(rows, keyFn)` (`apps/api/src/services/group-children.ts`), the fixture ids `servicePortrait` / `serviceStudio` / `addonMakeup` / `addonRetired` (`apps/api/test/helpers/fixtures.ts` — the applicability rows already exist there).
+- Consumes: `studioServiceAddonServices` junction + `addonServices` table (`@sevendays/db`), `groupChildren(rows, keyFn)` (`apps/api/src/services/group-children.ts`), the fixture ids `servicePortrait` / `serviceStudio` / `addonMakeup` / `addonRetired` (`apps/api/test/helpers/fixtures.ts`, the applicability rows already exist there).
 - Produces (Tasks 2–4 consume these exact names):
-  - `@sevendays/types`: `StudioServiceWithBranches` gains `applicableAddonServiceIds: string[]` (active-only, ordered like the branch ids — junction createdAt proxy, id tiebreak).
+  - `@sevendays/types`: `StudioServiceWithBranches` gains `applicableAddonServiceIds: string[]` (active-only, ordered like the branch ids, junction createdAt proxy, id tiebreak).
   - API response `GET /api/v1/studio-services` carries the field; `packages/api-client` needs NO change (it parses through `studioServiceWithBranchesSchema`).
 
 **Not here:** no route change (the handler forwards the service result verbatim), no api-client change, no landing change (Task 2), no seed/fixture change.
 
-- [ ] **Step 1: Write the failing types test** — in `packages/types/src/studio-service.test.ts`, append inside the existing `describe('studioServiceWithBranchesSchema')` block:
+- [ ] **Step 1: Write the failing types test**, in `packages/types/src/studio-service.test.ts`, append inside the existing `describe('studioServiceWithBranchesSchema')` block:
 
 ```ts
   it('parses a read row with embedded applicable add-on ids', () => {
@@ -120,9 +120,9 @@ Component rule (inherited from ticket 05): pages compose the shared components; 
 - [ ] **Step 2: Run to verify the types tests fail**
 
 Run: `pnpm --filter @sevendays/types test`
-Expected: FAIL — exactly which failing looks different per test, and that is the point: the parse-output test fails because `parsed.applicableAddonServiceIds` is `undefined` (the key exists but the schema strips it — a plain `safeParse(...).success` assertion here would pass in RED, so the test asserts OUTPUT); the non-uuid test fails the same way (stripped key → parse wrongly succeeds); the required-field test fails because a parse without the field currently succeeds.
+Expected: FAIL, exactly which failing looks different per test, and that is the point: the parse-output test fails because `parsed.applicableAddonServiceIds` is `undefined` (the key exists but the schema strips it, a plain `safeParse(...).success` assertion here would pass in RED, so the test asserts OUTPUT); the non-uuid test fails the same way (stripped key → parse wrongly succeeds); the required-field test fails because a parse without the field currently succeeds.
 
-- [ ] **Step 3: Extend the read schema** — in `packages/types/src/studio-service.ts`, replace:
+- [ ] **Step 3: Extend the read schema**, in `packages/types/src/studio-service.ts`, replace:
 
 ```ts
 export const studioServiceWithBranchesSchema = studioServiceSchema.extend({
@@ -136,22 +136,22 @@ with:
 // Read shape for GET /api/v1/studio-services (M2 ticket 04; ticket 07 adds
 // the applicability embed): active Studio Services with the branches they
 // are bookable at and the ACTIVE add-ons that apply to them, embedded as
-// bare ids — the booking form's branch step filters by membership, its
+// bare ids, the booking form's branch step filters by membership, its
 // add-ons step matrix-gates by the applicability ids, and the pages join
 // names from the sibling reads. Extends the row mirror (a plain object
-// schema, no refine — the zod v4 chain rule is not at play).
+// schema, no refine, the zod v4 chain rule is not at play).
 export const studioServiceWithBranchesSchema = studioServiceSchema.extend({
   bookableBranchIds: z.array(z.uuid()),
   applicableAddonServiceIds: z.array(z.uuid()),
 });
 ```
 
-(Also replace the comment above `studioServiceSchema` — it currently names only one embed — with:
+(Also replace the comment above `studioServiceSchema`, it currently names only one embed, with:
 
 ```ts
-// Mirror of the studio_services row (M2 ticket 01). The M2 API read shape —
+// Mirror of the studio_services row (M2 ticket 01). The M2 API read shape:
 // StudioService plus embedded bookableBranchIds and
-// applicableAddonServiceIds (ticket 07) — extends THIS schema in tickets
+// applicableAddonServiceIds (ticket 07), extends THIS schema in tickets
 // 04/07; define nothing per-route elsewhere.
 ```
 
@@ -160,9 +160,9 @@ The row mirror itself stays untouched.)
 - [ ] **Step 4: Run the types tests again**
 
 Run: `pnpm --filter @sevendays/types test`
-Expected: PASS — the two safeParse tests now pass; the required-field test passes because the new key is mandatory. All pre-existing tests stay green.
+Expected: PASS, the two safeParse tests now pass; the required-field test passes because the new key is mandatory. All pre-existing tests stay green.
 
-- [ ] **Step 5: Write the failing API integration test** — in `apps/api/test/studio-services.test.ts`, append a second `it` inside the existing `describe`:
+- [ ] **Step 5: Write the failing API integration test**, in `apps/api/test/studio-services.test.ts`, append a second `it` inside the existing `describe`:
 
 ```ts
   it('embeds only ACTIVE applicable add-on ids per service', async () => {
@@ -178,7 +178,7 @@ Expected: PASS — the two safeParse tests now pass; the required-field test pas
     expect(studio).toBeDefined();
 
     // Fixtures link Makeup → portrait (active link, active add-on) and the
-    // RETIRED add-on → studio (live link on an inactive add-on — the
+    // RETIRED add-on → studio (live link on an inactive add-on, the
     // activity filter's whole point, mirroring ticket-03's ruling).
     expect(portrait?.applicableAddonServiceIds).toEqual([ids.addonMakeup]);
     expect(studio?.applicableAddonServiceIds).toEqual([]);
@@ -188,9 +188,9 @@ Expected: PASS — the two safeParse tests now pass; the required-field test pas
 - [ ] **Step 6: Run to verify the API test fails**
 
 Run: `pnpm --filter @sevendays/api exec vitest run test/studio-services.test.ts`
-Expected: FAIL — `applicableAddonServiceIds` is `undefined` in the response (the stitch doesn't exist yet).
+Expected: FAIL, `applicableAddonServiceIds` is `undefined` in the response (the stitch doesn't exist yet).
 
-- [ ] **Step 7: Extend the service stitch** — in `apps/api/src/services/studio-services.ts`, replace the import block so it reads:
+- [ ] **Step 7: Extend the service stitch**, in `apps/api/src/services/studio-services.ts`, replace the import block so it reads:
 
 ```ts
 import type { Database } from '@sevendays/db';
@@ -210,11 +210,11 @@ then, after the existing `branchesByService` stitch, add the applicability stitc
 ```ts
   // Applicability matrix (ticket 07): the ACTIVE add-ons that apply to each
   // service, same embed pattern as the branch links one junction over. The
-  // innerJoin + isActive filter drops links to inactive add-ons — a live
+  // innerJoin + isActive filter drops links to inactive add-ons, a live
   // link on a dead add-on must not surface in the booking form's matrix
   // (mirrors the intake's activity-before-matrix ruling, ticket 03). Order
   // follows the junction's createdAt proxy, id tiebreak, like the branch
-  // ids — membership is the only consumer-facing fact.
+  // ids, membership is the only consumer-facing fact.
   const applicabilityRows = await db
     .select({
       studioServiceId: studioServiceAddonServices.studioServiceId,
@@ -243,7 +243,7 @@ Also extend the function's doc-comment first paragraph to name both embeds: `…
 - [ ] **Step 8: Run the API suite**
 
 Run: `pnpm --filter @sevendays/api exec vitest run test/studio-services.test.ts`
-Expected: PASS — both `it`s green. Then the whole api suite (the read shape changed; suites that POST appointments don't touch this read, but the gate proves it):
+Expected: PASS, both `it`s green. Then the whole api suite (the read shape changed; suites that POST appointments don't touch this read, but the gate proves it):
 
 Run: `pnpm --filter @sevendays/api test`
 Expected: PASS.
@@ -257,11 +257,11 @@ git add packages/types/src/studio-service.ts packages/types/src/studio-service.t
 git commit -m "feat(api): studio-services read embeds active applicable add-on ids"
 ```
 
-(Body bullets: `types: StudioServiceWithBranches.applicableAddonServiceIds (active-only junction embed, ticket-04 bookableBranchIds pattern one junction over); service: innerJoin active add-ons, groupChildren stitch. Feeds the /book add-ons step's matrix gating (#45) — spec-amendment note rides the PR.`)
+(Body bullets: `types: StudioServiceWithBranches.applicableAddonServiceIds (active-only junction embed, ticket-04 bookableBranchIds pattern one junction over); service: innerJoin active add-ons, groupChildren stitch. Feeds the /book add-ons step's matrix gating (#45), spec-amendment note rides the PR.`)
 
 ---
 
-### Task 2: Landing data layer — addon-services + appointment server fns, `phDateTime`
+### Task 2: Landing data layer, addon-services + appointment server fns, `phDateTime`
 
 **Files:**
 - Modify: `apps/landing/src/lib/api.functions.ts`, `apps/landing/src/lib/queries.ts`, `apps/landing/src/lib/format.ts`, `apps/landing/src/lib/format.test.ts`, `packages/api-client/src/index.ts` (pre-flight correction, see below)
@@ -272,11 +272,11 @@ git commit -m "feat(api): studio-services read embeds active applicable add-on i
   - `api.functions.ts`: `getAddonServices(): Promise<AddonService[]>` (no-arg server fn, Sentry span `GET /api/v1/addon-services`).
   - `api.functions.ts`: `createAppointment(input: CreateAppointmentArgs): Promise<AppointmentWithAddons>` (server fn, Sentry span `POST /api/v1/appointments`; callers pass `{ data: input }` per the 1.170.x options-object contract).
   - `queries.ts`: `addonServiceQueries.all()` → `queryOptions({ queryKey: ['addon-services'], queryFn })`.
-  - `format.ts`: `phDateTime(iso: string): string` (en-PH / Asia/Manila, medium date + short time — prototype verbatim).
+  - `format.ts`: `phDateTime(iso: string): string` (en-PH / Asia/Manila, medium date + short time, prototype verbatim).
 
-**Not here:** no booking logic (Task 3), no route/component work (Task 4), no runtime client-package change — the wrappers exist. (Pre-flight correction 2026-09-09: `CreateAppointmentArgs` is defined in `packages/api-client/src/routes/appointments.ts` but was never re-exported from the package index, so the import below would fail typecheck — Step 5 adds that one-line type re-export.)
+**Not here:** no booking logic (Task 3), no route/component work (Task 4), no runtime client-package change, the wrappers exist. (Pre-flight correction 2026-09-09: `CreateAppointmentArgs` is defined in `packages/api-client/src/routes/appointments.ts` but was never re-exported from the package index, so the import below would fail typecheck, Step 5 adds that one-line type re-export.)
 
-- [ ] **Step 1: Write the failing `phDateTime` tests** — in `apps/landing/src/lib/format.test.ts`, extend the import from `./format` to include `phDateTime` and append:
+- [ ] **Step 1: Write the failing `phDateTime` tests**, in `apps/landing/src/lib/format.test.ts`, extend the import from `./format` to include `phDateTime` and append:
 
 ```ts
 describe('phDateTime', () => {
@@ -293,12 +293,12 @@ describe('phDateTime', () => {
 - [ ] **Step 2: Run to verify it fails**
 
 Run: `pnpm --filter @sevendays/landing test`
-Expected: FAIL — `phDateTime` is not exported by `./format` (import error; the 15 existing tests still pass).
+Expected: FAIL, `phDateTime` is not exported by `./format` (import error; the 15 existing tests still pass).
 
-- [ ] **Step 3: Implement `phDateTime`** — `apps/landing/src/lib/format.ts` becomes:
+- [ ] **Step 3: Implement `phDateTime`**, `apps/landing/src/lib/format.ts` becomes:
 
 ```ts
-// Money + schedule display for the landing site — promoted verbatim from the
+// Money + schedule display for the landing site, promoted verbatim from the
 // prototype (wayfinder #33, spec residual). Cent-denominated ints in, peso
 // string out; ISO instants in, Philippine-wall-clock strings out.
 
@@ -318,9 +318,9 @@ export function phDateTime(iso: string): string {
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `pnpm --filter @sevendays/landing test`
-Expected: PASS (17 tests — 15 existing + 2 new).
+Expected: PASS (17 tests, 15 existing + 2 new).
 
-- [ ] **Step 5: Add the server functions and query factory** — extend `apps/landing/src/lib/api.functions.ts` (keep everything already there untouched; extend the type imports):
+- [ ] **Step 5: Add the server functions and query factory**, extend `apps/landing/src/lib/api.functions.ts` (keep everything already there untouched; extend the type imports):
 
 ```ts
 import { startSpan } from '@sentry/tanstackstart-react';
@@ -343,7 +343,7 @@ export const getAddonServices = createServerFn().handler(async () => {
  * Guest booking POST. Callers pass the start-fn payload ({ data: input });
  * the api-client RPC shape ({ json }) is wrapped here. Rejections reject
  * with ApiClientError(400) whose details carry the API's module-owned
- * message — src/lib/booking.ts maps it to the typed rejection card.
+ * message, src/lib/booking.ts maps it to the typed rejection card.
  */
 export const createAppointment = createServerFn()
   .validator((input: CreateAppointmentArgs) => input)
@@ -354,7 +354,7 @@ export const createAppointment = createServerFn()
   });
 ```
 
-Then extend `apps/landing/src/lib/queries.ts` — add `getAddonServices` to the existing import from `./api.functions` and append:
+Then extend `apps/landing/src/lib/queries.ts`, add `getAddonServices` to the existing import from `./api.functions` and append:
 
 ```ts
 export const addonServiceQueries = {
@@ -380,18 +380,18 @@ git add packages/api-client/src/index.ts apps/landing/src/lib/api.functions.ts a
 git commit -m "feat(landing): addon-services + appointment server fns, phDateTime helper"
 ```
 
-(Body bullets: `api-client: re-export the CreateAppointmentArgs type (pre-flight correction — never exported from the index). createAppointment wraps the ticket-04 RPC wrapper with a Sentry span; rejections surface as ApiClientError(400) for the booking lib to map (#45). phDateTime promoted verbatim from the prototype with pinned full-ICU outputs; lib-seam tests 15 → 17.`)
+(Body bullets: `api-client: re-export the CreateAppointmentArgs type (pre-flight correction, never exported from the index). createAppointment wraps the ticket-04 RPC wrapper with a Sentry span; rejections surface as ApiClientError(400) for the booking lib to map (#45). phDateTime promoted verbatim from the prototype with pinned full-ICU outputs; lib-seam tests 15 → 17.`)
 
 ---
 
-### Task 3: The pure booking lib (state machine, rejections, PHT math — TDD)
+### Task 3: The pure booking lib (state machine, rejections, PHT math, TDD)
 
 **Files:**
 - Create: `apps/landing/src/lib/booking.ts`, `apps/landing/src/lib/booking.test.ts`
 
 **Interfaces:**
 - Consumes: `AddonService`, `Branch`, `ServicePackageWithInclusions`, `StudioServiceWithBranches` from `@sevendays/types`; `CreateAppointmentArgs` from `@sevendays/api-client`.
-- Produces (Task 4 consumes these exact names) — every behavior of the wizard is one of these exports:
+- Produces (Task 4 consumes these exact names), every behavior of the wizard is one of these exports:
   - `TIME_SLOTS: string[]`, `phDateInputMin(now: Date): string`
   - `type Offering`, `type BookingSearchInit`, `type BookingCatalog`, `type BookingDetails`
   - `scheduledAtInstant(date: string, time: string): Date | null`, `isPastPick(scheduledAt: Date | null, now: Date): boolean`
@@ -403,11 +403,11 @@ git commit -m "feat(landing): addon-services + appointment server fns, phDateTim
   - `stepAfterOfferingChosen(applicableCount: number): 3 | 4`, `stepBackFromDateTime(hasApplicableAddons: boolean): 2 | 3`
   - `type RejectionReason`, `REJECTION_COPY: Record<RejectionReason, string>`, `reasonForApiMessage(message: string): RejectionReason`, `rejectionFromApiClientError(err: unknown): { reason: RejectionReason; apiMessage: string }`
   - `buildCreatePayload(details: BookingDetails): CreateAppointmentArgs`
-  - `useBookingWizard(init: BookingSearchInit, deps: { catalog: BookingCatalog; createAppointment: (args: CreateAppointmentArgs) => Promise<{ id: string }> })` — thin stateful shell, untested (CDP owns behavior); returns `{ step, branchId, branchChoices, setBranch, offering, chooseOffering, goNext, goBack, applicableAddons, addonIds, toggleAddon, selectedAddons, date, setDate, time, setTime, scheduledAt, isPast, offeringName, branchName, offeringPriceCents, totalCents, name, setName, email, setEmail, phone, setPhone, notes, setNotes, submitting, submit }` where `submit(): Promise<{ ok: true; appointmentId: string } | { ok: false; rejection: { reason: RejectionReason; apiMessage: string } }>`, `goNext()` advances linearly (guarding the empty-add-ons step for prefill flows) and `goBack()` returns from date/time via `stepBackFromDateTime`.
+  - `useBookingWizard(init: BookingSearchInit, deps: { catalog: BookingCatalog; createAppointment: (args: CreateAppointmentArgs) => Promise<{ id: string }> })`, thin stateful shell, untested (CDP owns behavior); returns `{ step, branchId, branchChoices, setBranch, offering, chooseOffering, goNext, goBack, applicableAddons, addonIds, toggleAddon, selectedAddons, date, setDate, time, setTime, scheduledAt, isPast, offeringName, branchName, offeringPriceCents, totalCents, name, setName, email, setEmail, phone, setPhone, notes, setNotes, submitting, submit }` where `submit(): Promise<{ ok: true; appointmentId: string } | { ok: false; rejection: { reason: RejectionReason; apiMessage: string } }>`, `goNext()` advances linearly (guarding the empty-add-ons step for prefill flows) and `goBack()` returns from date/time via `stepBackFromDateTime`.
 
-**Not here:** no React components (Task 4), no server-fn imports (the hook receives `createAppointment` as a dependency — the lib stays decoupled from the network), no client-side past-floor at submit (the API owns it; the hook exposes `isPast` for the hint only).
+**Not here:** no React components (Task 4), no server-fn imports (the hook receives `createAppointment` as a dependency, the lib stays decoupled from the network), no client-side past-floor at submit (the API owns it; the hook exposes `isPast` for the hint only).
 
-- [ ] **Step 1: Write the failing test file** — create `apps/landing/src/lib/booking.test.ts`:
+- [ ] **Step 1: Write the failing test file**, create `apps/landing/src/lib/booking.test.ts`:
 
 ```ts
 import type {
@@ -783,9 +783,9 @@ describe('buildCreatePayload', () => {
 - [ ] **Step 2: Run to verify it fails**
 
 Run: `pnpm --filter @sevendays/landing test`
-Expected: FAIL — `./booking` cannot be resolved (import error; the 17 existing tests still pass).
+Expected: FAIL, `./booking` cannot be resolved (import error; the 17 existing tests still pass).
 
-- [ ] **Step 3: Implement `booking.ts`** — create `apps/landing/src/lib/booking.ts`:
+- [ ] **Step 3: Implement `booking.ts`**, create `apps/landing/src/lib/booking.ts`:
 
 ```ts
 // The booking wizard's brain (issue #45, prototype variant C re-derived
@@ -793,9 +793,9 @@ Expected: FAIL — `./booking` cannot be resolved (import error; the 17 existing
 // seam can test it; useBookingWizard only wires React state to these.
 // Prototype artifacts that die here: Studio Service stubs, the name-keyed
 // applicability map (the API now embeds applicableAddonServiceIds), the
-// simulated past-datetime floor (the API owns it — the form renders the
+// simulated past-datetime floor (the API owns it, the form renders the
 // hint and the typed rejection card), and packagePriceCents (renamed
-// bookedPriceCents in ticket 02; nothing here reads a snapshot — the
+// bookedPriceCents in ticket 02; nothing here reads a snapshot, the
 // pre-submit rail keeps LIVE prices, spec ruling).
 
 import type { CreateAppointmentArgs } from '@sevendays/api-client';
@@ -807,7 +807,7 @@ import type {
 } from '@sevendays/types';
 import { useMemo, useState } from 'react';
 
-/** One wizard read snapshot — the four reads the route loader prefetches. */
+/** One wizard read snapshot, the four reads the route loader prefetches. */
 export interface BookingCatalog {
   branches: Branch[];
   packages: ServicePackageWithInclusions[];
@@ -860,7 +860,7 @@ export function scheduledAtInstant(date: string, time: string): Date | null {
   return new Date(`${date}T${time}:00+08:00`);
 }
 
-/** At-or-before now is past — the same boundary the API's floor enforces. */
+/** At-or-before now is past, the same boundary the API's floor enforces. */
 export function isPastPick(scheduledAt: Date | null, now: Date): boolean {
   return scheduledAt !== null && scheduledAt.getTime() <= now.getTime();
 }
@@ -944,7 +944,7 @@ export function stepBackFromDateTime(hasApplicableAddons: boolean): 2 | 3 {
 // ---------------------------------------------------------------------------
 // Typed rejections (prototype contract): the wire carries only the API's
 // module-owned message ({ error }); the reason is derived by matching that
-// message. Wordings pinned from apps/api REJECTION_MESSAGES — suites assert
+// message. Wordings pinned from apps/api REJECTION_MESSAGES, suites assert
 // them verbatim, so the match is stable.
 // ---------------------------------------------------------------------------
 export type RejectionReason =
@@ -958,7 +958,7 @@ export type RejectionReason =
 
 export const REJECTION_COPY: Record<RejectionReason, string> = {
   past_datetime:
-    'That date and time has already passed in the Philippines (PHT). Please pick a later slot — all times shown are Philippine time.',
+    'That date and time has already passed in the Philippines (PHT). Please pick a later slot, all times shown are Philippine time.',
   package_inactive: "That package isn't available right now. Please pick another one.",
   // Derived from the ratified package_inactive pattern (veto-flagged).
   service_inactive: "That service isn't available right now. Please pick another one.",
@@ -1019,7 +1019,7 @@ export type WizardSubmitResult =
   | { ok: false; rejection: { reason: RejectionReason; apiMessage: string } };
 
 /**
- * Thin stateful shell around the pure functions above — deliberately
+ * Thin stateful shell around the pure functions above, deliberately
  * untested (spec § Testing Decisions 5: the CDP scenario owns behavior).
  * The confirm button gates on branch + offering + schedule + the three
  * contact fields, so the submit guard is defensive only.
@@ -1067,10 +1067,10 @@ export function useBookingWizard(
   );
   const offeringName = offering
     ? offering.kind === 'package'
-      ? (catalog.packages.find((p) => p.id === offering.id)?.name ?? '—')
-      : (catalog.services.find((s) => s.id === offering.id)?.name ?? '—')
-    : '—';
-  const branchName = catalog.branches.find((b) => b.id === branchId)?.name ?? '—';
+      ? (catalog.packages.find((p) => p.id === offering.id)?.name ?? '-')
+      : (catalog.services.find((s) => s.id === offering.id)?.name ?? '-')
+    : '-';
+  const branchName = catalog.branches.find((b) => b.id === branchId)?.name ?? '-';
 
   /** A branch change that orphaned a service offering clears the offering. */
   function setBranch(id: string | null) {
@@ -1167,35 +1167,35 @@ export type BookingWizard = ReturnType<typeof useBookingWizard>;
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `pnpm --filter @sevendays/landing test`
-Expected: PASS (47 tests — 17 existing + 30 new).
+Expected: PASS (47 tests, 17 existing + 30 new).
 
 - [ ] **Step 5: Typecheck, lint, commit**
 
 ```bash
 pnpm --filter @sevendays/landing typecheck && pnpm --filter @sevendays/landing exec biome check --write src/lib/booking.ts src/lib/booking.test.ts
 git add apps/landing/src/lib/booking.ts apps/landing/src/lib/booking.test.ts
-git commit -m "feat(landing): pure booking wizard lib — steps, matrix gating, PHT math, typed rejections"
+git commit -m "feat(landing): pure booking wizard lib, steps, matrix gating, PHT math, typed rejections"
 ```
 
-(Body bullets: `Variant C state machine re-derived against the real schema (applicableAddonServiceIds embed replaces the prototype's name-keyed stub map; bookedPriceCents era). Rejection mapping pins the intake module's owned wordings; API owns the past-datetime floor — the lib renders the hint only. 30 lib-seam tests; mocked clock toFake ['Date'] only.`)
+(Body bullets: `Variant C state machine re-derived against the real schema (applicableAddonServiceIds embed replaces the prototype's name-keyed stub map; bookedPriceCents era). Rejection mapping pins the intake module's owned wordings; API owns the past-datetime floor, the lib renders the hint only. 30 lib-seam tests; mocked clock toFake ['Date'] only.`)
 
 ---
 
-### Task 4: `/book` route — variant C wizard, rail, rejection card, typed-Link sweep
+### Task 4: `/book` route, variant C wizard, rail, rejection card, typed-Link sweep
 
 **Files:**
 - Create: `apps/landing/src/routes/book.tsx`, `apps/landing/src/components/booking/rejection-card.tsx`, `apps/landing/src/components/booking/summary-rail.tsx`
-- Modify: `apps/landing/src/routeTree.gen.ts` (via `generate-routes` — never hand-edited), `apps/landing/src/components/package-card.tsx`, `apps/landing/src/components/branch-card.tsx`, `apps/landing/src/components/service-card.tsx`, `apps/landing/src/components/service-teaser-item.tsx`, `apps/landing/src/components/site-header.tsx`, `apps/landing/src/routes/index.tsx`
+- Modify: `apps/landing/src/routeTree.gen.ts` (via `generate-routes`, never hand-edited), `apps/landing/src/components/package-card.tsx`, `apps/landing/src/components/branch-card.tsx`, `apps/landing/src/components/service-card.tsx`, `apps/landing/src/components/service-teaser-item.tsx`, `apps/landing/src/components/site-header.tsx`, `apps/landing/src/routes/index.tsx`
 
 **Interfaces:**
 - Consumes: the full Task 3 lib surface (`useBookingWizard`, `TIME_SLOTS`, `phDateInputMin`, `RejectionReason`), `peso` + `phDateTime` (Task 2), the four query factories, `createAppointment` (Task 2 server fn), the pinned copy in Global Constraints.
-- Produces: the `/book` route (deep-link contract live), and every `/book` plain anchor converted to typed `Link`s — the ticket-05/06 convert-comments are retired.
+- Produces: the `/book` route (deep-link contract live), and every `/book` plain anchor converted to typed `Link`s, the ticket-05/06 convert-comments are retired.
 
-**Not here:** no `/booking/:id` route (success navigates by `href`; the target 404s until #46 — expected), no email, no visual design pass, no CDP scenario (Task 5).
+**Not here:** no `/booking/:id` route (success navigates by `href`; the target 404s until #46, expected), no email, no visual design pass, no CDP scenario (Task 5).
 
 Selector contract for the Task 5 scenario (ship it in this task's markup): each step panel carries `data-step='<n>'`; the past-pick hint carries `data-past-hint`; the rail's `<aside>` carries `data-summary-rail`; the rejection card's root carries `data-rejection-card`; the Back button carries `data-back`; each offering button (package and service cards on step 2) carries `data-offering='<offering id>'`. Remaining buttons are found by their pinned unique copy or as the first/last button inside their `data-step` section.
 
-- [ ] **Step 1: Create the rejection card** — `apps/landing/src/components/booking/rejection-card.tsx`:
+- [ ] **Step 1: Create the rejection card**, `apps/landing/src/components/booking/rejection-card.tsx`:
 
 ```tsx
 import { REJECTION_COPY, type RejectionReason } from '../../lib/booking';
@@ -1222,7 +1222,7 @@ export function RejectionCard({
 }
 ```
 
-- [ ] **Step 2: Create the summary rail** — `apps/landing/src/components/booking/summary-rail.tsx`:
+- [ ] **Step 2: Create the summary rail**, `apps/landing/src/components/booking/summary-rail.tsx`:
 
 ```tsx
 import type { BookingWizard } from '../../lib/booking';
@@ -1230,7 +1230,7 @@ import { peso, phDateTime } from '../../lib/format';
 
 // Sticky "Your booking" rail (variant C): live branch / offering / add-ons /
 // schedule / total while the customer chooses. Pre-submit money stays LIVE
-// (spec ruling — the money-free rule is email-only, #47).
+// (spec ruling, the money-free rule is email-only, #47).
 export function SummaryRail({ wizard }: { wizard: BookingWizard }) {
   return (
     <aside data-summary-rail className='h-fit rounded-xl border p-4 md:sticky md:top-6'>
@@ -1255,7 +1255,7 @@ export function SummaryRail({ wizard }: { wizard: BookingWizard }) {
         <div className='flex justify-between gap-3'>
           <dt className='text-muted-foreground'>Schedule</dt>
           <dd className='text-right'>
-            {wizard.scheduledAt ? phDateTime(wizard.scheduledAt.toISOString()) : '—'} (PHT)
+            {wizard.scheduledAt ? phDateTime(wizard.scheduledAt.toISOString()) : '-'} (PHT)
           </dd>
         </div>
         <div className='flex justify-between gap-3 border-t pt-2 font-semibold'>
@@ -1268,7 +1268,7 @@ export function SummaryRail({ wizard }: { wizard: BookingWizard }) {
 }
 ```
 
-- [ ] **Step 3: Create the route** — `apps/landing/src/routes/book.tsx`:
+- [ ] **Step 3: Create the route**, `apps/landing/src/routes/book.tsx`:
 
 ```tsx
 import { useSuspenseQuery } from '@tanstack/react-query';
@@ -1288,7 +1288,7 @@ import {
   studioServiceQueries,
 } from '../lib/queries';
 
-// Deep-link contract (IA #32): ids, all optional, SHAPE-ONLY — a malformed
+// Deep-link contract (IA #32): ids, all optional, SHAPE-ONLY, a malformed
 // param must never error the route; prefillFromSearch drops unknown ids
 // against the reads. 'package' is a deep-link grammar name, not a JS conflict.
 const searchSchema = z.object({
@@ -1316,7 +1316,7 @@ const QUESTIONS = [
   'What are you booking?',
   'Any add-ons? (optional)',
   'When? (Philippine time)',
-  'Last — your details',
+  'Last, your details',
 ];
 
 function BookPage() {
@@ -1340,7 +1340,7 @@ function BookPage() {
     setRejection(null);
     const result = await wizard.submit();
     if (result.ok) {
-      // Typed navigate({ to: '/booking/$id' }) lands with ticket #46 — the
+      // Typed navigate({ to: '/booking/$id' }) lands with ticket #46, the
       // route doesn't exist yet; navigate by fully-built href.
       navigate({ href: `/booking/${result.appointmentId}` });
     } else {
@@ -1434,7 +1434,7 @@ function BookPage() {
                 </p>
                 {!wizard.branchId ? (
                   <p className='mt-2 text-neutral-500 text-sm'>
-                    Choose a branch first — services are bookable per branch.
+                    Choose a branch first, services are bookable per branch.
                   </p>
                 ) : (
                   <div className='mt-2 grid gap-3 sm:grid-cols-2'>
@@ -1500,7 +1500,7 @@ function BookPage() {
                   onClick={wizard.goNext}
                   className='mt-4 text-neutral-500 text-sm underline'
                 >
-                  Skip — no add-ons
+                  Skip, no add-ons
                 </button>
               )}
             </section>
@@ -1534,7 +1534,7 @@ function BookPage() {
               </p>
               {wizard.isPast && (
                 <p data-past-hint className='mt-2 text-destructive text-sm'>
-                  That time has already passed — pick a later slot.
+                  That time has already passed, pick a later slot.
                 </p>
               )}
               <button
@@ -1571,7 +1571,7 @@ function BookPage() {
               />
               <textarea
                 className='rounded-md border px-3 py-2'
-                placeholder='Notes (optional — tell the studio anything useful)'
+                placeholder='Notes (optional, tell the studio anything useful)'
                 value={wizard.notes}
                 onChange={(e) => wizard.setNotes(e.target.value)}
               />
@@ -1595,7 +1595,7 @@ function BookPage() {
 }
 ```
 
-- [ ] **Step 4: Regenerate the route tree and sweep the plain anchors to typed Links** — run `pnpm --filter @sevendays/landing generate-routes` (`/book` enters the tree; committed file, biome-excluded). Then convert the six enumerated anchors — in each file add `Link` to the `@tanstack/react-router` import if absent, replace the anchor (every one carries the convert-comment "Plain anchor: /book arrives with ticket #45; convert to typed Links then." or sits at the enumerated line) with the typed Link, and delete the now-false comment:
+- [ ] **Step 4: Regenerate the route tree and sweep the plain anchors to typed Links**, run `pnpm --filter @sevendays/landing generate-routes` (`/book` enters the tree; committed file, biome-excluded). Then convert the six enumerated anchors, in each file add `Link` to the `@tanstack/react-router` import if absent, replace the anchor (every one carries the convert-comment "Plain anchor: /book arrives with ticket #45; convert to typed Links then." or sits at the enumerated line) with the typed Link, and delete the now-false comment:
 
   - `src/routes/index.tsx` hero: `<Link to='/book' className='rounded-md bg-neutral-900 px-6 py-3 text-center text-white text-xl'>Book now</Link>`
   - `src/components/site-header.tsx` Book now: `<Link to='/book' className='rounded-md bg-neutral-900 px-4 py-2 text-white'>Book now</Link>`
@@ -1612,7 +1612,7 @@ pnpm --filter @sevendays/landing generate-routes
 pnpm --filter @sevendays/landing typecheck && pnpm --filter @sevendays/landing test && pnpm --filter @sevendays/landing exec biome check --write src/routes/book.tsx src/components/booking/ src/components/package-card.tsx src/components/branch-card.tsx src/components/service-card.tsx src/components/service-teaser-item.tsx src/components/site-header.tsx src/routes/index.tsx
 ```
 
-Expected: clean — `/book` resolves in the regenerated tree, the typed Links typecheck against the search schema, 47 lib-seam tests stay green.
+Expected: clean, `/book` resolves in the regenerated tree, the typed Links typecheck against the search schema, 47 lib-seam tests stay green.
 
 - [ ] **Step 6: Commit**
 
@@ -1621,23 +1621,23 @@ git add apps/landing/src/routes/book.tsx apps/landing/src/components/booking/ ap
 git commit -m "feat(landing): /book booking wizard (variant C) + typed /book Links"
 ```
 
-(Body bullets: `One question per screen over the pure booking lib: branch (deep-link filtered) → offering → conditional add-ons (Skip / Continue · total) → date/time (PHT note, past hint, placeholder grid) → contact; sticky live-total rail; typed rejection cards from the API's owned wordings; success navigates /booking/:id by href until #46. The six /book plain anchors become typed Links — ticket-05/06 convert-comments retired.`)
+(Body bullets: `One question per screen over the pure booking lib: branch (deep-link filtered) → offering → conditional add-ons (Skip / Continue · total) → date/time (PHT note, past hint, placeholder grid) → contact; sticky live-total rail; typed rejection cards from the API's owned wordings; success navigates /booking/:id by href until #46. The six /book plain anchors become typed Links, ticket-05/06 convert-comments retired.`)
 
 ---
 
-### Task 5: CDP harness — dead-socket hardening + booking-wizard scenario
+### Task 5: CDP harness, dead-socket hardening + booking-wizard scenario
 
 **Files:**
 - Modify: `apps/landing/scripts/verify/lib.mjs`
 - Create: `apps/landing/scripts/verify/booking-wizard.mjs`
 
 **Interfaces:**
-- Consumes: live stack — seeded API (8787), landing dev server (3000), Chrome CDP (9222); `connect()` from `./lib.mjs`; `GET /api/v1/studio-services` (Task 1's `applicableAddonServiceIds`), `GET /api/v1/service-packages`, `GET /api/v1/addon-services`, `GET /api/v1/branches` for re-derived expectations. The route's selector contract from Task 4: `section[data-step='1'..'5']`, `[data-past-hint]`, `[data-summary-rail]`, `[data-rejection-card]`, `[data-back]`, `button[data-offering='<id>']`; remaining buttons as the first/last button inside their `data-step` section.
-- Produces: `booking-wizard.mjs` — 14 checks, READ-ONLY over the data (its submit drives a past-date booking the API rejects — no row is written); `lib.mjs` turns a dead CDP socket into loud failures instead of a hang (ticket-05 deferred minor: "harden when #45 extends the harness").
+- Consumes: live stack, seeded API (8787), landing dev server (3000), Chrome CDP (9222); `connect()` from `./lib.mjs`; `GET /api/v1/studio-services` (Task 1's `applicableAddonServiceIds`), `GET /api/v1/service-packages`, `GET /api/v1/addon-services`, `GET /api/v1/branches` for re-derived expectations. The route's selector contract from Task 4: `section[data-step='1'..'5']`, `[data-past-hint]`, `[data-summary-rail]`, `[data-rejection-card]`, `[data-back]`, `button[data-offering='<id>']`; remaining buttons as the first/last button inside their `data-step` section.
+- Produces: `booking-wizard.mjs`, 14 checks, READ-ONLY over the data (its submit drives a past-date booking the API rejects, no row is written); `lib.mjs` turns a dead CDP socket into loud failures instead of a hang (ticket-05 deferred minor: "harden when #45 extends the harness").
 
 **Not here:** no admin checks, no CI wiring, no happy-path booking writes (Task 6's mutating e2e script), no unit tests for the scenario.
 
-- [ ] **Step 1: Harden `lib.mjs` against a dead socket** — in `apps/landing/scripts/verify/lib.mjs`, replace:
+- [ ] **Step 1: Harden `lib.mjs` against a dead socket**, in `apps/landing/scripts/verify/lib.mjs`, replace:
 
 ```js
   let id = 0;
@@ -1662,7 +1662,7 @@ with:
   let id = 0;
   const pending = new Map();
   // A dead socket must fail LOUD (#45 hardens the harness, ticket-05
-  // follow-up): reject pending sends and refuse new ones — never hang,
+  // follow-up): reject pending sends and refuse new ones, never hang,
   // never resolve-with-nothing (which would false-PASS a check).
   ws.onclose = () => {
     for (const entry of pending.values()) entry.rej(new Error('CDP socket closed mid-call'));
@@ -1685,14 +1685,14 @@ with:
   }
 ```
 
-- [ ] **Step 2: Create the scenario** — `apps/landing/scripts/verify/booking-wizard.mjs` (14 checks; every expectation re-derived from the live API — where the live seed makes a filtering check vacuous, the check still asserts equality with the re-derived set and says so in its detail):
+- [ ] **Step 2: Create the scenario**, `apps/landing/scripts/verify/booking-wizard.mjs` (14 checks; every expectation re-derived from the live API, where the live seed makes a filtering check vacuous, the check still asserts equality with the re-derived set and says so in its detail):
 
 ```js
 // Scripted CDP checks for the booking wizard /book (issue #45). READ-ONLY
 // over the data: the one submit this scenario drives is a past-date booking
-// the API REJECTS — no row is written (the happy path is Task 6's e2e
+// the API REJECTS, no row is written (the happy path is Task 6's e2e
 // script). Seeded-state notes: all four services bookable at all three
-// branches, and only Portraits & ID Photo carries applicable add-ons —
+// branches, and only Portraits & ID Photo carries applicable add-ons;
 // checks 6/7 lean on that (no-addons service ⇒ skip case is live-real;
 // the matrix-equality check is vacuous-by-seed and says so).
 import { connect } from './lib.mjs';
@@ -1703,7 +1703,7 @@ const API = process.env.API_VERIFY_URL ?? 'http://127.0.0.1:8787';
 const results = [];
 function check(name, ok, detail = '') {
   results.push({ name, ok });
-  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? `, ${detail}` : ''}`);
 }
 
 const peso = (cents) =>
@@ -1753,7 +1753,7 @@ async function main() {
     `);
   const stepText = (n) => evaluate(`document.querySelector("section[data-step='${n}']")?.innerText ?? null`);
 
-  // 1 — branch step renders the live branches
+  // 1, branch step renders the live branches
   await go(`${LANDING}/book`);
   const step1 = await stepText(1);
   check(
@@ -1761,7 +1761,7 @@ async function main() {
     step1 !== null && branches.every((b) => step1.includes(b.name))
   );
 
-  // 2 — ?service= filters the branch step to the re-derived bookable set
+  // 2, ?service= filters the branch step to the re-derived bookable set
   const svcForFilter = services[0];
   const expectedBranches = branches.filter((b) =>
     svcForFilter.bookableBranchIds.includes(b.id)
@@ -1776,7 +1776,7 @@ async function main() {
     vacuous ? 'vacuous-by-seed: service bookable at every branch' : ''
   );
 
-  // 3 — unknown deep-link ids drop silently (no error card, all branches)
+  // 3, unknown deep-link ids drop silently (no error card, all branches)
   await go(`${LANDING}/book?branch=99999999-9999-4999-8999-999999999999&package=99999999-9999-4999-8999-999999999999`);
   const step1Clean = await stepText(1);
   const noCard = await evaluate(`document.querySelector('[data-rejection-card]') === null`);
@@ -1785,7 +1785,7 @@ async function main() {
     step1Clean !== null && branches.every((b) => step1Clean.includes(b.name)) && noCard
   );
 
-  // 4 — branch pick auto-advances to the offering step (packages grid live)
+  // 4, branch pick auto-advances to the offering step (packages grid live)
   await go(`${LANDING}/book`);
   await click(`section[data-step='1'] button`);
   const step2 = await stepText(2);
@@ -1794,7 +1794,7 @@ async function main() {
     step2 !== null && packages.every((p) => step2.includes(p.name))
   );
 
-  // 5 — offering step lists services bookable at the chosen branch
+  // 5, offering step lists services bookable at the chosen branch
   const branchPicked = branches[0];
   const bookableHere = services.filter((s) => s.bookableBranchIds.includes(branchPicked.id));
   check(
@@ -1803,7 +1803,7 @@ async function main() {
     `branch ${branchPicked.name}: ${bookableHere.length}/${services.length} bookable`
   );
 
-  // 6 — a package lands on the add-ons step (uniform ⇒ live add-ons list)
+  // 6, a package lands on the add-ons step (uniform ⇒ live add-ons list)
   await click(`section[data-step='2'] button`);
   const step3 = await stepText(3);
   check(
@@ -1811,7 +1811,7 @@ async function main() {
     step3 !== null && addons.every((a) => step3.includes(a.name))
   );
 
-  // 7 — a service with no applicable add-ons skips straight to date/time
+  // 7, a service with no applicable add-ons skips straight to date/time
   await go(`${LANDING}/book?service=${svcNoAddons.id}`);
   await click(`section[data-step='1'] button`);
   await click(`section[data-step='2'] button[data-offering='${svcNoAddons.id}']`);
@@ -1823,7 +1823,7 @@ async function main() {
     `service: ${svcNoAddons.name}`
   );
 
-  // 8 — Back from date/time (skip case) returns to the OFFERING step
+  // 8, Back from date/time (skip case) returns to the OFFERING step
   await click('[data-back]');
   const step2Again = await stepText(2);
   check(
@@ -1831,7 +1831,7 @@ async function main() {
     step2Again !== null
   );
 
-  // 9/10 — past pick shows the inline hint; future pick clears it
+  // 9/10, past pick shows the inline hint; future pick clears it
   await click(`section[data-step='2'] button[data-offering='${svcNoAddons.id}']`); // re-choose the no-addons service
   await setInput(`section[data-step='4'] input[type='date']`, phDate(-1));
   await click(`section[data-step='4'] button`); // first hour chip
@@ -1842,12 +1842,12 @@ async function main() {
   const hintGone = await evaluate(`document.querySelector('[data-past-hint]') === null`);
   check('book: future pick clears the hint', hintGone);
 
-  // 11 — Continue reaches the contact step
+  // 11, Continue reaches the contact step
   await click(`section[data-step='4'] > button`);
   const step5 = await stepText(5);
   check('book: date/time Continue reaches the contact step', step5 !== null);
 
-  // 12 — contact gate: confirm disabled until the three fields are set
+  // 12, contact gate: confirm disabled until the three fields are set
   const confirmSel = `section[data-step='5'] button[type='button']:last-of-type`;
   const disabledBefore = await evaluate(`document.querySelector(${q(confirmSel)})?.disabled ?? null`);
   await setInput(`section[data-step='5'] input[placeholder='Full name']`, 'Verify Bot');
@@ -1859,15 +1859,15 @@ async function main() {
     disabledBefore === true && disabledAfter === false
   );
 
-  // 13 — past-slot submit renders the typed rejection card (API 400; no row).
-  // Back to date/time (wizard state persists — the fields stay filled), set
+  // 13, past-slot submit renders the typed rejection card (API 400; no row).
+  // Back to date/time (wizard state persists, the fields stay filled), set
   // the past date, come back, confirm.
   await click('[data-back]');
   await setInput(`section[data-step='4'] input[type='date']`, phDate(-1));
   await click(`section[data-step='4'] button`);
   await click(`section[data-step='4'] > button`);
   await click(confirmSel);
-  // Dev-stack server fns take ~2-3s (wrangler + SSR round-trip) — poll for
+  // Dev-stack server fns take ~2-3s (wrangler + SSR round-trip), poll for
   // the card instead of a fixed sleep (a fixed 1.2s false-failed this check).
   let card = null;
   for (let i = 0; i < 20; i++) {
@@ -1880,7 +1880,7 @@ async function main() {
     card !== null && card.includes('already passed in the Philippines') && card.includes('API reason:')
   );
 
-  // 14 — the rail shows branch/offering/total derived from live data
+  // 14, the rail shows branch/offering/total derived from live data
   const pkg = pkgWithAddons;
   await go(`${LANDING}/book?package=${pkg.id}`);
   await click(`section[data-step='1'] button`);
@@ -1909,7 +1909,7 @@ main().catch((e) => {
 });
 ```
 
-The scenario ships exactly 14 `check(` calls — the self-review grep confirms it (14 named checks: branch step, filter, stale ids, auto-advance, services-at-branch, package add-ons, skip, back-to-offering, past hint, future clears, contact step, contact gate, rejection card, rail total).
+The scenario ships exactly 14 `check(` calls, the self-review grep confirms it (14 named checks: branch step, filter, stale ids, auto-advance, services-at-branch, package add-ons, skip, back-to-offering, past hint, future clears, contact step, contact gate, rejection card, rail total).
 
 - [ ] **Step 3: Bring up the stack and run ALL THREE scenarios**
 
@@ -1922,7 +1922,7 @@ node apps/landing/scripts/verify/content-pages.mjs    # ticket-06 regression (ty
 node apps/landing/scripts/verify/booking-wizard.mjs   # new: 14/14 checks passed, exit 0
 ```
 
-Expected: both regressions stay green; the new scenario reports `14/14 checks passed`, exit 0. (If a chip/step selector misses, fix the SELECTOR in this scenario — never the route's pinned copy.)
+Expected: both regressions stay green; the new scenario reports `14/14 checks passed`, exit 0. (If a chip/step selector misses, fix the SELECTOR in this scenario, never the route's pinned copy.)
 
 - [ ] **Step 4: Lint and commit**
 
@@ -1932,20 +1932,20 @@ git add apps/landing/scripts/verify/
 git commit -m "test(landing): booking-wizard CDP scenario + dead-socket hardening"
 ```
 
-(Body bullets: `14 read-only checks over /book (filter, skip, Back-from-date/time, past hint, typed rejection card, live rail total) — expectations re-derived from the live API; lib.mjs rejects on a dead CDP socket instead of hanging (ticket-05 follow-up).`)
+(Body bullets: `14 read-only checks over /book (filter, skip, Back-from-date/time, past hint, typed rejection card, live rail total), expectations re-derived from the live API; lib.mjs rejects on a dead CDP socket instead of hanging (ticket-05 follow-up).`)
 
 ---
 
 ### Task 6: Full gate + mutating e2e + docs + handoff
 
 **Files:**
-- Create: `apps/landing/scripts/verify/booking-e2e.mjs` (MUTATING — verify-time only)
+- Create: `apps/landing/scripts/verify/booking-e2e.mjs` (MUTATING, verify-time only)
 - Modify: `docs/plan.md` (booking-form checkbox → `- [✅]`), `docs/progress.md` (ticket-07 bullet)
 
 **Interfaces:**
 - Consumes: Tasks 1–5 complete and committed; the live stack.
 
-**Not here:** no GitHub issue edits (#45's acceptance boxes are the owner's — the mapping goes in the PR description), no PR (owner opens it), no ADR (the applicability embed applies the ticket-04 pattern one junction over — the spec amendment rides the PR description and the progress bullet; the wizard introduces no new architectural decision beyond the spec's own rulings).
+**Not here:** no GitHub issue edits (#45's acceptance boxes are the owner's, the mapping goes in the PR description), no PR (owner opens it), no ADR (the applicability embed applies the ticket-04 pattern one junction over, the spec amendment rides the PR description and the progress bullet; the wizard introduces no new architectural decision beyond the spec's own rulings).
 
 - [ ] **Step 1: Repo-wide gate**
 
@@ -1953,13 +1953,13 @@ git commit -m "test(landing): booking-wizard CDP scenario + dead-socket hardenin
 pnpm check && pnpm build
 ```
 
-Expected: green — landing vitest (47), api suites (incl. the extended studio-services suite), types tests, biome, typecheck across all workspaces, clean `vite build` (SSR bundle includes `/book`). A dirty `routeTree.gen.ts` after `pnpm build` is tool regen — it must already be committed from Task 4; if the build regenerates drift, chore-commit it BETWEEN tasks with a truthful body, never folded into a task commit.
+Expected: green, landing vitest (47), api suites (incl. the extended studio-services suite), types tests, biome, typecheck across all workspaces, clean `vite build` (SSR bundle includes `/book`). A dirty `routeTree.gen.ts` after `pnpm build` is tool regen, it must already be committed from Task 4; if the build regenerates drift, chore-commit it BETWEEN tasks with a truthful body, never folded into a task commit.
 
-- [ ] **Step 2: Run the mutating end-to-end** — create `apps/landing/scripts/verify/booking-e2e.mjs`:
+- [ ] **Step 2: Run the mutating end-to-end**, create `apps/landing/scripts/verify/booking-e2e.mjs`:
 
 ```js
 // MUTATING end-to-end (issue #45 AC 1): drives two REAL bookings through
-// /book — one package (with an add-on) and one studio service — against the
+// /book, one package (with an add-on) and one studio service, against the
 // live seeded stack, then reads each back through the public single-get and
 // asserts the server snapshot (bookedPriceCents, add-on entries, status).
 // Rows persist in the compose db by design (tiny volume; the studio
@@ -1973,7 +1973,7 @@ const API = process.env.API_VERIFY_URL ?? 'http://127.0.0.1:8787';
 const results = [];
 function check(name, ok, detail = '') {
   results.push({ name, ok });
-  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? `, ${detail}` : ''}`);
 }
 const phDate = (days) =>
   new Date(Date.now() + days * 86400_000).toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
@@ -2014,7 +2014,7 @@ async function main() {
     await setInput(`section[data-step='5'] input[placeholder='Email']`, 'e2e@example.com');
     await setInput(`section[data-step='5'] input[placeholder='Phone (+63…)']`, '+63 917 000 0000');
     await click(`section[data-step='5'] button[type='button']:last-of-type`);
-    // Dev server-fn round-trip ≈ 2.6s — poll for the redirect (check-13 precedent).
+    // Dev server-fn round-trip ≈ 2.6s, poll for the redirect (check-13 precedent).
     for (let i = 0; i < 20; i++) {
       await wait(500);
       const path = await evaluate(`location.pathname`);
@@ -2028,7 +2028,7 @@ async function main() {
     await click(`section[data-step='4'] > button`); // Continue
   }
 
-  // Booking 1 — package + first add-on
+  // Booking 1, package + first add-on
   await go(`${LANDING}/book?package=${pkg.id}&branch=${branch.id}`);
   await click(`section[data-step='1'] button`); // branch (prefilled, confirm the pick)
   await click(`section[data-step='2'] button[data-offering='${pkg.id}']`); // the preselected package card
@@ -2064,7 +2064,7 @@ async function main() {
     confRes.status === 404
   );
 
-  // Booking 2 — studio service (no applicable add-ons ⇒ skips the step)
+  // Booking 2, studio service (no applicable add-ons ⇒ skips the step)
   await go(`${LANDING}/book?service=${svc.id}&branch=${branch.id}`);
   await click(`section[data-step='1'] button`);
   await click(`section[data-step='2'] button[data-offering='${svc.id}']`);
@@ -2098,24 +2098,24 @@ main().catch((e) => {
 ```
 
 Bring the stack up (Task 5's three terminals) and run: `node apps/landing/scripts/verify/booking-e2e.mjs`
-Expected: `6/6 checks passed`, exit 0 — the confirmation-page URL itself 404s until #46 (expected; only the URL shape and the API record are asserted).
+Expected: `6/6 checks passed`, exit 0, the confirmation-page URL itself 404s until #46 (expected; only the URL shape and the API record are asserted).
 
-- [ ] **Step 3: Tick the `docs/plan.md` checkbox** — the booking-form checkbox is this ticket alone; change:
+- [ ] **Step 3: Tick the `docs/plan.md` checkbox**, the booking-form checkbox is this ticket alone; change:
 
 ```markdown
-- [ ] Booking form (prototype variant C — one question per screen, auto-advance): branch → offering (package, or a Studio Service bookable at that branch) → conditional add-ons (screen skipped when none apply, "Skip — no add-ons" otherwise) → date/time (PHT note, hour chips) → contact info (guest flow, no account; deep links `?branch=&package=&service=`)
+- [ ] Booking form (prototype variant C, one question per screen, auto-advance): branch → offering (package, or a Studio Service bookable at that branch) → conditional add-ons (screen skipped when none apply, "Skip, no add-ons" otherwise) → date/time (PHT note, hour chips) → contact info (guest flow, no account; deep links `?branch=&package=&service=`)
 ```
 
 to (✅ emoji per AGENTS.md, never plain `[x]`):
 
 ```markdown
-- [✅] Booking form (prototype variant C — one question per screen, auto-advance): branch → offering (package, or a Studio Service bookable at that branch) → conditional add-ons (screen skipped when none apply, "Skip — no add-ons" otherwise) → date/time (PHT note, hour chips) → contact info (guest flow, no account; deep links `?branch=&package=&service=`)
+- [✅] Booking form (prototype variant C, one question per screen, auto-advance): branch → offering (package, or a Studio Service bookable at that branch) → conditional add-ons (screen skipped when none apply, "Skip, no add-ons" otherwise) → date/time (PHT note, hour chips) → contact info (guest flow, no account; deep links `?branch=&package=&service=`)
 ```
 
-- [ ] **Step 4: Update `docs/progress.md`** — add one bullet to the landed-work list, directly after the ticket-06 bullet:
+- [ ] **Step 4: Update `docs/progress.md`**, add one bullet to the landed-work list, directly after the ticket-06 bullet:
 
 ```markdown
-- **M2 ticket 07 — booking wizard `/book` (#45 → .scratch/m2-booking-flow-tickets/07.md):** the guest flow landed as one route with client-side steps (prototype variant C): branch → offering (packages grid + services bookable at the branch) → conditional add-ons (matrix-gated for services, uniform for packages; `Skip — no add-ons` / `Continue · total`) → date/time (date input + placeholder hour chips 09:00–18:00 per ADR-0005, persistent PHT note, inline `data-past-hint` on a past pick — the API owns the `past_datetime` floor, the form never client-checks the clock at submit) → contact → POST → `navigate({ href: '/booking/:id' })` (route is #46; URL 404s by design until then). Deep links `?branch=&package=&service=` prefill with unknown-id dropping; `?service=` filters the branch step. Logic is a pure lib (`src/lib/booking.ts` + thin `useBookingWizard`): prefill/branch-filter/applicability/totals/step transitions/PH wall-clock math (`phDateInputMin`, `scheduledAtInstant`, `isPastPick`) and typed-rejection mapping (`reasonForApiMessage` pins the intake module's wordings — the wire carries only `{ error: message }`; card renders `REJECTION_COPY` + the raw message). API: `GET /studio-services` now embeds `applicableAddonServiceIds` (active-only junction stitch, ticket-04 pattern) — SPEC AMENDMENT, veto-flagged in the PR (the spec's API list lacked applicability; the add-ons step cannot matrix-gate without it); `service_inactive` rejection copy derived from the ratified `package_inactive` pattern (veto-flagged). Landing data layer: `getAddonServices` + `addonServiceQueries` + `createAppointment` server fns (Sentry spans); `phDateTime` promoted verbatim with pinned full-ICU outputs. Typed-Link sweep: all six `/book` plain anchors → typed `Link`s (ticket-05/06 convert-comments retired). Tests: lib seam 15 → 47 (30 booking tests incl. mocked-clock `toFake:['Date']` prior art); api studio-services suite +1 embed test (fixtures already carried the matrix rows — inactive-link filtering proven); types +3. CDP: `booking-wizard.mjs` 14 read-only checks (the submit check drives a past-date booking the API rejects — no row written); `booking-e2e.mjs` MUTATING (two real bookings, snapshot read-back) run at verification time, 6/6; `lib.mjs` rejects on dead CDP sockets (ticket-05 follow-up). Full `pnpm check` + `pnpm build` green; `docs/plan.md` booking-form checkbox ticked ✅. NOT landed: `/booking/:id` page (#46), Resend email (#47), milestone e2e-with-email verify. Deferred minors: the wizard's step-1 walk-in pill is a third badge implementation (collapses at the visual pass with ticket-06's two); matrix-filter CDP checks are vacuous-by-seed (all services bookable everywhere; equality asserted with the detail note); `rejectionFromApiClientError`'s foreign-throwable path renders `err.message` in the card's API-reason line (may leak a fetch-error string — cosmetic).
+- **M2 ticket 07, booking wizard `/book` (#45 → .scratch/m2-booking-flow-tickets/07.md):** the guest flow landed as one route with client-side steps (prototype variant C): branch → offering (packages grid + services bookable at the branch) → conditional add-ons (matrix-gated for services, uniform for packages; `Skip, no add-ons` / `Continue · total`) → date/time (date input + placeholder hour chips 09:00–18:00 per ADR-0005, persistent PHT note, inline `data-past-hint` on a past pick, the API owns the `past_datetime` floor, the form never client-checks the clock at submit) → contact → POST → `navigate({ href: '/booking/:id' })` (route is #46; URL 404s by design until then). Deep links `?branch=&package=&service=` prefill with unknown-id dropping; `?service=` filters the branch step. Logic is a pure lib (`src/lib/booking.ts` + thin `useBookingWizard`): prefill/branch-filter/applicability/totals/step transitions/PH wall-clock math (`phDateInputMin`, `scheduledAtInstant`, `isPastPick`) and typed-rejection mapping (`reasonForApiMessage` pins the intake module's wordings, the wire carries only `{ error: message }`; card renders `REJECTION_COPY` + the raw message). API: `GET /studio-services` now embeds `applicableAddonServiceIds` (active-only junction stitch, ticket-04 pattern), SPEC AMENDMENT, veto-flagged in the PR (the spec's API list lacked applicability; the add-ons step cannot matrix-gate without it); `service_inactive` rejection copy derived from the ratified `package_inactive` pattern (veto-flagged). Landing data layer: `getAddonServices` + `addonServiceQueries` + `createAppointment` server fns (Sentry spans); `phDateTime` promoted verbatim with pinned full-ICU outputs. Typed-Link sweep: all six `/book` plain anchors → typed `Link`s (ticket-05/06 convert-comments retired). Tests: lib seam 15 → 47 (30 booking tests incl. mocked-clock `toFake:['Date']` prior art); api studio-services suite +1 embed test (fixtures already carried the matrix rows, inactive-link filtering proven); types +3. CDP: `booking-wizard.mjs` 14 read-only checks (the submit check drives a past-date booking the API rejects, no row written); `booking-e2e.mjs` MUTATING (two real bookings, snapshot read-back) run at verification time, 6/6; `lib.mjs` rejects on dead CDP sockets (ticket-05 follow-up). Full `pnpm check` + `pnpm build` green; `docs/plan.md` booking-form checkbox ticked ✅. NOT landed: `/booking/:id` page (#46), Resend email (#47), milestone e2e-with-email verify. Deferred minors: the wizard's step-1 walk-in pill is a third badge implementation (collapses at the visual pass with ticket-06's two); matrix-filter CDP checks are vacuous-by-seed (all services bookable everywhere; equality asserted with the detail note); `rejectionFromApiClientError`'s foreign-throwable path renders `err.message` in the card's API-reason line (may leak a fetch-error string, cosmetic).
 ```
 
 - [ ] **Step 5: Commit the docs**
@@ -2123,7 +2123,7 @@ to (✅ emoji per AGENTS.md, never plain `[x]`):
 ```bash
 pnpm --filter @sevendays/landing exec biome check --write scripts/verify/booking-e2e.mjs
 git add apps/landing/scripts/verify/booking-e2e.mjs docs/plan.md docs/progress.md
-git commit -m "docs: M2 ticket 07 landed — booking wizard; booking-form checkbox ticked"
+git commit -m "docs: M2 ticket 07 landed, booking wizard; booking-form checkbox ticked"
 ```
 
 ---
@@ -2131,8 +2131,8 @@ git commit -m "docs: M2 ticket 07 landed — booking wizard; booking-form checkb
 ## Acceptance criteria mapping (for the PR description)
 
 - `A real booking can be made end to end from /book for both a package and a studio service` → Tasks 2–4 (route + lib + server fns) + Task 6 (`booking-e2e.mjs` 6/6: both bookings redirect and read back with correct snapshots).
-- `Deep-link params prefill and filter correctly (esp. ?service= branch filtering)` → Task 3 (`prefillFromSearch`, `branchFilterServiceId` — unit-tested incl. unknown-id dropping) + Task 5 (scenario checks 2–3 live).
-- `Add-ons step conditional-visibility, Skip affordance, and Back-from-date/time behaviour match the rulings` → Task 1 (the matrix embed) + Task 3 (`applicableAddonsFor`, `stepAfterOfferingChosen`, `stepBackFromDateTime` — unit-tested) + Task 5 (checks 6–8 live: skip case is live-real under the seed).
-- `Past slot shows the inline hint; API rejection reasons render as friendly copy cards` → Task 3 (`isPastPick`, `reasonForApiMessage`, `REJECTION_COPY` — unit-tested with the mocked clock) + Task 4 (hint markup, `RejectionCard`) + Task 5 (checks 9/10 hint, check 13 past-slot submit → typed card, no row written).
+- `Deep-link params prefill and filter correctly (esp. ?service= branch filtering)` → Task 3 (`prefillFromSearch`, `branchFilterServiceId`, unit-tested incl. unknown-id dropping) + Task 5 (scenario checks 2–3 live).
+- `Add-ons step conditional-visibility, Skip affordance, and Back-from-date/time behaviour match the rulings` → Task 1 (the matrix embed) + Task 3 (`applicableAddonsFor`, `stepAfterOfferingChosen`, `stepBackFromDateTime`, unit-tested) + Task 5 (checks 6–8 live: skip case is live-real under the seed).
+- `Past slot shows the inline hint; API rejection reasons render as friendly copy cards` → Task 3 (`isPastPick`, `reasonForApiMessage`, `REJECTION_COPY`, unit-tested with the mocked clock) + Task 4 (hint markup, `RejectionCard`) + Task 5 (checks 9/10 hint, check 13 past-slot submit → typed card, no row written).
 - `Submitting state on the confirm button; success redirects to /booking/:id` → Task 4 (`Booking…` submitting state, `canConfirm` gate, `navigate({ href })`) + Task 6 (both e2e bookings assert the `/booking/<uuid>` redirect).
 
