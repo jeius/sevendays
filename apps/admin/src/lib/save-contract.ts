@@ -67,7 +67,7 @@ export function closesOnEvent(event: SaveContractEvent): boolean {
  * Derives the delete dialog's in-body blocker lines from a guarded-delete
  * 400's details (the #213 contract: one { path, message } per blocking
  * family, e.g. ['appointments'] + 'referenced by 3 appointment(s)'). Each
- * line leads with the capitalized family: 'Appointments, referenced by 3
+ * line leads with the capitalized family: 'Appointments: referenced by 3
  * appointment(s)'. Unknown shapes answer empty, the dialog then shows only
  * the failure message.
  */
