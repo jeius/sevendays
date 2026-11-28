@@ -90,7 +90,7 @@ describe('POST /api/v1/testimonial-submissions (the public write)', () => {
     );
     expect(first.status).toBe(429);
     expect(await first.json()).toEqual({
-      error: "You're sending too fast — please wait a minute and try again.",
+      error: "You're sending too fast; please wait a minute and try again.",
     });
     // No edge header → the landing-forwarded X-Client-IP is the key; and
     // when BOTH exist the edge header wins (unspoofable, direct callers).

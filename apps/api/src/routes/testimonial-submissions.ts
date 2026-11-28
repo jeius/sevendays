@@ -30,7 +30,7 @@ const rateLimitSubmissions = async (
   const key = c.req.header('CF-Connecting-IP') ?? c.req.header('X-Client-IP') ?? 'unknown';
   const outcome = await c.env.RATE_LIMITER.limit({ key });
   if (!outcome.success) {
-    return tooManyRequests(c, "You're sending too fast — please wait a minute and try again.");
+    return tooManyRequests(c, "You're sending too fast; please wait a minute and try again.");
   }
   await next();
 };

@@ -108,7 +108,7 @@ async function main() {
       offeringName,
       branch,
       when,
-      subject: `Booking scheduled: ${offeringName} — ${when}`,
+      subject: `Booking scheduled: ${offeringName}, ${when}`,
       bookingUrl: `${LANDING_ORIGIN}/booking/${record.id}`,
     };
   }

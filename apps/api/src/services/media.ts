@@ -134,7 +134,7 @@ export async function commitUpload(
     return {
       ok: false,
       reason: 'not_found',
-      message: 'Upload not found — the PUT may have failed, expired, or been already committed.',
+      message: 'Upload not found: the PUT may have failed, expired, or been already committed.',
       details: [{ path: ['key'], message: 'no object at the staging key' }],
     };
   }
@@ -173,7 +173,7 @@ export async function commitUpload(
     return {
       ok: false,
       reason: 'not_found',
-      message: 'Upload not found — the PUT may have failed, expired, or been already committed.',
+      message: 'Upload not found: the PUT may have failed, expired, or been already committed.',
       details: [{ path: ['key'], message: 'no object at the staging key' }],
     };
   }

@@ -724,7 +724,7 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
       expect.objectContaining({
         from: EMAIL_FROM,
         to: 'ana@example.com',
-        subject: expect.stringContaining('Booking scheduled: Combined Package — '),
+        subject: expect.stringContaining('Booking scheduled: Combined Package, '),
         html: expect.any(String),
       }),
       { idempotencyKey: `booking-confirm/${created.id}` }

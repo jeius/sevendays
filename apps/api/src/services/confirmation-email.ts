@@ -84,7 +84,7 @@ export function buildConfirmationEmail(input: ConfirmationEmailInput): Confirmat
   const notesRow = input.notes === null ? '' : summaryRow('Notes', escapeHtml(input.notes));
 
   const html = `<p>Hi ${escapeHtml(input.customerName)},</p>
-<p>Your ${escapeHtml(input.offeringName)} at ${escapeHtml(input.branchName)} is scheduled for ${when} — please keep an eye on this email for any changes.</p>
+<p>Your ${escapeHtml(input.offeringName)} at ${escapeHtml(input.branchName)} is scheduled for ${when}. Please keep an eye on this email for any changes.</p>
 <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:16px 0;">
 <tbody>${summaryRow('Branch', escapeHtml(input.branchName))}${summaryRow('Booking', escapeHtml(input.offeringName))}${addonRows}${summaryRow('Schedule', when)}${notesRow}</tbody>
 </table>
@@ -95,7 +95,7 @@ export function buildConfirmationEmail(input: ConfirmationEmailInput): Confirmat
   return {
     from: EMAIL_FROM,
     to: input.customerEmail,
-    subject: `Booking scheduled: ${input.offeringName} — ${when}`,
+    subject: `Booking scheduled: ${input.offeringName}, ${when}`,
     html,
   };
 }

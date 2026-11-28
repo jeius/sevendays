@@ -40,7 +40,7 @@ describe('buildConfirmationEmail — identity', () => {
 
   it('subject is exact: scheduled-never-confirmed wording with the PHT pin', () => {
     expect(buildConfirmationEmail(base()).subject).toBe(
-      'Booking scheduled: Combined Package — Dec 25, 2026, 9:30 AM (PHT)'
+      'Booking scheduled: Combined Package, Dec 25, 2026, 9:30 AM (PHT)'
     );
   });
 });
@@ -50,7 +50,7 @@ describe('buildConfirmationEmail — body copy', () => {
     const html = buildConfirmationEmail(base()).html;
     expect(html).toContain('<p>Hi Juana Dela Cruz,</p>');
     expect(html).toContain(
-      'Your Combined Package at Calamba Branch is scheduled for Dec 25, 2026, 9:30 AM (PHT) — please keep an eye on this email for any changes.'
+      'Your Combined Package at Calamba Branch is scheduled for Dec 25, 2026, 9:30 AM (PHT). Please keep an eye on this email for any changes.'
     );
   });
 

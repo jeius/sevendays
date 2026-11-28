@@ -553,7 +553,7 @@ describe('the package cover lifecycle (commit-verified through ticket 02)', () =
       details: { path: string[]; message: string }[];
     };
     expect(body.error).toBe(
-      'Upload not found — the PUT may have failed, expired, or been already committed.'
+      'Upload not found: the PUT may have failed, expired, or been already committed.'
     );
     expect(body.details).toEqual([
       { path: ['coverImageKey'], message: 'no object at the staging key' },
