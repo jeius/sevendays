@@ -43,7 +43,7 @@ function BranchesPage() {
           {settings.branchesTitle}
         </h1>
         <p className='text-muted-foreground mt-6'>
-          Our branches are being set up; check back soon.
+          Our branches are being set up, so check back soon.
         </p>
         <Link
           to='/'

@@ -50,7 +50,7 @@ function PackagesPage() {
           {settings.packagesTitle}
         </h1>
         <p className='text-muted-foreground mt-6'>
-          No packages to show right now; check back soon.
+          No packages to show right now, so check back soon.
         </p>
         <Link
           to='/'

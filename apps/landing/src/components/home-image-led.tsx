@@ -375,7 +375,7 @@ export function HomeImageLed({
           ) : (
             // The ruled empty line, real rows arrive with the CMS.
             <p className='text-muted-foreground mt-6'>
-              Client words are on their way; check back soon.
+              Client words are on their way! Check back soon.
             </p>
           )}
         </div>

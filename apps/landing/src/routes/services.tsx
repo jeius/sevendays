@@ -71,7 +71,7 @@ function ServicesPage() {
               Need a service at one of our branches?
             </h2>
             <p className='mt-1 text-brand-700 text-sm dark:text-brand-400'>
-              Call or visit a branch; we will confirm availability.
+              Call or visit a branch, and we will confirm availability.
             </p>
           </div>
           <Link

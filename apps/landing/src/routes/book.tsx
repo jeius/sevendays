@@ -258,7 +258,7 @@ function BookPage() {
               </p>
               {wizard.isPast && (
                 <p data-past-hint className='text-destructive mt-2 text-sm'>
-                  That time has already passed; pick a later slot.
+                  That time has already passed, so pick a later slot.
                 </p>
               )}
               {/* DIRECT child of the section, the scripts click

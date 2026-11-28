@@ -205,7 +205,8 @@ async function main() {
   );
   check(
     '/packages: empty-state line ⇔ zero active packages',
-    listText.includes('No packages to show right now; check back soon.') === (packages.length === 0)
+    listText.includes('No packages to show right now, so check back soon.') ===
+      (packages.length === 0)
   );
 
   // /packages/:slug: by-slug detail + deep link

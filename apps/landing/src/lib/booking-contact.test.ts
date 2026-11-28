@@ -40,7 +40,7 @@ describe('contactSchema (the step-5 gate)', () => {
   it('carries one message per invalid contact field, in the pinned wording', () => {
     expect(contactFieldErrors({ name: '', email: '', phone: '', notes: '' })).toEqual({
       name: 'Please enter your full name.',
-      email: 'Please enter your email; your confirmation goes there.',
+      email: 'Please enter your email, and your confirmation goes there.',
       phone: 'Please enter a phone number.',
     });
   });
