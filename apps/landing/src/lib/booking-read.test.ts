@@ -167,10 +167,10 @@ describe('branchNameFor', () => {
     expect(branchNameFor(record(), [B1, B2])).toBe('Branch One');
   });
 
-  it("falls back to '—' when the branch is unresolvable", () => {
+  it("falls back to '-' when the branch is unresolvable", () => {
     expect(
       branchNameFor(record({ branchId: '99999999-9999-4999-8999-999999999999' }), [B1, B2])
-    ).toBe('—');
+    ).toBe('-');
   });
 });
 
@@ -188,8 +188,8 @@ describe('offeringNameFor', () => {
     ).toBe('Portraits & ID Photo');
   });
 
-  it("falls back to '—' when the offering has left the active-only lists", () => {
-    expect(offeringNameFor(record(), { packages: [], services: [] })).toBe('—');
+  it("falls back to '-' when the offering has left the active-only lists", () => {
+    expect(offeringNameFor(record(), { packages: [], services: [] })).toBe('-');
   });
 });
 

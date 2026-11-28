@@ -27,9 +27,9 @@ export function confirmationTotalCents(record: AppointmentWithAddons): number | 
   ); // guarded above
 }
 
-/** Branch display name joined from the branches read; '—' when unresolvable. */
+/** Branch display name joined from the branches read; '-' when unresolvable. */
 export function branchNameFor(record: AppointmentWithAddons, branches: BranchRead[]): string {
-  return branches.find((b) => b.id === record.branchId)?.name ?? '—';
+  return branches.find((b) => b.id === record.branchId)?.name ?? '-';
 }
 
 export interface ReadCatalog {
@@ -38,17 +38,17 @@ export interface ReadCatalog {
 }
 
 /**
- * Offering display name joined from the sibling reads; '—' when the
- * offering is unresolvable (e.g. a package deactivated after booking —
- * the lists are active-only). Exactly-one is a table CHECK, so one of the
- * two refs is always set.
+ * Offering display name joined from the sibling reads; '-' when the
+ * offering is unresolvable (e.g. a package deactivated after booking,
+ * because the lists are active-only). Exactly-one is a table CHECK, so one
+ * of the two refs is always set.
  */
 export function offeringNameFor(record: AppointmentWithAddons, catalog: ReadCatalog): string {
   if (record.servicePackageId) {
-    return catalog.packages.find((p) => p.id === record.servicePackageId)?.name ?? '—';
+    return catalog.packages.find((p) => p.id === record.servicePackageId)?.name ?? '-';
   }
   if (record.studioServiceId) {
-    return catalog.services.find((s) => s.id === record.studioServiceId)?.name ?? '—';
+    return catalog.services.find((s) => s.id === record.studioServiceId)?.name ?? '-';
   }
-  return '—';
+  return '-';
 }

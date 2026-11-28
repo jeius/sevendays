@@ -184,7 +184,7 @@ export type RejectionReason =
 
 export const REJECTION_COPY: Record<RejectionReason, string> = {
   past_datetime:
-    'That date and time has already passed in the Philippines (PHT). Please pick a later slot — all times shown are Philippine time.',
+    'That date and time has already passed in the Philippines (PHT). Please pick a later slot; all times shown are Philippine time.',
   package_inactive: "That package isn't available right now. Please pick another one.",
   // Derived from the ratified package_inactive pattern (veto-flagged).
   service_inactive: "That service isn't available right now. Please pick another one.",
@@ -249,7 +249,7 @@ export function buildCreatePayload(details: BookingDetails): CreateAppointmentAr
 // ---------------------------------------------------------------------------
 export const contactSchema = z.object({
   name: z.string().trim().min(1, 'Please enter your full name.'),
-  email: z.string().trim().min(1, 'Please enter your email — your confirmation goes there.'),
+  email: z.string().trim().min(1, 'Please enter your email; your confirmation goes there.'),
   phone: z.string().trim().min(1, 'Please enter a phone number.'),
   notes: z.string(),
 });
@@ -323,10 +323,10 @@ export function useBookingWizard(
   );
   const offeringName = offering
     ? offering.kind === 'package'
-      ? (catalog.packages.find((p) => p.id === offering.id)?.name ?? '—')
-      : (catalog.services.find((s) => s.id === offering.id)?.name ?? '—')
-    : '—';
-  const branchName = catalog.branches.find((b) => b.id === branchId)?.name ?? '—';
+      ? (catalog.packages.find((p) => p.id === offering.id)?.name ?? '-')
+      : (catalog.services.find((s) => s.id === offering.id)?.name ?? '-')
+    : '-';
+  const branchName = catalog.branches.find((b) => b.id === branchId)?.name ?? '-';
 
   /** A branch change that orphaned a service offering clears the offering. */
   function setBranch(id: string | null) {

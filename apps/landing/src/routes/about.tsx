@@ -162,7 +162,7 @@ function AboutPage() {
               Shot with us recently?
             </h3>
             <p className='mt-1 text-muted-foreground text-sm'>
-              Share a few words about your session — we'd love to hear it.
+              Share a few words about your session; we'd love to hear it.
             </p>
           </div>
           <Link

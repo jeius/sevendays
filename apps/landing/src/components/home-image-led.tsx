@@ -369,13 +369,13 @@ export function HomeImageLed({
                 to='/about'
                 className='text-brand-700 hover:text-brand-800 mt-6 inline-block text-sm font-medium underline underline-offset-4 dark:text-brand-300 dark:hover:text-brand-200'
               >
-                More kind words — and share your own
+                More kind words, and share your own
               </Link>
             </>
           ) : (
             // The ruled empty line — real rows arrive with the CMS.
             <p className='text-muted-foreground mt-6'>
-              Client words are on their way — check back soon.
+              Client words are on their way; check back soon.
             </p>
           )}
         </div>

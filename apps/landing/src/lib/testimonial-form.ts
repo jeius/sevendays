@@ -32,12 +32,12 @@ export const FORM_BOUNDS = {
 
 // TODO(owner-copy): the two min lines — pinned in the #216 plan, ratify
 // in-round at the next owner touch (the house's draft-copy convention).
-export const QUOTE_TOO_SHORT_LINE = 'Tell us a little more — at least 20 characters.';
+export const QUOTE_TOO_SHORT_LINE = 'Tell us a little more: at least 20 characters.';
 export const PERSON_TOO_SHORT_LINE = 'Your name needs at least 2 characters.';
 
 // The owner-ratified catch-all (2026-10-14): bounds validate inline, so
 // this line is the rare network/API-failure state.
-export const GENERIC_SEND_FAILURE_LINE = "Your story didn't send — please try again.";
+export const GENERIC_SEND_FAILURE_LINE = "Your story didn't send; please try again.";
 
 export type TestimonialFormErrors = { quote?: string; person?: string };
 

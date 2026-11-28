@@ -53,7 +53,7 @@ const QUESTIONS = [
   'What are you booking?',
   'Any add-ons? (optional)',
   'When? (Philippine time)',
-  'Last — your details',
+  'Last: your details',
 ];
 
 function BookPage() {
@@ -169,7 +169,7 @@ function BookPage() {
                 </p>
                 {!wizard.branchId ? (
                   <p className='text-muted-foreground mt-2 text-sm'>
-                    Choose a branch first — services are bookable per branch.
+                    Choose a branch first: services are bookable per branch.
                   </p>
                 ) : (
                   <div className='mt-2 grid gap-3 sm:grid-cols-2'>
@@ -238,7 +238,7 @@ function BookPage() {
                   onClick={wizard.goNext}
                   className='text-muted-foreground mt-4 text-sm underline'
                 >
-                  Skip — no add-ons
+                  Skip (no add-ons)
                 </button>
               )}
             </section>
@@ -258,7 +258,7 @@ function BookPage() {
               </p>
               {wizard.isPast && (
                 <p data-past-hint className='text-destructive mt-2 text-sm'>
-                  That time has already passed — pick a later slot.
+                  That time has already passed; pick a later slot.
                 </p>
               )}
               {/* DIRECT child of the section — the scripts click
@@ -345,7 +345,7 @@ function BookPage() {
                 <Label htmlFor='contact-notes'>Notes (optional)</Label>
                 <Textarea
                   id='contact-notes'
-                  placeholder='Notes (optional — tell the studio anything useful)'
+                  placeholder='Notes (optional: tell the studio anything useful)'
                   value={wizard.notes}
                   onChange={(e) => wizard.setNotes(e.target.value)}
                 />

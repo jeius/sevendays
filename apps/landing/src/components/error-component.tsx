@@ -19,7 +19,7 @@ export function ErrorComponent({ error }: { error: Error }) {
           Something went wrong.
         </h1>
         <p className='max-w-xl text-brand-200'>
-          An unexpected error interrupted the page. Try again — or reach the studio directly and
+          An unexpected error interrupted the page. Try again, or reach the studio directly and
           we'll take it from there.
         </p>
         <div className='flex flex-wrap gap-3'>

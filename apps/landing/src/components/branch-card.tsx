@@ -150,8 +150,8 @@ function WalkInIndicator({ acceptsWalkIns }: { acceptsWalkIns: boolean }) {
         <TooltipContent className='max-w-56'>
           <p>
             {acceptsWalkIns
-              ? 'Walk-ins welcome — come by anytime.'
-              : 'By appointment — call ahead or book online.'}
+              ? 'Walk-ins welcome: come by anytime.'
+              : 'By appointment: call ahead or book online.'}
           </p>
         </TooltipContent>
       </Tooltip>
