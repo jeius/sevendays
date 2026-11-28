@@ -4,9 +4,9 @@ import { labeledPrice, peso, phDateTime } from '../../lib/format';
 
 // The /booking/:id snapshot read-back (#58: extracted from the confirmation
 // page). Every literal is owner-pinned from the M2 prototype and asserted by
-// the e2e — copy is frozen. The card renders record snapshot values only;
+// the e2e, copy is frozen. The card renders record snapshot values only;
 // names join at the route (the snapshot rule is enforced by the lib
-// signatures — prices never come from the catalog).
+// signatures, prices never come from the catalog).
 export function ConfirmationCard({
   record,
   branchName,

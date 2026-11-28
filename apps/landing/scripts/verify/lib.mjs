@@ -1,6 +1,6 @@
 // Verification driver for the landing pages' scripted CDP checks (issue #43;
 // prior art: the prototype's prototype-verify scripts). Raw CDP over Node's
-// built-in WebSocket — no browser-automation dependency. Committed by owner
+// built-in WebSocket, no browser-automation dependency. Committed by owner
 // ruling (2026-09-08): tickets 06–10 extend this harness. Needs Chrome/
 // Chromium on --remote-debugging-port=9222.
 const CDP_HTTP = process.env.CDP_HTTP ?? 'http://127.0.0.1:9222';
@@ -26,7 +26,7 @@ export async function connect() {
   let id = 0;
   const pending = new Map();
   // A dead socket must fail LOUD (#45 hardens the harness, ticket-05
-  // follow-up): reject pending sends and refuse new ones — never hang,
+  // follow-up): reject pending sends and refuse new ones, never hang,
   // never resolve-with-nothing (which would false-PASS a check).
   ws.onclose = () => {
     for (const entry of pending.values()) entry.rej(new Error('CDP socket closed mid-call'));
@@ -69,7 +69,7 @@ export async function connect() {
   }
   const text = () => evaluate('document.body.innerText');
   // The /book deep-link seam (#254): a link's deep-link target is its
-  // PARSED query param, never an exact href string — exact matching
+  // PARSED query param, never an exact href string, exact matching
   // couples the check to the router's search serialization (environment-
   // sensitive on the deployed teaser). Pathname-filtered so /booking/<id>
   // links never qualify; only links carrying the param are collected.

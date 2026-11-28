@@ -8,7 +8,7 @@ export function getApiUrl(): string {
   const url = process.env.API_URL;
   if (typeof url !== 'string' || url.trim() === '') {
     throw new Error(
-      'API_URL is not set — the admin server cannot call the API. Set it in apps/admin/.env.local (dev) or Workers vars (prod). No fallback by design.'
+      'API_URL is not set: the admin server cannot call the API. Set it in apps/admin/.env.local (dev) or Workers vars (prod). No fallback by design.'
     );
   }
   return url;
@@ -18,12 +18,12 @@ export function getApiUrl(): string {
 // over *.workers.dev (error 1042), so in PRODUCTION builds the API fetch
 // routes through the `API` service binding instead of the public URL. The
 // gate is import.meta.env.DEV: vite dev also runs workerd (the plugin wires
-// the binding there, but its target is not in the dev session — an unresolved
+// the binding there, but its target is not in the dev session, an unresolved
 // binding 503s every data route), so dev always takes the API_URL network
 // path; vitest (plain Node) never resolves `cloudflare:workers`. The
 // specifier is built at runtime so bundlers never try to resolve it
 // statically, and the binding's fetch rides the client's custom-fetch seam
-// (CreateApiClientOptions.fetch — the toLoopbackFetch precedent).
+// (CreateApiClientOptions.fetch, the toLoopbackFetch precedent).
 let serviceBindingFetch: typeof fetch | undefined;
 if (!import.meta.env?.DEV) {
   try {
@@ -33,7 +33,7 @@ if (!import.meta.env?.DEV) {
     const binding = cf.env.API as { fetch: typeof fetch } | undefined;
     if (binding) serviceBindingFetch = binding.fetch.bind(binding);
   } catch {
-    // Not on Workers — keep the API_URL network path.
+    // Not on Workers, keep the API_URL network path.
   }
 }
 
@@ -46,7 +46,7 @@ export function getApiClient() {
 // and forward it as Authorization: Bearer over the same transport every
 // other admin→api call rides (the service-binding fetch in production, the
 // API_URL network path in dev). The browser never holds the raw token, and
-// no cookie header crosses apps — only the bearer credential does. The
+// no cookie header crosses apps, only the bearer credential does. The
 // cookie value is forwarded VERBATIM (<token>.<signature>, possibly
 // percent-encoded): the API's bearer plugin decodes and verifies the
 // signature.
@@ -64,14 +64,14 @@ function extractSessionToken(cookieHeader: string | null): string {
       const name = part.slice(0, eq).trim();
       // Suffix-match, not equality: dev `better-auth.session_token`,
       // production `__Secure-better-auth.session_token` (session_data is a
-      // different cookie — excluded by the exact suffix).
+      // different cookie, excluded by the exact suffix).
       if (name.endsWith(SESSION_COOKIE_SUFFIX)) {
         return part.slice(eq + 1).trim();
       }
     }
   }
   throw new SessionMissingError(
-    'No session cookie in the incoming request — the session-scoped API client cannot authenticate. The caller must run inside a signed-in request (the _shell gate guarantees it): pass getRequestHeaders().get("cookie"). No fallback by design.'
+    'No session cookie in the incoming request: the session-scoped API client cannot authenticate. The caller must run inside a signed-in request (the _shell gate guarantees it): pass getRequestHeaders().get("cookie"). No fallback by design.'
   );
 }
 
@@ -88,7 +88,7 @@ export function getSessionScopedApiClient(cookieHeader: string | null): ApiClien
 
 // The internal-send transport (M7 #221, ADR-0021): Task 1's
 // /internal/reset-email endpoint is Worker-to-Worker machinery outside the
-// /api/v1 contract, so it does NOT ride @sevendays/api-client — it rides
+// /api/v1 contract, so it does NOT ride @sevendays/api-client, it rides
 // the same transport rule as every other admin→api call (the service
 // binding in production, the API_URL network path in dev/vitest) plus the
 // INTERNAL_SEND_TOKEN shared secret (a Worker secret on the admin too;

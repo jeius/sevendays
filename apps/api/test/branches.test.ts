@@ -17,7 +17,7 @@ const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
 
 const { sendMock } = vi.hoisted(() => ({ sendMock: vi.fn() }));
 vi.mock('resend', () => ({
-  // `new Resend(...)` at the call site — vitest 4 rejects `new` on a vi.fn
+  // `new Resend(...)` at the call site, vitest 4 rejects `new` on a vi.fn
   // whose implementation is an arrow; the named `function` impl returning
   // the mock instance is the constructor-shaped equivalent. (Named, so the
   // style fixer doesn't rewrite it back to an arrow.)
@@ -27,7 +27,7 @@ vi.mock('resend', () => ({
 }));
 
 // Hono throws on c.executionCtx unless the request carries an execution
-// context (app.request's 4th argument) — the fake records waitUntil
+// context (app.request's 4th argument), the fake records waitUntil
 // promises so a test can await the fire-and-forget send.
 function fakeExecCtx() {
   const ctx = {
@@ -58,7 +58,7 @@ describe('GET /api/v1/branches', () => {
   });
 
   it('resolves coverImageUrl for a covered branch; bare rows carry null; the raw key never appears (M7 #214)', async () => {
-    // Direct db-state seeding (the #212 precedent) — the guard reads rows,
+    // Direct db-state seeding (the #212 precedent), the guard reads rows,
     // not API history. A FINAL key shape, as the commit pipeline stores it.
     await db
       .update(branches)
@@ -79,7 +79,7 @@ describe('GET /api/v1/branches', () => {
 
 describe('the branches read under the CMS (#138)', () => {
   it('excludes deactivated rows while active rows keep their full shape', async () => {
-    // Deactivate through the real CMS path — the isActive flip via PUT.
+    // Deactivate through the real CMS path, the isActive flip via PUT.
     const { token } = await signUpSession(url, 'branches-flip@sevendays.test');
     const put = await app.request(
       `/api/v1/admin/branches/${ids.branchB}`,
@@ -108,14 +108,14 @@ describe('the branches read under the CMS (#138)', () => {
     }[];
     expect(body).toHaveLength(1);
     expect(body[0]?.id).toBe(ids.branchA);
-    // The walk-in badge / phone data survive for active branches — the
+    // The walk-in badge / phone data survive for active branches, the
     // change is the filter, nothing else.
     expect(body[0]?.phone).toBe('+63 900 000 001');
     expect(body[0]?.acceptsWalkIns).toBe(false);
   });
 
   it('gated appointment reads still resolve appointments booked at a deactivated branch', async () => {
-    // Book at branchA (package offering + one add-on — the add-on name
+    // Book at branchA (package offering + one add-on, the add-on name
     // join is the read's only name resolution, itself filterless).
     const ctx = fakeExecCtx();
     const created = await app.request(
@@ -165,7 +165,7 @@ describe('the branches read under the CMS (#138)', () => {
     const publicBody = (await publicBranches.json()) as { id: string }[];
     expect(publicBody.some((b) => b.id === ids.branchA)).toBe(false);
 
-    // …while the gated appointment reads keep resolving the record — the
+    // …while the gated appointment reads keep resolving the record, the
     // history is untouched by any deactivation (spec: deactivated branch
     // names keep resolving in gated appointment reads).
     const list = await app.request(

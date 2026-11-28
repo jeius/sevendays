@@ -14,12 +14,12 @@ import type { ApiEnv } from '../services/db.js';
 import { badRequest, notFound } from '../services/errors.js';
 import { validatedJson, validatedParam } from '../services/validator.js';
 
-// Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts. Mounted
+// Chained registration (ADR-0006 Hono RPC), see routes/branches.ts. Mounted
 // behind routes/admin.ts's ONE requireSession: the uniform 401 envelope
 // precedes every validator here (per-family proof: test/admin-entities.test.ts).
-// validatedParam runs before validatedJson — path before body; both answer
+// validatedParam runs before validatedJson, path before body; both answer
 // the uniform { error, details } 400. One admin_mutation event per committed
-// write (M6 #183) — emitted only after result.ok, so 400/401 paths stay
+// write (M6 #183), emitted only after result.ok, so 400/401 paths stay
 // silent.
 export const adminBranches = new Hono<ApiEnv>()
   .get('/', async (c) => {

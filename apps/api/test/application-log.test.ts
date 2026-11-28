@@ -12,7 +12,7 @@ const db = createTestDb(url);
 const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
 
 // The Application Log seam: the sink writes one JSON string per event to
-// console.log (Task 1's logger.ts) — capture exactly that, parse it, and
+// console.log (Task 1's logger.ts), capture exactly that, parse it, and
 // assert against what `wrangler tail` would show.
 const captureLines = () => {
   const lines: string[] = [];
@@ -79,7 +79,7 @@ describe('the access line + requestId contract (M6 #183)', () => {
     const res = await app.request('/health', undefined, { DATABASE_URL: '' });
     expect(res.status).toBe(200);
     expect(res.headers.get('x-request-id')).toMatch(/^[0-9a-f-]{36}$/);
-    expect(parse(lines)).toEqual([]); // nothing at all — /health is silent
+    expect(parse(lines)).toEqual([]); // nothing at all, /health is silent
   });
 
   it('an unmounted path → an access line with status 404 and the raw path as route', async () => {
@@ -95,7 +95,7 @@ describe('the access line + requestId contract (M6 #183)', () => {
   it('a thrown handler error → an access line at 500 PLUS one error line, both keyed to the response header; the error class carries name/message/stack', async () => {
     const lines = captureLines();
     // Refused port: the per-request client builds fine, the handler's query
-    // throws (the error-seam precedent — postgres.js fails in ~4-10ms).
+    // throws (the error-seam precedent, postgres.js fails in ~4-10ms).
     const res = await app.request('/api/v1/branches', undefined, {
       ...testEnv(url),
       DATABASE_URL: 'postgres://postgres:postgres@127.0.0.1:1/sevendays_test',
@@ -120,7 +120,7 @@ describe('the access line + requestId contract (M6 #183)', () => {
       'stack',
       'time',
     ]);
-    // drizzle-orm 0.45.2 wraps the driver failure as DrizzleQueryError —
+    // drizzle-orm 0.45.2 wraps the driver failure as DrizzleQueryError:
     // message names the failing query, the raw cause rides .cause. The
     // wrapper's constructor never sets .name, so the emitted line's name
     // reads 'Error'; assert the wrapper-identifying message instead.
@@ -144,7 +144,7 @@ describe('the access line + requestId contract (M6 #183)', () => {
     expect(line.actorId).toBe(userId);
   });
 
-  it('no ACAO header anywhere — the wildcard CORS middleware is gone (the closed surface, #176)', async () => {
+  it('no ACAO header anywhere, the wildcard CORS middleware is gone (the closed surface, #176)', async () => {
     const ok = await app.request('/api/v1/branches', undefined, testEnv(url));
     const missing = await app.request('/nope', undefined, testEnv(url));
     for (const res of [ok, missing]) {

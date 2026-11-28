@@ -4,13 +4,13 @@ import { cn } from 'cn';
 // photo (object-cover, alt = the package name, lazy); null → today's
 // initials placeholder VERBATIM, so the CDP assertion "placeholder ⇔ no
 // cover" stays meaningful. `className` re-boxes both branches (cn is a
-// tailwind-merge engine: the surface's classes override the defaults) —
+// tailwind-merge engine: the surface's classes override the defaults):
 // list/detail keep the h-40 card box, home-featured goes edge-to-edge.
 // The placeholder gradient runs brand ink → brand primary (petrol): the
 // M7 post-flight #241 re-grade, owner-ruled 2026-11-08 (it replaced #97's
 // muted 600→800→deep ramp). Both stops are fixed brand points, identical
 // in both themes; the lightest stop (primary) is the incumbent's, so the
-// white text keeps its AA (white on petrol 5.65:1 — tokens.css).
+// white text keeps its AA (white on petrol 5.65:1, tokens.css).
 export function CoverPanel({
   name,
   coverImageUrl,

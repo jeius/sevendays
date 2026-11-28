@@ -14,11 +14,11 @@ import {
 import { validatedJson, validatedParam } from '../services/validator.js';
 
 // The moderation endpoints (M7 #216) behind the admin root's ONE
-// requireSession (401 structurally precedes every validator here) —
+// requireSession (401 structurally precedes every validator here);
 // action endpoints per the media presign/commit precedent: list;
 // accept-with-edit (optionally edited {quote, person}; the Testimonial
 // appends at the end of render order); reject (retains the row); delete
-// regardless of status. No notifications — the queue IS the notification
+// regardless of status. No notifications, the queue IS the notification
 // (the Submissions tab renders it at M7 #218). The reject route carries
 // no body validator: there is nothing to validate.
 const idParam = validatedParam(z.object({ id: z.uuid() }));

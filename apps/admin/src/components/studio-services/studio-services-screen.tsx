@@ -1,5 +1,5 @@
 // The studio-services screen (M5 #140): the consolidated-format table over
-// live StudioServiceWithBranches rows — ruled by #131 and ported
+// live StudioServiceWithBranches rows, ruled by #131 and ported
 // element-for-element from the composition of record (branch
 // prototype/131-admin-cms-compositions, screens/studio-services.tsx,
 // rounds 1–9), with the #131 bulk column + bar riding Task 4's pieces and
@@ -7,17 +7,17 @@
 // (dedicated column on desktop, reveal-only on mobile). The prototype's
 // local fixture state is replaced by the task seams:
 // `adminStudioServiceQueries.all()` + `adminBranchQueries.all()` (both
-// lists load — the badge join AND the editor's matrix vocabulary), Task 3's
+// lists load, the badge join AND the editor's matrix vocabulary), Task 3's
 // state seam (studioServiceStateFromRead / newStudioServiceState /
 // buildStudioServiceCreatePayload / buildStudioServiceUpdatePayload /
 // buildStudioServiceFlipPayload /
 // validateStudioServiceState) driving the create/edit Sheet editor, and
 // Task 2's result-valued save fns behind the create-then-matrix save
-// (AQ-4). The matrix renders as the ruled V3 selectable name-only cards —
+// (AQ-4). The matrix renders as the ruled V3 selectable name-only cards:
 // no checkbox inside; a deactivated branch dims to opacity-60 and stays
 // selectable (AQ-6: the admin matrix is staff-visible truth; the booking
 // form filters). Not here: the add-on applies-to matrix (edited from the
-// ADD-ON side — AQ-1), any add-on CRUD, hours/capacity.
+// ADD-ON side, AQ-1), any add-on CRUD, hours/capacity.
 import type {
   MediaPresignRequest,
   MediaPresignResponse,
@@ -96,7 +96,7 @@ type SaveStudioServiceInput = EditingTarget & { state: StudioServiceEditorState 
 
 /**
  * One editor save's outcome: the mutationFn runs the whole entity+matrix
- * chain, so `matrix-failed` has to carry the created row — AQ-4's
+ * chain, so `matrix-failed` has to carry the created row, AQ-4's
  * promote-to-edit anchor on the retry.
  */
 type SaveStudioServiceOutcome =
@@ -126,7 +126,7 @@ interface FlipInput {
   isActive: boolean;
 }
 
-/** The pending posture's fixed four rows — stable keys, never reordered. */
+/** The pending posture's fixed four rows, stable keys, never reordered. */
 const PENDING_ROW_KEYS = ['row-1', 'row-2', 'row-3', 'row-4'];
 
 /** Order-insensitive set equality over branch id lists (the edit save's matrix-diff gate). */
@@ -152,12 +152,12 @@ export function StudioServicesScreen() {
     void branchesQuery.refetch();
   };
   const queryClient = useQueryClient();
-  // T3: controlled disclosure — one expanded row at a time (id or null).
+  // T3: controlled disclosure, one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
   // The toolbar segment (#218): default All per visit, never persisted; the
-  // filtered view is render-time only — the caches and mutations ride the
+  // filtered view is render-time only, the caches and mutations ride the
   // full list.
   const [segment, setSegment] = useState<StatusSegment>('all');
   // The delete dialog's target + its last blockers (empty until a blocked
@@ -165,11 +165,11 @@ export function StudioServicesScreen() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The #131 bulk ruling: selection rides the loaded row ids; the bar mounts
-  // only while a selection exists. Sets REPLACE — never mutate in place.
+  // only while a selection exists. Sets REPLACE, never mutate in place.
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
   // The editor's create/edit switch and its open flag are separate: the
-  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // async Save contract (#218) closes the shell ONLY on a resolved-true;
   // a held save keeps the sheet open over the intact parent-held state,
   // INCLUDING AQ-4's create→edit promotion after a matrix failure;
   // onOpenChange(false) clears both.
@@ -177,7 +177,7 @@ export function StudioServicesScreen() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorState, setEditorState] = useState<StudioServiceEditorState>(newStudioServiceState());
   const [fieldErrors, setFieldErrors] = useState<LightFieldErrors>({});
-  // The cover loop (#332 — the branch editor's M7 #214 loop, ported):
+  // The cover loop (#332, the branch editor's M7 #214 loop, ported):
   // presign → XHR PUT → the staging key rides the NEXT save. The preview
   // object URL is revoked on replace/remove/unmount (the loop's contract).
   const [coverStatus, setCoverStatus] = useState<CoverUploadStatus>({ phase: 'idle' });
@@ -205,7 +205,7 @@ export function StudioServicesScreen() {
     setCoverStatus(next);
     if (next.phase === 'bound') {
       // Re-upload replaces the key (and revokes the replaced preview URL);
-      // binding happens only through the save — the preview reflects
+      // binding happens only through the save, the preview reflects
       // state, never commits.
       if (previewUrlRef.current) {
         URL.revokeObjectURL(previewUrlRef.current);
@@ -219,7 +219,7 @@ export function StudioServicesScreen() {
     try {
       await uploadCover(file, presign, handleCoverStatus, 'service-cover');
     } catch {
-      // XHR error/abort already emitted `failed` through onStatus — the
+      // XHR error/abort already emitted `failed` through onStatus, the
       // machine never stalls; nothing further to surface here.
     }
   }
@@ -250,12 +250,12 @@ export function StudioServicesScreen() {
   const deleteRow = services?.find((row) => row.id === deleteId);
 
   // Single-row flips: optimistic on the list cache (cancel + snapshot + patch
-  // ONLY isActive; rollback + toast on error; invalidate either way) — the
+  // ONLY isActive; rollback + toast on error; invalidate either way), the
   // posture 139's packages table pinned. The flip payload carries NO matrix
-  // ids — relations are untouched by a flip.
+  // ids, relations are untouched by a flip.
   const flip = useMutation({
     // Result-valued fn (Task 2's seam): ok:false converts to a throw so the
-    // optimistic handlers below own rollback + the error toast — a flip has
+    // optimistic handlers below own rollback + the error toast, a flip has
     // no inline field slot in the table, so a conflict surfaces as its
     // message.
     mutationFn: async ({ row, isActive }: FlipInput) => {
@@ -294,17 +294,17 @@ export function StudioServicesScreen() {
 
   /**
    * The editor save: the entity full-object PUT first, then the branch
-   * matrix full-replace PUT — the create-then-matrix save (AQ-4). Create
+   * matrix full-replace PUT, the create-then-matrix save (AQ-4). Create
    * mode POSTs the entity and anchors the matrix PUT at the RETURNED row's
    * id (skipped entirely when the selection is empty). Edit mode PUTs the
    * entity and runs the matrix only when the selection's SET differs from
-   * the snapshot's `bookableBranchIds` (order-insensitive — junction order
+   * the snapshot's `bookableBranchIds` (order-insensitive, junction order
    * is the fact, membership is what round-trips). A matrix `!ok` does NOT
    * undo the entity write: the async Save handler keeps the editor open
-   * with the selections intact (AQ-5 — the retry's Save re-runs both PUTs;
+   * with the selections intact (AQ-5, the retry's Save re-runs both PUTs;
    * the full-object PUT is idempotent) and switches a create-mode editor
    * over to edit-over-the-created-row, so the next Save re-runs as an
-   * UPDATE + matrix — never a duplicate create. That mode switch is the
+   * UPDATE + matrix, never a duplicate create. That mode switch is the
    * `matrix-failed` branch's promotion below.
    */
   const saveStudioService = useMutation({
@@ -368,7 +368,7 @@ export function StudioServicesScreen() {
       }
       if (outcome.kind === 'matrix-failed') {
         // The entity write landed; the branch matrix PUT failed. The sheet
-        // HOLDS with the selections intact — the retry re-runs both PUTs.
+        // HOLDS with the selections intact, the retry re-runs both PUTs.
         // AQ-4's mode switch: create promotes to the created row.
         setEditing(
           outcome.input.mode === 'create'
@@ -393,7 +393,7 @@ export function StudioServicesScreen() {
     }
   }
 
-  // Bulk flips: NOT optimistic — the sequential loop is the source of truth;
+  // Bulk flips: NOT optimistic, the sequential loop is the source of truth;
   // the invalidate refetches. SEQUENTIAL in list order over the selected rows
   // that still need the flip (deactivate → the ACTIVE selected; reactivate →
   // the INACTIVE selected); the first !ok stops the loop.
@@ -484,7 +484,7 @@ export function StudioServicesScreen() {
 
   function openCreate() {
     // The Sheet's children stay mounted across the async Save contract's
-    // held saves, so the upload state resets explicitly — a reopened
+    // held saves, so the upload state resets explicitly, a reopened
     // Sheet never shows a stale preview (the port's lifecycle law).
     setCoverStatus({ phase: 'idle' });
     if (previewUrlRef.current) {
@@ -590,7 +590,7 @@ export function StudioServicesScreen() {
                     <TableHead>Name</TableHead>
                     <TableHead className='text-right'>Price</TableHead>
                     <TableHead>Branches</TableHead>
-                    {/* T2: the Actions header renders empty — the icons carry
+                    {/* T2: the Actions header renders empty, the icons carry
                       their own labels. */}
                     <TableHead className='text-right' />
                   </TableRow>
@@ -603,7 +603,7 @@ export function StudioServicesScreen() {
                     const expanded = expandedId === row.id;
                     return (
                       <Fragment key={row.id}>
-                        {/* N3: whole-row click toggles expansion — the actions
+                        {/* N3: whole-row click toggles expansion, the actions
                           cell stops propagation so icon clicks never toggle
                           (the checkbox cell stops it too, inside the shared
                           bulk piece); the chevron stays the keyboard/AT
@@ -637,7 +637,7 @@ export function StudioServicesScreen() {
                               </div>
                               {/* N2: the truncated line hides while expanded.
                                 A1: the line indents by the dot (size-2.5) +
-                                its gap-2 — 4.5 spacing steps — so the text
+                                its gap-2, 4.5 spacing steps, so the text
                                 aligns with the name above it. */}
                               {expanded ? null : (
                                 <div className='flex min-w-0 items-center pl-4.5'>
@@ -781,7 +781,7 @@ export function StudioServicesScreen() {
                 onCheckedChange={(checked) =>
                   setEditorState({
                     ...editorState,
-                    // Either flip discards the entry — ADR-0020's
+                    // Either flip discards the entry, ADR-0020's
                     // re-entry contract.
                     hasPrice: checked === true,
                     priceCents: Number.NaN,
@@ -803,7 +803,7 @@ export function StudioServicesScreen() {
                   onChange={(e) =>
                     setEditorState({
                       ...editorState,
-                      // '' maps to NaN (nothing entered) — never a silent 0.
+                      // '' maps to NaN (nothing entered), never a silent 0.
                       priceCents:
                         e.target.value === ''
                           ? Number.NaN
@@ -814,7 +814,7 @@ export function StudioServicesScreen() {
               </div>
             )}
             <FieldDescription>
-              {editorState.hasPrice ? 'Stored as centavos.' : 'No price — bookable on inquiry.'}
+              {editorState.hasPrice ? 'Stored as centavos.' : 'No price: bookable on inquiry.'}
             </FieldDescription>
             {fieldErrors.price ? (
               <p className='text-destructive text-xs'>{fieldErrors.price}</p>
@@ -899,7 +899,7 @@ export function StudioServicesScreen() {
               </p>
             ) : null}
             {coverStatus.phase === 'bound' ? (
-              <p className='text-muted-foreground text-xs'>Cover ready — save to bind it.</p>
+              <p className='text-muted-foreground text-xs'>Cover ready: save to bind it.</p>
             ) : null}
             {coverStatus.phase === 'failed' ? (
               <p className='text-destructive text-xs'>Upload failed: {coverStatus.message}</p>
@@ -909,12 +909,12 @@ export function StudioServicesScreen() {
 
           <section className='space-y-2'>
             <h3 className='text-sm font-medium'>Bookable at branches</h3>
-            {/* Ruled V3: selectable name-only cards — NO checkbox inside; the
+            {/* Ruled V3: selectable name-only cards, NO checkbox inside; the
                 selected state reads from the card. The FULL branches
                 vocabulary renders, deactivated included: a deactivated branch
-                dims to opacity-60 and STAYS selectable (AQ-6 — the admin
+                dims to opacity-60 and STAYS selectable (AQ-6, the admin
                 matrix is staff-visible truth; the booking form filters).
-                Toggling REPLACES the state's branchIds array (click order) —
+                Toggling REPLACES the state's branchIds array (click order),
                 never a push into the aliased read row (Task 3's note). */}
             <div className='grid gap-2 sm:grid-cols-3'>
               {(branches ?? []).map((branch) => {
@@ -970,7 +970,7 @@ export function StudioServicesScreen() {
         />
       ) : null}
 
-      {/* AQ-3 + #155: the bulk confirm reuses the pinned dialog — the name
+      {/* AQ-3 + #155: the bulk confirm reuses the pinned dialog, the name
           argument is the eligible-aware count (owner-ratified): the title
           reads `Deactivate 3 items?` when every selected row will flip, and
           `Deactivate 2 of 3 selected items?` when some are already inactive

@@ -1,8 +1,8 @@
 // Schema-contract tests (ticket #135 AC): a canonical entity round-trips each
-// create/read schema pair — parse the create payload (asserting the parsed
+// create/read schema pair, parse the create payload (asserting the parsed
 // output drops every server-assigned field), then complete the server-assigned
 // fields by hand and parse the read shape. Pure Zod over pinned fixtures: no
-// DB rows, no routes (global-setup still runs — the suite's standing posture).
+// DB rows, no routes (global-setup still runs, the suite's standing posture).
 import {
   addonServiceSchema,
   attireSchema,
@@ -61,14 +61,14 @@ describe('create→read round-trips (the canonical fixtures, all nine entities)'
       phone: '+63 900 000 004',
       acceptsWalkIns: true,
       isActive: false,
-      // M7 #214: the row shape gained the nullable cover key — the canonical
+      // M7 #214: the row shape gained the nullable cover key, the canonical
       // fixture completes it by hand (born-null is the default state).
       coverImageKey: null,
-      // M7 #248: the row shape gained the nullable coordinate pair — the
+      // M7 #248: the row shape gained the nullable coordinate pair, the
       // fixture completes both by hand (rows always carry both keys).
       latitude: null,
       longitude: null,
-      // M7 #273: the row shape gained the nullable maps links — the fixture
+      // M7 #273: the row shape gained the nullable maps links, the fixture
       // completes both by hand (rows always carry both keys).
       googleMapsUrl: null,
       appleMapsUrl: null,

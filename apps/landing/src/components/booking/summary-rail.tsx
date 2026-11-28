@@ -26,7 +26,9 @@ export function SummaryRail({ wizard }: { wizard: BookingWizard }) {
         <div className='flex justify-between gap-3'>
           <dt className='text-muted-foreground'>Schedule</dt>
           <dd className='text-right'>
-            {wizard.scheduledAt ? phDateTime(wizard.scheduledAt.toISOString()) : '—'} (PHT)
+            {wizard.scheduledAt
+              ? `${phDateTime(wizard.scheduledAt.toISOString())} (PHT)`
+              : 'Not scheduled yet'}
           </dd>
         </div>
         {wizard.totalCents !== null && (

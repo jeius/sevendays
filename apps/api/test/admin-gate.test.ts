@@ -19,7 +19,7 @@ beforeEach(async () => {
 });
 
 // AC-1 (completeness half): EVERY admin router answers the uniform 401
-// envelope for an anonymous caller — the per-router invalid-body proofs
+// envelope for an anonymous caller, the per-router invalid-body proofs
 // live in the entity suites; this sweep proves no router escaped the gate.
 describe('the anonymous 401 envelope on every admin router', () => {
   const routers = [
@@ -49,7 +49,7 @@ describe('the anonymous 401 envelope on every admin router', () => {
       {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
-        body: '{"brandName": 42}', // garbage — validation never runs
+        body: '{"brandName": 42}', // garbage, validation never runs
       },
       testEnv(url)
     );
@@ -63,7 +63,7 @@ describe('the anonymous 401 envelope on every admin router', () => {
       {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: '{"quote": 42}', // garbage — validation never runs
+        body: '{"quote": 42}', // garbage, validation never runs
       },
       testEnv(url)
     );
@@ -73,9 +73,9 @@ describe('the anonymous 401 envelope on every admin router', () => {
 });
 
 // AC-2 (public-absence half): a deactivated row appears in the admin read
-// and is ABSENT from the public read — proven for the three entities whose
+// and is ABSENT from the public read, proven for the three entities whose
 // public reads are already active-only. The branches public read stays
-// unfiltered until #138 (spec § Read assembly) — deliberately unasserted
+// unfiltered until #138 (spec § Read assembly), deliberately unasserted
 // here; #138 owns the flip and its test.
 describe('deactivate → admin read shows it, public read does not', () => {
   const authed = async (method: string, path: string, email: string, body?: unknown) => {

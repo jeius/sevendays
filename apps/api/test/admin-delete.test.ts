@@ -29,7 +29,7 @@ import { truncateAll } from './helpers/truncate.js';
 // The guarded-DELETE contract suite (M7 #213): per-entity guard answers,
 // cascades, object-delete ordering, the 401-before-validation ordering, and
 // the freed name/slug. Appointments are inserted directly (the #212
-// direct-db-state precedent) — the guard reads rows, not API history.
+// direct-db-state precedent), the guard reads rows, not API history.
 const url = process.env.TEST_DATABASE_URL as string;
 const db = createTestDb(url);
 let ids: FixtureIds;
@@ -62,8 +62,8 @@ beforeEach(async () => {
   gids = await loadGalleryFixtures(db);
 });
 
-describe('guarded DELETE — testimonials + gallery photos (blocked by nothing)', () => {
-  it('testimonial deletes clean — 204 with no body, row gone, the audit row lands', async () => {
+describe('guarded DELETE, testimonials + gallery photos (blocked by nothing)', () => {
+  it('testimonial deletes clean, 204 with no body, row gone, the audit row lands', async () => {
     const [row] = await db
       .select()
       .from(testimonialsTable)
@@ -103,7 +103,7 @@ describe('guarded DELETE — testimonials + gallery photos (blocked by nothing)'
     expect(await res.json()).toEqual({ error: 'Testimonial not found.' });
   });
 
-  it('photo deletes clean — the R2 object goes with the row, exactly once, after the commit', async () => {
+  it('photo deletes clean, the R2 object goes with the row, exactly once, after the commit', async () => {
     const stub = stubCommitBucket();
     const [row] = await db
       .select()
@@ -138,7 +138,7 @@ describe('guarded DELETE — testimonials + gallery photos (blocked by nothing)'
   });
 });
 
-describe('guarded DELETE — the reference-guarded lookups', () => {
+describe('guarded DELETE, the reference-guarded lookups', () => {
   it('category with photos → 400 naming the blocking family + count; nothing deleted', async () => {
     const res = await authed(
       'DELETE',
@@ -158,7 +158,7 @@ describe('guarded DELETE — the reference-guarded lookups', () => {
     expect(row?.id).toBe(gids.categoryA);
   });
 
-  it('category with no photos deletes clean (the deactivated one) — 204 + audit row', async () => {
+  it('category with no photos deletes clean (the deactivated one), 204 + audit row', async () => {
     const res = await authed(
       'DELETE',
       `/api/v1/admin/gallery-categories/${gids.categoryRetired}`,
@@ -198,7 +198,7 @@ describe('guarded DELETE — the reference-guarded lookups', () => {
     });
   });
 
-  it('a fresh print size deletes clean — create via POST, then DELETE → 204', async () => {
+  it('a fresh print size deletes clean, create via POST, then DELETE → 204', async () => {
     const created = await authed(
       'POST',
       '/api/v1/admin/print-sizes',
@@ -241,7 +241,7 @@ describe('guarded DELETE — the reference-guarded lookups', () => {
     });
   });
 
-  it('attire with no junctions deletes clean — 204, row gone (the untouched fixture attire)', async () => {
+  it('attire with no junctions deletes clean, 204, row gone (the untouched fixture attire)', async () => {
     const res = await authed(
       'DELETE',
       `/api/v1/admin/attires/${ids.attireUniform}`,
@@ -284,7 +284,7 @@ const insertAppointment = async (overrides: Record<string, unknown> = {}) => {
   return row.id;
 };
 
-describe('guarded DELETE — the appointment-bearing entities (any Appointment ever)', () => {
+describe('guarded DELETE, the appointment-bearing entities (any Appointment ever)', () => {
   it('branch with any appointment → 400 with the appointment count', async () => {
     await insertAppointment({ branchId: ids.branchB, servicePackageId: ids.packageCombined });
     const res = await authed(
@@ -299,7 +299,7 @@ describe('guarded DELETE — the appointment-bearing entities (any Appointment e
     });
   });
 
-  it('a CANCELLED appointment still blocks — "any Appointment ever" is status-blind', async () => {
+  it('a CANCELLED appointment still blocks, "any Appointment ever" is status-blind', async () => {
     await insertAppointment({
       branchId: ids.branchB,
       servicePackageId: ids.packageCombined,
@@ -313,7 +313,7 @@ describe('guarded DELETE — the appointment-bearing entities (any Appointment e
     expect(res.status).toBe(400);
   });
 
-  it("branch with no appointments deletes clean — its matrix rows cascade, its siblings' stay, the audit row lands", async () => {
+  it("branch with no appointments deletes clean, its matrix rows cascade, its siblings' stay, the audit row lands", async () => {
     const res = await authed(
       'DELETE',
       `/api/v1/admin/branches/${ids.branchB}`,
@@ -341,7 +341,7 @@ describe('guarded DELETE — the appointment-bearing entities (any Appointment e
   it('a deleted branch cover object goes with the row (ADR-0019 §5: commit first, then the object delete)', async () => {
     const COVER_KEY = 'covers/aaaaaaaa-0000-4000-8000-0000000000be.jpg';
     // branchB deletes clean (its only reference is the portrait matrix row,
-    // which cascades in-transaction) — the #213 fixture ground truth.
+    // which cascades in-transaction), the #213 fixture ground truth.
     await db
       .update(branchesTable)
       .set({ coverImageKey: COVER_KEY })
@@ -385,7 +385,7 @@ describe('guarded DELETE — the appointment-bearing entities (any Appointment e
     });
   });
 
-  it('add-on with no history deletes clean — its applicability-matrix rows cascade', async () => {
+  it('add-on with no history deletes clean, its applicability-matrix rows cascade', async () => {
     const res = await authed(
       'DELETE',
       `/api/v1/admin/addon-services/${ids.addonRetired}`,
@@ -428,7 +428,7 @@ describe('guarded DELETE — the appointment-bearing entities (any Appointment e
     });
   });
 
-  it("studio service with no history deletes clean — BOTH matrices' rows cascade", async () => {
+  it("studio service with no history deletes clean, BOTH matrices' rows cascade", async () => {
     const res = await authed(
       'DELETE',
       `/api/v1/admin/studio-services/${ids.serviceStudio}`,
@@ -452,7 +452,7 @@ describe('guarded DELETE — the appointment-bearing entities (any Appointment e
     expect(portraitBranchLinks).toHaveLength(2);
   });
 
-  it("studio service with a cover deletes clean — the cover object goes only after the row's commit (#331)", async () => {
+  it("studio service with a cover deletes clean, the cover object goes only after the row's commit (#331)", async () => {
     const COVER_KEY = 'covers/aaaaaaaa-0000-4000-8000-0000000000e3.jpg';
     await db
       .update(studioServicesTable)
@@ -480,7 +480,7 @@ describe('guarded DELETE — the appointment-bearing entities (any Appointment e
     expect(await res.json()).toEqual({ error: 'Studio Service not found.' });
   });
 
-  it('package with any appointment → 400 — and a blocked delete never touches the bucket', async () => {
+  it('package with any appointment → 400, and a blocked delete never touches the bucket', async () => {
     await db
       .update(servicePackagesTable)
       .set({ coverImageKey: 'covers/00000000-0000-4000-8000-0000000000c1.jpg' })
@@ -501,7 +501,7 @@ describe('guarded DELETE — the appointment-bearing entities (any Appointment e
     expect(stub.deleteCalls).toEqual([]);
   });
 
-  it('package with no history deletes clean — frames, inclusions, and their junctions all go', async () => {
+  it('package with no history deletes clean, frames, inclusions, and their junctions all go', async () => {
     const [inclusion] = await db
       .select({ id: inclusionsTable.id })
       .from(inclusionsTable)
@@ -553,7 +553,7 @@ describe('guarded DELETE — the appointment-bearing entities (any Appointment e
     expect(stub.deleteCalls).toEqual(['covers/00000000-0000-4000-8000-0000000000c2.jpg']);
   });
 
-  it('delete frees the unique name + slug — a new row may take both', async () => {
+  it('delete frees the unique name + slug, a new row may take both', async () => {
     const res = await authed(
       'DELETE',
       `/api/v1/admin/service-packages/${ids.packageRetired}`,
@@ -590,7 +590,7 @@ describe('guarded DELETE — the appointment-bearing entities (any Appointment e
   });
 });
 
-describe('guarded DELETE — the 401 gate precedes validation (appointment-bearing half)', () => {
+describe('guarded DELETE, the 401 gate precedes validation (appointment-bearing half)', () => {
   it('anonymous DELETE with a non-uuid id → 401 BEFORE validation (branches)', async () => {
     const res = await app.request(
       '/api/v1/admin/branches/not-a-uuid',
@@ -632,7 +632,7 @@ describe('guarded DELETE — the 401 gate precedes validation (appointment-beari
   });
 });
 
-describe('guarded DELETE — the 401 gate precedes validation (this half)', () => {
+describe('guarded DELETE, the 401 gate precedes validation (this half)', () => {
   it('anonymous DELETE with a non-uuid id → 401 BEFORE validation (testimonials)', async () => {
     const res = await app.request(
       '/api/v1/admin/testimonials/not-a-uuid',

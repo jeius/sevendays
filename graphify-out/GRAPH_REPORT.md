@@ -1,38 +1,39 @@
-# Graph Report - root-files-sweep  (2026-11-23)
+# Graph Report - em-dash-sweep-apps  (2026-11-28)
 
 ## Corpus Check
-- 1049 files · ~2,045,529 words
+- 1055 files · ~1,778,674 words
 - Verdict: corpus is large enough that graph structure adds value.
+- Unclassified: 72 file(s) not represented in the graph (top: .csv 53, (none) 9, .example 5)
 
 ## Summary
-- 10139 nodes · 14414 edges · 752 communities (666 shown, 86 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 182 edges (avg confidence: 0.68)
+- 10409 nodes · 19989 edges · 620 communities (559 shown, 61 thin omitted)
+- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 2689 edges (avg confidence: 0.94)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `81fa5ef4`
+- Built from commit: `211e2518`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - Sevendays Service Catalog
-- package-inclusions.ts
+- with
 - Three separate Cloudflare Worker deployments (landing/admin/api)
-- packages/db package.json scripts
-- devDependencies
+- scripts
+- admin/package.json
 - landing package.json devDependencies
 - Architecture-review specs: row shaping, read-stitch, error seam, intake
-- devDependencies
+- api/package.json
 - admin/src/routeTree.gen.ts
 - dependencies
 - dependencies
-- truncate.ts
+- ref_vitest
 - packages/config package.json scripts
 - scripts
 - packages/types package.json
-- 2026-10-11-191-ship-provisioning-runbook.md
+- The ship-provisioning runbook (#191) Implementation Plan
 - landing/src/routeTree.gen.ts
-- appointment.ts
+- appointment-read.ts
 - Shared TS config: base.json
 - admin shadcn components.json
 - landing shadcn components.json
@@ -46,12 +47,12 @@
 - ui/package.json
 - Biome base: formatter
 - Biome vite tier: rules
-- api tsconfig.json
-- packages/config tsconfig.json
+- createAuth
+- compilerOptions
 - Specs: M2 preflight API client + M1.4 plan
-- db tsconfig.json
-- types tsconfig.json
-- $TURBO_DEFAULT$
+- env
+- primitive
+- package.json
 - rules
 - includes
 - includes
@@ -65,77 +66,75 @@
 - lookups-screen.tsx
 - Implementation Decisions
 - Plan: M1.3 provision, migrate, seed
-- build
+- $id.thumb.ts
 - api biome.json
 - Plan: M1.5 exit verification
-- DB script: verify appointment row
-- @sevendays/config docs & CI wiring
-- Biome base: root config
-- Biome base: includes
+- ref_postgres
+- ci.yml
+- biome/base.json
+- devDependencies
 - Shared TS config: react.json
-- DB script: check-env
+- check-env.mjs
 - attire.ts
-- test
-- turbo.json global env passthrough
+- db/package.json
+- Task 5: `apps/admin` — the Users tab (UI-bearing)
 - validate_data.py
-- Shared vitest config factory
+- ref_vitest
 - addon-service.ts
 - gallery.ts
-- print-size.ts
+- Global Constraints
 - ui/biome.json
 - Agent docs: issue tracker & triage labels
 - gray
-- Vitest blob report merge script
-- DB script: pooler transaction probe
-- DB migration runner (Drizzle)
+- deploy-v1
+- appointments.test.ts
+- Plan: #350 — Handover polish: sweep the apps tree
 - types biome.json
 - Root biome.json
-- packages/config biome.json
+- steps
 - Biome base: source settings
-- Biome base: VCS settings
-- Decls for verify-appointment-row script
+- deploy-teaser
+- postgres
 - book.tsx
-- connect
+- cms-reflection.mjs
 - Implementation Decisions
-- admin Vite config (Cloudflare plugin)
+- admin/vite.config.ts
 - sidebar.tsx
-- landing Vite config (Cloudflare plugin)
+- typescript/base.json
 - Biome node tier
-- DB script: db-state report
-- DB script: rehearsal fixture
+- appointment.ts
+- input
 - AGENTS rule: graphify query/update
-- AGENTS rule: log decisions as ADRs
-- AGENTS rule: per-app UI, shared tokens
-- AGENTS rule: async/await only
-- AGENTS rule: thin route handlers
-- File Structure
-- File Structure
+- appointment.test.ts
+- main
 - admin.functions.ts
 - Landing README: file-based routing
-- compose.yaml: local Postgres 17 test DB
-- Context map: one domain, three apps
+- healthcheck
 - CI check job
-- config AGENTS: strict baseline policy
-- Root vitest config (ADR-0003)
-- search
-- Global Constraints
+- drizzle-kit
+- exports
+- booking-wizard.mjs
+- allowBuilds
+- $type
+- cip/generate.py
+- HomeImageLed
 - ui-styling: Tailwind utilities reference
 - design-system: slide search core
 - brand: guidelines starter template
-- BM25
+- test_core.py
 - @tanstack/react-start
 - design skill docs
-- branches-screen.tsx
+- cip/core.py
 - ui-styling: canvas design system
 - organization-best-practices skill
 - lib/auth.ts
-- share-your-story.tsx
+- $type
 - ui-ux-pro-max: prerequisites
 - packages/api-client package.json
 - spacing
 - Workspace Task Orchestration
 - Global Constraints
-- search_stack
+- test_relevance_evaluator.py
 - pnpm/SKILL.md
 - ui-styling: shadcn form & input components
 - ui-styling: Tailwind responsive design
@@ -151,8 +150,7 @@
 - preload-manual: Use Manual Preloading Strategically
 - search-middleware: Use Search Param Middleware
 - ui-styling: shadcn accessibility
-- ui-styling: Tailwind config gen tests
-- testEnv
+- requireSession
 - session-cache.test.ts
 - design-system: HTML token validator
 - ssr-selective: Apply Selective SSR When Beneficial
@@ -164,7 +162,7 @@
 - err-retry-config: Configure Retry Logic Appropriately
 - mut-error-handling: Handle Mutation Errors Gracefully
 - mut-loading-states: Use isPending for Mutation Loading States
-- search
+- audit.functions.ts
 - brand: asset approval checklist
 - design: logo prompt engineering
 - Two-factor auth best practices skill
@@ -176,13 +174,14 @@
 - ui-styling skill overview
 - design: social photos workflow
 - pf-ensure-query-data: Use ensureQueryData for Conditional Prefetching
-- DesignSystemGenerator
+- test_design_system_mode.py
 - posthog.ts
 - design-system skill overview
 - radius
 - ui-styling: Tailwind customization
-- Plan: #81 v1 first light (file structure)
+- Global Constraints
 - Migration to pnpm
+- dropdown-menu.tsx
 - create-auth skill
 - pnpm Store
 - pf-stale-time-config: Set staleTime When Prefetching
@@ -193,22 +192,22 @@
 - design-system: slide generator
 - ctx-dependency-injection: Use Context for Dependency Injection
 - ui-styling: shadcn theming
-- ui-styling: Tailwind config generator
+- TestTailwindConfigGenerator
 - vitest: core test API
 - Mocking
-- catalog-rows.ts
+- seed.ts
 - Better Auth Integration Guide
 - brand: asset organization
 - design: logo color psychology
 - design: logo types & style guide
 - pnpm CI/CD Setup
 - pnpm: patches
-- Roadmap - Milestone Plan (M0-M6)
+- Roadmap
 - Root AGENTS.md conventions
 - brand: consistency checklist
 - design: CIP mockup prompts
 - design-system: semantic colors
-- design-system: background fetcher
+- json
 - Override Patterns
 - pnpm: peer dependencies
 - vitest: vi utilities
@@ -220,24 +219,24 @@
 - tanstack-query: quick reference
 - tanstack-router: quick reference
 - tanstack-start: quick reference
-- load-error-handling: Handle Loader Errors Appropriately
-- TestShadcnInstaller
-- ui-ux-pro-max: threshold gate tests
+- ADR-0005: Hourly slot grid with per-slot capacity for booking availability
+- ShadcnInstaller
+- 50
 - vitest/SKILL.md
 - Expect API
 - Per-context CONTEXT docs
 - ADRs: TS 6 pin & tiered Biome
-- audit-read.ts
+- 800
 - banner-design: sizes & styles
 - design: banner sizes & styles
-- design: icon generator
+- icon/generate.py
 - fontSize
 - pnpm Workspaces
 - pnpm Aliases
 - load-loader-deps: Define loaderDeps for Cache Control
-- .add_components
+- padding-y
 - Implementation Decisions
-- peso
+- book.tsx
 - ui-ux-pro-max: catalog refresh tests
 - vitest: test environments
 - Type Testing
@@ -250,19 +249,19 @@
 - org-file-based-routing: Prefer File-Based Routing for Conventions
 - org-pathless-layouts: Use Pathless Routes for Shared Layouts
 - preload-stale-time: Configure Preload Stale Time
-- main
+- .test_full_configuration_typescript
 - testimonial.ts
-- shared.tsx
+- sheet.tsx
 - Commands
 - vitest: lifecycle hooks
 - Snapshot Testing
 - Domain: Appointment context
 - admin README: production build
-- Spec: delivery versions v1/v2
+- Branch
 - Progress log & DB topology ADRs
 - Catalog docs: packages
 - Plan: M1.2 constraints
-- read_rows
+- DesignSystemGenerator
 - banner-design skill overview
 - brand: messaging framework
 - brand: voice framework
@@ -274,14 +273,14 @@
 - slides: layout patterns
 - deploy-adapters: Choose Appropriate Deployment Adapter
 - search-defaults: Provide Sensible Defaults for Search Params
-- ShadcnInstaller
+- Seed the v1 branch — the one filter-repo pass (booking-free artifact line) (#80) Implementation Plan
 - vitest: concurrency
 - ADR template & domain-docs guide
 - ADR-0008: Integration tests against real Postgres
 - brand: update guide
 - design: logo design reference
 - design-system: token architecture
-- site-tab.tsx
+- destructive
 - Global Virtual Store, Git Worktrees, Global Packages & Shims
 - search-type-inheritance: Leverage Parent Search Param Types
 - Projects
@@ -290,8 +289,8 @@
 - Plan: M1.4 file structure
 - Plan: intake deepening file structure
 - Tech stack doc
-- api-client tsconfig.json
-- seed.ts
+- destructive-foreground
+- muted
 - design-system: primitive tokens
 - design-system: token validator
 - pnpm Hooks (.pnpmfile.mjs)
@@ -310,7 +309,6 @@
 - auth-cookie-security: Configure Secure Cookie Settings
 - err-not-found: Handle Not-Found Scenarios
 - ui-styling: tailwind config gen tests
-- .generate_config_string
 - Plan: M2 E2E verification facts
 - Plan: M1.5 file structure
 - testimonial-submission.ts
@@ -325,21 +323,21 @@
 - tanstack-query rule: placeholder data
 - tanstack-query rule: infinite page params
 - tanstack-query rule: select transform
-- tanstack-router rule: not-found routes
+- err-server-errors: Handle Server Function Errors
 - tanstack-router rule: ensureQueryData
 - tanstack-router rule: parallel loading
 - tanstack-router rule: Link component
 - tanstack-router rule: route masks
 - tanstack-router rule: virtual routes
-- tanstack-start rule: server errors
+- primary-foreground
 - tanstack-start rule: request middleware
 - tanstack-start rule: streaming SSR
 - err-redirects: Use Redirects Appropriately
-- ui-styling: shadcn test fixtures
-- Plan: row shaping file structure
+- ring
+- secondary-foreground
 - brand skill overview
 - design: slide strategies
-- design: logo generator
+- white
 - design-system: component tokens
 - design-system: token generator
 - Product — Sevendays (studio-wide record)
@@ -361,8 +359,7 @@
 - tanstack-start rule: file separation
 - tanstack-start rule: createServerFn
 - tanstack-start rule: input validation
-- ui-styling: base config internals
-- Plan: #340 — Image viewer: package-detail cover zoom — the lone-image variant
+- mosaic-photo-grid.tsx
 - vitest: context & fixtures
 - Domain: Branch context
 - Draft: v2 offer sheet prototype
@@ -371,10 +368,10 @@
 - Spec: acquisition/error seam
 - Plan: M1.1 constraints
 - Plan: frame grouping & attire
-- Plan: error seam file structure
+- Global Constraints
 - Plan: M2 preflight-5 facts
 - brand: tokens sync script
-- design-system: token validator tests
+- css
 - tanstack-integration rule: QueryClient context
 - tanstack-query rule: gcTime
 - tanstack-query rule: error boundaries
@@ -385,7 +382,7 @@
 - Plan: #57 brand token unification
 - Configuration
 - vitest: reporters
-- Global Constraints
+- Implementation Decisions
 - Architecture doc
 - Spec hub: M1 data layer
 - Spec hub: M2 preflight
@@ -394,10 +391,10 @@
 - Spec hub: intake deepening
 - Spec hub: read-stitch
 - Plan: M1.3 file structure
-- Plan: read-stitch file structure
-- Plan: M2 preflight-2 constraints
-- Plan: M2 preflight-3 constraints
-- Plan: M2 preflight-4 facts
+- cmdk
+- @fontsource-variable/roboto-slab@^5.3.0
+- react@^19.2.0
+- TestWebStackFreshness
 - @sevendays/db overview refs
 - tanstack-query rule: targeted invalidation
 - tanstack-query rule: staleTime
@@ -406,7 +403,7 @@
 - tanstack-query rule: serializable keys
 - api-client/src/routes/admin.ts
 - Progress log hub
-- Plan: M2 preflight-1 constraints
+- @sevendays/types@workspace:*
 - File Structure
 - design: slides reference
 - design: HTML slide template
@@ -423,454 +420,326 @@
 - sec-sensitive-data: Keep Secrets Server-Side Only
 - ssr-data-loading: Load Data Appropriately for SSR
 - gallery-screen.tsx
-- confirmation-email.ts
-- Plan: M2-01 studio services catalog
-- brand: guideline template
-- File Structure
+- api/src/index.ts
+- Plan: #352: Handover polish: sweep docs (plan, progress, architecture, rest)
+- 3. Logo Usage
+- @tailwindcss/vite@^4.1.18
 - button
 - inf-loading-guards: Check isFetchingNextPage Before Fetching More
-- admin package.json hub
-- landing package.json hub
+- zod@^4.5.1
+- TestNativeDesktopStackFreshness
 - api-client biome.json
-- Plan: M2-02 appointment model
-- Plan: M2-04 read endpoints
+- hasExactlyOneAppointmentOffering
+- TestStyleTaxonomy
 - inf-max-pages: Consider maxPages for Large Datasets
 - mut-rollback-context: Provide Rollback Context from onMutate
 - perf-placeholder-data: Use placeholderData for Instant UI
 - perf-structural-sharing: Leverage Structural Sharing
 - Building For Production
-- brand: token sync tests
-- design-system: slide token validator
+- Global Constraints
+- Plan: #353 (Handover polish: sweep the author-written root files)
 - dependencies
 - studio-service.ts
-- ui-styling: shadcn script bootstrap
-- relations.ts
+- head
+- ref_drizzle_orm
 - design: slides create guide
 - pnpm: generation notes
 - slides: create guide
 - pf-route-prefetch: Prefetch Data During Route Transitions
 - ssr-client-per-request: Create QueryClient Per Request
-- Plan: M2-05 packages pages
-- ui-styling: shadcn dry-run tests
+- AppType
+- Milestone 4 — Admin Auth (v1-track) (spec)
 - submissions-tab.tsx
-- Plan: M2-06 content pages
-- ui-styling: tailwind config gen unit tests
-- ui-styling: plugin recommendation tests
-- ui-styling: nextjs recommendation tests
-- ui-styling: init default tests
-- ui-styling: JS config gen tests
-- ui-styling: color config tests
-- ui-styling: config validation tests
-- ui-styling: write-config error tests
-- ui-styling: full TS config tests
-- ui-styling: base config tests
-- ui-styling: content paths tests
+- Global Constraints
+- Global Constraints
+- logo/search.py
+- @fontsource-variable/figtree@^5.3.0
+- ADR-0027: Session-verify amortization — both halves, the ruled 60 s bound
+- File Structure
+- print-size.ts
+- .validate_config
+- Task 2: The api pins, the cover-commit media_failure, the actorId length, the corrected comment
+- save
+- posthog-js@^1.422.5
 - vitest: generation notes
 - ADR-0012: exactly-one booked offering
-- admin-mutation-log.test.ts
+- react@^19.2.0
 - ui/components.json
-- Global Constraints
+- react-dom@^19.2.0
 - Implementation Decisions
-- services/db.ts
+- types/src/index.ts
 - admin-gallery.ts
-- File Structure
+- @sevendays/api-client@workspace:*
 - filters.ts
-- testimonials-screen.tsx
-- landing/src/lib/queries.ts
+- cms-queries.ts
+- ServicePackageRead
 - compilerOptions
-- landing dep: @tanstack/react-router
-- 2026-09-26-136-m5-02-media-foundation.md
-- Plan: M2-08 booking confirmation
+- shadcn@^4.21.0
+- tailwindcss@^4.3.3
+- @tanstack/react-devtools@latest
 - unwrap.ts
-- Plan: M2-09 confirmation email
+- @tanstack/react-query@^5.102.8
 - Verify script: confirmation emails
 - ssr-stale-time-server: Set Higher staleTime on Server
+- @tanstack/react-router-ssr-query@^1.167.2
 - App READMEs (admin & landing)
 - ADR-0013: one appointments table
-- turbo.json typecheck task
+- tw-animate-css@^1.4.0
 - ADR-0014: email send topology
 - Plan: #80 seed v1 branch
 - Global Constraints
-- Plan: M2-03 service path intake
-- Global Constraints
+- zod@^4.5.1
 - Plan: edition-aware pipelines facts
-- ADR-0015: two-edition mechanism
-- admin dep: react-dom
+- react-dom@^19.2.0
 - Global Constraints
-- landing dep: @tanstack/react-query
-- ui/tsconfig.json
 - v1 export audit script
 - package-editor.tsx
-- Global Constraints
-- Plan: #248 — Post-flight T8: branch Maps button (nullable coordinates, manual admin input, new-tab pin)
 - scripts
 - Plan: #78 export audit file structure
 - global-search.ts
-- File Structure
+- Ledger
 - studio-services-screen.tsx
 - ADR-0017: Shared UI package — the shadcn monorepo pattern
 - Plan: #82 pick discipline
-- ADR-0016: service binding
-- landing dep: shadcn
-- Global Constraints
-- batch-photo-upload.ts
-- Global Constraints
 - radius
 - about.tsx
-- home-image-led.tsx
-- Global Constraints
-- v1.ts
-- lucide-react
-- mosaic-photo-grid.tsx
+- CreateAppointmentArgs
+- notFound
 - Phase A — the dedicated stack (no client dependency)
-- @tanstack/react-devtools
-- @tanstack/react-router-devtools
 - v1 triage classifier script
-- api/package.json
+- @sevendays/types@workspace:*
 - metrics.functions.ts
 - cf.ts
-- src/audit.ts
-- Global Constraints
-- api-client/src/index.ts
+- M5 Prototype: Admin CMS Compositions (wayfinder #131) Implementation Plan
+- createApiClient
 - design-tokens-starter.json
 - Global Constraints
 - ADR-0018: Two-role staff model — the admin gate stays owner-held
-- Global Constraints
-- services/appointments.ts
+- badRequest
 - Plan: #334 — Service covers: teaser variant pass + owner reaction
-- File Structure
-- File Structure
-- react-dom
-- users-tab.tsx
-- login.tsx
+- connect
+- ref_tanstack_react_router
 - Plan: #341 — Image viewer: teaser variant pass + owner reaction
-- helpers/env.ts
 - /public/photos — PROTOTYPE stand-ins (#111)
-- File Structure
 - Global Constraints
-- File Structure
-- ADR-0019: R2 media topology — presigned direct upload, public bucket, object-key storage
-- File Structure
-- Global Constraints
-- backfill-positions.mjs
+- unwrap
 - mock-api.ts
-- Implementation Decisions
 - src/media.ts
 - admin/src/lib/api.server.ts
-- Media bucket runbook — `sevendays-media` (ADR-0019)
-- admin/src/routes/__root.tsx
-- Global Constraints
+- shared.tsx
+- admin/src/lib/nav.ts
 - read-cache.test.ts
 - Staff provisioning & password reset (v1)
-- react
 - Global Constraints
-- landing/src/lib/sentry.ts
 - ADR-0022: Standalone Playwright as the browser-E2E and visual-regression foundation
-- Plan: #331 — Service covers: API spine — fifth purpose, cover column, tri-state save, resolved reads
+- admin-studio-services.ts
 - ADR-0023: The observability data path — admin server functions own the analytics queries
-- File Structure
-- File Structure
 - Plan: #338 — Create-button polish: teaser variant pass + owner reaction
-- admin-packages.ts
+- ref_zod
 - load-deferred-data: Split Critical and Non-Critical Data
 - Global Constraints
-- Global Constraints
-- Global Constraints
 - r2.ts
-- duration
+- primitive
 - org-index-routes: Understand Index vs Layout Routes
 - Global Constraints
 - Global Constraints
-- File Structure
-- api/src/index.ts
 - branch.ts
 - File Structure
-- Plan: #322 — Admin logo: login lockup reads site settings; sidebar rail sliver fixed
+- admin-sidebar.tsx
 - ADR-0020: Unpriced catalog items — nullable prices end to end, snapshots included
 - ship-media-copy.mjs
 - ADR-0021: Reset emails — a second email class over the API's Resend seam, via the service binding
-- env
 - measure-theme-pairs.mjs
 - File Structure
-- Database
-- users.functions.ts
-- File Structure
+- admin-entities.ts
 - probes.ts
-- tailwindcss
-- ship-content-carry.mjs
 - @sevendays/db
-- Global Constraints
 - File Structure
-- Plan: #339 — Image viewer: viewer spine — the library, the seam, and the mosaic walls live
 - services/media.ts
 - system-health.tsx
-- Plan: #332 — Service covers: admin editor Cover field — upload, replace, remove
-- Plan: #333 — Service covers: landing consumes coverImageUrl — stand-ins demote to fallback
+- StudioServiceWithBranches
 - org-route-tree-structure: Follow Hierarchical Route Tree Patterns
-- File Structure
-- aws4fetch
 - chart.tsx
-- @loglayer/transport-pino
-- pino-browser.d.ts
+- pino
 - e2e — the browser-test foundation (ADR-0022, M6 #189)
 - admin/src/vite-env.d.ts
-- detect_domain
-- @sevendays/db
 - landing/src/vite-env.d.ts
 - Global Constraints
-- src/site-settings.ts
 - Global Constraints
 - redesign.spec.ts
 - refresh-button.tsx
-- playwright.config.ts
 - Global Constraints
 - Global Constraints
-- File Structure
-- File Structure
-- Global Constraints
-- File Structure
-- File Structure
-- File Structure
 - package-expanded-row.test.ts
 - Global Constraints
-- File Structure
-- buttonVariants
-- File Structure
-- File Structure
 - $.ts
+- File Structure
+- SiteSettings
 - Global Constraints
-- File Structure
-- File Structure
-- File Structure
+- @posthog/react@^1.10.5
 - Global Constraints
-- @dnd-kit/sortable
-- @dnd-kit/utilities
-- Global Constraints
-- @posthog/react
-- File Structure
-- Global Constraints
-- @sevendays/ui
-- tw-animate-css
+- @sevendays/ui@workspace:*
+- posthog-js@^1.422.5
 - File Structure
 - File Structure
 - File Structure
-- File Structure
-- File Structure
-- @sevendays/db
-- Plan: #246 — Post-flight T6: site-logo accepts PNG (site-logo purpose only)
-- File Structure
+- Plan: #246, Post-flight T6: site-logo accepts PNG (site-logo purpose only)
 - File Structure
 - M8 — Admin-CMS Latency Spec
-- src/reset-email.ts
-- schema/index.ts
-- skeletons.tsx
-- dotenv-cli
+- types/src/index.ts
+- buttonVariants
 - ADR-0025: Read-through edge cache on the API's public catalog reads
 - Plan: #337 — Create-button polish: Plus on every CMS create action + the New service rename
 - Global Constraints
-- Plan: #273 — Branch Maps button v2: pasted Google/Apple Maps links replace coordinate entry
+- Plan: #248 — Post-flight T8: branch Maps button (nullable coordinates, manual admin input, new-tab pin)
 - card
 - admin/src/router.tsx
 - ADR-0026: Region placement of the api worker — the SIN hint
+- users-tab.tsx
 - Global Constraints
-- Global Constraints
-- ADR-0027: Session-verify amortization — both halves, the ruled 60 s bound
-- ApiClientError
 - split-critical-path: Keep Critical Config in Main Route File
-- recharts
 - Create Button Polish Spec
-- Landing Image Viewer Spec
 - Global Constraints
-- Services Cover Photos Spec
 - ts-query-options-loader: Use queryOptions in Loaders for Type Inference
 - Global Constraints
 - em-dash-sweep.mjs
 - auth-server-functions: Verify Auth in Server Functions
-- $id.thumb.ts
-- createApiClient
 - probe-cold-hydration.mjs
-- metrics/env.ts
 - file-shared-validation: Share Validation Schemas Between Client and Server
 - sec-csrf-protection: Implement CSRF Protection for Mutations
 - ADR-0024: Hyperdrive connection caching (BURNED)
 - sec-validate-inputs: Validate All User Inputs with Schemas
-- sf-error-handling: Handle Errors in Server Functions
-- fuse.js
 - Plan: #349 — Handover polish: sweep tool + the packages/scripts/e2e tree
 - cache-defaults: Set Sensible Defaults at QueryClient Level
-- cn
+- cn@^0.3.0
 - ts-route-context-typing: Type Route Context with createRootRouteWithContext
 - file-functions-file: Use .functions.ts Pattern for Server Functions
 - sf-method-selection: Choose Appropriate HTTP Method
-- @sentry/tanstackstart-react
+- @sentry/tanstackstart-react@^10.72.0
 - sf-response-headers: Customize Response Headers When Needed
-- test_text_layout_resilience.py
 - ADR-0028: Notifications are a derived view — the queue stays the notification
-- @tanstack/react-devtools
-- @tanstack/react-query
-- @tanstack/react-router
-- users-state.ts
-- persist_design_system
-- posthog-js
-- typing.test.ts
-- users-guards.ts
-- package-detail.tsx
+- @tanstack/react-devtools@latest
+- @tanstack/react-query@^5.102.8
+- @tanstack/react-router@latest
 - stub-screen.tsx
 - linter
-- appointments.test.ts
-- Plan: #353 (Handover polish: sweep the author-written root files)
-- hono
-- types/src/index.ts
-- lucide-react
-- input
-- format_ascii_box
-- progress.tsx
-- @dnd-kit/core
-- $type
-- posthog-js
-- lg
-- radix-ui
-- sm
-- padding-y
-- xl
-- none
-- 16
-- 1
-- 3
-- 8
-- @fontsource-variable/geist-mono
-- @sevendays/api-client
-- @sevendays/ui
-- @tanstack/react-router-ssr-query
-- yet-another-react-lightbox
-- destructive
-- destructive-foreground
-- muted
-- primary-foreground
-- ring
-- secondary-foreground
-- test_shadcn_add.py
-- dev
-- .test_check_shadcn_config_exists
-- .test_get_installed_components_empty
-- .test_get_installed_components_with_files
-- better-auth
+- lucide-react@^1.37.0
 
 ## God Nodes (most connected - your core abstractions)
-1. `Database` - 84 edges
-2. `TailwindConfigGenerator` - 58 edges
-3. `DesignSystemGenerator` - 48 edges
-4. `search()` - 46 edges
-5. `writeAuditRow()` - 43 edges
-6. `TestTailwindConfigGenerator` - 35 edges
-7. `search_stack()` - 35 edges
-8. `testEnv()` - 35 edges
-9. `ShadcnInstaller` - 34 edges
-10. `buttonVariants` - 34 edges
+1. `Button()` - 78 edges
+2. `GalleryScreen()` - 76 edges
+3. `StudioServicesScreen()` - 70 edges
+4. `requireSession()` - 68 edges
+5. `Ledger` - 65 edges
+6. `BranchesScreen()` - 65 edges
+7. `AddonsScreen()` - 62 edges
+8. `UsersTab()` - 62 edges
+9. `TailwindConfigGenerator` - 58 edges
+10. `TestimonialsScreen()` - 58 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `PostHog analytics via VITE_POSTHOG_KEY / VITE_POSTHOG_HOST` --conceptually_related_to--> `@sevendays/admin — internal dashboard for content + appointments (TanStack Start)`  [AMBIGUOUS]
-  apps/landing/README.md → AGENTS.md
-- `minimumReleaseAgeExclude: lucide-react@1.37.0` --conceptually_related_to--> `Shadcn`  [AMBIGUOUS]
-  pnpm-workspace.yaml → apps/landing/README.md
-- `@sevendays/api-client — the only supported path for both apps to call the API` --conceptually_related_to--> `@sevendays/landing — public marketing site + appointment booking (TanStack Start)`  [INFERRED]
-  apps/api/CONTEXT.md → AGENTS.md
-- `PostHog analytics via VITE_POSTHOG_KEY / VITE_POSTHOG_HOST` --conceptually_related_to--> `@sevendays/landing — public marketing site + appointment booking (TanStack Start)`  [INFERRED]
-  apps/landing/README.md → AGENTS.md
-- `@sevendays/api-client — the only supported path for both apps to call the API` --conceptually_related_to--> `@sevendays/admin — internal dashboard for content + appointments (TanStack Start)`  [INFERRED]
-  apps/api/CONTEXT.md → AGENTS.md
+- `Content pass — what never enters `v1` even on a v1-path` --references--> `createAppointment()`  [INFERRED]
+  docs/agents/v1-picks.md → apps/api/src/services/appointments.ts
+- `Task 3: Adopt the builders in the API test fixtures` --references--> `printSize()`  [INFERRED]
+  docs/superpowers/plans/2026-09-04-catalog-row-shaping-module.md → apps/admin/src/lib/package-expanded-row.test.ts
+- `Verified pre-plan facts (probed against the real toolchain 2026-09-04)` --references--> `validatedQuery()`  [INFERRED]
+  docs/superpowers/plans/2026-09-04-m2-preflight-2-api-client.md → apps/api/src/services/validator.ts
+- `Global Constraints` --references--> `unwrap()`  [INFERRED]
+  docs/superpowers/plans/2026-09-05-m2-preflight-4-admin-query-ssr.md → packages/api-client/src/unwrap.ts
+- `Task 2: Consolidated end-to-end re-verification pass (landing + admin)` --references--> `createApiClient()`  [INFERRED]
+  docs/superpowers/plans/2026-09-05-m2-preflight-5-closeout.md → packages/api-client/src/index.ts
 
 ## Import Cycles
 - None detected.
 
 ## Hyperedges (group relationships)
-- **Availability model (ADR-0005): Slots within Branch hours with remaining Slot capacity define bookable Availability** — apps_api_context_adr0005, apps_api_context_slot, apps_api_context_branch_hours, apps_api_context_slot_capacity, apps_api_context_availability [EXTRACTED 1.00]
-- **Guest booking pipeline: Branch → Service Package → Slot → contact info → Confirmation, recorded as an Appointment** — apps_landing_context_booking_flow, apps_api_context_branch, apps_api_context_service_package, apps_api_context_slot, apps_landing_context_confirmation, apps_api_context_appointment [EXTRACTED 1.00]
-- **Canonical domain vocabulary owned by the API context; landing and admin reference it via CONTEXT-MAP** — context_map, apps_api_context, apps_landing_context, apps_admin_context [EXTRACTED 1.00]
-- **Sevendays ADR Series (ADR-0000 template through ADR-0011)** — docs_adr_0000_template_doc, docs_adr_0001_typescript_6_pin_and_biome_adoption_doc, docs_adr_0002_tiered_biome_configs_doc, docs_adr_0003_vitest_4_per_workspace_configs_doc, docs_adr_0004_betterauth_shared_tables_token_verification_adr_0004_api_verifies_betterauth_sessions_via_shared_tables_not_cookies, docs_adr_0005_hourly_slot_grid_capacity_doc, docs_adr_0006_shared_api_client_hono_rpc_doc, docs_adr_0007_database_connection_topology_doc, docs_adr_0008_integration_tests_vs_real_postgres_adr_0008_integration_tests_against_real_postgres, docs_adr_0009_normalized_catalog_lookups_doc, docs_adr_0010_url_path_versioning_adr_0010_url_path_versioning, docs_adr_0011_per_request_db_client_adr_0011_per_request_database_client [INFERRED 0.95]
-- **Toolchain Consolidation (TS 6 pin, Biome tiers, Vitest per-workspace)** — docs_adr_0001_typescript_6_pin_and_biome_adoption_doc, docs_adr_0002_tiered_biome_configs_doc, docs_adr_0003_vitest_4_per_workspace_configs_doc, docs_tech_stack_doc, docs_progress_doc [INFERRED 0.85]
-- **End-to-End Appointment Booking Flow (PRD -> availability -> API client -> milestones)** — docs_prd_guest_booking_flow, docs_adr_0005_hourly_slot_grid_capacity_hourly_slot_grid, docs_adr_0006_shared_api_client_hono_rpc_rpc_client, docs_plan_milestone_2_booking, docs_plan_milestone_3_availability, docs_architecture_doc [INFERRED 0.85]
-- **Milestone 1 + M2 Pre-flight Planning Corpus** — docs_specs_2026_08_30_m1_real_data_layer_spec_m1_real_data_layer, docs_specs_2026_08_30_m2_preflight_api_client_spec_m2_preflight_api_client, docs_specs_2026_09_02_acquisition_error_seam_spec_acquisition_error_seam, docs_specs_2026_09_02_catalog_row_shaping_module_spec_catalog_row_shaping_module, docs_specs_2026_09_02_deepen_appointment_intake_spec_deepen_appointment_intake, docs_specs_2026_09_02_extract_read_stitch_module_spec_extract_read_stitch_module, docs_superpowers_plans_2026_08_30_m1_1_preflight_m1_1_preflight, docs_superpowers_plans_2026_08_31_m1_2_catalog_schema_m1_2_catalog_schema, docs_superpowers_plans_2026_08_31_m1_3_provision_migrate_seed_m1_3_provision_migrate_seed, docs_superpowers_plans_2026_09_01_frame_grouping_and_attire_normalization_frame_grouping_attire_normalization, docs_superpowers_plans_2026_09_01_m1_4_real_routes_integration_tests_m1_4_real_routes_integration_tests, docs_superpowers_plans_2026_09_02_deepen_appointment_intake_deepen_appointment_intake_plan, docs_superpowers_plans_2026_09_02_m1_5_exit_verification_m1_5_exit_verification [EXTRACTED 0.95]
 - **2026-09-02 Architecture Review Candidates (A-D)** — docs_specs_2026_09_02_acquisition_error_seam_spec_acquisition_error_seam, docs_specs_2026_09_02_catalog_row_shaping_module_spec_catalog_row_shaping_module, docs_specs_2026_09_02_deepen_appointment_intake_spec_deepen_appointment_intake, docs_specs_2026_09_02_extract_read_stitch_module_spec_extract_read_stitch_module, docs_superpowers_plans_2026_09_02_deepen_appointment_intake_deepen_appointment_intake_plan [EXTRACTED 0.85]
+- **Milestone 1 + M2 Pre-flight Planning Corpus** — docs_specs_2026_08_30_m1_real_data_layer_spec_m1_real_data_layer, docs_specs_2026_08_30_m2_preflight_api_client_spec_m2_preflight_api_client, docs_specs_2026_09_02_acquisition_error_seam_spec_acquisition_error_seam, docs_specs_2026_09_02_catalog_row_shaping_module_spec_catalog_row_shaping_module, docs_specs_2026_09_02_deepen_appointment_intake_spec_deepen_appointment_intake, docs_specs_2026_09_02_extract_read_stitch_module_spec_extract_read_stitch_module, docs_superpowers_plans_2026_08_30_m1_1_preflight_m1_1_preflight, docs_superpowers_plans_2026_08_31_m1_2_catalog_schema_m1_2_catalog_schema, docs_superpowers_plans_2026_08_31_m1_3_provision_migrate_seed_m1_3_provision_migrate_seed, docs_superpowers_plans_2026_09_01_frame_grouping_and_attire_normalization_frame_grouping_attire_normalization, docs_superpowers_plans_2026_09_01_m1_4_real_routes_integration_tests_m1_4_real_routes_integration_tests, docs_superpowers_plans_2026_09_02_deepen_appointment_intake_deepen_appointment_intake_plan, docs_superpowers_plans_2026_09_02_m1_5_exit_verification_m1_5_exit_verification [EXTRACTED 0.95]
+- **Availability model (ADR-0005): Slots within Branch hours with remaining Slot capacity define bookable Availability** — apps_api_context_adr0005, apps_api_context_slot, apps_api_context_branch_hours, apps_api_context_slot_capacity, apps_api_context_availability [EXTRACTED 1.00]
+- **Canonical domain vocabulary owned by the API context; landing and admin reference it via CONTEXT-MAP** — context_map, apps_api_context, apps_landing_context, apps_admin_context [EXTRACTED 1.00]
+- **Guest booking pipeline: Branch → Service Package → Slot → contact info → Confirmation, recorded as an Appointment** — apps_landing_context_booking_flow, apps_api_context_branch, apps_api_context_service_package, apps_api_context_slot, apps_landing_context_confirmation, apps_api_context_appointment [EXTRACTED 1.00]
 - **Database Connection Topology + Seed Infrastructure** — docs_specs_2026_08_30_m1_real_data_layer_spec_two_connection_topology, docs_specs_2026_08_30_m1_real_data_layer_spec_adr_0007, docs_superpowers_plans_2026_08_31_m1_3_provision_migrate_seed_session_mode_pooler, docs_superpowers_plans_2026_08_31_m1_3_provision_migrate_seed_check_env_gate, docs_superpowers_plans_2026_08_31_m1_3_provision_migrate_seed_seed_upsert, docs_superpowers_plans_2026_08_31_m1_3_provision_migrate_seed_fk_indexes_natural_keys [INFERRED 0.85]
+- **End-to-End Appointment Booking Flow (PRD -> availability -> API client -> milestones)** — docs_prd_guest_booking_flow, docs_adr_0005_hourly_slot_grid_capacity_hourly_slot_grid, docs_adr_0006_shared_api_client_hono_rpc_rpc_client, docs_plan_milestone_2_booking, docs_plan_milestone_3_availability, docs_architecture_doc [INFERRED 0.85]
+- **Toolchain Consolidation (TS 6 pin, Biome tiers, Vitest per-workspace)** — docs_adr_0001_typescript_6_pin_and_biome_adoption_doc, docs_adr_0002_tiered_biome_configs_doc, docs_adr_0003_vitest_4_per_workspace_configs_doc, docs_tech_stack_doc, docs_progress_doc [INFERRED 0.85]
+- **Sevendays ADR Series (ADR-0000 template through ADR-0011)** — docs_adr_0000_template_doc, docs_adr_0001_typescript_6_pin_and_biome_adoption_doc, docs_adr_0002_tiered_biome_configs_doc, docs_adr_0003_vitest_4_per_workspace_configs_doc, docs_adr_0004_betterauth_shared_tables_token_verification_adr_0004_api_verifies_betterauth_sessions_via_shared_tables_not_cookies, docs_adr_0005_hourly_slot_grid_capacity_doc, docs_adr_0006_shared_api_client_hono_rpc_doc, docs_adr_0007_database_connection_topology_doc, docs_adr_0008_integration_tests_vs_real_postgres_adr_0008_integration_tests_against_real_postgres, docs_adr_0009_normalized_catalog_lookups_doc, docs_adr_0010_url_path_versioning_adr_0010_url_path_versioning, docs_adr_0011_per_request_db_client_adr_0011_per_request_database_client [INFERRED 0.95]
 
-## Communities (752 total, 86 thin omitted)
+## Communities (620 total, 61 thin omitted)
 
 ### Community 0 - "Sevendays Service Catalog"
-Cohesion: 0.14
-Nodes (19): Real-Postgres Integration Tests, ADR-0009: Normalized catalog lookups for Print sizes, Attires, and Inclusions, Alternatives Considered, Attire Junction (package_inclusion_attires), Consequences, Context, Decision, ADR-0009: Normalized catalog lookups for Print sizes, Attires, Inclusions (+11 more)
+Cohesion: 0.17
+Nodes (16): ADR-0009: Normalized catalog lookups for Print sizes, Attires, and Inclusions, Alternatives Considered, Attire Junction (package_inclusion_attires), Consequences, Context, Decision, ADR-0009: Normalized catalog lookups for Print sizes, Attires, Inclusions, Frames Table (+8 more)
 
-### Community 1 - "package-inclusions.ts"
-Cohesion: 0.22
-Nodes (9): frames, ADR-0009, packageInclusionKindEnum, packageInclusions, ADR-0009, printSizes, servicePackages, ADR-0005 (+1 more)
+### Community 1 - "with"
+Cohesion: 0.05
+Nodes (38): E2E_ADMIN_URL, E2E_API_URL, E2E_BASE_URL, E2E_SMOKE_STAFF_EMAIL, E2E_SMOKE_STAFF_PASSWORD, PLAYWRIGHT_BROWSERS_PATH, default, description (+30 more)
 
 ### Community 2 - "Three separate Cloudflare Worker deployments (landing/admin/api)"
 Cohesion: 0.15
-Nodes (16): @sevendays/admin — internal dashboard for content + appointments (TanStack Start), @sevendays/api — shared backend API (Hono on Cloudflare Workers), @sevendays/landing — public marketing site + appointment booking (TanStack Start), @sevendays/ui — shadcn/ui design tokens (CSS variables), Secrets via wrangler secret put per environment, Test coverage status: apps/api real vitest, landing/admin no-op, Three separate Cloudflare Worker deployments (landing/admin/api), Cloudflare Worker deploy — Vite plugin + wrangler.jsonc + wrangler secret put (+8 more)
+Nodes (15): @sevendays/admin — internal dashboard for content + appointments (TanStack Start), @sevendays/api — shared backend API (Hono on Cloudflare Workers), @sevendays/landing — public marketing site + appointment booking (TanStack Start), @sevendays/ui — shadcn/ui design tokens (CSS variables), Test coverage status: apps/api real vitest, landing/admin no-op, Three separate Cloudflare Worker deployments (landing/admin/api), Cloudflare Worker deploy — Vite plugin + wrangler.jsonc + wrangler secret put, @sevendays/api-client — the only supported path for both apps to call the API (+7 more)
 
-### Community 3 - "packages/db package.json scripts"
-Cohesion: 0.04
-Nodes (48): drizzle-kit, default, types, dependencies, drizzle-orm, postgres, devDependencies, drizzle-kit (+40 more)
+### Community 3 - "scripts"
+Cohesion: 0.13
+Nodes (15): scripts, build, db:generate, db:migrate, db:push, db:seed, db:studio, db:verify-seed (+7 more)
 
-### Community 4 - "devDependencies"
-Cohesion: 0.07
-Nodes (29): devDependencies, @cloudflare/vite-plugin, @sevendays/config, @tailwindcss/typography, @tanstack/devtools-vite, @tanstack/router-cli, @tanstack/router-plugin, @types/node (+21 more)
+### Community 4 - "admin/package.json"
+Cohesion: 0.08
+Nodes (33): devDependencies, @cloudflare/vite-plugin@^1.54.2, @sevendays/config@workspace:*, @tailwindcss/typography@^0.5.16, @tanstack/devtools-vite@latest, @tanstack/router-cli@^1.167.33, @tanstack/router-plugin@latest, @types/node@^26.4.0 (+25 more)
 
 ### Community 5 - "landing package.json devDependencies"
-Cohesion: 0.07
-Nodes (29): devDependencies, @cloudflare/vite-plugin, @sevendays/config, @tailwindcss/typography, @tanstack/devtools-vite, @tanstack/router-cli, @tanstack/router-plugin, @types/node (+21 more)
+Cohesion: 0.08
+Nodes (33): devDependencies, @cloudflare/vite-plugin@^1.54.2, @sevendays/config@workspace:*, @tailwindcss/typography@^0.5.16, @tanstack/devtools-vite@latest, @tanstack/router-cli@^1.167.33, @tanstack/router-plugin@latest, @types/node@^26.4.0 (+25 more)
 
 ### Community 6 - "Architecture-review specs: row shaping, read-stitch, error seam, intake"
 Cohesion: 0.16
-Nodes (19): Candidate D — route-layer error seam, ADR-0007 seed/verify on session-mode URL, ADR-0008 minimal-fixtures stance, ADR-0009 Normalized Catalog Lookups + ordering, Candidate C — row-shaping builders, One Catalog Row-Shaping Module (Candidate C), Seeder's Natural-Key Upsert Flow, Opt-in Subpath Export (migrate precedent) (+11 more)
+Nodes (16): Candidate D — route-layer error seam, ADR-0007 seed/verify on session-mode URL, ADR-0008 minimal-fixtures stance, ADR-0009 Normalized Catalog Lookups + ordering, Candidate C — row-shaping builders, One Catalog Row-Shaping Module (Candidate C), Seeder's Natural-Key Upsert Flow, Opt-in Subpath Export (migrate precedent) (+8 more)
 
-### Community 7 - "devDependencies"
-Cohesion: 0.13
-Nodes (15): devDependencies, @cloudflare/workers-types, postgres, @sevendays/config, @types/node, typescript, vitest, wrangler (+7 more)
+### Community 7 - "api/package.json"
+Cohesion: 0.14
+Nodes (19): devDependencies, @cloudflare/workers-types@^5, postgres@^3.4.9, @sevendays/config@workspace:*, @types/node@^26.4.0, typescript@^6.0.3, vitest@^4.1.11, wrangler@^4.127.1 (+11 more)
 
 ### Community 8 - "admin/src/routeTree.gen.ts"
 Cohesion: 0.05
-Nodes (48): SettingsScreen(), Route, Route, Route, Route, Route, Route, Route (+40 more)
+Nodes (40): Route, Route, Route, Route, Route, Route, Route, ApiAdminGalleryPhotosIdThumbRoute (+32 more)
 
 ### Community 9 - "dependencies"
 Cohesion: 0.06
-Nodes (31): dependencies, class-variance-authority, cmdk, @fontsource-variable/figtree, @fontsource-variable/roboto-slab, motion, react, @sevendays/api-client (+23 more)
+Nodes (31): dependencies, better-auth@^1.7.5, class-variance-authority@^0.7.1, @dnd-kit/core@6.3.1, @dnd-kit/sortable@10.0.0, @dnd-kit/utilities@3.2.2, dotenv-cli@^11.0.0, @fontsource-variable/figtree@^5.3.0 (+23 more)
 
 ### Community 10 - "dependencies"
 Cohesion: 0.07
-Nodes (29): dependencies, class-variance-authority, cn, dotenv-cli, @fontsource-variable/figtree, @fontsource-variable/geist-mono, @fontsource-variable/roboto-slab, @posthog/react (+21 more)
+Nodes (28): dependencies, class-variance-authority@^0.7.1, cn@^0.3.0, dotenv-cli@^11.0.0, @fontsource-variable/geist-mono@^5.3.0, @fontsource-variable/roboto-slab@^5.3.0, lucide-react@^1.37.0, @posthog/react@^1.10.5 (+20 more)
 
-### Community 11 - "truncate.ts"
-Cohesion: 0.12
-Nodes (24): db, url, db, url, db, url, db, put() (+16 more)
+### Community 11 - "ref_vitest"
+Cohesion: 0.05
+Nodes (83): app, ADR-0006, ADR-0016, v1, db, url, authed(), bearer() (+75 more)
 
 ### Community 12 - "packages/config package.json scripts"
 Cohesion: 0.06
-Nodes (35): author, description, devDependencies, @biomejs/biome, @types/node, typescript, vitest, @vitest/coverage-istanbul (+27 more)
+Nodes (35): author, description, devDependencies, @biomejs/biome@2.5.11, @types/node@^26.4.0, typescript@^6.0.3, vitest@^4.1.11, @vitest/coverage-istanbul@^4.1.10 (+27 more)
 
 ### Community 13 - "scripts"
-Cohesion: 0.05
-Nodes (36): devDependencies, @biomejs/biome, @playwright/test, @sevendays/config, turbo, typescript, vitest, engines (+28 more)
+Cohesion: 0.12
+Nodes (17): scripts, build, build:packages, check, clean, dev, em-dash, fix (+9 more)
 
 ### Community 14 - "packages/types package.json"
-Cohesion: 0.07
-Nodes (29): devDependencies, @sevendays/config, @types/node, typescript, vitest, zod, exports, @sevendays/config (+21 more)
-
-### Community 15 - "2026-10-11-191-ship-provisioning-runbook.md"
 Cohesion: 0.08
-Nodes (24): BETTER_AUTH_SECRET=<auth-secret>, BETTER_AUTH_URL=https://sevendays-v1-admin.<subdomain>.workers.dev, CORS — same rule shape as above, the ship account's three admin origins:, CORS — the three admin origins, exact match, no trailing slash:, DATABASE_URL=<fresh transaction-pooler URL>, .env: DATABASE_MIGRATE_URL → the fresh session-pooler URL (A2), .env.local, temporarily:, Global Constraints (+16 more)
+Nodes (29): devDependencies, @sevendays/config@workspace:*, @types/node@^26.4.0, typescript@^6.0.3, vitest@^4.1.11, zod@^4.5.1, exports, @sevendays/config (+21 more)
+
+### Community 15 - "The ship-provisioning runbook (#191) Implementation Plan"
+Cohesion: 0.29
+Nodes (6): Recon state this plan starts from (verified live 2026-10-11, pre-plan), Task 4: The media runbook, fresh-bucket steps + the corrected M6 pointer, Task 5: The docs rotation, Task 6: The PR, the close-out, the v1 pick (expected SPLIT, scripts picked, docs dropped), the ledger row, The ship-provisioning runbook (#191) Implementation Plan, What this runbook does not do
 
 ### Community 16 - "landing/src/routeTree.gen.ts"
-Cohesion: 0.09
-Nodes (30): getRouter(), Register, @tanstack/react-router, Route, Route, Route, Route, Route (+22 more)
+Cohesion: 0.05
+Nodes (37): PostHogProvider(), PostHogProviderProps, RootDocument(), RouterContext, ErrorComponent(), PostHogProvider(), PostHogProviderProps, siteSettingsQueries (+29 more)
 
-### Community 17 - "appointment.ts"
-Cohesion: 0.08
-Nodes (28): ADR-0013, Appointment, appointmentFieldsSchema, AppointmentKind, appointmentKindSchema, appointmentSchema, AppointmentStatus, appointmentStatusSchema (+20 more)
+### Community 17 - "appointment-read.ts"
+Cohesion: 0.24
+Nodes (8): ADR-0013, appointmentFieldsSchema, EXACTLY_ONE_APPOINTMENT_MESSAGE, appointmentAddonEntrySchema, appointmentWithAddonsSchema, base, serviceOnly, ADR-0020
 
 ### Community 18 - "Shared TS config: base.json"
-Cohesion: 0.10
-Nodes (19): compilerOptions, declaration, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, lib, module, moduleDetection (+11 more)
+Cohesion: 0.12
+Nodes (17): compilerOptions, declaration, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, lib, module, moduleDetection (+9 more)
 
 ### Community 19 - "admin shadcn components.json"
 Cohesion: 0.11
@@ -881,36 +750,36 @@ Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
 ### Community 21 - "types tsconfig.build.json"
-Cohesion: 0.11
-Nodes (17): compilerOptions, declaration, declarationMap, noEmit, outDir, rootDir, exclude, extends (+9 more)
+Cohesion: 0.13
+Nodes (13): compilerOptions, declaration, declarationMap, noEmit, outDir, rootDir, exclude, extends (+5 more)
 
 ### Community 22 - "admin tsconfig.json"
-Cohesion: 0.12
-Nodes (16): compilerOptions, lib, noFallthroughCasesInSwitch, noUncheckedSideEffectImports, noUnusedLocals, noUnusedParameters, paths, extends (+8 more)
+Cohesion: 0.18
+Nodes (10): compilerOptions, lib, noFallthroughCasesInSwitch, noUncheckedSideEffectImports, noUnusedLocals, noUnusedParameters, paths, extends (+2 more)
 
 ### Community 23 - "api tsconfig.build.json"
-Cohesion: 0.11
-Nodes (17): compilerOptions, declaration, declarationMap, noEmit, outDir, rootDir, exclude, extends (+9 more)
+Cohesion: 0.12
+Nodes (15): compilerOptions, declaration, declarationMap, noEmit, outDir, rootDir, exclude, extends (+7 more)
 
 ### Community 24 - "landing tsconfig.json"
-Cohesion: 0.12
-Nodes (16): compilerOptions, lib, noFallthroughCasesInSwitch, noUncheckedSideEffectImports, noUnusedLocals, noUnusedParameters, paths, extends (+8 more)
+Cohesion: 0.18
+Nodes (10): compilerOptions, lib, noFallthroughCasesInSwitch, noUncheckedSideEffectImports, noUnusedLocals, noUnusedParameters, paths, extends (+2 more)
 
 ### Community 25 - "Spec: M1 real data layer"
 Cohesion: 0.14
-Nodes (19): GET /api/v1/addon-services, ADR-0005 Slot Capacity, ADR-0008 Integration Tests vs Real Postgres, ADR-0009 Normalized Catalog Lookups, ADR-0010 URL Path Versioning, appointment_addon_services join (price snapshot), Appointment Kind enum (scheduled|walk_in|visitation), POST /api/v1/appointments (+11 more)
+Nodes (15): GET /api/v1/addon-services, ADR-0005 Slot Capacity, ADR-0008 Integration Tests vs Real Postgres, ADR-0009 Normalized Catalog Lookups, ADR-0010 URL Path Versioning, appointment_addon_services join (price snapshot), Appointment Kind enum (scheduled|walk_in|visitation), POST /api/v1/appointments (+7 more)
 
 ### Community 26 - "db tsconfig.build.json"
 Cohesion: 0.12
-Nodes (16): compilerOptions, declaration, declarationMap, noEmit, outDir, rootDir, exclude, extends (+8 more)
+Nodes (15): compilerOptions, declaration, declarationMap, noEmit, outDir, rootDir, exclude, extends (+7 more)
 
 ### Community 27 - "package.ts"
-Cohesion: 0.07
-Nodes (33): PackageInclusion, PackageInclusionKind, packageInclusionKindSchema, packageInclusionSchema, ADR-0009, CreateServicePackageInput, createServicePackageSchema, PackageSaveFrame (+25 more)
+Cohesion: 0.09
+Nodes (27): Task 5: packages/types, the atomic package-save payload + the canonical read shape, frameSchema, PackageFrame, PackageInclusion, packageInclusionKindSchema, packageInclusionSchema, ADR-0009, createServicePackageSchema (+19 more)
 
 ### Community 28 - "ui/package.json"
-Cohesion: 0.05
-Nodes (42): @base-ui/react, next-themes, dependencies, @base-ui/react, class-variance-authority, cn, lucide-react, next-themes (+34 more)
+Cohesion: 0.06
+Nodes (41): dependencies, @base-ui/react@^1.8.0, class-variance-authority@^0.7.1, cn@^0.3.0, lucide-react@^1.37.0, next-themes@^0.4.6, sonner@^2.0.8, devDependencies (+33 more)
 
 ### Community 29 - "Biome base: formatter"
 Cohesion: 0.14
@@ -920,145 +789,149 @@ Nodes (16): formatter, attributePosition, bracketSameLine, bracketSpacing, enabl
 Cohesion: 0.12
 Nodes (15): jsxQuoteStyle, javascript, formatter, linter, rules, useSortedClasses, noBarrelFile, noNamespaceImport (+7 more)
 
-### Community 31 - "api tsconfig.json"
-Cohesion: 0.12
-Nodes (15): compilerOptions, types, exclude, extends, include, **.config.ts, coverage, dist (+7 more)
+### Community 31 - "createAuth"
+Cohesion: 0.23
+Nodes (18): handleCreateSave(), createAuth(), banAdminUser, createAdminUser, fetchAdminUsers, fetchAdminUserSessions, listSummaries(), pluginErrorToResult() (+10 more)
 
-### Community 32 - "packages/config tsconfig.json"
-Cohesion: 0.13
-Nodes (14): compilerOptions, declaration, declarationMap, noEmit, outDir, rootDir, strictNullChecks, exclude (+6 more)
+### Community 32 - "compilerOptions"
+Cohesion: 0.29
+Nodes (7): compilerOptions, declaration, declarationMap, noEmit, outDir, rootDir, strictNullChecks
 
 ### Community 33 - "Specs: M2 preflight API client + M1.4 plan"
 Cohesion: 0.23
-Nodes (13): ADR-0003 Per-Workspace Vitest Configs, ADR-0004 Auth Session Sharing, ADR-0006 Shared API Client + Hono RPC, ApiClientError typed error class (status + details), @sevendays/api-client shared package, apiErrorSchema — one uniform error envelope, API_URL server-side env with no fallback, Hono RPC Type Inference for AppType (+5 more)
+Nodes (8): ADR-0003 Per-Workspace Vitest Configs, ADR-0004 Auth Session Sharing, ADR-0006 Shared API Client + Hono RPC, ApiClientError typed error class (status + details), @sevendays/api-client shared package, apiErrorSchema — one uniform error envelope, M2 Pre-flight — Shared API Client Spec, TanStack Query SSR wiring in both apps
 
-### Community 34 - "db tsconfig.json"
-Cohesion: 0.15
-Nodes (12): compilerOptions, outDir, exclude, extends, include, dist, node_modules, @sevendays/config/ts/node (+4 more)
+### Community 34 - "env"
+Cohesion: 0.19
+Nodes (20): env, env, API_URL, BETTER_AUTH_URL, CF_ANALYTICS_READ_TOKEN, CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, DATABASE_URL (+12 more)
 
-### Community 35 - "types tsconfig.json"
-Cohesion: 0.15
-Nodes (12): exclude, extends, include, *.config.ts, coverage, dist, node_modules, @sevendays/config/ts/node (+4 more)
+### Community 35 - "primitive"
+Cohesion: 0.18
+Nodes (19): $type, $value, $type, $value, 500, 600, blue, green (+11 more)
 
-### Community 36 - "$TURBO_DEFAULT$"
-Cohesion: 0.22
-Nodes (9): $TURBO_DEFAULT$, inputs, inputs, inputs, inputs, fix, fix:unsafe, format (+1 more)
+### Community 36 - "package.json"
+Cohesion: 0.14
+Nodes (17): devDependencies, @biomejs/biome@2.5.11, @sevendays/config@workspace:*, turbo@^2.10.12, typescript@^6.0.3, vitest@^4.1.11, engines, node (+9 more)
 
 ### Community 37 - "rules"
 Cohesion: 0.17
 Nodes (12): noUnusedVariables, rules, recommended, noBarrelFile, noNamespaceImport, noReExportAll, correctness, nursery (+4 more)
 
 ### Community 38 - "includes"
-Cohesion: 0.17
-Nodes (11): extends, files, includes, !!**/dist, !!**/.output, !public/**/*.svg, @sevendays/config/biome/base, @sevendays/config/biome/vite (+3 more)
+Cohesion: 0.25
+Nodes (7): extends, files, includes, @sevendays/config/biome/base, @sevendays/config/biome/vite, overrides, root
 
 ### Community 39 - "includes"
-Cohesion: 0.18
-Nodes (10): extends, files, includes, !!**/dist, !!**/.output, !public/**/*.svg, @sevendays/config/biome/base, @sevendays/config/biome/vite (+2 more)
+Cohesion: 0.29
+Nodes (6): extends, files, includes, @sevendays/config/biome/base, @sevendays/config/biome/vite, root
 
 ### Community 40 - "Plan: M1.1 preflight"
 Cohesion: 0.22
-Nodes (11): ADR-0007 Database Connection Topology, Two-Connection Database Topology (pooled vs direct), ADR-0007 (authored in this plan), GitHub Actions CI Workflow (pnpm check + build), docs/plan.md Milestone 1 Checklist Rewrite, Committed Env Examples + Gitignored Secrets, M1.1 Pre-flight Implementation Plan, Manifest Aligns (lucide-react ^1.37.0, @types/node ^26) (+3 more)
+Nodes (8): ADR-0007 Database Connection Topology, ADR-0007 (authored in this plan), docs/plan.md Milestone 1 Checklist Rewrite, M1.1 Pre-flight Implementation Plan, Manifest Aligns (lucide-react ^1.37.0, @types/node ^26), GitHub Issue #3 — M1.1 pre-flight, Turbo globalPassThroughEnv Swap (DATABASE_URI → DATABASE_URL + DATABASE_MIGRATE_URL), ADR-0007 Amendment (probe outcome)
 
 ### Community 41 - "tasks"
-Cohesion: 0.18
-Nodes (11): cache, cache, cache, cache, cache, tasks, clean, db:generate (+3 more)
+Cohesion: 0.05
+Nodes (37): dependsOn, env, inputs, outputs, cache, cache, cache, cache (+29 more)
 
 ### Community 42 - "Plan: M1.2 catalog schema"
 Cohesion: 0.33
-Nodes (9): ADR-0003 per-workspace vitest config, ADR-0009 Normalized Catalog Lookups, First Checked-In Migration 0000, Inclusion union (framed_picture|print|privilege), M1.2 Catalog Schema Implementation Plan, Offline-by-Design Ticket (no live DB), GitHub Issue #4 — M1.2 catalog schema, packages/types Vitest Harness (+1 more)
+Nodes (7): ADR-0003 per-workspace vitest config, ADR-0009 Normalized Catalog Lookups, First Checked-In Migration 0000, Inclusion union (framed_picture|print|privilege), M1.2 Catalog Schema Implementation Plan, GitHub Issue #4 — M1.2 catalog schema, packages/types Vitest Harness
 
 ### Community 43 - "Plan: M1.4 real routes + integration tests"
 Cohesion: 0.31
-Nodes (9): ADR-0008 Integration Tests vs Real Postgres, ADR-0010 URL Path Versioning, /api/v1 Versioned Mount (app.route('/api/v1', api)), compose.yaml Postgres 17 Test Service, M1.4 Real API Routes + Integration Tests Plan, migrateDatabase Subpath Export in packages/db, Resolved Catalog Read Shapes (printSize/attires/frames), Global Setup + Fixtures + Truncate Harness (+1 more)
+Nodes (7): ADR-0008 Integration Tests vs Real Postgres, ADR-0010 URL Path Versioning, /api/v1 Versioned Mount (app.route('/api/v1', api)), compose.yaml Postgres 17 Test Service, M1.4 Real API Routes + Integration Tests Plan, migrateDatabase Subpath Export in packages/db, GitHub Issue #6 — M1.4 real routes + integration tests
 
 ### Community 44 - "Biome worker tier"
 Cohesion: 0.20
 Nodes (9): linter, rules, noBarrelFile, noNamespaceImport, noReExportAll, performance, style, $schema (+1 more)
 
 ### Community 45 - "Shared TS config: node.json"
-Cohesion: 0.20
-Nodes (9): compilerOptions, module, moduleResolution, target, types, extends, ./base.json, node (+1 more)
+Cohesion: 0.25
+Nodes (7): compilerOptions, module, moduleResolution, target, types, extends, $schema
 
 ### Community 46 - "db biome.json"
-Cohesion: 0.20
-Nodes (9): extends, files, includes, !!dist, @sevendays/config/biome/base, @sevendays/config/biome/node, root, !!drizzle (+1 more)
+Cohesion: 0.29
+Nodes (6): extends, files, includes, @sevendays/config/biome/base, @sevendays/config/biome/node, root
 
 ### Community 47 - "lookups-screen.tsx"
-Cohesion: 0.05
-Nodes (54): AttireFlipInput, AttiresSection(), EditingTarget, LookupsScreen(), PENDING_ROW_KEYS, PrintSizesSection(), SaveAttireInput, SaveSizeInput (+46 more)
+Cohesion: 0.04
+Nodes (97): editButton(), handleEditorSave(), openCreate(), openEdit(), handleEditorSave(), openCreate(), openAttireEdit(), openSizeEdit() (+89 more)
 
 ### Community 48 - "Implementation Decisions"
-Cohesion: 0.08
-Nodes (24): Admin UI compositions (the #131 rulings, verbatim), Environments and setup (owner-operated runbook, one-time), Implementation Decisions, Landing integration (client-side consumption), Milestone 5 — Admin CMS (v1-track) (spec), Mutation shapes, Open items riding the build, Ordering and bulk operations (closing #131's deferred decision) (+16 more)
+Cohesion: 0.14
+Nodes (14): Admin UI compositions (the #131 rulings, verbatim), Environments and setup (owner-operated runbook, one-time), Implementation Decisions, Landing integration (client-side consumption), Mutation shapes, Ordering and bulk operations (closing #131's deferred decision), Read assembly and public reads, Route topology and authorization (+6 more)
 
 ### Community 49 - "Plan: M1.3 provision, migrate, seed"
 Cohesion: 0.20
-Nodes (15): ADR-0007 Alignment (session-pooler refinement), scripts/catalog.ts Catalog Transcription, check-env.mjs Pre-Flight Gate, FK Indexes + Natural Keys Folded Into Migration 0000, M1.3 Provision, Migrate, Seed Implementation Plan, db:seed Single-Transaction Natural-Key Upsert, Session-Mode Pooler for Migrations + Seed, GitHub Issue #5 — M1.3 provision/migrate/seed (+7 more)
+Nodes (8): ADR-0007 Alignment (session-pooler refinement), M1.3 Provision, Migrate, Seed Implementation Plan, GitHub Issue #5 — M1.3 provision/migrate/seed, db:verify-seed psql-Equivalent Read-Back, ADR-0009 Revised In Place (owner-sanctioned, once), Frame Grouping & Attire Normalization Implementation Plan, Frame Numbering Rules (Frame 1/2/3; unlabeled in listed order), Additive Migration 0001 (frames + junction)
 
-### Community 50 - "build"
-Cohesion: 0.33
-Nodes (6): .env*, inputs, outputs, dist/**, .output/**, build
+### Community 50 - "$id.thumb.ts"
+Cohesion: 0.24
+Nodes (9): photo(), uuid(), THUMB_CACHE_IMMUTABLE, THUMB_CACHE_NO_STORE, ADR-0019, ADR-0025, Route, ADR-0019 (+1 more)
 
 ### Community 51 - "api biome.json"
-Cohesion: 0.25
-Nodes (7): extends, files, includes, @sevendays/config/biome/base, !worker-configuration.d.ts, root, @sevendays/config/biome/worker
+Cohesion: 0.29
+Nodes (6): extends, files, includes, @sevendays/config/biome/base, root, @sevendays/config/biome/worker
 
 ### Community 52 - "Plan: M1.5 exit verification"
 Cohesion: 0.53
-Nodes (6): Four-Act Exit Verification Runbook (pre-flight + acts 1-4), M1.5 M1 Exit Verification + Close-Out Implementation Plan, Negative Controls on the Deployed Artifact, rehearsal-fixture.mjs Compose-Only Rehearsal, GitHub Issue #7 — M1.5 exit verification + close-out, verify-appointment-row.mjs psql-Equivalent Probe
+Nodes (4): Four-Act Exit Verification Runbook (pre-flight + acts 1-4), M1.5 M1 Exit Verification + Close-Out Implementation Plan, rehearsal-fixture.mjs Compose-Only Rehearsal, GitHub Issue #7 — M1.5 exit verification + close-out
 
-### Community 54 - "@sevendays/config docs & CI wiring"
-Cohesion: 0.33
-Nodes (7): pnpm check gate (lint + format + typecheck + test), @sevendays/config — shared ts/biome/vitest tooling configs (built dist, gitignored), Turborepo-powered root commands (dev/build/lint/format/typecheck/test/check/fix), CI workflow (.github/workflows/ci.yml), @sevendays/config/biome/* — base + tier fragments (vite, worker, node), @sevendays/config/ts/* — base, node, react, vite tsconfig variants, @sevendays/config/vitest — shared Vitest config
+### Community 53 - "ref_postgres"
+Cohesion: 0.05
+Nodes (27): Task 1: `packages/db`, branches gain the nullable `cover_image_key` + migration 0010, Task 1: `packages/db`, the singleton `site_settings` table + migration 0011, Task 1: `packages/db`, the `testimonial_submissions` table + migration 0012, fail(), failures, pass(), sql, violations() (+19 more)
 
-### Community 55 - "Biome base: root config"
-Cohesion: 0.29
-Nodes (6): css, parser, files, javascript, tailwindDirectives, $schema
+### Community 54 - "ci.yml"
+Cohesion: 0.14
+Nodes (14): pnpm check gate (lint + format + typecheck + test), @sevendays/config — shared ts/biome/vitest tooling configs (built dist, gitignored), Turborepo-powered root commands (dev/build/lint/format/typecheck/test/check/fix), name, on, pull_request, push, permissions (+6 more)
 
-### Community 56 - "Biome base: includes"
-Cohesion: 0.29
-Nodes (7): includes, !!**/dist, !!**/node_modules, !!**/.turbo, **, !!**/.agents, !!**/.wrangler
+### Community 55 - "biome/base.json"
+Cohesion: 0.17
+Nodes (10): extends, root, files, includes, javascript, $schema, vcs, clientKind (+2 more)
+
+### Community 56 - "devDependencies"
+Cohesion: 0.15
+Nodes (13): devDependencies, @sevendays/config@workspace:*, @sevendays/types@workspace:*, tsx@^4.23.13, @types/node@^26.4.0, typescript@^6.0.3, vitest@^4.1.11, @sevendays/config (+5 more)
 
 ### Community 57 - "Shared TS config: react.json"
-Cohesion: 0.29
-Nodes (6): compilerOptions, jsx, jsxImportSource, extends, ./base.json, $schema
+Cohesion: 0.33
+Nodes (5): compilerOptions, jsx, jsxImportSource, extends, $schema
 
-### Community 58 - "DB script: check-env"
-Cohesion: 0.29
-Nodes (4): dbDir, dbEnvPath, devVarsPath, repoDir
+### Community 58 - "check-env.mjs"
+Cohesion: 0.15
+Nodes (7): destinationDir, workspaceDirs, workspaceRoot, dbDir, dbEnvPath, devVarsPath, repoDir
 
 ### Community 59 - "attire.ts"
-Cohesion: 0.31
-Nodes (7): Attire, attireSchema, CreateAttireInput, createAttireSchema, ADR-0009, UpdateAttireInput, updateAttireSchema
+Cohesion: 0.53
+Nodes (4): attireSchema, createAttireSchema, ADR-0009, updateAttireSchema
 
-### Community 60 - "test"
-Cohesion: 0.29
-Nodes (7): coverage/blob/**, ^test, $TURBO_ROOT$/vitest.config.ts, test, dependsOn, inputs, outputs
+### Community 60 - "db/package.json"
+Cohesion: 0.20
+Nodes (11): dependencies, drizzle-orm@^0.45.2, postgres@^3.4.9, drizzle-orm, postgres, main, name, private (+3 more)
 
-### Community 61 - "turbo.json global env passthrough"
+### Community 61 - "Task 5: `apps/admin` — the Users tab (UI-bearing)"
 Cohesion: 0.29
-Nodes (6): DATABASE_MIGRATE_URL, DATABASE_URL, TEST_DATABASE_URL, globalPassThroughEnv, $schema, ui
+Nodes (7): UsersActionResult, AdminUserSummary, banRefusal(), deleteRefusal(), isActiveOwner(), refusalLines(), Task 3: `apps/admin`, the Users lib seams + the server fns (TDD)
 
 ### Community 62 - "validate_data.py"
-Cohesion: 0.08
-Nodes (46): read_rows(), TestAccessibilityGuidance, TestChartsTypographyAndIcons, TestCurrentReactGuidance, TestSemanticColors, _catalog_date(), _check_app_interface_contract(), _check_catalog_contract() (+38 more)
+Cohesion: 0.06
+Nodes (44): read_rows(), TestAccessibilityGuidance, TestChartsTypographyAndIcons, TestCurrentReactGuidance, TestSemanticColors, TestGeneratedCatalogContract, _catalog_date(), _check_app_interface_contract() (+36 more)
 
-### Community 63 - "Shared vitest config factory"
-Cohesion: 0.60
-Nodes (3): baseConfig, sharedConfig, uiConfig
+### Community 63 - "ref_vitest"
+Cohesion: 0.12
+Nodes (11): publicTableNames(), BODY, sendMock, ADR-0014, ADR-0021, ADR-0003, Task 2: Derive the truncate table list from the exported schema, Task 1: `packages/db`, the `audit_log` table, migration 0008, live apply (TDD through the truncate pin) (+3 more)
 
 ### Community 64 - "addon-service.ts"
-Cohesion: 0.31
-Nodes (7): AddonService, addonServiceSchema, CreateAddonServiceInput, createAddonServiceSchema, ADR-0020, UpdateAddonServiceInput, updateAddonServiceSchema
+Cohesion: 0.53
+Nodes (4): addonServiceSchema, createAddonServiceSchema, ADR-0020, updateAddonServiceSchema
 
 ### Community 65 - "gallery.ts"
-Cohesion: 0.11
-Nodes (23): CreateGalleryCategoryInput, createGalleryCategorySchema, CreateGalleryPhotoInput, createGalleryPhotoSchema, GalleryCategory, GalleryCategoryOrderInput, galleryCategoryOrderSchema, galleryCategorySchema (+15 more)
+Cohesion: 0.24
+Nodes (14): CreateGalleryCategoryInput, createGalleryCategorySchema, createGalleryPhotoSchema, galleryCategoryOrderSchema, galleryCategorySchema, galleryPhotoOrderSchema, galleryPhotoSchema, galleryReadSchema (+6 more)
 
-### Community 66 - "print-size.ts"
-Cohesion: 0.36
-Nodes (6): CreatePrintSizeInput, createPrintSizeSchema, PrintSize, printSizeSchema, UpdatePrintSizeInput, updatePrintSizeSchema
+### Community 66 - "Global Constraints"
+Cohesion: 0.18
+Nodes (11): A4 The fresh bucket (docs/media-bucket-runbook.md § Fresh bucket at ship), A5 Secrets + vars, the complete `v1` GitHub environment write-up, A6 The deploy under the scoped roles (the dry-run gate), A7 The CI re-point, the `v1` environment's deploy identity, B2 Domains + DNS (once the zone is Active), B3 The var flips + the cutover commit + the redeploy, B4 The production smoke, the runbook's last step, Global Constraints (+3 more)
 
 ### Community 67 - "ui/biome.json"
 Cohesion: 0.33
@@ -1069,16 +942,20 @@ Cohesion: 0.17
 Nodes (12): Conventions, Issue Tracker: GitHub via gh CLI, gh CLI Issue Workflow, Issue tracker: GitHub, Pull requests as a triage surface, Wayfinder Map + Child Tickets, Wayfinding operations, When a skill says "fetch the relevant ticket" (+4 more)
 
 ### Community 69 - "gray"
-Cohesion: 0.05
-Nodes (53): $type, $value, $type, $value, $type, $value, $type, $value (+45 more)
+Cohesion: 0.11
+Nodes (19): $type, $value, $type, $value, $type, $value, $type, $value (+11 more)
 
-### Community 70 - "Vitest blob report merge script"
-Cohesion: 0.40
-Nodes (3): destinationDir, workspaceDirs, workspaceRoot
+### Community 70 - "deploy-v1"
+Cohesion: 0.18
+Nodes (11): env, runs-on, environment, if, name, needs, runs-on, TEST_DATABASE_URL (+3 more)
 
-### Community 71 - "DB script: pooler transaction probe"
-Cohesion: 0.40
-Nodes (3): ADR-0007, parsed, sql
+### Community 71 - "appointments.test.ts"
+Cohesion: 0.08
+Nodes (28): captureError(), ErrorCapture, resetErrorCapture(), setErrorCapture(), logError(), ResendRejectionError, authedListHeaders(), createViaApi() (+20 more)
+
+### Community 72 - "Plan: #350 — Handover polish: sweep the apps tree"
+Cohesion: 0.20
+Nodes (9): Branch law, Controller pre-flight (live-run, record before Task 1), Global Constraints, Plan: #350 — Handover polish: sweep the apps tree, Scope fences, Task 1 — the landing: product copy, placeholder glyphs, pins, echo, Task 3 — the api: visitor and staff copy, the email template, the pins, the echo, Task 4 — the mechanical sweep + the fix-up pass (+1 more)
 
 ### Community 73 - "types biome.json"
 Cohesion: 0.40
@@ -1088,85 +965,121 @@ Nodes (4): extends, @sevendays/config/biome/base, @sevendays/config/biome/node, 
 Cohesion: 0.50
 Nodes (3): extends, @sevendays/config/biome/base, $schema
 
-### Community 75 - "packages/config biome.json"
-Cohesion: 0.50
-Nodes (3): extends, root, ./src/biome/base.json
+### Community 75 - "steps"
+Cohesion: 0.36
+Nodes (10): steps, steps, steps, name, run, uses, with, working-directory (+2 more)
 
 ### Community 76 - "Biome base: source settings"
 Cohesion: 0.50
 Nodes (4): source, assist, actions, organizeImports
 
-### Community 77 - "Biome base: VCS settings"
-Cohesion: 0.50
-Nodes (4): vcs, clientKind, enabled, useIgnoreFile
+### Community 77 - "deploy-teaser"
+Cohesion: 0.22
+Nodes (10): cancel-in-progress, group, concurrency, environment, if, name, needs, runs-on (+2 more)
 
-### Community 78 - "Decls for verify-appointment-row script"
-Cohesion: 0.50
-Nodes (3): AppointmentProbeAddon, AppointmentProbeExpected, AppointmentProbeResult
+### Community 78 - "postgres"
+Cohesion: 0.22
+Nodes (9): services, POSTGRES_DB, POSTGRES_PASSWORD, POSTGRES_USER, env, image, options, ports (+1 more)
 
 ### Community 79 - "book.tsx"
 Cohesion: 0.06
-Nodes (46): ChoiceCard(), HourChipGrid(), RejectionCard(), WalkInBadge(), createAppointment, addonTotalCents(), API_REASON_MAP, applicableAddonsFor() (+38 more)
+Nodes (52): FlipInput, addonTotalCents(), API_REASON_MAP, applicableAddonsFor(), BookingCatalog, BookingDetails, BookingSearchInit, branchChoicesFor() (+44 more)
 
-### Community 80 - "connect"
-Cohesion: 0.08
-Nodes (30): FakeXhr, check(), main(), peso(), results, check(), main(), peso() (+22 more)
+### Community 80 - "cms-reflection.mjs"
+Cohesion: 0.22
+Nodes (13): Client Config (auth-client.ts), api(), call(), request(), statusCall(), check(), JPEG, main() (+5 more)
 
 ### Community 81 - "Implementation Decisions"
-Cohesion: 0.10
-Nodes (20): API-side session verification (ADR-0004, made concrete), Closing the public appointments reads, Environments and secrets, Implementation Decisions, Login UI + shell gate (the UI-bearing ticket), Milestone 4 — Admin Auth (v1-track) (spec), Out of scope, Problem Statement (+12 more)
+Cohesion: 0.17
+Nodes (12): API-side session verification (ADR-0004, made concrete), Closing the public appointments reads, Environments and secrets, Implementation Decisions, Login UI + shell gate (the UI-bearing ticket), Staff provisioning (owner-operated, matching the handover model), Testing posture, The admin auth server (`apps/admin`) (+4 more)
+
+### Community 82 - "admin/vite.config.ts"
+Cohesion: 0.18
+Nodes (6): ensureSession, getSession, ADR-0011, Route, config, config
 
 ### Community 84 - "sidebar.tsx"
-Cohesion: 0.06
-Nodes (40): AdminSidebar(), AdminSidebarProps, initials(), AdminTopbar(), ADR-0028, BRAND_ROW_RAIL_CLASSES, brandLockup, LOCKUP_MONOGRAM (+32 more)
+Cohesion: 0.13
+Nodes (31): AdminSidebar(), AdminSidebarProps, initials(), AdminTopbar(), ADR-0028, ShellLayout(), Task 1: The Tier-1 pull-list generated into packages/ui, Task 4: The shell, sidebar, top bar, layout composition, Toaster (+23 more)
 
-### Community 94 - "File Structure"
-Cohesion: 0.18
-Nodes (10): File Structure, Global Constraints, M6 Ticket 03 — The Audit Log's Write Side Implementation Plan, Task 1: `packages/db` — the `audit_log` table, migration 0008, live apply (TDD through the truncate pin), Task 2: `packages/types` — the audit vocabulary + contract tests (TDD), Task 3: `apps/api` — the audit module, requestId in Variables, rows on the four simple families (TDD), Task 4: `apps/api` — studio-services CRUD rows + the two matrix full-replaces (TDD), Task 5: `apps/api` — the gallery families, the three order PUTs, the media-commit row (TDD) (+2 more)
+### Community 85 - "typescript/base.json"
+Cohesion: 0.22
+Nodes (6): $schema, extends, $schema, exclude, extends, include
 
-### Community 96 - "File Structure"
-Cohesion: 0.20
-Nodes (9): File Structure, Global Constraints, M6 Ticket 02 — Sentry Live on All Three Apps Implementation Plan, Task 1: The api capture seam + the onError wiring (TDD), Task 2: The email-send + curated-503 captures (TDD, extending two live suites), Task 3: The api's Worker wrap — `withSentry`, the env trio, the wrangler main, Task 4: The frontends — the options builder (TDD), one init site, the scaffold replacement, Task 5: CI — release/environment tagging + the DSN sync + the VITE bake envs (+1 more)
+### Community 87 - "appointment.ts"
+Cohesion: 0.22
+Nodes (8): AppointmentKind, appointmentKindSchema, AppointmentStatus, appointmentStatusSchema, createAppointmentFieldsSchema, ADR-0020, UpdateAppointmentStatusInput, updateAppointmentStatusSchema
+
+### Community 88 - "input"
+Cohesion: 0.29
+Nodes (8): padding-x, input, $type, $value, focus-ring, padding-x, $type, $value
+
+### Community 94 - "appointment.test.ts"
+Cohesion: 0.25
+Nodes (7): appointmentSchema, createAppointmentSchema, baseCreate, neitherCreate, packageRow, serviceOnlyCreate, serviceRow
+
+### Community 96 - "main"
+Cohesion: 0.43
+Nodes (6): check(), main(), pickDate(), peso(), phDate(), results
 
 ### Community 97 - "admin.functions.ts"
+Cohesion: 0.06
+Nodes (71): LookupsScreen(), handleEditorSave(), openAttireCreate(), openSizeCreate(), handleSaveFailure(), AdminDeleteResult, AdminMutationResult, fetchAdminAddons (+63 more)
+
+### Community 99 - "healthcheck"
+Cohesion: 0.14
+Nodes (13): environment, healthcheck, image, ports, POSTGRES_DB, POSTGRES_PASSWORD, POSTGRES_USER, interval (+5 more)
+
+### Community 104 - "exports"
+Cohesion: 0.29
+Nodes (7): default, types, exports, ./catalog-rows, ./migrate, default, types
+
+### Community 105 - "booking-wizard.mjs"
+Cohesion: 0.53
+Nodes (5): check(), main(), peso(), phDate(), results
+
+### Community 106 - "allowBuilds"
+Cohesion: 0.20
+Nodes (9): allowBuilds, core-js, esbuild, lightningcss, @sentry/cli, sharp, workerd, minimumReleaseAgeExclude (+1 more)
+
+### Community 107 - "$type"
+Cohesion: 0.60
+Nodes (5): $type, $value, 700, 700, 700
+
+### Community 108 - "cip/generate.py"
+Cohesion: 0.19
+Nodes (7): build_cip_prompt(), check_logo_required(), generate_cip_set(), generate_with_nano_banana(), load_env(), load_logo_image(), main()
+
+### Community 109 - "HomeImageLed"
 Cohesion: 0.07
-Nodes (33): GROUP_ICONS, AdminDeleteResult, AdminMutationResult, fetchAdminAddons, fetchAdminAttires, fetchAdminBranches, fetchAdminGalleryCategories, fetchAdminGalleryPhotos (+25 more)
-
-### Community 108 - "search"
-Cohesion: 0.08
-Nodes (37): detect_domain(), get_cip_brief(), _load_csv(), Load CSV and return list of dicts, Core search function using BM25, Auto-detect the most relevant domain from query, Main search function with auto-domain detection, Search across all domains and combine results (+29 more)
-
-### Community 109 - "Global Constraints"
-Cohesion: 0.15
-Nodes (12): Global Constraints, M3 Verification + Close-Out (M3 ticket #101) Implementation Plan, Self-Review, Task 1: Promote the endorsed composition — the three production files, Task 2: The flip — `index.tsx` renders variant D + the ruled content-pages edit, Task 3: The serif register on inner pages (class-only), Task 4: Delete the prototype surfaces, Task 5: Main-side verification pack — stack, CDP trio, static gates, contrast (+4 more)
+Nodes (29): HERO_PHOTO, HERO_PHOTO_ALT, HomeImageLed(), FALLBACK_HEADING, FEATURED_COUNT, FEATURED_HEADING, selectFeaturedPackages(), A (+21 more)
 
 ### Community 110 - "ui-styling: Tailwind utilities reference"
 Cohesion: 0.05
 Nodes (43): Arbitrary Values, Aspect Ratio, Background Colors, Border Color, Border Radius, Border Style, Border Width, Borders (+35 more)
 
 ### Community 111 - "design-system: slide search core"
-Cohesion: 0.09
-Nodes (36): format_context(), format_result(), main(), Format a single search result for display, Format contextual recommendations for display., BM25, calculate_pattern_break(), detect_domain() (+28 more)
+Cohesion: 0.08
+Nodes (17): format_context(), format_result(), main(), BM25, calculate_pattern_break(), detect_domain(), get_background_config(), get_color_for_emotion() (+9 more)
 
 ### Community 112 - "brand: guidelines starter template"
 Cohesion: 0.05
 Nodes (37): 1. Color Palette, 2. Typography, 3. Logo Usage, 4. Voice & Tone, 5. Imagery Guidelines, 6. Design Components, Accessibility, AI Image Generation (+29 more)
 
-### Community 113 - "BM25"
-Cohesion: 0.09
-Nodes (14): BM25, BM25 ranking algorithm for text search, Lowercase, split, remove punctuation, filter short words, Build BM25 index from documents, Score all documents against query, format_markdown(), generate_design_system(), Format design system as markdown. (+6 more)
+### Community 113 - "test_core.py"
+Cohesion: 0.04
+Nodes (8): format_markdown(), generate_design_system(), TestBm25CoreBehavior, TestDiagnosticsContracts, TestDomainDetection, TestPersistence, TestSearchDomains, TestTokenizer
 
 ### Community 114 - "@tanstack/react-start"
-Cohesion: 0.13
-Nodes (14): compilerOptions, allowJs, jsx, jsxImportSource, module, noEmit, target, types (+6 more)
+Cohesion: 0.25
+Nodes (8): compilerOptions, allowJs, jsx, jsxImportSource, module, noEmit, target, types
 
 ### Community 115 - "design skill docs"
 Cohesion: 0.06
 Nodes (35): Banner Design (Built-in), Banner: Design Rules, Banner: Quick Size Reference, Banner: Top Art Styles, Banner: Workflow, CIP Design (Built-in), CIP: Generate Brief, CIP: Generate Mockups (+27 more)
 
-### Community 116 - "branches-screen.tsx"
-Cohesion: 0.08
-Nodes (37): BranchesScreen(), BulkFlipOutcome, EditingTarget, FlipInput, PENDING_ROW_KEYS, SaveBranchInput, RelationBadges(), Collapse() (+29 more)
+### Community 116 - "cip/core.py"
+Cohesion: 0.12
+Nodes (7): BM25, detect_domain(), get_cip_brief(), _load_csv(), search(), search_all(), _search_csv()
 
 ### Community 117 - "ui-styling: canvas design system"
 Cohesion: 0.06
@@ -1177,24 +1090,24 @@ Cohesion: 0.06
 Nodes (34): Active Organizations, Adding Members (Server-Side), Assigning Multiple Roles, Checking Permissions, Client-Side Setup, Complete Configuration Example, Controlling Organization Creation, Creating Custom Roles (+26 more)
 
 ### Community 119 - "lib/auth.ts"
-Cohesion: 0.15
-Nodes (12): requireAuditSession(), auth, ADR-0011, ADR-0027, createAuth(), ensureSession, getSession, ADR-0011 (+4 more)
+Cohesion: 0.20
+Nodes (6): auth, ADR-0011, ADR-0027, ADR-0011, ADR-0021, ADR-0027
 
-### Community 120 - "share-your-story.tsx"
-Cohesion: 0.25
-Nodes (11): submitTestimonial, buildTestimonialSubmissionPayload(), canSubmitTestimonialForm(), FORM_BOUNDS, GENERIC_SEND_FAILURE_LINE, PERSON_TOO_SHORT_LINE, QUOTE_TOO_SHORT_LINE, valid (+3 more)
+### Community 120 - "$type"
+Cohesion: 0.60
+Nodes (5): $type, $value, border, border, border
 
 ### Community 121 - "ui-ux-pro-max: prerequisites"
 Cohesion: 0.06
 Nodes (34): Accessibility, Available Domains, Available Stacks, Common Rules for Professional UI, Common Sticking Points, Example Workflow, How to Use This Skill, Icons & Visual Elements (+26 more)
 
 ### Community 122 - "packages/api-client package.json"
-Cohesion: 0.06
-Nodes (34): dependencies, hono, @sevendays/types, zod, devDependencies, @hono/zod-validator, @sevendays/api, @sevendays/config (+26 more)
+Cohesion: 0.07
+Nodes (34): dependencies, hono@^4.6.0, @sevendays/types@workspace:*, zod@^4.5.1, devDependencies, @hono/zod-validator@^0.4.0, @sevendays/api@workspace:*, @sevendays/config@workspace:* (+26 more)
 
 ### Community 123 - "spacing"
-Cohesion: 0.09
-Nodes (22): $type, $value, $type, $value, $type, $value, $type, $value (+14 more)
+Cohesion: 0.06
+Nodes (34): $type, $value, $type, $value, $type, $value, $type, $value (+26 more)
 
 ### Community 124 - "Workspace Task Orchestration"
 Cohesion: 0.15
@@ -1202,11 +1115,11 @@ Nodes (12): Commands that ignore `tasks`, Concurrency groups (v12.5.0), Cycles, 
 
 ### Community 125 - "Global Constraints"
 Cohesion: 0.15
-Nodes (12): #310 — the deployed-teaser cold-isolate hydration census — plan, Global Constraints, Not here, Self-review notes (plan-time), Task 1: branch + plan commit, Task 2: the census ruling comment on #310, Task 3: the BEFORE census (two passes) + the decision gate, Task 4: Phase B — the seam, the nine loaders, the docs (the preserved plan's Tasks 3–5, the pinned deltas) (+4 more)
+Nodes (12): #310, the deployed-teaser cold-isolate hydration census, plan, Global Constraints, Not here, Self-review notes (plan-time), Task 1: branch + plan commit, Task 2: the census ruling comment on #310, Task 3: the BEFORE census (two passes) + the decision gate, Task 4: Phase B, the seam, the nine loaders, the docs (the preserved plan's Tasks 3–5, the pinned deltas) (+4 more)
 
-### Community 126 - "search_stack"
-Cohesion: 0.10
-Nodes (8): _project_row(), Search stack-specific guidelines, search_stack(), _valid_max_results(), _rows(), TestNativeDesktopStackFreshness, _rows(), TestWebStackFreshness
+### Community 126 - "test_relevance_evaluator.py"
+Cohesion: 0.12
+Nodes (3): TestFixtureValidation, TestMetricMath, TestThresholdGate
 
 ### Community 127 - "pnpm/SKILL.md"
 Cohesion: 0.18
@@ -1268,21 +1181,17 @@ Nodes (9): Bad Example, Context, Explanation, Good Example: Combining Middleware
 Cohesion: 0.07
 Nodes (28): Accordion, Alert, ARIA Labels, Checkbox and Radio, Color Contrast, Command Palette Navigation, Component-Specific Patterns, Dialog/Modal Navigation (+20 more)
 
-### Community 142 - "ui-styling: Tailwind config gen tests"
-Cohesion: 0.07
-Nodes (15): Test adding colors multiple times., Test adding full color palette., Test adding custom breakpoints., Test TailwindConfigGenerator class., Test generating TypeScript configuration., Test generating config with plugins., Test validating config with no content paths., Test validating config with empty theme extensions. (+7 more)
-
-### Community 143 - "testEnv"
-Cohesion: 0.10
-Nodes (26): authed(), bearer(), db, url, authed(), bearer(), authed(), bearer() (+18 more)
+### Community 143 - "requireSession"
+Cohesion: 0.14
+Nodes (19): authenticationRequired(), createVerificationAuth(), requireSession(), Milestone 5 — Admin CMS (v1-track) (spec), Open items riding the build, Out of Scope, Problem Statement, References (+11 more)
 
 ### Community 144 - "session-cache.test.ts"
-Cohesion: 0.10
-Nodes (27): authenticationRequired(), createVerificationAuth(), requireSession(), SessionData, ADR-0004, ADR-0011, ADR-0027, VerificationAuth (+19 more)
+Cohesion: 0.11
+Nodes (22): ADR-0004, ADR-0011, ADR-0027, VerificationAuth, DATE_COLUMNS, defaultStore(), getSessionCacheStore(), presentedBearerToken() (+14 more)
 
 ### Community 145 - "design-system: HTML token validator"
-Cohesion: 0.14
-Nodes (24): get_context(), is_allowed_exception(), is_allowed_rgba(), is_inside_block(), load_css_variables(), main(), print_result(), print_summary() (+16 more)
+Cohesion: 0.13
+Nodes (12): get_context(), is_allowed_exception(), is_allowed_rgba(), is_inside_block(), load_css_variables(), main(), print_result(), print_summary() (+4 more)
 
 ### Community 146 - "ssr-selective: Apply Selective SSR When Beneficial"
 Cohesion: 0.20
@@ -1294,7 +1203,7 @@ Nodes (9): Further Notes, Implementation Decisions, M9 — Admin Notifications &
 
 ### Community 148 - "scripts/core.py"
 Cohesion: 0.06
-Nodes (47): BM25, _contains_phrase(), _domain_keywords(), _exact_match_diagnostic(), _exact_row_identity(), _file_signature(), _get_bm25(), _legacy_successor_guidance() (+39 more)
+Nodes (31): BM25, _contains_phrase(), detect_domain(), _domain_keywords(), _exact_match_diagnostic(), _exact_row_identity(), _exact_stack_identifier(), _file_signature() (+23 more)
 
 ### Community 149 - "pnpm: performance practices"
 Cohesion: 0.07
@@ -1320,9 +1229,9 @@ Nodes (7): Bad Example, Context, Explanation, Good Example: mutateAsync with try
 Cohesion: 0.22
 Nodes (8): Bad Example, Context, Explanation, Good Example, Good Example: Inline Optimistic Item with variables, mut-loading-states: Use isPending for Mutation Loading States, Mutation Status Reference, Priority: MEDIUM
 
-### Community 155 - "search"
-Cohesion: 0.10
-Nodes (9): _exact_stack_identifier(), Resolve a deprecated in-domain alias, or expose a cross-domain redirect., Main search function with auto-domain detection, Resolve a standalone API identifier even when its BM25 IDF is low., search(), _style_search_destination(), TestSearchDomains, read_rows() (+1 more)
+### Community 155 - "audit.functions.ts"
+Cohesion: 0.16
+Nodes (16): AuditResult, fetchAuditActors, fetchAuditLogPage, readDbUrl(), requireAuditSession(), ADR-0018, ADR-0023, auditLogSearchSchema (+8 more)
 
 ### Community 156 - "brand: asset approval checklist"
 Cohesion: 0.08
@@ -1346,7 +1255,7 @@ Nodes (24): Apparel, Business Card, Car/Sedan, CIP Deliverable Guide, Core Ident
 
 ### Community 161 - "design: logo search scripts"
 Cohesion: 0.12
-Nodes (19): BM25, detect_domain(), _load_csv(), Load CSV and return list of dicts, Core search function using BM25, Auto-detect the most relevant domain from query, Main search function with auto-domain detection, Search across all domains and combine results (+11 more)
+Nodes (6): BM25, detect_domain(), _load_csv(), search(), search_all(), _search_csv()
 
 ### Community 162 - "design-system: states & variants"
 Cohesion: 0.08
@@ -1368,29 +1277,29 @@ Nodes (23): Art Direction Styles (Reuse from Banner), Color & Contrast, Design B
 Cohesion: 0.22
 Nodes (8): API Comparison, Bad Example, Context, Explanation, Good Example, Good Example: With revalidateIfStale, pf-ensure-query-data: Use ensureQueryData for Conditional Prefetching, Priority: MEDIUM
 
-### Community 167 - "DesignSystemGenerator"
-Cohesion: 0.05
-Nodes (36): _contrast_ratio(), _derive_dark_palette(), DesignSystemGenerator, _filter_anti_patterns_for_mode(), _palette_is_dark(), _query_wants_dark(), WCAG relative luminance of a #RRGGBB string, or None if unparseable., True when a colors.csv row's Background is a dark surface. (+28 more)
+### Community 167 - "test_design_system_mode.py"
+Cohesion: 0.04
+Nodes (27): ansi_ljust(), _contrast_ratio(), _derive_dark_palette(), _detect_page_type(), _filter_anti_patterns_for_mode(), format_ascii_box(), format_master_md(), format_page_override_md() (+19 more)
 
 ### Community 168 - "posthog.ts"
-Cohesion: 0.16
-Nodes (27): escapeHogqlString(), eventsFilter(), fetchTrafficMetrics(), hogqlHostList(), isoToHogqlDatetime(), mungeTopPages(), mungeTrafficSeries(), mungeVitals() (+19 more)
+Cohesion: 0.14
+Nodes (37): PosthogConfig, escapeHogqlString(), eventsFilter(), fetchTrafficMetrics(), hogqlHostList(), isoToHogqlDatetime(), mungeTopPages(), mungeTrafficSeries() (+29 more)
 
 ### Community 169 - "design-system skill overview"
 Cohesion: 0.09
 Nodes (22): Best Practices, Chart.js Integration, Command, Component Spec Pattern, Contextual Decision Flow, Decision System CSVs, Design System, Integration (+14 more)
 
 ### Community 170 - "radius"
-Cohesion: 0.19
-Nodes (14): $type, $value, $type, $value, $type, $value, primitive, radius (+6 more)
+Cohesion: 0.11
+Nodes (27): $type, $value, lg, sm, $type, $value, $type, $value (+19 more)
 
 ### Community 171 - "ui-styling: Tailwind customization"
 Cohesion: 0.09
 Nodes (22): @apply Directive, Best Practices, Color Customization, Complete Tailwind Config, Configuration Examples, Content Configuration, Custom Color Palette, Custom Font Sizes (+14 more)
 
-### Community 172 - "Plan: #81 v1 first light (file structure)"
+### Community 172 - "Global Constraints"
 Cohesion: 0.18
-Nodes (10): #81 — v1 First Light: CI Green + Continuous Private Deploy, Verified Booking-Free — Implementation Plan, File Structure, Global Constraints, Task 1: Pre-flight — baseline and drift check, Task 2: The live booking-free battery on `sevendays-v1-*` (AC 2), Task 3: The env-shed in production shape (AC 3), Task 4: Teaser (main) untouched and still booking-present (AC 4), Task 5: CI green + deploy history on `v1` from the first push (AC 1 + AC 5) (+2 more)
+Nodes (10): Global Constraints, M4 Ticket 01, BetterAuth Foundation (deps, auth schema, migration 0005, env posture) Implementation Plan, Self-Review (recorded at planning time), Task 1: Dependency pins, `better-auth` in both apps, `@sevendays/db` in admin, Task 2: The auth factory + CLI instance file, `auth generate`, and the schema's house adjustments, Task 3: Migration 0005, generate through the house flow, apply, verify live, Task 4: Dev env examples, admin gains three vars, api gains one, Task 5: Deploy-workflow posture, `BETTER_AUTH_URL` vars + admin `DATABASE_URL` sync, both editions (+2 more)
 
 ### Community 173 - "Migration to pnpm"
 Cohesion: 0.09
@@ -1398,7 +1307,7 @@ Nodes (22): CI/CD Migration, Configuration Migration, From Lerna, From npm, From
 
 ### Community 175 - "create-auth skill"
 Cohesion: 0.10
-Nodes (20): Auth UI Implementation, Client Config (auth-client.ts), Common Plugins, Create Auth Skill, Database Adapters, Database Migrations, Drizzle Config (`drizzle.config.ts`), Drizzle + PostgreSQL Setup (+12 more)
+Nodes (19): Auth UI Implementation, Common Plugins, Create Auth Skill, Database Adapters, Database Migrations, Drizzle Config (`drizzle.config.ts`), Drizzle + PostgreSQL Setup, Environment Variables (+11 more)
 
 ### Community 176 - "pnpm Store"
 Cohesion: 0.08
@@ -1417,16 +1326,16 @@ Cohesion: 0.22
 Nodes (8): Bad Example, Context, ctx-before-load: Extend Context in beforeLoad, Execution Order, Explanation, Good Example, Good Example: Building Context Incrementally, Priority: LOW
 
 ### Community 180 - "ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies"
-Cohesion: 0.13
-Nodes (21): ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies, Alternatives Considered, Consequences, Context, Decision, ADR-0005: Hourly slot grid with per-slot capacity for booking availability, Alternatives Considered, Consequences (+13 more)
+Cohesion: 0.12
+Nodes (31): BetterAuth Staff Auth, ADR-0004: API verifies BetterAuth sessions via shared tables, not cookies, Alternatives Considered, Consequences, Context, Decision, Shared Session Tables Token Verification, ADR-0005: Hourly slot grid with per-slot capacity (+23 more)
 
 ### Community 181 - "design: routing by task type"
 Cohesion: 0.10
 Nodes (19): Banner Design Tasks, Brand Identity Tasks, Component Creation, Corporate Identity Program Tasks, Design Routing Guide, Design System Migration, Icon Design Tasks, Implementation Tasks (+11 more)
 
 ### Community 182 - "design-system: slide generator"
-Cohesion: 0.15
-Nodes (19): _e(), generate_chart_slide(), generate_cta_slide(), generate_deck(), generate_metrics_slide(), generate_problem_slide(), generate_solution_slide(), generate_testimonial_slide() (+11 more)
+Cohesion: 0.13
+Nodes (11): _e(), generate_chart_slide(), generate_cta_slide(), generate_deck(), generate_metrics_slide(), generate_problem_slide(), generate_solution_slide(), generate_testimonial_slide() (+3 more)
 
 ### Community 183 - "ctx-dependency-injection: Use Context for Dependency Injection"
 Cohesion: 0.22
@@ -1436,10 +1345,6 @@ Nodes (8): Bad Example, Context, ctx-dependency-injection: Use Context for Depen
 Cohesion: 0.10
 Nodes (19): Base Color Presets, Best Practices, Color Customization, Color Format, Component Customization, CSS Variable System, Customize Styles, Customize Variants (+11 more)
 
-### Community 185 - "ui-styling: Tailwind config generator"
-Cohesion: 0.10
-Nodes (11): Generate Tailwind CSS configuration files., Add full color palette (50-950 shades) for a base color. Args: name: Color name…, TailwindConfigGenerator, Test adding custom fonts., Test adding custom spacing., Test that adding same plugin twice doesn't duplicate., Test initialization for JavaScript config., Test initialization with different frameworks. (+3 more)
-
 ### Community 186 - "vitest: core test API"
 Cohesion: 0.10
 Nodes (20): Async Tests, Basic Test, Benchmarks (v5), Concurrent Tests, Custom Test with Fixtures, Failing Tests, Focus Tests, Key Points (+12 more)
@@ -1448,9 +1353,9 @@ Nodes (20): Async Tests, Basic Test, Benchmarks (v5), Concurrent Tests, Custom T
 Cohesion: 0.09
 Nodes (23): Async Timer Methods, Auto-advancing and Tick Modes, Auto-Cleanup with `using`, Auto-mock with Spy, Clearing Mocks, Conditional Mocking with vi.when (v5), Config Auto-Reset, Dynamic Mocking (vi.doMock) (+15 more)
 
-### Community 188 - "catalog-rows.ts"
-Cohesion: 0.13
-Nodes (19): assertAllKnownAttires(), AttireIdLookup, buildFrameRowValues(), buildInclusionRowValues(), buildJunctionPairs(), FrameRowValues, InclusionEntry, InclusionKind (+11 more)
+### Community 188 - "seed.ts"
+Cohesion: 0.06
+Nodes (55): Catalog Row-Shaping Module, Implementation Plan, File Structure, Global Constraints, Task 0: Branch and environment bootstrap, Task 1: The row-shaping builders (TDD) + opt-in subpath export, Task 3: Adopt the builders in the API test fixtures, Task 4: Adopt the builders in the seeder, Task 5: Full gates, every consumer proven together (+47 more)
 
 ### Community 189 - "Better Auth Integration Guide"
 Cohesion: 0.10
@@ -1476,13 +1381,13 @@ Nodes (20): Basic Setup, Best Practices Summary, Build Changed Packages Only, Ca
 Cohesion: 0.11
 Nodes (18): allowUnusedPatches, Best Practices, Creating a Patch, List Patched Packages, Managing Patches, Multiple Packages / Workspaces, Patch Configuration, Patch fails to apply (+10 more)
 
-### Community 195 - "Roadmap - Milestone Plan (M0-M6)"
-Cohesion: 0.15
-Nodes (19): BetterAuth Staff Auth, Dual Connection Strings (DATABASE_URL / DATABASE_MIGRATE_URL), Roadmap - Milestone Plan (M0-M6), Explicitly Deferred (post-v1, see PRD "Out of Scope"), Milestone 0 — Baseline (complete — exit criteria verified 2026-08-30), Milestone 1 — Real Data Layer, Milestone 2 — Public Booking Flow, Milestone 3: Booking Availability (+11 more)
+### Community 195 - "Roadmap"
+Cohesion: 0.25
+Nodes (8): Explicitly Deferred (post-v1, see PRD "Out of Scope"), Milestone 0 — Baseline (complete — exit criteria verified 2026-08-30), Milestone 1 — Real Data Layer, Milestone 2 — Public Booking Flow, Milestone 3 — Booking Availability, Milestone 4 — Admin Auth + Dashboard, Milestone 6 — Production Hardening, Roadmap
 
 ### Community 196 - "Root AGENTS.md conventions"
 Cohesion: 0.11
-Nodes (16): Agent skills, Commands, Current status of `pnpm test`, Directory Structure, Domain docs, Engineering Rules, graphify, Issue tracker (+8 more)
+Nodes (15): Agent skills, Commands, Current status of `pnpm test`, Directory Structure, Domain docs, Engineering Rules, graphify, Issue tracker (+7 more)
 
 ### Community 197 - "brand: consistency checklist"
 Cohesion: 0.11
@@ -1496,9 +1401,9 @@ Nodes (17): Apparel (Polo/T-Shirt), Base Prompt Structure, Business Card, CIP Mo
 Cohesion: 0.11
 Nodes (17): Accent, Applying Semantic Tokens, Background & Foreground, Border & Ring, Color Semantics, Dark Mode Overrides, Destructive, Interactive States (+9 more)
 
-### Community 200 - "design-system: background fetcher"
-Cohesion: 0.17
-Nodes (17): generate_css_for_background(), get_background_image(), get_curated_images(), get_overlay_css(), get_pexels_search_url(), load_backgrounds_config(), load_brand_colors(), main() (+9 more)
+### Community 200 - "json"
+Cohesion: 0.05
+Nodes (17): test_sync_parses_bundled_starter_template(), generate_css_for_background(), get_background_image(), get_curated_images(), get_overlay_css(), get_pexels_search_url(), load_backgrounds_config(), load_brand_colors() (+9 more)
 
 ### Community 201 - "Override Patterns"
 Cohesion: 0.10
@@ -1521,12 +1426,12 @@ Cohesion: 0.11
 Nodes (18): CI Integration, Code Coverage, Configuration, Coverage with Sharding, Ignoring Code, Istanbul, Istanbul, Key Points (+10 more)
 
 ### Community 206 - "ADR-0010: URL path versioning"
-Cohesion: 0.14
-Nodes (18): Shared Session Tables Token Verification, ADR-0006: Shared API client via Hono RPC type-sharing, called server-to-server only, Alternatives Considered, Consequences, Context, Decision, ADR-0006: Shared API client via Hono RPC type-sharing (server-to-server only), Hono RPC Shared API Client (packages/api-client) (+10 more)
+Cohesion: 0.15
+Nodes (15): ADR-0006: Shared API client via Hono RPC type-sharing, called server-to-server only, Alternatives Considered, Consequences, Context, Decision, ADR-0006: Shared API client via Hono RPC type-sharing (server-to-server only), Hono RPC Shared API Client (packages/api-client), Server-Mediated Topology (browser -> own app -> api) (+7 more)
 
 ### Community 207 - "api-client tsconfig.build.json"
-Cohesion: 0.11
-Nodes (17): compilerOptions, declaration, declarationMap, noEmit, outDir, rootDir, exclude, extends (+9 more)
+Cohesion: 0.13
+Nodes (13): compilerOptions, declaration, declarationMap, noEmit, outDir, rootDir, exclude, extends (+5 more)
 
 ### Community 208 - "pnpm CLI Commands"
 Cohesion: 0.09
@@ -1544,17 +1449,17 @@ Nodes (16): Code Splitting (Prefix: `split-`), Data Loading (Prefix: `load-`), E
 Cohesion: 0.12
 Nodes (16): API Routes (Prefix: `api-`), Authentication (Prefix: `auth-`), Deployment (Prefix: `deploy-`), Environment (Prefix: `env-`), Error Handling (Prefix: `err-`), File Organization (Prefix: `file-`), Full Reference, How to Use (+8 more)
 
-### Community 212 - "load-error-handling: Handle Loader Errors Appropriately"
-Cohesion: 0.22
-Nodes (8): Bad Example, Context, Error Handling Callbacks, Explanation, Good Example, Good Example: With TanStack Query, load-error-handling: Handle Loader Errors Appropriately, Priority: HIGH
+### Community 212 - "ADR-0005: Hourly slot grid with per-slot capacity for booking availability"
+Cohesion: 0.40
+Nodes (5): ADR-0005: Hourly slot grid with per-slot capacity for booking availability, Alternatives Considered, Consequences, Context, Decision
 
-### Community 213 - "TestShadcnInstaller"
-Cohesion: 0.12
-Nodes (10): Test ShadcnInstaller class., Test adding all components without config., Test adding all components in dry run mode., Create temporary project structure., Test listing installed components when none exist., Test listing installed components when they exist., Test initialization with default project root., Test initialization with custom project root. (+2 more)
+### Community 213 - "ShadcnInstaller"
+Cohesion: 0.05
+Nodes (3): main(), ShadcnInstaller, TestShadcnInstaller
 
-### Community 214 - "ui-ux-pro-max: threshold gate tests"
-Cohesion: 0.13
-Nodes (3): TestFixtureValidation, TestMetricMath, TestThresholdGate
+### Community 214 - "50"
+Cohesion: 0.67
+Nodes (4): $type, $value, 50, 50
 
 ### Community 215 - "vitest/SKILL.md"
 Cohesion: 0.21
@@ -1566,15 +1471,15 @@ Nodes (18): Assertion Count, Asymmetric Matchers, Basic Assertions, Chai-Style S
 
 ### Community 217 - "Per-context CONTEXT docs"
 Cohesion: 0.13
-Nodes (13): Admin, Language, Availability decision (ADR-0005), API, Availability (ADR-0005), API owns the canonical domain vocabulary, Language, Landing (+5 more)
+Nodes (12): Admin, Language, Availability decision (ADR-0005), API, Availability (ADR-0005), Language, Landing, Language (+4 more)
 
 ### Community 218 - "ADRs: TS 6 pin & tiered Biome"
 Cohesion: 0.14
 Nodes (17): ADR-0001: Pin TypeScript to ^6.0.3 and standardize on Biome for lint + format, Alternatives Considered, Biome Replaces ESLint + Prettier, Consequences, Context, Decision, ADR-0001: Pin TypeScript to ^6.0.3, standardize on Biome, Maximal Biome Ruleset (preset all + nursery) (+9 more)
 
-### Community 219 - "audit-read.ts"
-Cohesion: 0.15
-Nodes (11): AuditLogQueryParams, AuditLogRowData, buildConditions(), runAuditActors(), runAuditLogPage(), ADR-0023, createDbClient(), ADR-0008 (+3 more)
+### Community 219 - "800"
+Cohesion: 0.67
+Nodes (4): $type, $value, 800, 800
 
 ### Community 220 - "banner-design: sizes & styles"
 Cohesion: 0.12
@@ -1584,13 +1489,13 @@ Nodes (15): 22 Art Direction Styles, Banner Sizes & Art Direction Styles Referen
 Cohesion: 0.12
 Nodes (15): 22 Art Direction Styles, Banner Sizes & Art Direction Styles Reference, Complete Banner Sizes, CTA Rules, Design Principles, Pinterest Research Queries, Print, Print Specs (+7 more)
 
-### Community 222 - "design: icon generator"
-Cohesion: 0.20
-Nodes (15): apply_color(), apply_viewbox_size(), extract_svgs(), generate_batch(), generate_icon(), generate_sizes(), load_env(), main() (+7 more)
+### Community 222 - "icon/generate.py"
+Cohesion: 0.06
+Nodes (20): generate_html(), get_deliverable_info(), get_image_base64(), main(), format_brief(), format_results(), main(), apply_color() (+12 more)
 
 ### Community 223 - "fontSize"
-Cohesion: 0.12
-Nodes (16): $type, $value, $type, $value, $type, $value, $type, $value (+8 more)
+Cohesion: 0.11
+Nodes (20): $type, $value, $type, $value, $type, $value, $type, $value (+12 more)
 
 ### Community 224 - "pnpm Workspaces"
 Cohesion: 0.11
@@ -1604,17 +1509,17 @@ Nodes (15): Add multiple versions, Add with alias, Basic Syntax, Best Practices,
 Cohesion: 0.22
 Nodes (8): Bad Example, Context, Explanation, Good Example, Good Example: With TanStack Query, How the Cache Key Works, load-loader-deps: Define loaderDeps for Cache Control, Priority: HIGH
 
-### Community 227 - ".add_components"
-Cohesion: 0.22
-Nodes (7): main(), Add all available shadcn/ui components. Args: overwrite: If True, overwrite…, List installed components. Returns: Tuple of (success, message with component…, Check if shadcn is initialized in project. Returns: True if components.json…, Get list of already installed components. Returns: List of installed component…, Read shadcn version from project package.json; fall back to a pinned default., Add shadcn/ui components. Args: components: List of component names to add…
+### Community 227 - "padding-y"
+Cohesion: 0.67
+Nodes (4): padding-y, padding-y, $type, $value
 
 ### Community 228 - "Implementation Decisions"
 Cohesion: 0.11
 Nodes (18): Further Notes, Implementation Decisions, Milestone 6 — Production Hardening & Observability (spec), Out of Scope, Problem Statement, Sequencing (workstream order; the ticket-cut pass slices precisely), Ship-time provisioning, topology, domains, secrets (#176 + the #129 carry), Solution (+10 more)
 
-### Community 229 - "peso"
-Cohesion: 0.13
-Nodes (22): ConfirmationCard(), SummaryRail(), CatalogPlate(), CatalogPlates(), ServiceImageCard(), ServiceCard(), ServiceTeaserItem(), branchNameFor() (+14 more)
+### Community 229 - "book.tsx"
+Cohesion: 0.08
+Nodes (41): ChoiceCard(), ConfirmationCard(), HourChip(), HourChipGrid(), RejectionCard(), StepProgress(), SummaryRail(), BranchStripItem() (+33 more)
 
 ### Community 231 - "vitest: test environments"
 Cohesion: 0.12
@@ -1630,7 +1535,7 @@ Nodes (17): By File Path, By Test Name, Changed Files, CLI Filtering, Combining 
 
 ### Community 234 - "Spec & plan: deepen appointment intake"
 Cohesion: 0.17
-Nodes (16): ADR-0005 Slot Capacity (M3), ADR-0007 transaction-pooling refinement note, ADR-0008 compose integration suite, ADR-0011 per-request db client (untouched), Single Appointment Projection Constant, Module-Internal Transaction in createAppointment, Deepen the Appointment Intake Module (Candidate A), Live Transaction-Pooler Probe (Seam 3) (+8 more)
+Nodes (11): ADR-0005 Slot Capacity (M3), ADR-0007 transaction-pooling refinement note, ADR-0008 compose integration suite, ADR-0011 per-request db client (untouched), Deepen the Appointment Intake Module (Candidate A), client-transaction.test.ts Compose Seam 2 Proof, db.transaction Wrapping Resolve + Both Inserts, Deepen the Appointment Intake Module Implementation Plan (+3 more)
 
 ### Community 235 - "design: CIP design reference"
 Cohesion: 0.13
@@ -1660,17 +1565,13 @@ Nodes (8): Bad Example, Context, Directory Style, Explanation, Good Example, Mul
 Cohesion: 0.22
 Nodes (8): Bad Example, Cache Time Comparison, Context, Explanation, Good Example: Built-In Cache Tuning, Good Example: With TanStack Query, preload-stale-time: Configure Preload Stale Time, Priority: MEDIUM
 
-### Community 242 - "main"
-Cohesion: 0.13
-Nodes (8): main(), Add custom font families. Args: fonts: Dict of font_type: [font_names] e.g.,…, Add custom spacing values. Args: spacing: Dict of name: value e.g., {'18':…, Add custom breakpoints. Args: breakpoints: Dict of name: width e.g., {'3xl':…, Add plugin requirements. Args: plugins: List of plugin names e.g.,…, Get plugin recommendations based on configuration. Returns: List of recommended…, Validate configuration. Returns: Tuple of (valid, message), Add custom colors to theme. Args: colors: Dict of color_name: color_value Value…
-
 ### Community 243 - "testimonial.ts"
-Cohesion: 0.24
-Nodes (10): CreateTestimonialInput, createTestimonialSchema, PublicTestimonial, publicTestimonialSchema, Testimonial, TestimonialOrderInput, testimonialOrderSchema, testimonialSchema (+2 more)
+Cohesion: 0.52
+Nodes (5): createTestimonialSchema, publicTestimonialSchema, testimonialOrderSchema, testimonialSchema, updateTestimonialSchema
 
-### Community 244 - "shared.tsx"
-Cohesion: 0.10
-Nodes (24): SUBMISSION_STATUS_META, SubmissionStatusBadge(), AlertDialog(), AlertDialogAction(), AlertDialogCancel(), AlertDialogContent(), AlertDialogDescription(), AlertDialogFooter() (+16 more)
+### Community 244 - "sheet.tsx"
+Cohesion: 0.16
+Nodes (19): GlobalSearch(), GlobalSearchResults(), GROUP_ICONS, SearchResultItem(), File Structure, Global Constraints, M9 Ticket 3, Search everywhere (the below-sm top sheet + the `?focus=` landing) Implementation Plan, Task 2: The `?focus=` landing honored, the hook + the four routes + the four screens (+11 more)
 
 ### Community 245 - "Commands"
 Cohesion: 0.12
@@ -1692,13 +1593,13 @@ Nodes (15): Dashboard — appointment-management view filterable by Branch and S
 Cohesion: 0.13
 Nodes (15): Adding A Route, Adding Links, API Routes, Building For Production, Data Fetching, Deploy to Cloudflare Workers, Linting & Formatting, Optional Configuration (+7 more)
 
-### Community 250 - "Spec: delivery versions v1/v2"
-Cohesion: 0.17
-Nodes (11): Delivery Versions — v1 (Free Handover) / v2 (Paid Booking System) (spec), Further Notes, Handover Mechanics — #75 (facts from #69), Out of Scope, Problem Statement, The Artifact Mechanism — #70 (recorded as ADR-0015), The Booking-Off Direction (v1's transformed surfaces) — #72, The Editions (+3 more)
+### Community 250 - "Branch"
+Cohesion: 0.08
+Nodes (26): SiteHeader(), Acceptance criteria mapping (for the PR description), File Structure, Global Constraints, M2 Ticket 06, Landing Content Pages, Implementation Plan, Task 1: Data layer, studio-services server fn, query factory, bookable-branch names (TDD), Task 2: Shared page components (presentational), Task 3: Home, services teaser strip, branches strip, credibility blurb (+18 more)
 
 ### Community 251 - "Progress log & DB topology ADRs"
-Cohesion: 0.19
-Nodes (15): Consequences, Database connection topology, ADR-0007: Database connection topology, Transaction Pooling Semantics, ADR-0011: Per-request database client, Alternatives Considered, Consequences, Context (+7 more)
+Cohesion: 0.18
+Nodes (14): Consequences, Database connection topology, ADR-0007: Database connection topology, ADR-0011: Per-request database client, Alternatives Considered, Consequences, Context, Decision (+6 more)
 
 ### Community 252 - "Catalog docs: packages"
 Cohesion: 0.13
@@ -1708,9 +1609,9 @@ Nodes (15): Basic Package (BP), Customize Package (CP-1), Customize Package (CP-
 Cohesion: 0.13
 Nodes (14): Global Constraints, M1.2 — Catalog schema: lookups, inclusions, add-ons, Kind — Implementation Plan, Task 10: Generate and review the first migration, Task 11: ADR-0009 — normalized catalog lookups, Task 12: Full verification + handoff, Task 1: Zod — Print size + Attire lookups, and the types test harness, Task 2: Zod — the Inclusion union, Task 3: Zod — Add-on Service (+6 more)
 
-### Community 254 - "read_rows"
-Cohesion: 0.08
-Nodes (13): apply_decision_rules(), _object_without_duplicates(), parse_decision_rules(), Return deterministic mutations and an audit trail; never execute data., Parse the canonical condition -> action-array representation., _validate_action(), read_rows(), split_values() (+5 more)
+### Community 254 - "DesignSystemGenerator"
+Cohesion: 0.06
+Nodes (12): DesignSystemGenerator, apply_decision_rules(), _object_without_duplicates(), parse_decision_rules(), _validate_action(), TestReasoningMatch, read_rows(), split_values() (+4 more)
 
 ### Community 255 - "banner-design skill overview"
 Cohesion: 0.14
@@ -1725,7 +1626,7 @@ Cohesion: 0.14
 Nodes (13): Brand Voice Framework, Character Spectrum, Emotion Spectrum, Language Spectrum, Step 1: Define Personality Traits, Step 2: Create Voice Chart, Step 3: Context Adaptation, Tone Spectrum (+5 more)
 
 ### Community 258 - "brand: color extraction script"
-Cohesion: 0.22
+Cohesion: 0.20
 Nodes (11): calculateCompliance(), colorDistance(), displayPalette(), extractHexColors(), findNearestBrandColor(), fs, generateImageMagickCommand(), hexToRgb() (+3 more)
 
 ### Community 259 - "brand: asset validation script"
@@ -1756,9 +1657,9 @@ Nodes (10): Adapter Comparison, Bad Example, Context, deploy-adapters: Choose Ap
 Cohesion: 0.22
 Nodes (7): Bad Example, Context, Explanation, Good Example: With Valibot (Standard Schema — No Adapter Needed), Good Example: With Zod Adapter (Recommended), Priority: HIGH, search-defaults: Provide Sensible Defaults for Search Params
 
-### Community 266 - "ShadcnInstaller"
-Cohesion: 0.14
-Nodes (8): Handle shadcn/ui component installation., ShadcnInstaller, Test adding components without shadcn config., Test adding components that are already installed., Test listing installed components without config., Test initialization with dry run mode., Test checking for non-existent shadcn config., Test getting installed components without config.
+### Community 266 - "Seed the v1 branch — the one filter-repo pass (booking-free artifact line) (#80) Implementation Plan"
+Cohesion: 0.50
+Nodes (3): Global Constraints, Seed the v1 branch, the one filter-repo pass (booking-free artifact line) (#80) Implementation Plan, Verified pre-plan facts (probed against the real workspace 2026-09-11, HEAD `0bdfe82`)
 
 ### Community 267 - "vitest: concurrency"
 Cohesion: 0.14
@@ -1766,11 +1667,11 @@ Nodes (14): Bail on Failure, CI Example (GitHub Actions), Concurrency & Parallel
 
 ### Community 268 - "ADR template & domain-docs guide"
 Cohesion: 0.16
-Nodes (14): ADR Supersession Lifecycle Rule, ADR-XXXX: <short, decision-oriented title>, Alternatives Considered, Consequences, Context, Decision, ADR Template, Before exploring, read these (+6 more)
+Nodes (13): ADR-XXXX: <short, decision-oriented title>, Alternatives Considered, Consequences, Context, Decision, ADR Template, Before exploring, read these, CONTEXT-MAP.md + per-context CONTEXT.md (+5 more)
 
 ### Community 269 - "ADR-0008: Integration tests against real Postgres"
-Cohesion: 0.18
-Nodes (14): ADR-0003: Vitest 4 with a per-workspace config requirement, Alternatives Considered, Consequences, Context, Decision, ADR-0003: Vitest 4 per-workspace config requirement, Per-Workspace Vitest Config Requirement, passWithNoTests Silent-Green Trap (+6 more)
+Cohesion: 0.15
+Nodes (13): ADR-0003: Vitest 4 with a per-workspace config requirement, Alternatives Considered, Consequences, Context, Decision, ADR-0003: Vitest 4 per-workspace config requirement, Per-Workspace Vitest Config Requirement, ADR-0008: Integration tests against real Postgres (+5 more)
 
 ### Community 270 - "brand: update guide"
 Cohesion: 0.15
@@ -1784,9 +1685,9 @@ Nodes (12): Available Styles, Color Psychology, Commands, Design Brief (Start He
 Cohesion: 0.15
 Nodes (12): Categories, Dark Mode, File Organization, Layer 1: Primitive Tokens, Layer 2: Semantic Tokens, Layer 3: Component Tokens, Layer Overview, Migration from Flat Tokens (+4 more)
 
-### Community 273 - "site-tab.tsx"
-Cohesion: 0.11
-Nodes (22): QUERY_ERROR_LINE, QueryErrorState(), ICON_FIELDS, KICKER_FIELDS, PAGE_SECTIONS, SiteTab(), TextKeys, saveAdminSiteSettings (+14 more)
+### Community 273 - "destructive"
+Cohesion: 0.67
+Nodes (3): destructive, $type, $value
 
 ### Community 274 - "Global Virtual Store, Git Worktrees, Global Packages & Shims"
 Cohesion: 0.20
@@ -1820,13 +1721,13 @@ Nodes (12): Deepen the Appointment Intake Module — Implementation Plan, File S
 Cohesion: 0.15
 Nodes (13): Auth, Backend (`apps/api`), Data Layer, Email, Frontend (`apps/landing`, `apps/admin`), Monorepo, Observability, Provisioning Postgres (done 2026-08-31 — record of how it was done) (+5 more)
 
-### Community 282 - "api-client tsconfig.json"
-Cohesion: 0.15
-Nodes (12): exclude, extends, include, *.config.ts, coverage, dist, node_modules, @sevendays/config/ts/node (+4 more)
+### Community 282 - "destructive-foreground"
+Cohesion: 0.67
+Nodes (3): destructive-foreground, $type, $value
 
-### Community 283 - "seed.ts"
-Cohesion: 0.12
-Nodes (22): addonServiceSeeds, attireSeeds, branchSeeds, featuredPackageNames, inclusionSignatures(), PackageSeed, packageSeeds, printSizeSeeds (+14 more)
+### Community 283 - "muted"
+Cohesion: 0.67
+Nodes (3): muted, $type, $value
 
 ### Community 284 - "design-system: primitive tokens"
 Cohesion: 0.17
@@ -1896,25 +1797,17 @@ Nodes (8): auth-cookie-security: Configure Secure Cookie Settings, Bad Example, 
 Cohesion: 0.22
 Nodes (8): Bad Example, Context, err-not-found: Handle Not-Found Scenarios, Explanation, Good Example, Good Example: Not-Found in beforeLoad, Good Example: Targeting a Specific Route, Priority: MEDIUM
 
-### Community 301 - "ui-styling: tailwind config gen tests"
-Cohesion: 0.20
-Nodes (8): Tests for tailwind_config_gen.py, Reduce a generated TS/JS config to a bare assignable object so it can be handed…, Regression guard for the missing-comma bug between the ``theme`` block and…, The property preceding ``plugins`` must end with a comma (pure-Python check, so…, The emitted config parses as valid JS via ``node --check``., _strip_to_object(), TestGeneratedConfigIsValidJs, parametrize
-
-### Community 302 - ".generate_config_string"
-Cohesion: 0.20
-Nodes (6): Generate configuration file content. Returns: Configuration file as string, Generate TypeScript configuration., Generate JavaScript configuration., Format plugins array for config. Validates each plugin name against a strict…, Add indentation to JSON string., Write configuration to file. Returns: Tuple of (success, message)
-
 ### Community 303 - "Plan: M2 E2E verification facts"
-Cohesion: 0.18
-Nodes (10): Global Constraints, M2 Close-out — end-to-end verification + docs (#48) Implementation Plan, Self-Review (against issue #48 + the M2 spec), Task 1: Extend the verification harness (recipient email + notes + id tail; new Resend evidence script), Task 2: The live end-to-end gate (bookings + DB confirm + email evidence), Task 3: ADR-0013 — the generalized-appointment model, Task 4: ADR-0014 — the email send topology, Task 5: Docs close-out — progress.md refresh + the last plan.md tick (+2 more)
+Cohesion: 0.17
+Nodes (11): fillContactAndConfirm(), Global Constraints, M2 Close-out, end-to-end verification + docs (#48) Implementation Plan, Self-Review (against issue #48 + the M2 spec), Task 1: Extend the verification harness (recipient email + notes + id tail; new Resend evidence script), Task 2: The live end-to-end gate (bookings + DB confirm + email evidence), Task 3: ADR-0013, the generalized-appointment model, Task 4: ADR-0014, the email send topology (+3 more)
 
 ### Community 304 - "Plan: M1.5 file structure"
 Cohesion: 0.17
 Nodes (11): File Structure, Global Constraints, M1.5 — M1 Exit Verification + Close-Out Implementation Plan, Self-Review, Task 1: Probe script — `verify-appointment-row.mjs` (TDD, unit + compose), Task 2: Rehearsal on compose — prove the probe before it touches the live DB, Task 3: Pre-flight audit + Act 1 — create the Appointment via the deployed API, Task 4: Act 2 — confirm the row in Postgres (probe against live) (+3 more)
 
 ### Community 305 - "testimonial-submission.ts"
-Cohesion: 0.16
-Nodes (16): AcceptTestimonialSubmissionInput, acceptTestimonialSubmissionSchema, CreateTestimonialSubmissionInput, createTestimonialSubmissionSchema, canonical, TESTIMONIAL_PERSON_MAX, TESTIMONIAL_PERSON_MIN, TESTIMONIAL_QUOTE_MAX (+8 more)
+Cohesion: 0.10
+Nodes (31): submitTestimonial, buildTestimonialSubmissionPayload(), canSubmitTestimonialForm(), FORM_BOUNDS, GENERIC_SEND_FAILURE_LINE, PERSON_TOO_SHORT_LINE, QUOTE_TOO_SHORT_LINE, valid (+23 more)
 
 ### Community 306 - "brand: visual identity"
 Cohesion: 0.18
@@ -1929,8 +1822,8 @@ Cohesion: 0.18
 Nodes (10): Bold Dynamic, CIP Design Style Guide, Classic Traditional, Color Psychology, Corporate Minimal, Fresh Modern, Luxury Premium, Modern Tech (+2 more)
 
 ### Community 309 - "design-system: token embedding"
-Cohesion: 0.20
-Nodes (9): args, extractTokens(), fs, minimal, MINIMAL_TOKENS, path, projectRoot, tokensPath (+1 more)
+Cohesion: 0.17
+Nodes (8): args, fs, minimal, MINIMAL_TOKENS, path, projectRoot, tokensPath, wrapStyle
 
 ### Community 310 - "pnpm Configuration"
 Cohesion: 0.15
@@ -1960,9 +1853,9 @@ Nodes (10): Accessing Flattened Data, Bad Example, Context, Explanation, Good Ex
 Cohesion: 0.18
 Nodes (10): Bad Example, Context, Explanation, Good Example, Good Example: Picking Single Item from List, Good Example: Selecting Specific Fields, Good Example: Stable Select with useCallback, perf-select-transform: Use Select to Transform and Filter Data (+2 more)
 
-### Community 317 - "tanstack-router rule: not-found routes"
+### Community 317 - "err-server-errors: Handle Server Function Errors"
 Cohesion: 0.18
-Nodes (10): Bad Example, Context, err-not-found: Handle Not-Found Routes Properly, Explanation, Good Example: Catch-All Route, Good Example: Nested Not Found Bubbling, Good Example: Not Found with Data, Good Example: Root-Level Not Found (+2 more)
+Nodes (10): Bad Example, Context, err-server-errors: Handle Server Function Errors, Error Response Best Practices, Explanation, Good Example: Client-Side Error Handling, Good Example: Server Function with Error Handling, Good Example: Structured Error Handling (+2 more)
 
 ### Community 318 - "tanstack-router rule: ensureQueryData"
 Cohesion: 0.18
@@ -1984,9 +1877,9 @@ Nodes (10): Bad Example, Context, Explanation, Good Example: Programmatic Naviga
 Cohesion: 0.18
 Nodes (10): Bad Example, Context, Decision Guide, Explanation, Good Example: File Structure with Virtual Routes, Good Example: Generated Route Tree, Good Example: Let Virtual Routes Handle It, Good Example: When You DO Need Main Route File (+2 more)
 
-### Community 323 - "tanstack-start rule: server errors"
-Cohesion: 0.18
-Nodes (10): Bad Example, Context, err-server-errors: Handle Server Function Errors, Error Response Best Practices, Explanation, Good Example: Client-Side Error Handling, Good Example: Server Function with Error Handling, Good Example: Structured Error Handling (+2 more)
+### Community 323 - "primary-foreground"
+Cohesion: 0.67
+Nodes (3): primary-foreground, $type, $value
 
 ### Community 324 - "tanstack-start rule: request middleware"
 Cohesion: 0.18
@@ -2000,13 +1893,13 @@ Nodes (10): Bad Example, Context, Explanation, Good Example: Error Boundaries wi
 Cohesion: 0.22
 Nodes (8): Bad Example, Context, err-redirects: Use Redirects Appropriately, Explanation, Good Example, Good Example: External Redirects, Good Example: Handling Redirects in try/catch, Priority: MEDIUM
 
-### Community 327 - "ui-styling: shadcn test fixtures"
-Cohesion: 0.18
-Nodes (6): Test adding components with overwrite flag., Test successful component addition., Test component addition with subprocess error., Test component addition when npx is not found., Test successful addition of all components., patch
+### Community 327 - "ring"
+Cohesion: 0.67
+Nodes (3): ring, $type, $value
 
-### Community 328 - "Plan: row shaping file structure"
-Cohesion: 0.18
-Nodes (10): Catalog Row-Shaping Module — Implementation Plan, File Structure, Global Constraints, Task 0: Branch and environment bootstrap, Task 1: The row-shaping builders (TDD) + opt-in subpath export, Task 2: Derive the truncate table list from the exported schema, Task 3: Adopt the builders in the API test fixtures, Task 4: Adopt the builders in the seeder (+2 more)
+### Community 328 - "secondary-foreground"
+Cohesion: 0.67
+Nodes (3): secondary-foreground, $type, $value
 
 ### Community 329 - "brand skill overview"
 Cohesion: 0.20
@@ -2016,9 +1909,9 @@ Nodes (9): Brand, Brand Sync Workflow, Quick Start, References, Routing, Scripts
 Cohesion: 0.20
 Nodes (9): Common Structures, Duarte Sparkline Pattern, Matching Strategy to Context, Product Demo (6 slides), Sales Pitch (9 slides), Search Commands, Slide Strategies, Strategy Selection (+1 more)
 
-### Community 331 - "design: logo generator"
-Cohesion: 0.29
-Nodes (9): enhance_prompt(), generate_batch(), generate_logo(), load_env(), main(), Enhance the logo prompt with style and industry modifiers, Generate a logo using Gemini models with image generation Args: aspect_ratio:…, Generate multiple logo variants with different styles (+1 more)
+### Community 331 - "white"
+Cohesion: 0.67
+Nodes (3): white, $type, $value
 
 ### Community 332 - "design-system: component tokens"
 Cohesion: 0.20
@@ -2030,7 +1923,7 @@ Nodes (9): flattenTokens(), fs, generateCSS(), generateTailwind(), main(), parse
 
 ### Community 334 - "Product — Sevendays (studio-wide record)"
 Cohesion: 0.07
-Nodes (25): Capabilities and Constraints, Operating Context, Platform, Product — Admin (staff site), Product Principles, Product Purpose, Users, Accessibility & Inclusion (+17 more)
+Nodes (25): Capabilities and Constraints, Operating Context, Platform, Product, Admin (staff site), Product Principles, Product Purpose, Users, Accessibility & Inclusion (+17 more)
 
 ### Community 335 - "pnpm Config Dependencies"
 Cohesion: 0.17
@@ -2104,13 +1997,9 @@ Nodes (9): Bad Example, Context, Explanation, Good Example, Good Example: GET Fu
 Cohesion: 0.20
 Nodes (9): Bad Example, Context, Explanation, Good Example: Complex Validation, Good Example: Transform and Refine, Good Example: With Zod Validation, Priority: CRITICAL, sf-input-validation: Always Validate Server Function Inputs (+1 more)
 
-### Community 353 - "ui-styling: base config internals"
-Cohesion: 0.22
-Nodes (6): Path, Initialize generator. Args: typescript: If True, generate .ts config, else .js…, Determine default output path., Create base configuration structure., Get default content paths for framework., Any
-
-### Community 354 - "Plan: #340 — Image viewer: package-detail cover zoom — the lone-image variant"
-Cohesion: 0.18
-Nodes (10): Global Constraints, Owner rulings (settled at charting + the #328 pick, recorded in the spec), Plan: #340 — Image viewer: package-detail cover zoom — the lone-image variant, Scope fences, Self-review record (run 2026-11-21, before commit), Task 1 — The cover-slide seam extension (TDD), Task 2 — The `variant` prop + the package-detail wiring (the deliverable), Task 3 — Docs, graphify, and the final gate (+2 more)
+### Community 354 - "mosaic-photo-grid.tsx"
+Cohesion: 0.07
+Nodes (41): PhotoViewer(), COVER_CAROUSEL, COVER_RENDER, coverSlides(), GALLERY_ALT_FALLBACK, MOSAIC_CAROUSEL, MOSAIC_CONTROLLER, photoSlides() (+33 more)
 
 ### Community 355 - "vitest: context & fixtures"
 Cohesion: 0.20
@@ -2122,11 +2011,11 @@ Nodes (10): CMS — content-management area of the admin site, Availability — 
 
 ### Community 357 - "Draft: v2 offer sheet prototype"
 Cohesion: 0.22
-Nodes (8): How we proceed, Part A — the sheet draft (client-facing), Part B — boundary ledger (owner-facing; NEVER part of the sheet), PROTOTYPE — v2 offer sheet draft (throwaway), Sevendays Photography — Online Booking, What it looks like when it's done, What's included, What you saw in the demo
+Nodes (8): How we proceed, Part A: the sheet draft (client-facing), Part B: boundary ledger (owner-facing; NEVER part of the sheet), PROTOTYPE: v2 offer sheet draft (throwaway), Sevendays Photography: Online Booking, What it looks like when it's done, What's included, What you saw in the demo
 
 ### Community 358 - "v1 picks runbook"
-Cohesion: 0.13
-Nodes (14): Conflict policy on transformed surfaces, Content pass — what never enters `v1` even on a v1-path, Executing a PICK, Executing a SPLIT, Fallback — the squashed snapshot, Ledger, Path pass — `scripts/v1-triage.mjs`, The locks — after every push (+6 more)
+Cohesion: 0.14
+Nodes (13): Conflict policy on transformed surfaces, Content pass — what never enters `v1` even on a v1-path, Executing a PICK, Executing a SPLIT, Fallback — the squashed snapshot, Path pass — `scripts/v1-triage.mjs`, The locks — after every push, The loop — on every squash merge to main (+5 more)
 
 ### Community 359 - "Product requirements doc"
 Cohesion: 0.20
@@ -2134,7 +2023,7 @@ Nodes (10): Admin site (`apps/admin`), Landing site (`apps/landing`), Out of Sco
 
 ### Community 360 - "Spec: acquisition/error seam"
 Cohesion: 0.24
-Nodes (10): One Acquisition/Error Seam for the API (Candidate D), Per-Request DB Acquisition Middleware (c.set), ADR-0006 M2 route restructure (app type + env), ADR-0008 Integration Tests vs Real Postgres, ADR-0010 versioned subapp mount, ADR-0011 Per-Request DB Client, db-free /health endpoint, Deep-module deletion test (reference) (+2 more)
+Nodes (7): One Acquisition/Error Seam for the API (Candidate D), ADR-0006 M2 route restructure (app type + env), ADR-0008 Integration Tests vs Real Postgres, ADR-0010 versioned subapp mount, ADR-0011 Per-Request DB Client, notFound → Uniform JSON 404, Uniform 500 onError Handler
 
 ### Community 361 - "Plan: M1.1 constraints"
 Cohesion: 0.20
@@ -2144,21 +2033,21 @@ Nodes (9): Global Constraints, M1.1 — Pre-flight Implementation Plan, Task 1: 
 Cohesion: 0.20
 Nodes (9): File Structure, Frame Grouping & Attire Normalization — Implementation Plan, Global Constraints, Self-Review, Task 1: Zod — frames schemas + inclusion reshape (TDD), Task 2: Drizzle — frames + junction, migration 0001, live apply, Task 3: Seed — catalog restructure + frames/junction seeding, Task 4: Verify — frames + attire-aware read-back (+1 more)
 
-### Community 363 - "Plan: error seam file structure"
-Cohesion: 0.20
-Nodes (9): Acquisition / Error Seam — Implementation Plan, File Structure, Global Constraints, Self-Review, Task 0: Branch and environment bootstrap, Task 1: The error envelope — root `onError` + `notFound`, and the uniform 404 (route layer unchanged), Task 2: Acquisition middleware + route delegation — close "log-before-500" fully, Task 3: ADR-0011 amendment + ledger + issue evidence (+1 more)
+### Community 363 - "Global Constraints"
+Cohesion: 0.12
+Nodes (17): SessionData, resetSessionCacheStore(), sessionFixture(), Global Constraints, Task 1: The observability module, sink, factory, the five emitters (TDD), Global Constraints, M8 ticket 02, Session-verify amortization, both halves, implementation plan, Not here (+9 more)
 
 ### Community 364 - "Plan: M2 preflight-5 facts"
 Cohesion: 0.20
-Nodes (9): Global Constraints, M2 Pre-flight 5/5 — Close-out: end-to-end verification + roadmap ticks (#25) Implementation Plan, Self-Review (against issue #25 + spec), Task 1: Fold in the carried-forward deferred minors, Task 2: Consolidated end-to-end re-verification pass (landing + admin), Task 3: Full gates + progress.md refresh, Task 4: Tick the `docs/plan.md` M2 pre-flight checkboxes (`- [✅]` + dated), Task 5: graphify update + final commit (GitGraph current) (+1 more)
+Nodes (9): Global Constraints, M2 Pre-flight 5/5, Close-out: end-to-end verification + roadmap ticks (#25) Implementation Plan, Self-Review (against issue #25 + spec), Task 1: Fold in the carried-forward deferred minors, Task 2: Consolidated end-to-end re-verification pass (landing + admin), Task 3: Full gates + progress.md refresh, Task 4: Tick the `docs/plan.md` M2 pre-flight checkboxes (`- [✅]` + dated), Task 5: graphify update + final commit (GitGraph current) (+1 more)
 
 ### Community 365 - "brand: tokens sync script"
-Cohesion: 0.33
+Cohesion: 0.29
 Nodes (8): adjustBrightness(), { execFileSync }, extractColorsFromMarkdown(), fs, generateColorScale(), main(), path, updateDesignTokens()
 
-### Community 366 - "design-system: token validator tests"
-Cohesion: 0.28
-Nodes (8): Path, Regression tests for validate-tokens.cjs. The validator used to skip any line…, A hardcoded hex on the same line as a var() token is still a violation., A line that references only tokens produces no false positives., _run(), test_flags_hardcoded_hex_sharing_line_with_token(), test_token_only_line_reports_no_violation(), CompletedProcess
+### Community 366 - "css"
+Cohesion: 0.67
+Nodes (3): css, parser, tailwindDirectives
 
 ### Community 367 - "tanstack-integration rule: QueryClient context"
 Cohesion: 0.22
@@ -2189,8 +2078,8 @@ Cohesion: 0.22
 Nodes (8): Bad Example, Context, Explanation, Good Example: Composable Middleware Chain, Good Example: Global Middleware in start.ts, Good Example: Middleware for Server Routes, mw-composability: Compose Middleware Effectively, Priority: HIGH
 
 ### Community 374 - "Plan: #57 brand token unification"
-Cohesion: 0.25
-Nodes (7): Brand → shadcn Token Unification Prototype (wayfinder #57) Implementation Plan, Global Constraints, Self-Review, Task 1: Apply the owner's shadcn preset to landing, Task 2: Lift the token layer into packages/ui as the single shared source, Task 3: Throwaway showcase route /prototype-tokens, Task 4: Full check, push, and ticket handover
+Cohesion: 0.29
+Nodes (6): Brand → shadcn Token Unification Prototype (wayfinder #57) Implementation Plan, Global Constraints, Task 1: Apply the owner's shadcn preset to landing, Task 2: Lift the token layer into packages/ui as the single shared source, Task 3: Throwaway showcase route /prototype-tokens, Task 4: Full check, push, and ticket handover
 
 ### Community 375 - "Configuration"
 Cohesion: 0.18
@@ -2200,9 +2089,9 @@ Nodes (11): Basic Setup, Common Options, Conditional Configuration, Configuratio
 Cohesion: 0.22
 Nodes (8): Blob & Merge (CI/sharding), Built-in Reporters, Default Selection, HTML Report (v5 paths), JUnit Templating, Key Points, Output Files, Reporters
 
-### Community 377 - "Global Constraints"
-Cohesion: 0.20
-Nodes (9): Booking Flow Componentized, Zero Flow Changes (M3 ticket #99) Implementation Plan, Global Constraints, Self-Review, Task 1: The seam guard + the contact gate as a Zod schema (lib, test-first), Task 2: The #58 components + the SummaryRail / RejectionCard restyle, Task 3: `book.tsx` onto the components — the full restyle, Task 4: `booking.$id.tsx` — ConfirmationCard + the not-found on the system, Task 5: Verification — CDP read-only + the mutating e2e + gates (controller-run, evidence-only) (+1 more)
+### Community 377 - "Implementation Decisions"
+Cohesion: 0.11
+Nodes (17): CMS UX maturation — the system (#165; all patterns theme-aware from the start), Dark mode — from zero, all three surfaces (#162), Further Notes, Guarded DELETE everywhere (#159 — M5's delete-nowhere reversed and refined), Implementation Decisions, Milestone 7 — Experience & CMS Maturation (spec), Out of Scope, Problem Statement (+9 more)
 
 ### Community 378 - "Architecture doc"
 Cohesion: 0.22
@@ -2236,25 +2125,9 @@ Nodes (8): Further Notes, Implementation Decisions, Out of Scope, Problem Statem
 Cohesion: 0.22
 Nodes (8): Environment facts (controller-verified 2026-09-01), File Structure, Global Constraints, M1.3 — Provision, migrate, seed the real catalog — Implementation Plan, Task 1: Pre-flight gate + env template, Task 2: Fold FK indexes + natural keys into migration 0000 (pre-migrate ruling), Task 3: ADR-0007 alignment — the three stale `DATABASE_URL` spots + the session-pooler reality, Task 4: Seed + verify scripts (the re-runnable catalog seed)
 
-### Community 386 - "Plan: read-stitch file structure"
-Cohesion: 0.22
-Nodes (8): Extract the Read-Stitch Module — Implementation Plan, File Structure, Global Constraints, Self-Review (recorded at plan-writing time), Task 0: Branch and environment bootstrap, Task 1: The `groupChildren` module (TDD), Task 2: Adopt at both call sites (one commit — spec ruling), Task 3: Docs, issue evidence, full gate
-
-### Community 387 - "Plan: M2 preflight-2 constraints"
-Cohesion: 0.22
-Nodes (8): Global Constraints, M2 Pre-flight 2/5 — Shared API client over Hono RPC (#22) Implementation Plan, Self-Review, Task 1: Chain the API so `AppType` carries its route schema (+ validator split), Task 2: Package scaffold + client core (createApiClient, unwrap, ApiClientError), Task 3: Route wrappers + Seam 1 loopback suite (mock API, injectable fetch), Task 4: Full gates, docs, ticket close-out, Verified pre-plan facts (probed against the real toolchain 2026-09-04)
-
-### Community 388 - "Plan: M2 preflight-3 constraints"
-Cohesion: 0.22
-Nodes (8): Global Constraints, M2 Pre-flight 3/5 — Landing: TanStack Query SSR wiring + API_URL + sample branches call (#23) Implementation Plan, Self-Review (done pre-flight, 2026-09-05), Task 1: Deps + server-side API_URL seam + data layer, Task 2: Query SSR wiring + sample branches call, Task 3: End-to-end verification (dev + loud-fail + prod-shaped workerd + leak scan), Task 4: Full gates + docs cross-linking, Verified pre-plan facts (probed against the real toolchain 2026-09-05)
-
-### Community 389 - "Plan: M2 preflight-4 facts"
-Cohesion: 0.22
-Nodes (8): Global Constraints, M2 Pre-flight 4/5 — Admin: TanStack Query SSR wiring + API_URL + sample branches call (#24) Implementation Plan, Self-Review (done pre-flight, 2026-09-05), Task 1: Deps + server-side API_URL seam + data layer, Task 2: Query SSR wiring + sample branches call, Task 3: End-to-end verification (dev + loud-fail + prod-shaped workerd + leak scan), Task 4: Full gates + docs cross-linking, Verified pre-plan facts (probed against the real toolchain 2026-09-05)
-
 ### Community 390 - "@sevendays/db overview refs"
 Cohesion: 0.32
-Nodes (8): @sevendays/db — Drizzle schema + client (live Supabase, migrations 0000+0001 applied, catalog seeded), @sevendays/types — Zod schemas + inferred types, shared across all apps, db:generate then db:migrate for schema changes, Database access goes through packages/db, Validate all external input with Zod, db service — postgres:17, POSTGRES_DB sevendays_test, port 5432, pg_isready healthcheck, @sevendays/types (Zod) + @sevendays/db (Drizzle) define the shared entities, postgres service — postgres:17, POSTGRES_DB sevendays_test, port 5432, TEST_DATABASE_URL
+Nodes (6): @sevendays/db — Drizzle schema + client (live Supabase, migrations 0000+0001 applied, catalog seeded), @sevendays/types — Zod schemas + inferred types, shared across all apps, db:generate then db:migrate for schema changes, db service — postgres:17, POSTGRES_DB sevendays_test, port 5432, pg_isready healthcheck, @sevendays/types (Zod) + @sevendays/db (Drizzle) define the shared entities, postgres service — postgres:17, POSTGRES_DB sevendays_test, port 5432, TEST_DATABASE_URL
 
 ### Community 391 - "tanstack-query rule: targeted invalidation"
 Cohesion: 0.25
@@ -2278,19 +2151,15 @@ Nodes (7): Bad Example, Context, Explanation, Good Example, Priority: CRITICAL, 
 
 ### Community 396 - "api-client/src/routes/admin.ts"
 Cohesion: 0.03
-Nodes (81): adminAddonServices(), adminAttires(), adminBranches(), adminGalleryCategories(), adminGalleryPhotos(), adminMedia(), adminPrintSizes(), adminRoutes() (+73 more)
+Nodes (92): Task 2: Wrapper extensions + the binary thumb seam (`packages/api-client`), Task 4: `packages/api-client`, the nine `remove()` wrappers + loopback coverage (TDD), ADR-0006, AdminRpc, CreateAddonArgs, CreateAdminAddonEndpoint, CreateAdminAttireEndpoint, CreateAdminBranchArgs (+84 more)
 
 ### Community 397 - "Progress log hub"
 Cohesion: 0.25
 Nodes (8): Current Milestone: 1 — Real Data Layer (complete — exit criteria verified live 2026-09-02; next up: Milestone 2 pre-flight, issue #1), Gate status (all verified live on 2026-08-30), Immediate Next Steps (in order), Known Gaps / Not Yet Done, Milestone 1 gate (verified live 2026-09-02 on feat/m1.5-exit-verification), Notes for Future Sessions, Progress, What Exists
 
-### Community 398 - "Plan: M2 preflight-1 constraints"
-Cohesion: 0.25
-Nodes (7): Global Constraints, M2 Pre-flight 1/5 — API restructure: AppType export + Zod-validated Env (#21) Implementation Plan, Self-Review, Task 1: Zod-validated env — schema + tests (TDD), Task 2: Root app adopts the explicit Env, Task 3: Export AppType via a types-only subpath export, Task 4: Verification + ticket close-out
-
 ### Community 399 - "File Structure"
-Cohesion: 0.18
-Nodes (10): File Structure, Final Review (for the executor's last pass), Global Constraints, M3 Ticket 02 — Token Swap: the Validated Logo-Palette Layer Goes Live (#96) Implementation Plan, Task 1: The merged token layer in packages/ui, Task 2: Both apps onto the layer — fonts self-hosted, island CSS removed, Task 3: The living token gallery at /prototype-tokens, Task 4: Full verification sweep (the ticket's AC, made runnable) (+2 more)
+Cohesion: 0.12
+Nodes (14): options, APP, buildSentryOptions(), SentryFrontendInit, File Structure, Final Review (for the executor's last pass), Global Constraints, M3 Ticket 02, Token Swap: the Validated Logo-Palette Layer Goes Live (#96) Implementation Plan (+6 more)
 
 ### Community 400 - "design: slides reference"
 Cohesion: 0.29
@@ -2329,8 +2198,8 @@ Cohesion: 0.29
 Nodes (7): Applying Tags, Checking the Filter at Runtime, Defining Tags, Filtering by Tag, Key Points, Option conflict resolution, Test Tags (4.1+)
 
 ### Community 409 - "Spec: booking flow decisions"
-Cohesion: 0.12
-Nodes (15): API surface (`/api/v1`, thin routes over service modules), Booking form (prototype variant C rulings, ticket #33), Confirmation email (content per ticket #34, mechanics per ticket #36), Confirmation read-back (`/booking/:id`), Further Notes, Implementation Decisions, Information architecture (ticket #32), Milestone 2 — Public Booking Flow (spec) (+7 more)
+Cohesion: 0.13
+Nodes (14): API surface (`/api/v1`, thin routes over service modules), Booking form (prototype variant C rulings, ticket #33), Confirmation email (content per ticket #34, mechanics per ticket #36), Confirmation read-back (`/booking/:id`), Further Notes, Implementation Decisions, Information architecture (ticket #32), Milestone 2 — Public Booking Flow (spec) (+6 more)
 
 ### Community 410 - "slides skill overview"
 Cohesion: 0.33
@@ -2349,24 +2218,20 @@ Cohesion: 0.22
 Nodes (8): Bad Example, Context, Explanation, Good Example, Good Example: Using beforeLoad for Auth Context, Loading Lifecycle, Priority: MEDIUM, ssr-data-loading: Load Data Appropriately for SSR
 
 ### Community 414 - "gallery-screen.tsx"
-Cohesion: 0.10
-Nodes (37): DeactivateConfirm(), GuardedConfirm(), LightEntityEditor(), CategoryRail(), CategorySaveInput, GalleryScreen(), PENDING_CARD_KEYS, PENDING_RAIL_KEYS (+29 more)
+Cohesion: 0.05
+Nodes (94): CategorySaveInput, GalleryScreen(), clearTray(), commit(), enqueueFiles(), onCategoryDragEnd(), onFileDragEnter(), onFileDragOver() (+86 more)
 
-### Community 415 - "confirmation-email.ts"
-Cohesion: 0.07
-Nodes (39): Env, envSchema, parseEnv(), ADR-0007, ADR-0021, captureError(), logAccess(), logEmail() (+31 more)
+### Community 415 - "api/src/index.ts"
+Cohesion: 0.06
+Nodes (49): AdminMutationEntity, EmailPhase, logAccess(), logEmail(), MediaFailureOp, appLogger, createRequestLogger(), RequestLogger (+41 more)
 
-### Community 416 - "Plan: M2-01 studio services catalog"
-Cohesion: 0.20
-Nodes (9): File Structure, Global Constraints, M2 Ticket 01 — Studio Services Catalog + Package Slug/Featured — Implementation Plan, Task 1: Drizzle — studio_services + junctions + package slug/is_featured (migration 0002), Task 2: Seed — slugifyName (TDD), studio-service seeds, seed extensions (live ×2), Task 3: verify-seed extensions (live VERIFY PASSED), Task 4: Slug NOT NULL flip (migration 0003) + fixture blast radius + suites green, Task 5: packages/types — slug/isFeatured + StudioService mirror (TDD) (+1 more)
+### Community 416 - "Plan: #352: Handover polish: sweep docs (plan, progress, architecture, rest)"
+Cohesion: 0.17
+Nodes (11): Branch law, Controller pre-flight (live-run, record before Task 1), Global Constraints, Plan: #352: Handover polish: sweep docs (plan, progress, architecture, rest), Scope fences, Self-review record (written after the final append, 2026-11-23), Task 1: the eight reference docs (tree A), Task 2: the superpowers plans tree (tree B) (+3 more)
 
-### Community 417 - "brand: guideline template"
-Cohesion: 0.40
-Nodes (4): Brand Guidelines Template, Document Structure, Extractable Fields, Usage
-
-### Community 418 - "File Structure"
-Cohesion: 0.22
-Nodes (8): File Structure, Global Constraints, M9 Ticket 1 — The Notification (bell badge, pending panel, confirm-guarded accept/reject) Implementation Plan, Task 1: The lib seams — the badge mapper, the initials rule, the confirm meta, the pending wiring, the tab param (TDD), Task 2: The `cms/shared.tsx` ports — `GuardedConfirm.confirmVariant` + the exported pending family, Task 3: The Submissions-tab deep link — `?tab=` on the testimonials route, Task 4: The Notification — the derived bell + panel, live in the topbar, Task 5: Gates, the owner's as-built variants reaction, the live walkthrough, docs rotation, PR, the v1 pick, issues, graphify
+### Community 417 - "3. Logo Usage"
+Cohesion: 0.11
+Nodes (17): 3. Logo Usage, 4. Voice & Tone, 5. Imagery Guidelines, Brand Guidelines Template, Brand Personality, Clear Space, Document Structure, Don'ts (+9 more)
 
 ### Community 419 - "button"
 Cohesion: 0.20
@@ -2376,25 +2241,13 @@ Nodes (10): fg, font-size, hover-bg, button, $type, $value, $type, $value (+2 mo
 Cohesion: 0.25
 Nodes (7): Bad Example, Context, Explanation, Good Example, Good Example: Infinite Scroll, inf-loading-guards: Check isFetchingNextPage Before Fetching More, Priority: HIGH
 
-### Community 421 - "admin package.json hub"
-Cohesion: 0.40
-Nodes (4): imports, name, private, type
-
-### Community 422 - "landing package.json hub"
-Cohesion: 0.40
-Nodes (4): imports, name, private, type
-
 ### Community 423 - "api-client biome.json"
 Cohesion: 0.40
 Nodes (4): extends, @sevendays/config/biome/base, @sevendays/config/biome/node, root
 
-### Community 424 - "Plan: M2-02 appointment model"
-Cohesion: 0.20
-Nodes (9): File Structure, Global Constraints, M2 Ticket 02 — Generalize the Appointment Model (schema, Zod, call sites) — Implementation Plan, Self-Review (executed at plan-writing time — re-run after any edit), Task 1: packages/types — generalized appointment schemas (TDD), Task 2: Drizzle — nullable refs + exactly-one CHECK + rename (migration 0004), Task 3: apps/api — intake module + fixtures + integration suite on the renamed shape, Task 4: api-client + M1.5 probe tooling — rename and nullable package ref (+1 more)
-
-### Community 425 - "Plan: M2-04 read endpoints"
-Cohesion: 0.20
-Nodes (9): File Structure, Global Constraints, M2 Ticket 04 — Three Read Endpoints + Client Wrappers — Implementation Plan, Self-Review (executed at plan-writing time — re-run after any edit), Task 1: packages/types — the Studio Service read shape (TDD), Task 2: apps/api — by-slug + single-get reads, validatedParam, uniform 404 (TDD), Task 3: apps/api — studio-services read (service, route, fixtures, suite) (TDD), Task 4: packages/api-client — the three wrappers + mock endpoints + loopback tests (TDD) (+1 more)
+### Community 424 - "hasExactlyOneAppointmentOffering"
+Cohesion: 0.50
+Nodes (4): Global Constraints, M2 Ticket 02, Generalize the Appointment Model (schema, Zod, call sites), Implementation Plan, Self-Review (executed at plan-writing time, re-run after any edit), hasExactlyOneAppointmentOffering()
 
 ### Community 426 - "inf-max-pages: Consider maxPages for Large Datasets"
 Cohesion: 0.25
@@ -2416,17 +2269,29 @@ Nodes (7): Bad Example, Context, Explanation, Good Example, Good Example: Custom
 Cohesion: 0.14
 Nodes (14): Adding A Route, Adding Links, API Routes, Building For Production, Data Fetching, Deploy to Cloudflare Workers, Linting & Formatting, Optional Configuration (+6 more)
 
+### Community 431 - "Global Constraints"
+Cohesion: 0.20
+Nodes (9): Execution amendments (recorded at close-out, 2026-09-25), Global Constraints, M5 Ticket 01, Catalog Schema + Shared Types Implementation Plan, Self-Review (recorded at planning, 2026-09-25), Task 1: Schema files, new tables, lookup `is_active`, position columns; generated migration 0006; live apply, Task 3: Live backfill + verify, then drop the backfill default (migration 0007), Task 6: The api schema-contract suite (a canonical entity round-trips each schema pair), Task 7: Full gates, docs rotation, PR/merge, the v1 pick + ledger row, issue close (+1 more)
+
+### Community 432 - "Plan: #353 (Handover polish: sweep the author-written root files)"
+Cohesion: 0.20
+Nodes (9): Branch law, Controller pre-flight (live-run, record before Task 1), Global Constraints, Plan: #353 (Handover polish: sweep the author-written root files), Scope fences, Self-review record (written after the final append, 2026-11-23), Task 1: the hand-rewritten string, Task 2: the mechanical batch, the hand fixes, and the fix-up pass (+1 more)
+
 ### Community 433 - "dependencies"
-Cohesion: 0.11
-Nodes (19): dependencies, better-auth, drizzle-orm, @hono/zod-validator, loglayer, pino, resend, @sentry/cloudflare (+11 more)
+Cohesion: 0.10
+Nodes (20): dependencies, better-auth@^1.7.5, drizzle-orm@^0.45.2, hono@^4.6.0, @hono/zod-validator@^0.4.0, loglayer@9.4.0, @loglayer/transport-pino@3.3.0, resend@^6.26.0 (+12 more)
 
 ### Community 434 - "studio-service.ts"
-Cohesion: 0.16
-Nodes (15): CreateStudioServiceInput, createStudioServiceSchema, StudioService, StudioServiceAddonMatrixInput, studioServiceAddonMatrixSchema, StudioServiceBranchMatrixInput, studioServiceBranchMatrixSchema, studioServiceSchema (+7 more)
+Cohesion: 0.14
+Nodes (17): Schema changes (Drizzle migration via `db:generate`; never hand-edited), Global Constraints, M2 Ticket 01, Studio Services Catalog + Package Slug/Featured, Implementation Plan, Task 5: packages/types, slug/isFeatured + StudioService mirror (TDD), Task 1: packages/types, the Studio Service read shape (TDD), Scope fences, CreateStudioServiceInput, createStudioServiceSchema (+9 more)
 
-### Community 436 - "relations.ts"
-Cohesion: 0.09
-Nodes (24): attires, ADR-0009, account, rateLimit, session, user, verification, galleryCategories (+16 more)
+### Community 435 - "head"
+Cohesion: 0.22
+Nodes (8): head(), ADR-0019: R2 media topology — presigned direct upload, public bucket, object-key storage, Alternatives Considered, Amendments, Consequences, Context, Decision, The media pipeline (ADR-0019)
+
+### Community 436 - "ref_drizzle_orm"
+Cohesion: 0.05
+Nodes (55): JunctionRow, MediaEnv, ADR-0019, addonServices, ADR-0020, appointmentAddonServices, ADR-0020, appointmentKindEnum (+47 more)
 
 ### Community 440 - "pf-route-prefetch: Prefetch Data During Route Transitions"
 Cohesion: 0.25
@@ -2436,89 +2301,93 @@ Nodes (7): Bad Example, Context, Explanation, Good Example, Good Example: Parall
 Cohesion: 0.25
 Nodes (7): Bad Example, Context, Explanation, Good Example: React State (Pages Router / Remix), Good Example: Server Components (App Router), Priority: CRITICAL, ssr-client-per-request: Create QueryClient Per Request
 
-### Community 442 - "Plan: M2-05 packages pages"
-Cohesion: 0.17
-Nodes (11): Acceptance criteria mapping (for the PR description), File Structure, Global Constraints, M2 Ticket 05 — Landing Packages Pages — Implementation Plan, Task 1: Land the glossary branch content (doc duty — spec precondition), Task 2: Landing data layer — server functions, query factories, `peso` (TDD), Task 3: Shared page components (presentational), Task 4: Home — hero, Book-now CTA, featured strip with fallback (TDD) (+3 more)
+### Community 442 - "AppType"
+Cohesion: 0.07
+Nodes (33): AppType, Task 3: Export AppType via a types-only subpath export, Global Constraints, M2 Pre-flight 2/5, Shared API client over Hono RPC (#22) Implementation Plan, Task 1: Chain the API so `AppType` carries its route schema (+ validator split), Task 2: Package scaffold + client core (createApiClient, unwrap, ApiClientError), Task 3: Route wrappers + Seam 1 loopback suite (mock API, injectable fetch), Task 4: Full gates, docs, ticket close-out (+25 more)
+
+### Community 443 - "Milestone 4 — Admin Auth (v1-track) (spec)"
+Cohesion: 0.22
+Nodes (8): Milestone 4 — Admin Auth (v1-track) (spec), Out of scope, Problem Statement, References, Solution, Tickets, User Stories, Verification (the milestone gate)
 
 ### Community 444 - "submissions-tab.tsx"
-Cohesion: 0.09
-Nodes (45): Notification(), PENDING_SKELETON_KEYS, ADR-0028, PENDING_ROW_KEYS, SubmissionsTab(), acceptAdminTestimonialSubmission, rejectAdminTestimonialSubmission, removeAdminTestimonialSubmission (+37 more)
+Cohesion: 0.08
+Nodes (55): SegmentedControl(), SUBMISSION_STATUS_META, Notification(), PENDING_SKELETON_KEYS, ADR-0028, PENDING_ROW_KEYS, SubmissionsTab(), handleAccept() (+47 more)
 
-### Community 445 - "Plan: M2-06 content pages"
-Cohesion: 0.18
-Nodes (10): Acceptance criteria mapping (for the PR description), File Structure, Global Constraints, M2 Ticket 06 — Landing Content Pages — Implementation Plan, Task 1: Data layer — studio-services server fn, query factory, bookable-branch names (TDD), Task 2: Shared page components (presentational), Task 3: Home — services teaser strip, branches strip, credibility blurb, Task 4: `/services`, `/branches`, `/about` routes (+2 more)
+### Community 445 - "Global Constraints"
+Cohesion: 0.22
+Nodes (8): Global Constraints, M4 Ticket 03, Login UI + _shell Session Gate (owner-ruled hybrid composition) Implementation Plan, Self-Review (recorded at planning time), Task 1: The browser auth client + the `/login` route (the owner-ruled hybrid composition), Task 3: Sign-out in the user card (the Option-2 inline affordance), Task 4: The live dev verification, gate matrix, provisioning, revocation, frames (controller-run), Task 5: Full gate, docs rotation, PR, merge, and the watched deploy, Task 6: v1 pick + ledger row + issue close (the runbook tail)
+
+### Community 446 - "Global Constraints"
+Cohesion: 0.25
+Nodes (7): Admin Shell + IA (Variant A) + the Tier-1 Pull-List (M3 ticket #100) Implementation Plan, Global Constraints, Self-Review, Task 2: The decided form substrate, TanStack Form + zod 4 proven in the consuming app, Task 3: The IA, routes, titles, and stub screens, Task 5: Verification, SSR smoke, a11y + look gates, the minors, full check, Task 6: Docs, gates, PR, handover
+
+### Community 448 - "@fontsource-variable/figtree@^5.3.0"
+Cohesion: 0.20
+Nodes (6): @fontsource-variable/figtree@^5.3.0, @sevendays/types@workspace:*, @tanstack/react-start@latest, @fontsource-variable/figtree, @sevendays/types, @tanstack/react-start
+
+### Community 449 - "ADR-0027: Session-verify amortization — both halves, the ruled 60 s bound"
+Cohesion: 0.33
+Nodes (5): ADR-0027: Session-verify amortization — both halves, the ruled 60 s bound, Alternatives Considered, Consequences, Context, Decision
+
+### Community 450 - "File Structure"
+Cohesion: 0.40
+Nodes (5): File Structure, Task 2: The wire swap's client follow-through, the package wrapper + the landing type sweep, Task 3: Branches active-only + the appointment-resolution pin + the CMS-path slug 404, Task 4: `GET /api/v1/gallery` + `GET /api/v1/testimonials`, services, routes, wrappers, Task 5: Full gates + docs rotation + PR/merge + v1 pick + issue close
+
+### Community 451 - "print-size.ts"
+Cohesion: 0.70
+Nodes (3): createPrintSizeSchema, printSizeSchema, updatePrintSizeSchema
+
+### Community 454 - "Task 2: The api pins, the cover-commit media_failure, the actorId length, the corrected comment"
+Cohesion: 0.50
+Nodes (4): mutations(), byEvt(), parse(), Task 2: The api pins, the cover-commit media_failure, the actorId length, the corrected comment
+
+### Community 455 - "save"
+Cohesion: 0.67
+Nodes (3): put(), save(), Task 2: The nullable wire, `packages/types` (TDD) + `apps/api` (the one-line widening + ten suite pins)
 
 ### Community 458 - "ADR-0012: exactly-one booked offering"
 Cohesion: 0.33
 Nodes (5): ADR-0012: Exactly-one booked offering, enforced on both sides, Alternatives Considered, Consequences, Context, Decision
 
-### Community 459 - "admin-mutation-log.test.ts"
-Cohesion: 0.12
-Nodes (13): authed(), bearer(), db, url, authed(), bearer(), db, url (+5 more)
-
 ### Community 460 - "ui/components.json"
 Cohesion: 0.11
 Nodes (17): aliases, components, hooks, lib, ui, utils, iconLibrary, rsc (+9 more)
-
-### Community 461 - "Global Constraints"
-Cohesion: 0.20
-Nodes (9): Global Constraints, M4 Ticket 04 — API Session Verification + Appointments-List Gating Implementation Plan, Self-Review (recorded at planning time), Task 1: The optional `BETTER_AUTH_SECRET` env seam (test-first), Task 2: The verification service + `requireSession` + its proof suite, Task 3: Gate the appointments list + the seven-site blast radius, Task 4: The admin seam — `getSessionScopedApiClient`, Task 5: Full gate, docs rotation, PR, merge, and the watched deploy (+1 more)
 
 ### Community 462 - "Implementation Decisions"
 Cohesion: 0.12
 Nodes (15): Admin shell & IA (tickets #59 + #93), Brand & the token layer (tickets #90, #57, #92), Component inventory — the canonical record (ticket #58, extended by #60), Distribution: `packages/ui` as the shared library (ticket #56 → ADR-0017), Further Notes, Implementation Decisions, Landing refactor, surface by surface (ticket #60), Milestone 3 — UI/UX Design System (spec) (+7 more)
 
-### Community 463 - "services/db.ts"
-Cohesion: 0.13
-Nodes (40): AdminMutationEntity, EmailPhase, logAdminMutation(), logError(), MediaFailureOp, adminAddonServices, ADR-0006, adminAttires (+32 more)
+### Community 463 - "types/src/index.ts"
+Cohesion: 0.07
+Nodes (39): envSchema, ADR-0007, ADR-0021, logMediaFailure(), addonServices, ADR-0006, admin, adminMedia (+31 more)
 
 ### Community 464 - "admin-gallery.ts"
-Cohesion: 0.13
-Nodes (25): assertCategoryExists(), CATEGORY_UNIQUE, CategoryRow, checkCompleteOrder(), commitStagingKey(), createAdminGalleryPhoto(), createAdminTestimonial(), Detail (+17 more)
-
-### Community 465 - "File Structure"
-Cohesion: 0.17
-Nodes (11): File Structure, Final Review (for the executor's last pass), Global Constraints, M3 Ticket 03 — Landing Chrome + Atmosphere: Ink Bands, SiteFooter, MobileNav, Wash Ground (#97) Implementation Plan, Task 1: The `collapsible` Tier-1 primitive, Task 2: The chrome components — nav lib, ink-led SiteHeader, MobileNav, SiteFooter, Task 3: Chrome mounts at the root route — per-route SiteHeader renders die, Task 4: Home onto the wash ground + white-card strip items + the emphasis strip (+3 more)
+Cohesion: 0.08
+Nodes (59): logAdminMutation(), adminGalleryCategories, ADR-0006, adminTestimonials, ADR-0006, galleryPhotos, AdminDeleteFailure, AdminDeleteResult (+51 more)
 
 ### Community 466 - "filters.ts"
-Cohesion: 0.13
-Nodes (21): AuditLogScreen(), AuditResult, fetchAuditActors, fetchAuditLogPage, ADR-0018, ADR-0023, AUDIT_ACTION_LABELS, AUDIT_ENTITY_LABELS (+13 more)
+Cohesion: 0.17
+Nodes (20): AUDIT_ACTION_LABELS, AUDIT_ENTITY_LABELS, AUDIT_PAGE_SIZE, auditDateWindow(), AuditLogSearch, AuditWireRow, dateParam, dayStartUtc() (+12 more)
 
-### Community 467 - "testimonials-screen.tsx"
-Cohesion: 0.10
-Nodes (18): EditingTarget, FlipInput, PENDING_ROW_KEYS, SaveTestimonialInput, TestimonialsScreen(), removeAdminTestimonial, saveAdminTestimonialCreate, saveAdminTestimonialOrder (+10 more)
+### Community 467 - "cms-queries.ts"
+Cohesion: 0.08
+Nodes (36): visibleRow(), adminAddonQueries, adminBranchQueries, adminGalleryQueries, adminLookupQueries, adminPackageQueries, adminStudioServiceQueries, adminTestimonialQueries (+28 more)
 
-### Community 468 - "landing/src/lib/queries.ts"
-Cohesion: 0.09
-Nodes (24): toNotFoundError(), getAddonServices, getAppointment, getBranches, getGallery, getServicePackageBySlug, getServicePackages, getSiteSettings (+16 more)
+### Community 468 - "ServicePackageRead"
+Cohesion: 0.07
+Nodes (45): FlipInput, PackageDetail(), toNotFoundError(), createAppointment, getAddonServices, getAppointment, getBranches, getGallery (+37 more)
 
 ### Community 469 - "compilerOptions"
-Cohesion: 0.18
-Nodes (10): compilerOptions, declaration, declarationMap, noEmit, outDir, rootDir, extends, include (+2 more)
-
-### Community 470 - "landing dep: @tanstack/react-router"
-Cohesion: 0.18
-Nodes (10): Acceptance criteria mapping (for the PR description), File Structure, Global Constraints, M2 Ticket 07 — Booking Wizard `/book` (prototype variant C) — Implementation Plan, Task 1: Applicability on the studio-services read (types + API, TDD), Task 2: Landing data layer — addon-services + appointment server fns, `phDateTime`, Task 3: The pure booking lib (state machine, rejections, PHT math — TDD), Task 4: `/book` route — variant C wizard, rail, rejection card, typed-Link sweep (+2 more)
-
-### Community 471 - "2026-09-26-136-m5-02-media-foundation.md"
-Cohesion: 0.09
-Nodes (21): also cleans crashed-between-promote-and-delete leftovers; delete is unbilled), append R2_S3_ACCESS_KEY_ID=… and R2_S3_SECRET_ACCESS_KEY=… to apps/api/.dev.vars, both API Workers (the deployed teaser + v1 editions), both GitHub environments (the CI deploy legs sync them on every push), bucket (skip if info above succeeds), CORS — write the rule JSON to a scratch file, then:, File Structure, Global Constraints (+13 more)
-
-### Community 472 - "Plan: M2-08 booking confirmation"
-Cohesion: 0.22
-Nodes (8): File Structure, Global Constraints, M2 Ticket 08 — Confirmation read-back `/booking/:id` — Implementation Plan, Task 1: Data layer — `getAppointment` server fn, `appointmentQueries.byId`, shared 404 seam (TDD), Task 2: The pure read-back lib — snapshot total + name joins (TDD), Task 3: `/booking/$id` route + typed-navigation convert, Task 4: CDP harness — wizard unknown-id check + e2e read-back assertions, Task 5: Docs — tick the checkbox, log the landing
+Cohesion: 0.12
+Nodes (14): compilerOptions, declaration, declarationMap, noEmit, outDir, rootDir, extends, include (+6 more)
 
 ### Community 473 - "unwrap.ts"
-Cohesion: 0.16
-Nodes (14): CreateEndpoint, CreateInput, RpcClient, ADR-0006, CreateAppointmentArgs, CreateEndpoint, GetAppointmentArgs, GetEndpoint (+6 more)
-
-### Community 474 - "Plan: M2-09 confirmation email"
-Cohesion: 0.25
-Nodes (7): File Structure, Global Constraints, M2 Ticket 09 — Confirmation email: builder + Resend send-after-commit — Implementation Plan, Task 1: Env — required `RESEND_API_KEY` + `LANDING_ORIGIN`, test-env conversion (TDD), Task 2: The pure builder — money-free HTML, pinned copy (TDD), Task 3: Send + schedule + route wiring — the email leaves inside `waitUntil` (TDD), Task 4: Docs — tick the checkbox, log the landing
+Cohesion: 0.11
+Nodes (17): CreateEndpoint, CreateInput, RpcClient, ADR-0006, CreateEndpoint, GetEndpoint, BySlugEndpoint, GetPackageBySlugArgs (+9 more)
 
 ### Community 475 - "Verify script: confirmation emails"
-Cohesion: 0.29
-Nodes (8): check(), LANDING_ORIGIN, listEmails(), main(), PH_DATE_TIME, [pkgId, svcId], resend(), results
+Cohesion: 0.27
+Nodes (10): check(), LANDING_ORIGIN, listEmails(), main(), expectation(), PH_DATE_TIME, phDateTime(), [pkgId, svcId] (+2 more)
 
 ### Community 476 - "ssr-stale-time-server: Set Higher staleTime on Server"
 Cohesion: 0.25
@@ -2532,273 +2401,169 @@ Nodes (4): Getting Started, Learn More, Getting Started, Learn More
 Cohesion: 0.33
 Nodes (5): ADR-0013: One appointments table, nullable offering refs, booked-price snapshots, Alternatives Considered, Consequences, Context, Decision
 
-### Community 480 - "turbo.json typecheck task"
-Cohesion: 0.40
-Nodes (5): ^build, dependsOn, typecheck, dependsOn, inputs
-
 ### Community 481 - "ADR-0014: email send topology"
 Cohesion: 0.33
 Nodes (5): ADR-0014: Confirmation email — sent after the DB commit via waitUntil, deduped by idempotency key, Alternatives Considered, Consequences, Context, Decision
 
 ### Community 482 - "Plan: #80 seed v1 branch"
-Cohesion: 0.15
-Nodes (12): File Structure, Global Constraints, Seed the v1 branch — the one filter-repo pass (booking-free artifact line) (#80) Implementation Plan, Task 1: Re-derive the audit's two false-positive tokens (AC 1's verdict, landed on main), Task 2: Author the seed ruleset — the record (landed on main), Task 3: The dry-run rewrite — filter the clone and prove the lineage (loop until clean), Task 4: The seed content commit, part 1 — the code (typed cascade + booking-off surfaces), Task 5: The seed content commit, part 2 — client-safe docs + AGENTS.md, then the one commit (+4 more)
+Cohesion: 0.22
+Nodes (9): File Structure, Task 1: Re-derive the audit's two false-positive tokens (AC 1's verdict, landed on main), Task 2: Author the seed ruleset, the record (landed on main), Task 3: The dry-run rewrite, filter the clone and prove the lineage (loop until clean), Task 5: The seed content commit, part 2, client-safe docs + AGENTS.md, then the one commit, Task 6: Local booking-free verification, the landing serves (AC 4), Task 7: Evidence pack → owner sign-off → the one-way push (AC 5 + AC 6), Task 8: Main-side close-out, the tick, the record, the graph (+1 more)
 
 ### Community 483 - "Global Constraints"
-Cohesion: 0.18
-Nodes (10): Global Constraints, M4 Live Verify + v1 Picks + Docs Rotation (#122) Implementation Plan, Recon state this plan starts from (verified live 2026-09-23, pre-plan), Self-review record (completed at plan time), Task 1: Repair the two broken api `BETTER_AUTH_SECRET` puts, Task 2: Reset the staff user via the documented path + stage the gate fixtures, Task 3: The teaser live gate — the milestone verification, Task 4: The v1 leg — login on `sevendays-v1-admin`, 404-by-absence, cross-edition share (+2 more)
-
-### Community 484 - "Plan: M2-03 service path intake"
-Cohesion: 0.29
-Nodes (6): File Structure, Global Constraints, M2 Ticket 03 — Service-Path Intake + Typed Rejections + `past_datetime` Floor — Implementation Plan, Task 1: Service-path intake + matrix + floor, with full test coverage (TDD), Task 2: Regression sweep + full gate (no new code), Task 3: Close-out — docs, checkboxes, graphify, handoff
-
-### Community 485 - "Global Constraints"
 Cohesion: 0.20
-Nodes (9): Admin Shell + IA (Variant A) + the Tier-1 Pull-List (M3 ticket #100) Implementation Plan, Global Constraints, Self-Review, Task 1: The Tier-1 pull-list generated into packages/ui, Task 2: The decided form substrate — TanStack Form + zod 4 proven in the consuming app, Task 3: The IA — routes, titles, and stub screens, Task 4: The shell — sidebar, top bar, layout composition, Toaster, Task 5: Verification — SSR smoke, a11y + look gates, the minors, full check (+1 more)
+Nodes (9): Global Constraints, M4 Live Verify + v1 Picks + Docs Rotation (#122) Implementation Plan, Self-review record (completed at plan time), Task 1: Repair the two broken api `BETTER_AUTH_SECRET` puts, Task 2: Reset the staff user via the documented path + stage the gate fixtures, Task 3: The teaser live gate, the milestone verification, Task 4: The v1 leg, login on `sevendays-v1-admin`, 404-by-absence, cross-edition share, Task 5: Docs rotation, progress, tech-stack, AGENTS, CONTEXT glossaries, plan ticks (+1 more)
 
 ### Community 486 - "Plan: edition-aware pipelines facts"
 Cohesion: 0.18
-Nodes (10): Edition-aware pipelines — teaser live on main, v1 private-deploy leg dormant (#79) Implementation Plan, Global Constraints, Self-Review (against issue #79 + ADR-0015), Task 1: Generalize the CI triggers past `main`, Task 2: The branch-keyed continuous deploy legs, Task 3: GitHub environments `teaser` + `v1`, and their `API_URL` variables, Task 4: Owner secret gates (STOP steps — the executor never touches a secret value), Task 5: PR → CI green → the real merge reaching the teaser live (+2 more)
-
-### Community 487 - "ADR-0015: two-edition mechanism"
-Cohesion: 0.33
-Nodes (5): ADR-0015: Two-edition delivery — one filter-repo seed plus cherry-pick maintenance, Alternatives Considered, Consequences, Context, Decision
+Nodes (10): Edition-aware pipelines, teaser live on main, v1 private-deploy leg dormant (#79) Implementation Plan, Global Constraints, Self-Review (against issue #79 + ADR-0015), Task 1: Generalize the CI triggers past `main`, Task 2: The branch-keyed continuous deploy legs, Task 3: GitHub environments `teaser` + `v1`, and their `API_URL` variables, Task 4: Owner secret gates (STOP steps, the executor never touches a secret value), Task 5: PR → CI green → the real merge reaching the teaser live (+2 more)
 
 ### Community 489 - "Global Constraints"
 Cohesion: 0.20
-Nodes (9): Global Constraints, packages/ui Becomes the Shared Primitive Library (M3 ticket #95) Implementation Plan, Self-Review, Task 1: packages/ui becomes a real workspace package with a check pipeline, Task 2: The components.json trio — base-rhea/lucide/zinc, aliases routed, Task 3: Generate the `button` tracer into packages/ui (Base UI base), Task 4: Render the tracer in both apps through the shared import, Task 5: cn migration — the `cn` package replaces the hand-rolled helpers (+1 more)
-
-### Community 491 - "ui/tsconfig.json"
-Cohesion: 0.13
-Nodes (14): compilerOptions, lib, exclude, extends, include, coverage, dist, DOM (+6 more)
+Nodes (9): Global Constraints, packages/ui Becomes the Shared Primitive Library (M3 ticket #95) Implementation Plan, Self-Review, Task 1: packages/ui becomes a real workspace package with a check pipeline, Task 2: The components.json trio, base-rhea/lucide/zinc, aliases routed, Task 3: Generate the `button` tracer into packages/ui (Base UI base), Task 4: Render the tracer in both apps through the shared import, Task 5: cn migration, the `cn` package replaces the hand-rolled helpers (+1 more)
 
 ### Community 493 - "v1 export audit script"
-Cohesion: 0.31
+Cohesion: 0.27
 Nodes (10): argv, audit(), failUsage(), git(), makeFixture(), ADR-0015, runGit(), selfTest() (+2 more)
 
 ### Community 494 - "package-editor.tsx"
-Cohesion: 0.09
-Nodes (36): PACKAGE_NOT_FOUND_LINE, EditorDisplayErrors, KIND_ICONS, PackageEditor(), PackageEditorProps, RowActions, SaveFailure, ADR-0020 (+28 more)
-
-### Community 495 - "Global Constraints"
-Cohesion: 0.17
-Nodes (11): Execution amendments (recorded at close-out, 2026-09-25), Global Constraints, M5 Ticket 01 — Catalog Schema + Shared Types Implementation Plan, Self-Review (recorded at planning, 2026-09-25), Task 1: Schema files — new tables, lookup `is_active`, position columns; generated migration 0006; live apply, Task 2: The catalog-rows builders supply positions (one edit site for seed + fixtures), Task 3: Live backfill + verify, then drop the backfill default (migration 0007), Task 4: packages/types — the new-entity vocabulary (gallery, testimonials, lookup `is_active`, matrix payloads) (+3 more)
-
-### Community 496 - "Plan: #248 — Post-flight T8: branch Maps button (nullable coordinates, manual admin input, new-tab pin)"
-Cohesion: 0.15
-Nodes (12): Acceptance-criteria mapping (issue #248), Design (one paragraph, pinned before Task 1), Global Constraints, Owner rulings (ratified 2026-11-13, plan round), Plan: #248 — Post-flight T8: branch Maps button (nullable coordinates, manual admin input, new-tab pin), Scope fences, Task 1: DB — nullable coordinate columns + migration, Task 2: Wire schemas — packages/types (+4 more)
+Cohesion: 0.05
+Nodes (68): PACKAGE_NOT_FOUND_LINE, AttireFlipInput, SectionSegmentProps, SizeFlipInput, SizeSectionHandlers, EditorDisplayErrors, KIND_ICONS, PackageEditor() (+60 more)
 
 ### Community 497 - "scripts"
 Cohesion: 0.18
 Nodes (11): scripts, build, cf-typegen, deploy, dev, fix, fix:unsafe, format (+3 more)
 
 ### Community 498 - "Plan: #78 export audit file structure"
-Cohesion: 0.22
-Nodes (8): Export audit script — `git log -S`/`-G` sweeps keyed to the absence inventory (#78) Implementation Plan, File Structure, Global Constraints, Task 1: The instrument — token inventory, sweeper, CLI, detection proof, Task 2: The proofs — self-test, sabotage torture, `--repo` clone sweep, Task 3: Consumer documentation — plan.md pointer + progress.md record (incl. the #80 flags), Task 4: graphify, final gates, handoff, Verified pre-plan facts (probed against the real workspace 2026-09-11)
+Cohesion: 0.25
+Nodes (7): Export audit script, `git log -S`/`-G` sweeps keyed to the absence inventory (#78) Implementation Plan, File Structure, Global Constraints, Task 1: The instrument, token inventory, sweeper, CLI, detection proof, Task 2: The proofs, self-test, sabotage torture, `--repo` clone sweep, Task 3: Consumer documentation, plan.md pointer + progress.md record (incl. the #80 flags), Task 4: graphify, final gates, handoff
 
 ### Community 499 - "global-search.ts"
-Cohesion: 0.13
-Nodes (29): GlobalSearch(), GlobalSearchResults(), buildSearchIndex(), focusUrlFor(), GROUP_ROUTES, IndexedPhoto, runSearch(), SEARCH_BODY_WEIGHT (+21 more)
+Cohesion: 0.11
+Nodes (34): thumbUrl(), buildSearchIndex(), focusUrlFor(), GROUP_ROUTES, IndexedPhoto, runSearch(), SEARCH_BODY_WEIGHT, SEARCH_COPY (+26 more)
 
-### Community 500 - "File Structure"
-Cohesion: 0.20
-Nodes (9): File Structure, Global Constraints, M7 Ticket 02 — Guarded DELETE: the Nine-Entity API + Guards Implementation Plan, Post-plan self-review (already applied), Task 1: `'delete'` joins the audit action vocabulary — `packages/types` + the viewer label (TDD), Task 2: `apps/api` — the guard service + the five unguarded/lookup entities (TDD), Task 3: `apps/api` — the appointment-bearing four: any-Appointment-ever guards, cascades, cover lifecycle, name/slug freeing (TDD), Task 4: `packages/api-client` — the nine `remove()` wrappers + loopback coverage (TDD) (+1 more)
+### Community 500 - "Ledger"
+Cohesion: 0.08
+Nodes (48): adminServicePackages, ADR-0006, servicePackages, ADR-0006, CoverResolution, createAdminPackage(), Detail, entityFields() (+40 more)
 
 ### Community 501 - "studio-services-screen.tsx"
-Cohesion: 0.06
-Nodes (50): AddonsScreen(), BulkFlipOutcome, EditingTarget, FlipInput, PENDING_ROW_KEYS, SaveAddonInput, SaveAddonOutcome, ADR-0020 (+42 more)
+Cohesion: 0.07
+Nodes (103): AddonsScreen(), BulkFlipOutcome, EditingTarget, PENDING_ROW_KEYS, SaveAddonInput, ADR-0020, BranchesScreen(), handleCoverStatus() (+95 more)
 
 ### Community 502 - "ADR-0017: Shared UI package — the shadcn monorepo pattern"
 Cohesion: 0.33
 Nodes (5): ADR-0017: Shared UI package — the shadcn monorepo pattern, Alternatives Considered, Consequences, Context, Decision
 
 ### Community 503 - "Plan: #82 pick discipline"
-Cohesion: 0.18
-Nodes (10): #82 — Pick Discipline Stood Up: Runbook + First Real Picks — Implementation Plan, File Structure, Global Constraints, Task 1: Pre-flight — SHAs, the `v1` checkout, the backlog, the branches, Task 2: The classifier, the runbook, the `AGENTS.md` pointer (PR B's first commit), Task 3: Backlog triage + the booking worked example (ledger rows), Task 4: The split drill — a synthetic mixed commit, split per the runbook (local only), Task 5: PR A — per-route page titles on the five shared landing routes (the pick source) (+2 more)
-
-### Community 504 - "ADR-0016: service binding"
-Cohesion: 0.33
-Nodes (5): ADR-0016: Frontends call the API through a service binding in deployed environments, Alternatives Considered, Consequences, Context, Decision
-
-### Community 506 - "Global Constraints"
-Cohesion: 0.18
-Nodes (10): Global Constraints, M4 Ticket 01 — BetterAuth Foundation (deps, auth schema, migration 0005, env posture) Implementation Plan, Self-Review (recorded at planning time), Task 1: Dependency pins — `better-auth` in both apps, `@sevendays/db` in admin, Task 2: The auth factory + CLI instance file, `auth generate`, and the schema's house adjustments, Task 3: Migration 0005 — generate through the house flow, apply, verify live, Task 4: Dev env examples — admin gains three vars, api gains one, Task 5: Deploy-workflow posture — `BETTER_AUTH_URL` vars + admin `DATABASE_URL` sync, both editions (+2 more)
-
-### Community 507 - "batch-photo-upload.ts"
-Cohesion: 0.14
-Nodes (18): BATCH_CONCURRENCY, BatchFailureKind, BatchItem, BatchItemStatus, BatchUploadDeps, hasUnsettledUploads(), MAX_UPLOAD_ATTEMPTS, preCheckFile() (+10 more)
-
-### Community 508 - "Global Constraints"
-Cohesion: 0.18
-Nodes (10): Global Constraints, Landing Surfaces onto the System, Both Variants Styled (M3 ticket #98) Implementation Plan, Self-Review, Task 1: Home — the two-CTA hero band + typed-Links sweep, Task 2: /services — neutral add-on copy + the closing call-or-visit strip, Task 3: /packages — CTA-less index, the single detail affordance, the not-found, Task 4: /branches + the badge collapse — WalkInBadge onto the shared badge, ServiceCard swept, Task 5: /about — skeleton polish, slots intact (+2 more)
+Cohesion: 0.17
+Nodes (11): #82, Pick Discipline Stood Up: Runbook + First Real Picks, Implementation Plan, File Structure, Global Constraints, Task 1: Pre-flight, SHAs, the `v1` checkout, the backlog, the branches, Task 2: The classifier, the runbook, the `AGENTS.md` pointer (PR B's first commit), Task 3: Backlog triage + the booking worked example (ledger rows), Task 4: The split drill, a synthetic mixed commit, split per the runbook (local only), Task 5: PR A, per-route page titles on the five shared landing routes (the pick source) (+3 more)
 
 ### Community 509 - "radius"
 Cohesion: 0.60
 Nodes (5): radius, radius, radius, $type, $value
 
 ### Community 510 - "about.tsx"
-Cohesion: 0.30
-Nodes (7): ALL_TAB_ID, deriveGalleryTabs(), GalleryTab, hasPortfolioPhotos(), photosForTab(), storyParagraphs(), AboutPage()
+Cohesion: 0.11
+Nodes (22): MosaicPhotoGrid(), AboutSkeleton(), HomeSkeleton(), PackageDetailSkeleton(), PackagesSkeleton(), SLOTS_3, SLOTS_4, SLOTS_6 (+14 more)
 
-### Community 511 - "home-image-led.tsx"
-Cohesion: 0.13
-Nodes (14): HERO_PHOTO, HERO_PHOTO_ALT, HomeImageLed(), FALLBACK_HEADING, FEATURED_COUNT, FEATURED_HEADING, selectFeaturedPackages(), A (+6 more)
+### Community 512 - "CreateAppointmentArgs"
+Cohesion: 0.07
+Nodes (25): ADR-0015: Two-edition delivery — one filter-repo seed plus cherry-pick maintenance, Alternatives Considered, Consequences, Context, Decision, Delivery Versions — v1 (Free Handover) / v2 (Paid Booking System) (spec), Further Notes, Handover Mechanics — #75 (facts from #69) (+17 more)
 
-### Community 512 - "Global Constraints"
-Cohesion: 0.22
-Nodes (8): architecture.md Alignment Pass (ticket #115) Implementation Plan, Global Constraints, Task 1: The System Overview diagram — the production transport on the frontend→API edge, Task 2: Deployment Targets — the table rewrite + the client-safe editions pointer line, Task 3: Data Flow: Booking a Shoot — rewrite to today's reality, Task 4: The mini re-audit — evidence for every claim, the Observability drift fix, progress rotation, and the PR, Task 5: Drain the pending `6aff692` split pick (main-order backlog — row 153), Task 6: Triage + pick this ticket's merge, locks, ledger row (the close-out loop's tail)
-
-### Community 513 - "v1.ts"
-Cohesion: 0.08
-Nodes (24): addonServices, ADR-0006, admin, appointments, servicePackages, siteSettingsRoutes, ADR-0006, studioServices (+16 more)
-
-### Community 515 - "mosaic-photo-grid.tsx"
-Cohesion: 0.23
-Nodes (12): MosaicPhotoGrid(), PhotoViewer(), HomeSkeleton(), spanFor(), COVER_CAROUSEL, COVER_RENDER, coverSlides(), GALLERY_ALT_FALLBACK (+4 more)
+### Community 513 - "notFound"
+Cohesion: 0.05
+Nodes (61): Bad Example, Context, err-not-found: Handle Not-Found Routes Properly, Explanation, Good Example: Catch-All Route, Good Example: Nested Not Found Bubbling, Good Example: Not Found with Data, Good Example: Root-Level Not Found (+53 more)
 
 ### Community 516 - "Phase A — the dedicated stack (no client dependency)"
 Cohesion: 0.11
-Nodes (17): A1 The Cloudflare account, the subdomain, the ship token, A2 The Supabase org + project, A3 The fresh database — migrations, seed, the carry, the smoke-staff, A4 The fresh bucket (docs/media-bucket-runbook.md § Fresh bucket at ship), A5 Secrets + vars — the complete `v1` GitHub environment write-up, A6 The deploy under the scoped roles (the dry-run gate), A7 The CI re-point — the `v1` environment's deploy identity, B1 The media copy (scripted list+copy) (+9 more)
+Nodes (17): A1 The Cloudflare account, the subdomain, the ship token, A2 The Supabase org + project, A3 The fresh database: migrations, seed, the carry, the smoke-staff, A4 The fresh bucket (docs/media-bucket-runbook.md § Fresh bucket at ship), A5 Secrets + vars: the complete `v1` GitHub environment write-up, A6 The deploy under the scoped roles (the dry-run gate), A7 The CI re-point: the `v1` environment's deploy identity, B1 The media copy (scripted list+copy) (+9 more)
 
 ### Community 519 - "v1 triage classifier script"
-Cohesion: 0.46
+Cohesion: 0.43
 Nodes (7): CLUSTER, failUsage(), git(), isMainOnly(), loadMainOnlyPrefixes(), main(), ADR-0015
 
-### Community 521 - "api/package.json"
-Cohesion: 0.25
-Nodes (7): types, exports, ./app, name, private, type, version
+### Community 521 - "@sevendays/types@workspace:*"
+Cohesion: 0.30
+Nodes (5): types, @sevendays/types@workspace:*, exports, ./app, @sevendays/types
 
 ### Community 522 - "metrics.functions.ts"
-Cohesion: 0.21
-Nodes (11): collectContentCensus(), collectDbProbes(), ADR-0011, MetricsResult, fetchMetricsContent, fetchMetricsDbProbes, fetchMetricsStorage, fetchMetricsTraffic (+3 more)
+Cohesion: 0.23
+Nodes (14): POSTHOG_DEFAULT_API_HOST, readHostList(), readMetricsEnv(), readTrimmed(), FULL, ADR-0023, fetchMetricsContent, fetchMetricsDbProbes (+6 more)
 
 ### Community 523 - "cf.ts"
-Cohesion: 0.18
-Nodes (14): bucketStart(), CF_GRAPHQL_URL, fetchOneSeries(), fetchWorkerMetrics(), InvocationsRow, METRICS_WINDOWS, mungeWorkerSeries(), ENV (+6 more)
+Cohesion: 0.17
+Nodes (15): bucketStart(), CF_GRAPHQL_URL, InvocationsRow, METRICS_WINDOWS, metricsWindowSchema, mungeWorkerSeries(), ENV, ADR-0023 (+7 more)
 
-### Community 524 - "src/audit.ts"
-Cohesion: 0.31
-Nodes (7): AuditAction, auditActionSchema, AuditEntity, auditEntitySchema, AuditLogRow, auditLogRowSchema, fullRow
-
-### Community 525 - "Global Constraints"
-Cohesion: 0.20
-Nodes (9): Global Constraints, M5 Prototype: Admin CMS Compositions (wayfinder #131) Implementation Plan, Self-Review, Task 1: Scaffold — worktree, fixtures, nav registry, route, prototype chrome, Task 2: Shared compositions + the packages table + the package editor, Task 3: The matrix screens (studio services, add-ons) + branches + lookups, Task 4: The new-entity screens — gallery manager + testimonials, Task 5: The frame pass + full gates (+1 more)
-
-### Community 526 - "api-client/src/index.ts"
-Cohesion: 0.08
-Nodes (24): CreateApiClientOptions, ADR-0006, CreateAddonArgs, CreateAttireArgs, CreateGalleryCategoryArgs, CreateGalleryPhotoArgs, CreatePrintSizeArgs, CreateServicePackageArgs (+16 more)
+### Community 526 - "createApiClient"
+Cohesion: 0.09
+Nodes (31): Global Constraints, M2 Pre-flight 3/5, Landing: TanStack Query SSR wiring + API_URL + sample branches call (#23) Implementation Plan, Self-Review (done pre-flight, 2026-09-05), Task 1: Deps + server-side API_URL seam + data layer, Task 2: Query SSR wiring + sample branches call, Task 3: End-to-end verification (dev + loud-fail + prod-shaped workerd + leak scan), Task 4: Full gates + docs cross-linking, Verified pre-plan facts (probed against the real toolchain 2026-09-05) (+23 more)
 
 ### Community 527 - "design-tokens-starter.json"
 Cohesion: 0.15
 Nodes (12): component, $type, $value, dark, semantic, $schema, $type, $value (+4 more)
 
 ### Community 528 - "Global Constraints"
-Cohesion: 0.14
-Nodes (13): Global Constraints, M5 ticket 09 — Close-out: admin test suite, seed dev-only, cms-reflection exit gate, docs, v1 picks (#143) Implementation Plan, Recon state this plan starts from (verified live 2026-09-28, pre-plan), Task 10: Full gates, the PR, the merge, #143's own v1 pick, and the milestone-exit close, Task 1: Branch cut, Step-0 verification, and the admin vitest suite seats (package-editor seam), Task 2: TDD the package-editor validator gaps (duration, price, frame-token membership), Task 3: The matrix + gallery seam suites, and the two one-line seam fixes, Task 4: The upload-loop seam suites (cover loop + batch pool) (+5 more)
+Cohesion: 0.18
+Nodes (10): Global Constraints, M5 ticket 09, Close-out: admin test suite, seed dev-only, cms-reflection exit gate, docs, v1 picks (#143) Implementation Plan, Task 10: Full gates, the PR, the merge, #143's own v1 pick, and the milestone-exit close, Task 1: Branch cut, Step-0 verification, and the admin vitest suite seats (package-editor seam), Task 3: The matrix + gallery seam suites, and the two one-line seam fixes, Task 4: The upload-loop seam suites (cover loop + batch pool), Task 6: The `cms-reflection.mjs` exit-gate scenario, Task 7: The live gate run (operator machine) (+2 more)
 
 ### Community 529 - "ADR-0018: Two-role staff model — the admin gate stays owner-held"
 Cohesion: 0.33
 Nodes (5): ADR-0018: Two-role staff model — the admin gate stays owner-held, Alternatives Considered, Consequences, Context, Decision
 
-### Community 530 - "Global Constraints"
-Cohesion: 0.18
-Nodes (10): API suite debt — M5-pinned test gaps + api hygiene nits (#154) Implementation Plan, Global Constraints, Recon state this plan starts from (verified live 2026-09-29, pre-plan), Task 1: Media suite gaps — staging-key reject, no-contentType commit branch, thumb fallback + gate order, Task 2: Admin entity suites — PUT clash branches, deactivation-blind matrices, GET round-trips, Task 3: Package cover legs — absent-unchanged at a non-null pre-state, missing-staging full pin, Task 4: The order-guard duplicate arm + the AR3/AR7 public-read fixture cases, Task 5: api-client loopback tests for the gallery + testimonials wrappers (+2 more)
-
-### Community 531 - "services/appointments.ts"
-Cohesion: 0.09
-Nodes (28): ADR-0006, ADR-0006, appointmentProjection, createAppointment(), CreateAppointmentResult, CreateReason, fail(), fetchAddonEntries() (+20 more)
+### Community 531 - "badRequest"
+Cohesion: 0.06
+Nodes (56): appointments, ADR-0006, appointmentProjection, createAppointment(), CreateAppointmentResult, CreateReason, fail(), fetchAddonEntries() (+48 more)
 
 ### Community 532 - "Plan: #334 — Service covers: teaser variant pass + owner reaction"
 Cohesion: 0.17
-Nodes (11): Execution record (2026-11-21 — what actually ran), Global Constraints, Owner rulings (recorded), Plan: #334 — Service covers: teaser variant pass + owner reaction, Scope fences, Self-review checklist (controller pass — run before handoff), Task 1 — staging: the api leg + the rig + the plan record (no browser yet), Task 2 — the admin act: the owner's bind + the four preview states (the go gate) (+3 more)
+Nodes (11): Execution record (2026-11-21, what actually ran), Global Constraints, Owner rulings (recorded), Plan: #334, Service covers: teaser variant pass + owner reaction, Scope fences, Self-review checklist (controller pass, run before handoff), Task 1, staging: the api leg + the rig + the plan record (no browser yet), Task 2, the admin act: the owner's bind + the four preview states (the go gate) (+3 more)
 
-### Community 533 - "File Structure"
-Cohesion: 0.12
-Nodes (15): File Structure, Global Constraints, M5 Ticket 07 — Admin screens: gallery, testimonials, lookups (UI-bearing) Implementation Plan, Self-Review, Task 10: Evidence — rendered variants + the CDP smoke (including the real upload legs), recorded on the ticket, Task 11: Full gates, docs rotation, PR/merge, close, Task 1: Ordering gate, branch, baselines, Task 2: Wrapper extensions + the binary thumb seam (`packages/api-client`) (+7 more)
+### Community 533 - "connect"
+Cohesion: 0.32
+Nodes (12): check(), main(), peso(), results, connect(), evaluate(), go(), send() (+4 more)
 
-### Community 534 - "File Structure"
-Cohesion: 0.25
-Nodes (7): File Structure, Global Constraints, M5 Ticket 08 — Landing Integration: /about Tabbed Gallery, Testimonials Slot, CoverPanel, Empty States — Implementation Plan, Task 1: The ordering gate, baselines, and branch, Task 2: The CoverPanel rule + the three package surfaces + their empty states, Task 3: /about — the data layer, the tabbed gallery, the testimonials slot, the empty states, Task 4: Full gates + the stays-pinned audit + docs rotation + PR/merge + v1 pick + close
-
-### Community 536 - "users-tab.tsx"
-Cohesion: 0.10
-Nodes (14): ActionTooltip(), EmptyState(), ExpandRow(), PENDING_ROW_KEYS, Dialog(), DialogContent(), DialogDescription(), DialogFooter() (+6 more)
-
-### Community 537 - "login.tsx"
-Cohesion: 0.13
-Nodes (20): PendingSpinner(), SegmentedControl(), AccountTab(), AccountUser, TAB_SUBLINES, authClient, ADR-0011, AdminLockup() (+12 more)
+### Community 536 - "ref_tanstack_react_router"
+Cohesion: 0.06
+Nodes (46): CategoryRail(), presign(), railEntryClass(), SortableCategoryEntry(), SortablePhotoCard(), AccountTab(), changePassword(), AccountUser (+38 more)
 
 ### Community 538 - "Plan: #341 — Image viewer: teaser variant pass + owner reaction"
 Cohesion: 0.18
-Nodes (10): Execution record (2026-11-21), Global Constraints, Owner rulings (recorded), Plan: #341 — Image viewer: teaser variant pass + owner reaction, Scope fences, Self-review checklist (controller pass — run before handoff), Task 1 — staging: deploy provenance + the rig + the caption gate (no browser), Task 2 — the headless capture pass (+2 more)
-
-### Community 539 - "helpers/env.ts"
-Cohesion: 0.13
-Nodes (13): byEvt(), db, parse(), url, createTestAuth(), signOutSession(), ADR-0004, ADR-0011 (+5 more)
+Nodes (10): Execution record (2026-11-21), Global Constraints, Owner rulings (recorded), Plan: #341, Image viewer: teaser variant pass + owner reaction, Scope fences, Self-review checklist (controller pass, run before handoff), Task 1, staging: deploy provenance + the rig + the caption gate (no browser), Task 2, the headless capture pass (+2 more)
 
 ### Community 540 - "/public/photos — PROTOTYPE stand-ins (#111)"
 Cohesion: 0.50
-Nodes (3): Brand assets + owner photos (NOT stand-ins), /public/photos — PROTOTYPE stand-ins (#111), Source & license
-
-### Community 541 - "File Structure"
-Cohesion: 0.14
-Nodes (13): File Structure, Global Constraints, M5 Ticket 03 — Admin Write Model Implementation Plan, Task 10: Full gates + docs rotation + PR/merge + v1 pick + issue close, Task 1: The admin write plumbing — failure contract, 23505 mapper, media URL resolution, Task 2: Branches + print sizes admin CRUD (the pattern-defining pair), Task 3: Attires + add-on services admin CRUD (deltas of the Task 2 pattern), Task 4: Studio services admin CRUD + the two matrix full-replaces (+5 more)
+Nodes (3): Brand assets + owner photos (NOT stand-ins), /public/photos, PROTOTYPE stand-ins (#111), Source & license
 
 ### Community 542 - "Global Constraints"
 Cohesion: 0.18
-Nodes (10): Global Constraints, M4 Ticket 02 — Admin Auth Server Live (/api/auth routes, per-request instances, create-staff CLI) Implementation Plan, Self-Review (recorded at planning time), Task 1: The `/api/auth/*` catch-all route — BetterAuth's handler, per request, Task 2: The session server functions — `getSession` / `ensureSession`, Task 3: The `create-staff` script + the in-repo provisioning/reset runbook, Task 4: Local dev env values (gitignored — this task has NO commit), Task 5: The live dev verification — probe, refusal, provisioning, sign-in, Postgres rows (+2 more)
+Nodes (10): Global Constraints, M4 Ticket 02, Admin Auth Server Live (/api/auth routes, per-request instances, create-staff CLI) Implementation Plan, Self-Review (recorded at planning time), Task 1: The `/api/auth/*` catch-all route, BetterAuth's handler, per request, Task 2: The session server functions, `getSession` / `ensureSession`, Task 3: The `create-staff` script + the in-repo provisioning/reset runbook, Task 4: Local dev env values (gitignored, this task has NO commit), Task 5: The live dev verification, probe, refusal, provisioning, sign-in, Postgres rows (+2 more)
 
-### Community 543 - "File Structure"
-Cohesion: 0.14
-Nodes (13): File Structure, Global Constraints, M5 Ticket 06 — Admin screens: branches, studio services + both matrices, add-ons (UI-bearing) Implementation Plan, Self-Review, Task 1: Ordering gate, branch, baselines, Task 2: Wrapper extensions + the admin server-fn saves/matrices + query factories, Task 3: The pure light-entity state seam (`lib/light-entity-state.ts`), Task 4: The shared bulk-bar + relation-badge components (+5 more)
-
-### Community 544 - "ADR-0019: R2 media topology — presigned direct upload, public bucket, object-key storage"
-Cohesion: 0.29
-Nodes (6): ADR-0019: R2 media topology — presigned direct upload, public bucket, object-key storage, Alternatives Considered, Amendments, Consequences, Context, Decision
-
-### Community 545 - "File Structure"
-Cohesion: 0.15
-Nodes (12): File Structure, Global Constraints, M5 Ticket 05 — Admin screens: shared CMS patterns + the packages surface (UI-bearing) Implementation Plan, Self-Review, Task 1: Ordering gate, branch, dependencies, MotionConfig at the root, Task 2: The api-client admin wrappers + the admin server-function seam + query factories, Task 3: The pure editor-state seam + the cover-upload loop, Task 4: The shared CMS pattern library (`components/cms/shared.tsx`) (+4 more)
-
-### Community 546 - "Global Constraints"
-Cohesion: 0.18
-Nodes (10): Global Constraints, Owner-decision follow-ups — error postures, bulk counts, leak-safe 503, checkbox ruling (#155) Implementation Plan, Recon state this plan starts from (verified live 2026-09-29, pre-plan), Task 1: `QueryErrorState` + the seven list surfaces' error posture, Task 2: The package editor's 404 + failed-reads posture, Task 3: The bulk confirm's eligible-aware count (TDD seam + three screens), Task 4: The leak-safe 503 — `MissingR2CredentialsError` answers a curated line (TDD flip), Task 5: The checkbox indeterminate ruling — the deliberate primary border (+2 more)
-
-### Community 547 - "backfill-positions.mjs"
-Cohesion: 0.47
-Nodes (5): fail(), failures, pass(), sql, violations()
+### Community 543 - "unwrap"
+Cohesion: 0.19
+Nodes (27): Task 4: packages/api-client, the three wrappers + mock endpoints + loopback tests (TDD), Task 2: The api-client admin wrappers + the admin server-function seam + query factories, File Structure, M5 Ticket 06, Admin screens: branches, studio services + both matrices, add-ons (UI-bearing) Implementation Plan, Task 1: Ordering gate, branch, baselines, Task 2: Wrapper extensions + the admin server-fn saves/matrices + query factories, Task 9: Full gates, docs rotation, PR/merge, close, M5 Ticket 07, Admin screens: gallery, testimonials, lookups (UI-bearing) Implementation Plan (+19 more)
 
 ### Community 548 - "mock-api.ts"
-Cohesion: 0.11
-Nodes (23): RFC-4122, toLoopbackFetch(), clientFor(), ADDONS, APPOINTMENTS, BRANCH_LINKS, BRANCHES, GALLERY (+15 more)
-
-### Community 549 - "Implementation Decisions"
-Cohesion: 0.11
-Nodes (17): CMS UX maturation — the system (#165; all patterns theme-aware from the start), Dark mode — from zero, all three surfaces (#162), Further Notes, Guarded DELETE everywhere (#159 — M5's delete-nowhere reversed and refined), Implementation Decisions, Milestone 7 — Experience & CMS Maturation (spec), Out of Scope, Problem Statement (+9 more)
+Cohesion: 0.07
+Nodes (30): RFC-4122, ADR-0016: Frontends call the API through a service binding in deployed environments, Alternatives Considered, Consequences, Context, Decision, Self-Review, CreateApiClientOptions (+22 more)
 
 ### Community 550 - "src/media.ts"
-Cohesion: 0.16
-Nodes (13): MEDIA_CONTENT_TYPES, MEDIA_UPLOAD_CAP_BYTES, MediaContentType, MediaPresignRequest, mediaPresignRequestSchema, MediaPresignResponse, mediaPresignResponseSchema, MediaPurpose (+5 more)
+Cohesion: 0.24
+Nodes (9): MEDIA_CONTENT_TYPES, MediaContentType, mediaPresignRequestSchema, mediaPresignResponseSchema, mediaPurposeSchema, MediaStagingKey, mediaStagingKeySchema, SITE_LOGO_CONTENT_TYPES (+1 more)
 
 ### Community 551 - "admin/src/lib/api.server.ts"
-Cohesion: 0.13
-Nodes (17): AdminActionFailure, AdminClient, runAdminAction(), envelopeDetails(), conflictEnvelope, getBranches, getSiteSettings, extractSessionToken() (+9 more)
+Cohesion: 0.18
+Nodes (13): getBranches, getSiteSettings, getApiClient(), getApiUrl(), getInternalFetchDeps(), ADR-0004, ADR-0006, ADR-0016 (+5 more)
 
-### Community 552 - "Media bucket runbook — `sevendays-media` (ADR-0019)"
-Cohesion: 0.25
-Nodes (7): § Fresh bucket at ship (docs/ship-provisioning-runbook.md A4 + B1–B4), § Live round-trip verify, Media bucket runbook — `sevendays-media` (ADR-0019), § Owner handoff — minting the scoped R2 S3 token (owner-operated, ~5 minutes), Re-run / repair commands, Vars and secrets — where each value lives, What exists (verified 2026-09-26)
+### Community 553 - "shared.tsx"
+Cohesion: 0.08
+Nodes (46): SaveAddonOutcome, DeactivateConfirm(), GuardedConfirm(), LightEntityEditor(), PendingSpinner(), SubmissionStatusBadge(), Global Constraints, Task 1: Scaffold, worktree, fixtures, nav registry, route, prototype chrome (+38 more)
 
-### Community 553 - "admin/src/routes/__root.tsx"
-Cohesion: 0.29
-Nodes (4): PostHogProvider(), PostHogProviderProps, RouterContext, Toaster()
-
-### Community 554 - "Global Constraints"
+### Community 554 - "admin/src/lib/nav.ts"
 Cohesion: 0.20
-Nodes (9): Global Constraints, M4 Ticket 03 — Login UI + _shell Session Gate (owner-ruled hybrid composition) Implementation Plan, Self-Review (recorded at planning time), Task 1: The browser auth client + the `/login` route (the owner-ruled hybrid composition), Task 2: The `_shell` session gate + identity in context, Task 3: Sign-out in the user card (the Option-2 inline affordance), Task 4: The live dev verification — gate matrix, provisioning, revocation, frames (controller-run), Task 5: Full gate, docs rotation, PR, merge, and the watched deploy (+1 more)
+Nodes (15): NavGroup, navGroups, NavItem, NavTo, taxonomy, ADR-0018, ADR-0018, visibleNavGroups() (+7 more)
 
 ### Community 555 - "read-cache.test.ts"
-Cohesion: 0.11
-Nodes (23): ADMIN_MUTATION_READS, adminEvictPublicReads(), CACHED_READ_PREFIXES, CachedPublicRead, defaultStore(), evictCachedReads(), getReadCacheStore(), isCachedReadPath() (+15 more)
+Cohesion: 0.08
+Nodes (33): ADMIN_MUTATION_READS, adminEvictPublicReads(), CACHED_READ_PREFIXES, CachedPublicRead, defaultStore(), evictCachedReads(), getReadCacheStore(), isCachedReadPath() (+25 more)
 
 ### Community 556 - "Staff provisioning & password reset (v1)"
 Cohesion: 0.40
@@ -2806,39 +2571,27 @@ Nodes (4): Creating a staff user, Resetting a staff password, Staff provisioning
 
 ### Community 558 - "Global Constraints"
 Cohesion: 0.13
-Nodes (14): Global Constraints, M8 ticket 05 — Exit gate — re-run the baseline, close M8 — implementation plan, Not here (milestone-wide fence), Self-review notes for the executor, Task 10: post-merge — the v1 pick + the ledger row, Task 1: the pre-walk confound check + the owner ask (HITL starts), Task 2: the cold pass — capture + extraction, Task 3: the warm pass — the client arms + the verdict + the evidence comment (+6 more)
-
-### Community 559 - "landing/src/lib/sentry.ts"
-Cohesion: 0.38
-Nodes (4): options, APP, buildSentryOptions(), SentryFrontendInit
+Nodes (14): Global Constraints, M8 ticket 05, Exit gate, re-run the baseline, close M8, implementation plan, Not here (milestone-wide fence), Self-review notes for the executor, Task 10: post-merge, the v1 pick + the ledger row, Task 1: the pre-walk confound check + the owner ask (HITL starts), Task 2: the cold pass, capture + extraction, Task 3: the warm pass, the client arms + the verdict + the evidence comment (+6 more)
 
 ### Community 560 - "ADR-0022: Standalone Playwright as the browser-E2E and visual-regression foundation"
 Cohesion: 0.29
 Nodes (6): ADR-0022: Standalone Playwright as the browser-E2E and visual-regression foundation, Alternatives Considered, Amendment — 2026-11-22: CMS-content masking policy (#346), Consequences, Context, Decision
 
-### Community 561 - "Plan: #331 — Service covers: API spine — fifth purpose, cover column, tri-state save, resolved reads"
-Cohesion: 0.18
-Nodes (10): Global Constraints, Plan: #331 — Service covers: API spine — fifth purpose, cover column, tri-state save, resolved reads, Scope fences, Self-review checklist (controller pass — run before handoff), Task 1 — `packages/db`: the nullable cover key + generated migration 0015, Task 2 — the fifth media purpose: `'service-cover'` joins presign/commit (types + api, atomic), Task 3 — the studio-service wire: read schemas + resolved reads + every consumer ripple (types + api + fixtures, atomic), Task 4 — the tri-state save + the delete cleanup (admin-entities, admin-delete, routes, pins, cache verify) (+2 more)
+### Community 561 - "admin-studio-services.ts"
+Cohesion: 0.17
+Nodes (25): adminStudioServices, ADR-0006, deleteAdminStudioService(), assembleAdminStudioServices(), BranchEnv, createAdminStudioService(), getAdminStudioService(), listAdminStudioServices() (+17 more)
 
 ### Community 562 - "ADR-0023: The observability data path — admin server functions own the analytics queries"
 Cohesion: 0.33
 Nodes (5): ADR-0023: The observability data path — admin server functions own the analytics queries, Alternatives Considered, Consequences, Context, Decision
 
-### Community 563 - "File Structure"
-Cohesion: 0.22
-Nodes (8): File Structure, Global Constraints, M5 Ticket 04 — Public Reads + Trim Rules Implementation Plan, Task 1: The public package reads — trim rules, `(position, id)` ordering, resolved URLs, Task 2: The wire swap's client follow-through — the package wrapper + the landing type sweep, Task 3: Branches active-only + the appointment-resolution pin + the CMS-path slug 404, Task 4: `GET /api/v1/gallery` + `GET /api/v1/testimonials` — services, routes, wrappers, Task 5: Full gates + docs rotation + PR/merge + v1 pick + issue close
-
-### Community 564 - "File Structure"
-Cohesion: 0.18
-Nodes (10): File Structure, Global Constraints, M7 Ticket 12 — The Landing Redesign I: Chrome, Home, States, Settings Consumption Implementation Plan, Self-Review Checklist (for the executor's final pass), Task 1: The pure seams + the one types default (TDD), Task 2: The chrome — settings read path, glass bar, footer truth, banner, global NotFound/Error, the admin rider (UI-bearing), Task 3: Home — the ruled composition + the skeleton grammar (UI-bearing), Task 4: The states — whole-page empty lines + Back-to-home CTAs + the DEV-gated judging (UI-bearing) (+2 more)
-
 ### Community 565 - "Plan: #338 — Create-button polish: teaser variant pass + owner reaction"
 Cohesion: 0.20
-Nodes (9): Global Constraints, Owner rulings (recorded), Plan: #338 — Create-button polish: teaser variant pass + owner reaction, Scope fences, Self-review checklist (controller pass — run before handoff), Task 1 — staging: the capture rig + the plan record (no browser yet), Task 2 — the headed capture pass (the go gate), Task 3 — the owner reaction + disposition (+1 more)
+Nodes (9): Global Constraints, Owner rulings (recorded), Plan: #338, Create-button polish: teaser variant pass + owner reaction, Scope fences, Self-review checklist (controller pass, run before handoff), Task 1, staging: the capture rig + the plan record (no browser yet), Task 2, the headed capture pass (the go gate), Task 3, the owner reaction + disposition (+1 more)
 
-### Community 566 - "admin-packages.ts"
-Cohesion: 0.09
-Nodes (33): logMediaFailure(), resolveBranchCover(), resolveServiceCover(), CoverResolution, createAdminPackage(), Detail, entityFields(), fetchComposition() (+25 more)
+### Community 566 - "ref_zod"
+Cohesion: 0.12
+Nodes (20): adminTestimonialSubmissions, idParam, ADR-0021, rateLimitSubmissions(), testimonialSubmissionsRoutes, ADR-0006, ADR-0016, nextTestimonialPosition() (+12 more)
 
 ### Community 567 - "load-deferred-data: Split Critical and Non-Critical Data"
 Cohesion: 0.25
@@ -2846,21 +2599,13 @@ Nodes (7): Bad Example, Context, Explanation, Good Example: Built-In Deferred Lo
 
 ### Community 568 - "Global Constraints"
 Cohesion: 0.22
-Nodes (8): Global Constraints, Recon state this plan starts from (verified live 2026-10-10, pre-plan), Task 1: The seven-assertion suite, Task 2: The workflow wiring + the config comment refresh, Task 3: The owner gate — `smoke-staff` + the teaser environment secrets, Task 4: The docs rotation + the graph refresh, Task 5: Full gates, the dispatch verification, the PR, the close-out, and the v1 pick (expected SKIP), The production smoke — the verify gate's executable leg (#190) Implementation Plan
-
-### Community 569 - "Global Constraints"
-Cohesion: 0.17
-Nodes (11): Global Constraints, Recon state this plan starts from (verified live 2026-10-11, pre-plan), Task 1: The `windowToRange` straddle family dies — one range per fetch, `Date` pinned in the contract tests, Task 2: The three count munges route through the `numOrNull` guard, Task 3: The empty-string release is unset — both frontends, Task 4: The PII floor discriminates — the mocked free text echoes the recipient, Task 5: The studio-service update PUT aligns to the sibling convention — and the convention is pinned, Task 6: The nav taxonomy freezes read-only (+3 more)
-
-### Community 570 - "Global Constraints"
-Cohesion: 0.29
-Nodes (6): Gallery upload picker — JPG-only accept + the cap said up front (#170) Implementation Plan, Global Constraints, Recon state this plan starts from (verified live 2026-09-30, pre-plan), Task 1: The JPG-only picker + the cap caption, Task 2: The docs rotation + the graph refresh, Task 3: Full gates, the PR, the v1 pick, and the ledger
+Nodes (8): Global Constraints, Recon state this plan starts from (verified live 2026-10-10, pre-plan), Task 1: The seven-assertion suite, Task 2: The workflow wiring + the config comment refresh, Task 3: The owner gate, `smoke-staff` + the teaser environment secrets, Task 4: The docs rotation + the graph refresh, Task 5: Full gates, the dispatch verification, the PR, the close-out, and the v1 pick (expected SKIP), The production smoke, the verify gate's executable leg (#190) Implementation Plan
 
 ### Community 571 - "r2.ts"
 Cohesion: 0.16
-Nodes (20): windowToRange(), CLASS_A_ACTIONS, CLASS_B_ACTIONS, classifyActionType(), fetchR2Dataset(), fetchStorageMetrics(), mungeR2Ops(), mungeR2Storage() (+12 more)
+Nodes (26): fetchOneSeries(), fetchWorkerMetrics(), windowToRange(), MetricsResult, R2AnalyticsConfig, CLASS_A_ACTIONS, CLASS_B_ACTIONS, classifyActionType() (+18 more)
 
-### Community 572 - "duration"
+### Community 572 - "primitive"
 Cohesion: 0.20
 Nodes (10): fast, normal, slow, $type, $value, $type, $value, duration (+2 more)
 
@@ -2870,283 +2615,171 @@ Nodes (7): Bad Example, Context, Explanation, File Naming, Good Example, org-ind
 
 ### Community 575 - "Global Constraints"
 Cohesion: 0.15
-Nodes (12): Docs-audit rotation — the free set — implementation plan, Global Constraints, Not here, Self-review notes for the executor, Task 1: file the execution issue, Task 2: `docs/architecture.md` — rotate to current reality, Task 3: `docs/tech-stack.md` — rotate to current reality, Task 4: `AGENTS.md` — the migrations literal (+4 more)
+Nodes (12): Docs-audit rotation, the free set, implementation plan, Global Constraints, Not here, Self-review notes for the executor, Task 1: file the execution issue, Task 2: `docs/architecture.md`, rotate to current reality, Task 3: `docs/tech-stack.md`, rotate to current reality, Task 4: `AGENTS.md`, the migrations literal (+4 more)
 
 ### Community 576 - "Global Constraints"
 Cohesion: 0.14
-Nodes (13): Global Constraints, Landing redesign prototype on the live catalog (#164) Implementation Plan, Recon state this plan starts from (verified live 2026-09-30, pre-plan), Task 0: Claim the ticket, cut the branch, bring up the stack, Task 1: Owner content intake — make the catalog judgeable (HITL), Task 2: The direction contract — one ratified POV before any composition, Task 3: Composition round 1 — global chrome + branded NotFound + Error, Task 4: Composition round 2 — home (+5 more)
-
-### Community 577 - "File Structure"
-Cohesion: 0.29
-Nodes (6): File Structure, Global Constraints, M9 Ticket 2 — Global Search core (the fuse.js engine seam + the inline dropdown) Implementation Plan, Task 1: The engine seam — the deps land + `global-search.ts` (TDD), Task 2: The GlobalSearch dropdown — Variant B ported, live in the topbar, Task 3: Gates, the owner's as-built variants reaction, the live walkthrough, docs rotation, PR, the v1 pick, issues, graphify
-
-### Community 578 - "api/src/index.ts"
-Cohesion: 0.08
-Nodes (19): NOTE: these expectTypeOf assertions are enforced by `pnpm typecheck`, not by, app, AppType, ADR-0006, ADR-0016, ErrorCapture, resetErrorCapture(), setErrorCapture() (+11 more)
+Nodes (13): Global Constraints, Landing redesign prototype on the live catalog (#164) Implementation Plan, Recon state this plan starts from (verified live 2026-09-30, pre-plan), Task 0: Claim the ticket, cut the branch, bring up the stack, Task 1: Owner content intake, make the catalog judgeable (HITL), Task 2: The direction contract, one ratified POV before any composition, Task 3: Composition round 1, global chrome + branded NotFound + Error, Task 4: Composition round 2, home (+5 more)
 
 ### Community 579 - "branch.ts"
-Cohesion: 0.13
-Nodes (15): Branch, BranchRead, branchReadSchema, branchSchema, branchWriteBase, CreateBranchInput, createBranchSchema, latitudeSchema (+7 more)
+Cohesion: 0.19
+Nodes (12): branchReadSchema, branchSchema, branchWriteBase, createBranchSchema, latitudeSchema, longitudeSchema, mapsLinkSchema, read (+4 more)
 
 ### Community 580 - "File Structure"
 Cohesion: 0.22
-Nodes (8): File Structure, Global Constraints, M6 Ticket 07 — The Playwright pre-flight foundation Implementation Plan, Self-review record (planner), Task 1: The foundation at the root — devDep, script, config, the smoke home, Task 2: The CI leg — e2e.yml + the teaser E2E_BASE_URL, Task 3: The v1 fence — paths.txt records the three main-only paths, Task 4: Gates, the CDP-green proof, docs rotation, PR/merge, post-merge verification, ledger, close
+Nodes (8): File Structure, Global Constraints, M6 Ticket 07, The Playwright pre-flight foundation Implementation Plan, Self-review record (planner), Task 1: The foundation at the root, devDep, script, config, the smoke home, Task 2: The CI leg, e2e.yml + the teaser E2E_BASE_URL, Task 3: The v1 fence, paths.txt records the three main-only paths, Task 4: Gates, the CDP-green proof, docs rotation, PR/merge, post-merge verification, ledger, close
 
-### Community 581 - "Plan: #322 — Admin logo: login lockup reads site settings; sidebar rail sliver fixed"
-Cohesion: 0.17
-Nodes (11): Design (one paragraph, pinned before Task 1), Global Constraints, Owner rulings, Plan: #322 — Admin logo: login lockup reads site settings; sidebar rail sliver fixed, Scope fences, Self-review checklist (controller pass — run before handoff), Task 1 — the brand-lockup seam (model + pinned vocabulary, TDD), Task 2 — sidebar brand block rides the seam (bug B: the rail sliver) (+3 more)
+### Community 581 - "admin-sidebar.tsx"
+Cohesion: 0.05
+Nodes (62): BRAND_ROW_RAIL_CLASSES, BrandLockup, brandLockup(), LOCKUP_MONOGRAM, LOGO_CHIP_GEOMETRY_CLASSES, LOGO_IMG_CLASSES, withLogo, buildSiteSettingsSavePayload() (+54 more)
 
 ### Community 582 - "ADR-0020: Unpriced catalog items — nullable prices end to end, snapshots included"
 Cohesion: 0.33
 Nodes (5): ADR-0020: Unpriced catalog items — nullable prices end to end, snapshots included, Alternatives Considered, Consequences, Context, Decision
 
 ### Community 583 - "ship-media-copy.mjs"
-Cohesion: 0.25
-Nodes (4): dest, ADR-0019, objects, source
+Cohesion: 0.20
+Nodes (6): aws4fetch@1.0.20, dest, ADR-0019, objects, source, aws4fetch
 
 ### Community 584 - "ADR-0021: Reset emails — a second email class over the API's Resend seam, via the service binding"
 Cohesion: 0.33
 Nodes (5): ADR-0021: Reset emails — a second email class over the API's Resend seam, via the service binding, Alternatives Considered, Consequences, Context, Decision
-
-### Community 585 - "env"
-Cohesion: 0.40
-Nodes (5): NODE_ENV, VITE_SENTRY_DSN, VITE_SENTRY_ENVIRONMENT, VITE_SENTRY_RELEASE, env
 
 ### Community 586 - "measure-theme-pairs.mjs"
 Cohesion: 0.13
 Nodes (12): clamp01(), contrast(), css, DARK_BLOCK, DARK_PAIRS, LIGHT_PAIRS, oklchToSrgb(), rawOklch() (+4 more)
 
 ### Community 587 - "File Structure"
-Cohesion: 0.17
-Nodes (11): File Structure, Global Constraints, M6 Ticket 05 — The Analytics Dashboard's Audience Half (Traffic + Storage & Media) Implementation Plan, Task 1: `apps/admin` — the env extension + the PostHog HogQL client (TDD), Task 2: `apps/admin` — the CF GraphQL R2 datasets client (TDD), Task 3: `apps/admin` — the two session-gated server fns + the query factories (TDD), Task 4: `apps/admin` — the Traffic + Storage & Media widgets, the page composition, Task 5: `apps/landing` — pageviews + web vitals on the landing's provider, landing only (+3 more)
+Cohesion: 0.50
+Nodes (4): File Structure, Task 5: `apps/landing`, pageviews + web vitals on the landing's provider, landing only, Task 6: The rendered variants, the owner's ratification gate, Task 8: Gates, docs rotation (box 5 TICKED), PR/merge, the v1 pick, ledger, issue close
 
-### Community 588 - "Database"
-Cohesion: 0.08
-Nodes (63): AdminDeleteFailure, AdminDeleteResult, blocked(), deleteAdminAddonService(), deleteAdminAttire(), deleteAdminBranch(), deleteAdminGalleryCategory(), deleteAdminGalleryPhoto() (+55 more)
-
-### Community 589 - "users.functions.ts"
-Cohesion: 0.14
-Nodes (19): sessionWhen(), userAgentLine(), UsersTab(), banAdminUser, createAdminUser, fetchAdminUsers, fetchAdminUserSessions, listSummaries() (+11 more)
-
-### Community 590 - "File Structure"
-Cohesion: 0.20
-Nodes (9): File Structure, Global Constraints, M6 Ticket 01 — The api Application Log Implementation Plan, Task 1: The observability module — sink, factory, the five emitters (TDD), Task 2: requestId middleware + the root wiring + the closed CORS surface + `[observability]`, Task 3: Admin-mutation events across the nine routers, Task 4: Media failure events — presign, commit, thumbnail, Task 5: Email events — attempt + Resend outcome — and the PII sweep (+1 more)
+### Community 588 - "admin-entities.ts"
+Cohesion: 0.10
+Nodes (46): adminAddonServices, ADR-0006, adminAttires, ADR-0006, adminBranches, ADR-0006, adminPrintSizes, ADR-0006 (+38 more)
 
 ### Community 591 - "probes.ts"
 Cohesion: 0.13
-Nodes (18): CONTENT_CENSUS_SQL, ContentCensus, ContentCensusRow, ContentFamilyKey, mungeCensus(), mungeContentRow(), parsePgTimestamp(), parseSizeBytes() (+10 more)
-
-### Community 593 - "ship-content-carry.mjs"
-Cohesion: 0.29
-Nodes (4): carried, dest, source, TABLES
-
-### Community 595 - "Global Constraints"
-Cohesion: 0.20
-Nodes (9): Global Constraints, Not here, Not here, Rollback, Task 1: Placement gate + config sanity, Task 2: Landing — footer icons + favicon links, Task 3: Admin — Site tab icons + favicon links, Task 4: Both-themes verification, records, close (+1 more)
+Nodes (29): collectContentCensus(), collectDbProbes(), ADR-0011, File Structure, Task 1: `packages/db`, the probe module + the admin SQL-shape tests (TDD), Task 3: `apps/admin`, the DB result-union wrapper, the session-gated server fns, the query factories (TDD), Task 4: `apps/admin` + `packages/ui`, the dashboard screen, the app-local charts, the `--chart-*` tokens, the #93 stub's death, Task 5: The rendered variants, the owner's ratification gate (+21 more)
 
 ### Community 596 - "File Structure"
-Cohesion: 0.18
-Nodes (10): File Structure, Global Constraints, Packages-Pages #223-Stale Checks Rewrite Implementation Plan, Task 0: Branch + first commit (plan + glossary), Task 1: The derivation sync + the baseline gate, Task 2: The home strip checks — plate counting, detail-first both ways, the cover ⇔ over plates, Task 3: The /packages index checks — plate counting, priced-only full details, the cover ⇔ over plates, Task 4: The detail page + the uniform not-found — three flips and the deferred re-form (+2 more)
-
-### Community 597 - "Plan: #339 — Image viewer: viewer spine — the library, the seam, and the mosaic walls live"
-Cohesion: 0.15
-Nodes (12): Global Constraints, Owner rulings (settled at charting + the #328 pick, recorded in the spec), Plan: #339 — Image viewer: viewer spine — the library, the seam, and the mosaic walls live, Scope fences, Self-review record (run 2026-11-21, before commit), Task 1 — The library install + the slide-mapping seam (TDD), Task 2 — The PhotoViewer composition (the two hand-added laws + the mosaic wiring), Task 3 — The mosaic wall gains the open affordance (both surfaces light up) (+4 more)
+Cohesion: 0.14
+Nodes (16): check(), main(), ADR-0020, peso(), results, selectFeatured(), File Structure, Global Constraints (+8 more)
 
 ### Community 598 - "services/media.ts"
-Cohesion: 0.07
-Nodes (26): branches, ADR-0006, gallery, ADR-0006, listBranches(), MediaEnv, toBranchRead(), getPublicGallery() (+18 more)
+Cohesion: 0.04
+Nodes (68): commitStagingKey(), resolveCover(), commitUpload(), CommitUploadResult, EXTENSIONS, FINAL_PREFIXES, MAX_THUMBNAIL_INPUT_BYTES, MAX_UPLOAD_BYTES (+60 more)
 
 ### Community 599 - "system-health.tsx"
-Cohesion: 0.13
-Nodes (29): TrendChart(), ContentCensusSection(), FAMILY_LABELS, formatBytes(), formatCls(), formatCount(), formatDurationMs(), formatPercent() (+21 more)
+Cohesion: 0.12
+Nodes (38): TrendChart(), ContentCensusSection(), FAMILY_LABELS, formatBytes(), formatCls(), formatCount(), formatDurationMs(), formatPercent() (+30 more)
 
-### Community 600 - "Plan: #332 — Service covers: admin editor Cover field — upload, replace, remove"
-Cohesion: 0.20
-Nodes (9): Global Constraints, Owner rulings + skill audit, Plan: #332 — Service covers: admin editor Cover field — upload, replace, remove, Scope fences, Self-review checklist (controller pass — run before handoff), Task 1 — the state seam: cover state + the builder split (+4 pins, TDD), Task 2 — the screen: the Cover block port + the builder rewire (+0 pins, the composition), Task 3 — docs rotation + floors + graphify + the final gate (+1 more)
-
-### Community 601 - "Plan: #333 — Service covers: landing consumes coverImageUrl — stand-ins demote to fallback"
-Cohesion: 0.20
-Nodes (9): Global Constraints, Owner rulings + skill audit, Plan: #333 — Service covers: landing consumes coverImageUrl — stand-ins demote to fallback, Scope fences, Self-review checklist (controller pass — run before handoff), Task 1 — the seam: service-image lib (map moved verbatim + the precedence helper, +4 pins, TDD), Task 2 — the consumption: both cards swap to the helper; the component map copy retires (+0 pins, the composition port), Task 3 — docs rotation + floors + graphify + the final gate (+1 more)
+### Community 601 - "StudioServiceWithBranches"
+Cohesion: 0.09
+Nodes (27): FlipInput, ServiceImageCard(), serviceBackground(), serviceImage(), Further Notes, Out of Scope, Problem Statement, Services Cover Photos Spec (+19 more)
 
 ### Community 603 - "org-route-tree-structure: Follow Hierarchical Route Tree Patterns"
 Cohesion: 0.25
 Nodes (7): Bad Example, Context, Directory Style Equivalent, Explanation, Good Example, org-route-tree-structure: Follow Hierarchical Route Tree Patterns, Priority: CRITICAL
 
-### Community 604 - "File Structure"
-Cohesion: 0.29
-Nodes (6): File Structure, Global Constraints, Post-flight T3 — Gallery Manager UX: Empty-category Instruction, Grid Captions, Title→Name Implementation Plan, Task 1: The seam — `photoCardLabel`, the caption-law card label (TDD), Task 2: The three refinements ride — the caption card, the empty-category instruction, Title→Name, Task 3: Gates, the live walkthrough, docs rotation, PR, the v1 split, issues, graphify
-
 ### Community 606 - "chart.tsx"
-Cohesion: 0.20
-Nodes (12): TrendDatum, ChartConfig, ChartContainer(), ChartContext, ChartContextProps, ChartLegendContent(), ChartTooltipContent(), getPayloadConfigFromPayload() (+4 more)
+Cohesion: 0.15
+Nodes (15): TrendDatum, ChartConfig, ChartContainer(), ChartContext, ChartContextProps, ChartLegendContent(), ChartStyle(), ChartTooltipContent() (+7 more)
+
+### Community 608 - "pino"
+Cohesion: 0.50
+Nodes (3): pino@10.4.0, pino/browser, pino
 
 ### Community 609 - "e2e — the browser-test foundation (ADR-0022, M6 #189)"
 Cohesion: 0.33
 Nodes (5): e2e, the browser-test foundation (ADR-0022, M6 #189), Rulings that bind every suite here, Running, Taxonomy, Visual regression (ADR-0022, #225)
 
-### Community 611 - "detect_domain"
-Cohesion: 0.23
-Nodes (3): detect_domain(), Auto-detect the most relevant domain from query. Matches are weighted by…, TestDomainDetection
-
 ### Community 614 - "Global Constraints"
-Cohesion: 0.14
-Nodes (13): Global Constraints, M7 ticket 14 — M7 close-out: owner demo, exit verification, the two redesign picks, docs rotation (#225) Implementation Plan, Recon state this plan starts from (verified live 2026-11-05, pre-plan), Task 1: Branch cut, Step-0 verification, baseline floors, Task 2: The #223 v1 pick — landing redesign I on v1 (`29b4872`), Task 3: The #224 v1 pick — landing redesign II on v1 (`8e21d76`) + the superset check, Task 4: `cms-reflection.mjs` — the five M7 legs, green on the local stack, Task 5: `e2e/visual/` — the redesign visual suite (teaser, both themes) (+5 more)
-
-### Community 615 - "src/site-settings.ts"
-Cohesion: 0.24
-Nodes (10): EMPTY_SITE_SETTINGS, resolveSiteSettings(), SaveSiteSettingsInput, saveSiteSettingsSchema, SITE_SETTINGS_DEFAULTS, SiteSettings, siteSettingsSchema, read (+2 more)
+Cohesion: 0.15
+Nodes (12): Global Constraints, M7 ticket 14, M7 close-out: owner demo, exit verification, the two redesign picks, docs rotation (#225) Implementation Plan, Recon state this plan starts from (verified live 2026-11-05, pre-plan), Task 1: Branch cut, Step-0 verification, baseline floors, Task 2: The #223 v1 pick, landing redesign I on v1 (`29b4872`), Task 3: The #224 v1 pick, landing redesign II on v1 (`8e21d76`) + the superset check, Task 5: `e2e/visual/`, the redesign visual suite (teaser, both themes), Task 6: The M7 SDD deferred-minors sweep, dispositions land in-repo (+4 more)
 
 ### Community 616 - "Global Constraints"
 Cohesion: 0.13
-Nodes (14): Global Constraints, Recon state this plan starts from (verified live 2026-10-11, pre-plan), Task 10: B4 — the production smoke (smoke-green) + the r2.dev disable, Task 11: Close-out — the docs rotation, the ledger row, the issue, Task 1: Pre-flight — the readiness gate, the values file, the walk log, Task 2: A1 + A2 — the Cloudflare account, the subdomain, the ship token; the Supabase org + project, Task 3: A3 — the fresh database: migrations, seed, the carry, the smoke-staff, Task 4: A4 — the fresh bucket: create, CORS, lifecycle, r2.dev, the rotated S3 pair (+6 more)
+Nodes (14): Global Constraints, Recon state this plan starts from (verified live 2026-10-11, pre-plan), Task 10: B4, the production smoke (smoke-green) + the r2.dev disable, Task 11: Close-out, the docs rotation, the ledger row, the issue, Task 1: Pre-flight, the readiness gate, the values file, the walk log, Task 2: A1 + A2, the Cloudflare account, the subdomain, the ship token; the Supabase org + project, Task 3: A3, the fresh database: migrations, seed, the carry, the smoke-staff, Task 4: A4, the fresh bucket: create, CORS, lifecycle, r2.dev, the rotated S3 pair (+6 more)
 
 ### Community 617 - "redesign.spec.ts"
-Cohesion: 0.16
-Nodes (9): requiredEnv(), ADR-0022, MASK_SELECTORS, SENTINELS, SHARED_MASK_SELECTORS, STABILIZE_CSS, Surface, SURFACES (+1 more)
+Cohesion: 0.14
+Nodes (12): ADR-0022, requiredEnv(), ADR-0022, MASK_SELECTORS, SENTINELS, SHARED_MASK_SELECTORS, STABILIZE_CSS, Surface (+4 more)
 
 ### Community 618 - "refresh-button.tsx"
-Cohesion: 0.36
-Nodes (6): RefreshButton(), isUnavailable(), refreshOutcomeMessage(), RefreshQuerySnapshot, SOURCE_LABELS, sourceLabel()
-
-### Community 620 - "Global Constraints"
-Cohesion: 0.15
-Nodes (12): Global Constraints, M8 ticket 02 — Session-verify amortization, both halves — implementation plan, Not here, Self-review notes for the executor, Task 1: branch + plan commit, Task 2: the session-cache seam — store, key, container, hit projection (TDD), Task 3: the gate wiring — requireSession consults the cache (TDD), Task 4: the admin half — the ruled 60-second cookie cache + the config pin (+4 more)
+Cohesion: 0.39
+Nodes (5): isUnavailable(), refreshOutcomeMessage(), RefreshQuerySnapshot, SOURCE_LABELS, sourceLabel()
 
 ### Community 621 - "Global Constraints"
 Cohesion: 0.17
-Nodes (11): Global Constraints, M9 #317 — Exit gate — the live-stack walkthrough + the milestone close — implementation plan, Not here (the milestone-wide fence), Self-review notes for the executor, Task 1: the confound check + the before-state probe + the go-gate ask (HITL starts), Task 2: the walkthrough — the numbered states, light first, then dark, Task 3: the evidence comment on #317 — the AC map + the findings disposition, Task 4: the closeout branch — plan.md + progress.md (+3 more)
-
-### Community 622 - "File Structure"
-Cohesion: 0.18
-Nodes (10): File Structure, Global Constraints, M7 Ticket 03 — Branch Covers + Gallery Captions Implementation Plan, Task 1: `packages/db` — branches gain the nullable `cover_image_key` + migration 0010, Task 2: `packages/types` + `apps/api` — the branch-cover wire, the `'branch-cover'` purpose, and the cover-bearing CRUD (TDD, atomic), Task 3: `packages/types` + `apps/api` — the caption joins the public gallery wire (TDD, atomic), Task 4: `packages/api-client` — the BranchRead wrappers + the caption/cover-aware mock, Task 5: `apps/admin` — the branch Sheet's Cover block, the seam's cover state, the tray's caption pass-through (+2 more)
-
-### Community 623 - "File Structure"
-Cohesion: 0.18
-Nodes (10): File Structure, Global Constraints, M6 Ticket 04 — The Metrics Seam + the Analytics Dashboard's System Half Implementation Plan, Task 1: `packages/db` — the probe module + the admin SQL-shape tests (TDD), Task 2: `apps/admin` — the env reader + the CF GraphQL client + munging (TDD), Task 3: `apps/admin` — the DB result-union wrapper, the session-gated server fns, the query factories (TDD), Task 4: `apps/admin` + `packages/ui` — the dashboard screen, the app-local charts, the `--chart-*` tokens, the #93 stub's death, Task 5: The rendered variants — the owner's ratification gate (+2 more)
+Nodes (11): Global Constraints, M9 #317, Exit gate, the live-stack walkthrough + the milestone close, implementation plan, Not here (the milestone-wide fence), Self-review notes for the executor, Task 1: the confound check + the before-state probe + the go-gate ask (HITL starts), Task 2: the walkthrough, the numbered states, light first, then dark, Task 3: the evidence comment on #317, the AC map + the findings disposition, Task 4: the closeout branch, plan.md + progress.md (+3 more)
 
 ### Community 624 - "Global Constraints"
-Cohesion: 0.22
-Nodes (8): Global Constraints, Recon state this plan starts from (verified live 2026-10-11, pre-plan), Task 1: The teaching-text and cosmetic corrections, Task 2: The api pins — the cover-commit media_failure, the actorId length, the corrected comment, Task 3: The audit row's three unpinned negatives, Task 4: The admin pins — the actors no-placeholderData and the census catch arm, Task 5: The rotation, the PR, the close, The M6 deferred-minors sweep (#207) Implementation Plan
-
-### Community 625 - "File Structure"
-Cohesion: 0.18
-Nodes (10): File Structure, Global Constraints, M7 Ticket 05 — The Public Testimonial Form Implementation Plan, Task 1: `packages/db` — the `testimonial_submissions` table + migration 0012, Task 2: `packages/types` — the testimonial-submission wire (TDD), Task 3: `apps/api` — the rate-limit binding, the public POST, the moderation service + routes, the audit vocabulary (TDD), Task 4: `packages/api-client` — the submission wrappers + the mock's subtree, Task 5: `apps/landing` — the seam (IP-forwarding client, the server fn, the form lib) (+2 more)
-
-### Community 626 - "File Structure"
-Cohesion: 0.18
-Nodes (10): File Structure, Global Constraints, M7 Ticket 04 — Site Settings Implementation Plan, Task 1: `packages/db` — the singleton `site_settings` table + migration 0011, Task 2: `packages/types` + the api media seam — the site-settings wire + the `'site-logo'` purpose (TDD, atomic), Task 3: `apps/api` — the public GET, the admin PUT, the singleton save service (TDD), Task 4: `packages/api-client` — the siteSettings wrappers + the mock's GET/PUT subtree, Task 5: `apps/admin` — the site-settings seam (server fns, query, state/payload/validate) (+2 more)
-
-### Community 627 - "File Structure"
-Cohesion: 0.20
-Nodes (9): File Structure, Global Constraints, M6 Ticket 06 — The Audit Log Viewer Screen Implementation Plan, Task 1: `apps/admin` — the pure filter/pagination seam (TDD), Task 2: `packages/db` + `apps/admin` — the read module, the owner-gated server fns, the query factories (TDD), Task 3: `apps/admin` — the owner role through the shell: the nav taxonomy extracted, the gate testable (TDD), Task 4: The rendered variants — the owner's ratification gate, Task 5: `apps/admin` — the owner-gated route + the screen (the ratified composition) (+1 more)
+Cohesion: 0.33
+Nodes (5): Global Constraints, Task 1: The teaching-text and cosmetic corrections, Task 3: The audit row's three unpinned negatives, Task 5: The rotation, the PR, the close, The M6 deferred-minors sweep (#207) Implementation Plan
 
 ### Community 628 - "package-expanded-row.test.ts"
-Cohesion: 0.25
-Nodes (5): durationLineFrom(), expandedRowModel, inclusionLabel(), inclusionLine(), T0
+Cohesion: 0.12
+Nodes (20): durationLineFrom(), ExpandedRowModel, expandedRowModel(), inclusionLabel(), inclusionLine(), printSize(), T0, FeaturedPlates() (+12 more)
 
 ### Community 629 - "Global Constraints"
 Cohesion: 0.17
-Nodes (11): Global Constraints, M8 ticket 01 — Region placement of the api worker — implementation plan, Not here, Self-review notes for the executor, Task 1: the `[placement]` block + dry-run proof, Task 2: ADR-0026 + the progress.md bullet, Task 3: gates, push, PR, merge, watch the CI deploy, Task 4: live verification — `cf-placement` (agent-only) (+3 more)
-
-### Community 630 - "File Structure"
-Cohesion: 0.18
-Nodes (10): File Structure, Global Constraints, M7 Ticket 01 — Unpriced Catalogs: Nullable Prices End to End (ADR-0020) Implementation Plan, Post-plan self-review (already applied), Task 1: `packages/db` — the five columns nullable, the metadata-only migration, live apply + probe, Task 2: The nullable wire — `packages/types` (TDD) + `apps/api` (the one-line widening + ten suite pins), Task 3: `apps/landing` — the null-safe money seam (TDD: `format.ts`, `booking.ts`, `booking-read.ts`, `featured.ts`), Task 4: `apps/landing` — the no-price law at the render sites (+2 more)
-
-### Community 631 - "buttonVariants"
-Cohesion: 0.12
-Nodes (22): AnnouncementBanner(), ErrorComponent(), MobileNav(), NotFound(), SiteFooter(), SOCIAL_ICONS, SiteHeader(), PostHogProvider() (+14 more)
-
-### Community 632 - "File Structure"
-Cohesion: 0.15
-Nodes (12): File Structure, Global Constraints, M7 Ticket 07 — The CMS-Wide Interaction System Implementation Plan, Task 1: The interaction system's pure lib seams (TDD), Task 2: The delete + moderation server fns + the submissions query, Task 3: `shared.tsx` — the additive interaction compositions, Task 4: The async Save contract on all seven sheet surfaces — the nonce machinery deleted, Task 5: Delete dialogs + the status segment on the five light-entity screens (+4 more)
-
-### Community 633 - "File Structure"
-Cohesion: 0.25
-Nodes (7): File Structure, Global Constraints, M7 Ticket 09 — Upload UI Maturation Implementation Plan, Task 1: The lib seams (TDD) — the abort law, the predicates, the shared enqueue, Task 2: The screen wiring — drop zone, cancel, the leave guard (UI-bearing), Task 3: The owner-reacted variants round + the both-classes leave-guard proof (controller interaction), Task 4: Gates, docs rotation, PR, v1 pick, issues, graphify
+Nodes (11): Global Constraints, M8 ticket 01, Region placement of the api worker, implementation plan, Not here, Self-review notes for the executor, Task 1: the `[placement]` block + dry-run proof, Task 2: ADR-0026 + the progress.md bullet, Task 3: gates, push, PR, merge, watch the CI deploy, Task 4: live verification, `cf-placement` (agent-only) (+3 more)
 
 ### Community 634 - "$.ts"
-Cohesion: 0.18
-Nodes (11): makeSendResetPassword(), ResetEmailDeps, ResetEmailOutcome, sendResetEmailOverApi(), SendResetPasswordParams, input, ADR-0021, ADR-0021 (+3 more)
-
-### Community 635 - "Global Constraints"
-Cohesion: 0.29
-Nodes (6): Duplicate-Save Feedback via the Envelope-Unwrap Root Fix (Post-flight T5, #245) Implementation Plan, Global Constraints, Task 1: The pure seam — `envelopeDetails`, Task 2: The seam fix — every raw-envelope path unwrapped, Task 3: The mapped-or-toast law on the four light-entity screens, Task 4: Exit gates + docs + issue hygiene
+Cohesion: 0.16
+Nodes (13): makeSendResetPassword(), ResetEmailDeps, ResetEmailOutcome, sendResetEmailOverApi(), SendResetPasswordParams, input, ADR-0021, ADR-0021 (+5 more)
 
 ### Community 636 - "File Structure"
 Cohesion: 0.17
-Nodes (11): E2E Visual Tall-Viewport Capture Implementation Plan (#255), File Structure, Global Constraints, Task 1: The Reveal seam — `data-reveal` / `data-shown` on the shared wrapper, Task 2: The spec's tall-viewport settle chain, Task 3: The e2e README — the mechanics section carries the new ordering, Task 4: The repo gates, the code PR, the teaser-redeploy probe, Task 5: The re-baseline — all 16, on intent, on `visual/255` (+3 more)
+Nodes (11): E2E Visual Tall-Viewport Capture Implementation Plan (#255), File Structure, Global Constraints, Task 1: The Reveal seam, `data-reveal` / `data-shown` on the shared wrapper, Task 2: The spec's tall-viewport settle chain, Task 3: The e2e README, the mechanics section carries the new ordering, Task 4: The repo gates, the code PR, the teaser-redeploy probe, Task 5: The re-baseline, all 16, on intent, on `visual/255` (+3 more)
 
-### Community 637 - "File Structure"
-Cohesion: 0.25
-Nodes (7): File Structure, Global Constraints, M9 Ticket 3 — Search everywhere (the below-sm top sheet + the `?focus=` landing) Implementation Plan, Task 1: The landing lib seam — `focus-landing.ts` + the testimonials schema extension (TDD), Task 2: The `?focus=` landing honored — the hook + the four routes + the four screens, Task 3: The below-sm magnifier + top sheet — the narrow form of Global Search, Task 4: Gates, the owner's as-built variants reaction, the live walkthrough, docs rotation, PR, the v1 pick, issues, graphify
-
-### Community 638 - "File Structure"
-Cohesion: 0.18
-Nodes (10): API Public-Read Edge Cache (#263) Implementation Plan, File Structure, Global Constraints, Self-Review (recorded at plan time), Task 1: Sentry errors-only + the baseline floor, Task 2: The read-cache seam — store, keys, TTL helpers, Task 3: The read middleware — cache the five public reads, Task 4: The eviction middleware — committed admin mutations invalidate (+2 more)
-
-### Community 639 - "Global Constraints"
-Cohesion: 0.17
-Nodes (11): Global Constraints, Not here, Not here, Rollback, Task 1: `packages/ui` — the shared brand icon module, Task 2: Landing — the merged copyright row, Task 3: Admin — the Site tab adopts the shared icons, Task 4: Delete the superseded asset files + the first full check (+3 more)
+### Community 639 - "SiteSettings"
+Cohesion: 0.11
+Nodes (28): SiteFooter(), SOCIAL_ICONS, footerContactFor(), socialLinksFor(), Global Constraints, Not here, Not here, Rollback (+20 more)
 
 ### Community 642 - "Global Constraints"
 Cohesion: 0.15
-Nodes (12): #306 — The dev admin login form's submit never fires its handler — diagnosis plan, Global Constraints, Not here, Self-review notes for the executor, Task 1: branch + plan commit, Task 2: the live repro + the discrimination ladder (P0–P4) — controller-run, no commit, Task 3: the one-variable dev-only bisect (P5) + local prod parity — controller-run, no commit, Task 4: the fork — fix or document (the evidence decides) (+4 more)
-
-### Community 644 - "File Structure"
-Cohesion: 0.25
-Nodes (7): File Structure, Global Constraints, M7 Ticket 08 — The Packages Expanded Row Implementation Plan, Task 1: The two lib seams (TDD) — the composition model + peso to lib, Task 2: The composition — one component, both postures (UI-bearing), Task 3: The owner-reacted variants round (controller interaction — both themes, both postures), Task 4: Gates, docs rotation, PR, v1 pick, issue close, graphify
+Nodes (12): #306, The dev admin login form's submit never fires its handler, diagnosis plan, Global Constraints, Not here, Self-review notes for the executor, Task 1: branch + plan commit, Task 2: the live repro + the discrimination ladder (P0–P4), controller-run, no commit, Task 3: the one-variable dev-only bisect (P5) + local prod parity, controller-run, no commit, Task 4: the fork, fix or document (the evidence decides) (+4 more)
 
 ### Community 645 - "Global Constraints"
 Cohesion: 0.14
-Nodes (13): Global Constraints, Not here, Self-review notes (plan-time), Task 1: branch + plan commit + the lever ruling posted to #307, Task 2: the cold-load probe script + the BEFORE arm (the mismatch census), Task 3: the seam — `primeCmsQueriesForClient` (TDD), Task 4: the nine route loaders swap to the client-only seam, Task 5: ADR-0028 + the progress bullet + the AGENTS.md floor line (+5 more)
+Nodes (13): Global Constraints, Not here, Self-review notes (plan-time), Task 1: branch + plan commit + the lever ruling posted to #307, Task 2: the cold-load probe script + the BEFORE arm (the mismatch census), Task 3: the seam, `primeCmsQueriesForClient` (TDD), Task 4: the nine route loaders swap to the client-only seam, Task 5: ADR-0028 + the progress bullet + the AGENTS.md floor line (+5 more)
+
+### Community 647 - "posthog-js@^1.422.5"
+Cohesion: 0.20
+Nodes (6): posthog-js@^1.422.5, @sevendays/db@workspace:*, tw-animate-css@^1.4.0, posthog-js, @sevendays/db, tw-animate-css
 
 ### Community 648 - "File Structure"
 Cohesion: 0.18
-Nodes (10): Content-Pages #223-Stale Checks Rewrite Implementation Plan, File Structure, Global Constraints, Task 1: The deep-link seam — `bookParamValues` + three param-parsed re-forms, Task 2: The hero blurb follows the live site-settings wire, Task 3: The add-ons check inverts to guard the ruling's absence, Task 4: The walk-in check asserts the indicator's aria-label pair, Task 5: The testimonials check matches case-insensitively (+2 more)
+Nodes (10): Content-Pages #223-Stale Checks Rewrite Implementation Plan, File Structure, Global Constraints, Task 1: The deep-link seam, `bookParamValues` + three param-parsed re-forms, Task 2: The hero blurb follows the live site-settings wire, Task 3: The add-ons check inverts to guard the ruling's absence, Task 4: The walk-in check asserts the indicator's aria-label pair, Task 5: The testimonials check matches case-insensitively (+2 more)
 
 ### Community 649 - "File Structure"
 Cohesion: 0.18
-Nodes (10): File Structure, Global Constraints, M7 Ticket 06 — Dark Mode from Zero Implementation Plan, Task 1: `scripts/` — the theme-pair measurement harness (the spec of record; runs red until Task 2), Task 2: `packages/ui` — the production `.dark` block + the header amendment + the dark base rules, Task 3: `packages/ui` — the ThemeProvider seam + the shared sun/moon ThemeToggle primitive, Task 4: `apps/admin` — dark wired: the root provider, the topbar toggle, the layered link base, the dark chart pair, Task 5: `apps/landing` — dark wired: the root provider + the header toggle on the ink band (+2 more)
-
-### Community 650 - "File Structure"
-Cohesion: 0.18
-Nodes (10): File Structure, Global Constraints, M7 Ticket 10 — Settings: the Account + Users Tabs + Forgot-Password Implementation Plan, Task 1: `packages/types` + `apps/api` — the guarded internal send endpoint (TDD), Task 2: `apps/admin` — the forward seam, the auth wiring, the forgot/reset forms (UI-bearing), Task 3: `apps/admin` — the Users lib seams + the server fns (TDD), Task 4: `apps/admin` — the Settings restructure: the three-tab strip + the Account tab (UI-bearing), Task 5: `apps/admin` — the Users tab (UI-bearing) (+2 more)
+Nodes (10): File Structure, Global Constraints, M7 Ticket 06, Dark Mode from Zero Implementation Plan, Task 1: `scripts/`, the theme-pair measurement harness (the spec of record; runs red until Task 2), Task 2: `packages/ui`, the production `.dark` block + the header amendment + the dark base rules, Task 3: `packages/ui`, the ThemeProvider seam + the shared sun/moon ThemeToggle primitive, Task 4: `apps/admin`, dark wired: the root provider, the topbar toggle, the layered link base, the dark chart pair, Task 5: `apps/landing`, dark wired: the root provider + the header toggle on the ink band (+2 more)
 
 ### Community 651 - "File Structure"
 Cohesion: 0.22
-Nodes (8): File Structure, Global Constraints, Post-flight T1 — Landing Polish: Strip Removal, Placeholder Gradient, Mobile Toggle Implementation Plan, Task 1: The three rulings in code — one commit, all eight files, Task 2: The `content-pages.mjs` strip-coupled check — rewritten, fenced, Task 3: The quick variants round — before/after frames + DOM assertions, owner reaction, Task 4: The two-step baseline regen (teaser, deployed — never PR-gated), Task 5: Gates, the live walkthrough, docs rotation, the v1 SPLIT, issues, graphify
+Nodes (8): File Structure, Global Constraints, Post-flight T1, Landing Polish: Strip Removal, Placeholder Gradient, Mobile Toggle Implementation Plan, Task 1: The three rulings in code, one commit, all eight files, Task 2: The `content-pages.mjs` strip-coupled check, rewritten, fenced, Task 3: The quick variants round, before/after frames + DOM assertions, owner reaction, Task 4: The two-step baseline regen (teaser, deployed, never PR-gated), Task 5: Gates, the live walkthrough, docs rotation, the v1 SPLIT, issues, graphify
 
-### Community 652 - "File Structure"
-Cohesion: 0.25
-Nodes (7): File Structure, Global Constraints, Post-flight T2 — Admin Save/Sign-in Pending Vocabularies + the Dirty-state Save Gate Implementation Plan, Task 1: The lib seams — the login busy labels + `isEditorStateDirty` (TDD), Task 2: The vocabulary rides — the Site-tab Save + both login buttons, Task 3: The package editor's dirty-state Save gate, Task 4: Gates, the live walkthrough, docs rotation, PR, the v1 split, issues, graphify
-
-### Community 654 - "Plan: #246 — Post-flight T6: site-logo accepts PNG (site-logo purpose only)"
-Cohesion: 0.17
-Nodes (11): Design (one paragraph, pinned before Task 1), Global Constraints, Owner rulings (ratified in this plan, 2026-11-13), Plan: #246 — Post-flight T6: site-logo accepts PNG (site-logo purpose only), Scope fences, Self-review checklist (do after writing, before handoff), Task 1 — packages/types: per-purpose content types + 10 MiB cap constant, Task 2 — api: presign/commit accept PNG for site-logo; 10 MiB cap; purpose-aware gate (+3 more)
+### Community 654 - "Plan: #246, Post-flight T6: site-logo accepts PNG (site-logo purpose only)"
+Cohesion: 0.20
+Nodes (9): withCreds(), Design (one paragraph, pinned before Task 1), Global Constraints, Owner rulings (ratified in this plan, 2026-11-13), Plan: #246, Post-flight T6: site-logo accepts PNG (site-logo purpose only), Scope fences, Self-review checklist (do after writing, before handoff), Task 3, api routes: presign route pins for the widened pair (+1 more)
 
 ### Community 655 - "File Structure"
 Cohesion: 0.18
-Nodes (10): E2E Visual Data-Present Sentinels Implementation Plan (#259), File Structure, Global Constraints, Task 1: The spec — the per-surface sentinel map, the failure dump, the in-test evaluation, Task 2: The mis-point demo — AC3's loud-fail path, proven without a live flake, Task 3: The e2e README — the sentinel law joins the visual mechanics, Task 4: The repo gates + the 5-run stability gate (AC4), Task 5: The PR — the evidence quoted, then squash-merge (+2 more)
-
-### Community 656 - "File Structure"
-Cohesion: 0.18
-Nodes (10): File Structure, Global Constraints, M7 Ticket 13 — The Landing Redesign II: Catalog, Services, Branches, the Form Page Implementation Plan, Self-Review Checklist (for the executor's final pass), Task 1: The pure seams + the four ruled page-description defaults (TDD), Task 2: The catalog — plates index, the D2 detail + the spec sheet (UI-bearing), Task 3: Services + branches — the image-backed rows, the cover strips, the CTA-law sweep (UI-bearing), Task 4: About, the form page's polish, and home's head (UI-bearing) (+2 more)
+Nodes (11): E2E Visual Data-Present Sentinels Implementation Plan (#259), File Structure, Global Constraints, Task 1: The spec, the per-surface sentinel map, the failure dump, the in-test evaluation, Task 2: The mis-point demo, AC3's loud-fail path, proven without a live flake, Task 3: The e2e README, the sentinel law joins the visual mechanics, Task 4: The repo gates + the 5-run stability gate (AC4), Task 5: The PR, the evidence quoted, then squash-merge (+3 more)
 
 ### Community 657 - "M8 — Admin-CMS Latency Spec"
 Cohesion: 0.22
 Nodes (8): Further Notes, Implementation Decisions, M8 — Admin-CMS Latency Spec, Out of Scope, Problem Statement, Solution, Testing Decisions, User Stories
 
-### Community 658 - "src/reset-email.ts"
-Cohesion: 0.22
-Nodes (8): ResetEmailSendInput, resetEmailSendSchema, ADR-0006, ADR-0016, ADR-0021, ADR-0006, ADR-0016, ADR-0021
+### Community 658 - "types/src/index.ts"
+Cohesion: 0.25
+Nodes (7): resetEmailSendSchema, ADR-0006, ADR-0016, ADR-0021, ADR-0006, ADR-0016, ADR-0021
 
-### Community 659 - "schema/index.ts"
-Cohesion: 0.11
-Nodes (18): addonServices, ADR-0020, appointmentAddonServices, ADR-0020, appointmentKindEnum, appointments, appointmentStatusEnum, ADR-0020 (+10 more)
-
-### Community 660 - "skeletons.tsx"
-Cohesion: 0.08
-Nodes (24): PackageDetail(), Reveal(), AboutSkeleton(), BranchesSkeleton(), PackageDetailSkeleton(), PackagesSkeleton(), ServicesSkeleton(), SLOTS_3 (+16 more)
+### Community 660 - "buttonVariants"
+Cohesion: 0.09
+Nodes (41): fullSave(), BranchCard(), WalkInIndicator(), CatalogPlate(), CatalogPlates(), CoverPanel(), initialsOf(), Reveal() (+33 more)
 
 ### Community 662 - "ADR-0025: Read-through edge cache on the API's public catalog reads"
 Cohesion: 0.29
@@ -3154,15 +2787,15 @@ Nodes (6): ADR-0025: Read-through edge cache on the API's public catalog reads, 
 
 ### Community 663 - "Plan: #337 — Create-button polish: Plus on every CMS create action + the New service rename"
 Cohesion: 0.17
-Nodes (11): Global Constraints, Owner rulings (settled at charting 2026-11-19, recorded in the spec), Plan: #337 — Create-button polish: Plus on every CMS create action + the New service rename, Scope fences, Self-review checklist (controller pass — run before handoff), Task 1 — studio-services: the icon ×2 + the complete "New service" rename (all five sites), Task 2 — branches, testimonials, add-ons: the icon ×6 (two sites each, icon only), Task 3 — packages: the icon ×2 (index route gains its first lucide import + the table's EmptyState) (+3 more)
+Nodes (11): Global Constraints, Owner rulings (settled at charting 2026-11-19, recorded in the spec), Plan: #337, Create-button polish: Plus on every CMS create action + the New service rename, Scope fences, Self-review checklist (controller pass, run before handoff), Task 1, studio-services: the icon ×2 + the complete "New service" rename (all five sites), Task 2, branches, testimonials, add-ons: the icon ×6 (two sites each, icon only), Task 3, packages: the icon ×2 (index route gains its first lucide import + the table's EmptyState) (+3 more)
 
 ### Community 664 - "Global Constraints"
 Cohesion: 0.15
-Nodes (12): #294 — The admin Gallery rail renders full-width below `lg` — implementation plan, Global Constraints, Not here, Self-review notes for the executor, Task 1: branch + plan commit, Task 2: the rendered repro (the "before" evidence — red), Task 3: the one-token fix (green), Task 4: the rendered verification (the "after" walk — the brief's acceptance criteria) (+4 more)
+Nodes (12): #294, The admin Gallery rail renders full-width below `lg`, implementation plan, Global Constraints, Not here, Self-review notes for the executor, Task 1: branch + plan commit, Task 2: the rendered repro (the "before" evidence, red), Task 3: the one-token fix (green), Task 4: the rendered verification (the "after" walk, the brief's acceptance criteria) (+4 more)
 
-### Community 665 - "Plan: #273 — Branch Maps button v2: pasted Google/Apple Maps links replace coordinate entry"
-Cohesion: 0.15
-Nodes (12): Acceptance-criteria mapping (issue #273), Design (one paragraph, pinned before Task 1), Global Constraints, Owner rulings (ratified 2026-11-13, this plan round), Plan: #273 — Branch Maps button v2: pasted Google/Apple Maps links replace coordinate entry, Scope fences, Task 1: DB — two nullable link columns + migration 0014, Task 2: Wire schemas — packages/types + consumer sweep (+4 more)
+### Community 665 - "Plan: #248 — Post-flight T8: branch Maps button (nullable coordinates, manual admin input, new-tab pin)"
+Cohesion: 0.07
+Nodes (28): FlipInput, BRANCHES, CALAMBA, DIPOLOG, ILIGAN, isAppleUserAgent(), mapsHrefFor(), mapsUrlFor() (+20 more)
 
 ### Community 666 - "card"
 Cohesion: 0.20
@@ -3170,27 +2803,19 @@ Nodes (12): $type, $value, bg, bg, padding, shadow, card, bg (+4 more)
 
 ### Community 667 - "admin/src/router.tsx"
 Cohesion: 0.18
-Nodes (9): options, APP, buildSentryOptions(), SentryFrontendInit, getRouter(), Register, @tanstack/react-router, Register (+1 more)
+Nodes (8): options, APP, buildSentryOptions(), SentryFrontendInit, getRouter(), @tanstack/react-router, Register, routeTree
 
 ### Community 668 - "ADR-0026: Region placement of the api worker — the SIN hint"
 Cohesion: 0.33
 Nodes (5): ADR-0026: Region placement of the api worker — the SIN hint, Alternatives Considered, Consequences, Context, Decision
 
-### Community 669 - "Global Constraints"
-Cohesion: 0.33
-Nodes (5): Global Constraints, Task 1: The pure seams — `activeSessionRows` + `paginateSessions`, Task 2: The component pass — filter, paginate, whole-row toggle, dark accent, Task 3: Exit gates + docs, Users-Tab Sessions Display (Post-flight T4, #244) Implementation Plan
+### Community 669 - "users-tab.tsx"
+Cohesion: 0.06
+Nodes (55): AUDIT_ACTION_BADGE_CLASSES, AuditLogScreen(), FilterDate(), FilterSelect(), editButton(), openEdit(), editButton(), editButton() (+47 more)
 
 ### Community 670 - "Global Constraints"
 Cohesion: 0.17
-Nodes (11): Global Constraints, M8 ticket 03 — Versioned immutable gallery thumbnails — implementation plan, Not here, Self-review notes for the executor, Task 1: branch + plan commit, Task 2: the gallery-thumbs seam — the versioned URL builder + the cache-control constants (TDD), Task 3: the consumption — the proxy's cache law + the grid's versioned URLs, Task 4: the dated #136 supersession note + the progress bullet (+3 more)
-
-### Community 671 - "ADR-0027: Session-verify amortization — both halves, the ruled 60 s bound"
-Cohesion: 0.33
-Nodes (5): ADR-0027: Session-verify amortization — both halves, the ruled 60 s bound, Alternatives Considered, Consequences, Context, Decision
-
-### Community 672 - "ApiClientError"
-Cohesion: 0.36
-Nodes (3): ApiClientError, messageFor(), schema
+Nodes (11): Global Constraints, M8 ticket 03, Versioned immutable gallery thumbnails, implementation plan, Not here, Self-review notes for the executor, Task 1: branch + plan commit, Task 2: the gallery-thumbs seam, the versioned URL builder + the cache-control constants (TDD), Task 3: the consumption, the proxy's cache law + the grid's versioned URLs, Task 4: the dated #136 supersession note + the progress bullet (+3 more)
 
 ### Community 673 - "split-critical-path: Keep Critical Config in Main Route File"
 Cohesion: 0.25
@@ -3200,17 +2825,9 @@ Nodes (7): Bad Example, Context, Explanation, Good Example, Priority: MEDIUM, sp
 Cohesion: 0.22
 Nodes (8): Create Button Polish Spec, Further Notes, Implementation Decisions, Out of Scope, Problem Statement, Solution, Testing Decisions, User Stories
 
-### Community 676 - "Landing Image Viewer Spec"
-Cohesion: 0.22
-Nodes (8): Further Notes, Implementation Decisions, Landing Image Viewer Spec, Out of Scope, Problem Statement, Solution, Testing Decisions, User Stories
-
 ### Community 677 - "Global Constraints"
 Cohesion: 0.17
-Nodes (11): Global Constraints, M8 ticket 04 — The client Warm/Cold contract — implementation plan, Not here, Self-review notes for the executor, Task 1: branch + plan commit, Task 2: the staleness law + the priming seam in cms-queries (TDD), Task 3: the hover-intent priming loaders on the nine CMS routes, Task 4: the progress bullet (+3 more)
-
-### Community 678 - "Services Cover Photos Spec"
-Cohesion: 0.22
-Nodes (8): Further Notes, Implementation Decisions, Out of Scope, Problem Statement, Services Cover Photos Spec, Solution, Testing Decisions, User Stories
+Nodes (11): Global Constraints, M8 ticket 04, The client Warm/Cold contract, implementation plan, Not here, Self-review notes for the executor, Task 1: branch + plan commit, Task 2: the staleness law + the priming seam in cms-queries (TDD), Task 3: the hover-intent priming loaders on the nine CMS routes, Task 4: the progress bullet (+3 more)
 
 ### Community 679 - "ts-query-options-loader: Use queryOptions in Loaders for Type Inference"
 Cohesion: 0.25
@@ -3218,31 +2835,19 @@ Nodes (7): Bad Example, Context, Explanation, Good Example, Good Example: Organi
 
 ### Community 680 - "Global Constraints"
 Cohesion: 0.17
-Nodes (11): #309 — the testimonials sortable's div-in-tbody — fix plan, Global Constraints, Not here, Self-review notes for the executor, Task 1: branch + plan commit, Task 2: stack up + the BEFORE arm — the probe must see the defect (no commit), Task 3: the fix — the desktop DndContext wraps the `<Table>` (one commit), Task 4: the AFTER arm + the full gate (no commit) (+3 more)
+Nodes (11): #309, the testimonials sortable's div-in-tbody, fix plan, Global Constraints, Not here, Self-review notes for the executor, Task 1: branch + plan commit, Task 2: stack up + the BEFORE arm, the probe must see the defect (no commit), Task 3: the fix, the desktop DndContext wraps the `<Table>` (one commit), Task 4: the AFTER arm + the full gate (no commit) (+3 more)
 
 ### Community 681 - "em-dash-sweep.mjs"
-Cohesion: 0.29
-Nodes (12): argv, check(), EXCLUDED_PREFIXES, fix(), listFiles(), makeFixture(), printHits(), runGit() (+4 more)
+Cohesion: 0.21
+Nodes (14): Self-review record (written after the final append, 2026-11-22), Self-review record (written after the final append, 2026-11-23), argv, check(), EXCLUDED_PREFIXES, fix(), listFiles(), makeFixture() (+6 more)
 
 ### Community 682 - "auth-server-functions: Verify Auth in Server Functions"
 Cohesion: 0.25
 Nodes (7): auth-server-functions: Verify Auth in Server Functions, Bad Example, Context, Explanation, Good Example: Auth via Middleware, Good Example: Direct Session Check, Priority: HIGH
 
-### Community 683 - "$id.thumb.ts"
-Cohesion: 0.17
-Nodes (13): SortablePhotoCard(), SessionMissingError, photoCardLabel(), photo(), uuid(), THUMB_CACHE_IMMUTABLE, THUMB_CACHE_NO_STORE, thumbUrl() (+5 more)
-
-### Community 684 - "createApiClient"
-Cohesion: 0.21
-Nodes (16): getApiClient(), getApiClientForwardingIp(), getApiUrl(), ADR-0006, ADR-0016, ApiClient, createApiClient(), addonServicesRoutes() (+8 more)
-
 ### Community 685 - "probe-cold-hydration.mjs"
 Cohesion: 0.33
 Nodes (5): hydrationByRoute, loginTimeout, ADR-0022, nestingByRoute, routes
-
-### Community 686 - "metrics/env.ts"
-Cohesion: 0.25
-Nodes (9): CfAnalyticsConfig, POSTHOG_DEFAULT_API_HOST, PosthogConfig, R2AnalyticsConfig, readHostList(), readMetricsEnv(), readTrimmed(), FULL (+1 more)
 
 ### Community 687 - "file-shared-validation: Share Validation Schemas Between Client and Server"
 Cohesion: 0.25
@@ -3260,13 +2865,9 @@ Nodes (3): ADR-0024: Hyperdrive connection caching (BURNED), What happened, Wher
 Cohesion: 0.25
 Nodes (7): Bad Example, Context, Explanation, Good Example, Good Example: FormData Validation, Priority: CRITICAL, sec-validate-inputs: Validate All User Inputs with Schemas
 
-### Community 691 - "sf-error-handling: Handle Errors in Server Functions"
-Cohesion: 0.25
-Nodes (7): Bad Example, Context, Explanation, Good Example, Good Example: Error Handling with isRedirect, Priority: CRITICAL, sf-error-handling: Handle Errors in Server Functions
-
 ### Community 693 - "Plan: #349 — Handover polish: sweep tool + the packages/scripts/e2e tree"
-Cohesion: 0.18
-Nodes (10): Branch law, Controller pre-flight (live-run, record before Task 1), Global Constraints, Plan: #349 — Handover polish: sweep tool + the packages/scripts/e2e tree, Scope fences, Self-review record (written after the final append, 2026-11-22), Task 1 — the tool: `scripts/em-dash-sweep.mjs` + the package.json entry, Task 2 — the hand-rewritten strings, their pins, and the echo repairs (+2 more)
+Cohesion: 0.20
+Nodes (9): Branch law, Controller pre-flight (live-run, record before Task 1), Global Constraints, Plan: #349, Handover polish: sweep tool + the packages/scripts/e2e tree, Scope fences, Task 1, the tool: `scripts/em-dash-sweep.mjs` + the package.json entry, Task 2, the hand-rewritten strings, their pins, and the echo repairs, Task 3, the mechanical sweep + the fix-up pass (+1 more)
 
 ### Community 694 - "cache-defaults: Set Sensible Defaults at QueryClient Level"
 Cohesion: 0.29
@@ -3288,157 +2889,49 @@ Nodes (6): Bad Example, Context, Explanation, Good Example, Priority: CRITICAL, 
 Cohesion: 0.29
 Nodes (6): Bad Example, Context, Explanation, Good Example, Priority: MEDIUM, sf-response-headers: Customize Response Headers When Needed
 
-### Community 701 - "test_text_layout_resilience.py"
-Cohesion: 0.22
-Nodes (3): read_rows(), TestTextLayoutDataContracts, TestTextLayoutRetrieval
-
 ### Community 702 - "ADR-0028: Notifications are a derived view — the queue stays the notification"
 Cohesion: 0.33
 Nodes (5): ADR-0028: Notifications are a derived view — the queue stays the notification, Alternatives Considered, Consequences, Context, Decision
 
-### Community 706 - "users-state.ts"
-Cohesion: 0.20
-Nodes (13): activeSessionRows(), AdminSessionRow, paginateSessions(), roleLabel(), SessionPage, SESSIONS_PAGE_SIZE, shapeSessionRows(), shapeUserRows() (+5 more)
-
-### Community 707 - "persist_design_system"
-Cohesion: 0.14
-Nodes (15): _detect_page_type(), format_master_md(), format_page_override_md(), _generate_intelligent_overrides(), persist_design_system(), Path, Format design system as MASTER.md with hierarchical override logic., Format a page-specific override file with intelligent AI-generated content. (+7 more)
-
-### Community 709 - "typing.test.ts"
-Cohesion: 0.33
-Nodes (5): client, CreateEndpoint, CreateInput, DeleteBranchArgs, DeleteBranchEndpoint
-
-### Community 710 - "users-guards.ts"
-Cohesion: 0.33
-Nodes (6): AdminUserSummary, banRefusal(), deleteRefusal(), isActiveOwner(), refusalLines(), AdminUserRow
-
-### Community 711 - "package-detail.tsx"
-Cohesion: 0.16
-Nodes (11): BranchCard(), CoverPanel(), initialsOf(), FeaturedPlates(), subline(), inclusionPhrase(), InclusionRow(), ADR-0009 (+3 more)
-
 ### Community 712 - "stub-screen.tsx"
-Cohesion: 0.40
-Nodes (3): StubScreen(), StubScreenProps, Route
+Cohesion: 0.47
+Nodes (4): StubScreen(), StubScreenProps, AppointmentsPage(), Route
 
 ### Community 713 - "linter"
 Cohesion: 0.33
 Nodes (6): project, qwik, solid, linter, domains, enabled
 
-### Community 714 - "appointments.test.ts"
-Cohesion: 0.27
-Nodes (9): authedListHeaders(), createViaApi(), db, fakeExecCtx(), FUTURE_ISO(), futureDate(), payload(), { sendMock } (+1 more)
-
-### Community 715 - "Plan: #353 (Handover polish: sweep the author-written root files)"
-Cohesion: 0.20
-Nodes (9): Branch law, Controller pre-flight (live-run, record before Task 1), Global Constraints, Plan: #353 (Handover polish: sweep the author-written root files), Scope fences, Self-review record (written after the final append, 2026-11-23), Task 1: the hand-rewritten string, Task 2: the mechanical batch, the hand fixes, and the fix-up pass (+1 more)
-
-### Community 717 - "types/src/index.ts"
-Cohesion: 0.28
-Nodes (4): ApiError, apiErrorSchema, frameSchema, PackageFrame
-
-### Community 719 - "input"
-Cohesion: 0.29
-Nodes (8): padding-x, input, $type, $value, focus-ring, padding-x, $type, $value
-
-### Community 720 - "format_ascii_box"
-Cohesion: 0.25
-Nodes (8): ansi_ljust(), format_ascii_box(), hex_to_ansi(), Convert hex color to ANSI True Color swatch (██) with fallback., Like str.ljust but accounts for zero-width ANSI escape sequences., Create a Unicode section separator: ├─── NAME ───...┤, Format design system as Unicode box with ANSI color swatches., section_header()
-
-### Community 723 - "$type"
-Cohesion: 0.60
-Nodes (5): $type, $value, border, border, border
-
-### Community 725 - "lg"
-Cohesion: 0.60
-Nodes (5): lg, $type, $value, lg, lg
-
-### Community 727 - "sm"
-Cohesion: 0.60
-Nodes (5): sm, sm, sm, $type, $value
-
-### Community 728 - "padding-y"
-Cohesion: 0.67
-Nodes (4): padding-y, padding-y, $type, $value
-
-### Community 729 - "xl"
-Cohesion: 0.67
-Nodes (4): xl, xl, $type, $value
-
-### Community 730 - "none"
-Cohesion: 0.67
-Nodes (4): $type, $value, none, none
-
-### Community 731 - "16"
-Cohesion: 0.67
-Nodes (3): $type, $value, 16
-
-### Community 732 - "1"
-Cohesion: 0.67
-Nodes (3): $type, $value, 1
-
-### Community 733 - "3"
-Cohesion: 0.67
-Nodes (3): $type, $value, 3
-
-### Community 734 - "8"
-Cohesion: 0.67
-Nodes (3): $type, $value, 8
-
-### Community 740 - "destructive"
-Cohesion: 0.67
-Nodes (3): destructive, $type, $value
-
-### Community 741 - "destructive-foreground"
-Cohesion: 0.67
-Nodes (3): destructive-foreground, $type, $value
-
-### Community 742 - "muted"
-Cohesion: 0.67
-Nodes (3): muted, $type, $value
-
-### Community 743 - "primary-foreground"
-Cohesion: 0.67
-Nodes (3): primary-foreground, $type, $value
-
-### Community 744 - "ring"
-Cohesion: 0.67
-Nodes (3): ring, $type, $value
-
-### Community 745 - "secondary-foreground"
-Cohesion: 0.67
-Nodes (3): secondary-foreground, $type, $value
-
-### Community 747 - "dev"
-Cohesion: 0.67
-Nodes (3): cache, persistent, dev
-
 ## Ambiguous Edges - Review These
 - `Shadcn` → `minimumReleaseAgeExclude: lucide-react@1.37.0`  [AMBIGUOUS]
   pnpm-workspace.yaml · relation: conceptually_related_to
-- `@sevendays/admin — internal dashboard for content + appointments (TanStack Start)` → `PostHog analytics via VITE_POSTHOG_KEY / VITE_POSTHOG_HOST`  [AMBIGUOUS]
-  apps/landing/README.md · relation: conceptually_related_to
 - `Attire Junction (package_inclusion_attires)` → `Catalog Attires & Universal Privileges`  [AMBIGUOUS]
   docs/adr/0009-normalized-catalog-lookups.md · relation: conceptually_related_to
+- `@sevendays/admin — internal dashboard for content + appointments (TanStack Start)` → `PostHog analytics via VITE_POSTHOG_KEY / VITE_POSTHOG_HOST`  [AMBIGUOUS]
+  apps/landing/README.md · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **5406 isolated node(s):** `fs`, `path`, `fs`, `path`, `fs` (+5401 more)
-  These have ≤1 connection - possible missing edges or undocumented components.
-- **86 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **253 isolated node(s):** `ADR-0022`, `ADR-0020`, `ADR-0006`, `ADR-0016`, `ADR-0004` (+248 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 5587 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **61 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `Ledger` connect `Ledger` to `notFound`, `requireSession`, `badRequest`, `ref_tanstack_react_router`, `Plan: #248 — Post-flight T8: branch Maps button (nullable coordinates, manual admin input, new-tab pin)`, `users-tab.tsx`, `gallery-screen.tsx`, `api/src/index.ts`, `createAuth`, `unwrap`, `admin/src/lib/api.server.ts`, `posthog.ts`, `admin/src/lib/nav.ts`, `lookups-screen.tsx`, `ref_zod`, `AppType`, `r2.ts`, `admin-sidebar.tsx`, `admin-entities.ts`, `types/src/index.ts`, `admin-gallery.ts`, `cms-queries.ts`, `ServicePackageRead`, `services/media.ts`, `StudioServiceWithBranches`, `unwrap.ts`, `admin.functions.ts`, `book.tsx`, `v1 picks runbook`, `redesign.spec.ts`, `package-editor.tsx`, `global-search.ts`, `studio-services-screen.tsx`, `Branch`, `SiteSettings`?**
+  _High betweenness centrality (0.023) - this node is a cross-community bridge._
+- **Are the 2 inferred relationships involving `GalleryScreen()` (e.g. with `Task 7: The gallery screen, category rail + upload tray + sortable card grid + photo editor` and `Task 2: The screen wiring, drop zone, cancel, the leave guard (UI-bearing)`) actually correct?**
+  _`GalleryScreen()` has 2 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `ADR-0022`, `ADR-0020`, `ADR-0006` to the rest of the system?**
+  _253 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `with` be split into smaller, more focused modules?**
+  _Cohesion score 0.05128205128205128 - nodes in this community are weakly interconnected._
+- **Why does `yet-another-react-lightbox` connect `mosaic-photo-grid.tsx` to `dependencies`, `landing package.json devDependencies`?**
+  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+
+### Low-confidence Hints
+_AMBIGUOUS edges — the extractor was unsure. Verify before acting on these._
+
 - **What is the exact relationship between `Shadcn` and `minimumReleaseAgeExclude: lucide-react@1.37.0`?**
-  _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **What is the exact relationship between `@sevendays/admin — internal dashboard for content + appointments (TanStack Start)` and `PostHog analytics via VITE_POSTHOG_KEY / VITE_POSTHOG_HOST`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **What is the exact relationship between `Attire Junction (package_inclusion_attires)` and `Catalog Attires & Universal Privileges`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `@tanstack/react-start` connect `@tanstack/react-start` to `admin.functions.ts`, `admin/src/lib/api.server.ts`, `admin/src/routeTree.gen.ts`, `metrics.functions.ts`, `users.functions.ts`, `landing/src/routeTree.gen.ts`, `filters.ts`, `landing/src/lib/queries.ts`, `lib/auth.ts`?**
-  _High betweenness centrality (0.003) - this node is a cross-community bridge._
-- **Why does `Database` connect `Database` to `v1.ts`, `read-cache.test.ts`, `admin-gallery.ts`, `services/appointments.ts`, `admin-packages.ts`, `services/media.ts`, `audit-read.ts`, `confirmation-email.ts`?**
-  _High betweenness centrality (0.003) - this node is a cross-community bridge._
-- **Why does `FakeXhr` connect `connect` to `site-tab.tsx`?**
-  _High betweenness centrality (0.002) - this node is a cross-community bridge._
-- **Are the 2 inferred relationships involving `TailwindConfigGenerator` (e.g. with `TestGeneratedConfigIsValidJs` and `TestTailwindConfigGenerator`) actually correct?**
-  _`TailwindConfigGenerator` has 2 INFERRED edges - model-reasoned connections that need verification._

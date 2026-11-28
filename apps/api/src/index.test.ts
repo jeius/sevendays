@@ -17,7 +17,7 @@ describe('GET /health', () => {
 describe('versioning mount', () => {
   it('serves routes under /api/v1', async () => {
     const res = await app.request('/api/v1/branches');
-    expect([200, 500]).toContain(res.status); // db-reachable or loud 500 — never 404
+    expect([200, 500]).toContain(res.status); // db-reachable or loud 500, never 404
   });
 
   it('does not serve the unversioned legacy path', async () => {

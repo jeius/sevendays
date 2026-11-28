@@ -6,7 +6,7 @@ Error collection is automatic and configured in `src/router.tsx`.
 
 ## Instrumentation
 
-We want our server functions instrumented. So if you see a function name like `createServerFn`, you can instrument it with Sentry. You'll need to import `startSpan` (a named import — never `import * as Sentry`):
+We want our server functions instrumented. So if you see a function name like `createServerFn`, you can instrument it with Sentry. You'll need to import `startSpan` (a named import, never `import * as Sentry`):
 
 ```tsx
 import { startSpan } from '@sentry/tanstackstart-react'

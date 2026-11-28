@@ -1,10 +1,10 @@
 // The Users tab's server fns (M7 #221, ADR-0018's pattern): every call
 // rides the already-mounted admin() plugin SERVER-SIDE over the per-request
 // instance (ADR-0011), the caller's session forwarded through the incoming
-// request headers — the plugin's own role gate does the enforcement. The
+// request headers, the plugin's own role gate does the enforcement. The
 // browser never gains admin client methods (authClient.admin does not
 // exist; the client plugin is deliberately NOT added). Mutations resolve
-// the result-value union (never throw across the RPC boundary — the #155
+// the result-value union (never throw across the RPC boundary, the #155
 // ruling); lockout guards run HERE over a fresh listUsers read before the
 // plugin call, with the refusal lines riding `blockers` for the in-body
 // dialog law (#218).
@@ -22,8 +22,8 @@ export type UsersActionResult<T> =
 const TEMP_PASSWORD_MIN = 12; // matches emailAndPassword.minPasswordLength
 
 async function pluginErrorToResult(error: unknown): Promise<never> {
-  // BetterAuth's APIError carries statusCode/message; anything else rethrows —
-  // not a user-management refusal (serialization, session loss) — loud.
+  // BetterAuth's APIError carries statusCode/message; anything else rethrows:
+  // not a user-management refusal (serialization, session loss), loud.
   // Read .statusCode, never .status: in better-call 1.4.0, .status is the
   // status-NAME string ("FORBIDDEN"), while .statusCode is the HTTP number
   // the #155 result-value union carries.
@@ -35,7 +35,7 @@ async function pluginErrorToResult(error: unknown): Promise<never> {
 }
 
 // The plugin's user rows (UserWithRole) trimmed to the six fields the seams
-// + UI consume — raw rows never leave the server fns.
+// + UI consume, raw rows never leave the server fns.
 type PluginUserRow = {
   id?: unknown;
   name?: unknown;
@@ -95,7 +95,7 @@ export const createAdminUser = createServerFn({
         const result = await createAuth().api.createUser({
           headers: getRequestHeaders(),
           // ADR-0018's 'staff' rides the plugin's runtime schema (routes.mjs
-          // createUserBodySchema: role: z.union([z.string(), ...]) — any
+          // createUserBodySchema: role: z.union([z.string(), ...]), any
           // string); the .d.mts narrows to better-auth's 'user'|'admin'
           // defaults, hence the bridge.
           body: {
@@ -143,7 +143,7 @@ export const banAdminUser = createServerFn({
       try {
         const auth = createAuth();
         const headers = getRequestHeaders();
-        // The actor is the signed-in caller — the self-guard reads the
+        // The actor is the signed-in caller, the self-guard reads the
         // session, never the target row.
         const session = await auth.api.getSession({ headers });
         if (!session) {
@@ -205,7 +205,7 @@ export const revokeAdminUserSession = createServerFn({
   strict: { output: false },
 })
   // better-auth 1.7.5 revokes BY TOKEN (internalAdapter.deleteSession over
-  // body.sessionToken) — the caller passes the token from the
+  // body.sessionToken), the caller passes the token from the
   // fetchAdminUserSessions rows, never a session id.
   .validator(z.object({ sessionToken: z.string().min(1) }))
   .handler(async ({ data }): Promise<UsersActionResult<{ sessionToken: string }>> => {

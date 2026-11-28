@@ -29,7 +29,7 @@ const branch = branchReadSchema.parse({
   updatedAt: STAMP,
 });
 
-// The null-coordinates read's editor state — latitude/longitude are the
+// The null-coordinates read's editor state, latitude/longitude are the
 // raw input strings ('' = clear to null), the #248 encoding.
 const branchState = light.branchStateFromRead(branch);
 
@@ -47,7 +47,7 @@ const service = studioServiceWithBranchesSchema.parse({
 });
 
 describe('studio-service state', () => {
-  it('studioServiceStateFromRead hands the editor its OWN branchIds copy (replace, never push — the read row is the query cache)', () => {
+  it('studioServiceStateFromRead hands the editor its OWN branchIds copy (replace, never push, the read row is the query cache)', () => {
     const state = light.studioServiceStateFromRead(service);
     expect(state.branchIds).toEqual([uuid(1), uuid(3)]);
     expect(state.branchIds).not.toBe(service.bookableBranchIds);
@@ -123,7 +123,7 @@ describe('studio-service state', () => {
       googleMapsUrl: null,
       appleMapsUrl: null,
     });
-    // The cover is deliberately ABSENT from a flip — the absence is what
+    // The cover is deliberately ABSENT from a flip, the absence is what
     // makes a flip never re-verify or clobber media (the tri-state law).
     expect('coverImageKey' in flip).toBe(false);
   });
@@ -158,7 +158,7 @@ describe('studio-service state', () => {
     expect(state.coverImageKey).toBeUndefined();
   });
 
-  // #248: the manual coordinate fields — state strings, the payload parse,
+  // #248: the manual coordinate fields, state strings, the payload parse,
   // the validator's bounds/dp/pair rules, and the flip's untouched re-send.
   it('#248: state round-trips stored coordinates as strings', () => {
     const state = light.branchStateFromRead({ ...branch, latitude: 14.16598, longitude: 121.2485 });
@@ -228,7 +228,7 @@ describe('studio-service state', () => {
     expect(payload.longitude).toBe(125.591);
   });
 
-  // #273: the Maps link fields — state strings ('' = clear to null), the
+  // #273: the Maps link fields, state strings ('' = clear to null), the
   // https-transport validation mirror (no host allowlist), and the flip's
   // untouched re-send. The #248 coordinate pins above stay green: the
   // lat/lng state/payload code is dormant, not removed.
@@ -282,7 +282,7 @@ describe('studio-service state', () => {
     expect(cleared.appleMapsUrl).toBeNull();
   });
 
-  it('#273: validation rejects an http:// link — https transport only, no host allowlist', () => {
+  it('#273: validation rejects an http:// link, https transport only, no host allowlist', () => {
     const errors = light.validateBranchState({
       ...branchState,
       googleMapsUrl: 'http://maps.app.goo.gl/x',
@@ -338,7 +338,7 @@ describe('studio-service state', () => {
       priceCents: 150000,
       isActive: false,
     });
-    // The cover is deliberately ABSENT from a flip — the absence is what
+    // The cover is deliberately ABSENT from a flip, the absence is what
     // makes a flip never re-verify or clobber media (the tri-state law).
     expect('coverImageKey' in light.buildStudioServiceFlipPayload(service, false)).toBe(false);
   });
@@ -366,7 +366,7 @@ describe('studio-service state', () => {
       priceCents: 50000,
       isActive: true,
     });
-    // The flip carries the 4 entity fields ONLY — `appliesToServiceIds` is
+    // The flip carries the 4 entity fields ONLY, `appliesToServiceIds` is
     // display-only editor state, untouched by this PUT (the applicability
     // write path is the service-keyed `buildAddonMatrixDiff`). Brief
     // deviation: the pinned `{ ...state, isActive: false }` spread dragged
@@ -472,7 +472,7 @@ describe('studio-service state', () => {
 
 describe('unpriced editors (ADR-0020)', () => {
   // The add-on fixture (the file's other price-bearing row) is parsed inline
-  // inside the round-trip test above — re-parsed here, describe-local.
+  // inside the round-trip test above, re-parsed here, describe-local.
   const addon = addonServiceSchema.parse({
     id: uuid(4),
     name: 'Rush delivery',
@@ -490,7 +490,7 @@ describe('unpriced editors (ADR-0020)', () => {
     expect(light.buildStudioServiceUpdatePayload(state).priceCents).toBeNull();
   });
 
-  it('studio-service: create defaults unchecked (owner ruling 2026-10-12) — the fresh payload saves null', () => {
+  it('studio-service: create defaults unchecked (owner ruling 2026-10-12), the fresh payload saves null', () => {
     expect(light.newStudioServiceState().hasPrice).toBe(false);
     expect(
       light.buildStudioServiceCreatePayload(light.newStudioServiceState()).priceCents
@@ -527,7 +527,7 @@ describe('unpriced editors (ADR-0020)', () => {
     expect(light.validateAddonState(light.newAddonState()).price).toBeUndefined();
   });
 
-  it('the table flip payloads carry row.priceCents verbatim — null stays null, never a 0', () => {
+  it('the table flip payloads carry row.priceCents verbatim, null stays null, never a 0', () => {
     expect(
       light.buildStudioServiceFlipPayload({ ...service, priceCents: null }, false).priceCents
     ).toBeNull();

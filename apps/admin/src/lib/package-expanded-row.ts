@@ -2,15 +2,15 @@
 // derivation from ServicePackageRead to the render model both postures
 // (the desktop ExpandPanel and the mobile stacked reveal) render.
 // durationMinutes renders nowhere else in the table; frames chip by
-// frame number; inclusions render as bullet lines — label + print size +
+// frame number; inclusions render as bullet lines, label + print size +
 // attires for picture kinds, the description alone for privileges (an
 // attire suffix would duplicate the subject: "Usage of Barong · Barong").
-// Array order IS render order (the server renumbers in-transaction) —
+// Array order IS render order (the server renumbers in-transaction);
 // the seam never sorts. Pure rendering, zero API work: the read shape
 // already carries every field.
 //
 // (owner-reacted 2026-10-17, #219's variants round): the three string
-// forms ratified as rendered — the duration line ("60 minutes" beside a
+// forms ratified as rendered, the duration line ("60 minutes" beside a
 // Clock icon), the chip prefix ("Frame 1"), and the bullet grammar
 // ("1 framed picture · 8x10 · Toga"; privileges description-alone).
 import type {

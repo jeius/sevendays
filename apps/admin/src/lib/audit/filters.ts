@@ -1,6 +1,6 @@
-// The Audit Log viewer's pure seam (#188, spec § The Audit Log — Viewer):
+// The Audit Log viewer's pure seam (#188, spec § The Audit Log, Viewer):
 // search-param normalization, UTC day windows, page math, the label maps,
-// and the wire→row parse — every fn pure so the lib-seam suite pins the
+// and the wire→row parse, every fn pure so the lib-seam suite pins the
 // filter/pagination semantics the screen rides. The role law (ADR-0018)
 // lives in the server fns and the route, never here. Rows parse through
 // the landed auditLogRowSchema ("the #188 viewer parses rows through it").
@@ -19,7 +19,7 @@ export const AUDIT_PAGE_SIZE = 20;
 const DAY_MS = 86_400_000;
 
 // Search params arrive as strings and may be stale or hand-edited: every
-// field is tolerant — an invalid value drops to its default (the metrics
+// field is tolerant, an invalid value drops to its default (the metrics
 // env reader's posture), never a thrown validation. z.object semantics do
 // the entity/action narrowing; .catch() is the drop.
 const dateParam = z
@@ -42,7 +42,7 @@ export type AuditLogSearch = z.infer<typeof auditLogSearchSchema>;
 
 // A regex-valid but calendar-invalid day is not a day: 2026-13-99 passes
 // the \d{2} slots and 2026-02-31 ROLLS OVER to March in V8 instead of
-// parsing NaN — the round-trip check catches both, dropping the side to
+// parsing NaN, the round-trip check catches both, dropping the side to
 // null (a half-open window, the tolerant posture of every field here).
 function isCalendarDay(day: string): boolean {
   const parsed = new Date(`${day}T00:00:00.000Z`);
@@ -54,9 +54,9 @@ function dayStartUtc(day: string): Date | null {
 }
 
 // UTC day boundaries by design (occurredAt is timestamptz and the screen
-// displays UTC via formatUtc — the window matches the display): from →
+// displays UTC via formatUtc, the window matches the display): from →
 // that day's 00:00Z inclusive; to → the NEXT day's 00:00Z exclusive (an
-// inclusive day). from after to leaves start > end — an empty window
+// inclusive day). from after to leaves start > end, an empty window
 // (0 rows), not an error.
 export function auditDateWindow(search: AuditLogSearch): {
   start: string | null;
@@ -94,7 +94,7 @@ export function pageWindow(
   };
 }
 
-// Filter-option and cell copy — the eleven entity families and seven
+// Filter-option and cell copy, the eleven entity families and seven
 // actions, human-labeled once (owner-ratifiable at the variants step).
 export const AUDIT_ENTITY_LABELS: Record<AuditEntity, string> = {
   branch: 'Branches',
@@ -135,7 +135,7 @@ export function hasActiveFilters(search: AuditLogSearch): boolean {
 export type AuditWireRow = Omit<AuditLogRow, 'occurredAt'> & { occurredAt: string };
 
 // The RPC boundary guard: parses wire rows back through the landed
-// auditLogRowSchema. A malformed row is a server bug — the throw surfaces
+// auditLogRowSchema. A malformed row is a server bug, the throw surfaces
 // as the query's error state, never a silently dropped entry.
 export function parseAuditWireRows(rows: unknown): AuditLogRow[] {
   return auditLogRowSchema.array().parse(rows);

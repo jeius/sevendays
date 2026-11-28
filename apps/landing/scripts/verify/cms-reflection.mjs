@@ -1,20 +1,20 @@
 // The M5 + M7 exit gates (issues #143/#225, specs #134/#172 § Verification):
-// M5 — a scratch package walked create → cover upload → price change →
+// M5, a scratch package walked create → cover upload → price change →
 // print-size trim → deactivate, each step fresh-load-asserted by CDP.
-// M7 — five legs appended after the M5 walk: the unpriced flip (nothing
+// M7, five legs appended after the M5 walk: the unpriced flip (nothing
 // renders where a price would), guarded delete (blocked → 400 naming the
 // blocker; cascade; delete frees the name + slug), the public testimonial
 // submission accepted-with-edit rendering at the end of order then cleaned
 // up, the site-settings snapshot/mutate/restore through both the store and
 // the landing chrome, and the dark toggle proving the ruled ramp live.
-// The mutation leg drives the ADMIN API SEAM — sign-in over HTTP (the
-// admin app's BetterAuth endpoint) → Bearer → /api/v1/admin/* — never the
+// The mutation leg drives the ADMIN API SEAM, sign-in over HTTP (the
+// admin app's BetterAuth endpoint) → Bearer → /api/v1/admin/*, never the
 // admin UI. MAIN-ONLY owner harness (the seed's ruleset).
 //
 // Env (operator machine, never committed):
-//   VERIFY_STAFF_EMAIL / VERIFY_STAFF_PASSWORD  — a provisioned staff row
+//   VERIFY_STAFF_EMAIL / VERIFY_STAFF_PASSWORD: a provisioned staff row
 //     (docs/staff-provisioning.md; one-time harness user via create-staff)
-//   ADMIN_VERIFY_URL  (default http://localhost:3001) — the auth server
+//   ADMIN_VERIFY_URL  (default http://localhost:3001), the auth server
 //   API_VERIFY_URL    (default http://127.0.0.1:8787)
 //   LANDING_VERIFY_URL(default http://localhost:3000)
 //   CDP_HTTP          (default http://127.0.0.1:9222)
@@ -22,7 +22,7 @@
 // The dev DB is the live Supabase pooler: this script only ever CREATES a
 // scratch package + a scratch print size and deactivates rows it created.
 // Per-run litter: the deactivated rows + one promoted cover object + (born-
-// empty store only) an all-null site_settings row — render-inert,
+// empty store only) an all-null site_settings row, render-inert,
 // psql-cleanable by id (the #231 class).
 import { connect } from './lib.mjs';
 
@@ -39,10 +39,10 @@ const JPEG = Buffer.from(
 const results = [];
 function check(name, ok, detail = '') {
   results.push({ name, ok });
-  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? `: ${detail}` : ''}`);
 }
 
-// Re-derived here, not imported — this script verifies deployed pages, not
+// Re-derived here, not imported, this script verifies deployed pages, not
 // build artifacts (the packages-pages.mjs rule).
 const peso = (cents) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
@@ -53,8 +53,8 @@ const sizeCode = `CDP${runId % 100000}`;
 
 // Leg E's probe (read from source, not guessed): packages/ui's ThemeToggle
 // mounts ONCE per landing page (the site-header ink bar; the mobile nav
-// carries no toggle) with a STATIC aria-label — the primitive's own
-// both-themes law — so the labeled-button probe is the stable selector.
+// carries no toggle) with a STATIC aria-label, the primitive's own
+// both-themes law, so the labeled-button probe is the stable selector.
 const TOGGLE_SELECTOR = 'button[aria-label="Toggle theme"]';
 
 async function signIn() {
@@ -76,9 +76,9 @@ async function signIn() {
 
 function api(token) {
   // One seam, two postures: `call` is the M5 walk's helper (parsed body,
-  // throws on non-2xx — the loud convention); `statusCall` its
+  // throws on non-2xx, the loud convention); `statusCall` its
   // non-throwing twin returning { status, body } for the M7 legs that
-  // assert codes (the house 400, the 204s). One request implementation —
+  // assert codes (the house 400, the 204s). One request implementation:
   // never a second seam.
   async function request(method, path, payload) {
     const res = await fetch(`${API}/api/v1/admin${path}`, {
@@ -113,16 +113,16 @@ async function main() {
   const attires = await call('GET', '/attires');
   const attireId = attires.find((a) => a.isActive)?.id;
   if (!attireId)
-    throw new Error('no active attire in the live catalog — cannot build the scratch inclusion');
+    throw new Error('no active attire in the live catalog: cannot build the scratch inclusion');
 
-  // The scratch print size this package (alone) references — deactivating
+  // The scratch print size this package (alone) references, deactivating
   // it in step 4 never touches a seeded row.
   const size = await call('POST', '/print-sizes', {
     code: sizeCode,
     description: `CDP gate size ${runId}`,
   });
 
-  // Step 1 — create the scratch package (featured, so home-featured shows it).
+  // Step 1, create the scratch package (featured, so home-featured shows it).
   const price1 = 91000 + (runId % 1000);
   const created = await call('POST', '/service-packages', {
     name: pkgName,
@@ -151,7 +151,7 @@ async function main() {
     const detailUrl = `${LANDING}/packages/${slug}`;
     const homeUrl = `${LANDING}/`;
 
-    // Step 1 assertions — visible everywhere, placeholder cover (⇔ rule).
+    // Step 1 assertions, visible everywhere, placeholder cover (⇔ rule).
     await go(listUrl);
     check('step1: /packages lists the scratch package', (await text()).includes(pkgName));
     await go(detailUrl);
@@ -170,7 +170,7 @@ async function main() {
     );
     check('step1: no cover img yet (placeholder ⇔ no cover)', coverImg === 0);
 
-    // Step 2 — presign → PUT the JPEG → bind as cover via the atomic save.
+    // Step 2, presign → PUT the JPEG → bind as cover via the atomic save.
     const presigned = await call('POST', '/media/presign', {
       purpose: 'package-cover',
       contentType: 'image/jpeg',
@@ -220,7 +220,7 @@ async function main() {
     );
     check('step2: home-featured renders the cover <img>', homeImg > 0);
 
-    // Step 3 — price change, fresh load.
+    // Step 3, price change, fresh load.
     const price2 = price1 + 111;
     await call('PUT', `/service-packages/${pkgId}`, {
       name: pkgName,
@@ -244,7 +244,7 @@ async function main() {
     await go(detailUrl);
     check('step3: fresh load shows the new price', (await text()).includes(peso(price2)));
 
-    // Step 4 — deactivate the scratch print size: the trim rule, live.
+    // Step 4, deactivate the scratch print size: the trim rule, live.
     await call('PUT', `/print-sizes/${size.id}`, {
       code: sizeCode,
       description: `CDP gate size ${runId}`,
@@ -260,7 +260,7 @@ async function main() {
     await go(listUrl);
     check('step4: the package still lists after the trim', (await text()).includes(pkgName));
 
-    // Step 5 — deactivate the scratch package: gone everywhere, fresh load.
+    // Step 5, deactivate the scratch package: gone everywhere, fresh load.
     await call('PUT', `/service-packages/${pkgId}`, {
       name: pkgName,
       description: 'Scratch package for the cms-reflection gate.',
@@ -293,7 +293,7 @@ async function main() {
     );
     check('step5: home-featured no longer shows it', homeGone === false);
 
-    // Step 6 (M7 leg B) — unpriced: nothing renders where a price would.
+    // Step 6 (M7 leg B), unpriced: nothing renders where a price would.
     await call('PUT', `/service-packages/${pkgId}`, {
       name: pkgName,
       description: 'Scratch package for the cms-reflection gate.',
@@ -344,8 +344,8 @@ async function main() {
       ],
     });
 
-    // Step 7 (M7 leg A) — guarded delete. The status-asserted calls ride
-    // `statusCall` (the seam's non-throwing twin) — the house 400 and the
+    // Step 7 (M7 leg A), guarded delete. The status-asserted calls ride
+    // `statusCall` (the seam's non-throwing twin), the house 400 and the
     // 204s are VALUES here, never throws.
     const blocked = await statusCall('DELETE', `/print-sizes/${size.id}`); // the scratch package's inclusion references it
     check(
@@ -387,7 +387,7 @@ async function main() {
     );
     await go(detailUrl);
     // The uniform not-found's copy is the #223 global NotFound's
-    // owner-ratified h2 ('This page never developed.') — the route-level
+    // owner-ratified h2 ('This page never developed.'), the route-level
     // overrides are gone (M7 #223), so no page renders 'Package not found.'
     // anymore.
     check(
@@ -395,8 +395,8 @@ async function main() {
       (await text()).includes('This page never developed.')
     );
 
-    // Step 8 (M7 leg C) — the public testimonial form, hold-at-API.
-    const subQuote = `The M7 gate walked end to end — run ${runId} made the whole studio feel effortless.`;
+    // Step 8 (M7 leg C), the public testimonial form, hold-at-API.
+    const subQuote = `The M7 gate walked end to end, run ${runId} made the whole studio feel effortless.`;
     const subPerson = `Gate Runner ${runId % 1000}`;
     const posted = await fetch(`${API}/api/v1/testimonial-submissions`, {
       method: 'POST',
@@ -404,7 +404,7 @@ async function main() {
       body: JSON.stringify({ quote: subQuote, person: subPerson }),
     });
     const postedBody = await posted.json().catch(() => ({}));
-    // The generic 201 is a FIXED message — packages/types'
+    // The generic 201 is a FIXED message, packages/types'
     // TESTIMONIAL_SUBMISSION_ACCEPTED ('Thank you! Your story is on its
     // way.'), re-derived here per the harness's no-import rule.
     check(
@@ -448,11 +448,11 @@ async function main() {
     await go(`${LANDING}/about`);
     check('step8: /about no longer renders it', !(await text()).includes(editedFragment));
 
-    // Step 9 (M7 leg D) — site settings through the landing chrome. The
+    // Step 9 (M7 leg D), site settings through the landing chrome. The
     // wire keys are packages/types' siteSettingsSchema verbatim
-    // (brandTagline — the schema read at authoring time, never guessed).
+    // (brandTagline, the schema read at authoring time, never guessed).
     const snapshot = await (await fetch(`${API}/api/v1/site-settings`)).json();
-    // born-empty ⇔ every content field null — bannerIsActive is the one
+    // born-empty ⇔ every content field null, bannerIsActive is the one
     // non-nullable boolean on the wire (EMPTY_SITE_SETTINGS carries false).
     const bornEmpty = Object.entries(snapshot).every(
       ([k, v]) => k === 'bannerIsActive' || v === null
@@ -469,7 +469,7 @@ async function main() {
     // Order-insensitive deep compare: the born-empty snapshot is the
     // EMPTY_SITE_SETTINGS literal (logoImageUrl sits third) while the
     // post-restore row re-reads through toRead (logoImageUrl appended
-    // last) — same content, different key order, so a strict stringify
+    // last), same content, different key order, so a strict stringify
     // could never compare equal.
     const canon = (o) =>
       JSON.stringify(
@@ -480,10 +480,10 @@ async function main() {
     check('step9: the settings restore to the pre-run snapshot', canon(after) === canon(snapshot));
     if (bornEmpty)
       console.log(
-        '# NOTE: born-empty store — the restored all-null row is render-inert litter (the #231 class); psql-delete by id to clean'
+        '# NOTE: born-empty store: the restored all-null row is render-inert litter (the #231 class); psql-delete by id to clean'
       );
 
-    // Step 10 (M7 leg E) — dark mode, live.
+    // Step 10 (M7 leg E), dark mode, live.
     await go(homeUrl);
     const lightBg = await evaluate('getComputedStyle(document.body).backgroundColor');
     await evaluate(`document.querySelector(${JSON.stringify(TOGGLE_SELECTOR)}).click()`);

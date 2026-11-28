@@ -1,5 +1,5 @@
 // Storage & Media (#187): R2 stored-bytes trend + object count + the
-// Class A/B operation counts with the free-tier budget markers — a COST
+// Class A/B operation counts with the free-tier budget markers, a COST
 // SIGNAL, not a quota (the spec's words). Values are window-scoped; the
 // markers are static monthly references labeled as such. One query for
 // the whole section; every card folds to its curated state.
@@ -30,7 +30,7 @@ export function StorageMediaSection({ window }: { window: MetricsWindow }) {
             <>
               <p className='text-2xl font-semibold tabular-nums'>
                 {storage.data.data.latestPayloadSizeBytes === null
-                  ? '—'
+                  ? '-'
                   : formatBytes(storage.data.data.latestPayloadSizeBytes)}
               </p>
               <TrendChart
@@ -42,7 +42,7 @@ export function StorageMediaSection({ window }: { window: MetricsWindow }) {
                 }))}
               />
               <p className='text-muted-foreground text-xs'>
-                Free tier: 10 GB-month storage — a cost signal, not a quota.
+                Free tier: 10 GB-month storage, a cost signal, not a quota.
               </p>
             </>
           ) : null}
@@ -51,7 +51,7 @@ export function StorageMediaSection({ window }: { window: MetricsWindow }) {
           {storage.data?.ok ? (
             <p className='text-2xl font-semibold tabular-nums'>
               {storage.data.data.latestObjectCount === null
-                ? '—'
+                ? '-'
                 : formatCount(storage.data.data.latestObjectCount)}
             </p>
           ) : null}
@@ -67,7 +67,7 @@ export function StorageMediaSection({ window }: { window: MetricsWindow }) {
                 monthly marker
               </p>
               <p className='text-muted-foreground text-xs'>
-                Free tier: 1M Class A ops / month — a cost signal, not a quota.
+                Free tier: 1M Class A ops / month, a cost signal, not a quota.
               </p>
             </>
           ) : null}
@@ -83,7 +83,7 @@ export function StorageMediaSection({ window }: { window: MetricsWindow }) {
                 monthly marker
               </p>
               <p className='text-muted-foreground text-xs'>
-                Free tier: 10M Class B ops / month — a cost signal, not a quota.
+                Free tier: 10M Class B ops / month, a cost signal, not a quota.
               </p>
             </>
           ) : null}

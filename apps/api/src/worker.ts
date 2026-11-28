@@ -1,16 +1,16 @@
-// The Sentry Worker entry (M6 #184, spec § Sentry — the api via the Workers
+// The Sentry Worker entry (M6 #184, spec § Sentry, the api via the Workers
 // SDK). src/index.ts stays SDK-free (its test graph and the AppType export
 // are untouched); this file is the wrangler main and the ONLY
 // @sentry/cloudflare import in the api: withSentry initializes per request
 // (env bindings are per-request under workerd) and auto-instruments the
-// request path (errors-only since #263 — trace sampling is OFF: every traced
+// request path (errors-only since #263, trace sampling is OFF: every traced
 // request cost CPU against the free plan's 10 ms cap, the same margin the
 // public-read cache buys back; revisit only with a paid plan), while the
 // explicit capture seam (observability/capture.ts) owns WHAT is captured:
 // every 5xx + the curated 503 + email-send failures, never 4xx. A missing
 // SENTRY_DSN leaves Sentry disabled (the no-op-without-DSN posture both
 // frontends share). The explicit <Env> generic is load-bearing: the default
-// generic is cloudflare:workers' env TYPE (a type-only import — the SDK's
+// generic is cloudflare:workers' env TYPE (a type-only import, the SDK's
 // runtime build never imports the scheme).
 import { captureException, withSentry } from '@sentry/cloudflare';
 import type { Env } from './env.js';
@@ -32,7 +32,7 @@ export default withSentry<Env>((env) => {
     // would capture onError errors itself and make the seam's capture a
     // silent no-op (core's same-object guard drops the duplicate). The
     // filter removes that integration so the explicit capture seam IS the
-    // only capture path — same mechanism the stubbed-client tests assert.
+    // only capture path, same mechanism the stubbed-client tests assert.
     integrations: (defaults) => defaults.filter((integration) => integration.name !== 'Hono'),
   };
 }, app);

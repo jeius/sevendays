@@ -1,7 +1,7 @@
 import type { ServicePackageRead } from '@sevendays/types';
 
 // Home featured strip (spec: is_featured, unpriced-first then price
-// ascending — ADR-0020 + owner ruling 2026-10-12; fallback first-4 when
+// ascending, ADR-0020 + owner ruling 2026-10-12; fallback first-4 when
 // none flagged; heading switch owner-ratified).
 export const FEATURED_HEADING = 'Featured packages';
 export const FALLBACK_HEADING = 'Our packages';
@@ -14,7 +14,7 @@ export function selectFeaturedPackages(packages: ServicePackageRead[]): {
 } {
   // ADR-0020 + owner ruling 2026-10-12: unpriced packages LEAD the strip
   // (name-ordered within the group), priced follow ascending (name
-  // tiebreak) — inquiry-priced reads as the headliner, not the tail.
+  // tiebreak), inquiry-priced reads as the headliner, not the tail.
   const byPrice = (a: ServicePackageRead, b: ServicePackageRead) => {
     if (a.priceCents === null && b.priceCents === null) return a.name.localeCompare(b.name);
     if (a.priceCents === null) return -1;

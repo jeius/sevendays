@@ -12,7 +12,7 @@ const API = process.env.API_VERIFY_URL ?? 'http://127.0.0.1:8787';
 const results = [];
 function check(name, ok, detail = '') {
   results.push({ name, ok });
-  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? `: ${detail}` : ''}`);
 }
 
 const peso = (cents) =>
@@ -59,9 +59,9 @@ async function main() {
     'home: services teaser strip renders the live services',
     services.every((s) => home.includes(s.name))
   );
-  // Ruled edit (#241, the M7 post-flight — #239 item 1): the home emphasis
+  // Ruled edit (#241, the M7 post-flight, #239 item 1): the home emphasis
   // strip is retired on both editions, so the chrome alone carries branches
-  // (the header nav + the footer — both counted here) and the strip's
+  // (the header nav + the footer, both counted here) and the strip's
   // absence is asserted; walk-in badges stay fully covered by the /branches
   // check below.
   const homeBranchLinks = await evaluate(
@@ -81,7 +81,7 @@ async function main() {
   );
   check('home: gallery wall renders (variant D stand-in strip)', galleryFigures >= 6);
   // #254: the deep-link assertion matches the PARSED service param, never
-  // the exact href string — the router's search serialization is not the
+  // the exact href string, the router's search serialization is not the
   // contract (environment-sensitive on the deployed teaser).
   const teaserServiceIds = await bookParamValues('service');
   check(
@@ -92,11 +92,11 @@ async function main() {
     `[...document.querySelectorAll('a')].some(a => a.textContent.trim() === 'View all services' && a.getAttribute('href') === '/services')`
   );
   check('home: strip-end View all services links /services', viewAll === true);
-  // #254 (owner-ruled 2026-11-09): the hero blurb follows the live wire —
+  // #254 (owner-ruled 2026-11-09): the hero blurb follows the live wire:
   // the saved homeDescription wins (a teaser site-copy save no longer
   // fails the check); the ratified default (#111 resolution; ruled edit
   // #101) governs only while the field is null (defaults never ride the
-  // wire — #215).
+  // wire, #215).
   const expectedBlurb =
     settings.homeDescription ??
     'Portrait, family, and event photography from our Calamba, Dipolog, and Iligan studios. Booked in minutes, delivered in seven days.';
@@ -135,7 +135,7 @@ async function main() {
     })
   );
   // #254 (owner-ruled 2026-11-09): the cross-reference left with the #164
-  // Round-3 ruled services rewrite — the check inverts to guard the
+  // Round-3 ruled services rewrite, the check inverts to guard the
   // ruling's absence, the literal byte-kept (the #241 strip-retirement
   // pattern).
   check(
@@ -171,7 +171,7 @@ async function main() {
     })
   );
   // #254 (owner-ruled 2026-11-09): the text badge recomposed into the
-  // icon WalkInIndicator (#223 Round 4) — the state text lives in the
+  // icon WalkInIndicator (#223 Round 4), the state text lives in the
   // trigger's aria-label pair, never in textContent. The check asserts the
   // label per branch, re-derived from the live payload, and keeps the
   // both-states requirement (the seed carries both flags).
@@ -197,7 +197,7 @@ async function main() {
       branches.some((b) => !b.acceptsWalkIns),
     `labels: ${JSON.stringify(walkInLabels)}`
   );
-  // #254: param-parsed form, text-anchored — the CTA's copy stays part of
+  // #254: param-parsed form, text-anchored, the CTA's copy stays part of
   // the assertion; the href string does not.
   const branchLinkIds = await evaluate(`
     (() => {
@@ -215,8 +215,8 @@ async function main() {
     branches.every((b) => branchLinkIds.includes(b.id))
   );
 
-  // /about — Ruled edit (M5 ticket #142): the two placeholder checks rewrite
-  // into payload-derived ⇔ rules (the story line is byte-kept — not this
+  // /about, Ruled edit (M5 ticket #142): the two placeholder checks rewrite
+  // into payload-derived ⇔ rules (the story line is byte-kept, not this
   // ticket's copy). The live gallery/testimonials tables are CMS-born-empty,
   // so the empty branches are LIVE-exercised today; the populated branches
   // arm for the owner's first uploads. Tab filtering asserts client-side
@@ -296,11 +296,11 @@ async function main() {
     check(
       '/about: tab filtering is client-side over the single fetch',
       true,
-      'armed — single-category or empty payload cannot demo filtering'
+      'armed: single-category or empty payload cannot demo filtering'
     );
   }
   // #254 (owner-ruled 2026-11-09): the attribution renders uppercase mono
-  // and text() is innerText (CSS text-transform applied) — the person
+  // and text() is innerText (CSS text-transform applied), the person
   // matches case-insensitively over the unchanged seam; the ⇔ rule stays.
   const aboutLower = about.toLowerCase();
   check(

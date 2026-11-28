@@ -1,8 +1,8 @@
 // The DB-probe seams of the metrics module (#186): the SQL shapes live in
-// packages/db (the "DB access goes through packages/db" rule — the raw SQL
+// packages/db (the "DB access goes through packages/db" rule, the raw SQL
 // for system views has no schema table, so it ships as pinned constants),
 // the munging is pure, and everything runs plain-node over fakes (the
-// admin lib-seam pattern — no db, no browser).
+// admin lib-seam pattern, no db, no browser).
 
 import {
   CONTENT_CENSUS_SQL,
@@ -34,7 +34,7 @@ describe('the probe SQL shapes (spike-proven against the compose db)', () => {
     expect(PROBE_SIZE_SQL).toBe('select pg_database_size(current_database()) as bytes');
   });
 
-  it('content census counts active rows and last-updated per family (the ::int cast is load-bearing — bare count(*) is int8 → string through postgres-js)', () => {
+  it('content census counts active rows and last-updated per family (the ::int cast is load-bearing, bare count(*) is int8 → string through postgres-js)', () => {
     expect(CONTENT_CENSUS_SQL.packages).toBe(
       'select (count(*) filter (where is_active))::int as active, max(updated_at) as last_updated from service_packages'
     );
@@ -101,7 +101,7 @@ describe('mungeContentRow', () => {
   });
 });
 
-describe('the result-union wrappers (the #155 class — failures resolve, never throw)', () => {
+describe('the result-union wrappers (the #155 class, failures resolve, never throw)', () => {
   it('collectDbProbes maps an exec failure to unavailable', async () => {
     const exec = async () => {
       throw new Error('connection refused');

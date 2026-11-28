@@ -23,7 +23,7 @@ const uuid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0
 const STAMP = '2026-11-17T00:00:00.000Z';
 
 // Fixtures parse through the WIRE schemas (the gallery-thumbs posture):
-// what the seam consumes is exactly what the cached #288 queries deliver —
+// what the seam consumes is exactly what the cached #288 queries deliver,
 // Date instances and nullables included.
 const pkg = (n: number, overrides: Record<string, unknown> = {}) =>
   servicePackageReadSchema.parse({
@@ -109,12 +109,12 @@ const makeIndex = (overrides: Partial<SearchIndexInput> = {}) =>
   });
 
 describe('the index + fields (D8)', () => {
-  it('zero query answers [] — the hint line, never browse-all (#302)', () => {
+  it('zero query answers [], the hint line, never browse-all (#302)', () => {
     expect(runSearch(makeIndex(), '')).toEqual([]);
     expect(runSearch(makeIndex(), '   ')).toEqual([]);
   });
 
-  it('filters from the first character — no min-length gate', () => {
+  it('filters from the first character, no min-length gate', () => {
     const index = makeIndex({ packages: [pkg(1, { name: 'Graduation Deluxe' })] });
     expect(runSearch(index, 'g')[0]?.hits[0]?.id).toBe(uuid(1));
   });
@@ -165,7 +165,7 @@ describe('the index + fields (D8)', () => {
     expect(runSearch(index, 'aisle')[0]?.key).toBe('gallery');
   });
 
-  it("the category-name join — a photo matches its category's name however it's captioned (D8)", () => {
+  it("the category-name join, a photo matches its category's name however it's captioned (D8)", () => {
     const index = makeIndex({
       photos: [
         photo(31, { title: 'Sunset pair', caption: 'The couple at dusk', categoryId: uuid(41) }),
@@ -177,7 +177,7 @@ describe('the index + fields (D8)', () => {
     expect(gallery?.hits[0]?.id).toBe(uuid(31));
   });
 
-  it('the join displayed — gallery secondary is "category · caption", empty parts skipped', () => {
+  it('the join displayed, gallery secondary is "category · caption", empty parts skipped', () => {
     const index = makeIndex({
       photos: [
         photo(31, { title: 'Sunset pair', caption: 'The couple at dusk', categoryId: uuid(41) }),
@@ -194,7 +194,7 @@ describe('the index + fields (D8)', () => {
     expect(byId.get(uuid(33))).toBe('Loose frame');
   });
 
-  it('nullable wire fields never throw — a null-title photo matches by caption, renders an empty identity', () => {
+  it('nullable wire fields never throw, a null-title photo matches by caption, renders an empty identity', () => {
     const index = makeIndex({
       photos: [photo(31, { title: null, caption: 'Beach sunset', categoryId: uuid(41) })],
       categories: [category(41, { name: 'Destinations' })],
@@ -206,7 +206,7 @@ describe('the index + fields (D8)', () => {
 });
 
 describe('ranking + capping + order (D7/D9)', () => {
-  it('identity > body — the pinned weights, an identity match outranks a body match', () => {
+  it('identity > body, the pinned weights, an identity match outranks a body match', () => {
     expect(SEARCH_IDENTITY_WEIGHT).toBe(2);
     expect(SEARCH_BODY_WEIGHT).toBe(1);
     const index = makeIndex({
@@ -231,7 +231,7 @@ describe('ranking + capping + order (D7/D9)', () => {
     expect(group?.overflow).toBe(2);
   });
 
-  it('fixed group order — packages, branches, testimonials, gallery; empty groups omitted', () => {
+  it('fixed group order, packages, branches, testimonials, gallery; empty groups omitted', () => {
     const index = makeIndex({
       packages: [pkg(1, { name: 'Alpha Pack' })],
       branches: [branch(11, { name: 'Alpha Mall', address: 'Somewhere' })],
@@ -262,7 +262,7 @@ describe('hits + navigation + states (D9/D10)', () => {
     expect(hits[1]?.deactivated).toBe(true);
   });
 
-  it('peso on package rows — priced formats, unpriced stays blank (ADR-0020)', () => {
+  it('peso on package rows, priced formats, unpriced stays blank (ADR-0020)', () => {
     const index = makeIndex({
       packages: [
         pkg(1, { name: 'Priced Session', priceCents: 110000 }),
@@ -288,14 +288,14 @@ describe('hits + navigation + states (D9/D10)', () => {
     expect(byGroup.get('packages')?.thumbUrl).toBeNull();
   });
 
-  it('focusUrlFor — one uniform ?focus=<id> href per group (D10 emit; #316 honors)', () => {
+  it('focusUrlFor, one uniform ?focus=<id> href per group (D10 emit; #316 honors)', () => {
     expect(focusUrlFor('packages', uuid(1))).toBe(`/packages?focus=${uuid(1)}`);
     expect(focusUrlFor('branches', uuid(2))).toBe(`/branches?focus=${uuid(2)}`);
     expect(focusUrlFor('testimonials', uuid(3))).toBe(`/testimonials?focus=${uuid(3)}`);
     expect(focusUrlFor('gallery', uuid(4))).toBe(`/gallery?focus=${uuid(4)}`);
   });
 
-  it('searchDropdownState — hint at zero query, empty at no match, results otherwise', () => {
+  it('searchDropdownState, hint at zero query, empty at no match, results otherwise', () => {
     expect(searchDropdownState('', [])).toBe('hint');
     expect(searchDropdownState('  ', [])).toBe('hint');
     expect(searchDropdownState('zzz', [])).toBe('empty');
@@ -305,7 +305,7 @@ describe('hits + navigation + states (D9/D10)', () => {
 });
 
 describe('the copy, verbatim (D5 at #305 + the 2026-11-17 owner rulings)', () => {
-  it('hint, overflow tail, Deactivated suffix, group labels — one-sourced, byte-pinned', () => {
+  it('hint, overflow tail, Deactivated suffix, group labels, one-sourced, byte-pinned', () => {
     expect(SEARCH_COPY.hint).toBe('Type to search packages, branches, testimonials, gallery');
     expect(SEARCH_COPY.overflow(2, 'Packages')).toBe('+2 more in Packages');
     expect(SEARCH_COPY.deactivated).toBe('Deactivated');
@@ -317,7 +317,7 @@ describe('the copy, verbatim (D5 at #305 + the 2026-11-17 owner rulings)', () =>
     });
   });
 
-  it('the no-results line — period INSIDE the closing curly quote (owner-ruled 2026-11-17)', () => {
+  it('the no-results line, period INSIDE the closing curly quote (owner-ruled 2026-11-17)', () => {
     expect(SEARCH_COPY.noResults('graduation')).toBe('No results for “graduation.”');
   });
 });

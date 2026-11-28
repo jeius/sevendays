@@ -1,10 +1,10 @@
 import { cn } from 'cn';
 import { TIME_SLOTS } from '../../lib/booking';
 
-// The placeholder hour grid (#58 inventory — deliberately not Slot-named;
+// The placeholder hour grid (#58 inventory, deliberately not Slot-named;
 // Slot is glossary domain language for real availability, which v1 doesn't
 // have). v2-transient: the availability rebuild may replace the whole
-// control — token-fit styling only, no structural investment.
+// control, token-fit styling only, no structural investment.
 export function HourChipGrid({
   value,
   onSelect,

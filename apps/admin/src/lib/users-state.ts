@@ -1,5 +1,5 @@
 // The Users tab's row vocabulary (M7 #221): ADR-0018's domain words in UI
-// copy (Owner/Staff — the 'admin' gate literal never renders), the
+// copy (Owner/Staff, the 'admin' gate literal never renders), the
 // Active/Banned status pair, the own-row marker, and the session-row shape
 // that strips the plugin's session TOKEN by construction (a component
 // cannot render what the shape does not carry).
@@ -28,7 +28,7 @@ export function shapeUserRows(users: readonly AdminUserSummary[], actorId: strin
   }));
 }
 
-/** The plugin's session row minus the token — never shaped, never shipped. */
+/** The plugin's session row minus the token, never shaped, never shipped. */
 export interface AdminSessionRow {
   id: string;
   createdAt: Date;
@@ -69,7 +69,7 @@ export function activeSessionRows(
   return sessions.filter((session) => session.expiresAt > now);
 }
 
-/** Five session rows per expanded page — the owner-scale list (#244). */
+/** Five session rows per expanded page, the owner-scale list (#244). */
 export const SESSIONS_PAGE_SIZE = 5;
 
 /** One page of the sessions list, newest session first. */

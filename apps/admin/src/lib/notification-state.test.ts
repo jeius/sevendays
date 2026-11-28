@@ -19,7 +19,7 @@ const row = (id: string) => ({
 });
 
 describe('bellStatus (the count → badge / accessible-name / tooltip mapper, D2)', () => {
-  it('0 reads as quiet: no badge, the bare name, no tooltip — never a zero', () => {
+  it('0 reads as quiet: no badge, the bare name, no tooltip, never a zero', () => {
     expect(bellStatus(0)).toEqual({
       badge: null,
       ariaName: 'Notifications',
@@ -41,7 +41,7 @@ describe('bellStatus (the count → badge / accessible-name / tooltip mapper, D2
     expect(bellStatus(12).badge).toBe('9+');
   });
 
-  it('the cap is visual-only — the accessible name carries the UNCAPPED count', () => {
+  it('the cap is visual-only, the accessible name carries the UNCAPPED count', () => {
     expect(bellStatus(12).ariaName).toBe('Notifications, 12 pending submissions');
   });
 
@@ -52,7 +52,7 @@ describe('bellStatus (the count → badge / accessible-name / tooltip mapper, D2
 });
 
 describe('initialsFromPerson (the letters-only initials rule, #304)', () => {
-  it('letters-only words, first two, uppercased — ‘Maria & Paolo Dela Cruz’ → ‘MP’', () => {
+  it('letters-only words, first two, uppercased, ‘Maria & Paolo Dela Cruz’ → ‘MP’', () => {
     expect(initialsFromPerson('Maria & Paolo Dela Cruz')).toBe('MP');
   });
 
@@ -61,8 +61,8 @@ describe('initialsFromPerson (the letters-only initials rule, #304)', () => {
     expect(initialsFromPerson('')).toBe('');
   });
 
-  it('digit and symbol words are skipped, not counted — ‘2026 batch — Team A’ → ‘BT’', () => {
-    expect(initialsFromPerson('2026 batch — Team A')).toBe('BT');
+  it('digit and symbol words are skipped, not counted, ‘2026 batch, Team A’ → ‘BT’', () => {
+    expect(initialsFromPerson('2026 batch, Team A')).toBe('BT');
   });
 });
 
@@ -78,11 +78,11 @@ describe('PANEL_CONFIRM_META (the two confirms’ copy + the #304 polarity)', ()
     expect(ACCEPTING_LABEL).toBe('Accepting…');
   });
 
-  it('reject: the tab’s dialog byte-identical, REJECTING_LABEL, destructive — GuardedConfirm’s own default', () => {
+  it('reject: the tab’s dialog byte-identical, REJECTING_LABEL, destructive, GuardedConfirm’s own default', () => {
     expect(PANEL_CONFIRM_META.reject).toEqual({
       title: 'Reject this submission?',
       description:
-        'The submission stays on record as rejected — nothing publishes, and the sender is never told.',
+        'The submission stays on record as rejected; nothing publishes, and the sender is never told.',
       confirmLabel: 'Reject',
       busyLabel: REJECTING_LABEL,
       confirmVariant: 'destructive',

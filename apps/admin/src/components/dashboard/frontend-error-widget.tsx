@@ -1,5 +1,5 @@
 // One error-rate widget per frontend (#178's addition, landed at #186):
-// the frontends' only countable server-error home — the same CF GraphQL
+// the frontends' only countable server-error home, the same CF GraphQL
 // source, the same workersInvocationsAdaptive shape, scoped to the
 // frontend's own Worker name. It receives the already-fetched series from
 // SystemHealth (one workers query = one cache entry, never three) plus

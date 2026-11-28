@@ -3,10 +3,10 @@
 // metrics docs (r2OperationsAdaptiveGroups grouped by actionType;
 // r2StorageAdaptiveGroups max-gauges newest-first), scoped to the media
 // bucket, over the same GraphQL endpoint + envelope the workers client
-// uses. The Class A/B classification is pinned from R2's pricing docs —
+// uses. The Class A/B classification is pinned from R2's pricing docs:
 // deletes/aborts and unknown future names are the free class, counted in
 // neither total. If the live probe (Task 7) rejects the `Time!` scalar,
-// switch both documents to `string!` HERE and in the shape tests — that
+// switch both documents to `string!` HERE and in the shape tests, that
 // is the one documented fallback (the #186 note, still open).
 
 import type { MetricsWindow } from './cf';
@@ -42,7 +42,7 @@ export const R2_STORAGE_QUERY = `query R2Storage($accountTag: string!, $bucketNa
   }
 }`;
 
-// The free-tier budget markers (spec-pinned): decimal GB — R2 bills
+// The free-tier budget markers (spec-pinned): decimal GB, R2 bills
 // decimal, formatBytes divides by 1000. A COST SIGNAL, not a quota.
 export const R2_FREE_TIER = {
   storageBytes: 10_000_000_000,
@@ -213,7 +213,7 @@ export async function fetchStorageMetrics(
   }
   try {
     // #208: ONE range for both documents (the #187 ledger's real-code
-    // straddle — per-arm windowToRange calls could straddle a second
+    // straddle, per-arm windowToRange calls could straddle a second
     // boundary and send the two documents' ranges 1s apart).
     const range = windowToRange(window);
     const [opsRows, storageRows] = await Promise.all([

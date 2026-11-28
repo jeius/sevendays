@@ -25,9 +25,9 @@ import { type AuditActor, writeAuditRow } from './audit.js';
 import { commitUpload, resolveMediaUrl } from './media.js';
 
 // The positioned collections (M5 #137): position is SERVER-assigned and
-// never client-supplied — create assigns max+1, the order PUT full-replaces
+// never client-supplied, create assigns max+1, the order PUT full-replaces
 // 1..N in payload order. Reorder is atomic and TOTAL: the payload must list
-// EVERY row of the collection exactly once (deactivated included — the
+// EVERY row of the collection exactly once (deactivated included, the
 // admin grid manages them all); a mismatch answers 400 and touches nothing.
 // Hard deletes live in the admin-delete service since M7 #213 (guarded:
 // nothing may reference the row); this module keeps the positioned
@@ -46,7 +46,7 @@ const CATEGORY_UNIQUE: Record<string, string> = { gallery_categories_name_unique
 
 /**
  * The full-replace guard shared by all three order PUTs: unknown ids,
- * missing rows, and duplicates are all named in the details — the editor
+ * missing rows, and duplicates are all named in the details, the editor
  * can mark exactly what drifted.
  */
 function checkCompleteOrder(rows: { id: string }[], ids: string[], field: string): OrderCheck {
@@ -165,7 +165,7 @@ export async function setGalleryCategoryOrder(
   audit: AuditActor,
   categoryIds: string[]
   // The order service never returns not_found (it reads first, checks, then
-  // writes) — the declared union carries only the invalid arm, so the thin
+  // writes), the declared union carries only the invalid arm, so the thin
   // route's `!result.ok` narrows to badRequest without a 404 branch.
 ): Promise<{ ok: true; row: CategoryRow[] } | AdminWriteFailure> {
   const rows = await db.select().from(galleryCategories);
@@ -178,7 +178,7 @@ export async function setGalleryCategoryOrder(
         .set({ position: index + 1, updatedAt: new Date() })
         .where(eq(galleryCategories.id, categoryId));
     }
-    // M6 #185: reorder is family-level — entityId AND summary are null
+    // M6 #185: reorder is family-level, entityId AND summary are null
     // (the #183 twin's entityId ruling, carried to the durable record).
     await writeAuditRow(tx, audit, {
       entity: 'gallery-category',
@@ -204,14 +204,14 @@ export async function getAdminTestimonial(
   return row ?? null;
 }
 
-// Shared with the submissions accept since M7 #216 — the append rule is
+// Shared with the submissions accept since M7 #216, the append rule is
 // ONE rule: max+1 over every row, the spec's own citation.
 export async function nextTestimonialPosition(db: Database): Promise<number> {
   const [row] = await db.select({ value: max(testimonials.position) }).from(testimonials);
   return (row?.value ?? 0) + 1;
 }
 
-// No unique constraint on testimonials — create/update carry no conflict
+// No unique constraint on testimonials, create/update carry no conflict
 // path (the no-row guards are the only throws, and unreachable in practice).
 export async function createAdminTestimonial(
   db: Database,
@@ -241,7 +241,7 @@ export async function updateAdminTestimonial(
   id: string,
   input: UpdateTestimonialInput
 ): Promise<AdminWriteResult<TestimonialRow>> {
-  // M6 #185: the pre-read joins the other entities' pattern — the
+  // M6 #185: the pre-read joins the other entities' pattern, the
   // deactivate ruling needs the BEFORE state; the not_found arm keeps its
   // current meaning (no row → no write, no audit row).
   const [current] = await db.select().from(testimonials).where(eq(testimonials.id, id)).limit(1);
@@ -280,7 +280,7 @@ export async function setTestimonialOrder(
         .set({ position: index + 1, updatedAt: new Date() })
         .where(eq(testimonials.id, testimonialId));
     }
-    // M6 #185: reorder is family-level — entityId AND summary are null
+    // M6 #185: reorder is family-level, entityId AND summary are null
     // (the #183 twin's entityId ruling, carried to the durable record).
     await writeAuditRow(tx, audit, {
       entity: 'testimonial',
@@ -340,7 +340,7 @@ async function commitStagingKey(
 ): Promise<{ ok: true; finalKey: string } | AdminWriteFailure> {
   const commit = await commitUpload(env.MEDIA_BUCKET, { stagingKey, purpose: 'gallery-photo' });
   if (!commit.ok) {
-    // M6 #183: the commit seam's typed failure — one media_failure event
+    // M6 #183: the commit seam's typed failure, one media_failure event
     // (reason is commitUpload's vocabulary: foreign_key | not_found |
     // cap_violation). Emitted HERE, not at the route: 'conflict' at the
     // route level conflates this with uniqueness collisions.
@@ -386,7 +386,7 @@ export async function createAdminGalleryPhoto(
   input: CreateGalleryPhotoInput,
   log?: RequestLogger
 ): Promise<AdminCreateResult<GalleryPhoto>> {
-  // Category existence FIRST — an invalid payload must not touch the bucket
+  // Category existence FIRST, an invalid payload must not touch the bucket
   // (a commit would promote the object and orphan it on the 400).
   if (input.categoryId !== undefined && input.categoryId !== null) {
     const failure = await assertCategoryExists(db, input.categoryId);
@@ -409,7 +409,7 @@ export async function createAdminGalleryPhoto(
     if (!row) throw new Error('insert gallery_photos: no row returned');
     // M6 #185 (the media commit's row): the commit promoted the object
     // before this transaction; THIS row is the durable record of the whole
-    // request. Untitled photos fall back to the immutable final key — a
+    // request. Untitled photos fall back to the immutable final key, a
     // stable, join-free identifier.
     await writeAuditRow(tx, audit, {
       entity: 'gallery-photo',
@@ -465,7 +465,7 @@ export async function updateAdminGalleryPhoto(
     });
     return updated;
   });
-  // Keys are immutable — replace is new key + row update + old-key delete,
+  // Keys are immutable, replace is new key + row update + old-key delete,
   // the old object deleted only AFTER the update (and its audit row) committed.
   if (finalKey !== current.r2Key) {
     await env.MEDIA_BUCKET.delete(current.r2Key);
@@ -478,7 +478,7 @@ export async function setGalleryPhotoOrder(
   env: PhotoEnv,
   audit: AuditActor,
   photoIds: string[]
-  // Same declared union as the other two order services (never not_found —
+  // Same declared union as the other two order services (never not_found:
   // it reads first, checks, then writes): the thin route's `!result.ok`
   // narrows to badRequest without a 404 branch.
 ): Promise<{ ok: true; row: GalleryPhoto[] } | AdminWriteFailure> {
@@ -492,7 +492,7 @@ export async function setGalleryPhotoOrder(
         .set({ position: index + 1, updatedAt: new Date() })
         .where(eq(galleryPhotos.id, photoId));
     }
-    // M6 #185: reorder is family-level — entityId AND summary are null
+    // M6 #185: reorder is family-level, entityId AND summary are null
     // (the #183 twin's entityId ruling, carried to the durable record).
     await writeAuditRow(tx, audit, {
       entity: 'gallery-photo',

@@ -4,7 +4,7 @@ import { spanFor } from '../lib/mosaic';
 
 // The skeleton grammar (#164 Round 5, owner-ruled: "emphasize the loading
 // skeletons a little bit" → the brand-tinted sweep): structure-only
-// silhouettes per surface on the shared Tier-1 skeleton primitive — no
+// silhouettes per surface on the shared Tier-1 skeleton primitive, no
 // per-element spinners, first loads server-rendered; these render as route
 // pendingComponents on client navigations. The .skeleton-grammar wrapper
 // (styles.css) rides the sweep over every skeleton inside it. Home is

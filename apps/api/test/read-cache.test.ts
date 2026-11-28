@@ -26,7 +26,7 @@ const store = fakeStore(); // shared by this and Task 4's describe
 
 const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
 
-// NOTE (import staging): imports land as their describes do — noUnusedLocals
+// NOTE (import staging): imports land as their describes do, noUnusedLocals
 // is a gate. All staged imports are in (`app`, `eq` (drizzle-orm),
 // `galleryPhotos` (@sevendays/db), `signUpSession` (./helpers/auth.js), the
 // `bearer` const, `testEnv`, `loadFixtures`, `loadGalleryFixtures`, and the
@@ -67,7 +67,7 @@ afterEach(() => {
 });
 
 describe('the read-cache seam (unit)', () => {
-  it('has no store under plain Node — the vitest default is no-op', () => {
+  it('has no store under plain Node, the vitest default is no-op', () => {
     expect(getReadCacheStore()).toBeNull();
   });
 
@@ -90,7 +90,7 @@ describe('the read-cache seam (unit)', () => {
     expect(isCachedReadPath('/api/v1/gallery')).toBe(true);
     expect(isCachedReadPath('/api/v1/testimonials')).toBe(true);
     expect(isCachedReadPath('/api/v1/site-settings')).toBe(true);
-    // Everything else bypasses — the booking lookups, appointments, admin.
+    // Everything else bypasses, the booking lookups, appointments, admin.
     expect(isCachedReadPath('/api/v1/studio-services')).toBe(false);
     expect(isCachedReadPath('/api/v1/addon-services')).toBe(false);
     expect(isCachedReadPath('/api/v1/appointments')).toBe(false);
@@ -106,7 +106,7 @@ describe('the read-cache seam (unit)', () => {
     // The served response keeps its body unread and carries no cache directive.
     expect(served.headers.get('cache-control')).toBeNull();
     expect(await served.text()).toBe('{"ok":true}');
-    // The hit projection strips the storage directive — byte-identical wire.
+    // The hit projection strips the storage directive, byte-identical wire.
     const hit = responseFromCacheHit(
       toStoredResponse(Response.json({ ok: true }, { status: 200 }))
     );
@@ -143,7 +143,7 @@ describe('publicReadCache (the read path)', () => {
     expect(second.headers.get('content-type')).toBe(first.headers.get('content-type'));
     expect(second.headers.get('cache-control')).toBeNull();
     // The hit re-stamps x-request-id with its OWN request's id (Task 2
-    // review, minor #1) — consecutive responses never share one.
+    // review, minor #1), consecutive responses never share one.
     expect(second.headers.get('x-request-id')).not.toBe(first.headers.get('x-request-id'));
   });
 

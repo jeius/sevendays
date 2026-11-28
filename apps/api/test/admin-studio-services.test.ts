@@ -62,7 +62,7 @@ describe('studio services admin CRUD', () => {
   });
 
   it('GET /:id returns the assembled read (links embedded regardless of add-on activity)', async () => {
-    // serviceStudio carries a link to the RETIRED add-on — the admin read
+    // serviceStudio carries a link to the RETIRED add-on, the admin read
     // shows it (the public read filters that link; this surface must not).
     const res = await authed(
       'GET',
@@ -158,7 +158,7 @@ describe('studio services admin CRUD', () => {
     expect(res.status).toBe(200);
     expect(((await res.json()) as { isActive: boolean }).isActive).toBe(false);
     // The round-trip (#137 T9): the assembled admin GET still shows the
-    // deactivated service — links embedded, isActive false.
+    // deactivated service, links embedded, isActive false.
     const after = await authed(
       'GET',
       `/api/v1/admin/studio-services/${ids.serviceStudio}`,
@@ -179,8 +179,8 @@ describe('studio services admin CRUD', () => {
   });
 });
 
-describe('the branch matrix (PUT /:id/branches — full-replace, one transaction)', () => {
-  it('full-replace round-trips: trim to one branch, then grow back — the diff rewrite', async () => {
+describe('the branch matrix (PUT /:id/branches, full-replace, one transaction)', () => {
+  it('full-replace round-trips: trim to one branch, then grow back, the diff rewrite', async () => {
     const first = await authed(
       'PUT',
       `/api/v1/admin/studio-services/${ids.servicePortrait}/branches`,
@@ -235,7 +235,7 @@ describe('the branch matrix (PUT /:id/branches — full-replace, one transaction
     expect(((await res.json()) as { bookableBranchIds: string[] }).bookableBranchIds).toEqual([]);
   });
 
-  it('a DEACTIVATED branch id still links — the existence check is deactivation-blind by ruling', async () => {
+  it('a DEACTIVATED branch id still links, the existence check is deactivation-blind by ruling', async () => {
     // #137 T4 minor: the admin composes from admin reads (deactivated rows
     // included); activity filtering is read-side, never write-side.
     const [ghost] = await db
@@ -261,7 +261,7 @@ describe('the branch matrix (PUT /:id/branches — full-replace, one transaction
   });
 });
 
-describe('the add-on matrix (PUT /:id/addons — full-replace, one transaction)', () => {
+describe('the add-on matrix (PUT /:id/addons, full-replace, one transaction)', () => {
   it('full-replace round-trips truthfully', async () => {
     const res = await authed(
       'PUT',
@@ -325,7 +325,7 @@ describe('the add-on matrix (PUT /:id/addons — full-replace, one transaction)'
   });
 });
 
-describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => {
+describe('audit rows (M6 #185, one per committed mutation, tx-gated)', () => {
   const rows = async () => db.select().from(auditLog);
 
   it('POST → one create row with the service name; the actor is the caller', async () => {
@@ -429,7 +429,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
 });
 
 describe('unpriced saves (ADR-0020)', () => {
-  it('POST with priceCents null creates an unpriced service — 201, wire echoes null', async () => {
+  it('POST with priceCents null creates an unpriced service, 201, wire echoes null', async () => {
     const res = await authed(
       'POST',
       '/api/v1/admin/studio-services',
@@ -440,7 +440,7 @@ describe('unpriced saves (ADR-0020)', () => {
     expect(((await res.json()) as { priceCents: number | null }).priceCents).toBeNull();
   });
 
-  it('PUT with priceCents null flips the priced fixture unpriced — 200, wire echoes null', async () => {
+  it('PUT with priceCents null flips the priced fixture unpriced, 200, wire echoes null', async () => {
     const res = await authed(
       'PUT',
       `/api/v1/admin/studio-services/${ids.servicePortrait}`,
@@ -572,7 +572,7 @@ describe('the cover tri-state (#331)', () => {
   });
 
   it('PUT with a staging key that has no object → 400 with the coverImageKey field detail (the commit re-path)', async () => {
-    const stub = stubCommitBucket(); // empty — head misses
+    const stub = stubCommitBucket(); // empty, head misses
     const { token } = await signUpSession(url, 'admin-services-cover-miss@sevendays.test');
     const res = await app.request(
       `/api/v1/admin/studio-services/${ids.serviceStudio}`,

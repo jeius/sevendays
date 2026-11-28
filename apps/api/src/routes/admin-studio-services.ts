@@ -21,13 +21,13 @@ import type { ApiEnv } from '../services/db.js';
 import { badRequest, notFound } from '../services/errors.js';
 import { validatedJson, validatedParam } from '../services/validator.js';
 
-// Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts. The two
+// Chained registration (ADR-0006 Hono RPC), see routes/branches.ts. The two
 // matrix PUTs ride the same gate (routes/admin.ts's ONE requireSession); each
 // answers the refreshed canonical read, so the editor state round-trips.
-// #208: the entityId convention, documented — the update PUT emits
+// #208: the entityId convention, documented, the update PUT emits
 // result.row.id (the eight sibling routers' shape, #183's brief table);
 // the two matrix PUTs emit the validated param id (the brief's own
-// ruling — the mutation is keyed by the service, and #185's audit row
+// ruling, the mutation is keyed by the service, and #185's audit row
 // carries the same id on every path, so the ephemeral line and the
 // durable row never diverge; the order PUTs' null is the family-grain
 // convention and does not extend here).

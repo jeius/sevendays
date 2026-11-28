@@ -1,9 +1,9 @@
 import type { ResolvedPackageInclusion } from '@sevendays/types';
 
-/** The inclusion phrase — the data composes the line (there is no name
+/** The inclusion phrase, the data composes the line (there is no name
  * field): ×qty · printSize · description · attires. Shared by the D2
  * featured plates (#223) and the package detail's grouped spec sheet
- * (#224). The old render block died here (#224 — the plates index and
+ * (#224). The old render block died here (#224, the plates index and
  * the D2 detail own the inclusions surfaces now). */
 export function inclusionPhrase(inclusion: ResolvedPackageInclusion): string {
   const size = inclusion.printSize ? inclusion.printSize.code : null;

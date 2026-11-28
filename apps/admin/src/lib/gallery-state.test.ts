@@ -129,7 +129,7 @@ describe('titles and order payloads', () => {
   });
 });
 
-describe('batchItemsFromFiles + isFileDrag (M7 #220 — the shared enqueue + the file-drag gate)', () => {
+describe('batchItemsFromFiles + isFileDrag (M7 #220, the shared enqueue + the file-drag gate)', () => {
   it('maps every file by the AR-11 enqueue law: title from file name, caption null, category passthrough, fresh unique ids, input order', () => {
     const a = new File(['a'], 'Graduation 2026.jpg', { type: 'image/jpeg' });
     const b = new File(['b'], 'studio.batch.2.jpg', { type: 'image/jpeg' });
@@ -143,7 +143,7 @@ describe('batchItemsFromFiles + isFileDrag (M7 #220 — the shared enqueue + the
     expect(batchItemsFromFiles([a], null).at(0)?.categoryId).toBeNull();
   });
 
-  it('isFileDrag: only Files-carrying drags count — dnd-kit/text drags never arm the zone', () => {
+  it('isFileDrag: only Files-carrying drags count, dnd-kit/text drags never arm the zone', () => {
     expect(isFileDrag(['Files'])).toBe(true);
     expect(isFileDrag(['Files', 'text/uri-list'])).toBe(true);
     expect(isFileDrag(['text/plain'])).toBe(false);
@@ -151,7 +151,7 @@ describe('batchItemsFromFiles + isFileDrag (M7 #220 — the shared enqueue + the
   });
 });
 
-describe('photoCardLabel (the card display law, #243 — the #214 caption law on the management wall)', () => {
+describe('photoCardLabel (the card display law, #243, the #214 caption law on the management wall)', () => {
   it('caption leads when present', () => {
     expect(photoCardLabel(photo(1, { caption: 'The kiss, golden hour' }))).toBe(
       'The kiss, golden hour'

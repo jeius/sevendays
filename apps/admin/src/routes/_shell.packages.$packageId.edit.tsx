@@ -9,7 +9,7 @@ import { cmsRoutePriming, primeCmsQueries } from '#/lib/cms-queries';
 
 export const Route = createFileRoute('/_shell/packages/$packageId/edit')({
   head: () => ({ meta: [{ title: 'Edit package | Sevendays Admin' }] }),
-  // M8 #288: hover-intent priming — the byId read + both lookups start
+  // M8 #288: hover-intent priming, the byId read + both lookups start
   // while the edit link is hovered (fire-and-forget, never blocks).
   loader: ({ context: { queryClient }, params }) => {
     primeCmsQueries(cmsRoutePriming.packageEdit(queryClient, params.packageId));

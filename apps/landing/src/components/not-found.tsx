@@ -3,12 +3,12 @@ import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
 import { Phone } from 'lucide-react';
 
-// Branded global 404 (#164 Round 1, owner-ruled: white body, no logo — the
+// Branded global 404 (#164 Round 1, owner-ruled: white body, no logo, the
 // earlier ink field left a light band above the footer on tall desktop
 // viewports, so min-h-full makes the white own the page's full stretch
-// between header and footer; dark returns the ink field — the ruled
+// between header and footer; dark returns the ink field, the ruled
 // pre-light look). GLOBAL at __root (M7 #223): the two route-level
-// notFound() overrides are gone — unknown routes AND unknown/inactive
+// notFound() overrides are gone, unknown routes AND unknown/inactive
 // slugs/ids all wear this one surface. Copy owner-ratified as rendered,
 // 2026-10-20 (#223 round); the primary Back-to-home / outline call
 // affordances stand as fenced (the round's explicit ratification).

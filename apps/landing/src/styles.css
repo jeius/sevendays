@@ -29,17 +29,17 @@ body {
 }
 
 /* PROTOTYPE F1 (#111): this pair used to sit UNLAYERED, and unlayered author
-   styles beat every Tailwind utility layer — so `a { color }` hijacked the
+   styles beat every Tailwind utility layer, so `a { color }` hijacked the
    text color of every link-shaped control on the site: chrome nav links
    (text-white/85) and solid CTAs (text-primary-foreground) all rendered
    brand-700 petrol regardless of their classes (measured 2026-09-16:
-   brand-700 on ink ≈ 1.6:1; brand-700 on primary ≈ 1.2:1 — the owner's
+   brand-700 on ink ≈ 1.6:1; brand-700 on primary ≈ 1.2:1, the owner's
    "chrome texts don't follow proper contrasts"). Moved into @layer base so
    the declared utilities win again; content links without a color class
    still get the #92-measured 8.22:1 pair. */
 @layer base {
   a {
-    color: var(--brand-700); /* link pair: 8.22:1 on white — the #92 measured table */
+    color: var(--brand-700); /* link pair: 8.22:1 on white, the #92 measured table */
     text-decoration-thickness: 1px;
     text-underline-offset: 2px;
   }
@@ -86,7 +86,7 @@ pre code {
 }
 
 /* #164 Round 4 scope rider (owner ruling), built M7 #223: the mobile menu
-   panel animates on Base UI's native transition contract — the library
+   panel animates on Base UI's native transition contract, the library
    stamps data-open / data-closed / data-starting-style / data-ending-style
    on the panel and keeps it mounted through the exit transition itself.
    Closed = lifted and transparent; opening drops it in; closing lifts it
@@ -110,7 +110,7 @@ pre code {
   }
 }
 
-/* #164 Round 2 (owner ruling), built M7 #223: the services marquee — the
+/* #164 Round 2 (owner ruling), built M7 #223: the services marquee, the
    track holds the card list THREE times, so -33.3333% is one copy-width
    (a seamless loop that stays filled on any viewport: two full copies
    always remain behind the window, whatever the screen width). */
@@ -124,7 +124,7 @@ pre code {
 }
 
 /* #164 Round 2 (owner ruling), built M7 #223: the testimonial page-change
-   reveal — a quick fade-and-rise, run per page via the keyed grid. */
+   reveal, a quick fade-and-rise, run per page via the keyed grid. */
 @keyframes reveal {
   from {
     opacity: 0;
@@ -136,7 +136,7 @@ pre code {
   }
 }
 
-/* #164 Round 5 (owner ruling), built M7 #223: emphasized skeletons — a
+/* #164 Round 5 (owner ruling), built M7 #223: emphasized skeletons, a
    brand-tinted sweep rides over the shared pulse inside .skeleton-grammar
    layouts. */
 .skeleton-grammar [data-slot="skeleton"] {
@@ -175,13 +175,13 @@ pre code {
 
 /* Landing image viewer (#336 D8, built M9 #339): the immersive near-black
    stage is the library's own default backdrop (#000 via
-   --yarl__color_backdrop) in BOTH themes — the recorded deliberate token
+   --yarl__color_backdrop) in BOTH themes, the recorded deliberate token
    exception (photo viewing wants a constant dark stage; a light-mode
    viewer that flashed white would be the jarring surface). The chrome ink
    (buttons, counter) keeps the library's white registers. Token-native
    parts only, below: the caption line re-registered to the wall's mono
    vocabulary, and the brand focus ring on chrome focus-visible (the
-   library ships a color change alone). Dark mode needs no casing — the
+   library ships a color change alone). Dark mode needs no casing, the
    portal is a body child, so the `.dark` block's variables resolve inside
    it. */
 .yarl__root {

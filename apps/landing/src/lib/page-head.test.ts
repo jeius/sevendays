@@ -2,15 +2,15 @@
 // the settings brand suffix, and the meta description renders only when the
 // page carries one. Pinned so a future suffix retune moves the seam and the
 // suite together. The dedup that makes this work is the router's own (the
-// deepest match's title + name entries win — verified against the installed
+// deepest match's title + name entries win, verified against the installed
 // headContentUtils).
 import type { SiteSettings } from '@sevendays/types';
 import { EMPTY_SITE_SETTINGS, resolveSiteSettings } from '@sevendays/types';
 import { describe, expect, it } from 'vitest';
 import { pageMetaFor } from './page-head';
 
-describe('pageMetaFor (M7 #224 — the brand-suffix title + the description gate)', () => {
-  it('composes the suffix from the resolved settings — defaults reproduce today’s literal exactly', () => {
+describe('pageMetaFor (M7 #224, the brand-suffix title + the description gate)', () => {
+  it('composes the suffix from the resolved settings, defaults reproduce today’s literal exactly', () => {
     const resolved = resolveSiteSettings(EMPTY_SITE_SETTINGS);
     const meta = pageMetaFor(resolved.packagesTitle, resolved.packagesDescription, resolved);
     expect(meta).toEqual([
@@ -36,7 +36,7 @@ describe('pageMetaFor (M7 #224 — the brand-suffix title + the description gate
     expect(meta).toEqual([{ title: 'Branches | Sevendays Photography' }]);
   });
 
-  it('a null page title renders NO entries — the root’s fallback title stands', () => {
+  it('a null page title renders NO entries, the root’s fallback title stands', () => {
     const resolved = resolvedDefaults();
     expect(pageMetaFor(null, resolved.servicesDescription, resolved)).toEqual([]);
   });

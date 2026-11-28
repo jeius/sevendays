@@ -14,12 +14,12 @@ import {
 
 // ADR-0004 made concrete (M4 ticket 04): the API answers "who is calling"
 // by verifying the bearer token against the SAME tables the admin auth
-// server writes — through BetterAuth's own session API, never a hand-rolled
+// server writes, through BetterAuth's own session API, never a hand-rolled
 // lookup: the presented value is `<token>.<signature>` (setSignedCookie)
 // and the bearer plugin strips/verifies the signature against this
 // instance's secret before the session read, so a raw `WHERE token = $1`
 // against the presented value can never match (#119's live-verified
-// finding; the secret must equal the admin issuer's — the ADR-0004 share).
+// finding; the secret must equal the admin issuer's, the ADR-0004 share).
 export function createVerificationAuth(options: { database: Database; secret: string }) {
   return betterAuth({
     database: drizzleAdapter(options.database, { provider: 'pg' }),
@@ -36,7 +36,7 @@ type VerificationAuth = ReturnType<typeof createVerificationAuth>;
 export type SessionData = VerificationAuth['$Infer']['Session'];
 
 // Module-owned copy (the REJECTION_MESSAGES class): the uniform 401 envelope.
-// `details` omitted by design — there is exactly one reason.
+// `details` omitted by design, there is exactly one reason.
 export function authenticationRequired(c: import('hono').Context) {
   return c.json({ error: 'Authentication required.' }, 401);
 }
@@ -46,10 +46,10 @@ export function authenticationRequired(c: import('hono').Context) {
  * through the verification instance and sets the session into context, or
  * returns the uniform 401 envelope. The instance is constructed per request
  * over the per-request db handle acquireDb already placed in context
- * (ADR-0011 — the drizzle adapter captures the db it is given). ADR-0027: a
+ * (ADR-0011, the drizzle adapter captures the db it is given). ADR-0027: a
  * cache hit (the token-hash session cache, services/session-cache.ts) serves
  * the verified identity and skips the instance entirely; only a miss
- * constructs it — 401 outcomes are never cached, and every cache failure
+ * constructs it, 401 outcomes are never cached, and every cache failure
  * degrades to this verification path. A missing
  * BETTER_AUTH_SECRET throws loudly (the createAuth posture): a deploy that
  * cannot verify anyone fails the gated route with the uniform 500, never a
@@ -62,11 +62,11 @@ export const requireSession = async (
   const { BETTER_AUTH_SECRET } = parseEnv(c.env);
   if (!BETTER_AUTH_SECRET) {
     throw new Error(
-      'BETTER_AUTH_SECRET is not set — the API cannot verify sessions. Set the Worker secret (ADR-0004, shared with the admin). No fallback by design.'
+      'BETTER_AUTH_SECRET is not set: the API cannot verify sessions. Set the Worker secret (ADR-0004, shared with the admin). No fallback by design.'
     );
   }
   // ADR-0027: consult the token-hash session cache BEFORE any
-  // verification work — a hit serves the verified identity with zero
+  // verification work, a hit serves the verified identity with zero
   // DB I/O and never constructs the per-request auth instance. A miss
   // verifies exactly as before and back-fills on success; 401
   // outcomes are never cached (the put sits below the null check).

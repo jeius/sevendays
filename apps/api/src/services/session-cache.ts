@@ -2,24 +2,24 @@ import type { SessionData } from './auth.js';
 
 // The session-verify cache (ADR-0027, #286): a token-hash → (session, user)
 // read-through cache consulted by the session gate (services/auth.ts) BEFORE
-// any verification work — a hit serves the verified identity with zero DB
+// any verification work, a hit serves the verified identity with zero DB
 // I/O and never constructs the per-request auth instance. Storage is the
 // Workers Cache API beside the public read cache (ADR-0025): free, per-colo,
 // TTL-evicted. The key is a SHA-256 digest over a secret fingerprint (itself
 // a SHA-256 of the shared BETTER_AUTH_SECRET) plus the PRESENTED bearer
-// value — neither the secret nor the token ever appears in a key or a log;
+// value, neither the secret nor the token ever appears in a key or a log;
 // the inner digest is fixed-length hex, so the outer hash has no
 // length-extension surface. 401 outcomes are never cached; a hit re-checks
 // the cached session's expiry before serving (a hit is never more permissive
 // than a fresh verification). Revocation is TTL-only by the owner-ruled
-// bound (≤60 s per colo — the signing-out browser itself is immediate): no
-// eviction path exists, so this store carries no evict — the deliberate
+// bound (≤60 s per colo, the signing-out browser itself is immediate): no
+// eviction path exists, so this store carries no evict, the deliberate
 // clone difference from services/read-cache.ts. The seam mirrors
 // read-cache.ts: an injectable registry whose default is caches.default
-// under workerd and null under plain Node/vitest — every existing suite runs
+// under workerd and null under plain Node/vitest, every existing suite runs
 // uncached with the null store (the floors hold by construction). Cache I/O
-// is best-effort throughout: match resolves undefined on error, put swallows
-// — a cache failure degrades to uncached verification and never fails a
+// is best-effort throughout: match resolves undefined on error, put swallows;
+// a cache failure degrades to uncached verification and never fails a
 // request.
 
 export interface SessionCacheStore {
@@ -32,12 +32,12 @@ export const SESSION_CACHE_TTL_SECONDS = 60;
 export const SESSION_CACHE_KEY_ORIGIN = 'https://session-cache.sevendays.internal';
 
 // The stored container: the verified session as JSON under a storage
-// freshness directive the Cache API honors at put() — PUBLIC, because the
+// freshness directive the Cache API honors at put(), PUBLIC, because the
 // Cache API is a shared cache and a `private` directive makes the entry
 // unstashable (put throws 413, the best-effort catch swallows, nothing
 // ever caches). Per-user isolation comes from the token-hash key, not the
 // directive: the container is Worker-internal colo storage and is never
-// served to a client — the hit path parses the body server-side. The TTL
+// served to a client, the hit path parses the body server-side. The TTL
 // is the revocation bound.
 export function toSessionCacheEntry(session: SessionData): Response {
   return new Response(JSON.stringify(session), {
@@ -46,7 +46,7 @@ export function toSessionCacheEntry(session: SessionData): Response {
 }
 
 // The Date columns the adapter returns as Date instances and the JSON
-// container stringified — revived so a cached hit satisfies the same
+// container stringified, revived so a cached hit satisfies the same
 // SessionData shape a fresh verification produces.
 const DATE_COLUMNS = new Set(['expiresAt', 'createdAt', 'updatedAt']);
 
@@ -62,7 +62,7 @@ function reviveDates(row: Record<string, unknown>): Record<string, unknown> {
 }
 
 // The hit projection: the parsed cached session, or null when anything is
-// off (malformed JSON, missing halves, an expired session — the expiry
+// off (malformed JSON, missing halves, an expired session, the expiry
 // guard). Best-effort: never throws.
 export async function sessionFromCacheEntry(entry: Response): Promise<SessionData | null> {
   try {
@@ -89,14 +89,14 @@ async function sha256Hex(input: string): Promise<string> {
 
 // The key: SHA-256 over a secret fingerprint (itself a SHA-256 of the shared
 // auth secret) plus the presented bearer value. A secret rotation changes
-// every key; old entries age out via the TTL — no migration.
+// every key; old entries age out via the TTL, no migration.
 export async function sessionCacheKey(secret: string, presentedToken: string): Promise<string> {
   const fingerprint = await sha256Hex(secret);
   return sha256Hex(`${fingerprint}:${presentedToken}`);
 }
 
 // The presented value exactly as the bearer plugin sees it (scheme stripped
-// case-insensitively, value trimmed) — the cache-key input. Null for
+// case-insensitively, value trimmed), the cache-key input. Null for
 // anything the gate would 401 anyway (no header, non-bearer scheme): those
 // requests never consult the store.
 export function presentedBearerToken(header: string | undefined): string | null {
@@ -105,7 +105,7 @@ export function presentedBearerToken(header: string | undefined): string | null 
   return value ? value : null;
 }
 
-// The Cache-API-backed default (workerd only). Never throws — see header.
+// The Cache-API-backed default (workerd only). Never throws, see header.
 function defaultStore(): SessionCacheStore | null {
   const cache = typeof caches !== 'undefined' ? caches.default : undefined;
   if (!cache) return null;

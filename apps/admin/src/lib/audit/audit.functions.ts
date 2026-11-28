@@ -1,11 +1,11 @@
 // The Audit Log viewer's server functions (#188, ADR-0023): the reads are
-// admin-side over packages/db — the api stays domain-pure, zero api
+// admin-side over packages/db, the api stays domain-pure, zero api
 // routes, zero api files. The gate is the metrics seam's discipline PLUS
-// the role law (ADR-0018): the audit record is person-level — owner-only
-// by the standing rule — so the gate demands a session AND
+// the role law (ADR-0018): the audit record is person-level, owner-only
+// by the standing rule, so the gate demands a session AND
 // role === 'admin' (the BetterAuth plugin's literal for the owner;
 // 'staff' and null both fail). Ordering inside each fn: dbUrl first (no
-// db means no auth either — one curated not-configured state for both),
+// db means no auth either, one curated not-configured state for both),
 // then the gate (the only throw a fn permits), then the read inside
 // try/catch → unavailable with one log-only line (the #155 law: the loud
 // detail never rides the payload). Sentry span per the server-fn house

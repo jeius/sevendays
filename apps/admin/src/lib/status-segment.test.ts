@@ -8,7 +8,7 @@ const rows = [
 ];
 
 describe('STATUS_SEGMENTS (the toolbar triple)', () => {
-  it('is All / Active / Deactivated in order — the spec-pinned labels', () => {
+  it('is All / Active / Deactivated in order, the spec-pinned labels', () => {
     expect(STATUS_SEGMENTS).toEqual([
       { value: 'all', label: 'All' },
       { value: 'active', label: 'Active' },
@@ -18,7 +18,7 @@ describe('STATUS_SEGMENTS (the toolbar triple)', () => {
 });
 
 describe('filterByStatusSegment', () => {
-  it("segment 'all' returns every row as a COPY (never the caller's array — render-time derivation only)", () => {
+  it("segment 'all' returns every row as a COPY (never the caller's array, render-time derivation only)", () => {
     const all = filterByStatusSegment(rows, 'all');
     expect(all).toEqual(rows);
     expect(all).not.toBe(rows);

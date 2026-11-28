@@ -14,7 +14,7 @@ describe('bulkConfirmName (#155 owner-ratified formats)', () => {
     expect(bulkConfirmName(3, 0)).toBe('0 of 3 selected items');
   });
 
-  it('plural only — a lone selection keeps the plural form (the bar’s `{n} selected` matches; no singular branch by ruling)', () => {
+  it('plural only, a lone selection keeps the plural form (the bar’s `{n} selected` matches; no singular branch by ruling)', () => {
     expect(bulkConfirmName(1, 1)).toBe('1 items');
   });
 });

@@ -72,7 +72,7 @@ describe('parseEnv', () => {
     expect(() => parseEnv({ DATABASE_URL: 'not a url' })).toThrow(/postgres|URL/i);
   });
 
-  it('parses without BETTER_AUTH_SECRET (optional — the auth middleware owns the loud failure)', () => {
+  it('parses without BETTER_AUTH_SECRET (optional, the auth middleware owns the loud failure)', () => {
     const env = parseEnv({
       DATABASE_URL: 'postgres://u:p@host:5432/db',
       RESEND_API_KEY: 're_test_placeholder',
@@ -98,13 +98,13 @@ describe('parseEnv', () => {
   });
 });
 
-describe('parseEnv — media keys (M5 #136)', () => {
+describe('parseEnv, media keys (M5 #136)', () => {
   const mediaVars = () => ({
     CLOUDFLARE_ACCOUNT_ID: '0123456789abcdef0123456789abcdef',
     MEDIA_PUBLIC_BASE_URL: 'https://pub-test.r2.dev',
   });
 
-  it('parses the media keys — binding-shaped objects pass; the optional S3 pair may be absent', () => {
+  it('parses the media keys, binding-shaped objects pass; the optional S3 pair may be absent', () => {
     const env = parseEnv({
       DATABASE_URL: 'postgres://u:p@host:5432/db',
       RESEND_API_KEY: 're_test_placeholder',
@@ -120,7 +120,7 @@ describe('parseEnv — media keys (M5 #136)', () => {
     expect(env.R2_S3_SECRET_ACCESS_KEY).toBeUndefined();
   });
 
-  it('rejects a missing MEDIA_BUCKET binding (required — deploys with wrangler.toml once the bucket exists)', () => {
+  it('rejects a missing MEDIA_BUCKET binding (required, deploys with wrangler.toml once the bucket exists)', () => {
     expect(() =>
       parseEnv({
         DATABASE_URL: 'postgres://u:p@host:5432/db',
@@ -184,7 +184,7 @@ describe('parseEnv — media keys (M5 #136)', () => {
     ).toThrow(/MEDIA_PUBLIC_BASE_URL/);
   });
 
-  it('rejects an empty R2_S3_ACCESS_KEY_ID when present (optional key — no silent blank)', () => {
+  it('rejects an empty R2_S3_ACCESS_KEY_ID when present (optional key, no silent blank)', () => {
     expect(() =>
       parseEnv({
         DATABASE_URL: 'postgres://u:p@host:5432/db',

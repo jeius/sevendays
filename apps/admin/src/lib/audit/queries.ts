@@ -1,8 +1,8 @@
 // The viewer's query factories (#188): the page query keys on the FULL
-// search (every filter is cache identity — a filter change is a new
+// search (every filter is cache identity, a filter change is a new
 // entry), parses rows through the landed auditLogRowSchema at the RPC
 // boundary, and keeps previous data across page flips. Actors are
-// long-stale — a studio's staff list barely moves. No server-side cache;
+// long-stale, a studio's staff list barely moves. No server-side cache;
 // no polling.
 
 import type { AuditLogRow } from '@sevendays/types';

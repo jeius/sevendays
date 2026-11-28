@@ -3,7 +3,7 @@
 // docs), the actionType→class classifier (pinned from R2's pricing docs),
 // the gauge munging (storage samples are MAXes within buckets, latest =
 // the freshest sample), and the fetch contract with its failure mapping.
-// Plain-node over stubbed fetch — no network, no browser.
+// Plain-node over stubbed fetch, no network, no browser.
 import { describe, expect, it, vi } from 'vitest';
 import { CF_GRAPHQL_URL, windowToRange } from './cf';
 import type { MetricsEnv } from './env';
@@ -154,7 +154,7 @@ describe('mungeR2Storage', () => {
 
 describe('fetchStorageMetrics', () => {
   it('posts both documents with bearer auth and the bucket-scoped variables, then munges the union', async () => {
-    // #208: Date is pinned — the variables assertion recomputes
+    // #208: Date is pinned, the variables assertion recomputes
     // windowToRange at assert time; the pinned clock makes the impl's
     // read and the recompute the same instant (the once-seen #187 flake).
     vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-06T12:34:56.789Z') });
@@ -226,7 +226,7 @@ describe('fetchStorageMetrics', () => {
     }
   });
 
-  it('computes the range ONCE — both documents share it even when the wall clock crosses a second boundary mid-flight (#208)', async () => {
+  it('computes the range ONCE, both documents share it even when the wall clock crosses a second boundary mid-flight (#208)', async () => {
     const pinned = new Date('2026-10-06T12:34:56.789Z');
     const variables: Array<Record<string, unknown>> = [];
     let call = 0;
@@ -235,7 +235,7 @@ describe('fetchStorageMetrics', () => {
       const body = JSON.parse(String(init.body)) as { variables: Record<string, unknown> };
       variables.push(body.variables);
       // Same probe as cf.test.ts: cross a second boundary between the two
-      // documents' arms — per-arm windowToRange calls shift the second
+      // documents' arms, per-arm windowToRange calls shift the second
       // document's range; one computed range cannot move.
       vi.setSystemTime(new Date(pinned.getTime() + call * 1500));
       return {
@@ -282,7 +282,7 @@ describe('fetchStorageMetrics', () => {
     expect(result).toEqual({ ok: false, reason: 'unavailable' });
   });
 
-  it('a GraphQL errors array (HTTP 200) maps to unavailable — the loud detail is log-only', async () => {
+  it('a GraphQL errors array (HTTP 200) maps to unavailable, the loud detail is log-only', async () => {
     const fetchImpl = async () => ({
       ok: true,
       json: async () => ({ data: null, errors: [{ message: 'Unknown field' }] }),

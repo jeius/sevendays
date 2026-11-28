@@ -1,9 +1,9 @@
 // The dashboard's widget chrome (#186): one Card per widget with a title,
-// an optional window badge, and the CURATED failure states — the #155
+// an optional window badge, and the CURATED failure states, the #155
 // leak-safe pattern carried to the dashboard. A widget never throws, never
 // bubbles: pending renders skeletons, a resolved not-ok result renders its
 // pinned line, a thrown query error (the gate, or an SSR transport fault)
-// folds to the unavailable line — the never-500 law, structurally.
+// folds to the unavailable line, the never-500 law, structurally.
 
 import { Card, CardContent, CardHeader, CardTitle } from '@sevendays/ui/components/card';
 import { Skeleton } from '@sevendays/ui/components/skeleton';

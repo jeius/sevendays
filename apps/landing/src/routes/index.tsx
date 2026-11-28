@@ -22,7 +22,7 @@ import {
 export const Route = createFileRoute('/')({
   loader: async ({ context: { queryClient } }) => {
     // The settings leg never throws (#215's law): home's <head> degrades to
-    // code defaults, never to a thrown loader — the four data reads still
+    // code defaults, never to a thrown loader, the four data reads still
     // own their failure surface.
     const settings = queryClient
       .ensureQueryData(siteSettingsQueries.all())
@@ -41,7 +41,7 @@ export const Route = createFileRoute('/')({
     return { meta: pageMetaFor(settings.homeTitle, settings.homeDescription, settings) };
   },
   component: HomePage,
-  // The skeleton grammar (#164 Round 5): client navigations only — first
+  // The skeleton grammar (#164 Round 5): client navigations only, first
   // loads are server-rendered (the M5 freshness rule); judge by throttling
   // in devtools while clicking between pages.
   pendingComponent: HomeSkeleton,

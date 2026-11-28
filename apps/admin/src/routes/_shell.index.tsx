@@ -1,4 +1,4 @@
-// The Analytics Dashboard (#186, ADR-0023): the admin's landing screen —
+// The Analytics Dashboard (#186, ADR-0023): the admin's landing screen:
 // the #93 Dashboard stub dies here (the appointments stub at
 // /appointments stays; it is v2 payload). Any staff session sees it; every
 // source failure renders its widget's curated state; the page never 500s.

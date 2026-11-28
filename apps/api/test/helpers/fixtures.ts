@@ -27,7 +27,7 @@ export type FixtureIds = {
   serviceRetired: string;
   serviceStudio: string;
   serviceBranchLinks: string[];
-  // #138: the combined package's inclusion + junction row ids — its
+  // #138: the combined package's inclusion + junction row ids, its
   // ordering tests swap positions deterministically (id order would
   // contradict the swapped positions, created_at order would contradict
   // the swapped junction positions).
@@ -132,7 +132,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     })
     .returning({ id: addonServices.id });
 
-  // M2 ticket 02: one active Studio Service — the db-level exactly-one CHECK
+  // M2 ticket 02: one active Studio Service, the db-level exactly-one CHECK
   // test needs a second offering to attempt a both-set insert. M2 ticket 03
   // adds the applicability-matrix fixtures its rejection tests need; the
   // inactive service is the existing serviceRetired (reused).
@@ -155,7 +155,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     })
     .returning({ id: studioServices.id });
 
-  // M2 ticket 03: a second ACTIVE service, linked to branchA ONLY — the
+  // M2 ticket 03: a second ACTIVE service, linked to branchA ONLY, the
   // bookability rejection needs an active service that is NOT bookable
   // everywhere (portrait is linked to both branches).
   const [serviceStudio] = await db
@@ -169,9 +169,9 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     .returning({ id: studioServices.id });
 
   // Bookability rows (ticket 01's presence-row junction): portrait bookable
-  // at BOTH branches; retired linked to branchA only (inactive — invisible
+  // at BOTH branches; retired linked to branchA only (inactive, invisible
   // on reads even though its link exists); studio (ticket 03) linked to
-  // branchA only — booking it at branchB is the service_not_bookable case.
+  // branchA only, booking it at branchB is the service_not_bookable case.
   await db.insert(branchStudioServices).values([
     { studioServiceId: servicePortrait.id, branchId: branchA.id },
     { studioServiceId: servicePortrait.id, branchId: branchB.id },
@@ -186,7 +186,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
   ];
 
   // Applicability matrix (ticket 03): Makeup applies to the portrait
-  // service; the RETIRED add-on is linked to the studio service — a live
+  // service; the RETIRED add-on is linked to the studio service, a live
   // link on an inactive add-on proves activity-before-matrix (ticket 03).
   await db.insert(studioServiceAddonServices).values([
     { studioServiceId: servicePortrait.id, addonServiceId: addonMakeup.id },
@@ -235,7 +235,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
 
   // Inclusion + junction shaping goes through the db builders (candidate C):
   // one source for per-Kind fields and attire decomposition. Ids are still
-  // captured per row — the stitch read orders junction rows by created_at,
+  // captured per row, the stitch read orders junction rows by created_at,
   // and autocommit gives each insert its own timestamp.
   const printSizeIdMap = new Map([
     ['2R', printSize2R.id],
@@ -304,7 +304,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
 
   // One row per statement (kept from the pre-position era): the builder now
   // supplies junction position per inclusion (catalog attire order), and the
-  // #138 read will order by (position, id) — until then the current read
+  // #138 read will order by (position, id), until then the current read
   // still keys on created_at, and distinct statements keep each row's
   // created_at distinct so that ordering stays deterministic. The builder
   // owns the pair order; these statements preserve it.
@@ -314,7 +314,7 @@ export async function loadFixtures(db: TestDb): Promise<FixtureIds> {
     entries: [framedEntry, print2REntry, print2x2Entry],
     attireId: attireIdMap,
   });
-  // Still one row per statement (distinct created_at — cheap, and any
+  // Still one row per statement (distinct created_at, cheap, and any
   // created_at-sensitive reader stays deterministic); #138 captures the
   // framed inclusion's junction ids via .returning for its position-swap
   // tests.
@@ -394,7 +394,7 @@ export type GalleryFixtureIds = {
 /**
  * The CMS-born-empty tables get their own fixture builder (the main
  * loadFixtures predates M5's gallery): 3 categories (one deactivated),
- * 3 photos (one deactivated, one uncategorized — the staff-only state),
+ * 3 photos (one deactivated, one uncategorized, the staff-only state),
  * 3 testimonials (one deactivated). Positions contiguous 1..3.
  */
 export async function loadGalleryFixtures(db: TestDb): Promise<GalleryFixtureIds> {

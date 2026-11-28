@@ -1,10 +1,10 @@
-// The Audit Log screen's route (#188, spec § The Audit Log — Viewer):
+// The Audit Log screen's route (#188, spec § The Audit Log, Viewer):
 // owner-only, re-gated HERE even though the nav hides the entry and the
-// server fns gate themselves — a staff arrival at the bare URL lands on
+// server fns gate themselves, a staff arrival at the bare URL lands on
 // their own dashboard, never on person-level history (the standing
 // rule). Filters are shareable search params (the WindowToggle
 // precedent), tolerant by construction (Task 1's catch-everything
-// schema — a stale shared URL never fails a visit).
+// schema, a stale shared URL never fails a visit).
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
 import { AuditLogScreen } from '#/components/audit/audit-log-screen';

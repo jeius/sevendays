@@ -24,7 +24,7 @@ function pkg(overrides: Partial<ServicePackageRead> = {}): ServicePackageRead {
 }
 
 // The owner-approved seeded catalog's first four, pinned for the narrative
-// tests (docs/catalog.md — never invent data in place of these).
+// tests (docs/catalog.md, never invent data in place of these).
 const BASIC = { name: 'Basic Package', priceCents: 90000, slug: 'basic-package', isFeatured: true };
 const A = { name: 'Package A', priceCents: 110000, slug: 'package-a', isFeatured: true };
 const B = { name: 'Package B', priceCents: 150000, slug: 'package-b', isFeatured: true };

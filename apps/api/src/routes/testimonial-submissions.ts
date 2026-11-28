@@ -8,21 +8,21 @@ import { tooManyRequests } from '../services/errors.js';
 import { createTestimonialSubmission } from '../services/testimonial-submissions.js';
 import { validatedJson } from '../services/validator.js';
 
-// The public testimonial submission POST (M7 #216 — v1's only public write
+// The public testimonial submission POST (M7 #216, v1's only public write
 // surface, both editions). Abuse posture, in gate order:
-// 1. the Workers Rate Limiting binding (its FIRST user — wrangler.toml
+// 1. the Workers Rate Limiting binding (its FIRST user, wrangler.toml
 //    [[ratelimits]] RATE_LIMITER, 5 per 60s): every attempt consumes,
 //    BEFORE validation, so junk pays too. The key is per-IP: the edge's
-//    CF-Connecting-IP for direct callers (unspoofable — it wins even when
+//    CF-Connecting-IP for direct callers (unspoofable, it wins even when
 //    X-Client-IP is also set); X-Client-IP when the request rides the
-//    landing's service binding (ADR-0016 — the edge header is absent
+//    landing's service binding (ADR-0016, the edge header is absent
 //    there; the landing's server fn sets it from ITS own edge header, a
 //    header the browser cannot set on this path); 'unknown' in dev.
 // 2. the honeypot: a filled 'website' field silently discards with the
-//    SAME 201 body — success-shaped, indistinguishable by construction.
-// 3. the length bounds (quote 20–600, person 2–80) — the schema's 400s.
+//    SAME 201 body, success-shaped, indistinguishable by construction.
+// 3. the length bounds (quote 20–600, person 2–80), the schema's 400s.
 // The answer is ALWAYS generic: the fixed message, no row echo.
-// Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts.
+// Chained registration (ADR-0006 Hono RPC), see routes/branches.ts.
 const rateLimitSubmissions = async (
   c: import('hono').Context<ApiEnv>,
   next: () => Promise<void>
@@ -30,7 +30,7 @@ const rateLimitSubmissions = async (
   const key = c.req.header('CF-Connecting-IP') ?? c.req.header('X-Client-IP') ?? 'unknown';
   const outcome = await c.env.RATE_LIMITER.limit({ key });
   if (!outcome.success) {
-    return tooManyRequests(c, "You're sending too fast — please wait a minute and try again.");
+    return tooManyRequests(c, "You're sending too fast; please wait a minute and try again.");
   }
   await next();
 };

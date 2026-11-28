@@ -131,7 +131,7 @@ describe('branches admin CRUD', () => {
     expect(body.details).toEqual([{ path: ['name'], message: 'already in use' }]);
   });
 
-  it('PUT is full-object and flips isActive — deactivation through the entity PUT', async () => {
+  it('PUT is full-object and flips isActive, deactivation through the entity PUT', async () => {
     const { token } = await signUpSession(url, 'admin-branches-put@sevendays.test');
     const res = await app.request(
       `/api/v1/admin/branches/${ids.branchA}`,
@@ -317,7 +317,7 @@ describe('branches admin CRUD', () => {
   });
 
   it('PUT with a staging key that has no object → 400 with the coverImageKey field detail (the commit re-path)', async () => {
-    const stub = stubCommitBucket(); // empty — head misses
+    const stub = stubCommitBucket(); // empty, head misses
     const { token } = await signUpSession(url, 'admin-branches-cover-miss@sevendays.test');
     const res = await app.request(
       `/api/v1/admin/branches/${ids.branchA}`,
@@ -755,7 +755,7 @@ describe('add-on services admin CRUD', () => {
     expect(res.status).toBe(200);
     expect(((await res.json()) as { isActive: boolean }).isActive).toBe(false);
     // The round-trip (#137 T9): the admin GET still shows the deactivated
-    // row — the public read trims, the admin read never does.
+    // row, the public read trims, the admin read never does.
     const after = await app.request(
       `/api/v1/admin/addon-services/${ids.addonMakeup}`,
       { headers: bearer(token) },
@@ -816,7 +816,7 @@ describe('add-on services admin CRUD', () => {
   });
 });
 
-describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => {
+describe('audit rows (M6 #185, one per committed mutation, tx-gated)', () => {
   const rows = async () => db.select().from(auditLog);
 
   it('POST branches → exactly one row with the ruled fields; requestId = the served X-Request-Id AND the admin_mutation line (the Application Log correlation)', async () => {
@@ -895,7 +895,7 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
 
   it('failed writes record nothing: a 400 (duplicate name), a 404 (unknown id), and a 401 (anonymous) each leave the table empty', async () => {
     const dup = await authed('POST', '/api/v1/admin/branches', 'audit-dup-a@sevendays.test', {
-      name: 'Test Branch A', // fixture name — the uniqueness collision
+      name: 'Test Branch A', // fixture name, the uniqueness collision
       address: 'X St',
       phone: '+63 900 000 000',
     });
@@ -944,8 +944,8 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
   });
 });
 
-describe('unpriced saves (ADR-0020 — add-on services)', () => {
-  it('POST with priceCents null creates an unpriced add-on — 201, wire echoes null', async () => {
+describe('unpriced saves (ADR-0020, add-on services)', () => {
+  it('POST with priceCents null creates an unpriced add-on, 201, wire echoes null', async () => {
     const res = await authed(
       'POST',
       '/api/v1/admin/addon-services',
@@ -956,7 +956,7 @@ describe('unpriced saves (ADR-0020 — add-on services)', () => {
     expect(((await res.json()) as { priceCents: number | null }).priceCents).toBeNull();
   });
 
-  it('PUT with priceCents null flips the priced fixture unpriced — 200, wire echoes null', async () => {
+  it('PUT with priceCents null flips the priced fixture unpriced, 200, wire echoes null', async () => {
     const res = await authed(
       'PUT',
       `/api/v1/admin/addon-services/${ids.addonMakeup}`,

@@ -12,8 +12,8 @@ import type { ApiEnv } from '../services/db.js';
 import { badRequest, notFound } from '../services/errors.js';
 import { validatedJson, validatedParam, validatedQuery } from '../services/validator.js';
 
-// Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts.
-// The list is session-gated (M4 ticket 04 — the M2 public-PII stopgap
+// Chained registration (ADR-0006 Hono RPC), see routes/branches.ts.
+// The list is session-gated (M4 ticket 04, the M2 public-PII stopgap
 // closes): requireSession runs BEFORE the query validator so an
 // unauthenticated caller gets the 401 envelope, never a 400 that would
 // leak validation detail. The single-get and POST stay public (the
@@ -54,7 +54,7 @@ export const appointments = new Hono<ApiEnv>()
       return badRequest(c, result.message);
     }
     // Fire-and-forget (issue #47): the booking is committed; the email is
-    // scheduled past the response — its failure never fails the booking.
+    // scheduled past the response, its failure never fails the booking.
     scheduleConfirmationEmail(c.executionCtx, c.env, db, result.record, c.get('logger'));
     return c.json(result.record, 201);
   });

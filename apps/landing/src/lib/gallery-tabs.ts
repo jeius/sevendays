@@ -1,7 +1,7 @@
 import type { GalleryRead, PublicGalleryPhoto } from '@sevendays/types';
 
 // The /about portfolio seam (M5 ticket #142): tabs derive from the FETCHED
-// payload — an "All" tab first and default plus one tab per category holding
+// payload, an "All" tab first and default plus one tab per category holding
 // ≥1 photo, in the payload's category order (position order is the API's
 // job; the payload carries no position fields). Filtering is client-side
 // over the single fetch. Uncategorized photos are structurally absent from

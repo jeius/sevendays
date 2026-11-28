@@ -1,10 +1,10 @@
 // The reset-email forward seam (M7 #221, ADR-0021): the admin Worker stays
-// Resend-free — sendResetPassword forwards over the API service binding to
+// Resend-free, sendResetPassword forwards over the API service binding to
 // the internal send endpoint. NEVER THROWS: anti-enumeration means the auth
 // request answers identically whether the email exists, the send failed,
-// or the secret is unprovisioned — a throw here would 500 the request and
+// or the secret is unprovisioned, a throw here would 500 the request and
 // leak existence. Failures resolve { sent: false }; the caller logs
-// console.error (the #186 metrics-seam posture — Workers Logs retains it).
+// console.error (the #186 metrics-seam posture, Workers Logs retains it).
 import type { ResetEmailSendInput } from '@sevendays/types';
 
 export interface ResetEmailDeps {
@@ -42,7 +42,7 @@ export async function sendResetEmailOverApi(
 }
 
 /** BetterAuth's sendResetPassword callback shape (1.7.5, probed in dist):
- * ({ user, url, token }, request) — we consume user.email/user.name + url. */
+ * ({ user, url, token }, request), we consume user.email/user.name + url. */
 export interface SendResetPasswordParams {
   user: { email: string; name: string };
   url: string;

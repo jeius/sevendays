@@ -1,25 +1,25 @@
 // MUTATING end-to-end (issue #45 AC 1; #48 extends it): drives two REAL
-// bookings through /book — one package (with an add-on) and one studio
-// service — against the live seeded stack, then reads each back through the
+// bookings through /book, one package (with an add-on) and one studio
+// service, against the live seeded stack, then reads each back through the
 // public single-get AND its /booking/:id page, asserting the server snapshot
 // (bookedPriceCents, add-on entries, status, notes) and the rendered
 // read-back (ticket 08). Rows persist in the target db by design (tiny
-// volume; the studio reconciles manually until M3 availability) — #48's live
+// volume; the studio reconciles manually until M3 availability), #48's live
 // run books with E2E_CUSTOMER_EMAIL (the Resend sandbox delivers only to the
 // account owner's address) and deletes its rows after the evidence is
 // recorded (the M1.5 Q3=A ruling). Run at verification time:
 //   E2E_CUSTOMER_EMAIL=<owner address> node apps/landing/scripts/verify/booking-e2e.mjs
 //
-// The final BOOKINGS line is machine-parseable — confirmation-emails.mjs and
+// The final BOOKINGS line is machine-parseable, confirmation-emails.mjs and
 // the packages/db row probe take the two ids from it.
 //
 // Controller-ruled deviations from the plan snippet (mirroring the Task 5
 // scenario fixes, live-proven there): (1) step-4 Continue is
-// `section[data-step='4'] > button` — `button:last-of-type` matches the last
+// `section[data-step='4'] > button`, `button:last-of-type` matches the last
 // hour chip per CSS per-parent semantics; (2) step-3 Continue is
 // `section[data-step='3'] > button` for the same reason (the add-on cards
 // are buttons inside a sibling grid div); (3) fillContactAndConfirm polls
-// location.pathname for /booking/<uuid> instead of a fixed 1.5s wait — the
+// location.pathname for /booking/<uuid> instead of a fixed 1.5s wait, the
 // dev server-fn round-trip measured ~2.6s (Task 5 check 13).
 import { connect } from './lib.mjs';
 
@@ -33,12 +33,12 @@ const CUSTOMER_EMAIL = process.env.E2E_CUSTOMER_EMAIL ?? 'e2e@example.com';
 // The service booking carries notes so the real email proves the
 // Notes-row-only-when-non-null rule on a live artifact (the package booking
 // stays notes-less and proves the opposite side).
-const SERVICE_NOTES = 'E2E verification booking — safe to discard.';
+const SERVICE_NOTES = 'E2E verification booking: safe to discard.';
 
 const results = [];
 function check(name, ok, detail = '') {
   results.push({ name, ok });
-  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? `: ${detail}` : ''}`);
 }
 const peso = (cents) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
@@ -84,7 +84,7 @@ async function main() {
     await setInput(`section[data-step='5'] input[placeholder='Phone (+63…)']`, '+63 917 000 0000');
     if (notes) await setInput(`section[data-step='5'] textarea`, notes);
     await click(`section[data-step='5'] button[type='button']:last-of-type`);
-    // Dev server-fn round-trip ≈ 2.6s — poll for the redirect (check-13 precedent).
+    // Dev server-fn round-trip ≈ 2.6s, poll for the redirect (check-13 precedent).
     for (let i = 0; i < 20; i++) {
       await wait(500);
       const path = await evaluate(`location.pathname`);
@@ -98,7 +98,7 @@ async function main() {
     await click(`section[data-step='4'] > button`); // Continue
   }
 
-  // Booking 1 — package + first add-on
+  // Booking 1, package + first add-on
   await go(`${LANDING}/book?package=${pkg.id}&branch=${branch.id}`);
   await click(`section[data-step='1'] button`); // branch (prefilled, confirm the pick)
   await click(`section[data-step='2'] button[data-offering='${pkg.id}']`); // the preselected package card
@@ -128,7 +128,7 @@ async function main() {
       pkgRecord.addonServices[0].addonServiceId === addons[0].id &&
       pkgRecord.addonServices[0].priceCents === addons[0].priceCents
   );
-  // Ticket 08: the read-back page is live — assert the rendered snapshot
+  // Ticket 08: the read-back page is live, assert the rendered snapshot
   // (names joined from the sibling reads; prices from the record only).
   // React SSR splits interpolated text nodes with <!-- --> markers, so
   // strip them before plain-substring matching (live-run finding).
@@ -150,7 +150,7 @@ async function main() {
     `expected total ${expectedTotal}`
   );
 
-  // Booking 2 — studio service (no applicable add-ons ⇒ skips the step)
+  // Booking 2, studio service (no applicable add-ons ⇒ skips the step)
   await go(`${LANDING}/book?service=${svc.id}&branch=${branch.id}`);
   await click(`section[data-step='1'] button`);
   await click(`section[data-step='2'] button[data-offering='${svc.id}']`);
@@ -172,7 +172,7 @@ async function main() {
       svcRecord?.notes === SERVICE_NOTES
   );
 
-  // Ticket 08: the service read-back — no add-on rows render when the
+  // Ticket 08: the service read-back, no add-on rows render when the
   // booking carries none (the page's 'Add-on' rows are the only source of
   // that string).
   const svcHtml = stripSsrMarkers(await (await fetch(`${LANDING}${svcPath}`)).text());

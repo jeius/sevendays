@@ -1,9 +1,9 @@
 // The shared CMS pattern library (M5 #139): the compositions every admin
 // screen consumes, ruled by #131 and ported from the composition of record
 // (branch prototype/131-admin-cms-compositions, rounds 1–9). Copy is pinned
-// by the ticket plan's Global Constraints — transcribe, never re-draft.
+// by the ticket plan's Global Constraints, transcribe, never re-draft.
 // Token flags: the status palette + radius step-down are flagged TODO at
-// their use sites pending the owner's design-system ruling — never promote
+// their use sites pending the owner's design-system ruling, never promote
 // them into packages/ui silently.
 import type { TestimonialSubmissionStatus } from '@sevendays/types';
 import {
@@ -44,18 +44,18 @@ import { useEffect, useState } from 'react';
 import { DELETING_LABEL, SAVING_LABEL } from '#/lib/save-contract';
 import { STATUS_SEGMENTS, type StatusSegment } from '#/lib/status-segment';
 
-/** M7 #218: the pending vocabulary's spinner — LoaderCircle, animate-spin, currentColor, aria-hidden. Icon-only buttons render this IN PLACE of their icon; labeled buttons prefix it. */
+/** M7 #218: the pending vocabulary's spinner, LoaderCircle, animate-spin, currentColor, aria-hidden. Icon-only buttons render this IN PLACE of their icon; labeled buttons prefix it. */
 export function PendingSpinner() {
   return <LoaderCircle aria-hidden='true' className='animate-spin' />;
 }
 
 /**
- * The segmented control (M7 #218) — the WindowToggle recipe (dashboard) as
+ * The segmented control (M7 #218), the WindowToggle recipe (dashboard) as
  * pressed buttons: role=group + aria-label on an inline-flex bordered
  * container; the active segment rides the design system's own active stop
- * (--brand-primary-active, the tokens.css convention — white on #034356 is
+ * (--brand-primary-active, the tokens.css convention, white on #034356 is
  * 10.82:1); the inactive segments hover on accent. Local state at the call
- * site — no routes, no persistence.
+ * site, no routes, no persistence.
  */
 export function SegmentedControl<T extends string>({
   options,
@@ -96,7 +96,7 @@ export function SegmentedControl<T extends string>({
   );
 }
 
-/** The All/Active/Deactivated triple — the spec's retired-row filter, default All per visit at the call site. */
+/** The All/Active/Deactivated triple, the spec's retired-row filter, default All per visit at the call site. */
 export function StatusSegmented({
   value,
   onChange,
@@ -114,7 +114,7 @@ export function StatusSegmented({
   );
 }
 
-/** One h1 per screen — house rule. Subline muted under it, actions right-aligned on the row. */
+/** One h1 per screen, house rule. Subline muted under it, actions right-aligned on the row. */
 export function PageHeader({
   title,
   subline,
@@ -142,7 +142,7 @@ export function PageHeader({
 export function StatusBadge({ isActive }: { isActive: boolean }) {
   return (
     <span className='inline-flex items-center gap-1.5'>
-      {/* Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families — never promote into packages/ui. */}
+      {/* Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families, never promote into packages/ui. */}
       <span
         aria-hidden='true'
         className={`size-2.5 rounded-full ${
@@ -157,8 +157,8 @@ export function StatusBadge({ isActive }: { isActive: boolean }) {
 // The submissions queue's status palette (M7 #218): the audit viewer's
 // badge discipline (outline Badge + hue family, audit-log-screen.tsx:57)
 // on the three moderation states.
-// Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families — never promote into packages/ui.
-/** Exported for the Notification's badge (M9 #314): the amber pending family rides the one source — no drift. */
+// Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families, never promote into packages/ui.
+/** Exported for the Notification's badge (M9 #314): the amber pending family rides the one source, no drift. */
 export const SUBMISSION_STATUS_META: Record<
   TestimonialSubmissionStatus,
   { label: string; className: string }
@@ -180,7 +180,7 @@ export const SUBMISSION_STATUS_META: Record<
   },
 };
 
-/** One moderation state — visible text, never color alone. */
+/** One moderation state, visible text, never color alone. */
 export function SubmissionStatusBadge({ status }: { status: TestimonialSubmissionStatus }) {
   const meta = SUBMISSION_STATUS_META[status];
   return (
@@ -207,11 +207,11 @@ export const QUERY_ERROR_LINE = 'Couldn’t load this page.';
 export const PACKAGE_NOT_FOUND_LINE = 'This package doesn’t exist or was removed.';
 
 /**
- * The query-error posture (#155 ruling): a failed read renders this — never
+ * The query-error posture (#155 ruling): a failed read renders this, never
  * the skeleton-forever the `|| !data` pending arm would otherwise hold. The
  * line and the Retry affordance are owner-ratified copy; onRetry re-runs the
  * caller's failed query(ies). The not-found variant (the editor's 404) passes
- * NO onRetry and a child action instead — retrying a 404 is a lie.
+ * NO onRetry and a child action instead, retrying a 404 is a lie.
  */
 export function QueryErrorState({
   line,
@@ -258,7 +258,7 @@ export function Collapse({ open, children }: { open: boolean; children: ReactNod
 /**
  * The identity row of an expandable pair. Collapsed it renders byte-identically
  * to a plain TableRow (the caller's classes pass through untouched); expanded,
- * its bottom border drops so the separator moves to the ExpandPanel's end —
+ * its bottom border drops so the separator moves to the ExpandPanel's end;
  * the line encloses identity + panel as one visual row instead of cutting
  * between them. The conditional border-b-0 beats the TableRow primitive's
  * border-b through tailwind-merge in the primitive's cn(). Ref/style/onClick
@@ -304,7 +304,7 @@ export function ExpandPanel({
 }
 
 /**
- * An icon-only action shows its label on hover/focus — the tooltip content IS
+ * An icon-only action shows its label on hover/focus, the tooltip content IS
  * the button's aria-label text (which stays for AT). Also exported for the
  * identity cells, so a truncated row NAME reveals its full text on hover
  * (trigger is the name element itself).
@@ -319,7 +319,7 @@ export function ActionTooltip({ label, button }: { label: string; button: ReactE
 }
 
 /**
- * Icon-only row actions: Edit (caller-rendered — packages routes to the
+ * Icon-only row actions: Edit (caller-rendered, packages routes to the
  * editor screen, others open the sheet) / Deactivate (PowerOff) / Reactivate
  * (Power), each with aria-label + a tooltip carrying the same text.
  */
@@ -359,7 +359,7 @@ export function RowIconActions({
         <ActionTooltip
           label='Reactivate'
           button={
-            // Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families — never promote into packages/ui.
+            // Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families, never promote into packages/ui.
             <Button
               variant='ghost'
               size='icon-sm'
@@ -396,7 +396,7 @@ export function RowIconActions({
 
 /**
  * Actions cluster: the hover/focus-within-revealed icon actions, then the
- * expand chevron (always visible, rotates when open) — the owner ruling puts
+ * expand chevron (always visible, rotates when open), the owner ruling puts
  * the chevron AFTER the icons. No chevron when the row has nothing to reveal.
  */
 export function RowActionsCluster({
@@ -446,9 +446,9 @@ export function RowActionsCluster({
 }
 
 /**
- * Controlled deactivate confirm. onConfirm never deletes — the screen flips
+ * Controlled deactivate confirm. onConfirm never deletes, the screen flips
  * isActive. Below the sm breakpoint the dialog docks to the bottom edge as a
- * sheet — full width, rounded top (max-sm:rounded-t-xl) — and above sm the
+ * sheet, full width, rounded top (max-sm:rounded-t-xl), and above sm the
  * dock classes restore the primitive's centered dialog verbatim.
  *
  * Motion recipe (the composition of record's unified popup pattern): the
@@ -464,15 +464,15 @@ export function RowActionsCluster({
  *
  * Close-latch: the screens render this component conditionally
  * (`confirmRow ? <DeactivateConfirm …> : null`), so propagating the close to
- * the parent immediately would unmount the WHOLE component — AnimatePresence
- * included — in the same commit that should start the exit. The component
+ * the parent immediately would unmount the WHOLE component, AnimatePresence
+ * included, in the same commit that should start the exit. The component
  * holds a local `visible` latch: the close request only flips the latch (the
  * exit plays while the parent's open prop stays true), and the parent is
- * informed via onExitComplete — the canonical Motion pattern for
+ * informed via onExitComplete, the canonical Motion pattern for
  * parent-conditional rendering.
  *
  * Overlay-flash fix: the owner-visible exit flash was the Backdrop, not the
- * popup — the primitive's tw-animate overlay exit
+ * popup, the primitive's tw-animate overlay exit
  * (`data-closed:animate-out fade-out-0 duration-100`) runs with fill-mode
  * none, so at 100ms the backdrop snapped back to full opacity for the rest of
  * the popup's 300ms exit. The overlay therefore rides the same motion recipe
@@ -565,7 +565,7 @@ export function DeactivateConfirm({
 /**
  * The guarded-action confirm (M7 #218): DeactivateConfirm's motion recipe
  * (visible latch + AnimatePresence exit + the mobile dock) on a
- * PENDING-GUARDED action — the confirm button goes disabled + spinner + the
+ * PENDING-GUARDED action, the confirm button goes disabled + spinner + the
  * busy label swap + aria-busy while the parent's mutation runs; the dialog
  * STAYS OPEN on failure with the blocking references rendered in-body
  * (never toast-and-close); the parent clears `open` on success. Cancel is
@@ -587,11 +587,11 @@ export function GuardedConfirm({
   title: string;
   description: ReactNode;
   confirmLabel: string;
-  /** The stay-side label — 'Cancel' everywhere except the leaving-mid-upload guard (#220), where 'Stay' reads as the answer. */
+  /** The stay-side label, 'Cancel' everywhere except the leaving-mid-upload guard (#220), where 'Stay' reads as the answer. */
   cancelLabel?: string;
   busyLabel: string;
   /**
-   * The confirm button's pair — 'destructive' everywhere except the
+   * The confirm button's pair, 'destructive' everywhere except the
    * accept-publishes guard, which takes 'default' (the primary fill):
    * owner-ruled at the #304 prototype reaction, 2026-11-16. Every existing
    * call site is unchanged (destructive stays the default).
@@ -690,10 +690,10 @@ export function GuardedConfirm({
 
 /**
  * The delete confirm (M7 #218, spec § Confirmation UX): GuardedConfirm with
- * the delete copy — names the row, states the irreversible, and where the
+ * the delete copy, names the row, states the irreversible, and where the
  * entity carries media, `mediaNote` states the images go with it (audit
  * story 37). No typed-name gate (guarded deletes destroy no booking
- * history). Blockers arrive only after a blocked 400 — the dialog's first
+ * history). Blockers arrive only after a blocked 400, the dialog's first
  * open shows none.
  */
 export function DeleteGuardDialog({
@@ -719,7 +719,7 @@ export function DeleteGuardDialog({
       description={
         <>
           {/* TODO(owner-copy): unplanned string awaiting the owner's ratification (#134 open items).
-              Spans, not <p> — AlertDialogDescription renders its own <p>. */}
+              Spans, not <p>, AlertDialogDescription renders its own <p>. */}
           <span className='block'>This permanently deletes it from the catalog.</span>
           {mediaNote ? <span className='block'>{mediaNote}</span> : null}
         </>
@@ -737,30 +737,30 @@ export function DeleteGuardDialog({
 
 /**
  * The light-entity editor shell: entity-name title, a description line, the
- * screen's fields, and Save changes / Cancel. V1 ruled Sheet everywhere — the
+ * screen's fields, and Save changes / Cancel. V1 ruled Sheet everywhere, the
  * prototype's dialog-chrome variant is dead, and the prototype's honesty
  * caption is replaced by the required `description` prop.
  *
- * Side: useIsMobile (768px) drives it — bottom sheet on mobile, right sheet
+ * Side: useIsMobile (768px) drives it, bottom sheet on mobile, right sheet
  * on desktop. The primitive's bottom side is h-auto (unbounded), so
  * max-md:max-h-[85dvh] bounds the flex column and lets the body's flex-1
  * overflow-y-auto actually scroll.
  *
  * Motion recipe: SheetContent is composed with a motion.div through the Base
  * UI `render` prop and the conditional content is wrapped in
- * <AnimatePresence> — side-aware transform strings (desktop translateX(100%)
+ * <AnimatePresence>, side-aware transform strings (desktop translateX(100%)
  * ↔ 0; mobile translateY(100%) ↔ 0) + opacity alongside, 300ms ease-out, all
  * WAAPI so Base UI's getAnimations() unmount gate holds the popup until the
  * exit finishes. The visible-latch + onExitComplete discipline is identical
  * to DeactivateConfirm's (the screens render the editor conditionally).
  *
  * The async Save contract (M7 #218, replacing the M5 veto-throw channel):
- * onSave returns a promise — resolve true = success (the shell closes);
+ * onSave returns a promise, resolve true = success (the shell closes);
  * resolve false = hold (the sheet stays open, its field state intact,
  * retry safe); throw = hold (swallowed; the screen's inline errors + toast
  * are the UX). The shell owns the pending state: Save disabled + the
  * LoaderCircle spinner + the "Saving…" label swap + aria-busy in flight,
- * Cancel disabled alongside. The close is the shell's alone — a failed
+ * Cancel disabled alongside. The close is the shell's alone, a failed
  * save can never silently discard edits. The editorNonce remount machinery
  * this replaces is deleted, not extended.
  */
@@ -789,7 +789,7 @@ export function LightEntityEditor({
   }, [open]);
 
   // The async Save contract: the shell awaits onSave; ONLY a resolved-true
-  // closes — a resolved-false (validation veto, failed save, matrix
+  // closes, a resolved-false (validation veto, failed save, matrix
   // failure) or a throw holds the sheet open over the intact state.
   async function handleSave() {
     if (saving) {

@@ -26,7 +26,7 @@ describe('GET /api/v1/studio-services', () => {
 
     // Two active services now: portrait (both branches) + the ticket-03
     // module fixture (branchA only). The retired service stays invisible
-    // despite its link — the active-only filter's whole point.
+    // despite its link, the active-only filter's whole point.
     expect(body).toHaveLength(2);
     const portrait = body[0];
     expect(portrait?.id).toBe(ids.servicePortrait);
@@ -57,7 +57,7 @@ describe('GET /api/v1/studio-services', () => {
     expect(studio).toBeDefined();
 
     // Fixtures link Makeup → portrait (active link, active add-on) and the
-    // RETIRED add-on → studio (live link on an inactive add-on — the
+    // RETIRED add-on → studio (live link on an inactive add-on, the
     // activity filter's whole point, mirroring ticket-03's ruling).
     expect(portrait?.applicableAddonServiceIds).toEqual([ids.addonMakeup]);
     expect(studio?.applicableAddonServiceIds).toEqual([]);

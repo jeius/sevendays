@@ -5,10 +5,10 @@ import {
   EMAIL_FROM,
 } from './confirmation-email.js';
 
-// The builder is pure — fixed instants, no clock, no I/O. Every pinned
+// The builder is pure, fixed instants, no clock, no I/O. Every pinned
 // string comes from the spec's § Confirmation email (owner-ratified
 // ticket-34 copy); the phDateTime pins match the landing's format tests and
-// were probed on full-ICU Node — fix path is a full-ICU environment, never
+// were probed on full-ICU Node, fix path is a full-ICU environment, never
 // editing the expectation.
 
 const base = (overrides: Partial<ConfirmationEmailInput> = {}): ConfirmationEmailInput => ({
@@ -26,7 +26,7 @@ const base = (overrides: Partial<ConfirmationEmailInput> = {}): ConfirmationEmai
   ...overrides,
 });
 
-describe('buildConfirmationEmail — identity', () => {
+describe('buildConfirmationEmail, identity', () => {
   it('from is the sandbox EMAIL_FROM constant, exactly', () => {
     expect(buildConfirmationEmail(base()).from).toBe(
       'Sevendays Photography <onboarding@resend.dev>'
@@ -40,17 +40,17 @@ describe('buildConfirmationEmail — identity', () => {
 
   it('subject is exact: scheduled-never-confirmed wording with the PHT pin', () => {
     expect(buildConfirmationEmail(base()).subject).toBe(
-      'Booking scheduled: Combined Package — Dec 25, 2026, 9:30 AM (PHT)'
+      'Booking scheduled: Combined Package, Dec 25, 2026, 9:30 AM (PHT)'
     );
   });
 });
 
-describe('buildConfirmationEmail — body copy', () => {
+describe('buildConfirmationEmail, body copy', () => {
   it('greets the customer and states the schedule in the pinned sentence', () => {
     const html = buildConfirmationEmail(base()).html;
     expect(html).toContain('<p>Hi Juana Dela Cruz,</p>');
     expect(html).toContain(
-      'Your Combined Package at Calamba Branch is scheduled for Dec 25, 2026, 9:30 AM (PHT) — please keep an eye on this email for any changes.'
+      'Your Combined Package at Calamba Branch is scheduled for Dec 25, 2026, 9:30 AM (PHT). Please keep an eye on this email for any changes.'
     );
   });
 
@@ -61,7 +61,7 @@ describe('buildConfirmationEmail — body copy', () => {
   });
 });
 
-describe('buildConfirmationEmail — summary table', () => {
+describe('buildConfirmationEmail, summary table', () => {
   it('always carries Branch, Booking, and Schedule rows with their values', () => {
     const html = buildConfirmationEmail(base()).html;
     expect(html).toContain(
@@ -97,7 +97,7 @@ describe('buildConfirmationEmail — summary table', () => {
   });
 });
 
-describe('buildConfirmationEmail — money-free (spec ruling)', () => {
+describe('buildConfirmationEmail, money-free (spec ruling)', () => {
   it('a package booking shows no peso output, no total, no fee', () => {
     const html = buildConfirmationEmail(base()).html;
     expect(html).not.toContain('₱');
@@ -119,7 +119,7 @@ describe('buildConfirmationEmail — money-free (spec ruling)', () => {
   });
 });
 
-describe('buildConfirmationEmail — footer, CTA, escaping', () => {
+describe('buildConfirmationEmail, footer, CTA, escaping', () => {
   it('footer carries the customer contact exactly', () => {
     expect(buildConfirmationEmail(base()).html).toContain(
       'Juana Dela Cruz · juana@example.com · +63 917 000 0000'

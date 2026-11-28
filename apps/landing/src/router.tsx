@@ -11,7 +11,7 @@ export function getRouter() {
     defaultOptions: {
       queries: {
         // Under SSR, staleTime + refetchOnReconnect:false stop the dehydrated
-        // server data from refetching during hydration — it stays authoritative
+        // server data from refetching during hydration, it stays authoritative
         // on first render (no 'static' preset is configured here).
         refetchOnReconnect: false,
         staleTime: 60_000,

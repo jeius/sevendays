@@ -1,11 +1,11 @@
 // The CMS query-contract tests (M8 #288): the ruled 5-minute staleness on
 // every shared CMS factory (spec D4's Warm/Cold contract), the
-// invalidation contract (query keys byte-stable — the screens'
+// invalidation contract (query keys byte-stable, the screens'
 // own-mutation invalidation keys off these factories, and
 // invalidateQueries overrides staleness), the out-of-scope tuned values
 // (dashboard/audit) pinned untouched, and the loader-priming seam
 // (fire-and-forget thunks through queryClient.query). Asserts OPTIONS
-// objects and thunk calls only — the server fns are never invoked from a
+// objects and thunk calls only, the server fns are never invoked from a
 // plain-node test (the RPC wrapper needs request context; module import
 // is safe, spike-proven at metrics-queries.test.ts).
 import type { QueryClient } from '@tanstack/react-query';
@@ -42,7 +42,7 @@ const allCmsOptions = () => [
   siteSettingsQuery.all(),
 ];
 
-describe('the CMS staleness law (M8 #288 — spec D4)', () => {
+describe('the CMS staleness law (M8 #288, spec D4)', () => {
   it('every CMS list/detail factory stales at the ruled 5 minutes and revalidates on focus', () => {
     expect(CMS_STALENESS_MS).toBe(300_000);
     for (const option of allCmsOptions()) {
@@ -51,7 +51,7 @@ describe('the CMS staleness law (M8 #288 — spec D4)', () => {
     }
   });
 
-  it('the query keys are byte-stable — the screens own-mutation-invalidate through them', () => {
+  it('the query keys are byte-stable, the screens own-mutation-invalidate through them', () => {
     expect(adminPackageQueries.all().queryKey).toEqual(['admin', 'service-packages']);
     expect(adminPackageQueries.byId('p1').queryKey).toEqual(['admin', 'service-packages', 'p1']);
     expect(adminBranchQueries.all().queryKey).toEqual(['admin', 'branches']);
@@ -69,7 +69,7 @@ describe('the CMS staleness law (M8 #288 — spec D4)', () => {
     expect(siteSettingsQuery.all().queryKey).toEqual(['site-settings']);
   });
 
-  it('the dashboard + audit tuned values stay untouched (out of scope — spec D4)', () => {
+  it('the dashboard + audit tuned values stay untouched (out of scope, spec D4)', () => {
     expect(metricsQueries.workers('7d')).toMatchObject({ staleTime: 60_000 });
     expect(metricsQueries.dbProbes()).toMatchObject({ staleTime: 60_000 });
     expect(metricsQueries.content()).toMatchObject({ staleTime: 300_000 });
@@ -80,7 +80,7 @@ describe('the CMS staleness law (M8 #288 — spec D4)', () => {
   });
 });
 
-describe('primeCmsQueries — the loader-time priming seam (M8 #288)', () => {
+describe('primeCmsQueries, the loader-time priming seam (M8 #288)', () => {
   it('runs every thunk exactly once (fire-and-forget)', () => {
     const primes = [vi.fn(async () => undefined), vi.fn(async () => undefined)];
     primeCmsQueries(primes);
@@ -88,7 +88,7 @@ describe('primeCmsQueries — the loader-time priming seam (M8 #288)', () => {
     expect(primes[1]).toHaveBeenCalledTimes(1);
   });
 
-  it('a rejected prime never escapes the helper — a failing read cannot fail a navigation', () => {
+  it('a rejected prime never escapes the helper, a failing read cannot fail a navigation', () => {
     const prime = vi.fn(async () => {
       throw new Error('boom');
     });

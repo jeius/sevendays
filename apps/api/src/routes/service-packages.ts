@@ -6,13 +6,13 @@ import {
   listActivePackagesWithInclusions,
 } from '../services/service-packages.js';
 
-// Chained registration (ADR-0006 Hono RPC) — see routes/branches.ts.
+// Chained registration (ADR-0006 Hono RPC), see routes/branches.ts.
 export const servicePackages = new Hono<ApiEnv>()
   .get('/', async (c) => {
     const db = c.get('db');
     return c.json(await listActivePackagesWithInclusions(db, c.env));
   })
-  // No param schema (Global Constraints): slug is an opaque text key — an
+  // No param schema (Global Constraints): slug is an opaque text key, an
   // unknown slug is a plain service-level 404, and validating would add a
   // second error path for no benefit. The :id/:slug asymmetry is deliberate.
   // Unknown AND deactivated slugs take the same uniform 404 (#138).

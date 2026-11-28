@@ -1,7 +1,7 @@
 // The CF GraphQL half of the metrics seam (#186): the pinned query shape
 // (the tutorial-verbatim workersInvocationsAdaptive document), the fetch
 // contract, the envelope + failure mapping, and the widget munging
-// (bucketing, error rate, CPU µs→ms). Plain-node over stubbed fetch —
+// (bucketing, error rate, CPU µs→ms). Plain-node over stubbed fetch:
 // no network, no browser (the admin lib-seam pattern).
 import { describe, expect, it, vi } from 'vitest';
 import {
@@ -152,7 +152,7 @@ describe('errorRate', () => {
 
 describe('fetchWorkerMetrics', () => {
   it('posts the pinned document with bearer auth, one fetch per script, and munges each', async () => {
-    // #208: Date is pinned for the whole test — the assertion recomputes
+    // #208: Date is pinned for the whole test, the assertion recomputes
     // windowToRange at assert time, and a wall-clock second boundary
     // between the impl's call and that recompute was the once-seen #187
     // flake. Under the pinned clock both reads are the same instant.
@@ -202,7 +202,7 @@ describe('fetchWorkerMetrics', () => {
     }
   });
 
-  it('computes the range ONCE — all three scripts share it even when the wall clock crosses a second boundary mid-flight (#208)', async () => {
+  it('computes the range ONCE, all three scripts share it even when the wall clock crosses a second boundary mid-flight (#208)', async () => {
     const pinned = new Date('2026-10-06T12:34:56.789Z');
     const variables: Array<Record<string, unknown>> = [];
     let call = 0;
@@ -257,7 +257,7 @@ describe('fetchWorkerMetrics', () => {
     expect(result).toEqual({ ok: false, reason: 'unavailable' });
   });
 
-  it('a GraphQL errors array (HTTP 200) maps to unavailable — the loud detail is log-only', async () => {
+  it('a GraphQL errors array (HTTP 200) maps to unavailable, the loud detail is log-only', async () => {
     const fetchImpl = async () => ({
       ok: true,
       json: async () => ({ data: null, errors: [{ message: 'Unknown field' }] }),

@@ -1,6 +1,6 @@
 // The time-window toggle (#186): 24h/7d/30d as route search params
 // (shareable, SSR-stable), 7d the spec's default. The DB-probe and Content
-// widgets are point-in-time and windowless — the toggle visually scopes
+// widgets are point-in-time and windowless, the toggle visually scopes
 // only the windowed widgets (each carries its own badge).
 import { Link } from '@tanstack/react-router';
 
@@ -31,7 +31,7 @@ export function WindowToggle({ window }: { window: MetricsWindow }) {
               active
                 ? // The active segment rides the design system's own
                   // active/pressed stop (--brand-primary-active, the
-                  // tokens.css convention): white on #034356 is 10.82:1 —
+                  // tokens.css convention): white on #034356 is 10.82:1;
                   // the base primary's 5.65:1 read washed out at 12px
                   // beside the ink-on-wash text around it (owner feedback).
                   'bg-brand-800 text-primary-foreground px-3 py-1.5 text-xs font-medium'

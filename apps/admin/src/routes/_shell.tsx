@@ -1,5 +1,5 @@
-// The admin app shell (pathless — no URL segment): everything staff-facing
-// renders through it, gated on a session — the M4 spec's beforeLoad gate.
+// The admin app shell (pathless, no URL segment): everything staff-facing
+// renders through it, gated on a session, the M4 spec's beforeLoad gate.
 // Signed-out arrivals at ANY admin URL bounce to /login preserving the aimed
 // URL (location.href rides the redirect search param; /login's round-trip
 // consumes it). Variant A per #59: labeled sidebar + sticky top bar; the
@@ -29,13 +29,13 @@ export const Route = createFileRoute('/_shell')({
   },
   // M7 #223 (the plan.md consumption box's "admin sidebar" clause): the
   // shell primes the settings read so the sidebar's brand renders
-  // server-side. Guarded — a failed read renders the default wordmark and
+  // server-side. Guarded, a failed read renders the default wordmark and
   // never blocks the session gate. M8 #289: ensureQueryData is removed in
   // the next major of @tanstack/react-query 5.102.8, and its own JSDoc
   // names query({ ...options, staleTime: 'static' }) as the replacement.
   // 'static' reproduces the old posture (dist-proven, the #288 spike):
   // missing cache → awaited fetch; present cache → serve it, zero
-  // requests — invalidated or not (the old ensureQueryData served it
+  // requests, invalidated or not (the old ensureQueryData served it
   // too: behavior-neutral).
   loader: async ({ context: { queryClient } }) => {
     await queryClient
@@ -46,7 +46,7 @@ export const Route = createFileRoute('/_shell')({
 });
 
 function ShellLayout() {
-  // The gate's own session fetch is the identity source — no extra call.
+  // The gate's own session fetch is the identity source, no extra call.
   const { user } = Route.useRouteContext();
   return (
     <SidebarProvider>

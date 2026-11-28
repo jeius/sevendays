@@ -1,6 +1,6 @@
 // The internal reset-email send endpoint (M7 #221, ADR-0021): guarded by the
 // INTERNAL_SEND_TOKEN shared secret (the ADR's "reachable only from the two
-// frontend Workers" made enforceable — the API Worker serves a public
+// frontend Workers" made enforceable, the API Worker serves a public
 // workers.dev URL), synchronous/result-returning (unlike ADR-0014's
 // waitUntil), and PII-floor-clean (classified codes only, never recipient
 // text). The builder's copy is pinned here; the route's contract is pinned
@@ -39,7 +39,7 @@ const post = (env: Record<string, unknown>, body = BODY, token?: string) =>
     env
   );
 
-describe('buildResetEmail (M7 #221 — the pinned copy)', () => {
+describe('buildResetEmail (M7 #221, the pinned copy)', () => {
   it('renders the pinned subject, greeting, link, and expiry line; the name is HTML-escaped', () => {
     const email = buildResetEmail({
       to: 'owner@sevendays.ph',
@@ -72,7 +72,7 @@ describe('buildResetEmail (M7 #221 — the pinned copy)', () => {
   });
 });
 
-describe('POST /internal/reset-email (M7 #221 — the guarded route)', () => {
+describe('POST /internal/reset-email (M7 #221, the guarded route)', () => {
   it('answers the curated 503 when INTERNAL_SEND_TOKEN is not provisioned', async () => {
     sendMock.mockClear();
     const res = await post(testEnv('postgres://stub:stub@localhost/db'));
@@ -106,7 +106,7 @@ describe('POST /internal/reset-email (M7 #221 — the guarded route)', () => {
     expect(body.error).toBeTruthy();
   });
 
-  it('sends through the Resend seam and answers 200 { status: true } — payload pinned (from/to/subject, no idempotency key)', async () => {
+  it('sends through the Resend seam and answers 200 { status: true }, payload pinned (from/to/subject, no idempotency key)', async () => {
     sendMock.mockClear();
     sendMock.mockResolvedValue({ data: { id: 're-1' }, error: null });
     const env = {

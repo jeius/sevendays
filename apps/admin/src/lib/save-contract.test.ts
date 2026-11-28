@@ -51,7 +51,7 @@ describe('reduceSaveContract (the async Save contract state)', () => {
     });
   });
 
-  it('settled ok:false → saving released too — the hold is the OPEN sheet, never a stuck spinner (retry is safe)', () => {
+  it('settled ok:false → saving released too, the hold is the OPEN sheet, never a stuck spinner (retry is safe)', () => {
     expect(reduceSaveContract({ saving: true }, { type: 'settled', ok: false })).toEqual({
       saving: false,
     });
@@ -73,7 +73,7 @@ describe('blockerLines (the delete dialog’s in-body blockers, from the #213 40
         { path: ['appointments'], message: 'referenced by 3 appointment(s)' },
         { path: ['photos'], message: 'contains 2 photo(s)' },
       ])
-    ).toEqual(['Appointments — referenced by 3 appointment(s)', 'Photos — contains 2 photo(s)']);
+    ).toEqual(['Appointments: referenced by 3 appointment(s)', 'Photos: contains 2 photo(s)']);
   });
 
   it('a detail with no path renders its message alone', () => {

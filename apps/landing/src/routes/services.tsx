@@ -42,7 +42,7 @@ function ServicesPage() {
         <h1 className='font-bold font-serif text-4xl text-brand-ink dark:text-foreground'>
           {settings.servicesTitle}
         </h1>
-        {/* The ruled intro (#164 Round 3): the add-ons line is GONE — the
+        {/* The ruled intro (#164 Round 3): the add-ons line is GONE, the
             Services page carries Studio Services only (add-ons live inside
             the booking flow, per the landing CONTEXT); the ruled draft is
             the settings default. */}
@@ -57,7 +57,7 @@ function ServicesPage() {
           ))}
         </div>
       </section>
-      {/* Closing call-or-visit strip (#60 ruling) — the #97 emphasis-strip
+      {/* Closing call-or-visit strip (#60 ruling), the #97 emphasis-strip
           pattern, KEPT VERBATIM as landed (theme-aware pair included).
           Call-or-visit flavored: no booking presupposition on either
           edition. */}
@@ -71,7 +71,7 @@ function ServicesPage() {
               Need a service at one of our branches?
             </h2>
             <p className='mt-1 text-brand-700 text-sm dark:text-brand-400'>
-              Call or visit a branch — we will confirm availability.
+              Call or visit a branch, and we will confirm availability.
             </p>
           </div>
           <Link

@@ -53,7 +53,7 @@ const QUESTIONS = [
   'What are you booking?',
   'Any add-ons? (optional)',
   'When? (Philippine time)',
-  'Last — your details',
+  'Last: your details',
 ];
 
 function BookPage() {
@@ -73,7 +73,7 @@ function BookPage() {
     apiMessage: string;
   } | null>(null);
   // Inline Zod errors (#58 ruling): a field shows its message only after the
-  // customer blurs it still-invalid — display-only state, never part of the
+  // customer blurs it still-invalid, display-only state, never part of the
   // gate. The gate itself is the M2 predicate restated as contactSchema
   // (booking-contact.test.ts pins the equivalence).
   const [touched, setTouched] = useState({ name: false, email: false, phone: false });
@@ -107,7 +107,7 @@ function BookPage() {
           container width. */}
       <StepProgress step={wizard.step} className='mt-6' />
       {/* Layout frozen (M2): 1fr + 16rem rail. The step content moves onto
-          the white card (#92 atmosphere) — which also puts every
+          the white card (#92 atmosphere), which also puts every
           destructive-bearing text (past hint, inline errors, rejection
           card) on a card surface per the spec placement rule. */}
       <div className='mt-6 grid gap-8 md:grid-cols-[1fr_16rem]'>
@@ -169,7 +169,7 @@ function BookPage() {
                 </p>
                 {!wizard.branchId ? (
                   <p className='text-muted-foreground mt-2 text-sm'>
-                    Choose a branch first — services are bookable per branch.
+                    Choose a branch first: services are bookable per branch.
                   </p>
                 ) : (
                   <div className='mt-2 grid gap-3 sm:grid-cols-2'>
@@ -218,7 +218,7 @@ function BookPage() {
                   ))}
                 </div>
               )}
-              {/* Exactly one of these renders (M2 behavior) — both must stay
+              {/* Exactly one of these renders (M2 behavior), both must stay
                   DIRECT children of the section: the e2e clicks
                   `section[data-step='3'] > button` for Continue. */}
               {wizard.addonIds.length > 0 ? (
@@ -238,7 +238,7 @@ function BookPage() {
                   onClick={wizard.goNext}
                   className='text-muted-foreground mt-4 text-sm underline'
                 >
-                  Skip — no add-ons
+                  Skip (no add-ons)
                 </button>
               )}
             </section>
@@ -258,10 +258,10 @@ function BookPage() {
               </p>
               {wizard.isPast && (
                 <p data-past-hint className='text-destructive mt-2 text-sm'>
-                  That time has already passed — pick a later slot.
+                  That time has already passed, so pick a later slot.
                 </p>
               )}
-              {/* DIRECT child of the section — the scripts click
+              {/* DIRECT child of the section, the scripts click
                   `section[data-step='4'] > button`; the chips live inside
                   HourChipGrid's wrapping div. */}
               <button
@@ -345,7 +345,7 @@ function BookPage() {
                 <Label htmlFor='contact-notes'>Notes (optional)</Label>
                 <Textarea
                   id='contact-notes'
-                  placeholder='Notes (optional — tell the studio anything useful)'
+                  placeholder='Notes (optional: tell the studio anything useful)'
                   value={wizard.notes}
                   onChange={(e) => wizard.setNotes(e.target.value)}
                 />

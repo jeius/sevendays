@@ -1,11 +1,11 @@
 // The add-ons screen (M5 #140): the consolidated-format table over live
-// AddonService rows — ruled by #131 and ported element-for-element from the
+// AddonService rows, ruled by #131 and ported element-for-element from the
 // composition of record (branch prototype/131-admin-cms-compositions,
 // screens/add-ons.tsx, rounds 1–5 digested in its header), with the #131
 // bulk column + bar riding Task 4's pieces and the applies-to relation
 // rendering through RelationBadges (dedicated column on desktop, reveal-only
 // on mobile). The relation is DERIVED: the bare add-on read embeds no
-// applicability ids, so the badges join the services read — the services
+// applicability ids, so the badges join the services read, the services
 // whose `applicableAddonServiceIds` include the row's id. The prototype's
 // local fixture state is replaced by the task seams:
 // `adminAddonQueries.all()` + `adminStudioServiceQueries.all()` (the badge
@@ -14,12 +14,12 @@
 // buildAddonFlipPayload / validateAddonState / buildAddonMatrixDiff)
 // driving the create/edit Sheet editor, and Task 2's result-valued save fns
 // behind the create-then-fan-out save (AQ-4). The matrix renders as the
-// ruled CHECKBOX rows — ticket #140's override of the prototype's
+// ruled CHECKBOX rows, ticket #140's override of the prototype's
 // name-only cards (AQ-8): one `flex items-center gap-3 rounded-lg border
 // p-3` row per studio service, checkbox + NAME ONLY; a deactivated service
 // dims to opacity-60 and stays checkable (AQ-6: the admin matrix is
 // staff-visible truth; the booking form filters). The save is AQ-1's client
-// fan-out — the junction is service-keyed (#137), so toggling one add-on's
+// fan-out, the junction is service-keyed (#137), so toggling one add-on's
 // applicability PUTs one full-replace per AFFECTED service via
 // `buildAddonMatrixDiff`. Not here: any add-on-keyed matrix route (the
 // fan-out IS the design), per-service matrix editing on the services screen
@@ -89,7 +89,7 @@ import { filterByStatusSegment, type StatusSegment } from '#/lib/status-segment'
 
 /**
  * The editor's mode switch: create (from `New add-on`) or edit (a row
- * snapshot). Both carry the services snapshot the editor OPENED with — the
+ * snapshot). Both carry the services snapshot the editor OPENED with, the
  * badge join's vocabulary AND the matrix's checked-state seed AND the save
  * diff's source, pinned at open time, never re-read at save.
  */
@@ -102,8 +102,8 @@ type SaveAddonInput = EditingTarget & { state: AddonEditorState };
 
 /**
  * One editor save's outcome: the mutationFn runs the whole entity+fan-out
- * chain, so `matrix-failed` has to carry the created row — AQ-4's
- * promote-to-edit anchor on the retry — plus the failed service's NAME,
+ * chain, so `matrix-failed` has to carry the created row, AQ-4's
+ * promote-to-edit anchor on the retry, plus the failed service's NAME,
  * resolved from the snapshot for the toast.
  */
 type SaveAddonOutcome =
@@ -134,7 +134,7 @@ interface FlipInput {
   isActive: boolean;
 }
 
-/** The pending posture's fixed four rows — stable keys, never reordered. */
+/** The pending posture's fixed four rows, stable keys, never reordered. */
 const PENDING_ROW_KEYS = ['row-1', 'row-2', 'row-3', 'row-4'];
 
 export function AddonsScreen() {
@@ -151,12 +151,12 @@ export function AddonsScreen() {
     void servicesQuery.refetch();
   };
   const queryClient = useQueryClient();
-  // T3: controlled disclosure — one expanded row at a time (id or null).
+  // T3: controlled disclosure, one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
   // The toolbar segment (#218): default All per visit, never persisted; the
-  // filtered view is render-time only — the caches and mutations ride the
+  // filtered view is render-time only, the caches and mutations ride the
   // full list.
   const [segment, setSegment] = useState<StatusSegment>('all');
   // The delete dialog's target + its last blockers (empty until a blocked
@@ -164,11 +164,11 @@ export function AddonsScreen() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The #131 bulk ruling: selection rides the loaded row ids; the bar mounts
-  // only while a selection exists. Sets REPLACE — never mutate in place.
+  // only while a selection exists. Sets REPLACE, never mutate in place.
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
   // The editor's create/edit switch and its open flag are separate: the
-  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // async Save contract (#218) closes the shell ONLY on a resolved-true;
   // a held save keeps the sheet open over the intact parent-held state,
   // INCLUDING AQ-4's create→edit promotion after a matrix failure;
   // onOpenChange(false) clears both.
@@ -193,12 +193,12 @@ export function AddonsScreen() {
   const deleteRow = addons?.find((row) => row.id === deleteId);
 
   // Single-row flips: optimistic on the list cache (cancel + snapshot + patch
-  // ONLY isActive; rollback + toast on error; invalidate either way) — the
+  // ONLY isActive; rollback + toast on error; invalidate either way), the
   // posture 139's packages table pinned. The flip payload carries NO matrix
-  // ids — applicability is service-keyed and untouched by a flip.
+  // ids, applicability is service-keyed and untouched by a flip.
   const flip = useMutation({
     // Result-valued fn (Task 2's seam): ok:false converts to a throw so the
-    // optimistic handlers below own rollback + the error toast — a flip has
+    // optimistic handlers below own rollback + the error toast, a flip has
     // no inline field slot in the table, so a conflict surfaces as its
     // message.
     mutationFn: async ({ row, isActive }: FlipInput) => {
@@ -231,17 +231,17 @@ export function AddonsScreen() {
 
   /**
    * The editor save: the entity full-object PUT first, then AQ-1's client
-   * fan-out — the junction is service-keyed (#137), so the applies-to save
+   * fan-out, the junction is service-keyed (#137), so the applies-to save
    * is `buildAddonMatrixDiff` over the PINNED services snapshot, one
    * full-replace PUT per AFFECTED service, SEQUENTIAL (the first `!ok`
-   * stops the loop). The diff empty = zero PUTs — an unchanged edit's
+   * stops the loop). The diff empty = zero PUTs, an unchanged edit's
    * matrix rides entirely on the entity PUT, and a create with an empty
    * selection fans out nothing. A matrix `!ok` does NOT undo the entity
    * write (nor the PUTs before the failure): the async Save handler keeps
-   * the editor open with the checks intact (AQ-5 — the retry's Save re-runs
+   * the editor open with the checks intact (AQ-5, the retry's Save re-runs
    * the whole chain; every PUT is a full-replace/idempotent) and switches a
    * create-mode editor over to edit-over-the-created-row, so the next Save
-   * re-runs as an UPDATE + fan-out — never a duplicate create. That mode
+   * re-runs as an UPDATE + fan-out, never a duplicate create. That mode
    * switch is the `matrix-failed` branch's promotion below.
    */
   const saveAddon = useMutation({
@@ -277,11 +277,11 @@ export function AddonsScreen() {
     },
   });
 
-  // Bulk flips: NOT optimistic — the sequential loop is the source of truth;
+  // Bulk flips: NOT optimistic, the sequential loop is the source of truth;
   // the invalidate refetches. SEQUENTIAL in list order over the selected rows
   // that still need the flip (deactivate → the ACTIVE selected; reactivate →
   // the INACTIVE selected); the first !ok stops the loop. The flip touches
-  // NO relations (applicability is service-keyed) — the addons list is the
+  // NO relations (applicability is service-keyed), the addons list is the
   // only cache to invalidate.
   const bulkFlip = useMutation({
     mutationFn: async ({ next }: { next: boolean }): Promise<BulkFlipOutcome> => {
@@ -376,8 +376,8 @@ export function AddonsScreen() {
 
   function openEdit(row: AddonService) {
     // The snapshot pins at open: the bare add-on read embeds no applicability
-    // ids, so the local appliesToServiceIds seeds from the services read —
-    // the services whose applicableAddonServiceIds include this row — and
+    // ids, so the local appliesToServiceIds seeds from the services read:
+    // the services whose applicableAddonServiceIds include this row, and
     // the save diffs against this same pinned array, never a re-read.
     const snapshot = services ?? [];
     setEditorState({
@@ -409,7 +409,7 @@ export function AddonsScreen() {
     try {
       const outcome = await saveAddon.mutateAsync(input);
       if (outcome.kind === 'saved') {
-        // The badges live on the services read — both lists invalidate.
+        // The badges live on the services read, both lists invalidate.
         queryClient.invalidateQueries({ queryKey: adminAddonQueries.all().queryKey });
         queryClient.invalidateQueries({ queryKey: adminStudioServiceQueries.all().queryKey });
         toast.success('Saved.');
@@ -418,10 +418,10 @@ export function AddonsScreen() {
       if (outcome.kind === 'matrix-failed') {
         // The entity write landed (and possibly earlier fan-out PUTs); the
         // failing matrix PUT did not. The sheet HOLDS with the checks
-        // intact — the retry's Save re-runs the chain. AQ-4's mode switch:
+        // intact, the retry's Save re-runs the chain. AQ-4's mode switch:
         // a create that already created promotes to edit-over-the-created-
         // row, so the retry is an UPDATE + fan-out, never a duplicate
-        // create. Both lists invalidate — the entity half is real either
+        // create. Both lists invalidate, the entity half is real either
         // way, and the PUTs before the failure may have landed too.
         setEditing(
           outcome.input.mode === 'create'
@@ -445,7 +445,7 @@ export function AddonsScreen() {
       return false;
     } catch (error) {
       // Bounded duplicate-POST window: a fast double-submit can fire the
-      // create twice — the second lands on the unique-name constraint and
+      // create twice, the second lands on the unique-name constraint and
       // surfaces as its 400 conflict message, never a duplicate row.
       toast.error(error instanceof Error ? error.message : 'The save failed.');
       return false;
@@ -532,7 +532,7 @@ export function AddonsScreen() {
                     <TableHead>Name</TableHead>
                     <TableHead className='text-right'>Price</TableHead>
                     <TableHead>Services</TableHead>
-                    {/* T2: the Actions header renders empty — the icons carry
+                    {/* T2: the Actions header renders empty, the icons carry
                       their own labels. */}
                     <TableHead className='text-right' />
                   </TableRow>
@@ -547,7 +547,7 @@ export function AddonsScreen() {
                     const expanded = expandedId === row.id;
                     return (
                       <Fragment key={row.id}>
-                        {/* N3: whole-row click toggles expansion — the actions
+                        {/* N3: whole-row click toggles expansion, the actions
                           cell stops propagation so icon clicks never toggle
                           (the checkbox cell stops it too, inside the shared
                           bulk piece); the chevron stays the keyboard/AT
@@ -581,7 +581,7 @@ export function AddonsScreen() {
                               </div>
                               {/* N2: the truncated line hides while expanded.
                                 A1: the line indents by the dot (size-2.5) +
-                                its gap-2 — 4.5 spacing steps — so the text
+                                its gap-2, 4.5 spacing steps, so the text
                                 aligns with the name above it. */}
                               {expanded ? null : (
                                 <div className='flex min-w-0 items-center pl-4.5'>
@@ -725,7 +725,7 @@ export function AddonsScreen() {
                 onCheckedChange={(checked) =>
                   setEditorState({
                     ...editorState,
-                    // Either flip discards the entry — ADR-0020's
+                    // Either flip discards the entry, ADR-0020's
                     // re-entry contract.
                     hasPrice: checked === true,
                     priceCents: Number.NaN,
@@ -747,7 +747,7 @@ export function AddonsScreen() {
                   onChange={(e) =>
                     setEditorState({
                       ...editorState,
-                      // '' maps to NaN (nothing entered) — never a silent 0.
+                      // '' maps to NaN (nothing entered), never a silent 0.
                       priceCents:
                         e.target.value === ''
                           ? Number.NaN
@@ -758,7 +758,7 @@ export function AddonsScreen() {
               </div>
             )}
             <FieldDescription>
-              {editorState.hasPrice ? 'Stored as centavos.' : 'No price — bookable on inquiry.'}
+              {editorState.hasPrice ? 'Stored as centavos.' : 'No price: bookable on inquiry.'}
             </FieldDescription>
             {fieldErrors.price ? (
               <p className='text-destructive text-xs'>{fieldErrors.price}</p>
@@ -777,15 +777,15 @@ export function AddonsScreen() {
 
           <section className='space-y-2'>
             <h3 className='text-sm font-medium'>Applies to services</h3>
-            {/* Ruled CHECKBOX matrix — ticket #140's override of the
+            {/* Ruled CHECKBOX matrix, ticket #140's override of the
                 prototype's name-only cards (AQ-8): one row per studio
                 service, checkbox + NAME ONLY (no price). The FULL services
                 vocabulary renders from the pinned snapshot, deactivated
                 included: a deactivated service dims to opacity-60 and STAYS
-                checkable (AQ-6 — the admin matrix is staff-visible truth;
+                checkable (AQ-6, the admin matrix is staff-visible truth;
                 the booking form filters). Checked reads the local
                 appliesToServiceIds list (seeded from the snapshot at open);
-                toggling REPLACES the array (click order) — never a push
+                toggling REPLACES the array (click order), never a push
                 into the aliased read row (Task 3's note). */}
             <div className='grid gap-2'>
               {editing.services.map((service) => {
@@ -844,7 +844,7 @@ export function AddonsScreen() {
         />
       ) : null}
 
-      {/* AQ-3 + #155: the bulk confirm reuses the pinned dialog — the name
+      {/* AQ-3 + #155: the bulk confirm reuses the pinned dialog, the name
           argument is the eligible-aware count (owner-ratified): the title
           reads `Deactivate 3 items?` when every selected row will flip, and
           `Deactivate 2 of 3 selected items?` when some are already inactive

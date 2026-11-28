@@ -24,9 +24,9 @@ export const Route = createFileRoute('/share-your-story')({
 
 // The public testimonial submission page (M7 #216): the #164 prototype
 // Round-4-ruled composition (owner-reacted 2026-10-01), ported onto
-// today's primitives — #224 upgrades the visual treatment, #217 the
+// today's primitives, #224 upgrades the visual treatment, #217 the
 // theme. Quote + person ONLY; the counter and maxLength read the API
-// schema's own numbers through FORM_BOUNDS (the spec's 600 bound — the
+// schema's own numbers through FORM_BOUNDS (the spec's 600 bound, the
 // prototype's 500 was a pre-spec stub); disabled-until-valid follows the
 // spec's min bounds; the hidden honeypot rides the payload verbatim; the
 // ruled success panel replaces the form on 201. The 429 line is the
@@ -59,7 +59,7 @@ function ShareYourStoryPage() {
       setSubmitted(true);
     } catch (error) {
       // 429 carries the ruled customer line in the parsed envelope
-      // (details.error — the client's .message is prefixed "API <status>:",
+      // (details.error, the client's .message is prefixed "API <status>:",
       // the booking seam's documented split at booking.ts:215). Everything
       // else (bounds race, network) is the generic catch-all.
       const details = (error as { details?: { error?: unknown } } | undefined)?.details;
@@ -84,7 +84,7 @@ function ShareYourStoryPage() {
       </p>
 
       {submitted ? (
-        // The ruled success panel (Round 4): the generic answer — the
+        // The ruled success panel (Round 4): the generic answer, the
         // customer cannot tell a stored submission from a honeypot
         // discard, which is exactly the posture.
         <div className='mt-10 flex flex-col items-start gap-4 rounded-xl border border-line-soft bg-card p-6 shadow-sm'>
@@ -143,7 +143,7 @@ function ShareYourStoryPage() {
               </p>
             ) : null}
           </div>
-          {/* Honeypot: invisible to humans, irresistible to bots — the
+          {/* Honeypot: invisible to humans, irresistible to bots, the
               API's silent discard is the real gate (a filled 'website'
               answers the success shape and never reaches the database). */}
           <div aria-hidden='true' className='absolute h-0 w-0 overflow-hidden opacity-0'>

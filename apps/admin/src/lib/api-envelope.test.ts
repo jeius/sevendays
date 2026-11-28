@@ -22,7 +22,7 @@ describe('envelopeDetails (#245)', () => {
     expect(envelopeDetails({ error: 'Non-JSON error response' })).toBeUndefined();
   });
 
-  it('yields undefined for non-object input (defensive — details? is optional on the wire)', () => {
+  it('yields undefined for non-object input (defensive, details? is optional on the wire)', () => {
     expect(envelopeDetails(undefined)).toBeUndefined();
     expect(envelopeDetails(null)).toBeUndefined();
     expect(envelopeDetails('nope')).toBeUndefined();
@@ -37,7 +37,7 @@ describe('envelopeDetails (#245)', () => {
     expect(conflictFieldErrors(envelopeDetails(conflictEnvelope))).toEqual({
       name: 'A studio service with this name already exists.',
     });
-    // The raw-envelope degradation this ticket retires — pinned so it cannot return:
+    // The raw-envelope degradation this ticket retires, pinned so it cannot return:
     expect(conflictFieldErrors(conflictEnvelope)).toEqual({});
   });
 });
