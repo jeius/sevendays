@@ -1,5 +1,5 @@
 // The manual refresh (#186; affordance per owner feedback at #187): one
-// button invalidating the ['metrics'] prefix — every widget refetches
+// button invalidating the ['metrics'] prefix, every widget refetches
 // (revalidate-on-focus is the passive path; this is the active one; there
 // is no polling). useIsFetching over the same prefix drives the
 // affordance: the icon spins while any metrics query is in flight and the
@@ -7,7 +7,7 @@
 // When the click's fetches settle, the cache is snapshotted onto
 // refreshOutcomeMessage: a thrown error or a resolved 'unavailable'
 // source raises a toast (the shared sonner Toaster is mounted in
-// __root); 'not-configured' stays inline-only. Success stays silent —
+// __root); 'not-configured' stays inline-only. Success stays silent:
 // the widgets are the feedback. All five metrics queries are mounted and
 // active, so invalidateQueries always starts refetches and the pending
 // flag can't linger.

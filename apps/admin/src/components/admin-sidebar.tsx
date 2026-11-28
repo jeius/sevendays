@@ -1,5 +1,5 @@
-// Admin-local Tier 2 (spec #94): the shell's sidebar — variant A's labeled
-// grouped nav (the taxonomy lives in #/lib/nav — the #59 ruling, extracted
+// Admin-local Tier 2 (spec #94): the shell's sidebar, variant A's labeled
+// grouped nav (the taxonomy lives in #/lib/nav, the #59 ruling, extracted
 // at #188 so the owner-visibility law is testable), collapsing to the
 // variant C icon-rail posture (tooltips + group dividers) via the top bar's
 // trigger. Brand = wordmark + primary only (the tool-neutral mapping);
@@ -53,7 +53,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
 
   // Sign-out (M4 spec § Login UI + shell gate): revoke the session through
   // BetterAuth's own endpoint (the row dies server-side), then land on
-  // /login — arriving signed-out at the shell would bounce there anyway;
+  // /login, arriving signed-out at the shell would bounce there anyway;
   // this makes the revocation visible and immediate.
   const onSignOut = async () => {
     await authClient.signOut();
@@ -66,11 +66,11 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   // the labeled posture separates groups by its labels + spacing.
   const rail = state === 'collapsed';
   const groups = visibleNavGroups(user.role);
-  // M7 #223: the brand block consumes site settings — the studio's name
+  // M7 #223: the brand block consumes site settings, the studio's name
   // and logo (when set) ride the sidebar; the SD monogram is the fallback.
-  // The "Admin" kicker stays fixed — it names the tool, not the brand.
-  // #322: both brand surfaces ride the brand-lockup seam (#/lib/brand-lockup)
-  // — the model AND the rail/fit vocabulary are pinned there.
+  // The "Admin" kicker stays fixed, it names the tool, not the brand.
+  // #322: both brand surfaces ride the brand-lockup seam (#/lib/brand-lockup):
+  // the model AND the rail/fit vocabulary are pinned there.
   const { data: rawSettings } = useQuery(siteSettingsQuery.all());
   const lockup = brandLockup(rawSettings);
 
@@ -116,7 +116,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                     {/* render-prop delegation (Base UI, not asChild): the Link
                         becomes the menu button. TanStack's Link owns
                         aria-current natively; the primitive's isActive owns
-                        styling — exactly one aria-current per screen (the
+                        styling, exactly one aria-current per screen (the
                         #59 dual-aria-current minor, fixed by construction). */}
                     <SidebarMenuButton
                       render={<Link to={item.to} />}
@@ -136,7 +136,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
       <SidebarFooter>
         {/* Identity from the gate's session fetch; sign-out inline (the
             owner-ruled Option 2: one click, no menu). In the collapsed icon
-            rail the row becomes a column — avatar above the logout button. */}
+            rail the row becomes a column, avatar above the logout button. */}
         <div className='flex items-center gap-3 px-2 py-1.5 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 group-data-[collapsible=icon]:px-0'>
           <span className='bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold'>
             {initials(user.name)}

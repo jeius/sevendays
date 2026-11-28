@@ -11,7 +11,7 @@ import { type AuditActor, writeAuditRow } from './audit.js';
 import { commitUpload, resolveMediaUrl } from './media.js';
 
 // The site-settings seam (M7 #215, spec § Settings made real): the
-// SINGLETON precedent — one row ever, born-empty (no row until the first
+// SINGLETON precedent, one row ever, born-empty (no row until the first
 // save), full-object PUT with no per-field patching. Unset fields stay
 // null on the wire; defaults live in packages/types and resolve at the
 // consumers (the chrome never renders broken). The raw logo key never
@@ -21,7 +21,7 @@ type SettingsEnv = Pick<Env, 'MEDIA_BUCKET' | 'MEDIA_PUBLIC_BASE_URL'>;
 
 /** The row → read resolution (the #214 toBranchRead precedent): strip the
  * row's id/timestamps + the raw key, resolve the logo URL. The read type
- * is exhaustive by construction — a missed field fails typecheck. */
+ * is exhaustive by construction, a missed field fails typecheck. */
 function toRead(row: typeof siteSettings.$inferSelect, env: SettingsEnv): SiteSettings {
   const { id: _id, logoImageKey, updatedAt: _updatedAt, ...content } = row;
   return { ...content, logoImageUrl: resolveMediaUrl(env, logoImageKey) };
@@ -29,7 +29,7 @@ function toRead(row: typeof siteSettings.$inferSelect, env: SettingsEnv): SiteSe
 
 /**
  * The public singleton read: the stored row, or the born-empty wire when
- * no row exists (every environment starts empty — live, compose, ship).
+ * no row exists (every environment starts empty, live, compose, ship).
  * Defaults NEVER ride the read; resolution is the consumers' seam
  * (resolveSiteSettings in packages/types).
  */
@@ -39,13 +39,13 @@ export async function getSiteSettings(db: Database, env: SettingsEnv): Promise<S
 }
 
 // The logo commit (the resolveCover/resolveBranchCover controller
-// ruling): HEAD-verify through commitUpload ONLY when a key is present —
+// ruling): HEAD-verify through commitUpload ONLY when a key is present:
 // the tri-state makes "changed" structural (stored keys are immutable
 // final keys, inputs are staging keys, and the staging-key regex rejects
 // final keys, so a present string is always a new bind). undefined =
 // unchanged, null = clear, string = bind/replace. A commit failure
 // re-paths its details onto the payload field and resolves as the
-// conflict failure (→ 400). Runs BEFORE the transaction — bucket I/O
+// conflict failure (→ 400). Runs BEFORE the transaction, bucket I/O
 // never holds a tx open.
 async function resolveLogo(
   env: SettingsEnv,
@@ -60,7 +60,7 @@ async function resolveLogo(
   });
   if (!commit.ok) {
     // M6 #183: the cover-commit seam's typed failure (see
-    // admin-packages's resolveCover — the route-level 'conflict' cannot
+    // admin-packages's resolveCover, the route-level 'conflict' cannot
     // name it).
     if (log) {
       logMediaFailure(log, { op: 'commit', reason: commit.reason });
@@ -80,11 +80,11 @@ async function resolveLogo(
 /**
  * The singleton full-object save: commit the logo (if any) → upsert the
  * one row in a transaction that also writes the audit row (create on the
- * first save, update after — the entity routers' semantics) → delete the
+ * first save, update after, the entity routers' semantics) → delete the
  * replaced/cleared logo's OLD object only after the commit (the #137
  * precedent: a rolled-back save never touches the bucket). The result is
  * the id-less write's (the order-PUT convention): the singleton save
- * structurally cannot answer not_found, so this is AdminCreateResult —
+ * structurally cannot answer not_found, so this is AdminCreateResult,
  * assignable wherever an AdminWriteResult is consumed.
  */
 export async function saveSiteSettings(

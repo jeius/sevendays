@@ -30,10 +30,10 @@ export const Route = createFileRoute('/packages/$slug')({
     return { meta: pageMetaFor(pkg?.name ?? null, pkg?.description ?? null, settings) };
   },
   component: PackageDetailPage,
-  // The ruled skeleton grammar (#164 Round 5): client navigations only —
+  // The ruled skeleton grammar (#164 Round 5): client navigations only;
   // first loads are server-rendered (the M5 freshness rule).
   pendingComponent: PackageDetailSkeleton,
-  // Unknown/inactive slug → the router's notFound() — the ROOT's global
+  // Unknown/inactive slug → the router's notFound(), the ROOT's global
   // NotFound answers (M7 #223; the route-level override is gone).
 });
 

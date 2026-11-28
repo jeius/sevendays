@@ -1,5 +1,5 @@
 // The testimonials screen (M5 #141): the person-main table over live
-// Testimonial rows — ported element-for-element from the composition of
+// Testimonial rows, ported element-for-element from the composition of
 // record (prototype/131-admin-cms-compositions, screens/testimonials.tsx,
 // rounds 2–5) onto the task seams. The prototype's local fixture state is
 // replaced by: `adminTestimonialQueries.all()` for the list; Task 4's state
@@ -7,13 +7,13 @@
 // `buildTestimonialPayload` / `buildTestimonialFlipPayload` /
 // `validateTestimonialState`) driving the create/edit Sheet editor and the
 // optimistic single flips; Task 3's result-valued save fns. No Position
-// column and no position field anywhere — array order is the display order,
+// column and no position field anywhere, array order is the display order,
 // owned by the order PUT that fires on drop (optimistic via
-// `reorderVisiblePhotos` — the #218 slot-swap law over the full global
-// order — + `buildTestimonialOrderPayload`; `!ok` → snapshot restore +
+// `reorderVisiblePhotos`, the #218 slot-swap law over the full global
+// order, + `buildTestimonialOrderPayload`; `!ok` → snapshot restore +
 // toast + invalidate, AR-9). Round-3 ruling: rows drag by the GripVertical
 // grip ONLY (activation lives on the handle; the row's clean click toggles
-// expansion), pinned to PointerSensor distance 4 — no TouchSensor long-press
+// expansion), pinned to PointerSensor distance 4, no TouchSensor long-press
 // (the grip's `touch-none` owns the scroll conflict).
 import {
   closestCenter,
@@ -107,7 +107,7 @@ interface FlipInput {
   isActive: boolean;
 }
 
-/** The pending posture's fixed four rows — stable keys, never reordered. */
+/** The pending posture's fixed four rows, stable keys, never reordered. */
 const PENDING_ROW_KEYS = ['row-1', 'row-2', 'row-3', 'row-4'];
 
 // Round-3 ruling: handle-only drag on the desktop table row. The grip
@@ -124,7 +124,7 @@ function SortableTestimonialRow({
 }: {
   id: string;
   // A2: while expanded the identity row's bottom border drops (the
-  // separator moves to the ExpandPanel's end) — ExpandRow owns that.
+  // separator moves to the ExpandPanel's end), ExpandRow owns that.
   expanded: boolean;
   children: ReactNode;
   onClick?: () => void;
@@ -222,14 +222,14 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
     isError,
     refetch,
   } = useQuery(adminTestimonialQueries.all());
-  // M9 #316: the ?focus= landing — scroll + highlight the matched row on
+  // M9 #316: the ?focus= landing, scroll + highlight the matched row on
   // the published tab (a focus-only URL defaults there by the #314 law).
   useFocusLanding(search.focus, testimonials !== undefined);
   const queryClient = useQueryClient();
-  // T3: controlled disclosure — one expanded row at a time (id or null).
+  // T3: controlled disclosure, one expanded row at a time (id or null).
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // The screen's two tabs (#218): the published list and the moderation
-  // queue — the queue is a stop on an existing screen, not a new place to
+  // queue, the queue is a stop on an existing screen, not a new place to
   // remember. M9 #314 amends the mechanism, not the ruling: the tab is
   // URL-driven (the audit-log precedent) so the Notification's `Open
   // Submissions` footer can aim at the queue; absent param = the published
@@ -242,16 +242,16 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
   // Deep-linkable in the prototype frame pass; here a plain selection.
   const [confirmId, setConfirmId] = useState<string | null>(null);
   // The toolbar segment (#218): default All per visit, never persisted; the
-  // filtered view is render-time only — the caches and mutations ride the
+  // filtered view is render-time only, the caches and mutations ride the
   // full list.
   const [segment, setSegment] = useState<StatusSegment>('all');
   // The delete dialog's target + its last blockers (empty until a blocked
-  // 400 answers — testimonials are blocked by nothing, but the wiring is
+  // 400 answers, testimonials are blocked by nothing, but the wiring is
   // the same everywhere).
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The editor's create/edit switch and its open flag are separate: the
-  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // async Save contract (#218) closes the shell ONLY on a resolved-true;
   // a held save (veto, failure) keeps the sheet open over the intact
   // parent-held state; onOpenChange(false) (Cancel, overlay, or the
   // post-success exit) clears both.
@@ -263,7 +263,7 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
   const quoteId = useId();
   const activeId = useId();
 
-  // Round-3 ruling: the package-editor's handle-only sensor posture —
+  // Round-3 ruling: the package-editor's handle-only sensor posture;
   // PointerSensor with a 4px distance constraint (activation lives on the
   // grip, so no touch long-press is needed; touch-none on the grip keeps
   // page scroll from fighting a grip drag), plus the keyboard sensor.
@@ -276,11 +276,11 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
   const deleteRow = testimonials?.find((row) => row.id === deleteId);
 
   // Single-row flips: optimistic on the list cache (cancel + snapshot + patch
-  // ONLY isActive; rollback + toast on error; invalidate either way) — the
+  // ONLY isActive; rollback + toast on error; invalidate either way), the
   // branches screen's posture.
   const flip = useMutation({
     // Result-valued fn (Task 2's seam): ok:false converts to a throw so the
-    // optimistic handlers below own rollback + the error toast — a flip has
+    // optimistic handlers below own rollback + the error toast, a flip has
     // no inline field slot in the table, so a failure surfaces as its
     // message.
     mutationFn: async ({ row, isActive }: FlipInput) => {
@@ -313,7 +313,7 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
     },
   });
 
-  // The order PUT on drop (AR-9): optimistic — `reorderVisiblePhotos`'s
+  // The order PUT on drop (AR-9): optimistic, `reorderVisiblePhotos`'s
   // slot-swap law over the full global order produces the reordered ROW
   // array; the cache array is REPLACE-d in that order (never a push into an
   // aliased read row); a failure restores the snapshot + toasts + invalidates.
@@ -350,11 +350,11 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
     },
   });
 
-  // Editor saves: NON-optimistic — the form state is the source of truth;
+  // Editor saves: NON-optimistic, the form state is the source of truth;
   // the async Save contract owns the flow: await the full-object PUT,
   // resolve true on ok (the shell closes), false on any hold (retry is
-  // safe — the save is a full-object PUT). No unique fields on this
-  // table, so no conflict mapping — every !ok surfaces as its message
+  // safe, the save is a full-object PUT). No unique fields on this
+  // table, so no conflict mapping, every !ok surfaces as its message
   // toast.
   const saveTestimonial = useMutation({
     mutationFn: async (input: SaveTestimonialInput) => {
@@ -417,7 +417,7 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
     if (errors.person || errors.quote) {
       setFieldErrors(errors);
       toast.error('Fix the highlighted fields.');
-      return false; // the async contract's hold — no throw, no remount
+      return false; // the async contract's hold, no throw, no remount
     }
     setFieldErrors({});
     try {
@@ -434,7 +434,7 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
       toast.error(result.message);
       return false;
     } catch (error) {
-      // Not an API failure (serialization, session loss) — loud toast, same hold.
+      // Not an API failure (serialization, session loss), loud toast, same hold.
       toast.error(error instanceof Error ? error.message : 'The save failed.');
       return false;
     }
@@ -558,14 +558,14 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
                 (A3). The TODO(token-ruling) radius step-down is flagged at
                 its ruling site in the pattern library, not re-declared. */}
               <TooltipProvider>
-                {/* #309: DndContext wraps the <Table>, not the <tbody> children —
+                {/* #309: DndContext wraps the <Table>, not the <tbody> children;
                     dnd-kit's Accessibility subtree (the display:none DndDescribedBy
                     instructions div and the live-region div) renders inline at the
                     context's React position post-mount (it renders null until
                     mounted, and no portal container is set). Inside <TableBody>
                     that landed two <div>s as <tbody> children: an invalid content
                     model React dev flags as a hydration-class warning. Context
-                    flows through the React tree regardless of DOM position — the
+                    flows through the React tree regardless of DOM position, the
                     rows' useSortable wiring is unchanged. The mobile stacked
                     DndContext below already wraps divs, so it stays. */}
                 <DndContext
@@ -576,10 +576,10 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
                   <Table className='@max-[700px]:hidden'>
                     <TableHeader>
                       <TableRow>
-                        {/* Drag-handle column (round-3 ruling) — no header label. */}
+                        {/* Drag-handle column (round-3 ruling), no header label. */}
                         <TableHead className='w-10' />
                         <TableHead>Person</TableHead>
-                        {/* T2: the Actions header renders empty — the icons carry
+                        {/* T2: the Actions header renders empty, the icons carry
                       their own labels. */}
                         <TableHead className='text-right' />
                       </TableRow>
@@ -620,10 +620,10 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
                                       />
                                     </div>
                                     {/* N2: the truncated quote hides while
-                                    expanded — the reveal carries the full
+                                    expanded, the reveal carries the full
                                     text. A1: the line indents by the dot
-                                    (size-2.5) + its gap-2 — 4.5 spacing
-                                    steps — so the text aligns with the
+                                    (size-2.5) + its gap-2, 4.5 spacing
+                                    steps, so the text aligns with the
                                     person above it. */}
                                     {expanded ? null : (
                                       <div className='flex min-w-0 items-center pl-4.5'>
@@ -665,7 +665,7 @@ export function TestimonialsScreen({ search }: { search: TestimonialsSearch }) {
 
               {/* Stacked posture (below 700px container width): the two-line
                 header toggles the animated reveal (M1); rows drag by the grip
-                (round-3 ruling). A second DndContext — the prototype's
+                (round-3 ruling). A second DndContext, the prototype's
                 posture: both lists render the same sortable ids, and one
                 context would register each id twice. */}
               <DndContext

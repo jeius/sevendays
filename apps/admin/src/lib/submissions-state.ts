@@ -1,8 +1,8 @@
 // The Submissions tab's pure seams (M7 #218 over #216's moderation
-// endpoints): the tab's own status segment (pending-first — the queue IS
+// endpoints): the tab's own status segment (pending-first, the queue IS
 // the work), the accept-with-edit state machine (prefill → validate on the
 // imported bounds → the trimmed payload), and the UTC-stable submitted-on
-// line. The bounds constants are imported from @sevendays/types — never
+// line. The bounds constants are imported from @sevendays/types, never
 // re-declared.
 import {
   type AcceptTestimonialSubmissionInput,
@@ -17,7 +17,7 @@ import { focusSearchParam } from './focus-landing';
 
 export type SubmissionSegment = 'pending' | 'accepted' | 'rejected' | 'all';
 
-/** Pending leads — the moderation queue's default view; All closes the row (audit-trail spotting). */
+/** Pending leads, the moderation queue's default view; All closes the row (audit-trail spotting). */
 export const SUBMISSION_SEGMENTS: ReadonlyArray<{ value: SubmissionSegment; label: string }> = [
   { value: 'pending', label: 'Pending' },
   { value: 'accepted', label: 'Accepted' },
@@ -35,7 +35,7 @@ export function filterSubmissions<T extends { status: TestimonialSubmission['sta
   return rows.filter((row) => row.status === segment);
 }
 
-/** The accept-with-edit sheet's field state — prefilled from the submission, edited in place. */
+/** The accept-with-edit sheet's field state, prefilled from the submission, edited in place. */
 export type AcceptEditState = { quote: string; person: string };
 
 export function acceptEditStateFromSubmission(row: TestimonialSubmission): AcceptEditState {
@@ -43,14 +43,14 @@ export function acceptEditStateFromSubmission(row: TestimonialSubmission): Accep
 }
 
 // The min-error copy is the landing form's pinned TODO(owner-copy) pair,
-// verbatim (#216) — one product, one line. The max lines are this tab's
-// TODO(owner-copy) proposals — ratify at the variants round.
+// verbatim (#216), one product, one line. The max lines are this tab's
+// TODO(owner-copy) proposals, ratify at the variants round.
 const QUOTE_MIN_ERROR = 'Tell us a little more: at least 20 characters.';
 const PERSON_MIN_ERROR = 'Your name needs at least 2 characters.';
 const QUOTE_MAX_ERROR = 'That’s a little long: at most 600 characters.';
 const PERSON_MAX_ERROR = 'That name is a little long: at most 80 characters.';
 
-/** Validates the TRIMMED text against the wire bounds (the API re-verifies — a staff edit that breaks a bound is a 400, never a silent trim). */
+/** Validates the TRIMMED text against the wire bounds (the API re-verifies, a staff edit that breaks a bound is a 400, never a silent trim). */
 export function validateAcceptEdit(state: AcceptEditState): {
   quote?: string;
   person?: string;
@@ -71,12 +71,12 @@ export function validateAcceptEdit(state: AcceptEditState): {
   return errors;
 }
 
-/** The accept payload always carries the trimmed pair — the sheet prefilled both, so both ride the request. */
+/** The accept payload always carries the trimmed pair, the sheet prefilled both, so both ride the request. */
 export function buildAcceptPayload(state: AcceptEditState): AcceptTestimonialSubmissionInput {
   return { quote: state.quote.trim(), person: state.person.trim() };
 }
 
-/** UTC-stable date line (fixed locale + timeZone — SSR/hydration-safe; pinned on full-ICU Node). */
+/** UTC-stable date line (fixed locale + timeZone, SSR/hydration-safe; pinned on full-ICU Node). */
 export function submittedOn(row: TestimonialSubmission): string {
   return row.createdAt.toLocaleDateString('en-PH', {
     timeZone: 'UTC',
@@ -87,13 +87,13 @@ export function submittedOn(row: TestimonialSubmission): string {
 }
 
 // The screen's two-tab deep link (M9 #314): the Notification panel's
-// `Open Submissions` footer lands on the queue — a tolerant optional
+// `Open Submissions` footer lands on the queue, a tolerant optional
 // param on the testimonials route (the audit-log precedent), absent =
 // the published list, exactly the pre-#314 default. #218's "local
 // state, no routes" ruling is amended in spirit only: still one screen,
-// no new route — the tab became the URL-driven segment so a link can
+// no new route, the tab became the URL-driven segment so a link can
 // aim at it. M9 #316: the ?focus= landing param joins the same schema
-// (the Global Search deep link's fourth surface — a focus-only visit
+// (the Global Search deep link's fourth surface, a focus-only visit
 // still defaults to the published list, where the focused row lives).
 export type TestimonialsTab = 'testimonials' | 'submissions';
 
@@ -104,7 +104,7 @@ export const testimonialsSearchSchema = z.object({
 
 export type TestimonialsSearch = z.infer<typeof testimonialsSearchSchema>;
 
-/** Absent (or garbage, dropped by the catch) → the published list — the pre-#314 default, unchanged. */
+/** Absent (or garbage, dropped by the catch) → the published list, the pre-#314 default, unchanged. */
 export function initialTab(search: TestimonialsSearch): TestimonialsTab {
   return search.tab === 'submissions' ? 'submissions' : 'testimonials';
 }

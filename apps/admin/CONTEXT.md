@@ -9,15 +9,15 @@ The content-management area of the admin site: Service Packages, Branch info (in
 _Avoid_: settings, config
 
 **Deactivate**:
-The catalog action of hiding a Service Package from the landing site while leaving existing Appointments untouched. Deliberately not "delete" — the package stays in the data model.
+The catalog action of hiding a Service Package from the landing site while leaving existing Appointments untouched. Deliberately not "delete", the package stays in the data model.
 _Avoid_: delete, remove, archive
 
 **Fulfillable**:
-An Appointment staff still need to act on — pending or confirmed, not yet completed, cancelled, or no-show. Deactivating a Service Package never changes an Appointment's fulfillability.
+An Appointment staff still need to act on, pending or confirmed, not yet completed, cancelled, or no-show. Deactivating a Service Package never changes an Appointment's fulfillability.
 _Avoid_: actionable, open
 
 **Delete**:
-The CMS action that permanently removes an entity and what it owns (a package's Frames and Inclusions, its cover image; a photo and its image) — offered only when nothing references the row; otherwise it reports what blocks and Deactivate is the path. The confirm dialog names the row and states that its images go with it. History-bearing rows retire by Deactivation, never Delete.
+The CMS action that permanently removes an entity and what it owns (a package's Frames and Inclusions, its cover image; a photo and its image), offered only when nothing references the row; otherwise it reports what blocks and Deactivate is the path. The confirm dialog names the row and states that its images go with it. History-bearing rows retire by Deactivation, never Delete.
 _Avoid_: hard delete, remove, purge
 
 **Unpriced**:
@@ -29,23 +29,23 @@ The appointment-management view: the list of Appointments filterable by Branch a
 _Avoid_: home, overview, analytics
 
 **Analytics Dashboard**:
-The admin's landing view at `/` (nav: Analytics, Overview group): the studio's aggregate operating pulse — audience traffic, system health, storage and media budget, content freshness — plus a Sentry link-out. Aggregate-only by rule (person-level data is owner-scoped); booking analytics never appear here (v2).
+The admin's landing view at `/` (nav: Analytics, Overview group): the studio's aggregate operating pulse, audience traffic, system health, storage and media budget, content freshness, plus a Sentry link-out. Aggregate-only by rule (person-level data is owner-scoped); booking analytics never appear here (v2).
 _Avoid_: dashboard, home, overview
 
 **Audit Log**:
-The owner-only screen presenting the CMS's durable who/what/when record (the Audit Log table, owned by the API's context) as a filterable, newest-first table. Person-level by nature — it names who acted — so it never joins the all-staff Analytics Dashboard.
+The owner-only screen presenting the CMS's durable who/what/when record (the Audit Log table, owned by the API's context) as a filterable, newest-first table. Person-level by nature, it names who acted, so it never joins the all-staff Analytics Dashboard.
 _Avoid_: activity feed, change history, changelog
 
 **Notification**:
-The top bar's derived view of pending work — the badge counts pending Testimonial Submissions and the panel lists those submissions themselves. No Notification row exists anywhere: the count is shared by all staff, and an item clears only by moderation.
+The top bar's derived view of pending work, the badge counts pending Testimonial Submissions and the panel lists those submissions themselves. No Notification row exists anywhere: the count is shared by all staff, and an item clears only by moderation.
 _Avoid_: inbox, alert, message
 
 **Global Search**:
-The top bar's inline search over the four CMS entities (packages, branches, testimonials, gallery) — the top-bar Input is the typing surface (⌘K/Ctrl+K focuses it) and results drop from it; client-side over the same cached lists the screens read, so a result can never disagree with the screen it lands on. A result lands on its entity's list screen with the row highlighted; it never opens an editor.
+The top bar's inline search over the four CMS entities (packages, branches, testimonials, gallery), the top-bar Input is the typing surface (⌘K/Ctrl+K focuses it) and results drop from it; client-side over the same cached lists the screens read, so a result can never disagree with the screen it lands on. A result lands on its entity's list screen with the row highlighted; it never opens an editor.
 _Avoid_: command palette (the losing anatomy), omnibar, quick find
 
 **Staff User**:
-A studio employee who signs in to the admin site with an email and password — there is no self-serve sign-up; the owner provisions users (Users Page; the CLI runbook is the bootstrap/break-glass path). Carries a role (ADR-0018): the owner holds `admin` — the only role BetterAuth's user-management endpoints answer to — staff hold `staff`.
+A studio employee who signs in to the admin site with an email and password, there is no self-serve sign-up; the owner provisions users (Users Page; the CLI runbook is the bootstrap/break-glass path). Carries a role (ADR-0018): the owner holds `admin`, the only role BetterAuth's user-management endpoints answer to, staff hold `staff`.
 _Avoid_: member, account (for the person), customer
 
 **Password Reset**:
@@ -53,21 +53,21 @@ Replacing a Staff User's password, by either channel: the owner sets a new one o
 _Avoid_: forgot-password (the screen's feature name, not the act), credential recovery
 
 **Users Page**:
-The owner-only tab of Settings where the studio owner manages Staff Users: list, create (hand-over temporary password plus the role choice), reset password, deactivate (BetterAuth's ban — which ends Sessions), revoke Sessions, and Delete. Your own row is view-only, and the last owner can't be deleted or deactivated — user management never locks itself out.
+The owner-only tab of Settings where the studio owner manages Staff Users: list, create (hand-over temporary password plus the role choice), reset password, deactivate (BetterAuth's ban, which ends Sessions), revoke Sessions, and Delete. Your own row is view-only, and the last owner can't be deleted or deactivated, user management never locks itself out.
 _Avoid_: accounts screen, admin panel
 
 **Site Settings**:
-The Settings tab holding the site-wide content the studio owns once: the Brand (logo mark, name, tagline) that both the admin and the landing render; the page titles and descriptions (Packages, Branches, Services, About), the Home hero, and the About story the landing serves; and the site-wide extras (announcement banner, footer social and contact links). Unset fields fall back to the built-in defaults — the chrome never renders broken.
+The Settings tab holding the site-wide content the studio owns once: the Brand (logo mark, name, tagline) that both the admin and the landing render; the page titles and descriptions (Packages, Branches, Services, About), the Home hero, and the About story the landing serves; and the site-wide extras (announcement banner, footer social and contact links). Unset fields fall back to the built-in defaults, the chrome never renders broken.
 _Avoid_: theme, configuration (when meaning content), preferences
 
 **Session**:
-A signed-in Staff User's server-side state — the row BetterAuth writes at sign-in and the API verifies from the forwarded bearer token on gated routes (ADR-0004). Ends at sign-out or expiry (~7 days).
+A signed-in Staff User's server-side state, the row BetterAuth writes at sign-in and the API verifies from the forwarded bearer token on gated routes (ADR-0004). Ends at sign-out or expiry (~7 days).
 _Avoid_: login (as a noun for the state), JWT, cookie (the API never sees cookies)
 
 **Warm Navigation**:
-Moving to an admin screen whose data the client already holds: the screen renders that data immediately, with a background refresh following. The latency contract's target case — warm navigation must feel instant. The bound: what's shown is at most the staleness bound (5 minutes) behind, and a staff member's own saves always invalidate immediately.
+Moving to an admin screen whose data the client already holds: the screen renders that data immediately, with a background refresh following. The latency contract's target case, warm navigation must feel instant. The bound: what's shown is at most the staleness bound (5 minutes) behind, and a staff member's own saves always invalidate immediately.
 _Avoid_: cached visit, prefetch (a mechanism that warms, not the state)
 
 **Cold Navigation**:
-Moving to an admin screen with nothing held — the first visit in a session. The one case where skeletons and loading indicators are acceptable; the latency work shrinks this wait but never promises to eliminate it.
+Moving to an admin screen with nothing held, the first visit in a session. The one case where skeletons and loading indicators are acceptable; the latency work shrinks this wait but never promises to eliminate it.
 _Avoid_: slow path (unwarmed, not necessarily slow)

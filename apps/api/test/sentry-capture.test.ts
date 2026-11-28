@@ -8,7 +8,7 @@ const url = process.env.TEST_DATABASE_URL as string;
 // The stubbed-client contract (M6 #184, AC 4): what the worker entry's
 // withSentry registration receives, asserted at the seams the AC names. The
 // 5xx + curated-503 captures ride the root onError; 4xx reaches it never
-// (validated* helpers and requireSession return, they do not throw) — and
+// (validated* helpers and requireSession return, they do not throw), and
 // the no-op default is the deployed posture before the owner sets SENTRY_DSN.
 afterEach(() => {
   resetErrorCapture();
@@ -19,7 +19,7 @@ describe('Sentry capture at the onError seam (M6 #184)', () => {
   it('captures the thrown error on a forced 5xx', async () => {
     const captured: unknown[] = [];
     setErrorCapture((error) => captured.push(error));
-    // Same forced 5xx as error-seam.test.ts: full env + a refused port —
+    // Same forced 5xx as error-seam.test.ts: full env + a refused port;
     // the handler's query throws, drizzle wraps it as DrizzleQueryError.
     const res = await app.request('/api/v1/branches', undefined, {
       ...testEnv(url),
@@ -31,7 +31,7 @@ describe('Sentry capture at the onError seam (M6 #184)', () => {
     expect((captured[0] as Error).message).toMatch(/Failed query/);
   });
 
-  it('captures nothing by default — the no-op-before-registration posture', async () => {
+  it('captures nothing by default, the no-op-before-registration posture', async () => {
     // No setErrorCapture call: the default capture is a no-op, so the same
     // 500 runs clean without a registered client (a deploy without
     // SENTRY_DSN, or any test that never injected a stub).

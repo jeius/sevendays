@@ -1,8 +1,8 @@
 // The metrics env reader's contract (#186, extended at #187): tolerance.
-// An unset source yields null for that source — the curated
-// not-configured widget state — never a thrown env error. The spec-pinned
+// An unset source yields null for that source, the curated
+// not-configured widget state, never a thrown env error. The spec-pinned
 // tokens plus the deployment-identity vars (#186's script trio; #187's
-// bucket + landing-hosts + region host — owner-reviewable at PR, the
+// bucket + landing-hosts + region host, owner-reviewable at PR, the
 // CF_ANALYTICS_SCRIPT_* precedent).
 import { describe, expect, it } from 'vitest';
 import { readMetricsEnv } from './env';
@@ -57,7 +57,7 @@ describe('readMetricsEnv', () => {
     expect(readMetricsEnv({ ...FULL, CF_ANALYTICS_SCRIPT_LANDING: '  ' }).cf).toBeNull();
   });
 
-  it('a missing bucket nulls the R2 group alone — the workers widgets stay live', () => {
+  it('a missing bucket nulls the R2 group alone, the workers widgets stay live', () => {
     const env = readMetricsEnv({ ...FULL, CF_ANALYTICS_BUCKET: undefined });
     expect(env.r2).toBeNull();
     expect(env.cf).not.toBeNull();

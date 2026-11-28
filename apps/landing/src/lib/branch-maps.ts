@@ -1,7 +1,7 @@
 import type { BranchRead } from '@sevendays/types';
 
-// DORMANT since #273 — kept for possible future revival:
-// The branch Maps pin (#248): the canonical universal Maps URL — a plain
+// DORMANT since #273, kept for possible future revival:
+// The branch Maps pin (#248): the canonical universal Maps URL, a plain
 // query (lat,lng), no API key. null = no coordinates on the row → the card
 // renders no button. Bounds/precision are already enforced at the wire
 // schema (packages/types), so the interpolation is URL-safe by contract.

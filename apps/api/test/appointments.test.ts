@@ -23,14 +23,14 @@ const url = process.env.TEST_DATABASE_URL as string;
 const db = createTestDb(url);
 let ids: FixtureIds;
 
-// M2 ticket 09 — the confirmation email's send seam. The Resend SDK is
+// M2 ticket 09, the confirmation email's send seam. The Resend SDK is
 // mocked at the module boundary: these tests prove the wire contract
 // (payload + idempotency key) and the waitUntil mechanics over real
 // Postgres; the builder's copy rules are the pure unit suite's job
 // (src/services/confirmation-email.test.ts).
 const { sendMock } = vi.hoisted(() => ({ sendMock: vi.fn() }));
 vi.mock('resend', () => ({
-  // `new Resend(...)` at the call site — vitest 4 rejects `new` on a vi.fn
+  // `new Resend(...)` at the call site, vitest 4 rejects `new` on a vi.fn
   // whose implementation is an arrow; the named `function` impl returning
   // the mock instance is the constructor-shaped equivalent. (Named, so the
   // style fixer doesn't rewrite it back to an arrow.)
@@ -40,7 +40,7 @@ vi.mock('resend', () => ({
 }));
 
 // Hono throws on c.executionCtx unless the request carries an execution
-// context (app.request's 4th argument) — the fake records waitUntil
+// context (app.request's 4th argument), the fake records waitUntil
 // promises so a test can await the fire-and-forget send.
 function fakeExecCtx() {
   const ctx = {
@@ -63,7 +63,7 @@ const FUTURE_ISO = () => futureDate().toISOString();
 
 // The list is session-gated (M4 ticket 04): every list read goes through a
 // real BetterAuth session minted by the test issuer (helpers/auth.ts). The
-// session is minted per call — AFTER beforeEach's truncateAll wiped the
+// session is minted per call, AFTER beforeEach's truncateAll wiped the
 // auth tables; a cached token would die with the truncate.
 const authedListHeaders = async () => ({
   authorization: `Bearer ${(await signUpSession(url, 'list-reader@sevendays.test')).token}`,
@@ -329,7 +329,7 @@ describe('GET /api/v1/appointments/:id', () => {
     expect(body.bookedPriceCents).toBe(150000);
     // Set-assert the entries: intake writes both junction rows in ONE insert,
     // so their createdAt ties and the stitch's orderBy gives no order
-    // guarantee between them — the SHAPE is what's pinned, not entry order.
+    // guarantee between them, the SHAPE is what's pinned, not entry order.
     expect(body.addonServices).toHaveLength(2);
     const byId = new Map(
       (body.addonServices as { addonServiceId: string; name: string; priceCents: number }[]).map(
@@ -362,7 +362,7 @@ describe('GET /api/v1/appointments/:id', () => {
     expect(body.error.length).toBeGreaterThan(0);
   });
 
-  it('stays public without a session (uuid-opacity ruling — M4 ticket 04)', async () => {
+  it('stays public without a session (uuid-opacity ruling, M4 ticket 04)', async () => {
     const created = (await createViaApi(payload())) as { id: string };
     const res = await app.request(`/api/v1/appointments/${created.id}`, undefined, testEnv(url));
     expect(res.status).toBe(200);
@@ -386,7 +386,7 @@ describe('GET /api/v1/appointments/:id', () => {
   });
 });
 
-// Seam 1 of the intake spec — the module's interface is the only place
+// Seam 1 of the intake spec, the module's interface is the only place
 // intake behavior is proven: rejection failures carry the module-owned
 // message, and the happy path commits record + junction rows in one
 // transaction. Complements the HTTP-level tests above (route = one call to
@@ -458,7 +458,7 @@ describe('appointments offering CHECK (db-level)', () => {
   });
 
   // Drizzle wraps driver errors: the PG message (with the CHECK name) sits
-  // on err.cause — unwrap before matching the constraint name.
+  // on err.cause, unwrap before matching the constraint name.
   const constraintError = async (promise: Promise<unknown>) => {
     try {
       await promise;
@@ -490,11 +490,11 @@ describe('appointments offering CHECK (db-level)', () => {
   });
 });
 
-// M2 ticket 03 — the service path at the module seam: same failure-variant
+// M2 ticket 03, the service path at the module seam: same failure-variant
 // contract as the package path, plus the floor (mocked clock, never a
 // public export). Complements the HTTP-level tests below (route = one
 // call to badRequest with result.message).
-describe('createAppointment module seam — service path + floor (ticket 03)', () => {
+describe('createAppointment module seam, service path + floor (ticket 03)', () => {
   const moduleInput = (overrides: Record<string, unknown> = {}) =>
     createAppointmentSchema.parse(
       payload({
@@ -553,7 +553,7 @@ describe('createAppointment module seam — service path + floor (ticket 03)', (
     vi.useFakeTimers({ toFake: ['Date'] });
     try {
       vi.setSystemTime(new Date('2026-09-10T00:00:00.000Z'));
-      // Typed rejections RESOLVE { ok: false } — never throw (the module's
+      // Typed rejections RESOLVE { ok: false }, never throw (the module's
       // failure-variant contract, same as the five package-path reasons).
       await expect(
         createAppointment(db, moduleInput({ scheduledAt: '2026-09-10T00:00:00.000Z' }))
@@ -584,10 +584,10 @@ describe('createAppointment module seam — service path + floor (ticket 03)', (
   });
 });
 
-// M2 ticket 03 — the service path through the HTTP seam. The thin route is
+// M2 ticket 03, the service path through the HTTP seam. The thin route is
 // already the forwarding layer (badRequest(c, result.message)); these pin
 // the 201 record and the module-owned wordings arriving verbatim.
-describe('POST /api/v1/appointments — service path (ticket 03)', () => {
+describe('POST /api/v1/appointments, service path (ticket 03)', () => {
   const servicePayload = (overrides: Record<string, unknown> = {}) => ({
     branchId: ids.branchA,
     servicePackageId: null,
@@ -685,13 +685,13 @@ describe('POST /api/v1/appointments — service path (ticket 03)', () => {
   });
 });
 
-// M2 ticket 09 — the confirmation email at the HTTP seam: scheduled through
+// M2 ticket 09, the confirmation email at the HTTP seam: scheduled through
 // the request's execution context AFTER the commit, never blocking the
 // response, never failing the booking. Fixture facts asserted here come
 // from loadFixtures(): branch 'Test Branch A', package 'Combined Package',
-// add-on 'Makeup' — the send resolves the two names from the db AT SEND
+// add-on 'Makeup', the send resolves the two names from the db AT SEND
 // TIME (inside waitUntil), which is what these assertions prove.
-describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
+describe('POST /api/v1/appointments, confirmation email (ticket 09)', () => {
   afterEach(() => {
     resetErrorCapture();
     vi.restoreAllMocks();
@@ -715,7 +715,7 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
     expect(res.status).toBe(201);
     const created = await res.json();
 
-    // The send's db reads need real I/O turns — the SDK call cannot have
+    // The send's db reads need real I/O turns, the SDK call cannot have
     // happened by response time (fire-and-forget, not awaited inline).
     expect(sendMock).not.toHaveBeenCalled();
     await Promise.all(ctx.promises);
@@ -751,12 +751,12 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
     expect(sendMock).toHaveBeenCalledTimes(1);
   });
 
-  it('a typed Resend failure never fails the booking — the failed email event with the classified code, 201 stands', async () => {
+  it('a typed Resend failure never fails the booking, the failed email event with the classified code, 201 stands', async () => {
     const lines: string[] = [];
     vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
       lines.push(String(args[0]));
     });
-    // The SDK's REAL failure shape: it resolves { data: null, error } — it
+    // The SDK's REAL failure shape: it resolves { data: null, error }, it
     // does not throw (resend@6 Response contract).
     sendMock.mockResolvedValue({
       data: null,
@@ -778,19 +778,19 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
     expect(failed[0]?.requestId).toBe(res.headers.get('x-request-id'));
   });
 
-  it('a typed Resend failure is captured at the send seam (M6 #184) — the original error, recipient-free; a successful send is not captured', async () => {
+  it('a typed Resend failure is captured at the send seam (M6 #184), the original error, recipient-free; a successful send is not captured', async () => {
     const captured: unknown[] = [];
     setErrorCapture((error) => captured.push(error));
-    // Success leg first: the beforeEach default sendMock resolves ok — a
+    // Success leg first: the beforeEach default sendMock resolves ok, a
     // completed booking must never reach Sentry (failures only).
     const okCtx = fakeExecCtx();
     expect((await postBooking(okCtx)).status).toBe(201);
     await Promise.all(okCtx.promises);
     expect(captured).toHaveLength(0);
-    // Failure leg: the SDK's real shape — it resolves { data: null, error },
+    // Failure leg: the SDK's real shape, it resolves { data: null, error },
     // and the send seam reifies it as ResendRejectionError. #208: the free
     // text now ECHOES THE RECIPIENT (resend's real failure messages can),
-    // so the PII floor below actually discriminates — the #184 floor was
+    // so the PII floor below actually discriminates, the #184 floor was
     // weak because a PII-free mock message could never fail it.
     sendMock.mockResolvedValue({
       data: null,
@@ -802,19 +802,19 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
     });
     const failCtx = fakeExecCtx();
     const res = await postBooking(failCtx);
-    expect(res.status).toBe(201); // booking stands — capture rides the catch
+    expect(res.status).toBe(201); // booking stands, capture rides the catch
     await Promise.all(failCtx.promises);
     expect(captured).toHaveLength(1);
     expect(captured[0]).toBeInstanceOf(ResendRejectionError);
     expect((captured[0] as ResendRejectionError).rejectionName).toBe('internal_server_error');
     // PII floor, now discriminating: the captured message is the CLASSIFIED
-    // line (built from the rejection name alone) — resend's recipient-
+    // line (built from the rejection name alone), resend's recipient-
     // echoing free text never rides the capture.
     expect((captured[0] as Error).message).toBe('resend rejected the send (internal_server_error)');
     expect((captured[0] as Error).message).not.toContain('ana@example.com');
   });
 
-  it('a thrown send failure never fails the booking either — code send_failed, 201 stands', async () => {
+  it('a thrown send failure never fails the booking either, code send_failed, 201 stands', async () => {
     const lines: string[] = [];
     vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
       lines.push(String(args[0]));
@@ -843,7 +843,7 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
     await Promise.all(ctx.promises);
     const parsed = lines.map((line) => JSON.parse(line) as Record<string, unknown>);
     const emailLines = parsed.filter((line) => line.evt === 'email');
-    expect(emailLines).toHaveLength(2); // attempt, then sent — nothing else
+    expect(emailLines).toHaveLength(2); // attempt, then sent, nothing else
     expect(emailLines[0]).toMatchObject({ phase: 'attempt', appointmentId: created.id });
     expect(emailLines[1]).toMatchObject({ phase: 'sent', appointmentId: created.id });
     const requestId = res.headers.get('x-request-id');
@@ -919,10 +919,10 @@ describe('POST /api/v1/appointments — confirmation email (ticket 09)', () => {
 describe('unpriced bookings (ADR-0020)', () => {
   // The CMS checkbox is the UI path; these pin the wire contract: null is
   // the unpriced state end to end, and priced snapshots never rewrite.
-  // Catalog prices are nulled with direct db updates — the row-level truth,
+  // Catalog prices are nulled with direct db updates, the row-level truth,
   // not another API call.
 
-  it('books an unpriced package — 201, null offering snapshot, priced add-on lines retained', async () => {
+  it('books an unpriced package, 201, null offering snapshot, priced add-on lines retained', async () => {
     await db
       .update(servicePackagesTable)
       .set({ priceCents: null })
@@ -937,7 +937,7 @@ describe('unpriced bookings (ADR-0020)', () => {
     ]);
   });
 
-  it('books an unpriced studio service — 201, null snapshot (both offering paths unpriced-able)', async () => {
+  it('books an unpriced studio service, 201, null snapshot (both offering paths unpriced-able)', async () => {
     await db
       .update(studioServicesTable)
       .set({ priceCents: null })

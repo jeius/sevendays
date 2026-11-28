@@ -5,14 +5,14 @@ import { peso } from '../lib/format';
 import { CoverPanel } from './cover-panel';
 import { inclusionPhrase } from './inclusions-list';
 
-// The featured strip, OWNER-RULED D2 "light split plate" (#164 Round 2 —
+// The featured strip, OWNER-RULED D2 "light split plate" (#164 Round 2,
 // "I think I'll go with D2"): the cover is 60% of the plate at natural
-// quality (no overlay touches it — the CoverPanel law renders the ink→petrol
+// quality (no overlay touches it, the CoverPanel law renders the ink→petrol
 // placeholder when a row has no cover), the light panel carries serif
-// name, mono peso (nothing when unpriced — the #163 law), a subline, and
+// name, mono peso (nothing when unpriced, the #163 law), a subline, and
 // dotted inclusion lines; short PRIMARY ticks separate the plates. The
 // losing variants (rate card, editorial index, plate+lineup, ink panel,
-// the retired parallax) stay on the prototype branch — nothing merges.
+// the retired parallax) stay on the prototype branch, nothing merges.
 
 function subline(p: ServicePackageRead): string {
   const mins = p.durationMinutes;
@@ -73,7 +73,7 @@ export function FeaturedPlates({
                   <h3 className='font-semibold font-serif text-2xl text-brand-ink dark:text-foreground'>
                     {p.name}
                   </h3>
-                  {/* The unpriced law: peso(null) renders nothing — no
+                  {/* The unpriced law: peso(null) renders nothing, no
                       placeholder, no inquire line, the panel reflows. */}
                   <p className='font-mono text-brand-700 text-sm dark:text-brand-300'>
                     {peso(p.priceCents)}

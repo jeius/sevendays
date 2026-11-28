@@ -1,7 +1,7 @@
 // The reset-email forward seam (M7 #221, ADR-0021): BetterAuth's
 // sendResetPassword on the admin Worker forwards { to, url, name } over the
 // API service binding to Task 1's internal endpoint. The seam NEVER throws
-// (anti-enumeration: a 500 from the auth route leaks account existence) —
+// (anti-enumeration: a 500 from the auth route leaks account existence):
 // every failure resolves { sent: false } and the caller logs. The mocked
 // boundary is the deps.fetch the seam actually calls.
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -19,7 +19,7 @@ const deps = (fetchImpl: typeof fetch) => ({
   token: 'shared-secret-token',
 });
 
-describe('sendResetEmailOverApi (M7 #221 — the never-throwing forward seam)', () => {
+describe('sendResetEmailOverApi (M7 #221, the never-throwing forward seam)', () => {
   it('POSTs the pinned URL with the shared-secret header and the exact body', async () => {
     const fetchImpl = vi.fn(
       async () => new Response(JSON.stringify({ status: true }), { status: 200 })
@@ -37,7 +37,7 @@ describe('sendResetEmailOverApi (M7 #221 — the never-throwing forward seam)', 
     });
   });
 
-  it('resolves { sent: false, status } on the guarded failures (401) — never throws', async () => {
+  it('resolves { sent: false, status } on the guarded failures (401), never throws', async () => {
     const fetchImpl = vi.fn(
       async () => new Response(JSON.stringify({ error: 'Unauthorized.' }), { status: 401 })
     );
@@ -45,7 +45,7 @@ describe('sendResetEmailOverApi (M7 #221 — the never-throwing forward seam)', 
     expect(result).toEqual({ sent: false, status: 401 });
   });
 
-  it('resolves { sent: false } when fetch itself rejects (binding down) — never throws', async () => {
+  it('resolves { sent: false } when fetch itself rejects (binding down), never throws', async () => {
     const fetchImpl = vi.fn(async () => {
       throw new Error('binding unavailable');
     });
@@ -54,7 +54,7 @@ describe('sendResetEmailOverApi (M7 #221 — the never-throwing forward seam)', 
   });
 });
 
-describe('makeSendResetPassword (M7 #221 — the BetterAuth callback wrapper)', () => {
+describe('makeSendResetPassword (M7 #221, the BetterAuth callback wrapper)', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });

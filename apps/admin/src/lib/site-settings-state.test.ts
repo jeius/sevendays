@@ -91,7 +91,7 @@ describe('validateSiteSettingsState (the client-side pre-flight, mirroring the s
     expect(bad.socialInstagram).toBe('Enter a full URL (https://…).');
     expect(bad.contactEmail).toBe('Enter a valid email address.');
     expect(seam.validateSiteSettingsState(state)).toEqual({});
-    // Empty values are unset, not invalid — no errors for blanks.
+    // Empty values are unset, not invalid, no errors for blanks.
     expect(
       seam.validateSiteSettingsState({ ...state, socialInstagram: '', contactEmail: '' })
     ).toEqual({});

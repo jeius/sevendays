@@ -21,7 +21,7 @@ export const branchQueries = {
 };
 
 export const siteSettingsQueries = {
-  /** The singleton's resolved read (M7 #223) — the chrome's copy source. */
+  /** The singleton's resolved read (M7 #223), the chrome's copy source. */
   all: () =>
     queryOptions({
       queryKey: ['site-settings'],
@@ -67,7 +67,7 @@ export const addonServiceQueries = {
 
 export const galleryQueries = {
   /**
-   * The assembled public gallery read (#138). Default staleTime — every
+   * The assembled public gallery read (#138). Default staleTime, every
    * fresh page load re-reads through the loader's ensureQueryData (the M5
    * "immediately" rule: freshness is a fresh-page-load property; no cache
    * layer). Tab filtering is client state over this single payload.
@@ -91,11 +91,11 @@ export const testimonialQueries = {
 
 export const appointmentQueries = {
   /**
-   * Confirmation read-back (ticket 08). Posture per the spec residual —
+   * Confirmation read-back (ticket 08). Posture per the spec residual;
    * no special cache posture: the default staleTime keeps every visit a
    * fresh server-function read; `retry: false` only stops the default
    * retry loop from re-firing the deterministic 404 an unknown id
-   * produces (retry is not caching — nothing here outlives the visit).
+   * produces (retry is not caching, nothing here outlives the visit).
    */
   byId: (id: string) =>
     queryOptions({

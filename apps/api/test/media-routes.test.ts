@@ -55,7 +55,7 @@ function stubImages(marker = 'WEBP-MARKER-BYTES') {
 }
 
 // Stub R2 bucket for the thumb legs: get returns metadata + a one-chunk body
-// (the service reads .size and streams .body — exactly what R2ObjectBody gives).
+// (the service reads .size and streams .body, exactly what R2ObjectBody gives).
 // contentType: undefined keeps the historical 'image/jpeg' default for the
 // existing tests; a distinct string proves flow-through; null models an
 // object stored with NO contentType (the service's ?? octet-stream branch).
@@ -108,7 +108,7 @@ describe('POST /api/v1/admin/media/presign', () => {
     expect(await res.json()).toEqual({ error: 'Authentication required.' });
   });
 
-  it('answers 401 — never the validator 400 — for an anonymous caller with an INVALID body (the M4 ordering)', async () => {
+  it('answers 401, never the validator 400, for an anonymous caller with an INVALID body (the M4 ordering)', async () => {
     const res = await app.request(
       '/api/v1/admin/media/presign',
       {
@@ -144,7 +144,7 @@ describe('POST /api/v1/admin/media/presign', () => {
     expect(detail.path).toEqual(['contentType']);
   });
 
-  it('mints { key, uploadUrl } for an authed caller — key staging-shaped, URL type-signed on the account S3 host', async () => {
+  it('mints { key, uploadUrl } for an authed caller, key staging-shaped, URL type-signed on the account S3 host', async () => {
     const { token } = await signUpSession(url, 'presign-happy@sevendays.test');
     const res = await app.request(
       '/api/v1/admin/media/presign',
@@ -207,7 +207,7 @@ describe('POST /api/v1/admin/media/presign', () => {
     expect(errors[0]?.name).toBe('MissingR2CredentialsError');
   });
 
-  it('the curated 503 is captured at the onError seam (M6 #184) — MissingR2CredentialsError reaches Sentry', async () => {
+  it('the curated 503 is captured at the onError seam (M6 #184), MissingR2CredentialsError reaches Sentry', async () => {
     const captured: unknown[] = [];
     setErrorCapture((error) => captured.push(error));
     const { token } = await signUpSession(url, 'presign-sentry@sevendays.test');
@@ -224,11 +224,11 @@ describe('POST /api/v1/admin/media/presign', () => {
     expect(captured).toHaveLength(1);
     expect(captured[0]).toBeInstanceOf(MissingR2CredentialsError);
     // The loud detail rides the capture (Sentry is the loud channel; the
-    // 503 line the guest sees stays curated — the leak-safe split).
+    // 503 line the guest sees stays curated, the leak-safe split).
     expect((captured[0] as Error).message).toContain('R2_S3_ACCESS_KEY_ID');
   });
 
-  it('a successful presign stays QUIET — no media event at all (the highest-frequency admin call)', async () => {
+  it('a successful presign stays QUIET, no media event at all (the highest-frequency admin call)', async () => {
     const lines: string[] = [];
     vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
       lines.push(String(args[0]));
@@ -330,7 +330,7 @@ describe('GET /api/v1/admin/gallery-photos/:id/thumb', () => {
     expect(await res.json()).toEqual({ error: 'Photo not found.' });
   });
 
-  it('serves the transformed variant — width-capped webp from the Images binding (≤20 MB input)', async () => {
+  it('serves the transformed variant, width-capped webp from the Images binding (≤20 MB input)', async () => {
     const { token } = await signUpSession(url, 'thumb-webp@sevendays.test');
     const row = await insertPhoto('gallery/00000000-0000-4000-8000-000000000000.jpg');
     const bucket = stubMediaBucket({ size: 5 * 1024 * 1024 });
@@ -359,7 +359,7 @@ describe('GET /api/v1/admin/gallery-photos/:id/thumb', () => {
     expect(outputCall.output).toEqual({ format: 'image/webp' });
   });
 
-  it('falls back to the original bytes over 20 MB — the Images binding is never invoked', async () => {
+  it('falls back to the original bytes over 20 MB, the Images binding is never invoked', async () => {
     const { token } = await signUpSession(url, 'thumb-fallback@sevendays.test');
     const row = await insertPhoto('covers/00000000-0000-4000-8000-000000000000.jpg');
     const bucket = stubMediaBucket({ size: 20 * 1024 * 1024 + 1, body: 'HUGE-ORIGINAL' });
@@ -375,7 +375,7 @@ describe('GET /api/v1/admin/gallery-photos/:id/thumb', () => {
     expect(images.calls).toEqual([]);
   });
 
-  it('the over-20 MB fallback serves the STORED content type — a marker value proves flow-through, not a constant', async () => {
+  it('the over-20 MB fallback serves the STORED content type, a marker value proves flow-through, not a constant', async () => {
     // #136 T5 minor: the stub's hardcoded image/jpeg made the existing
     // fallback assert indistinguishable from a hardcoded constant; a stored
     // marker type must arrive in the response headers verbatim.
@@ -418,10 +418,10 @@ describe('GET /api/v1/admin/gallery-photos/:id/thumb', () => {
     expect(images.calls).toEqual([]);
   });
 
-  it('answers 401 — never the param 400 — for an anonymous caller with a NON-UUID id (gate-before-param proof)', async () => {
+  it('answers 401, never the param 400, for an anonymous caller with a NON-UUID id (gate-before-param proof)', async () => {
     // #136 T5 minor: the existing anonymous-401 test sends a valid uuid, so
     // the param validator's position was proven only structurally. A
-    // non-uuid id would fail validatedParam IF it ran — a 401 here proves
+    // non-uuid id would fail validatedParam IF it ran, a 401 here proves
     // the session gate short-circuits first (the presign mirror's ordering).
     const res = await app.request(
       '/api/v1/admin/gallery-photos/not-a-uuid/thumb',

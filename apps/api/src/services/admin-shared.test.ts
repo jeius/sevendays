@@ -92,7 +92,7 @@ describe('AdminSaveError', () => {
     expect(error.failure.reason).toBe('conflict');
   });
 
-  it('is thrown (not returned) — the transaction-rollback channel', async () => {
+  it('is thrown (not returned), the transaction-rollback channel', async () => {
     await expect(
       (async () => {
         throw new AdminSaveError(invalidRefs('bad', []));

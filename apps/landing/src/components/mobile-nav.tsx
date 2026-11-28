@@ -11,14 +11,14 @@ import { CalendarPlus, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import type { NAV_LINKS } from '../lib/nav';
 
-// Mobile chrome — panel B treatment (#111 ruled) wearing #164's ruled
+// Mobile chrome, panel B treatment (#111 ruled) wearing #164's ruled
 // animation, rebuilt on Base UI's NATIVE transition contract (the Round-6
 // fix: the library stamps data-open / data-closed / data-starting-style on
-// the panel and keeps it mounted through the exit transition itself —
+// the panel and keeps it mounted through the exit transition itself;
 // .nav-panel in styles.css styles those states; custom mount/unmount state
 // classes fought the library and lost). The trigger rotates 90° through
 // the Menu/X morph; reduced motion = instant; the panel unmounts when
-// closed again — no a11y residue. CTA law: Book now carries CalendarPlus.
+// closed again, no a11y residue. CTA law: Book now carries CalendarPlus.
 // Hidden at md+ where the desktop nav lives.
 export function MobileNav({ links }: { links: typeof NAV_LINKS }) {
   const [open, setOpen] = useState(false);
@@ -63,7 +63,7 @@ export function MobileNav({ links }: { links: typeof NAV_LINKS }) {
         </nav>
         {/* Below md the theme toggle lives HERE, not in the bar (the M7
             post-flight #241, owner-ruled 2026-11-09): its own hairline row
-            under the CTA, outside <nav> (a control, not navigation) — the
+            under the CTA, outside <nav> (a control, not navigation), the
             mono THEME label left, the shared toggle right on the bar's ink
             tint. Toggling keeps the panel open. */}
         <div className='mx-auto max-w-5xl px-6 pb-4'>

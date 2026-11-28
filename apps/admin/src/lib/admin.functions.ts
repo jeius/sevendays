@@ -1,9 +1,9 @@
 // The admin CMS server functions (M5 #139): every /api/v1/admin call rides
-// the M4 session-scoped client seam (ADR-0004/0016) — the cookie is read
+// the M4 session-scoped client seam (ADR-0004/0016), the cookie is read
 // from the INCOMING request server-side and forwarded as Bearer over the
 // service binding; the browser never holds the token. Mutations return
 // result values (never throw) so the API's field-level error details
-// survive the server-fn serialization boundary — the editor maps them to
+// survive the server-fn serialization boundary, the editor maps them to
 // per-field errors via lib/package-editor-state.ts.
 import { startSpan } from '@sentry/tanstackstart-react';
 import { ApiClientError } from '@sevendays/api-client';
@@ -60,7 +60,7 @@ import { envelopeDetails } from './api-envelope';
 // this union instead of throwing, so the API's 400 field details cross the
 // serialization boundary intact. The package READ is result-valued too
 // (#155 fix round: the RPC boundary erases the thrown ApiClientError class,
-// so its status rides the result) — other reads stay throwing; query error
+// so its status rides the result), other reads stay throwing; query error
 // state carries the message.
 export type AdminMutationResult<T> =
   | { ok: true; data: T }
@@ -84,7 +84,7 @@ export const fetchAdminPackage = createServerFn({ method: 'GET' })
         ).admin.servicePackages.byId({ param: { id: data.id } });
         return { ok: true as const, data: read };
       } catch (error) {
-        // The RPC boundary erases the ApiClientError class — a client-side
+        // The RPC boundary erases the ApiClientError class, a client-side
         // instanceof can never match (#155 live-frame finding). Surface the
         // status through the RESULT instead.
         if (error instanceof ApiClientError) {
@@ -151,7 +151,7 @@ export const fetchAdminTestimonials = createServerFn({ method: 'GET' }).handler(
 export const presignAdminCoverUpload = createServerFn({
   method: 'POST',
   // Result-value fns carry the API's non-schematized error details
-  // ({ ok: false; details?: unknown }) across the boundary by design —
+  // ({ ok: false; details?: unknown }) across the boundary by design:
   // the serializer's compile-time output gate rejects `unknown`, so the
   // output check is waived HERE ONLY (inputs stay strict; the runtime
   // payload is still JSON + Dates).
@@ -172,14 +172,14 @@ export const presignAdminCoverUpload = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
 
 export const saveAdminPackageCreate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -198,14 +198,14 @@ export const saveAdminPackageCreate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
 
 export const saveAdminPackageUpdate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -228,14 +228,14 @@ export const saveAdminPackageUpdate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
 
 export const saveAdminBranchCreate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -254,14 +254,14 @@ export const saveAdminBranchCreate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
 
 export const saveAdminBranchUpdate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -284,15 +284,15 @@ export const saveAdminBranchUpdate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
 
-// M7 #215: the singleton full-object save — one PUT, no per-field patching.
+// M7 #215: the singleton full-object save, one PUT, no per-field patching.
 export const saveAdminSiteSettings = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -311,14 +311,14 @@ export const saveAdminSiteSettings = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
 
 export const saveAdminStudioServiceCreate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -337,14 +337,14 @@ export const saveAdminStudioServiceCreate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
 
 export const saveAdminStudioServiceUpdate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -367,14 +367,14 @@ export const saveAdminStudioServiceUpdate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
 
 export const saveAdminAddonCreate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -393,14 +393,14 @@ export const saveAdminAddonCreate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
 
 export const saveAdminAddonUpdate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -423,14 +423,14 @@ export const saveAdminAddonUpdate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
 
 export const saveAdminStudioServiceBranchMatrix = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -456,14 +456,14 @@ export const saveAdminStudioServiceBranchMatrix = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
 
 export const saveAdminStudioServiceAddonMatrix = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -489,7 +489,7 @@ export const saveAdminStudioServiceAddonMatrix = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
@@ -497,7 +497,7 @@ export const saveAdminStudioServiceAddonMatrix = createServerFn({
 // POST /api/v1/admin/gallery-categories
 export const saveAdminGalleryCategoryCreate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -516,7 +516,7 @@ export const saveAdminGalleryCategoryCreate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
@@ -524,7 +524,7 @@ export const saveAdminGalleryCategoryCreate = createServerFn({
 // PUT /api/v1/admin/gallery-categories/:id
 export const saveAdminGalleryCategoryUpdate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -547,7 +547,7 @@ export const saveAdminGalleryCategoryUpdate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
@@ -555,7 +555,7 @@ export const saveAdminGalleryCategoryUpdate = createServerFn({
 // PUT /api/v1/admin/gallery-categories/order
 export const saveAdminGalleryCategoryOrder = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -574,7 +574,7 @@ export const saveAdminGalleryCategoryOrder = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
@@ -582,7 +582,7 @@ export const saveAdminGalleryCategoryOrder = createServerFn({
 // POST /api/v1/admin/gallery-photos
 export const saveAdminGalleryPhotoCreate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -601,7 +601,7 @@ export const saveAdminGalleryPhotoCreate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
@@ -609,7 +609,7 @@ export const saveAdminGalleryPhotoCreate = createServerFn({
 // PUT /api/v1/admin/gallery-photos/:id
 export const saveAdminGalleryPhotoUpdate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -632,7 +632,7 @@ export const saveAdminGalleryPhotoUpdate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
@@ -640,7 +640,7 @@ export const saveAdminGalleryPhotoUpdate = createServerFn({
 // PUT /api/v1/admin/gallery-photos/order
 export const saveAdminGalleryPhotoOrder = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -659,7 +659,7 @@ export const saveAdminGalleryPhotoOrder = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
@@ -667,7 +667,7 @@ export const saveAdminGalleryPhotoOrder = createServerFn({
 // POST /api/v1/admin/testimonials
 export const saveAdminTestimonialCreate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -686,7 +686,7 @@ export const saveAdminTestimonialCreate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
@@ -694,7 +694,7 @@ export const saveAdminTestimonialCreate = createServerFn({
 // PUT /api/v1/admin/testimonials/:id
 export const saveAdminTestimonialUpdate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -717,7 +717,7 @@ export const saveAdminTestimonialUpdate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
@@ -725,7 +725,7 @@ export const saveAdminTestimonialUpdate = createServerFn({
 // PUT /api/v1/admin/testimonials/order
 export const saveAdminTestimonialOrder = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -744,7 +744,7 @@ export const saveAdminTestimonialOrder = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
@@ -752,7 +752,7 @@ export const saveAdminTestimonialOrder = createServerFn({
 // POST /api/v1/admin/print-sizes
 export const saveAdminPrintSizeCreate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -771,7 +771,7 @@ export const saveAdminPrintSizeCreate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
@@ -779,7 +779,7 @@ export const saveAdminPrintSizeCreate = createServerFn({
 // PUT /api/v1/admin/print-sizes/:id
 export const saveAdminPrintSizeUpdate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -802,7 +802,7 @@ export const saveAdminPrintSizeUpdate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
@@ -810,7 +810,7 @@ export const saveAdminPrintSizeUpdate = createServerFn({
 // POST /api/v1/admin/attires
 export const saveAdminAttireCreate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -829,7 +829,7 @@ export const saveAdminAttireCreate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
@@ -837,7 +837,7 @@ export const saveAdminAttireCreate = createServerFn({
 // PUT /api/v1/admin/attires/:id
 export const saveAdminAttireUpdate = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -860,13 +860,13 @@ export const saveAdminAttireUpdate = createServerFn({
             details: envelopeDetails(error.details),
           };
         }
-        throw error; // not an API failure (serialization, session loss) — loud
+        throw error; // not an API failure (serialization, session loss), loud
       }
     });
   });
 
 // M7 #218: the guarded-delete server fns over the #213 remove() wrappers.
-// A 204 has no data, so the delete result carries only ok — and !ok keeps
+// A 204 has no data, so the delete result carries only ok, and !ok keeps
 // the result-value channel's details (the blocked-delete 400's one
 // { path, message } per blocking family) for the delete dialogs' in-body
 // blockers (blockerLines in lib/save-contract.ts).
@@ -874,21 +874,21 @@ export type AdminDeleteResult =
   | { ok: true }
   | { ok: false; status: number; message: string; details?: unknown };
 
-// (RULING 2026-10-16, superseding the helper design below — the original
+// (RULING 2026-10-16, superseding the helper design below, the original
 // runAdminAction/adminDeleteFn helpers lived as plain module-scope functions
 // in THIS file, so their server-only references survived the client
 // transform and the production build failed import-protection: "Import
 // denied in client environment … Import: ./api.server". The helpers now
 // live in src/lib/admin.functions.server.ts, and every delete fn is an
 // explicit createServerFn whose handler body is the ONLY runAdminAction
-// reference — handler-body-only references to ./admin.functions.server are
+// reference, handler-body-only references to ./admin.functions.server are
 // stripped from client builds exactly like the file's existing ./api.server
 // import. The build gate (`pnpm --filter @sevendays/admin build`) is part
 // of this task's gates from the ruling on.)
 
 export const removeAdminPackage = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -906,11 +906,11 @@ export const removeAdminPackage = createServerFn({
 // block with their own span names + wrapper groups:
 //   branches.remove / studioServices.remove / addons.remove /
 //   printSizes.remove / attires.remove / galleryCategories.remove /
-//   galleryPhotos.remove / testimonials.remove — each { param: { id } }.
+//   galleryPhotos.remove / testimonials.remove, each { param: { id } }.
 
 export const removeAdminBranch = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -924,7 +924,7 @@ export const removeAdminBranch = createServerFn({
 
 export const removeAdminStudioService = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -938,7 +938,7 @@ export const removeAdminStudioService = createServerFn({
 
 export const removeAdminAddon = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -952,7 +952,7 @@ export const removeAdminAddon = createServerFn({
 
 export const removeAdminPrintSize = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -966,7 +966,7 @@ export const removeAdminPrintSize = createServerFn({
 
 export const removeAdminAttire = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -980,7 +980,7 @@ export const removeAdminAttire = createServerFn({
 
 export const removeAdminGalleryCategory = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -994,7 +994,7 @@ export const removeAdminGalleryCategory = createServerFn({
 
 export const removeAdminGalleryPhoto = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -1008,7 +1008,7 @@ export const removeAdminGalleryPhoto = createServerFn({
 
 export const removeAdminTestimonial = createServerFn({
   method: 'POST',
-  // See presignAdminCoverUpload — output strictness waived for the result
+  // See presignAdminCoverUpload, output strictness waived for the result
   // value (details?: unknown rides through by design).
   strict: { output: false },
 })
@@ -1033,7 +1033,7 @@ export const removeAdminTestimonialSubmission = createServerFn({
   });
 
 // M7 #218: the Submissions tab's read + moderation fns over #216's
-// endpoints (the media action-endpoint precedent — accept/reject are
+// endpoints (the media action-endpoint precedent, accept/reject are
 // action POSTs, not full-object PUTs).
 export const fetchAdminTestimonialSubmissions = createServerFn({ method: 'GET' }).handler(
   async () => {

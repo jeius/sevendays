@@ -1,7 +1,7 @@
 // The PostHog HogQL half of the metrics seam (#187): the four pinned
 // query documents (built by pure functions), the host escaping, the
 // columns/results zip, the munging, and the fetch contract with its
-// failure mapping. Plain-node over stubbed fetch — no network, no
+// failure mapping. Plain-node over stubbed fetch, no network, no
 // browser (the admin lib-seam pattern). Dialect facts pinned in the plan
 // header; the quantile + parallel-arrays fallbacks live in Global
 // Constraints and are live-probe-gated (Task 7), never speculative.
@@ -37,7 +37,7 @@ const ENV: MetricsEnv = {
 
 const RANGE = { since: '2026-10-01T12:00:00.000Z', until: '2026-10-08T12:00:00.000Z' };
 
-// The shared filter fragment every pageview document pins — asserted once
+// The shared filter fragment every pageview document pins, asserted once
 // here and reused by the document expectations below.
 const FILTER = [
   "event = '$pageview'",
@@ -60,7 +60,7 @@ order by day`;
     );
   });
 
-  it('the window totals re-pin the filter (window uniques are their own query — summed dailies double-count)', () => {
+  it('the window totals re-pin the filter (window uniques are their own query, summed dailies double-count)', () => {
     expect(windowTotalsQuery(RANGE, ENV.posthog?.landingHosts ?? [])).toBe(
       `select count() as pageviews, count(distinct distinct_id) as uniques
 from events
@@ -278,7 +278,7 @@ describe('fetchTrafficMetrics', () => {
     expect(result).toEqual({ ok: false, reason: 'unavailable' });
   });
 
-  it('a body-level error maps to unavailable — the loud detail is log-only', async () => {
+  it('a body-level error maps to unavailable, the loud detail is log-only', async () => {
     const fetchImpl = async () => ({
       ok: true,
       json: async () => ({ error: 'invalid query' }),

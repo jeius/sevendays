@@ -1,12 +1,12 @@
-// The Audit Log screen (#188, spec § The Audit Log — Viewer): the
+// The Audit Log screen (#188, spec § The Audit Log, Viewer): the
 // owner-only, filterable, newest-first, paginated table over the durable
-// record — no joins anywhere (the snapshotted actorEmail + inline
+// record, no joins anywhere (the snapshotted actorEmail + inline
 // summary are the whole row, #185's design). Filters ride URL search
 // params; every filter change resets to page 1; a stale page beyond the
 // end self-heals via replace-navigation (the response carries the
-// clamped truth — pageWindow, the one tested math). The row's title
-// carries requestId — the Application Log correlation affordance without
-// a column. UTC throughout (formatUtc) — SSR/hydration-stable. Curated
+// clamped truth, pageWindow, the one tested math). The row's title
+// carries requestId, the Application Log correlation affordance without
+// a column. UTC throughout (formatUtc), SSR/hydration-stable. Curated
 // failure states follow the never-500 law: any thrown query error
 // (including a role-gate Unauthorized) renders the unavailable line.
 
@@ -48,9 +48,9 @@ const ALL = 'all';
 
 // The action badges' colors (the owner's variant ruling, 2026-10-10: A with
 // red/yellow/green/blue on the four actions; delete → violet joins with M7
-// #213, controller-ruled 2026-10-12 for distinctness — retunable at the
+// #213, controller-ruled 2026-10-12 for distinctness, retunable at the
 // variants step): create → green, update → blue, deactivate → red,
-// reorder → amber, delete → violet — tinted bg + matched border + dark
+// reorder → amber, delete → violet, tinted bg + matched border + dark
 // text of the same hue, over the outline variant (cn/tw-merge lets these
 // override the variant's border/text). Default-palette utilities, the
 // #202 app-local-token pattern; the keys are the enum, only colors tune.
@@ -62,7 +62,7 @@ export const AUDIT_ACTION_BADGE_CLASSES: Record<AuditAction, string> = {
   delete: 'border-violet-200 bg-violet-50 text-violet-700',
   // M7 #216 moderation verbs (controller-ruled 2026-10-14): accept → teal,
   // the only remaining saturated family not neighboring a taken hue;
-  // reject → slate, deliberately neutral — a terminal, non-alarm state.
+  // reject → slate, deliberately neutral, a terminal, non-alarm state.
   accept: 'border-teal-200 bg-teal-50 text-teal-700',
   reject: 'border-slate-200 bg-slate-50 text-slate-700',
 };
@@ -142,7 +142,7 @@ export function AuditLogScreen({ search }: { search: AuditLogSearch }) {
 
   // A stale ?page beyond the end (a shared URL whose filters narrowed
   // since) self-heals: replace to the clamped page so rows and footer
-  // agree. Primitive deps only — the object identity of pageWindow's
+  // agree. Primitive deps only, the object identity of pageWindow's
   // result is not stable.
   const clampedPage = window?.page;
   useEffect(() => {

@@ -15,7 +15,7 @@
 // the adminLookupQueries.printSizes vocabulary (ACTIVE sizes as options, the
 // explicit SelectValue render resolving ANY current value's label incl.
 // deactivated); the upload becomes the presign → XHR → bind loop; create
-// mode renders NO Advanced card (the server generates the slug — AQ-6).
+// mode renders NO Advanced card (the server generates the slug, AQ-6).
 //
 // The Save button's clean-form gate (M7 post-flight #242): disabled until
 // the state structurally differs from its saved baseline (the seam's
@@ -112,7 +112,7 @@ const KIND_ICONS = {
 /**
  * The inline-error shape the editor renders: Task 3's `EditorFieldErrors`
  * plus the `slug` slot only the Advanced card can host (server 400s at
- * `['slug']` — a clash or a format failure — mark the slug Field; the seam's
+ * `['slug']`, a clash or a format failure, mark the slug Field; the seam's
  * record has no slug slot by design, so this is the render-side extension).
  */
 interface EditorDisplayErrors extends EditorFieldErrors {
@@ -195,7 +195,7 @@ function InclusionEditorRow({
               aria-label='Print size'
               className={`w-24 ${errors?.printSizeId ? 'border-destructive' : ''}`}
             >
-              {/* N5: render the item LABEL explicitly — Base UI's SelectValue
+              {/* N5: render the item LABEL explicitly, Base UI's SelectValue
                   falls through to the raw value when no items prop is given.
                   The options list ACTIVE sizes only; the explicit render still
                   resolves a deactivated CURRENT value's code. */}
@@ -231,7 +231,7 @@ function InclusionEditorRow({
           <X />
         </Button>
       </div>
-      {/* N7: the four-attire inline chips on framed_picture/print rows only —
+      {/* N7: the four-attire inline chips on framed_picture/print rows only;
           privileges drop them (the T8-scoped ruling). AQ-4: a deactivated
           attire's chip renders dimmed; the vocabulary is never truncated. */}
       {row.kind !== 'privilege' ? (
@@ -295,11 +295,11 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
   const [state, setState] = useState<PackageEditorState | null>(() =>
     mode === 'create' ? newEditorState() : null
   );
-  // #242: the dirty gate's baseline — the snapshot the live state compares
+  // #242: the dirty gate's baseline, the snapshot the live state compares
   // against (structurally, via isEditorStateDirty). The hydrate sets it for
   // edit; create's is its own initial state (the empty form is clean); a
   // successful edit save re-sets it to what was saved. A failed save never
-  // touches it — the form stays dirty and retry is safe (#218's hold law).
+  // touches it, the form stays dirty and retry is safe (#218's hold law).
   const [savedBaseline, setSavedBaseline] = useState<PackageEditorState | null>(() =>
     mode === 'create' ? newEditorState() : null
   );
@@ -307,13 +307,13 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<EditorDisplayErrors | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // The bound preview's object URL — the caller's to revoke (Task 3's JSDoc
+  // The bound preview's object URL, the caller's to revoke (Task 3's JSDoc
   // contract): on replace and on unmount.
   const previewUrlRef = useRef<string | null>(null);
   // #242: the MUTATE-time state snapshot the next re-baseline adopts. React
   // Query fires onSuccess from the latest render's options and the inputs
   // stay editable while a save is in flight, so an onSuccess closure over
-  // `state` could adopt an unsaved mid-flight edit — the ref pins what was
+  // `state` could adopt an unsaved mid-flight edit, the ref pins what was
   // actually sent; a mid-flight edit keeps the form dirty until its own save.
   const pendingBaselineRef = useRef<PackageEditorState | null>(null);
 
@@ -326,9 +326,9 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
   const featuredId = useId();
   const activeId = useId();
 
-  // Hydrate once from the edit read — never on refetch (a post-save
+  // Hydrate once from the edit read, never on refetch (a post-save
   // invalidation must not clobber the editor's state). The hydrated state
-  // is also the dirty gate's first baseline (#242) — the same instance, so
+  // is also the dirty gate's first baseline (#242), the same instance, so
   // row keys and frame tokens compare identity-stable.
   useEffect(() => {
     if (mode === 'edit' && packageQuery.data?.ok && state === null) {
@@ -378,7 +378,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
     );
   }
 
-  // N7: toggles write into the row's attireIds array — selection order is
+  // N7: toggles write into the row's attireIds array, selection order is
   // membership order; the builders re-pin to the lookup's array order.
   function toggleAttire(key: string, attireId: string, checked: boolean) {
     setState((prev) =>
@@ -417,7 +417,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
       description: '',
     };
     // Insert WITHIN the prints block of the underlying array (not appended at
-    // the end) so sections stay contiguous — array order must keep matching
+    // the end) so sections stay contiguous, array order must keep matching
     // displayed order (the #137 write shape).
     setState((prev) => {
       if (!prev) {
@@ -474,7 +474,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
 
   // Sections are views over the one inclusions array: a drag reorders the
   // section's rows among themselves. The reorder is derived from the filtered
-  // section list and applied by row identity — never by raw array index —
+  // section list and applied by row identity, never by raw array index,
   // so a drag can never cross another section's rows.
   function reorderInclusions(
     matches: (row: EditorInclusion) => boolean,
@@ -524,7 +524,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
     setUploadStatus(next);
     if (next.phase === 'bound') {
       // Re-upload replaces the key (and revokes the replaced preview URL);
-      // binding happens only through the atomic save — the preview reflects
+      // binding happens only through the atomic save, the preview reflects
       // state, never commits.
       if (previewUrlRef.current) {
         URL.revokeObjectURL(previewUrlRef.current);
@@ -538,7 +538,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
     try {
       await uploadCover(file, presign, handleUploadStatus);
     } catch {
-      // XHR error/abort already emitted `failed` through onStatus — the
+      // XHR error/abort already emitted `failed` through onStatus, the
       // machine never stalls; nothing further to surface here.
     }
   }
@@ -611,7 +611,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
           queryKey: adminPackageQueries.byId(result.data.id).queryKey,
         });
         toast.success('Saved.');
-        // #242: what was sent is the new baseline — the form is clean again
+        // #242: what was sent is the new baseline, the form is clean again
         // and Save re-disables until the next edit.
         setSavedBaseline(pendingBaselineRef.current);
         // Stay on the route.
@@ -727,7 +727,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
   const uploading = uploadStatus.phase === 'presigning' || uploadStatus.phase === 'uploading';
   // #242: the clean-form gate. savedBaseline is non-null wherever the editor
   // renders (it is set beside the state: hydrate for edit, the initial state
-  // for create); the null guard keeps the types honest and errs ENABLED —
+  // for create); the null guard keeps the types honest and errs ENABLED:
   // the seam's own direction (the gate may open on a no-op save, never
   // block a real one).
   const dirty = savedBaseline === null || isEditorStateDirty(state, savedBaseline);
@@ -812,7 +812,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
                     checked={state.hasPrice}
                     onCheckedChange={(checked) => {
                       updateField('hasPrice', checked === true);
-                      // Either flip discards the entry — ADR-0020's
+                      // Either flip discards the entry, ADR-0020's
                       // re-entry contract (re-check starts empty).
                       updateField('priceCents', Number.NaN);
                     }}
@@ -828,7 +828,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
                       id={priceId}
                       type='number'
                       className={`pl-7 tabular-nums ${fieldErrors?.price ? 'border-destructive' : ''}`}
-                      // NaN (an unparseable entry — the seam's encoding) renders
+                      // NaN (an unparseable entry, the seam's encoding) renders
                       // as an empty input; the save gate surfaces the error.
                       value={Number.isNaN(state.priceCents) ? '' : state.priceCents / 100}
                       onChange={(e) =>
@@ -939,7 +939,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
                   Remove cover
                 </Button>
               </div>
-              {/* The per-file status line (single-file leg) — agent-authored
+              {/* The per-file status line (single-file leg), agent-authored
                   texts, flagged for Task 7's rendered-variant record. */}
               {uploadStatus.phase === 'presigning' ? (
                 <p className='text-muted-foreground text-xs'>Presigning…</p>
@@ -964,7 +964,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
           </Card>
 
           {mode === 'edit' ? (
-            // AQ-6: create renders NO Advanced card — the server generates
+            // AQ-6: create renders NO Advanced card, the server generates
             // the slug at create; edit owns it behind the break-links warning.
             <div>
               {/* TODO(token-ruling): card-radius step-down pending the owner's design-system ruling (#134 open items) */}
@@ -1000,14 +1000,14 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
         </div>
 
         {/* E1: separators between the left card column and the inclusions
-            area — horizontal when stacked, vertical on the xl grid. */}
+            area, horizontal when stacked, vertical on the xl grid. */}
         <Separator className='xl:hidden' />
         <Separator orientation='vertical' className='hidden xl:block' />
 
         <div className='min-w-0 space-y-4'>
           <h2 className='text-lg font-semibold tracking-tight'>Inclusions</h2>
 
-          {/* N6: the three section groups render bg-card — the rounded-lg
+          {/* N6: the three section groups render bg-card, the rounded-lg
               step-down and borders are unchanged. */}
           <section className='space-y-3 rounded-lg border bg-card p-4'>
             <div className='flex items-center justify-between'>
@@ -1025,7 +1025,7 @@ export function PackageEditor({ mode, packageId }: PackageEditorProps) {
               return (
                 <div key={frame.token} className='bg-muted/20 space-y-2 rounded-lg border p-3'>
                   <div className='flex items-center gap-2'>
-                    {/* N = index + 1 — display-derived, never an input; the
+                    {/* N = index + 1, display-derived, never an input; the
                         server renumbers from array order on save. */}
                     <Badge variant='outline' className='font-mono text-xs'>
                       Frame {frameIndex + 1}

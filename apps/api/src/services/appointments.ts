@@ -19,7 +19,7 @@ import { groupChildren } from './group-children.js';
 
 /**
  * The ten intake rejections; wording is module-owned (route stays thin).
- * Ticket 03 adds the service-path cases + the past-datetime floor — the
+ * Ticket 03 adds the service-path cases + the past-datetime floor, the
  * five package-path wordings are UNCHANGED (suites assert them verbatim).
  */
 const REJECTION_MESSAGES = {
@@ -45,11 +45,11 @@ function fail(reason: CreateReason): CreateAppointmentResult {
   return { ok: false, reason, message: REJECTION_MESSAGES[reason] };
 }
 
-// The one Appointment projection (14 columns) — create's `.returning()` and
+// The one Appointment projection (14 columns), create's `.returning()` and
 // the list read select the same shape, so a column change lands here once.
 // Returning an explicit partial projection makes every selected column a
 // declared, non-optional field (noUncheckedIndexedAccess only guards the
-// array index, not the projection itself) — so the single insert's row is
+// array index, not the projection itself), so the single insert's row is
 // fully typed and the record assembly needs no non-null assertions.
 const appointmentProjection = {
   id: appointments.id,
@@ -72,7 +72,7 @@ const appointmentProjection = {
  * Resolve the referenced rows and persist the Appointment with booking-time
  * price snapshots (M1.4; ticket 03 generalizes the offering). One
  * transaction wraps reference resolution and both inserts (Appointment +
- * add-on junction rows), so a failure anywhere leaves nothing behind — and
+ * add-on junction rows), so a failure anywhere leaves nothing behind, and
  * M3's Slot capacity check-then-insert can later join this same transaction
  * (ADR-0005). The offering is exactly one of a Service Package or a Studio
  * Service (the create schema's refine dispatches the path): the service
@@ -80,12 +80,12 @@ const appointmentProjection = {
  * past-datetime floor applies to both paths before offering resolution.
  * Reference resolution is validation: a rejection returns a typed failure
  * whose `message` is the caller-facing wording (module-owned; the route
- * forwards it verbatim). The client never supplies a price — snapshots
+ * forwards it verbatim). The client never supplies a price, snapshots
  * come from the resolved rows (ADR-0020: an unpriced offering snapshots
  * null; the invariant is "when the booked item had one"). ADR-0011
  * untouched: `db` is the per-request
  * handle; the transaction lives inside this one request (verified over the
- * live pooler — ADR-0007 amendment).
+ * live pooler, ADR-0007 amendment).
  */
 export async function createAppointment(
   db: Database,
@@ -100,10 +100,10 @@ export async function createAppointment(
 
     // The floor (ticket 03): at-or-before the current instant → the typed
     // 'past_datetime' rejection. PH is fixed UTC+8 with no DST, so "before
-    // now in Asia/Manila" IS "before now on the UTC instant" — a plain
+    // now in Asia/Manila" IS "before now on the UTC instant", a plain
     // instant comparison, no tz arithmetic, and createAppointmentSchema
     // stays shape-only (spec ruling). Evaluated after the branch resolve
-    // and before offering resolution — a rejected clock never reaches the
+    // and before offering resolution, a rejected clock never reaches the
     // junction queries.
     if (input.scheduledAt.getTime() <= Date.now()) return fail('past_datetime');
 
@@ -112,7 +112,7 @@ export async function createAppointment(
     // the path. Package path: unknown/inactive (unchanged). Service path:
     // unknown → inactive → bookable at THIS branch, all inside this same
     // transaction (the one write seam, ADR-0005).
-    // number | null (ADR-0020): an unpriced offering snapshots null —
+    // number | null (ADR-0020): an unpriced offering snapshots null:
     // everything downstream (the insert, the record, the wire) flows.
     let offeringPriceCents: number | null;
     let serviceId: string | null = null;
@@ -221,13 +221,13 @@ export async function createAppointment(
 
 /**
  * Add-on entries for the given appointment ids in one inArray query (M2
- * ticket 04) — shared by the list and the single-get so both shapes come
+ * ticket 04), shared by the list and the single-get so both shapes come
  * from one stitch. Entries arrive pre-ordered: createdAt is the append-only
  * monotonic proxy (the junction has no position column; SQL gives no
- * row-order guarantee without an explicit ORDER BY — a later migration if
- * M2's UI needs persisted order). Raw rows carry appointmentId — group raw,
+ * row-order guarantee without an explicit ORDER BY, a later migration if
+ * M2's UI needs persisted order). Raw rows carry appointmentId, group raw,
  * project at the attach pass. Every requested id gets an entry list (empty
- * when it has no add-ons) — never undefined.
+ * when it has no add-ons), never undefined.
  */
 async function fetchAddonEntries(
   db: Database,
@@ -293,7 +293,7 @@ export async function listAppointments(
  * One Appointment with its add-on entries (M2 ticket 04): the same
  * AppointmentWithAddons shape as the list, via the same stitch. Unknown id
  * → null (the route turns it into the uniform 404). Public until M4 like
- * the list (standing decision — this serves the customer's own
+ * the list (standing decision, this serves the customer's own
  * confirmation read-back; M4's BetterAuth closes both together).
  */
 export async function getAppointmentWithAddons(

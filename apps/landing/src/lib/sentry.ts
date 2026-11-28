@@ -1,5 +1,5 @@
 // The Sentry options seam (M6 #184, spec § Sentry): a pure builder so the
-// errors-only posture is one asserted literal — frontends errors at 100%,
+// errors-only posture is one asserted literal, frontends errors at 100%,
 // traces OFF, no session replay (PostHog owns web vitals/audience), PII off
 // (sendDefaultPii false + the scaffold's stricter dataCollection block).
 // src/instrument.ts is the only consumer; the lib-seam suite owns the
@@ -27,7 +27,7 @@ export function buildSentryOptions(input: {
   return {
     dsn: input.dsn,
     environment: input.environment ?? 'dev',
-    // #208: an empty-string release is unset too — a CI var that renders
+    // #208: an empty-string release is unset too, a CI var that renders
     // empty must not tag events with release: '' (the #184 ledger's edge).
     ...(input.release ? { release: input.release } : {}),
     sampleRate: 1,
@@ -35,7 +35,7 @@ export function buildSentryOptions(input: {
     sendDefaultPii: false,
     // Client-report tracking (the default) crashes module load in workerd:
     // @sentry/node-core's interval needs Node Timer .unref() and
-    // process.on('beforeExit') — neither exists in the CF runtime the
+    // process.on('beforeExit'), neither exists in the CF runtime the
     // frontends SSR in (the #197-class teaser 500s; local dev 500s once a
     // DSN is set). Dropped-event diagnostics add nothing to the
     // errors-only posture.

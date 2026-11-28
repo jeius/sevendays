@@ -25,7 +25,7 @@ function photo(overrides: Partial<PublicGalleryPhoto> = {}): PublicGalleryPhoto 
 }
 
 describe('photoSlides', () => {
-  it('maps every photo to one slide — payload order and count preserved, src = photoUrl', () => {
+  it('maps every photo to one slide, payload order and count preserved, src = photoUrl', () => {
     const photos = [photo(), photo(), photo()];
     const slides = photoSlides(photos);
     expect(slides).toHaveLength(3);
@@ -60,7 +60,7 @@ describe('photoSlides', () => {
 });
 
 describe('the pinned option vocabulary (#336 D5/D6)', () => {
-  it('MOSAIC_CONTROLLER: backdrop-close ON (upstream defaults false — set explicitly), Esc ON, both pull-closes OFF', () => {
+  it('MOSAIC_CONTROLLER: backdrop-close ON (upstream defaults false, set explicitly), Esc ON, both pull-closes OFF', () => {
     expect(MOSAIC_CONTROLLER).toEqual({
       closeOnEscape: true,
       closeOnBackdropClick: true,
@@ -69,7 +69,7 @@ describe('the pinned option vocabulary (#336 D5/D6)', () => {
     });
   });
 
-  it('MOSAIC_CAROUSEL: the wall loops (finite false) on the library defaults — preload 2, 16px padding, 30% spacing, contain', () => {
+  it('MOSAIC_CAROUSEL: the wall loops (finite false) on the library defaults, preload 2, 16px padding, 30% spacing, contain', () => {
     expect(MOSAIC_CAROUSEL).toEqual({
       finite: false,
       preload: 2,
@@ -89,7 +89,7 @@ describe('the pinned option vocabulary (#336 D5/D6)', () => {
 });
 
 describe('coverSlides (the lone-image law, #336 D4/D5)', () => {
-  it('a covered package maps to exactly one slide — src = coverImageUrl, alt = the package name, no title', () => {
+  it('a covered package maps to exactly one slide, src = coverImageUrl, alt = the package name, no title', () => {
     const slides = coverSlides({
       name: 'The Wedding Package',
       coverImageUrl: 'https://pub-test.r2.dev/covers/pkg.jpg',
@@ -100,7 +100,7 @@ describe('coverSlides (the lone-image law, #336 D4/D5)', () => {
     expect('title' in (slides[0] ?? {})).toBe(false);
   });
 
-  it('a null cover maps to ZERO slides — the placeholder is not a photograph (D4)', () => {
+  it('a null cover maps to ZERO slides, the placeholder is not a photograph (D4)', () => {
     expect(coverSlides({ name: 'The Wedding Package', coverImageUrl: null })).toEqual([]);
   });
 
@@ -124,7 +124,7 @@ describe('the cover variant constants (#336 D4)', () => {
     });
   });
 
-  it('COVER_RENDER: both arrows render null — the library’s named hide (no arrows at all)', () => {
+  it('COVER_RENDER: both arrows render null, the library’s named hide (no arrows at all)', () => {
     expect(COVER_RENDER.buttonPrev?.()).toBe(null);
     expect(COVER_RENDER.buttonNext?.()).toBe(null);
   });

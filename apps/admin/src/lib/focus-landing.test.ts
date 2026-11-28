@@ -4,8 +4,8 @@ import { testimonialsSearchSchema } from './submissions-state.js';
 
 const UUID = '00000000-0000-4000-8000-000000000001';
 
-describe('focusSearchSchema — the param read (D10, tolerant by construction)', () => {
-  it('absent focus → dropped — normal navigation untouched', () => {
+describe('focusSearchSchema, the param read (D10, tolerant by construction)', () => {
+  it('absent focus → dropped, normal navigation untouched', () => {
     expect(focusSearchSchema.parse({})).toEqual({});
   });
 
@@ -13,7 +13,7 @@ describe('focusSearchSchema — the param read (D10, tolerant by construction)',
     expect(focusSearchSchema.parse({ focus: UUID })).toEqual({ focus: UUID });
   });
 
-  it('non-uuid garbage drops to undefined — never throws (the audit-log posture); the charset law also keeps the row selector quote-safe', () => {
+  it('non-uuid garbage drops to undefined, never throws (the audit-log posture); the charset law also keeps the row selector quote-safe', () => {
     expect(focusSearchSchema.parse({ focus: 'x"]' })).toEqual({});
     expect(focusSearchSchema.parse({ focus: '' })).toEqual({});
     expect(focusSearchSchema.parse({ focus: 'not-a-uuid' })).toEqual({});
@@ -39,11 +39,11 @@ describe('the testimonials interplay (tab + focus compose on one route)', () => 
 });
 
 describe('the pinned constants (the plan-time rulings, 2026-11-17)', () => {
-  it('FOCUS_HIGHLIGHT_MS — the ~1.6 s fade law', () => {
+  it('FOCUS_HIGHLIGHT_MS, the ~1.6 s fade law', () => {
     expect(FOCUS_HIGHLIGHT_MS).toBe(1600);
   });
 
-  it('FOCUS_ROW_CLASS — semantic tokens only, paints nothing without [data-focused]', () => {
+  it('FOCUS_ROW_CLASS, semantic tokens only, paints nothing without [data-focused]', () => {
     expect(FOCUS_ROW_CLASS).toBe(
       'transition-colors data-[focused]:bg-primary/10 data-[focused]:ring-1 data-[focused]:ring-primary/30'
     );

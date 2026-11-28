@@ -1,5 +1,5 @@
 // The dashboard's trend chart (#186): the shadcn chart component
-// (ChartContainer over recharts) — the owner's 2026-10-06 ruling —
+// (ChartContainer over recharts), the owner's 2026-10-06 ruling:
 // app-local per the #93 reversal. Colors come from the admin-local
 // --chart-* tokens (the exact CSS-variable contract ChartContainer
 // themes by). Animations are disabled: deterministic SSR/hydration and

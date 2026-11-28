@@ -5,7 +5,7 @@ import { cn } from 'cn';
 import { peso } from '../lib/format';
 
 // Home teaser item (owner-ratified shape): name + price + Book now deep
-// link — user story 7 (book from any page via service deep links).
+// link, user story 7 (book from any page via service deep links).
 export function ServiceTeaserItem({ service }: { service: StudioServiceWithBranches }) {
   return (
     <article className='flex flex-col gap-2 rounded-xl border border-brand-gray-cool bg-card p-4 shadow-sm'>

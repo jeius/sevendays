@@ -26,19 +26,19 @@ import { type AuditActor, writeAuditRow } from './audit.js';
 
 // The guarded-DELETE service (M7 #213, reversing M5's delete-nowhere per the
 // M7 spec § Guarded DELETE everywhere): ONE contract across the nine CMS
-// entities — a row is truly deletable only while nothing references it. A
+// entities, a row is truly deletable only while nothing references it. A
 // blocked delete resolves as the 'blocked' failure the thin routes map to
 // the house 400-with-field-details (owner-ratified copy, 2026-10-12:
 // 'Blocked by existing references.' + one count-bearing detail per blocking
 // family). "Any Appointment ever" means ANY status including cancelled and
-// no_show — the guards count rows, never filter status. Children and matrix
+// no_show, the guards count rows, never filter status. Children and matrix
 // rows cascade INSIDE the transaction as explicit deletes (only
 // package_inclusion_attires rides its DB-level ON DELETE CASCADE on
-// inclusion_id); covers and photos are ADR-0019 §5 lifecycle events — the
+// inclusion_id); covers and photos are ADR-0019 §5 lifecycle events, the
 // DB commit lands FIRST, the object delete after (the #137 cover-replace
 // precedent), so a blocked or rolled-back delete never touches the bucket.
 // Every committed delete writes its audit row (action 'delete') as the
-// transaction's last statement — the #185 law carried to the new action.
+// transaction's last statement, the #185 law carried to the new action.
 
 export type AdminDeleteFailure = {
   ok: false;
@@ -52,7 +52,7 @@ export type AdminDeleteResult =
   | { ok: false; reason: 'not_found' }
   | AdminDeleteFailure;
 
-/** The blocked-delete failure — the owner-ratified message, one detail per blocking family. */
+/** The blocked-delete failure, the owner-ratified message, one detail per blocking family. */
 function blocked(details: AdminDetail[]): AdminDeleteFailure {
   return { ok: false, reason: 'blocked', message: 'Blocked by existing references.', details };
 }
@@ -218,7 +218,7 @@ export async function deleteAdminBranch(
     ]);
   }
   await db.transaction(async (tx) => {
-    // branch_id carries no DB-level cascade — the explicit delete IS the cascade.
+    // branch_id carries no DB-level cascade, the explicit delete IS the cascade.
     await tx.delete(branchStudioServices).where(eq(branchStudioServices.branchId, id));
     await tx.delete(branches).where(eq(branches.id, id));
     await writeAuditRow(tx, audit, {
@@ -294,7 +294,7 @@ export async function deleteAdminStudioService(
     ]);
   }
   await db.transaction(async (tx) => {
-    // Both matrices' studio_service_id sides DO carry DB-level cascades —
+    // Both matrices' studio_service_id sides DO carry DB-level cascades;
     // the explicit deletes keep the transaction's writes observable and
     // uniform with every other entity here.
     await tx.delete(branchStudioServices).where(eq(branchStudioServices.studioServiceId, id));
@@ -310,7 +310,7 @@ export async function deleteAdminStudioService(
     });
   });
   // ADR-0019 §5 + the #137 precedent: the cover object goes only after the
-  // row's commit — a blocked or rolled-back delete never touches the bucket.
+  // row's commit, a blocked or rolled-back delete never touches the bucket.
   if (current.coverImageKey) {
     await env.MEDIA_BUCKET.delete(current.coverImageKey);
   }
@@ -343,7 +343,7 @@ export async function deleteAdminPackage(
     ]);
   }
   await db.transaction(async (tx) => {
-    // Inclusions before frames (inclusions hold the frame FK — the atomic
+    // Inclusions before frames (inclusions hold the frame FK, the atomic
     // save's own order); the inclusion-attire junctions ride the DB-level
     // ON DELETE CASCADE on inclusion_id.
     await tx.delete(packageInclusions).where(eq(packageInclusions.servicePackageId, id));
@@ -357,7 +357,7 @@ export async function deleteAdminPackage(
     });
   });
   // ADR-0019 §5 + the #137 precedent: the cover object goes only after the
-  // row's commit — a blocked or rolled-back delete never touches the bucket.
+  // row's commit, a blocked or rolled-back delete never touches the bucket.
   if (current.coverImageKey) {
     await env.MEDIA_BUCKET.delete(current.coverImageKey);
   }

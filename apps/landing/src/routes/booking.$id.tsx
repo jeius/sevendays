@@ -13,7 +13,7 @@ import {
 export const Route = createFileRoute('/booking/$id')({
   loader: async ({ params, context: { queryClient } }) => {
     // The appointment read gates the 404; the catalog reads feed the name
-    // joins. Only the appointment's 404 maps to not-found — the catalog
+    // joins. Only the appointment's 404 maps to not-found, the catalog
     // reads are lists with no 404 path, so their failures pass through to
     // the error boundary untouched.
     const catalogPromise = Promise.all([

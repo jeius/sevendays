@@ -1,5 +1,5 @@
 // Home copy (M7 #223): every word the home page renders now consumes site
-// settings (hero title/blurb, the four section headings) — defaults in
+// settings (hero title/blurb, the four section headings), defaults in
 // code at SITE_SETTINGS_DEFAULTS (#215); the stand-in gallery and the
 // placeholder testimonials are RETIRED with the ruled redesign (the live
 // reads render; content gaps are owner-owned per the #164 resolution).

@@ -68,7 +68,7 @@ describe('runBatchUpload', () => {
     expect(phases.at(-1)).toBe('done');
   });
 
-  it('commits the item caption unchanged — the pass-through seam (M7 #214; null at enqueue, editing ruled out)', async () => {
+  it('commits the item caption unchanged, the pass-through seam (M7 #214; null at enqueue, editing ruled out)', async () => {
     const commit = vi.fn(
       async (): CommitResult => ({ ok: true, photo: { id: uuid(98) } as never })
     );
@@ -112,7 +112,7 @@ describe('runBatchUpload', () => {
     expect(last?.[1]).toMatchObject({ phase: 'failed', kind: 'transient', attempts: 2 });
   });
 
-  it('a 400 PUT is PERMANENT — no retry, no second presign', async () => {
+  it('a 400 PUT is PERMANENT, no retry, no second presign', async () => {
     const d = deps({
       put: vi.fn(async () => {
         throw new PutUploadError(400);
@@ -176,7 +176,7 @@ describe('runBatchUpload', () => {
   });
 });
 
-describe('runBatchUpload — the abort seam (M7 #220: cancel settles canceled, never a retry)', () => {
+describe('runBatchUpload, the abort seam (M7 #220: cancel settles canceled, never a retry)', () => {
   it('a PRE-ABORTED signal settles every item canceled with zero network calls', async () => {
     const d = deps();
     const controller = new AbortController();
@@ -193,7 +193,7 @@ describe('runBatchUpload — the abort seam (M7 #220: cancel settles canceled, n
     expect(phases).toEqual(['canceled', 'canceled']);
   });
 
-  it('an abort while PRESIGN is in flight settles the item canceled — the PUT never fires, no retry presign', async () => {
+  it('an abort while PRESIGN is in flight settles the item canceled, the PUT never fires, no retry presign', async () => {
     let releasePresign: () => void = () => {};
     const gate = new Promise<void>((resolve) => {
       releasePresign = resolve;
@@ -216,7 +216,7 @@ describe('runBatchUpload — the abort seam (M7 #220: cancel settles canceled, n
     expect(d.presign).toHaveBeenCalledTimes(1); // the abort consumed no retry
   });
 
-  it('an abort during the PUT settles canceled — the abort reject is NEVER a transient retry (the pre-#220 pool would have re-queued it)', async () => {
+  it('an abort during the PUT settles canceled, the abort reject is NEVER a transient retry (the pre-#220 pool would have re-queued it)', async () => {
     const d = deps({
       put: vi.fn(
         (_file: File, _uploadUrl: string, _onProgress: unknown, signal?: AbortSignal) =>
@@ -238,7 +238,7 @@ describe('runBatchUpload — the abort seam (M7 #220: cancel settles canceled, n
     expect(last?.[1]).toEqual({ phase: 'canceled' });
   });
 
-  it('an abort settles QUEUED items canceled too — never-run items make no network calls (the settlement guarantee extends)', async () => {
+  it('an abort settles QUEUED items canceled too, never-run items make no network calls (the settlement guarantee extends)', async () => {
     const d = deps({
       put: vi.fn(
         (_file: File, _uploadUrl: string, _onProgress: unknown, signal?: AbortSignal) =>
@@ -258,7 +258,7 @@ describe('runBatchUpload — the abort seam (M7 #220: cancel settles canceled, n
     expect(d.presignCalls).toHaveLength(4); // items 5–6 never presigned
   });
 
-  it('an abort while the COMMIT is in flight lets its verdict stand — done stays done, never canceled', async () => {
+  it('an abort while the COMMIT is in flight lets its verdict stand, done stays done, never canceled', async () => {
     let releaseCommit: () => void = () => {};
     const gate = new Promise<void>((resolve) => {
       releaseCommit = resolve;
@@ -280,7 +280,7 @@ describe('runBatchUpload — the abort seam (M7 #220: cancel settles canceled, n
     expect(result.canceled).toHaveLength(0);
   });
 
-  it('an abort AFTER the PUT resolves still cancels — a canceled item is never promoted (the staged object is the tmp/ GC’s)', async () => {
+  it('an abort AFTER the PUT resolves still cancels, a canceled item is never promoted (the staged object is the tmp/ GC’s)', async () => {
     let releasePut: () => void = () => {};
     const gate = new Promise<void>((resolve) => {
       releasePut = resolve;
@@ -306,7 +306,7 @@ describe('the tray + leave-guard predicates (M7 #220)', () => {
   it('hasUnsettledUploads: enqueued(undefined)/queued/uploading/committing are unsettled; done/failed/canceled are terminal; an empty tray is settled', () => {
     // Named consts, never an indexed array: noUncheckedIndexedAccess types
     // every `items[n]` read `BatchItem | undefined` (ruled at execution,
-    // 2026-10-17 — the indexed first cut was a plan defect).
+    // 2026-10-17, the indexed first cut was a plan defect).
     const enqueued = item(1);
     const queued = item(2);
     const uploadingItem = item(3);
@@ -320,7 +320,7 @@ describe('the tray + leave-guard predicates (M7 #220)', () => {
       [doneItem.id, { phase: 'done', photo: { id: uuid(96) } as never }],
       [failedItem.id, { phase: 'failed', kind: 'transient', message: 'x', attempts: 2 }],
     ]);
-    // enqueued carries NO status yet — the pool has not reported.
+    // enqueued carries NO status yet, the pool has not reported.
     expect(
       hasUnsettledUploads(
         [enqueued, queued, uploadingItem, committing, doneItem, failedItem],
@@ -336,7 +336,7 @@ describe('the tray + leave-guard predicates (M7 #220)', () => {
     expect(hasUnsettledUploads([], new Map())).toBe(false);
   });
 
-  it('trayIsVisible holds the tray open on failures AND on canceled rows — a mid-batch cancel never silently swallows the story', () => {
+  it('trayIsVisible holds the tray open on failures AND on canceled rows, a mid-batch cancel never silently swallows the story', () => {
     const one = item(1);
     const two = item(2);
     const onFailed = new Map<string, BatchItemStatus>([

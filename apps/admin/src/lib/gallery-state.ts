@@ -2,8 +2,8 @@
 // full-object metadata payload, the two drag-reorder helpers, the upload
 // title derivation, and (M7 #220) the shared picker/drop enqueue + the
 // file-drag gate. Everything here is a plain function over plain
-// data — no React, no network, no DOM — so #143's lib-seam suite can pin
-// the photo payload law (r2Key ABSENT — presence-encoded replace stays
+// data, no React, no network, no DOM, so #143's lib-seam suite can pin
+// the photo payload law (r2Key ABSENT, presence-encoded replace stays
 // unexposed), the visible-subset slot-swap reorder, and the flat reorder
 // without rendering a component. Order PUTs are TOTAL full-replaces (#137):
 // both reorder helpers return the COMPLETE id list, never a delta.
@@ -33,7 +33,7 @@ export interface PhotoEditorState {
 /**
  * `#143 seam: read → photo state`. The read row minus server-managed
  * fields (id/position/photoUrl/createdAt/updatedAt). The editor edits
- * strings — `caption` (and `title`) null maps to `''`; null is a
+ * strings, `caption` (and `title`) null maps to `''`; null is a
  * write-time decision.
  */
 export function photoStateFromRead(row: GalleryPhoto): PhotoEditorState {
@@ -48,7 +48,7 @@ export function photoStateFromRead(row: GalleryPhoto): PhotoEditorState {
 /**
  * `#143 seam: photo state → full-object metadata PUT payload`. Empty
  * strings null out (the PUT is full-object: null clears, never "leave
- * alone"); `r2Key` is ABSENT — presence-encoded replace (ADR-0019) stays
+ * alone"); `r2Key` is ABSENT, presence-encoded replace (ADR-0019) stays
  * unexposed this ticket (AR-6); the payload never carries a key, so a
  * metadata save can never replace the photo.
  */
@@ -63,7 +63,7 @@ export function buildPhotoPayload(state: PhotoEditorState): UpdateGalleryPhotoIn
 
 /**
  * `#143 seam: read → photo flip payload`. The read's title/caption/
- * categoryId reshaped with ONLY `isActive` flipped — the flip never drops
+ * categoryId reshaped with ONLY `isActive` flipped, the flip never drops
  * a field (#137's full-object PUT). NO `r2Key`: a flip never replaces the
  * photo.
  */
@@ -81,7 +81,7 @@ export function buildPhotoFlipPayload(
 
 /**
  * dnd-kit's `arrayMove`: the item at `from` re-inserted at index `to`.
- * Local on purpose — this seam stays dependency-free pure functions.
+ * Local on purpose, this seam stays dependency-free pure functions.
  */
 function arrayMove<T>(items: T[], from: number, to: number): T[] {
   const moved = items.slice();
@@ -93,9 +93,9 @@ function arrayMove<T>(items: T[], from: number, to: number): T[] {
 }
 
 /**
- * `#143 seam: the flat reorder` — dnd-kit's `arrayMove` over the FULL
+ * `#143 seam: the flat reorder`, dnd-kit's `arrayMove` over the FULL
  * list (indexes found by id; either id missing → the input returned
- * unchanged). The returned array is the complete `photoIds` payload —
+ * unchanged). The returned array is the complete `photoIds` payload:
  * order PUTs are TOTAL full-replaces (#137), never a delta.
  */
 export function reorderIds(ids: string[], activeId: string, overId: string): string[] {
@@ -108,11 +108,11 @@ export function reorderIds(ids: string[], activeId: string, overId: string): str
 }
 
 /**
- * `#143 seam: the visible-subset slot-swap reorder` — the prototype's
+ * `#143 seam: the visible-subset slot-swap reorder`, the prototype's
  * reorder math, generalized. The drag operates on the VISIBLE filtered
  * list, so: take the visible ids in their global sequence, `arrayMove`
  * that SUBSEQUENCE by (activeId, overId), write it back into the exact
- * global slots the visible items occupied — invisible photos keep their
+ * global slots the visible items occupied, invisible photos keep their
  * positions, so a filtered drag can never collide with positions held
  * outside the filter. The returned array is the complete `photoIds`
  * payload (order PUTs are TOTAL full-replaces, #137). Either id not in
@@ -131,7 +131,7 @@ export function reorderVisiblePhotos(
   // The visible ids in their global sequence.
   const subsequence = globalIds.filter((id) => visibleSet.has(id));
   // Ghost-id parity with reorderIds (#143): a visibleId absent from the
-  // global list (a stale filtered view) bails — the input returned
+  // global list (a stale filtered view) bails, the input returned
   // unchanged, never a silently corrupted write-back.
   const globalSet = new Set(globalIds);
   if (visibleIds.some((id) => !globalSet.has(id))) {
@@ -158,7 +158,7 @@ export function reorderVisiblePhotos(
 }
 
 /**
- * `#143 seam: the upload title derivation` — the file name minus its LAST
+ * `#143 seam: the upload title derivation`, the file name minus its LAST
  * extension (`report.2024.jpg` → `report.2024`); empty → `''`. A leading
  * dot (`.jpg`) is a dotfile, not an extension, so the name is kept.
  */
@@ -171,11 +171,11 @@ export function titleFromFileName(name: string): string {
 }
 
 /**
- * `#243 seam: the card display law`. The gallery grid's card label — the
+ * `#243 seam: the card display law`. The gallery grid's card label, the
  * #214 caption law on the management wall: the caption leads when
  * present, the title remains the fallback, and a photo carrying neither
  * still gets the terminal 'Untitled photo' line (a management card
- * always labels — unlike the public walls, which render no caption line
+ * always labels, unlike the public walls, which render no caption line
  * at all when the photo carries none). Display-only: the wire field
  * stays `title` everywhere.
  */
@@ -184,7 +184,7 @@ export function photoCardLabel(photo: GalleryPhoto): string {
 }
 
 /**
- * `#143 seam` — the category order PUT body. Array order IS the payload
+ * `#143 seam`, the category order PUT body. Array order IS the payload
  * order (TOTAL full-replace, #137).
  */
 export function buildCategoryOrderPayload(
@@ -194,7 +194,7 @@ export function buildCategoryOrderPayload(
 }
 
 /**
- * `#143 seam` — the photo order PUT body. Array order IS the payload
+ * `#143 seam`, the photo order PUT body. Array order IS the payload
  * order (TOTAL full-replace, #137).
  */
 export function buildPhotoOrderPayload(photos: GalleryPhoto[]): GalleryPhotoOrderInput {
@@ -202,7 +202,7 @@ export function buildPhotoOrderPayload(photos: GalleryPhoto[]): GalleryPhotoOrde
 }
 
 /**
- * `#143 seam` — the testimonial order PUT body. Array order IS the
+ * `#143 seam`, the testimonial order PUT body. Array order IS the
  * payload order (TOTAL full-replace, #137).
  */
 export function buildTestimonialOrderPayload(rows: Testimonial[]): TestimonialOrderInput {
@@ -210,13 +210,13 @@ export function buildTestimonialOrderPayload(rows: Testimonial[]): TestimonialOr
 }
 
 /**
- * `#220 seam: files → staged items` — the ONE enqueue law the picker and
+ * `#220 seam: files → staged items`, the ONE enqueue law the picker and
  * the drop zone share (AR-11): category = the open rail filter captured AT
  * ENQUEUE (the caller resolves `'all'` → `null`), title = file name minus
  * its LAST extension (`titleFromFileName`), caption null (pre-commit
  * metadata editing is ruled out), ids fresh per item. Dropped non-JPG or
  * oversized files ride the SAME courtesy pre-check the picker's `accept`
- * approximates — the pool's `pre-check` failure row is the answer, never
+ * approximates, the pool's `pre-check` failure row is the answer, never
  * a drop-side filter.
  */
 export function batchItemsFromFiles(files: File[], categoryId: string | null): BatchItem[] {
@@ -230,10 +230,10 @@ export function batchItemsFromFiles(files: File[], categoryId: string | null): B
 }
 
 /**
- * `#220 seam: the file-drag gate` — ONLY drags whose `dataTransfer.types`
+ * `#220 seam: the file-drag gate`, ONLY drags whose `dataTransfer.types`
  * carry `'Files'` arm the drop zone. dnd-kit's pointer/touch/keyboard
  * drags never start an HTML5 drag (no `dataTransfer` types at all), and
- * text/element drags carry no `'Files'` — so the sortable grid and the
+ * text/element drags carry no `'Files'`, so the sortable grid and the
  * drop zone cannot interfere by construction.
  */
 export function isFileDrag(types: readonly string[]): boolean {

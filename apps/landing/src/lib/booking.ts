@@ -3,11 +3,11 @@
 // seam can test it; useBookingWizard only wires React state to these.
 // Prototype artifacts that die here: Studio Service stubs, the name-keyed
 // applicability map (the API now embeds applicableAddonServiceIds), the
-// simulated past-datetime floor (the API owns it — the form renders the
+// simulated past-datetime floor (the API owns it, the form renders the
 // hint and the typed rejection card), and packagePriceCents (renamed
-// bookedPriceCents in ticket 02; nothing here reads a snapshot — the
+// bookedPriceCents in ticket 02; nothing here reads a snapshot, the
 // pre-submit rail keeps LIVE prices, spec ruling); the totals are
-// null-honest since ADR-0020 — an unpriced offering or selected add-on
+// null-honest since ADR-0020, an unpriced offering or selected add-on
 // nulls the Total (never a ₱0 stand-in).
 
 import type { CreateAppointmentArgs } from '@sevendays/api-client';
@@ -20,7 +20,7 @@ import type {
 import { useMemo, useState } from 'react';
 import { z } from 'zod';
 
-/** One wizard read snapshot — the four reads the route loader prefetches. */
+/** One wizard read snapshot, the four reads the route loader prefetches. */
 export interface BookingCatalog {
   branches: BranchRead[];
   packages: ServicePackageRead[];
@@ -73,7 +73,7 @@ export function scheduledAtInstant(date: string, time: string): Date | null {
   return new Date(`${date}T${time}:00+08:00`);
 }
 
-/** At-or-before now is past — the same boundary the API's floor enforces. */
+/** At-or-before now is past, the same boundary the API's floor enforces. */
 export function isPastPick(scheduledAt: Date | null, now: Date): boolean {
   return scheduledAt !== null && scheduledAt.getTime() <= now.getTime();
 }
@@ -170,7 +170,7 @@ export function stepBackFromDateTime(hasApplicableAddons: boolean): 2 | 3 {
 // ---------------------------------------------------------------------------
 // Typed rejections (prototype contract): the wire carries only the API's
 // module-owned message ({ error }); the reason is derived by matching that
-// message. Wordings pinned from apps/api REJECTION_MESSAGES — suites assert
+// message. Wordings pinned from apps/api REJECTION_MESSAGES, suites assert
 // them verbatim, so the match is stable.
 // ---------------------------------------------------------------------------
 export type RejectionReason =
@@ -242,8 +242,8 @@ export function buildCreatePayload(details: BookingDetails): CreateAppointmentAr
 
 // ---------------------------------------------------------------------------
 // Contact step (#99): the M2 confirm gate restated as a schema. The
-// predicate is UNCHANGED — name/email/phone non-empty after trim, notes
-// never gates — and the messages feed the step's inline Zod errors (#58
+// predicate is UNCHANGED, name/email/phone non-empty after trim, notes
+// never gates, and the messages feed the step's inline Zod errors (#58
 // ruling: plain primitives + inline errors, no bespoke wrapper).
 // booking-contact.test.ts pins the equivalence with the old expression.
 // ---------------------------------------------------------------------------
@@ -275,7 +275,7 @@ export type WizardSubmitResult =
   | { ok: false; rejection: { reason: RejectionReason; apiMessage: string } };
 
 /**
- * Thin stateful shell around the pure functions above — deliberately
+ * Thin stateful shell around the pure functions above, deliberately
  * untested (spec § Testing Decisions 5: the CDP scenario owns behavior).
  * The confirm button gates on branch + offering + schedule + the three
  * contact fields, so the submit guard is defensive only.

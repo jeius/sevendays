@@ -1,16 +1,16 @@
 // The light-entity editors' pure seam (M5 #140): editor state ↔ the
 // full-object save payloads, the two matrix payloads, and the add-on
 // matrix's per-service diff. Everything here is a plain function over
-// plain data — no React, no network — so #143's lib-seam suite can pin
+// plain data, no React, no network, so #143's lib-seam suite can pin
 // flip payloads, the matrix diff, and validation without rendering a
 // component. Saves ride the full-object PUTs (#137): the branch save
-// carries the tri-state cover encoding (#214 — absent/null/key differ
+// carries the tri-state cover encoding (#214, absent/null/key differ
 // from create), and a flip carries every field with ONLY isActive
 // flipped (no cover key either way). The add-on applies-to matrix is
 // service-keyed in the write model (#137): toggling one add-on's applicability fans out into one
-// full-replace PUT per AFFECTED service — the diff below is that seam.
+// full-replace PUT per AFFECTED service, the diff below is that seam.
 // M5 #141 grows this seam with the testimonial, print-size, and attire
-// blocks — same template.
+// blocks, same template.
 
 import type {
   AddonService,
@@ -44,7 +44,7 @@ export interface BranchEditorState {
   name: string;
   address: string;
   phone: string;
-  // #248: raw coordinate inputs — '' = clear to null. Parsed to numbers in
+  // #248: raw coordinate inputs, '' = clear to null. Parsed to numbers in
   // the payload builders; validated with the same bounds/dp/pair rules the
   // wire schema enforces (packages/types).
   latitude: string;
@@ -71,9 +71,9 @@ export interface BranchEditorState {
 export interface StudioServiceEditorState {
   name: string;
   description: string;
-  /** ADR-0020: false = unpriced — the payload saves null and the entry is discarded. */
+  /** ADR-0020: false = unpriced, the payload saves null and the entry is discarded. */
   hasPrice: boolean;
-  /** NaN = nothing entered (the re-entry encoding — meaningful only when hasPrice). */
+  /** NaN = nothing entered (the re-entry encoding, meaningful only when hasPrice). */
   priceCents: number;
   isActive: boolean;
   branchIds: string[];
@@ -83,7 +83,7 @@ export interface StudioServiceEditorState {
 
 /**
  * The add-on editor's whole state. `#143 seam: the add-on state shape`.
- * `appliesToServiceIds` is in click order, same law as `branchIds` —
+ * `appliesToServiceIds` is in click order, same law as `branchIds`,
  * though applicability itself is service-keyed (#137), so this list only
  * drives the editor's matrix display; the write path is
  * `buildAddonMatrixDiff`.
@@ -91,9 +91,9 @@ export interface StudioServiceEditorState {
 export interface AddonEditorState {
   name: string;
   description: string;
-  /** ADR-0020: false = unpriced — the payload saves null and the entry is discarded. */
+  /** ADR-0020: false = unpriced, the payload saves null and the entry is discarded. */
   hasPrice: boolean;
-  /** NaN = nothing entered (the re-entry encoding — meaningful only when hasPrice). */
+  /** NaN = nothing entered (the re-entry encoding, meaningful only when hasPrice). */
   priceCents: number;
   isActive: boolean;
   appliesToServiceIds: string[];
@@ -122,7 +122,7 @@ export type LightFieldErrors = {
 /**
  * `#143 seam: read → branch state`. The read row minus server-managed
  * fields (id/createdAt/updatedAt); `coverImageKey` starts `undefined` (a
- * read never echoes keys, so there is nothing to echo — the cover is
+ * read never echoes keys, so there is nothing to echo, the cover is
  * unchanged until the editor says otherwise).
  */
 export function branchStateFromRead(row: BranchRead): BranchEditorState {
@@ -162,7 +162,7 @@ export function newBranchState(): BranchEditorState {
 }
 
 // #248: input-string → number|null. Returns null for '' (the clear
-// encoding); NaN never reaches a payload — validateBranchState gates the
+// encoding); NaN never reaches a payload, validateBranchState gates the
 // save first.
 function parseCoordinate(input: string): number | null {
   return input.trim() === '' ? null : Number(input);
@@ -186,7 +186,7 @@ function validateCoordinate(input: string, bound: number, label: string): string
   return undefined;
 }
 
-// #273: any https URL — transport check only (no host allowlist, owner-ruled).
+// #273: any https URL, transport check only (no host allowlist, owner-ruled).
 function validateMapsLink(input: string, label: string): string | undefined {
   const trimmed = input.trim();
   if (trimmed === '') {
@@ -205,7 +205,7 @@ function validateMapsLink(input: string, label: string): string | undefined {
 
 /**
  * `#143 seam: branch state → create payload` (M7 #214 split, the
- * package seam's law). The five fields explicit — the schema's defaults
+ * package seam's law). The five fields explicit, the schema's defaults
  * are never trusted client-side (#137's full-object PUT). `coverImageKey`
  * is included ONLY when the state carries a fresh staging key string.
  */
@@ -251,7 +251,7 @@ export function buildBranchUpdatePayload(state: BranchEditorState): UpdateBranch
  * `#143 seam: read → branch flip payload`. The read reshaped back into the
  * full-object update payload with ONLY `isActive` flipped. `coverImageKey`
  * is deliberately ABSENT: the absence is what makes a flip never re-verify
- * or clobber media — the cover is untouched by the PUT (the tri-state
+ * or clobber media, the cover is untouched by the PUT (the tri-state
  * encoding; the read never echoes keys anyway).
  */
 export function buildBranchFlipPayload(row: BranchRead, isActive: boolean): UpdateBranchInput {
@@ -262,7 +262,7 @@ export function buildBranchFlipPayload(row: BranchRead, isActive: boolean): Upda
     latitude: row.latitude,
     longitude: row.longitude,
     acceptsWalkIns: row.acceptsWalkIns,
-    // #273: the links are row data — a flip re-sends them untouched (ONLY
+    // #273: the links are row data, a flip re-sends them untouched (ONLY
     // isActive flips; null here would clobber existing links).
     googleMapsUrl: row.googleMapsUrl,
     appleMapsUrl: row.appleMapsUrl,
@@ -283,10 +283,10 @@ export function studioServiceStateFromRead(
     hasPrice: row.priceCents !== null,
     priceCents: row.priceCents ?? Number.NaN,
     isActive: row.isActive,
-    // The state owns its own copy — a push on editor state must never
+    // The state owns its own copy, a push on editor state must never
     // mutate the React Query cache row (#143 sweep: replace, never push).
     branchIds: [...row.bookableBranchIds],
-    // #332: a read never echoes keys — the cover is unchanged until the
+    // #332: a read never echoes keys, the cover is unchanged until the
     // editor says otherwise (the branch seam's law verbatim).
     coverImageUrl: row.coverImageUrl,
     coverImageKey: undefined,
@@ -301,7 +301,7 @@ export function newStudioServiceState(): StudioServiceEditorState {
   return {
     name: '',
     description: '',
-    // Owner ruling 2026-10-12: create defaults unchecked — pricing is an
+    // Owner ruling 2026-10-12: create defaults unchecked, pricing is an
     // explicit act; the fresh payload saves null.
     hasPrice: false,
     priceCents: Number.NaN,
@@ -314,7 +314,7 @@ export function newStudioServiceState(): StudioServiceEditorState {
 
 /**
  * `#143 seam: studio-service state → create payload` (#332, the #214
- * branch-builder split's law). The four entity fields ONLY — never the
+ * branch-builder split's law). The four entity fields ONLY, never the
  * matrix ids; relations ride their own full-replace PUTs
  * (`buildBranchMatrixPayload` / the add-on diff). `coverImageKey` is
  * included ONLY when the state carries a fresh staging key string.
@@ -351,10 +351,10 @@ export function buildStudioServiceUpdatePayload(
 
 /**
  * `#143 seam: read → studio-service flip payload`. The read reshaped
- * into the full-object update payload with ONLY `isActive` flipped —
+ * into the full-object update payload with ONLY `isActive` flipped:
  * every entity field carried, the flip never drops a field (#137).
  * `coverImageKey` is deliberately ABSENT: the absence is what makes a
- * flip never re-verify or clobber media — the cover is untouched by the
+ * flip never re-verify or clobber media, the cover is untouched by the
  * PUT (the tri-state encoding; the read never echoes keys anyway).
  */
 export function buildStudioServiceFlipPayload(
@@ -382,7 +382,7 @@ export function buildBranchMatrixPayload(
 /**
  * `#143 seam: read → add-on state`. From the row's own fields; the bare
  * `AddonService` read embeds no applicability ids, so
- * `appliesToServiceIds` starts empty — the editor fills it from the
+ * `appliesToServiceIds` starts empty, the editor fills it from the
  * services snapshot for display; the write path is
  * `buildAddonMatrixDiff`.
  */
@@ -405,7 +405,7 @@ export function newAddonState(): AddonEditorState {
   return {
     name: '',
     description: '',
-    // Owner ruling 2026-10-12: create defaults unchecked — pricing is an
+    // Owner ruling 2026-10-12: create defaults unchecked, pricing is an
     // explicit act; the fresh payload saves null.
     hasPrice: false,
     priceCents: Number.NaN,
@@ -429,7 +429,7 @@ export function buildAddonPayload(state: AddonEditorState): UpdateAddonServiceIn
 
 /**
  * `#143 seam: read → add-on flip payload`. The read reshaped into the
- * full-object update payload with ONLY `isActive` flipped — every entity
+ * full-object update payload with ONLY `isActive` flipped, every entity
  * field carried, the flip never drops a field (#137's deactivation
  * contract). Applicability is service-keyed and untouched by this PUT.
  */
@@ -446,20 +446,20 @@ export function buildAddonFlipPayload(
 }
 
 /**
- * `#143 seam: the add-on matrix diff` — THE matrix seam. The add-on
+ * `#143 seam: the add-on matrix diff`, THE matrix seam. The add-on
  * applies-to matrix is service-keyed (#137): toggling one add-on's
  * applicability fans out into one full-replace PUT per AFFECTED service.
  *
  * For each service in ARRAY order, `want = desired.includes(service.id)`,
  * `have = service.applicableAddonServiceIds.includes(addonId)`; when
  * `want !== have`, emit one entry whose payload is that service's FULL
- * new set — other add-on memberships preserved — so the client fan-out
+ * new set, other add-on memberships preserved, so the client fan-out
  * stays truthful against concurrent edits to OTHER relations. Only
  * affected services are emitted.
  *
  * The source of truth is the services snapshot the editor opened with:
  * a mid-edit concurrent change to THIS add-on's memberships is
- * overwritten — single-studio staff per ADR-0018, accepted.
+ * overwritten, single-studio staff per ADR-0018, accepted.
  */
 export function buildAddonMatrixDiff(
   services: StudioServiceWithBranches[],
@@ -485,7 +485,7 @@ export function buildAddonMatrixDiff(
 }
 
 /**
- * `#143 seam: branch validation` — mirrors the save schema's
+ * `#143 seam: branch validation`, mirrors the save schema's
  * client-relevant rules for inline marking (AQ-5): name/address/phone
  * min-1 (trimmed). An all-empty result = valid.
  */
@@ -500,7 +500,7 @@ export function validateBranchState(state: BranchEditorState): LightFieldErrors 
   if (state.phone.trim().length < 1) {
     errors.phone = 'Phone is required.';
   }
-  // #248: the pair rule is client-side too — both empty or both valid.
+  // #248: the pair rule is client-side too, both empty or both valid.
   const latitudeError = validateCoordinate(state.latitude, 90, 'Latitude');
   const longitudeError = validateCoordinate(state.longitude, 180, 'Longitude');
   if (latitudeError) {
@@ -529,8 +529,8 @@ export function validateBranchState(state: BranchEditorState): LightFieldErrors 
 }
 
 /**
- * `#143 seam: studio-service validation` — name + description min-1
- * (trimmed); `priceCents` ≥ 0 integer guard — the PRIMARY save-blocker
+ * `#143 seam: studio-service validation`, name + description min-1
+ * (trimmed); `priceCents` ≥ 0 integer guard, the PRIMARY save-blocker
  * for a checked-empty price (the Priced checkbox saves null; the schema
  * re-verifies). An all-empty result = valid.
  */
@@ -549,8 +549,8 @@ export function validateStudioServiceState(state: StudioServiceEditorState): Lig
 }
 
 /**
- * `#143 seam: add-on validation` — name + description min-1 (trimmed);
- * `priceCents` ≥ 0 integer guard — the PRIMARY save-blocker for a
+ * `#143 seam: add-on validation`, name + description min-1 (trimmed);
+ * `priceCents` ≥ 0 integer guard, the PRIMARY save-blocker for a
  * checked-empty price (the Priced checkbox saves null; the schema
  * re-verifies). An all-empty result = valid.
  */
@@ -604,7 +604,7 @@ export function newTestimonialState(): TestimonialEditorState {
 
 /**
  * `#143 seam: testimonial state → full-object PUT payload`. All three
- * fields explicit — the schema's `.default(true)` is never trusted
+ * fields explicit, the schema's `.default(true)` is never trusted
  * client-side (#137's full-object PUT: no undefined-vs-null merge
  * semantics).
  */
@@ -618,7 +618,7 @@ export function buildTestimonialPayload(state: TestimonialEditorState): UpdateTe
 
 /**
  * `#143 seam: read → testimonial flip payload`. The read reshaped back
- * into the full-object update payload with ONLY `isActive` flipped — the
+ * into the full-object update payload with ONLY `isActive` flipped, the
  * flip never drops a field, because the PUT is full-object and a missing
  * field would overwrite real data with the schema default (#137's
  * deactivation contract).
@@ -635,7 +635,7 @@ export function buildTestimonialFlipPayload(
 }
 
 /**
- * `#143 seam: testimonial validation` — mirrors the save schema's
+ * `#143 seam: testimonial validation`, mirrors the save schema's
  * client-relevant rules for inline marking (AQ-5): quote/person min-1
  * (trimmed). An all-empty result = valid.
  */
@@ -686,7 +686,7 @@ export function newPrintSizeState(): PrintSizeEditorState {
 
 /**
  * `#143 seam: print-size state → full-object PUT payload`. All three
- * fields explicit — the schema's `.default(true)` is never trusted
+ * fields explicit, the schema's `.default(true)` is never trusted
  * client-side (#137's full-object PUT: no undefined-vs-null merge
  * semantics).
  */
@@ -700,7 +700,7 @@ export function buildPrintSizePayload(state: PrintSizeEditorState): UpdatePrintS
 
 /**
  * `#143 seam: read → print-size flip payload`. The read reshaped back
- * into the full-object update payload with ONLY `isActive` flipped — the
+ * into the full-object update payload with ONLY `isActive` flipped, the
  * flip never drops a field, because the PUT is full-object and a missing
  * field would overwrite real data with the schema default (#137's
  * deactivation contract).
@@ -714,7 +714,7 @@ export function buildPrintSizeFlipPayload(row: PrintSize, isActive: boolean): Up
 }
 
 /**
- * `#143 seam: print-size validation` — mirrors the save schema's
+ * `#143 seam: print-size validation`, mirrors the save schema's
  * client-relevant rules for inline marking (AQ-5): code/description
  * min-1 (trimmed). An all-empty result = valid.
  */
@@ -760,7 +760,7 @@ export function newAttireState(): AttireEditorState {
 
 /**
  * `#143 seam: attire state → full-object PUT payload`. Both fields
- * explicit — the schema's `.default(true)` is never trusted client-side
+ * explicit, the schema's `.default(true)` is never trusted client-side
  * (#137's full-object PUT: no undefined-vs-null merge semantics).
  */
 export function buildAttirePayload(state: AttireEditorState): UpdateAttireInput {
@@ -772,7 +772,7 @@ export function buildAttirePayload(state: AttireEditorState): UpdateAttireInput 
 
 /**
  * `#143 seam: read → attire flip payload`. The read reshaped back into
- * the full-object update payload with ONLY `isActive` flipped — the flip
+ * the full-object update payload with ONLY `isActive` flipped, the flip
  * never drops a field, because the PUT is full-object and a missing field
  * would overwrite real data with the schema default (#137's deactivation
  * contract).
@@ -785,7 +785,7 @@ export function buildAttireFlipPayload(row: Attire, isActive: boolean): UpdateAt
 }
 
 /**
- * `#143 seam: attire validation` — mirrors the save schema's
+ * `#143 seam: attire validation`, mirrors the save schema's
  * client-relevant rules for inline marking (AQ-5): name min-1 (trimmed).
  * An all-empty result = valid.
  */
@@ -797,7 +797,7 @@ export function validateAttireState(state: AttireEditorState): LightFieldErrors 
   return errors;
 }
 
-// A single named re-export, never a barrel — #140 keeps #139's shared
+// A single named re-export, never a barrel, #140 keeps #139's shared
 // conflict→field-error mapper under one import path for the three
 // light-entity screens, re-exported (never re-implemented) per the seam.
 // biome-ignore lint/performance/noBarrelFile: single named re-export, per the ticket seam

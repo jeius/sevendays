@@ -3,7 +3,7 @@ import { logAccess, logEmail, logMediaFailure } from './events.js';
 import { createRequestLogger } from './logger.js';
 
 // The sink seam: every event lands on console.log as ONE JSON string (the
-// pino/browser write inside logger.ts) — tests capture that string and parse
+// pino/browser write inside logger.ts), tests capture that string and parse
 // it, so assertions run against exactly what `wrangler tail` would show.
 const captureLines = () => {
   const lines: string[] = [];
@@ -19,7 +19,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('event classes — enumerated field schemas (spec #175)', () => {
+describe('event classes, enumerated field schemas (spec #175)', () => {
   it('access: exactly the ruled keys at info; actorId omitted when the session did not verify', () => {
     const lines = captureLines();
     logAccess(createRequestLogger('req-unit-1'), {

@@ -15,18 +15,18 @@ import {
 } from './admin.functions';
 import { getSiteSettings } from './api.functions';
 
-// Query key factories for the admin CMS (M5 #139) — the branchQueries
+// Query key factories for the admin CMS (M5 #139), the branchQueries
 // precedent, one factory per resource the ticket 05 screens consume.
 //
 // M8 #288 (the Warm/Cold contract, spec D4): every factory carries the
-// ruled 5-minute staleness — within the window TanStack Query renders the
+// ruled 5-minute staleness, within the window TanStack Query renders the
 // cached rows instantly (Warm Navigation, zero network) and a background
 // refetch always follows once stale (bounded staleness: nothing shown is
 // more than five minutes behind; cross-staff edit lag up to that refetch
 // is accepted). refetchOnWindowFocus is stated explicitly, the metrics/
 // audit factories' posture. Own-mutation invalidation (the screens'
 // invalidateQueries calls, all keyed through these factories) overrides
-// staleness — a save refetches immediately regardless of the window; the
+// staleness, a save refetches immediately regardless of the window; the
 // query keys are byte-stable and pinned by cms-queries.test.ts.
 
 export const CMS_STALENESS_MS = 300_000;
@@ -122,7 +122,7 @@ export const adminTestimonialQueries = {
     }),
 };
 
-// M7 #218: the Submissions tab's queue — newest-first from the API (#216's list).
+// M7 #218: the Submissions tab's queue, newest-first from the API (#216's list).
 export const adminTestimonialSubmissionQueries = {
   all: () =>
     queryOptions({
@@ -133,7 +133,7 @@ export const adminTestimonialSubmissionQueries = {
     }),
 };
 
-// M7 #215: the singleton's one query — the public read the Site tab loads.
+// M7 #215: the singleton's one query, the public read the Site tab loads.
 export const siteSettingsQuery = {
   all: () =>
     queryOptions({
@@ -145,17 +145,17 @@ export const siteSettingsQuery = {
 };
 
 // The loader-time priming seam (M8 #288): CMS route loaders hand these
-// thunks to primeCmsQueries so a hover-intent navigation — the router's
-// defaultPreload: 'intent' already runs route loaders on hover — starts
+// thunks to primeCmsQueries so a hover-intent navigation, the router's
+// defaultPreload: 'intent' already runs route loaders on hover, starts
 // the screen's reads before the click. queryClient.query() is the
 // non-deprecated fetch path in @tanstack/react-query 5.102.8
 // (ensureQueryData/fetchQuery/prefetchQuery are all removed-next-major
 // there): it fetches when the cache is missing or stale, serves fresh
 // data with zero requests, and its in-flight fetch dedupes with the
-// screen's own useQuery — priming never doubles a read.
+// screen's own useQuery, priming never doubles a read.
 //
 // Fire-and-forget BY DESIGN: primeCmsQueries never awaits, so a loader
-// can never block a navigation — the Cold skeleton stays the screens'
+// can never block a navigation, the Cold skeleton stays the screens'
 // existing isPending vocabulary (spec user story 2), and the
 // hover-started fetch is already in flight when the click lands (Cold
 // Navigations shorten, the skeleton contract holds). A rejected read is
@@ -170,7 +170,7 @@ export function primeCmsQueries(primes: ReadonlyArray<() => Promise<unknown>>): 
 // The per-route priming lists: exactly the cms-queries factories each CMS
 // screen consumes (the editor routes add the lookups; the screens with
 // cross-entity badges add the branches/services reads). Kept beside the
-// factories so a factory edit and its route's priming can never drift —
+// factories so a factory edit and its route's priming can never drift;
 // the seam test pins every list. Thunks, not pre-built options, so each
 // queryClient.query() call infers its own generics from the concrete
 // factory options (a shared generic param fails their contravariance).

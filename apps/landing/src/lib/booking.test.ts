@@ -388,7 +388,7 @@ describe('unpriced totals (ADR-0020)', () => {
     addons: [{ ...addon(UNPRICED_ADDON_ID, 0), priceCents: null }, addon(PRICED_ADDON_ID, 12000)],
   };
 
-  it('an unpriced offering nulls offeringPriceCents and totalCents — never a ₱0 stand-in', () => {
+  it('an unpriced offering nulls offeringPriceCents and totalCents, never a ₱0 stand-in', () => {
     const offering = { kind: 'package' as const, id: UNPRICED_PKG_ID };
     expect(offeringPriceCents(offering, unpricedCatalog)).toBeNull();
     expect(totalCents(offering, [PRICED_ADDON_ID], unpricedCatalog)).toBeNull();

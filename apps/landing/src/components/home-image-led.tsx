@@ -19,15 +19,15 @@ import { MosaicPhotoGrid } from './mosaic-photo-grid';
 
 // The ruled home composition (#164 Round 2, closed "all goods" 2026-10-01;
 // built M7 #223), one voice per section (kickers retired; serif headings
-// carry — the settings kicker fields drive the heading TEXT now, defaults
-// in code). Slot map: 1 hero under the glass bar (-mt-14 — the photo reads
+// carry, the settings kicker fields drive the heading TEXT now, defaults
+// in code). Slot map: 1 hero under the glass bar (-mt-14, the photo reads
 // through the bar) → 2 the LIVE mosaic gallery (no title-captions on home)
 // → 3 featured as D2 light split plates → 4 the full-bleed 3-copy services
 // marquee (desktop) / JS transform stepper (mobile) → 5 REAL testimonials,
-// paginated 3/page with a page-change reveal — the page's last section
+// paginated 3/page with a page-change reveal, the page's last section
 // (the #92 emphasis strip that closed it is retired: M7 post-flight #241).
 // The copy consumes site settings end to end (hero title/blurb, eyebrow,
-// the four section headings) — defaults when unset.
+// the four section headings), defaults when unset.
 const SIDES_COUNT = 2;
 
 export function HomeImageLed({
@@ -45,12 +45,12 @@ export function HomeImageLed({
 }) {
   const selection = selectFeaturedPackages(packages);
   // The read arrives resolved (defaults applied at the server-fn seam), but
-  // SiteSettings keeps nullability at the type level — coalesce to the
+  // SiteSettings keeps nullability at the type level, coalesce to the
   // selection's own ruled heading (byte-identical to the #215 default).
   const featuredHeading = selection.isFeatured
     ? (settings.kickerPackages ?? selection.heading)
     : selection.heading;
-  // Round 2 owner ruling: paginated testimonials — 3 per page (a
+  // Round 2 owner ruling: paginated testimonials, 3 per page (a
   // pull-quote lead + side rail on every page), non-looping.
   const pages = paginateTestimonials(testimonials);
   const [page, setPage] = useState(0);
@@ -58,13 +58,13 @@ export function HomeImageLed({
   const current = pages[safePage]?.items ?? [];
   const lead = current[0];
   const sides = current.slice(1, SIDES_COUNT + 1);
-  // OWNER-RULED: the services carousel on MOBILE is a JS transform stepper
-  // — each card CENTERED in the viewport, one card per 3.5s interval, drag
+  // OWNER-RULED: the services carousel on MOBILE is a JS transform stepper:
+  // each card CENTERED in the viewport, one card per 3.5s interval, drag
   // with snap-to-nearest on release, wrapping seamlessly through the
   // identical loop copies. Scroll-snap + programmatic smooth scrolling
   // proved browser-fragile twice in the arc, so NO native scrolling is
   // involved: the track moves by transform, the container never scrolls.
-  // DESKTOP keeps the pure CSS marquee — the md: animation overrides the
+  // DESKTOP keeps the pure CSS marquee, the md: animation overrides the
   // inline transform, and every stepper path early-returns at md. Reduced
   // motion = instant steps, still on the interval (auto-scroll is the
   // owner's explicit ask).
@@ -95,7 +95,7 @@ export function HomeImageLed({
       vIndex.current += 1;
       apply(true);
       if (vIndex.current >= count) {
-        // Slid into the identical first loop copy — normalize silently
+        // Slid into the identical first loop copy, normalize silently
         // once the transition has settled (identical pixels, invisible).
         window.setTimeout(() => {
           vIndex.current -= count;
@@ -157,9 +157,9 @@ export function HomeImageLed({
 
   return (
     <div>
-      {/* 1 — Hero under the glass bar: the photo reads through the ruled
+      {/* 1, Hero under the glass bar: the photo reads through the ruled
           chrome (-mt-14 = the 56px bar). Copy consumes settings (title,
-          blurb, brand eyebrow) — the incumbent photo and CTAs stand. */}
+          blurb, brand eyebrow), the incumbent photo and CTAs stand. */}
       <section className='relative isolate overflow-hidden bg-brand-ink -mt-14'>
         <img
           src={HERO_PHOTO}
@@ -202,7 +202,7 @@ export function HomeImageLed({
         </div>
       </section>
 
-      {/* 2 — Gallery: the LIVE read's mosaic wall — no title-captions on
+      {/* 2, Gallery: the LIVE read's mosaic wall, no title-captions on
           home (ruled; captions render on about's wall, #224). */}
       <section className='border-line-soft border-b' data-strip='gallery'>
         <div className='mx-auto max-w-5xl px-6 py-16'>
@@ -212,7 +212,7 @@ export function HomeImageLed({
           {gallery.photos.length > 0 ? (
             <MosaicPhotoGrid photos={gallery.photos} />
           ) : (
-            // The shared wall's ruled line (about's placeholder law) — a
+            // The shared wall's ruled line (about's placeholder law), a
             // zero-photo read still reads as deliberate.
             <p className='text-muted-foreground mt-8'>Portfolio coming soon.</p>
           )}
@@ -225,13 +225,13 @@ export function HomeImageLed({
         </div>
       </section>
 
-      {/* 3 — Featured packages: the ruled D2 plates. The M5 empty-state
+      {/* 3, Featured packages: the ruled D2 plates. The M5 empty-state
           rule stands: zero ACTIVE packages collapse the strip ENTIRELY. */}
       {packages.length > 0 && (
         <FeaturedPlates heading={featuredHeading} strip={selection.packages} />
       )}
 
-      {/* 4 — Services: the full-bleed 3-copy marquee (desktop) — the track
+      {/* 4, Services: the full-bleed 3-copy marquee (desktop), the track
           holds the list three times so -33.3333% is one copy-width (two
           full copies always remain behind the loop point on any screen);
           hover pauses; the edge mask fades the cards at the viewport. A
@@ -288,7 +288,7 @@ export function HomeImageLed({
         </section>
       )}
 
-      {/* 5 — Testimonials: REAL client words (the audit's stand-in gap
+      {/* 5, Testimonials: REAL client words (the audit's stand-in gap
           closes), paginated with a page-change reveal. */}
       <section className='border-line-soft border-y bg-wash-b' data-strip='testimonials'>
         <div className='mx-auto max-w-5xl px-6 py-16'>
@@ -373,7 +373,7 @@ export function HomeImageLed({
               </Link>
             </>
           ) : (
-            // The ruled empty line — real rows arrive with the CMS.
+            // The ruled empty line, real rows arrive with the CMS.
             <p className='text-muted-foreground mt-6'>
               Client words are on their way; check back soon.
             </p>

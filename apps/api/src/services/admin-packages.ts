@@ -33,18 +33,18 @@ import { commitUpload, resolveMediaUrl } from './media.js';
 import { assemblePackageRead } from './service-packages.js';
 
 // The package write model (M5 #137, spec § Mutation shapes): one atomic
-// save — entity fields + coverImageKey + frames[] + inclusions[] in ONE
+// save, entity fields + coverImageKey + frames[] + inclusions[] in ONE
 // transaction. Array order is the order: frameNumber = frames array order,
 // inclusion position = array order, junction position = attire order per
 // inclusion (all 1-based). Children are REWRITTEN (delete + insert) inside
-// the transaction — nothing references frame/inclusion ids durably
+// the transaction, nothing references frame/inclusion ids durably
 // (appointments snapshot at the package level; reads re-assemble per
 // request), so row-id churn is invisible. A bad reference throws
-// AdminSaveError INSIDE the transaction — a returned failure value would
+// AdminSaveError INSIDE the transaction, a returned failure value would
 // COMMIT the rows already written; the throw is what makes drizzle roll
 // back (the "no partial junction writes" guarantee). The whole transaction
 // rides guardUnique so a raced 23505 lands in the same 400 vocabulary.
-// M6 #185: the save's transaction now ends with its audit row — one per
+// M6 #185: the save's transaction now ends with its audit row, one per
 // REQUEST (the spec's request-grain ruling).
 
 type PackageRow = typeof servicePackages.$inferSelect;
@@ -59,7 +59,7 @@ const PACKAGE_UNIQUE: Record<string, string> = {
 };
 
 // The advanced-slug format (agent ruling): exactly the alphabet
-// slugifyName emits — lowercase letters/digits joined by single dashes.
+// slugifyName emits, lowercase letters/digits joined by single dashes.
 // Keeps the /packages/:slug URL space stable; the editor's break-links
 // warning precedes this in the UI.
 const SLUG_FORMAT = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -71,10 +71,10 @@ function toRead(row: ServicePackageWithInclusions, env: SaveEnv): ServicePackage
 }
 
 /**
- * The five reads + stitch scoped to the given rows — the public readers'
+ * The five reads + stitch scoped to the given rows, the public readers'
  * query bodies with NO activity filter anywhere (admin reads include
  * deactivated rows and always assemble the FULL composition). Order pin:
- * inclusions AND junctions by (position, id) — the save rewrites children
+ * inclusions AND junctions by (position, id), the save rewrites children
  * with fresh uuids, so an id-ordering would scramble after the first PUT;
  * positions are the maintained order. (The public reads keep created_at/id
  * until #138.)
@@ -140,13 +140,13 @@ type CoverResolution = { ok: true; finalKey: string | null | undefined } | Admin
 
 /**
  * The cover commit (controller ruling): HEAD-verify through ticket 02's
- * commitUpload ONLY when a key is present — presence-encoding makes
+ * commitUpload ONLY when a key is present, presence-encoding makes
  * "changed" structural (stored keys are immutable final keys, inputs are
  * staging keys, and the staging-key regex rejects final keys, so a present
  * string is always a new bind). undefined = unchanged, null = clear,
  * string = bind/replace. A commit failure re-paths its details onto the
  * payload field and resolves as the conflict failure (→ 400). Runs BEFORE
- * the transaction — bucket I/O never holds a tx open.
+ * the transaction, bucket I/O never holds a tx open.
  */
 async function resolveCover(
   env: SaveEnv,
@@ -161,7 +161,7 @@ async function resolveCover(
   });
   if (!commit.ok) {
     // M6 #183: the cover-commit seam's typed failure (see admin-gallery's
-    // commitStagingKey — the route-level 'conflict' cannot name it).
+    // commitStagingKey, the route-level 'conflict' cannot name it).
     if (log) {
       logMediaFailure(log, { op: 'commit', reason: commit.reason });
     }
@@ -191,7 +191,7 @@ function entityFields(input: CreateServicePackageInput | UpdateServicePackageInp
 /**
  * The transaction body's order is deliberate: current-row resolve → name/
  * slug pre-checks → ROW WRITE → reference checks → children rewrite. The
- * reference checks run AFTER the row write so the rollback is observable —
+ * reference checks run AFTER the row write so the rollback is observable:
  * an invalid reference throwing once the entity row is written is exactly
  * what the PUT-rollback test asserts (the rename did not stick).
  */
@@ -266,7 +266,7 @@ async function runPackageSave(
           if (clash) {
             // The spec's ruling: a create-time slug collision IS a name
             // collision. They part ways only when a different name collapses
-            // to the same slug — name whichever field actually clashed.
+            // to the same slug, name whichever field actually clashed.
             throw new AdminSaveError(conflict(clash.name === args.input.name ? 'name' : 'slug'));
           }
           const [created] = await tx
@@ -281,7 +281,7 @@ async function runPackageSave(
           packageId = created.id;
         }
 
-        // Reference resolution (inside the tx — a throw rolls back everything).
+        // Reference resolution (inside the tx, a throw rolls back everything).
         const printSizeIds = [
           ...new Set(
             args.input.inclusions
@@ -391,10 +391,10 @@ async function runPackageSave(
         if (junctionPairs.length > 0) {
           await tx.insert(packageInclusionAttires).values(junctionPairs);
         }
-        // M6 #185: the atomic save is ONE committed request — entity row,
+        // M6 #185: the atomic save is ONE committed request, entity row,
         // children, and this audit row commit together or not at all (an
         // AdminSaveError above has already rolled everything back, row
-        // included — the mid-tx test's gate).
+        // included, the mid-tx test's gate).
         const action: AuditAction =
           args.updateId === null
             ? 'create'
@@ -412,7 +412,7 @@ async function runPackageSave(
     );
   } catch (error) {
     // The rollback channel's other half (admin-shared.ts's AdminSaveError
-    // contract — "caught by the save's caller and mapped back into the same
+    // contract, "caught by the save's caller and mapped back into the same
     // union"): the throw already aborted the transaction, so the carried
     // failure resolves here. Anything that is not a save error keeps
     // propagating (guardUnique already passed it through; the root onError
@@ -424,7 +424,7 @@ async function runPackageSave(
   const saved = outcome.row;
   if (!saved.ok) return saved;
   // After-commit bucket hygiene: the replaced/cleared cover's old object is
-  // deleted only AFTER the save committed — a rolled-back save never deletes
+  // deleted only AFTER the save committed, a rolled-back save never deletes
   // (the row still points at it), and in-place overwrite never happens.
   const storedAfter = args.finalKey === undefined ? oldCoverKey : args.finalKey;
   if (oldCoverKey && storedAfter !== oldCoverKey) {
@@ -453,7 +453,7 @@ export async function createAdminPackage(
     updateId: null,
   });
   // The save's not_found branch is PUT-only (it fires when updateId misses);
-  // with updateId statically null it cannot fire — the guard keeps the wider
+  // with updateId statically null it cannot fire, the guard keeps the wider
   // AdminWriteResult honest at the type level instead of a cast.
   if (!result.ok && result.reason === 'not_found') {
     throw new Error('package create: not_found is unreachable (updateId is null)');

@@ -1,5 +1,5 @@
 // The Global Search engine seam (M9 #315, D7/D8): a hand-wired fuse.js
-// matcher over the #288-cached admin list arrays — identity fields weigh
+// matcher over the #288-cached admin list arrays, identity fields weigh
 // above body fields (weights pinned here, the spec's execution-tuning
 // clause), the gallery photos join their category's name client-side (a
 // free Map over the separate cached categories query, so "graduation"
@@ -7,11 +7,11 @@
 // under the four fixed headers capped at 5 with the "+N more" tail. cmdk's
 // built-in filter cannot serve the inline-dropdown posture (it only
 // filters items driven by its own Command.Input inside its tree, and the
-// dropdown types into the topbar, outside it) — matching lives HERE and
+// dropdown types into the topbar, outside it), matching lives HERE and
 // only here; the component's cmdk tree runs shouldFilter={false} as the
 // headless listbox core. Every customer-visible string is one-sourced in
 // SEARCH_COPY (D5's ratified table + the 2026-11-17 owner rulings). No
-// React — the component composes this; the plain-node suite pins it.
+// React, the component composes this; the plain-node suite pins it.
 import type {
   BranchRead,
   GalleryCategory,
@@ -28,7 +28,7 @@ export type SearchGroupKey = 'packages' | 'branches' | 'testimonials' | 'gallery
 /** The ruled cap (D9): 5 per group; the rest answer as the overflow count. */
 export const SEARCH_GROUP_CAP = 5;
 
-/** The identity weight (names, persons, titles) — pinned, identity > body (#302). */
+/** The identity weight (names, persons, titles), pinned, identity > body (#302). */
 export const SEARCH_IDENTITY_WEIGHT = 2;
 
 /** The body weight (descriptions, addresses, quotes, captions, the joined category name). */
@@ -38,7 +38,7 @@ const FUSE_THRESHOLD = 0.3;
 
 // D5's ratified copy table (one source; the component imports, never
 // re-declares). The no-results period sits INSIDE the closing curly quote
-// and the group labels are the ruled four — both owner-ruled, byte-pinned
+// and the group labels are the ruled four, both owner-ruled, byte-pinned
 // by the suite.
 export const SEARCH_COPY = {
   hint: 'Type to search packages, branches, testimonials, gallery',
@@ -55,7 +55,7 @@ export const SEARCH_COPY = {
 
 // Where a result lands (D10): the entity's list screen with the uniform
 // ?focus=<id> param. THIS seam emits the href; #316's landing honors it
-// (scroll into view + highlight) — nothing here reads or registers params.
+// (scroll into view + highlight), nothing here reads or registers params.
 const GROUP_ROUTES: Record<SearchGroupKey, string> = {
   packages: '/packages',
   branches: '/branches',
@@ -67,18 +67,18 @@ export function focusUrlFor(group: SearchGroupKey, id: string): string {
   return `${GROUP_ROUTES[group]}?focus=${id}`;
 }
 
-/** One rendered result row — everything the item anatomy needs (D9). */
+/** One rendered result row, everything the item anatomy needs (D9). */
 export interface SearchHit {
   id: string;
   group: SearchGroupKey;
-  /** Identity field — the primary line. */
+  /** Identity field, the primary line. */
   primary: string;
-  /** Body field — the one-line secondary snippet ('' when none). */
+  /** Body field, the one-line secondary snippet ('' when none). */
   secondary: string;
   deactivated: boolean;
-  /** Packages only — the peso-formatted price ('' when unpriced, ADR-0020). */
+  /** Packages only, the peso-formatted price ('' when unpriced, ADR-0020). */
   price: string;
-  /** Gallery only — the #287 versioned thumb URL; null elsewhere. */
+  /** Gallery only, the #287 versioned thumb URL; null elsewhere. */
   thumbUrl: string | null;
   focusUrl: string;
 }
@@ -167,11 +167,11 @@ const toPhotoHit = (row: IndexedPhoto): SearchHit => ({
 });
 
 /**
- * Builds the four per-entity Fuse indexes over cached-shaped arrays (D8 —
+ * Builds the four per-entity Fuse indexes over cached-shaped arrays (D8:
  * the exact shapes the #288 factories deliver, deactivated rows included).
  * The category join is a free client-side Map: a missing or null
  * categoryId joins to '' (uncategorized photos search their own fields
- * only). Excluded everywhere: slugs, branch phone, frames/inclusions —
+ * only). Excluded everywhere: slugs, branch phone, frames/inclusions;
  * system identifiers and junction data, not search surface.
  */
 export function buildSearchIndex(input: SearchIndexInput): SearchIndex {
@@ -226,7 +226,7 @@ export function buildSearchIndex(input: SearchIndexInput): SearchIndex {
  * One pass over the index: relevance-ordered per group (fuse's weighted
  * score), capped at SEARCH_GROUP_CAP with the remainder as overflow, the
  * four groups in FIXED order with empty groups omitted. Zero query answers
- * [] — the hint line, never browse-all.
+ * [], the hint line, never browse-all.
  */
 export function runSearch(index: SearchIndex, query: string): SearchGroup[] {
   const needle = query.trim().toLowerCase();

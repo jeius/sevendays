@@ -4,8 +4,8 @@ import { testEnv } from './helpers/env.js';
 
 const url = process.env.TEST_DATABASE_URL as string;
 
-// 404 half of the 404/405 ledger item: every unmounted path — top-level
-// and under /api/v1 — returns the uniform JSON envelope, never Hono's
+// 404 half of the 404/405 ledger item: every unmounted path, top-level
+// and under /api/v1, returns the uniform JSON envelope, never Hono's
 // bare plain-text default (which would degrade the M2 api-client to `unknown`).
 describe('uniform 404 envelope', () => {
   it('returns uniform JSON 404 for an unknown path under /api/v1', async () => {
@@ -33,7 +33,7 @@ describe('GET /health', () => {
 });
 
 // 500 + log policy (closes "log-before-500" fully, user stories 2 + 6):
-// every thrown error — from the acquisition middleware or a handler — reaches
+// every thrown error, from the acquisition middleware or a handler, reaches
 // the root onError, which logs it once with the route and returns the uniform
 // 500. Two distinct paths are proven over real Postgres via the in-app
 // request style: a missing DATABASE_URL (middleware throws on acquisition) and
@@ -48,7 +48,7 @@ describe('uniform 500 envelope + structured error events', () => {
     vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
       lines.push(String(args[0]));
     });
-    // FULL env (the schema requires RESEND_API_KEY/LANDING_ORIGIN too — a
+    // FULL env (the schema requires RESEND_API_KEY/LANDING_ORIGIN too, a
     // bare env dies as ZodError in the acquisition middleware before any
     // query) + a refused port: postgres.js fails fast (~4-10ms), the
     // handler's query throws, drizzle-orm 0.45.2 wraps it as DrizzleQueryError.
@@ -64,7 +64,7 @@ describe('uniform 500 envelope + structured error events', () => {
     expect(errorLines).toHaveLength(1);
     // DrizzleQueryError's message names the failing query (the raw cause
     // rides .cause); its constructor never sets .name, so the line's name
-    // reads 'Error' — assert the wrapper-identifying message instead.
+    // reads 'Error', assert the wrapper-identifying message instead.
     expect(String(errorLines[0]?.message)).toMatch(/Failed query/);
     expect(errorLines[0]?.route).toBe('/api/v1/branches'); // matched route → the pattern
   });
@@ -89,7 +89,7 @@ describe('uniform 500 envelope + structured error events', () => {
 // 405 deferral (spec Out of Scope): Hono has no built-in method-mismatch
 // surface, so a GET-only route hit with POST returns 404 (not 405) today.
 // Lock the current behavior so a future M2-pre-flight change can't silently
-// regress it — 405 belongs beside that restructure, not here.
+// regress it, 405 belongs beside that restructure, not here.
 describe('method mismatch (405 deferred)', () => {
   it('returns 404 for POST on a GET-only route', async () => {
     const res = await app.request('/api/v1/branches', { method: 'POST' }, testEnv(url));

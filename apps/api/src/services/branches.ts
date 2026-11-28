@@ -17,11 +17,11 @@ function toBranchRead(row: typeof branches.$inferSelect, env: MediaEnv): BranchR
 
 /**
  * The public branches read (M5 #138): ACTIVE rows only, name-ordered, the
- * row-level flip never a shape change — plus the M7 #214 cover resolution
+ * row-level flip never a shape change, plus the M7 #214 cover resolution
  * (coverImageUrl on the wire, raw keys never leaving). Gated appointment
- * reads resolve deactivated branches independently — they never join this
+ * reads resolve deactivated branches independently, they never join this
  * read (the appointments projection carries branchId; the landing's
- * confirmation join degrades to its documented '—' fallback).
+ * confirmation join degrades to its documented '-' fallback).
  */
 export async function listBranches(db: Database, env: MediaEnv): Promise<BranchRead[]> {
   const rows = await db

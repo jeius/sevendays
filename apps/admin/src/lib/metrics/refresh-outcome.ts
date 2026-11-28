@@ -1,10 +1,10 @@
 // The Refresh outcome evaluator (#187 close-out feedback): the seam
-// RESOLVES source failures (MetricsResult unions — nothing throws except
+// RESOLVES source failures (MetricsResult unions, nothing throws except
 // the session gate), so "the refresh failed" is derived from the query
 // cache after the fetch settles. Precedence: a thrown query error (the
 // gate, an SSR transport fault) is the loud case; resolved 'unavailable'
 // sources are named; 'not-configured' is the designed interim state, not
-// a failure, and stays silent. Pure — the RefreshButton snapshots the
+// a failure, and stays silent. Pure, the RefreshButton snapshots the
 // cache onto the structural snapshot type and renders the toast.
 export type RefreshQuerySnapshot = {
   queryKey: readonly unknown[];
@@ -53,11 +53,11 @@ export function refreshOutcomeMessage(snapshots: RefreshQuerySnapshot[]): string
     }
   }
   if (thrownCount > 0) {
-    return `Refresh failed — ${firstError}.`;
+    return `Refresh failed: ${firstError}.`;
   }
   if (unavailable.length > 0) {
     const noun = unavailable.length === 1 ? 'source' : 'sources';
-    return `Refresh completed with ${unavailable.length} ${noun} unavailable — ${unavailable.join(', ')}.`;
+    return `Refresh completed with ${unavailable.length} ${noun} unavailable: ${unavailable.join(', ')}.`;
   }
   return null;
 }

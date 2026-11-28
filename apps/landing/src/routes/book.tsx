@@ -73,7 +73,7 @@ function BookPage() {
     apiMessage: string;
   } | null>(null);
   // Inline Zod errors (#58 ruling): a field shows its message only after the
-  // customer blurs it still-invalid — display-only state, never part of the
+  // customer blurs it still-invalid, display-only state, never part of the
   // gate. The gate itself is the M2 predicate restated as contactSchema
   // (booking-contact.test.ts pins the equivalence).
   const [touched, setTouched] = useState({ name: false, email: false, phone: false });
@@ -107,7 +107,7 @@ function BookPage() {
           container width. */}
       <StepProgress step={wizard.step} className='mt-6' />
       {/* Layout frozen (M2): 1fr + 16rem rail. The step content moves onto
-          the white card (#92 atmosphere) — which also puts every
+          the white card (#92 atmosphere), which also puts every
           destructive-bearing text (past hint, inline errors, rejection
           card) on a card surface per the spec placement rule. */}
       <div className='mt-6 grid gap-8 md:grid-cols-[1fr_16rem]'>
@@ -218,7 +218,7 @@ function BookPage() {
                   ))}
                 </div>
               )}
-              {/* Exactly one of these renders (M2 behavior) — both must stay
+              {/* Exactly one of these renders (M2 behavior), both must stay
                   DIRECT children of the section: the e2e clicks
                   `section[data-step='3'] > button` for Continue. */}
               {wizard.addonIds.length > 0 ? (
@@ -261,7 +261,7 @@ function BookPage() {
                   That time has already passed; pick a later slot.
                 </p>
               )}
-              {/* DIRECT child of the section — the scripts click
+              {/* DIRECT child of the section, the scripts click
                   `section[data-step='4'] > button`; the chips live inside
                   HourChipGrid's wrapping div. */}
               <button

@@ -1,5 +1,5 @@
 // The Site tab (M7 #215, moved verbatim at #221 when the Settings screen
-// became the three-tab strip): the all-staff singleton editor — ONE
+// became the three-tab strip): the all-staff singleton editor, ONE
 // full-object save, unset fields fall back to the defaults pinned in
 // packages/types. The Save button moved from the screen header to this
 // tab's footer when the header stopped being Site-only; its shape is
@@ -110,7 +110,7 @@ const ICON_FIELDS: {
 ];
 
 // The compact row (the ruled variant C): the label right-aligned in a
-// 10rem column, the control filling the rest — no per-field hints.
+// 10rem column, the control filling the rest, no per-field hints.
 function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
     <div className='grid grid-cols-[10rem_1fr] items-center gap-x-3 gap-y-1'>
@@ -126,7 +126,7 @@ export function SiteTab() {
   const [editorState, setEditorState] = useState<SiteSettingsEditorState | null>(null);
   const [fieldErrors, setFieldErrors] = useState<SiteSettingsFieldErrors>({});
 
-  // The logo loop (M7 #215 — the #214 Cover card ported to the 'site-logo'
+  // The logo loop (M7 #215, the #214 Cover card ported to the 'site-logo'
   // purpose): presign → XHR PUT → the staging key rides the NEXT save.
   const [logoStatus, setLogoStatus] = useState<CoverUploadStatus>({ phase: 'idle' });
   const fileInputRef = useRef<HTMLInputElement>(null);

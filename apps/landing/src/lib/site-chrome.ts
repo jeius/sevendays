@@ -1,7 +1,7 @@
 import type { SiteSettings } from '@sevendays/types';
 
 // The chrome's site-settings consumption seams (M7 #223): pure shapers over
-// the RESOLVED settings (the server fn applies resolveSiteSettings — these
+// the RESOLVED settings (the server fn applies resolveSiteSettings, these
 // never see a raw null-default mix). Three laws live here: the banner
 // renders NOTHING when off or untitled (never a broken strip); unset
 // social links hide (the row collapses when all are unset); the contact

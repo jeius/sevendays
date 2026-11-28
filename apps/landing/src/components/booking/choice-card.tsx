@@ -2,10 +2,10 @@ import { cn } from 'cn';
 import type { ReactNode } from 'react';
 
 // The wizard's select card (#58 inventory): one shell for the branch /
-// offering / add-on steps — radio semantics where the step is single-select
+// offering / add-on steps, radio semantics where the step is single-select
 // (branch, offering), checkbox semantics where it's multi-select (add-ons).
 // Frozen-flow adjudication (#99): the M2 keyboard behavior is Tab + Enter
-// per card, so the honest ARIA mapping is the toggle button (aria-pressed) —
+// per card, so the honest ARIA mapping is the toggle button (aria-pressed):
 // real radio/checkbox roles would promise arrow-key group navigation the
 // frozen flow doesn't have. offeringId is the CDP seam (data-offering).
 export function ChoiceCard({
@@ -27,7 +27,7 @@ export function ChoiceCard({
       onClick={onSelect}
       className={cn(
         'focus-visible:ring-brand-focus-ring rounded-xl border p-4 text-left transition-colors focus-visible:ring-3',
-        // DM-2 (#217): the name span inherits the card's state color —
+        // DM-2 (#217): the name span inherits the card's state color:
         // selected keeps ink on the fixed near-white chip; unselected rides
         // the token card as it flips.
         selected

@@ -45,7 +45,7 @@ const fullSave = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-// undefined JSON.stringify's away — the absent-encoding rides cleanly.
+// undefined JSON.stringify's away, the absent-encoding rides cleanly.
 const put = async (
   token: string,
   body: Record<string, unknown>,
@@ -62,11 +62,11 @@ const put = async (
   );
 
 beforeEach(async () => {
-  await truncateAll(db); // the suite needs no catalog fixtures — the singleton starts empty
+  await truncateAll(db); // the suite needs no catalog fixtures, the singleton starts empty
 });
 
 describe('GET /api/v1/site-settings (the public singleton read)', () => {
-  it('born-empty: answers the EMPTY wire verbatim — defaults never ride the read (M7 #215)', async () => {
+  it('born-empty: answers the EMPTY wire verbatim, defaults never ride the read (M7 #215)', async () => {
     const res = await app.request('/api/v1/site-settings', undefined, testEnv(url));
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -96,7 +96,7 @@ describe('PUT /api/v1/admin/site-settings (the singleton full-object save)', () 
     expect(body).not.toHaveProperty('logoImageKey');
     const rows = await db.select({ id: siteSettings.id }).from(siteSettings);
     expect(rows).toHaveLength(1);
-    // A second save UPDATES the same row — never a second one.
+    // A second save UPDATES the same row, never a second one.
     expect((await put(token, fullSave({ brandName: 'Renamed' }))).status).toBe(200);
     const again = await db.select({ id: siteSettings.id }).from(siteSettings);
     expect(again).toHaveLength(1);
@@ -151,7 +151,7 @@ describe('PUT /api/v1/admin/site-settings (the singleton full-object save)', () 
   });
 
   it('a missing staging key → the house 400 with the logoImageKey field detail (the commit re-path)', async () => {
-    const stub = stubCommitBucket(); // empty — head misses
+    const stub = stubCommitBucket(); // empty, head misses
     const { token } = await signUpSession(url, 'site-settings-logo-miss@sevendays.test');
     const res = await put(token, fullSave({ logoImageKey: STAGING }), {
       MEDIA_BUCKET: stub.bucket,
@@ -164,7 +164,7 @@ describe('PUT /api/v1/admin/site-settings (the singleton full-object save)', () 
     expect(body.details[0]?.path).toEqual(['logoImageKey']);
   });
 
-  it('one audit row per committed save — create on the first, update after; summary null; the row id carries', async () => {
+  it('one audit row per committed save, create on the first, update after; summary null; the row id carries', async () => {
     const { token } = await signUpSession(url, 'site-settings-audit@sevendays.test');
     await put(token, fullSave());
     await put(token, fullSave({ brandName: 'Renamed' }));

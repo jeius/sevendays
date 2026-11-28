@@ -40,12 +40,12 @@ import { groupChildren } from './group-children.js';
 import { commitUpload, resolveMediaUrl } from './media.js';
 
 // Admin CRUD for the simple catalog entities (M5 #137): list/get/create/
-// update per entity — full-object PUTs, deactivation as the isActive flip,
+// update per entity, full-object PUTs, deactivation as the isActive flip,
 // no deletes. Each entity's unique column rides BOTH conflict mechanisms:
 // a deterministic pre-check answers the common case, guardUnique maps the
 // PG 23505 race through the same 400-with-field-details vocabulary. Routes
-// stay thin — every business fact lives here. M6 #185: every write now
-// opens a transaction whose LAST statement is its audit row — the row
+// stay thin, every business fact lives here. M6 #185: every write now
+// opens a transaction whose LAST statement is its audit row, the row
 // commits exactly when the write does (the spec's transaction-is-the-gate
 // ruling).
 
@@ -71,12 +71,12 @@ function toBranchRead(row: typeof branches.$inferSelect, env: BranchEnv): Branch
 
 // The branch-cover commit (M7 #214, admin-packages.ts's resolveCover
 // controller ruling): HEAD-verify through commitUpload ONLY when a key is
-// present — presence-encoding makes "changed" structural (stored keys are
+// present, presence-encoding makes "changed" structural (stored keys are
 // immutable final keys, inputs are staging keys, and the staging-key regex
 // rejects final keys, so a present string is always a new bind).
 // undefined = unchanged, null = clear, string = bind/replace. A commit
 // failure re-paths its details onto the payload field and resolves as the
-// conflict failure (→ 400). Runs BEFORE the transaction — bucket I/O
+// conflict failure (→ 400). Runs BEFORE the transaction, bucket I/O
 // never holds a tx open.
 async function resolveBranchCover(
   env: BranchEnv,
@@ -91,7 +91,7 @@ async function resolveBranchCover(
   });
   if (!commit.ok) {
     // M6 #183: the cover-commit seam's typed failure (see admin-packages's
-    // resolveCover — the route-level 'conflict' cannot name it).
+    // resolveCover, the route-level 'conflict' cannot name it).
     if (log) {
       logMediaFailure(log, { op: 'commit', reason: commit.reason });
     }
@@ -109,12 +109,12 @@ async function resolveBranchCover(
 
 // The studio-service cover commit (#331, resolveBranchCover's ruling
 // verbatim, one purpose over): HEAD-verify through commitUpload ONLY when
-// a key is present — presence-encoding makes "changed" structural (stored
+// a key is present, presence-encoding makes "changed" structural (stored
 // keys are immutable final keys, inputs are staging keys, and the
 // staging-key regex rejects final keys, so a present string is always a
 // new bind). undefined = unchanged, null = clear, string = bind/replace.
 // A commit failure re-paths its details onto the payload field and
-// resolves as the conflict failure (→ 400). Runs BEFORE the transaction —
+// resolves as the conflict failure (→ 400). Runs BEFORE the transaction:
 // bucket I/O never holds a tx open.
 async function resolveServiceCover(
   env: BranchEnv,
@@ -145,7 +145,7 @@ async function resolveServiceCover(
 
 export async function listAdminBranches(db: Database, env: BranchEnv): Promise<BranchRead[]> {
   // Admin read: ALL rows including deactivated (spec § Route topology),
-  // covers resolved — raw keys never leave.
+  // covers resolved, raw keys never leave.
   const rows = await db.select().from(branches).orderBy(asc(branches.name));
   return rows.map((row) => toBranchRead(row, env));
 }
@@ -174,7 +174,7 @@ export async function createAdminBranch(
         .insert(branches)
         .values({
           ...input,
-          // #248: the validated input already carries the pair — spelled out
+          // #248: the validated input already carries the pair, spelled out
           // so the persistence is explicit at the write site.
           latitude: input.latitude,
           longitude: input.longitude,
@@ -217,7 +217,7 @@ export async function updateAdminBranch(
   }
   const cover = await resolveBranchCover(env, input.coverImageKey, log);
   if (!cover.ok) return cover;
-  // M6 #185: deactivation is a RULING on the flip — only true→false is
+  // M6 #185: deactivation is a RULING on the flip, only true→false is
   // 'deactivate'; reactivation and edits of deactivated rows are 'update'.
   const action: AuditAction =
     current.isActive && input.isActive === false ? 'deactivate' : 'update';
@@ -234,7 +234,7 @@ export async function updateAdminBranch(
           phone: input.phone,
           acceptsWalkIns: input.acceptsWalkIns,
           // #248: both-or-neither is the schema's job (the pair refinement);
-          // the write stores whatever the validated pair is — null clears.
+          // the write stores whatever the validated pair is, null clears.
           latitude: input.latitude,
           longitude: input.longitude,
           googleMapsUrl: input.googleMapsUrl,
@@ -257,7 +257,7 @@ export async function updateAdminBranch(
   );
   if (!result.ok) return result;
   // After-commit bucket hygiene (#137's precedent): the replaced/cleared
-  // cover's old object is deleted only AFTER the save committed — a
+  // cover's old object is deleted only AFTER the save committed, a
   // rolled-back save never deletes (the row still points at it).
   if (current.coverImageKey && storedCover !== current.coverImageKey) {
     await env.MEDIA_BUCKET.delete(current.coverImageKey);
@@ -486,11 +486,11 @@ const STUDIO_SERVICE_UNIQUE: Record<string, string> = { studio_services_name_uni
 
 /**
  * The admin assembly: the StudioServiceWithBranches shape with ALL links
- * embedded (bare ids) — assembled WITHOUT the public read's activity
+ * embedded (bare ids), assembled WITHOUT the public read's activity
  * filters: a live link on a deactivated add-on is a staff-visible fact
  * here (the booking form's matrix keeps its own filter). Batched
  * two-embed read (no N+1); junction order = the createdAt proxy + id
- * tiebreak (the public read's convention — membership is the fact).
+ * tiebreak (the public read's convention, membership is the fact).
  */
 async function assembleAdminStudioServices(
   db: Database,
@@ -516,7 +516,7 @@ async function assembleAdminStudioServices(
     .orderBy(asc(studioServiceAddonServices.createdAt), asc(studioServiceAddonServices.id));
   const branchesByService = groupChildren(linkRows, (row) => row.studioServiceId);
   const addonsByService = groupChildren(addonRows, (row) => row.studioServiceId);
-  // #331: strip the raw key, resolve the absolute URL — ALL rows including
+  // #331: strip the raw key, resolve the absolute URL, ALL rows including
   // deactivated (the admin truth), raw keys never leaving.
   return serviceRows.map((s) => {
     const { coverImageKey, ...rest } = s;
@@ -629,7 +629,7 @@ export async function updateAdminStudioService(
   if (!result.ok) return result;
   // After-commit bucket hygiene (#331, the #137 precedent): the
   // replaced/cleared cover's old object is deleted only AFTER the save
-  // committed — a rolled-back save never deletes (the row still points
+  // committed, a rolled-back save never deletes (the row still points
   // at it).
   if (current.coverImageKey && storedCover !== current.coverImageKey) {
     await env.MEDIA_BUCKET.delete(current.coverImageKey);
@@ -641,7 +641,7 @@ export async function updateAdminStudioService(
 
 /**
  * The branch matrix (spec § Route topology): full-replace keyed by the
- * service — diff the payload against the existing rows and rewrite inside
+ * service, diff the payload against the existing rows and rewrite inside
  * ONE transaction (delete net-missing by row id, insert net-new).
  * Duplicate payload ids collapse (presence-row semantics). The existence
  * check is DEACTIVATION-BLIND by ruling: the admin composes from admin
@@ -689,7 +689,7 @@ export async function setStudioServiceBranchMatrix(
         .insert(branchStudioServices)
         .values(toAdd.map((branchId) => ({ studioServiceId: id, branchId })));
     }
-    // M6 #185: ONE row per matrix REQUEST (request-grain) — the junction
+    // M6 #185: ONE row per matrix REQUEST (request-grain), the junction
     // churn is the write; the row records the save, not the row count.
     await writeAuditRow(tx, audit, {
       entity: 'studio-service',
@@ -703,7 +703,7 @@ export async function setStudioServiceBranchMatrix(
   return { ok: true, row: read };
 }
 
-/** The add-on matrix — the branch matrix one junction over (same contract). */
+/** The add-on matrix, the branch matrix one junction over (same contract). */
 export async function setStudioServiceAddonMatrix(
   db: Database,
   env: BranchEnv,
@@ -751,7 +751,7 @@ export async function setStudioServiceAddonMatrix(
         .insert(studioServiceAddonServices)
         .values(toAdd.map((addonId) => ({ studioServiceId: id, addonServiceId: addonId })));
     }
-    // M6 #185: ONE row per matrix REQUEST (request-grain) — the junction
+    // M6 #185: ONE row per matrix REQUEST (request-grain), the junction
     // churn is the write; the row records the save, not the row count.
     await writeAuditRow(tx, audit, {
       entity: 'studio-service',

@@ -1,7 +1,7 @@
 // Scripted CDP checks for the landing packages surfaces (issue #43). Read-
 // only over the live stack: seeded API (8787) + landing dev (3000) + Chrome
 // CDP (9222). The featured rule and peso are RE-DERIVED here (not imported)
-// so the script verifies deployed pages, not build artifacts — keep the two
+// so the script verifies deployed pages, not build artifacts, keep the two
 // in sync via this comment.
 import { connect } from './lib.mjs';
 
@@ -11,14 +11,14 @@ const API = process.env.API_VERIFY_URL ?? 'http://127.0.0.1:8787';
 const results = [];
 function check(name, ok, detail = '') {
   results.push({ name, ok });
-  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? `: ${detail}` : ''}`);
 }
 
 function selectFeatured(packages) {
   // #256: synced to src/lib/featured.ts's law (ADR-0020 + owner ruling
-  // 2026-10-12 — the mirror contract this header carries): unpriced
+  // 2026-10-12, the mirror contract this header carries): unpriced
   // packages LEAD the strip (name-ordered within the group), priced
-  // follow ascending (name tiebreak) — inquiry-priced reads as the
+  // follow ascending (name tiebreak), inquiry-priced reads as the
   // headliner, not the tail.
   const byPrice = (a, b) => {
     if (a.priceCents === null && b.priceCents === null) return a.name.localeCompare(b.name);
@@ -31,7 +31,7 @@ function selectFeatured(packages) {
   return [...packages].sort(byPrice).slice(0, 4);
 }
 
-// #256: mirrors src/lib/format.ts — null is the unpriced state and
+// #256: mirrors src/lib/format.ts, null is the unpriced state and
 // returns null (the old form would format null/100 as ₱0.00).
 const peso = (cents) =>
   cents === null
@@ -60,7 +60,7 @@ async function main() {
   // Ticket 06 added services/branches strips to home; count cards inside the
   // featured strip's section only (data-strip='featured').
   // #256: the #164/#223 strip plates are whole-card Links into the
-  // detail page — no <article> since. Count the plates by their
+  // detail page, no <article> since. Count the plates by their
   // /packages/ link prefix inside the featured section (the trailing
   // slash keeps the nav's exact-/packages link out).
   const homeCards = await evaluate(
@@ -76,7 +76,7 @@ async function main() {
     'home: strip ordered unpriced-first, then price-ascending (ADR-0020)',
     positions.every((pos, i) => pos >= 0 && (i === 0 || positions[i - 1] < pos))
   );
-  // #256 (owner-ruled 2026-11-09): packages are DETAIL-FIRST — strip
+  // #256 (owner-ruled 2026-11-09): packages are DETAIL-FIRST, strip
   // plates link the package detail page, never /book directly (contrast
   // the services cards' direct-book deep-links). Asserted both ways:
   // zero /book package params on home, and every plate's parsed href is
@@ -137,7 +137,7 @@ async function main() {
   await go(`${LANDING}/packages`);
   const listText = await text();
   // #256: the index plates are whole-card Links (no <article> since
-  // #164) — counted by the /packages/ link prefix; the nav's
+  // #164), counted by the /packages/ link prefix; the nav's
   // exact-/packages link never matches the trailing-slash prefix.
   const listCards = await evaluate(`document.querySelectorAll("a[href^='/packages/']").length`);
   check(
@@ -146,7 +146,7 @@ async function main() {
     `expected ${packages.length}, got ${listCards}`
   );
   // #256 (owner-ruled 2026-11-09): the detail-first ruling asserted on the
-  // index too — zero /book?package= hrefs on /packages, and every index
+  // index too, zero /book?package= hrefs on /packages, and every index
   // plate's parsed href is the package's /packages/<slug> path (final
   // whole-branch review finding: the home arm alone left the index
   // unasserted).
@@ -164,10 +164,10 @@ async function main() {
     indexBookPackageIds.length === 0 && packages.every((p) => indexPlateSlugs.includes(p.slug)),
     `slugs: ${JSON.stringify(indexPlateSlugs)}`
   );
-  // #256: the plates carry name + peso (priced) + description — the
+  // #256: the plates carry name + peso (priced) + description, the
   // index carries no inclusions wording since #164 Round 3. Cheapest
   // derives over PRICED rows only (ADR-0020: unpriced rows render no
-  // price — Math.min over nulls coerces to a phantom ₱0.00).
+  // price, Math.min over nulls coerces to a phantom ₱0.00).
   const priced = packages.filter((p) => p.priceCents != null);
   const cheapest = Math.min(...priced.map((p) => p.priceCents));
   check(
@@ -211,17 +211,17 @@ async function main() {
   // /packages/:slug: by-slug detail + deep link
   await go(`${LANDING}/packages/basic-package`);
   const detail = await text();
-  // Ruled edit (M5 ticket #142): the cover rule is the ⇔ assertion —
+  // Ruled edit (M5 ticket #142): the cover rule is the ⇔ assertion:
   // placeholder present ⇔ no coverImageUrl; an img (alt = name, lazy,
   // object-cover) ⇔ coverImageUrl present. The old clause assumed null
   // covers forever; this form survives real content.
-  // #256: the detail hero dropped its <article> wrapper — the cover img
+  // #256: the detail hero dropped its <article> wrapper, the cover img
   // is the page's only alt=<name> image (the spec sheet renders none).
   const detailCover = await evaluate(
     `[...document.querySelectorAll('img')].some(i => i.getAttribute('alt') === ${JSON.stringify(basic.name)})`
   );
   // #256: the detail's spec-sheet heading is "What's included" since
-  // the #164 Round-3 rewrite; peso null-guarded (the unpriced law — an
+  // the #164 Round-3 rewrite; peso null-guarded (the unpriced law, an
   // unpriced probe package renders no price line).
   const basicPrice = peso(basic.priceCents);
   check(
@@ -236,7 +236,7 @@ async function main() {
       ? detailCover === true && !detail.includes('Cover photo coming soon')
       : detailCover === false && detail.includes('Cover photo coming soon')
   );
-  // #254/#256: the deferred re-form — the deep-link assertion matches
+  // #254/#256: the deferred re-form, the deep-link assertion matches
   // the PARSED package param, never the exact href string (the router's
   // search serialization is not the contract). The detail CTA is the
   // page's sole /book?package= carrier.
@@ -246,7 +246,7 @@ async function main() {
   // Unknown slug: uniform not-found
   await go(`${LANDING}/packages/not-a-real-slug`);
   const missing = await text();
-  // #256 (#223): unknown slugs wear the site-wide uniform NotFound —
+  // #256 (#223): unknown slugs wear the site-wide uniform NotFound:
   // the route-level notFound overrides are gone (M7 #223). Owner-ratified
   // copy, byte-kept literal.
   check(

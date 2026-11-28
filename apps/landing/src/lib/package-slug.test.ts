@@ -45,7 +45,7 @@ describe('servicePackageQueries.bySlug', () => {
     expect(mockedGet).toHaveBeenCalledWith({ data: 'basic-package' });
   });
 
-  it('404 contract: a rejected slug is NOT cached — each visit re-fetches', async () => {
+  it('404 contract: a rejected slug is NOT cached, each visit re-fetches', async () => {
     const err = new ApiClientError(404, { error: 'Package not found.' });
     mockedGet.mockRejectedValue(err);
     const queryFn = servicePackageQueries.bySlug('gone-package').queryFn;

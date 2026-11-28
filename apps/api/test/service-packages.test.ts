@@ -39,7 +39,7 @@ describe('GET /api/v1/service-packages', () => {
     expect(body.some((p) => p.id === ids.packageRetired)).toBe(false);
 
     // M2 ticket 01: the wire shape carries the new catalog fields (the client
-    // unwrap() requires slug — prove the API serves it before types ship).
+    // unwrap() requires slug, prove the API serves it before types ship).
     expect(simple?.slug).toBe('simple-package');
     expect(simple?.isFeatured).toBe(false);
 
@@ -131,7 +131,7 @@ describe('public trim rules, position ordering, and resolved URLs (#138)', () =>
     for (const print of combined?.inclusions.filter((i) => i.kind === 'print') ?? []) {
       expect(print.attires).toEqual([]);
     }
-    // The privilege has no attires and no size — untouched by either rule.
+    // The privilege has no attires and no size, untouched by either rule.
     const privilege = combined?.inclusions.find((i) => i.kind === 'privilege');
     expect(privilege).toBeDefined();
     expect(privilege?.attires).toEqual([]);
@@ -148,7 +148,7 @@ describe('public trim rules, position ordering, and resolved URLs (#138)', () =>
     expect(simple?.name).toBe('Simple Package');
     expect(simple?.priceCents).toBe(90000);
     expect(simple?.inclusions).toEqual([]);
-    // Frames are not inclusions — the trim never touches them.
+    // Frames are not inclusions, the trim never touches them.
     expect(simple?.frames.map((f) => f.frameNumber)).toEqual([1]);
     // The combined package keeps its framed picture and its privilege.
     const combined = body.find((p) => p.id === ids.packageCombined);
@@ -173,7 +173,7 @@ describe('public trim rules, position ordering, and resolved URLs (#138)', () =>
     const body = (await res.json()) as ServicePackageRead[];
     const combined = body.find((p) => p.id === ids.packageCombined);
     // Insert-time positions read framed → 2R → 2x2 (positions are distinct,
-    // so the id tiebreak never runs — minted uuids carry no order); the
+    // so the id tiebreak never runs, minted uuids carry no order); the
     // swapped positions must win.
     expect(combined?.inclusions.map((i) => i.printSize?.code ?? i.kind)).toEqual([
       '2R',
@@ -185,7 +185,7 @@ describe('public trim rules, position ordering, and resolved URLs (#138)', () =>
 
   it('junction attires order by (position, id), not by created_at', async () => {
     // Fixtures insert Filipiniana first (strictly earlier created_at) at
-    // position 1; swapping the POSITIONS must flip the read order — the
+    // position 1; swapping the POSITIONS must flip the read order, the
     // dead (created_at, id) key would keep Filipiniana first.
     await db
       .update(packageInclusionAttires)
@@ -234,7 +234,7 @@ describe('public trim rules, position ordering, and resolved URLs (#138)', () =>
     );
     expect(res.status).toBe(200);
     const body = (await res.json()) as ServicePackageRead;
-    // Simple's only inclusion referenced the deactivated 2R — the by-slug
+    // Simple's only inclusion referenced the deactivated 2R, the by-slug
     // read trims it away too (the all-trimmed package still renders).
     expect(body.inclusions).toEqual([]);
     expect(body.coverImageUrl).toBe(

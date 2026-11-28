@@ -1,13 +1,13 @@
-// The packages index (M5 #139): the gated shell's catalog entry point —
+// The packages index (M5 #139): the gated shell's catalog entry point:
 // PageHeader over the consolidated packages table (the #131 table ruling).
 // The prototype's honesty caption does NOT port. Extracted from
 // _shell.packages.tsx during Task 7's evidence run when the editor routes
 // proved unmountable under a parent that rendered the table without an
-// Outlet (the Task 5 plan structure — matched-but-never-rendered children).
-// M9 #316: the ?focus= deep link — a Global Search result lands here with
+// Outlet (the Task 5 plan structure, matched-but-never-rendered children).
+// M9 #316: the ?focus= deep link, a Global Search result lands here with
 // the matched row scrolled into view + highlighted (tolerant by
 // construction: absent/garbage drops, an unknown id no-ops; the packages
-// edit route stays one deliberate click away — the landing never opens it).
+// edit route stays one deliberate click away, the landing never opens it).
 import { Button } from '@sevendays/ui/components/button';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
@@ -19,7 +19,7 @@ import { focusSearchSchema } from '#/lib/focus-landing';
 export const Route = createFileRoute('/_shell/packages/')({
   head: () => ({ meta: [{ title: 'Packages | Sevendays Admin' }] }),
   validateSearch: focusSearchSchema,
-  // M8 #288: hover-intent priming — fire-and-forget, never blocks
+  // M8 #288: hover-intent priming, fire-and-forget, never blocks
   // (the cms-queries seam carries the law).
   loader: ({ context: { queryClient } }) => {
     primeCmsQueries(cmsRoutePriming.packagesIndex(queryClient));

@@ -1,9 +1,9 @@
 // The gallery route (M5 #141, Task 7): the gated shell's gallery entry
-// point. The route mounts the pinned PageHeader + GalleryScreen — its
+// point. The route mounts the pinned PageHeader + GalleryScreen, its
 // `Upload photos` action is a label wired by htmlFor to the hidden file
 // input that lives INSIDE the screen, so this file holds no logic beyond
 // the render (the tray state is the screen's). M9 #316: the ?focus= deep
-// link — a Global Search result lands here with the matched card scrolled
+// link, a Global Search result lands here with the matched card scrolled
 // into view + highlighted (tolerant by construction: absent/garbage drops,
 // an unknown id no-ops).
 import { Button } from '@sevendays/ui/components/button';
@@ -17,7 +17,7 @@ import { focusSearchSchema } from '#/lib/focus-landing';
 export const Route = createFileRoute('/_shell/gallery')({
   head: () => ({ meta: [{ title: 'Gallery | Sevendays Admin' }] }),
   validateSearch: focusSearchSchema,
-  // M8 #288: hover-intent priming — the photos + categories reads
+  // M8 #288: hover-intent priming, the photos + categories reads
   // (fire-and-forget, never blocks).
   loader: ({ context: { queryClient } }) => {
     primeCmsQueries(cmsRoutePriming.gallery(queryClient));
@@ -33,7 +33,7 @@ function GalleryPage() {
         title='Gallery'
         subline='The /about portfolio: upload in batches, organize by category.'
         actions={
-          // The label/htmlFor pair opens the screen's hidden input — the id
+          // The label/htmlFor pair opens the screen's hidden input, the id
           // is this file's one coupling point (zero route logic). The label
           // carries the button's render prop: Base UI merges the Button's
           // classes/props onto it. nativeButton={false} tells Base UI the
@@ -47,7 +47,7 @@ function GalleryPage() {
                 <label
                   htmlFor='gallery-upload-input'
                   className='cursor-pointer'
-                  // biome-ignore lint/a11y/noNoninteractiveTabindex: this label is a Base UI <Button> render target (nativeButton={false}) — an interactive control at runtime, so it needs its own tab stop
+                  // biome-ignore lint/a11y/noNoninteractiveTabindex: this label is a Base UI <Button> render target (nativeButton={false}), an interactive control at runtime, so it needs its own tab stop
                   tabIndex={0}
                 >
                   <ImagePlus aria-hidden='true' />
@@ -56,7 +56,7 @@ function GalleryPage() {
               }
             />
             {/* #170 (ruling #165 Q7 f): the picker's constraint said up
-                front — plain text-muted-foreground, so both themes carry
+                front, plain text-muted-foreground, so both themes carry
                 it with no extra styling. The PageHeader's actions row
                 (flex items-center gap-2) seats it beside the affordance;
                 it renders in every screen state, the empty states

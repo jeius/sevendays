@@ -128,7 +128,7 @@ describe('package admin reads', () => {
   });
 });
 
-describe('the atomic package save — create', () => {
+describe('the atomic package save, create', () => {
   it('POST full save → 201; slug generated, frames renumbered, inclusions in array order, junctions in attire order', async () => {
     const res = await authed(
       'POST',
@@ -173,7 +173,7 @@ describe('the atomic package save — create', () => {
       save()
     );
     // 'deluxe package' is a distinct NAME but slugifies to the SAME
-    // 'deluxe-package' — the pre-check's OR query finds the row and names
+    // 'deluxe-package', the pre-check's OR query finds the row and names
     // the slug (the true 23505 race is the same vocabulary through
     // guardUnique, unit-proven in admin-shared.test.ts).
     const res = await authed(
@@ -236,8 +236,8 @@ describe('the atomic package save — create', () => {
   });
 });
 
-describe('the atomic package save — update', () => {
-  it('PUT reorders frames and inclusions — array order becomes frameNumber/position, children rewritten', async () => {
+describe('the atomic package save, update', () => {
+  it('PUT reorders frames and inclusions, array order becomes frameNumber/position, children rewritten', async () => {
     const res = await authed(
       'PUT',
       `/api/v1/admin/service-packages/${ids.packageCombined}`,
@@ -284,7 +284,7 @@ describe('the atomic package save — update', () => {
     ]);
     expect(body.inclusions[0]?.attires.map((a) => a.name)).toEqual(['Executive', 'Filipiniana']);
     expect(body.inclusions[2]?.attires).toEqual([]);
-    // children were REWRITTEN — the two framed inclusions ride fresh frame ids
+    // children were REWRITTEN, the two framed inclusions ride fresh frame ids
     expect(body.inclusions[0]?.frameId).not.toBeNull();
     expect(body.inclusions[1]?.frameId).not.toBeNull();
     expect(body.inclusions[0]?.frameId).not.toBe(body.inclusions[1]?.frameId);
@@ -318,7 +318,7 @@ describe('the atomic package save — update', () => {
     expect(body.details[0]?.path).toEqual(['slug']);
   });
 
-  it('the old slug 404s publicly after a PUT rename — through the EXISTING public route', async () => {
+  it('the old slug 404s publicly after a PUT rename, through the EXISTING public route', async () => {
     const created = await authed(
       'POST',
       '/api/v1/admin/service-packages',
@@ -420,7 +420,7 @@ describe('the atomic package save — update', () => {
         )
       );
     // The cascaded rewrite left zero junction rows for the one remaining
-    // (privilege) inclusion — the fixture's framed/print pairs are gone.
+    // (privilege) inclusion, the fixture's framed/print pairs are gone.
     expect(junctions).toHaveLength(0);
   });
 });
@@ -473,7 +473,7 @@ describe('the package cover lifecycle (commit-verified through ticket 02)', () =
       env
     );
 
-  it('PUT with a staging key binds it — HEAD-verified, promoted to covers/, staging deleted, URL resolved', async () => {
+  it('PUT with a staging key binds it, HEAD-verified, promoted to covers/, staging deleted, URL resolved', async () => {
     const { stub, env } = withBucket();
     const res = await putCover('admin-cover-bind@sevendays.test', STAGING, env);
     expect(res.status).toBe(200);
@@ -484,7 +484,7 @@ describe('the package cover lifecycle (commit-verified through ticket 02)', () =
     expect(stub.deleteCalls).toEqual([STAGING]);
   });
 
-  it('PUT null clears the cover — and the replaced object is deleted only after the save', async () => {
+  it('PUT null clears the cover, and the replaced object is deleted only after the save', async () => {
     const { stub, env } = withBucket();
     const bound = await putCover('admin-cover-clear-a@sevendays.test', STAGING, env);
     expect(bound.status).toBe(200);
@@ -508,7 +508,7 @@ describe('the package cover lifecycle (commit-verified through ticket 02)', () =
   it('PUT without the field leaves a BOUND cover unchanged (absent = unchanged at a non-null pre-state)', async () => {
     // #137 T6 minor: absent-unchanged was pinned only at the null pre-state.
     // Bind a real cover first, then PUT the package with the field absent:
-    // the stored final key survives — no re-promote, no delete of the bound
+    // the stored final key survives, no re-promote, no delete of the bound
     // object (presence-encoding makes "changed" structural).
     const { stub, env } = withBucket();
     const bound = await putCover('admin-cover-absent2-a@sevendays.test', STAGING, env);
@@ -518,11 +518,11 @@ describe('the package cover lifecycle (commit-verified through ticket 02)', () =
     const res = await putCover('admin-cover-absent2-b@sevendays.test', 'ABSENT', env);
     expect(res.status).toBe(200);
     expect(((await res.json()) as { coverImageUrl: string | null }).coverImageUrl).toBe(boundUrl);
-    expect(stub.putCalls).toHaveLength(1); // only the initial bind — no second promote
-    expect(stub.deleteCalls).toEqual([STAGING]); // staging cleanup only — the bound object survives
+    expect(stub.putCalls).toHaveLength(1); // only the initial bind, no second promote
+    expect(stub.deleteCalls).toEqual([STAGING]); // staging cleanup only, the bound object survives
   });
 
-  it('PUT with a foreign key → the commit 400 with the coverImageKey detail — and NO delete call', async () => {
+  it('PUT with a foreign key → the commit 400 with the coverImageKey detail, and NO delete call', async () => {
     const { stub, env } = withBucket();
     const res = await putCover(
       'admin-cover-foreign@sevendays.test',
@@ -536,7 +536,7 @@ describe('the package cover lifecycle (commit-verified through ticket 02)', () =
   });
 
   it('PUT with a staging key that has no object → the 400 not-found shape (typed conflict, nothing deleted)', async () => {
-    // #137 T6 minor: the old test asserted only status===400 — the typed
+    // #137 T6 minor: the old test asserted only status===400, the typed
     // not_found vocabulary (commitUpload's message, the coverImageKey
     // re-path) and the no-delete proof were unpinned. This is the ACTUAL
     // documented status: not_found maps through the conflict arm → 400,
@@ -580,10 +580,10 @@ describe('the package cover lifecycle (commit-verified through ticket 02)', () =
   });
 });
 
-describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => {
+describe('audit rows (M6 #185, one per committed mutation, tx-gated)', () => {
   const rows = async () => db.select().from(auditLog);
 
-  it('the atomic save POST → exactly ONE row (request-grain — frames, inclusions, junctions are one committed request); requestId = the served X-Request-Id', async () => {
+  it('the atomic save POST → exactly ONE row (request-grain, frames, inclusions, junctions are one committed request); requestId = the served X-Request-Id', async () => {
     const { token } = await signUpSession(url, 'audit-pkg@sevendays.test');
     const res = await app.request(
       '/api/v1/admin/service-packages',
@@ -654,12 +654,12 @@ describe('audit rows (M6 #185 — one per committed mutation, tx-gated)', () => 
       .select({ name: servicePackages.name })
       .from(servicePackages)
       .where(eq(servicePackages.id, ids.packageCombined));
-    expect(name[0]?.name).toBe('Combined Package'); // the rename rolled back — and nothing recorded it
+    expect(name[0]?.name).toBe('Combined Package'); // the rename rolled back, and nothing recorded it
   });
 });
 
 describe('unpriced saves (ADR-0020)', () => {
-  it('POST with priceCents null creates an unpriced package — 201, wire echoes null', async () => {
+  it('POST with priceCents null creates an unpriced package, 201, wire echoes null', async () => {
     const res = await authed(
       'POST',
       '/api/v1/admin/service-packages',
@@ -670,7 +670,7 @@ describe('unpriced saves (ADR-0020)', () => {
     expect(((await res.json()) as { priceCents: number | null }).priceCents).toBeNull();
   });
 
-  it('PUT with priceCents null flips the priced fixture unpriced — 200, wire echoes null', async () => {
+  it('PUT with priceCents null flips the priced fixture unpriced, 200, wire echoes null', async () => {
     const res = await authed(
       'PUT',
       `/api/v1/admin/service-packages/${ids.packageCombined}`,

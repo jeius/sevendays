@@ -43,7 +43,7 @@ const authed = async (method: string, path: string, email: string, body?: unknow
 };
 
 beforeEach(async () => {
-  await truncateAll(db); // submissions arrive through the public POST — no fixtures
+  await truncateAll(db); // submissions arrive through the public POST, no fixtures
 });
 
 describe('POST /api/v1/testimonial-submissions (the public write)', () => {
@@ -127,7 +127,7 @@ describe('the admin moderation endpoints', () => {
   });
 
   it('accept as-is appends the Testimonial at nextTestimonialPosition (max+1), flips the row, writes the accept audit row, renders at the end of the public order', async () => {
-    await loadGalleryFixtures(db); // 3 testimonials, positions 1..3 — the append lands at 4
+    await loadGalleryFixtures(db); // 3 testimonials, positions 1..3, the append lands at 4
     expect((await post(VALID)).status).toBe(201);
     const [submission] = await db
       .select()
@@ -145,9 +145,9 @@ describe('the admin moderation endpoints', () => {
     const body = (await res.json()) as { status: string };
     expect(body.status).toBe('accepted');
 
-    // Appended at the END of render order — the public read is the proof
+    // Appended at the END of render order, the public read is the proof
     // (the fixtures render 2 active testimonials; the append lands at
-    // position 4 and renders last — 3 public rows).
+    // position 4 and renders last, 3 public rows).
     const publicRes = await app.request('/api/v1/testimonials', undefined, testEnv(url));
     const testimonials = (await publicRes.json()) as { quote: string; person: string }[];
     expect(testimonials).toHaveLength(3);
@@ -232,7 +232,7 @@ describe('the admin moderation endpoints', () => {
     expect(res.status).toBe(200);
     expect(((await res.json()) as { status: string }).status).toBe('rejected');
     const rows = await db.select().from(testimonialSubmissions);
-    expect(rows).toHaveLength(1); // retained — the audit trail
+    expect(rows).toHaveLength(1); // retained, the audit trail
     const auditRows = await db
       .select()
       .from(auditLog)

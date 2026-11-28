@@ -1,7 +1,7 @@
 // The CMS interaction system's pure seams (M7 #218, spec § the CMS UX
-// maturation system — #165's ruling): the async Save contract's state, the
+// maturation system, #165's ruling): the async Save contract's state, the
 // one pending vocabulary's mapper, and the delete dialog's blocker-line
-// derivation. Plain data in, plain data out — components/cms/shared.tsx
+// derivation. Plain data in, plain data out, components/cms/shared.tsx
 // renders these; this module never imports React.
 //
 // The async Save contract (binding): onSave resolves true = success (the
@@ -10,17 +10,17 @@
 // rule lives in closesOnEvent; the editorNonce/keepEditorOpen remount
 // machinery it replaces is deleted, not extended.
 
-/** The three spec-pinned busy labels (+ the two moderation extensions, TODO(owner-copy) — ratify at the variants round). */
+/** The three spec-pinned busy labels (+ the two moderation extensions, TODO(owner-copy), ratify at the variants round). */
 export const SAVING_LABEL = 'Saving…';
 export const UPLOADING_LABEL = 'Uploading…';
 export const DELETING_LABEL = 'Deleting…';
 export const ACCEPTING_LABEL = 'Accepting…';
 export const REJECTING_LABEL = 'Rejecting…';
 
-/** The login extensions — owner-ratified verbatim, 2026-11-08 (#242 round). */
+/** The login extensions, owner-ratified verbatim, 2026-11-08 (#242 round). */
 export const SIGNING_IN_LABEL = 'Signing in…';
 export const SENDING_LABEL = 'Sending…';
-/** The /login/reset extension — owner-ratified verbatim, 2026-11-08 (the #242 deferred-minor rider). */
+/** The /login/reset extension, owner-ratified verbatim, 2026-11-08 (the #242 deferred-minor rider). */
 export const RESETTING_LABEL = 'Resetting…';
 
 /**
@@ -40,7 +40,7 @@ export function pendingVocabulary(options: {
   };
 }
 
-/** The shell's save-cycle state: started → saving; settled → idle (either way — the hold is the open sheet, never a stuck spinner). */
+/** The shell's save-cycle state: started → saving; settled → idle (either way, the hold is the open sheet, never a stuck spinner). */
 export type SaveContractState = { saving: boolean };
 
 export const idleSaveContract: SaveContractState = { saving: false };
@@ -56,7 +56,7 @@ export function reduceSaveContract(
 
 /**
  * The close rule: ONLY a settled-true closes. In-flight holds (the sheet is
- * busy), settled-false holds (a validation veto or a failed save — the
+ * busy), settled-false holds (a validation veto or a failed save, the
  * state is intact and retry is safe).
  */
 export function closesOnEvent(event: SaveContractEvent): boolean {
@@ -67,8 +67,8 @@ export function closesOnEvent(event: SaveContractEvent): boolean {
  * Derives the delete dialog's in-body blocker lines from a guarded-delete
  * 400's details (the #213 contract: one { path, message } per blocking
  * family, e.g. ['appointments'] + 'referenced by 3 appointment(s)'). Each
- * line leads with the capitalized family: 'Appointments — referenced by 3
- * appointment(s)'. Unknown shapes answer empty — the dialog then shows only
+ * line leads with the capitalized family: 'Appointments, referenced by 3
+ * appointment(s)'. Unknown shapes answer empty, the dialog then shows only
  * the failure message.
  */
 export function blockerLines(details: unknown): string[] {
@@ -86,7 +86,7 @@ export function blockerLines(details: unknown): string[] {
     }
     const family = Array.isArray(path) && typeof path[0] === 'string' ? path[0] : null;
     lines.push(
-      family ? `${family.charAt(0).toUpperCase()}${family.slice(1)} — ${message}` : message
+      family ? `${family.charAt(0).toUpperCase()}${family.slice(1)}: ${message}` : message
     );
   }
   return lines;

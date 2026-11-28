@@ -1,8 +1,8 @@
 // Scripted CDP checks for the booking wizard /book (issue #45). READ-ONLY
 // over the data: the one submit this scenario drives is a past-date booking
-// the API REJECTS — no row is written (the happy path is Task 6's e2e
+// the API REJECTS, no row is written (the happy path is Task 6's e2e
 // script). Seeded-state notes: all four services bookable at all three
-// branches, and only Portraits & ID Photo carries applicable add-ons —
+// branches, and only Portraits & ID Photo carries applicable add-ons;
 // checks 6/7 lean on that (no-addons service ⇒ skip case is live-real;
 // the matrix-equality check is vacuous-by-seed and says so).
 import { connect } from './lib.mjs';
@@ -13,7 +13,7 @@ const API = process.env.API_VERIFY_URL ?? 'http://127.0.0.1:8787';
 const results = [];
 function check(name, ok, detail = '') {
   results.push({ name, ok });
-  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? `: ${detail}` : ''}`);
 }
 
 const peso = (cents) =>
@@ -61,7 +61,7 @@ async function main() {
   const stepText = (n) =>
     evaluate(`document.querySelector("section[data-step='${n}']")?.innerText ?? null`);
 
-  // 1 — branch step renders the live branches
+  // 1, branch step renders the live branches
   await go(`${LANDING}/book`);
   const step1 = await stepText(1);
   check(
@@ -69,7 +69,7 @@ async function main() {
     step1 !== null && branches.every((b) => step1.includes(b.name))
   );
 
-  // 2 — ?service= filters the branch step to the re-derived bookable set
+  // 2, ?service= filters the branch step to the re-derived bookable set
   const svcForFilter = services[0];
   const expectedBranches = branches.filter((b) => svcForFilter.bookableBranchIds.includes(b.id));
   await go(`${LANDING}/book?service=${svcForFilter.id}`);
@@ -81,7 +81,7 @@ async function main() {
     vacuous ? 'vacuous-by-seed: service bookable at every branch' : ''
   );
 
-  // 3 — unknown deep-link ids drop silently (no error card, all branches)
+  // 3, unknown deep-link ids drop silently (no error card, all branches)
   await go(
     `${LANDING}/book?branch=99999999-9999-4999-8999-999999999999&package=99999999-9999-4999-8999-999999999999`
   );
@@ -92,7 +92,7 @@ async function main() {
     step1Clean !== null && branches.every((b) => step1Clean.includes(b.name)) && noCard
   );
 
-  // 4 — branch pick auto-advances to the offering step (packages grid live)
+  // 4, branch pick auto-advances to the offering step (packages grid live)
   await go(`${LANDING}/book`);
   await click(`section[data-step='1'] button`);
   const step2 = await stepText(2);
@@ -101,7 +101,7 @@ async function main() {
     step2 !== null && packages.every((p) => step2.includes(p.name))
   );
 
-  // 5 — offering step lists services bookable at the chosen branch
+  // 5, offering step lists services bookable at the chosen branch
   const branchPicked = branches[0];
   const bookableHere = services.filter((s) => s.bookableBranchIds.includes(branchPicked.id));
   check(
@@ -110,7 +110,7 @@ async function main() {
     `branch ${branchPicked.name}: ${bookableHere.length}/${services.length} bookable`
   );
 
-  // 6 — a package lands on the add-ons step (uniform ⇒ live add-ons list)
+  // 6, a package lands on the add-ons step (uniform ⇒ live add-ons list)
   await click(`section[data-step='2'] button`);
   const step3 = await stepText(3);
   check(
@@ -118,7 +118,7 @@ async function main() {
     step3 !== null && addons.every((a) => step3.includes(a.name))
   );
 
-  // 7 — a service with no applicable add-ons skips straight to date/time
+  // 7, a service with no applicable add-ons skips straight to date/time
   await go(`${LANDING}/book?service=${svcNoAddons.id}`);
   await click(`section[data-step='1'] button`);
   await click(`section[data-step='2'] button[data-offering='${svcNoAddons.id}']`);
@@ -130,12 +130,12 @@ async function main() {
     `service: ${svcNoAddons.name}`
   );
 
-  // 8 — Back from date/time (skip case) returns to the OFFERING step
+  // 8, Back from date/time (skip case) returns to the OFFERING step
   await click('[data-back]');
   const step2Again = await stepText(2);
   check('book: Back from date/time (skip case) returns to the offering step', step2Again !== null);
 
-  // 9/10 — past pick shows the inline hint; future pick clears it
+  // 9/10, past pick shows the inline hint; future pick clears it
   await click(`section[data-step='2'] button[data-offering='${svcNoAddons.id}']`); // re-choose the no-addons service
   await setInput(`section[data-step='4'] input[type='date']`, phDate(-1));
   await click(`section[data-step='4'] button`); // first hour chip
@@ -146,12 +146,12 @@ async function main() {
   const hintGone = await evaluate(`document.querySelector('[data-past-hint]') === null`);
   check('book: future pick clears the hint', hintGone);
 
-  // 11 — Continue reaches the contact step
+  // 11, Continue reaches the contact step
   await click(`section[data-step='4'] > button`);
   const step5 = await stepText(5);
   check('book: date/time Continue reaches the contact step', step5 !== null);
 
-  // 12 — contact gate: confirm disabled until the three fields are set
+  // 12, contact gate: confirm disabled until the three fields are set
   const confirmSel = `section[data-step='5'] button[type='button']:last-of-type`;
   const disabledBefore = await evaluate(
     `document.querySelector(${q(confirmSel)})?.disabled ?? null`
@@ -167,15 +167,15 @@ async function main() {
     disabledBefore === true && disabledAfter === false
   );
 
-  // 13 — past-slot submit renders the typed rejection card (API 400; no row).
-  // Back to date/time (wizard state persists — the fields stay filled), set
+  // 13, past-slot submit renders the typed rejection card (API 400; no row).
+  // Back to date/time (wizard state persists, the fields stay filled), set
   // the past date, come back, confirm.
   await click('[data-back]');
   await setInput(`section[data-step='4'] input[type='date']`, phDate(-1));
   await click(`section[data-step='4'] button`);
   await click(`section[data-step='4'] > button`);
   await click(confirmSel);
-  // Dev-stack server fns take ~2-3s (wrangler + SSR round-trip) — poll for
+  // Dev-stack server fns take ~2-3s (wrangler + SSR round-trip), poll for
   // the card instead of a fixed sleep (a fixed 1.2s false-failed this check).
   let card = null;
   for (let i = 0; i < 20; i++) {
@@ -188,7 +188,7 @@ async function main() {
     card?.includes('already passed in the Philippines') === true && card.includes('API reason:')
   );
 
-  // 14 — the rail shows branch/offering/total derived from live data
+  // 14, the rail shows branch/offering/total derived from live data
   const pkg = pkgWithAddons;
   await go(`${LANDING}/book?package=${pkg.id}`);
   await click(`section[data-step='1'] button`);
@@ -204,7 +204,7 @@ async function main() {
     `expected total ${peso(expectedTotal)} (${pkg.name} + ${addons[0].name}); uniform package add-ons: ${totalAddonsForPackage}`
   );
 
-  // 15 — ticket 08: the confirmation route exists; an unknown id renders
+  // 15, ticket 08: the confirmation route exists; an unknown id renders
   // the uniform not-found (status + rendered text, packages-pages precedent).
   const missingRes = await fetch(`${LANDING}/booking/00000000-0000-4000-8000-000000000000`);
   const missingHtml = await missingRes.text();

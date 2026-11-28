@@ -14,16 +14,16 @@ import { isAppleUserAgent, mapsHrefFor } from '../lib/branch-maps';
 import { CoverPanel } from './cover-panel';
 
 // The branch card (/branches) on the ruled language (#164 Round 4): the
-// #214 cover as a 16:9 strip atop the card (the CoverPanel law — null
+// #214 cover as a 16:9 strip atop the card (the CoverPanel law, null
 // renders the ink→petrol placeholder), the walk-in badge as an icon tooltip
 // beside the name, the phone as a mono tel: link, CTAs under a hairline.
 //
 // The variant-split CTAs (OWNER-RULED): MAIN = the icon-only outline call
-// (aria-labeled, its previous text as the tooltip content — hover/focus
+// (aria-labeled, its previous text as the tooltip content, hover/focus
 // opens, touch taps through to the call, which is what the icon promises)
-// beside the primary "Book at this branch" (CalendarPlus — the CTA law).
-// The v1 arm — a single solid-primary "Call {branch}" with Phone, ZERO
-// book words on the page — is a pick-time transform on the v1 branch,
+// beside the primary "Book at this branch" (CalendarPlus, the CTA law).
+// The v1 arm, a single solid-primary "Call {branch}" with Phone, ZERO
+// book words on the page, is a pick-time transform on the v1 branch,
 // never a runtime branch in this codebase (the #97 convention).
 export function BranchCard({ branch }: { branch: BranchRead }) {
   const [isApple, setIsApple] = useState(false);
@@ -56,7 +56,7 @@ export function BranchCard({ branch }: { branch: BranchRead }) {
         </a>
         <div className='mt-3 flex flex-wrap gap-2 border-line-soft border-t pt-4'>
           {/* OWNER-RULED: the icon-only call affordance carries its
-              previous text as a tooltip — hover (fine pointers) or focus
+              previous text as a tooltip, hover (fine pointers) or focus
               (keyboard) opens it; on touch the tap just calls, which is
               what the icon promises. */}
           <TooltipProvider>
@@ -90,7 +90,7 @@ export function BranchCard({ branch }: { branch: BranchRead }) {
             Book at this branch
           </Link>
           {/* #273 (OWNER-RULED): Open in Maps opens the pasted link in a
-              new tab — Apple devices prefer the Apple link when set, else
+              new tab, Apple devices prefer the Apple link when set, else
               the Google link; cards without links render nothing. The
               device flag is effect-driven (SSR renders the Google base). */}
           {mapsHref ? (
@@ -114,12 +114,12 @@ export function BranchCard({ branch }: { branch: BranchRead }) {
 }
 
 // The walk-in indicator, OWNER-RULED Round 4: the text badge recomposes as
-// an ICON with the shared tooltip — hover opens on fine pointers, TAP
+// an ICON with the shared tooltip, hover opens on fine pointers, TAP
 // toggles on coarse ones (a controlled Tooltip: Base UI's hover alone
 // doesn't fire reliably on touch). Both state texts survive verbatim in
 // the tooltip copy and the trigger's aria-label. Branches-page-local BY
 // DESIGN: the booking wizard's step keeps the text WalkInBadge (M7 leaves
-// v2's booking surfaces untouched — the divergence is deliberate, and the
+// v2's booking surfaces untouched, the divergence is deliberate, and the
 // v1 pick drops the negative tooltip's "or book online" clause there).
 function WalkInIndicator({ acceptsWalkIns }: { acceptsWalkIns: boolean }) {
   const [open, setOpen] = useState(false);

@@ -10,7 +10,7 @@ import { pageMetaFor } from '../../lib/page-head';
 import { servicePackageQueries, siteSettingsQueries } from '../../lib/queries';
 
 export const Route = createFileRoute('/packages/')({
-  // The never-throwing settings ensure (#215's law — the #223 root-loader
+  // The never-throwing settings ensure (#215's law, the #223 root-loader
   // posture, page-local): the intro + head degrade to code defaults; the
   // packages read owns its own failure surface.
   loader: async ({ context: { queryClient } }) => {
@@ -25,14 +25,14 @@ export const Route = createFileRoute('/packages/')({
     return { meta: pageMetaFor(settings.packagesTitle, settings.packagesDescription, settings) };
   },
   component: PackagesPage,
-  // The ruled skeleton grammar (#164 Round 5): client navigations only —
+  // The ruled skeleton grammar (#164 Round 5): client navigations only;
   // first loads are server-rendered (the M5 freshness rule); judge by
   // throttling in devtools while clicking between pages.
   pendingComponent: PackagesSkeleton,
 });
 
 function PackagesPage() {
-  // The ?empty=1 judging aid (M7 #223): DEV-gated — production builds
+  // The ?empty=1 judging aid (M7 #223): DEV-gated, production builds
   // answer false by construction, so the aid never ships. The hooks run
   // unconditionally (rules of hooks); the gate renders after them.
   const isEmpty = isEmptyJudgingParam(import.meta.env.DEV, useLocation().searchStr);
@@ -67,7 +67,7 @@ function PackagesPage() {
 
   return (
     <div>
-      {/* The ruled intro (#164 Round 3): the Services-page shape — h1 +
+      {/* The ruled intro (#164 Round 3): the Services-page shape, h1 +
           description from settings, defaults being the Round-3-ratified
           draft. */}
       <section className='mx-auto max-w-5xl px-6 pt-12'>

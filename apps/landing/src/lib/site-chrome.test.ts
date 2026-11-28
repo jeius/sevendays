@@ -2,7 +2,7 @@
 // the RESOLVED settings. The banner gates are the law: off or untitled
 // renders NOTHING (never a broken strip); unset socials hide; the contact
 // block renders only what the studio set. Fixtures here are hand-built
-// resolved shapes (resolveSiteSettings is types-tested — #215).
+// resolved shapes (resolveSiteSettings is types-tested, #215).
 import type { SiteSettings } from '@sevendays/types';
 import { EMPTY_SITE_SETTINGS } from '@sevendays/types';
 import { describe, expect, it } from 'vitest';
@@ -13,7 +13,7 @@ const ON = {
   bannerIsActive: true,
 } as SiteSettings;
 
-describe('bannerFor (M7 #223 — off or untitled renders nothing)', () => {
+describe('bannerFor (M7 #223, off or untitled renders nothing)', () => {
   it('inactive banner → null even when title/body are set', () => {
     expect(
       bannerFor({ ...ON, bannerIsActive: false, bannerTitle: 'News', bannerBody: 'Body' })
@@ -39,7 +39,7 @@ describe('bannerFor (M7 #223 — off or untitled renders nothing)', () => {
   });
 });
 
-describe('socialLinksFor (M7 #223 — unset links hide, order fixed)', () => {
+describe('socialLinksFor (M7 #223, unset links hide, order fixed)', () => {
   it('nothing set → empty row (the footer renders no social line)', () => {
     expect(socialLinksFor(EMPTY_SITE_SETTINGS)).toEqual([]);
   });
@@ -57,7 +57,7 @@ describe('socialLinksFor (M7 #223 — unset links hide, order fixed)', () => {
   });
 });
 
-describe('footerContactFor (M7 #223 — renders only what the studio set)', () => {
+describe('footerContactFor (M7 #223, renders only what the studio set)', () => {
   it('nothing set → null (no contact block)', () => {
     expect(footerContactFor(EMPTY_SITE_SETTINGS)).toBeNull();
   });

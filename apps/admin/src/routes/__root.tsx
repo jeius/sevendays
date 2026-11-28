@@ -54,9 +54,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 });
 
 // #306 root cause (diagnosed 2026-11-15): the dev login form's submit never
-// ran its handler because the interaction landed BEFORE React hydrated —
+// ran its handler because the interaction landed BEFORE React hydrated:
 // SSR paints the form instantly while hydration completes seconds later
-// under vite dev — and a pre-hydration submit falls through React's
+// under vite dev, and a pre-hydration submit falls through React's
 // delegated listeners (the form carries no __reactFiber$ own property yet)
 // to the browser's native form submission: a full-page GET to /login (the
 // inputs have no name attributes, so the URL is a bare "?") that discards
@@ -75,7 +75,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang='en' suppressHydrationWarning>
       <head>
         <HeadContent />
-        {/* The pre-hydration submit guard — the root cause is recorded above. */}
+        {/* The pre-hydration submit guard, the root cause is recorded above. */}
         <script>{PRE_HYDRATION_SUBMIT_GUARD}</script>
       </head>
       <body>

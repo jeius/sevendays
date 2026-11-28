@@ -7,8 +7,8 @@ import { CalendarPlus } from 'lucide-react';
 import { NAV_LINKS } from '../lib/nav';
 import { MobileNav } from './mobile-nav';
 
-// Site chrome — the ruled pass C "Sticky ink bar" (#164 Round 1, owner
-// endorsed; built M7 #223): the ink band goes sticky and glassy — 90% ink
+// Site chrome, the ruled pass C "Sticky ink bar" (#164 Round 1, owner
+// endorsed; built M7 #223): the ink band goes sticky and glassy, 90% ink
 // + backdrop-blur so scrolling content reads softly beneath it, the
 // white/10 hairline keeping the glass legible on bright photos. The
 // incumbent wordmark (serif name + mono kicker) carries, desktop-only
@@ -16,7 +16,7 @@ import { MobileNav } from './mobile-nav';
 // sets one, the incumbent sd.png otherwise; name/tagline from the Site
 // tab, code defaults when unset). Link treatment stays #111's ruled B
 // (brand-200 rest 13.94:1, white hover/current, petrol tick). CTA law,
-// main arm: Book now carries CalendarPlus — the v1 arm's Call-us swap is a
+// main arm: Book now carries CalendarPlus, the v1 arm's Call-us swap is a
 // pick-time transform, never in this codebase.
 export function SiteHeader({ settings }: { settings: SiteSettings }) {
   return (

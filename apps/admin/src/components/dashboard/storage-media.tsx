@@ -1,5 +1,5 @@
 // Storage & Media (#187): R2 stored-bytes trend + object count + the
-// Class A/B operation counts with the free-tier budget markers — a COST
+// Class A/B operation counts with the free-tier budget markers, a COST
 // SIGNAL, not a quota (the spec's words). Values are window-scoped; the
 // markers are static monthly references labeled as such. One query for
 // the whole section; every card folds to its curated state.

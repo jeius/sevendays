@@ -10,13 +10,13 @@ import type { Env } from '../env.js';
 // enforced upload URL; commit is the trust-but-verify gate (binding HEAD →
 // caps → promote to an immutable final key → delete staging → hand back the
 // final key; miss or violation → delete the object and the typed 400 the
-// route maps). Storage vs URLs: only object keys move here — resolving
+// route maps). Storage vs URLs: only object keys move here, resolving
 // MEDIA_PUBLIC_BASE_URL into absolute URLs is the read assembly's job
 // (#138), never this service's.
 
 export const MEDIA_BUCKET_NAME = 'sevendays-media';
-export const PRESIGN_EXPIRY_SECONDS = 900; // 15 min — one file PUT, minted per file on demand
-// #246: the single owner-ruled cap (10 MiB, 2026-11-13 — was 50 MiB). The
+export const PRESIGN_EXPIRY_SECONDS = 900; // 15 min, one file PUT, minted per file on demand
+// #246: the single owner-ruled cap (10 MiB, 2026-11-13, was 50 MiB). The
 // constant lives in @sevendays/types so the admin courtesy pre-check reads
 // the same number; the commit-time HEAD is still the real gate (presign
 // cannot carry a size condition).
@@ -28,14 +28,14 @@ const EXTENSIONS = { 'image/jpeg': 'jpg', 'image/png': 'png' } as const;
 
 const FINAL_PREFIXES: Record<MediaPurpose, string> = {
   'package-cover': 'covers',
-  // M7 #214: branch covers share the covers/ prefix — one immutable-cover
+  // M7 #214: branch covers share the covers/ prefix, one immutable-cover
   // directory; the purpose still names its owner for the presign contract.
   'branch-cover': 'covers',
-  // M7 #215: the brand logo gets its own immutable directory — a logo is
+  // M7 #215: the brand logo gets its own immutable directory, a logo is
   // not a cover (the purpose names the owner, the prefix names the class).
   'site-logo': 'brand',
   'gallery-photo': 'gallery',
-  // M9 #331: studio-service covers share the covers/ prefix — the
+  // M9 #331: studio-service covers share the covers/ prefix, the
   // branch-cover ruling carried to the fifth purpose.
   'service-cover': 'covers',
 };
@@ -43,7 +43,7 @@ const FINAL_PREFIXES: Record<MediaPurpose, string> = {
 const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 
 /** Deploy-time misconfiguration (the BETTER_AUTH_SECRET posture): the route
- * does not catch this — the root onError logs the loud detail and answers
+ * does not catch this, the root onError logs the loud detail and answers
  * the curated 503 'Media uploads are not configured.' (#155's leak-safe
  * channel: operators distinguish missing tokens from generic infra failure;
  * env names never leave the Worker), so a Worker without the owner-minted
@@ -51,7 +51,7 @@ const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 export class MissingR2CredentialsError extends Error {
   constructor() {
     super(
-      'R2_S3_ACCESS_KEY_ID / R2_S3_SECRET_ACCESS_KEY are not set — the API cannot presign uploads. Set the Worker secrets per docs/media-bucket-runbook.md § Owner handoff (scoped R2 S3 token). No fallback by design.'
+      'R2_S3_ACCESS_KEY_ID / R2_S3_SECRET_ACCESS_KEY are not set: the API cannot presign uploads. Set the Worker secrets per docs/media-bucket-runbook.md § Owner handoff (scoped R2 S3 token). No fallback by design.'
     );
     this.name = 'MissingR2CredentialsError';
   }
@@ -68,7 +68,7 @@ export type CommitUploadResult =
 
 /**
  * Mint a presigned PUT for one file (POST /api/v1/admin/media/presign,
- * session-gated). The key is server-assigned (`tmp/<uuid>.jpg`, or `.png` for the site-logo purpose — the client
+ * session-gated). The key is server-assigned (`tmp/<uuid>.jpg`, or `.png` for the site-logo purpose, the client
  * never supplies key text); the Content-Type is signed into the URL so a PUT
  * with a different type fails the signature. allHeaders is LOAD-BEARING:
  * aws4fetch's UNSIGNABLE_HEADERS set contains content-type, so signQuery
@@ -101,14 +101,14 @@ export async function presignUpload(
 
 /**
  * The commit contract (trust-but-verify, closed): HEAD-verify the staging
- * object → enforce the caps (10 MiB, image/jpeg — PNG for the site-logo
- * purpose only, #246 — the presigned PUT carried
+ * object → enforce the caps (10 MiB, image/jpeg, PNG for the site-logo
+ * purpose only, #246, the presigned PUT carried
  * no size condition, so this is the real gate) → promote to the immutable
  * final key via the binding (no S3 credentials involved) → delete the
  * staging key → hand the final key back for the caller to persist (#137).
  * Miss or violation deletes the object and answers the typed 400 shape. A
  * staging key that was never minted by presign (anything not tmp/<uuid>.jpg)
- * is refused WITHOUT deleting — the commit path must never be able to delete
+ * is refused WITHOUT deleting, the commit path must never be able to delete
  * an arbitrary (promoted) object.
  */
 export async function commitUpload(
@@ -145,7 +145,7 @@ export async function commitUpload(
       message: `upload exceeds the 10 MiB cap (${obj.size} bytes)`,
     });
   }
-  // #246: allowed types are per-purpose — site-logo accepts PNG (owner
+  // #246: allowed types are per-purpose, site-logo accepts PNG (owner
   // ruling 2026-11-13); every other purpose stays JPG-only (#170).
   const allowedTypes: readonly string[] =
     input.purpose === 'site-logo' ? ['image/jpeg', 'image/png'] : ['image/jpeg'];
@@ -167,7 +167,7 @@ export async function commitUpload(
   }
   const src = await bucket.get(stagingKey.data);
   if (!src) {
-    // Vanished between head and get (strongly consistent binding — this is a
+    // Vanished between head and get (strongly consistent binding, this is a
     // concurrent commit winning the race, or a manual delete). Nothing to
     // promote, nothing left to clean.
     return {
@@ -190,8 +190,8 @@ export async function commitUpload(
  * resolve the row → stream the object → transform via the Images binding
  * (no public read path involved). Over the binding's documented 20 MB input
  * limit, fall back to the ORIGINAL bytes with the stored content type (the
- * ADR-0019 cap trade, made explicit — full-size display in the admin grid).
- * Returns null for a missing row OR a missing object — the route answers
+ * ADR-0019 cap trade, made explicit, full-size display in the admin grid).
+ * Returns null for a missing row OR a missing object, the route answers
  * the per-entity 404 either way.
  */
 export async function servePhotoThumbnail(
@@ -220,7 +220,7 @@ export async function servePhotoThumbnail(
 
 /**
  * Read-time URL resolution (ADR-0019): the absolute public URL for an object
- * key, null passthrough for a null key. The ONLY place a key becomes a URL —
+ * key, null passthrough for a null key. The ONLY place a key becomes a URL:
  * admin reads resolve here (#137); #138 reuses it for the public reads. Raw
  * keys never leave the API at any layer. (Added by #137 as the one fenced
  * extension to this seam; presign/commit/thumb are untouched.)

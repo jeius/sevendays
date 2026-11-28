@@ -21,7 +21,7 @@ import { servePhotoThumbnail } from '../services/media.js';
 import { validatedJson, validatedParam } from '../services/validator.js';
 
 // #136 seeded this router with the by-id thumbnail route only (keys stay
-// server-side — the research's by-key sketch refined to by-id). #137's write
+// server-side, the research's by-key sketch refined to by-id). #137's write
 // model completes it: GET / (all rows incl. deactivated, photoUrl resolved),
 // POST / (the staging key is commit-verified and promoted at persist), PUT
 // /order, GET /:id, PUT /:id. Static paths are registered BEFORE /:id so the

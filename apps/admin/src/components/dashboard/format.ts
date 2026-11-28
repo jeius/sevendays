@@ -1,6 +1,6 @@
 // Deterministic formatters for the dashboard (#186): every output is a
 // pure function of its input so SSR and hydration render byte-identical
-// strings (no locale-dependent Intl for dates, no relative "3h ago" —
+// strings (no locale-dependent Intl for dates, no relative "3h ago";
 // those would mismatch across the SSR/client boundary).
 export function formatUtc(iso: string | null): string {
   if (iso === null) return '-';

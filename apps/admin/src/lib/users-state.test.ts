@@ -1,6 +1,6 @@
 // The Users tab's row vocabulary (M7 #221): the domain role words render
-// (ADR-0018 — Owner/Staff in UI copy, never the 'admin' gate literal);
-// session rows are SHAPED — the plugin's token never crosses the seam into
+// (ADR-0018, Owner/Staff in UI copy, never the 'admin' gate literal);
+// session rows are SHAPED, the plugin's token never crosses the seam into
 // anything a component could render.
 import { describe, expect, it } from 'vitest';
 import type { AdminSessionRow } from './users-state';
@@ -48,7 +48,7 @@ describe('shapeUserRows (M7 #221)', () => {
     expect(rows[1]).toMatchObject({ roleLabel: 'Staff', isSelf: true });
   });
 
-  it('shapeSessionRows strips the token — the shaped row carries no token key at all', () => {
+  it('shapeSessionRows strips the token, the shaped row carries no token key at all', () => {
     const rows = shapeSessionRows([
       {
         id: 'sess-1',

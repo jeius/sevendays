@@ -1,8 +1,8 @@
 // The money-free confirmation email (issue #47). This first half is the PURE
 // builder: a template-literal HTML string, no I/O, no dependencies (the
-// Resend `react` param is Node-only — Workers takes `html`). Money-free is
+// Resend `react` param is Node-only, Workers takes `html`). Money-free is
 // enforced structurally: the input carries no price field, so no price can
-// reach the HTML. "Scheduled", never "confirmed" — the appointment's status
+// reach the HTML. "Scheduled", never "confirmed", the appointment's status
 // is still pending at booking. The send/schedule half joins this file in
 // Task 3.
 import { branches, type Database, servicePackages, studioServices } from '@sevendays/db';
@@ -14,7 +14,7 @@ import { captureError } from '../observability/capture.js';
 import { logEmail } from '../observability/events.js';
 import type { RequestLogger } from '../observability/logger.js';
 
-/** Sandbox sender (M2): ONE constant, no env override — M6's domain swap
+/** Sandbox sender (M2): ONE constant, no env override, M6's domain swap
  * replaces it (the `bookings@` local part is reserved). */
 export const EMAIL_FROM = 'Sevendays Photography <onboarding@resend.dev>';
 
@@ -25,7 +25,7 @@ const PH_DATE_TIME = new Intl.DateTimeFormat('en-PH', {
 });
 
 /** The landing's phDateTime semantics (apps/landing/src/lib/format.ts),
- * reimplemented locally — separate app, no cross-app import. Pinned output:
+ * reimplemented locally, separate app, no cross-app import. Pinned output:
  * 2026-12-25T01:30:00.000Z → "Dec 25, 2026, 9:30 AM" (full-ICU runtimes). */
 function phDateTime(instant: Date): string {
   return PH_DATE_TIME.format(instant);
@@ -33,7 +33,7 @@ function phDateTime(instant: Date): string {
 
 /** Uniform escaping for every interpolated BODY value: customer name and
  * notes are free-text input, and catalog names carry `&` (Portraits & ID
- * Photo → Portraits &amp; ID Photo in HTML). The SUBJECT is exempt — plain
+ * Photo → Portraits &amp; ID Photo in HTML). The SUBJECT is exempt, plain
  * text, never HTML-parsed. */
 function escapeHtml(value: string): string {
   return value
@@ -53,7 +53,7 @@ export interface ConfirmationEmailInput {
   branchPhone: string;
   scheduledAt: Date;
   notes: string | null;
-  /** Name-only rows — the money-free rule keeps prices out by type. */
+  /** Name-only rows, the money-free rule keeps prices out by type. */
   addonNames: string[];
   landingOrigin: string;
 }
@@ -72,7 +72,7 @@ function summaryRow(label: string, value: string): string {
 /**
  * Build the full Resend payload minus the send options: exact from/subject,
  * the pinned body copy, the plain inline-styled summary table (no hero, no
- * logo, no banner), a single CTA link, the contact footer. Pure — the unit
+ * logo, no banner), a single CTA link, the contact footer. Pure, the unit
  * suite owns every copy rule; nothing here reads env, db, or the clock.
  */
 export function buildConfirmationEmail(input: ConfirmationEmailInput): ConfirmationEmail {
@@ -103,7 +103,7 @@ export function buildConfirmationEmail(input: ConfirmationEmailInput): Confirmat
 // --- Send half (Task 3): resolve at send time, one waitUntil, booking stands ----
 
 /**
- * Structural slice of the request's execution context — the route passes
+ * Structural slice of the request's execution context, the route passes
  * `c.executionCtx`; tests pass a fake collector. (Hono throws on
  * `c.executionCtx` when the request carries no execution context, which is
  * exactly how a test proves the wiring exists.)
@@ -114,10 +114,10 @@ export interface ConfirmationEmailScheduler {
 
 /**
  * resend@6's typed failure, reified: the SDK resolves { data, error } and
- * never throws, so the error branch THROWS this instead — the waitUntil
+ * never throws, so the error branch THROWS this instead, the waitUntil
  * catch can classify the email event's code (`resend:<rejectionName>`)
  * without ever logging resend's free-text message (which may echo the
- * recipient address — the PII floor). #184's Sentry capture reads the
+ * recipient address, the PII floor). #184's Sentry capture reads the
  * original error off the send seam.
  */
 export class ResendRejectionError extends Error {
@@ -132,8 +132,8 @@ export class ResendRejectionError extends Error {
 
 /**
  * Schedule the send past the response (spec mechanics): ONE waitUntil after
- * the commit, the rejection caught and logged INSIDE the scheduled callback
- * — email failure = booking stands, and a failed send can never surface as
+ * the commit, the rejection caught and logged INSIDE the scheduled callback;
+ * email failure = booking stands, and a failed send can never surface as
  * an unhandled waitUntil rejection.
  */
 export function scheduleConfirmationEmail(
@@ -147,7 +147,7 @@ export function scheduleConfirmationEmail(
     sendConfirmationEmail(env, db, record, log).catch((error: unknown) => {
       // Email failure = booking stands; the failed event carries a
       // CLASSIFIED code, never the error's free text (resend messages may
-      // echo the recipient — the PII floor; the loud detail is #184's
+      // echo the recipient, the PII floor; the loud detail is #184's
       // Sentry capture at this same seam).
       logEmail(log, {
         phase: 'failed',
@@ -155,7 +155,7 @@ export function scheduleConfirmationEmail(
         code:
           error instanceof ResendRejectionError ? `resend:${error.rejectionName}` : 'send_failed',
       });
-      // #184: the Sentry capture at the send seam — no HTTP status signals
+      // #184: the Sentry capture at the send seam, no HTTP status signals
       // an email failure (the booking already answered 201), so the original
       // error is captured here: ResendRejectionError's message is classified
       // (recipient-free by construction); the other throw sites name ids,
@@ -189,11 +189,11 @@ async function resolveOfferingName(db: Database, record: AppointmentWithAddons):
 
 /**
  * Resolve the copy's names at send time (spec: reads keyed by the stored
- * ids — a catalog edit after booking never rewrites the email's facts; the
+ * ids, a catalog edit after booking never rewrites the email's facts; the
  * add-on names ride the record's embedded entries) and hand the payload to
- * the Resend SDK with the idempotency key (≤256 chars, 24h retention — a
+ * the Resend SDK with the idempotency key (≤256 chars, 24h retention, a
  * retried request can't double-send). resend@6 RESOLVES typed failures
- * ({ data, error }) — it does not throw on API errors, so the error branch
+ * ({ data, error }), it does not throw on API errors, so the error branch
  * is checked, never try/catch'd. The db handle is the request's per-request
  * client (ADR-0011): waitUntil extends the request context's lifetime, so
  * the client stays valid past the response.

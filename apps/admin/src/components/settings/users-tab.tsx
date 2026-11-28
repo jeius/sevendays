@@ -1,16 +1,16 @@
 // The Users tab (M7 #221, Task 5): the owner-only staff surface. The table
-// carries the own-row view-only law (no actions — an em-dash — plus the
+// carries the own-row view-only law (no actions, the hyphen placeholder, plus the
 // '(you)' suffix); the affordance annotations re-derive from the same pure
 // seams the server fns guard with (deleteRefusal/banRefusal over the query
-// list — affordance-only; the server's fresh-list refusal is authoritative
+// list, affordance-only; the server's fresh-list refusal is authoritative
 // and its blockers render in-body). The expanded sessions row follows the
 // #219 pattern; the RAW plugin rows stay in memory solely as the per-session
 // revoke mutation arg (better-auth 1.7.5 revokes BY TOKEN) while the render
-// reads only shapeSessionRows' output — the session TOKEN never renders and
+// reads only shapeSessionRows' output, the session TOKEN never renders and
 // never lands in UI copy. The create Sheet rides the #218 async-Save
 // contract (close-only-on-success; field-level failures inline) and the
 // three dialogs (reset password, ban/unban, guarded delete) resolve Task 3's
-// result-value union. All data rides the server fns — the browser never
+// result-value union. All data rides the server fns, the browser never
 // calls BetterAuth's admin plugin (authClient.admin does not exist).
 import { Badge } from '@sevendays/ui/components/badge';
 import { Button } from '@sevendays/ui/components/button';
@@ -81,10 +81,10 @@ import {
 
 const TEMP_PASSWORD_MIN = 12; // matches emailAndPassword.minPasswordLength
 
-/** The pending posture's fixed four skeleton rows — stable keys, never reordered. */
+/** The pending posture's fixed four skeleton rows, stable keys, never reordered. */
 const PENDING_ROW_KEYS = ['row-1', 'row-2', 'row-3', 'row-4'];
 
-/** UTC-stable session timestamps (the formatUtc law — SSR/hydration byte-identical). */
+/** UTC-stable session timestamps (the formatUtc law, SSR/hydration byte-identical). */
 function sessionWhen(at: Date): string {
   return formatUtc(at.toISOString());
 }
@@ -99,12 +99,12 @@ function userAgentLine(userAgent: string | null): string {
 
 /**
  * One icon row action. A blocked action (non-empty refusal) renders DISABLED
- * with the refusal line as its tooltip — the affordance annotation; the
+ * with the refusal line as its tooltip, the affordance annotation; the
  * server's fresh-list refusal stays authoritative. A disabled button swallows
  * hover, so the tooltip trigger is a span wrapping it (the button's own
  * aria-label keeps the action named for assistive tech). Tones follow the
  * house families: neutral (reset), destructive (ban/delete), positive
- * (unban — the reactivate family from the pattern library).
+ * (unban, the reactivate family from the pattern library).
  */
 function GuardedRowAction({
   label,
@@ -123,7 +123,7 @@ function GuardedRowAction({
     tone === 'destructive'
       ? 'text-destructive hover:bg-destructive/10 hover:text-destructive'
       : tone === 'positive'
-        ? // Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families — never promote into packages/ui.
+        ? // Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families, never promote into packages/ui.
           'text-green-700 hover:bg-green-600/10 hover:text-green-700 dark:text-green-400 dark:hover:bg-green-400/10 dark:hover:text-green-400'
         : undefined;
   const button = (
@@ -164,12 +164,12 @@ export function UsersTab({ actorId }: { actorId: string }) {
   const rows = shapeUserRows(users ?? [], actorId);
 
   // One expanded row at a time (the #219 pattern); expanding fetches the
-  // sessions. The RAW rows (token included) stay in memory only — the
+  // sessions. The RAW rows (token included) stay in memory only, the
   // per-session Revoke needs `session.token` (revokes go by token), while
   // the render reads the shaped rows the token was stripped from.
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // #244: the sessions page resets whenever a different row expands (or the
-  // same one collapses) — paginateSessions' clamp covers a revoke shrinking
+  // same one collapses), paginateSessions' clamp covers a revoke shrinking
   // the list mid-page.
   const [sessionPage, setSessionPage] = useState(1);
   const sessionsQuery = useQuery({
@@ -181,7 +181,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
   // carries no index signature, so the spread satisfies shapeSessionRows'
   // `& Record<string, unknown>` param (shallow copy, Date references kept).
   const rawSessions = (sessionsQuery.data ?? []).map((session) => ({ ...session }));
-  // #244: the expanded view lists ACTIVE sessions only — expired rows are
+  // #244: the expanded view lists ACTIVE sessions only, expired rows are
   // dropped before anything shapes them for render.
   const activeRows = activeSessionRows(shapeSessionRows(rawSessions), new Date());
   const sessionsPage = paginateSessions(activeRows, sessionPage);
@@ -256,7 +256,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
         toast.success('User deleted.');
         await queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
         if (expandedId === userId) {
-          setExpandedId(null); // the expanded row is gone — collapse with it
+          setExpandedId(null); // the expanded row is gone, collapse with it
         }
         setDeleteTarget(null);
       } else {
@@ -310,7 +310,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
   }
 
   // The #218 async-Save contract: resolve true closes the sheet; false (or a
-  // transport throw) holds it open over the intact fields — the plugin's
+  // transport throw) holds it open over the intact fields, the plugin's
   // refusal (a duplicate email answers its message) renders inline.
   async function handleCreateSave(): Promise<boolean> {
     const name = createName.trim();
@@ -377,7 +377,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
     );
   }
 
-  // First-load only — a background refetch renders the stale table.
+  // First-load only, a background refetch renders the stale table.
   if (isPending) {
     return (
       <div className='space-y-3'>
@@ -426,7 +426,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
                 {rows.map((row) => {
                   const expanded = expandedId === row.id;
                   // The affordance annotations re-derive from the same pure
-                  // seams the server fns guard with — affordance-only.
+                  // seams the server fns guard with, affordance-only.
                   const rowDeleteBlockers = deleteRefusal(actorId, row, rows);
                   const rowBanBlockers = banRefusal(actorId, row, rows);
                   return (
@@ -435,7 +435,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
                         expanded={expanded}
                         className={`cursor-pointer transition-colors ${
                           expanded
-                            ? // #244: full-opacity accent + a petrol start rail — bg-muted/50 is
+                            ? // #244: full-opacity accent + a petrol start rail, bg-muted/50 is
                               // invisible on the dark card (#23262a over #1f2226). The rail is
                               // --primary (the fixed brand point, legible both themes).
                               'bg-accent/70 shadow-[inset_2px_0_0_0_var(--primary)] hover:bg-accent/70 dark:bg-accent dark:hover:bg-accent'
@@ -588,7 +588,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
                                         disabled={sessionsBusy}
                                         aria-busy={thisPending}
                                         onClick={() => {
-                                          // The token rides as the mutation arg only —
+                                          // The token rides as the mutation arg only:
                                           // better-auth 1.7.5 revokes BY TOKEN; a session
                                           // id would silently no-op the delete.
                                           if (session.token !== undefined) {
@@ -671,7 +671,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
               onChange={(event) => setCreateEmail(event.target.value)}
             />
           </Field>
-          {/* The role picker lives at CREATE only — no role editing post-create. */}
+          {/* The role picker lives at CREATE only, no role editing post-create. */}
           <Field>
             <FieldLabel htmlFor='users-create-role'>Role</FieldLabel>
             <Select
@@ -751,7 +751,7 @@ export function UsersTab({ actorId }: { actorId: string }) {
                 onChange={(event) => setResetConfirmValue(event.target.value)}
               />
             </Field>
-            {/* Failure stays open with the line — the result-value law. */}
+            {/* Failure stays open with the line, the result-value law. */}
             {resetError ? (
               <p role='alert' className='text-destructive text-xs'>
                 {resetError}

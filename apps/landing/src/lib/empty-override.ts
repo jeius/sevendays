@@ -3,7 +3,7 @@
 // owner round judges them without emptying the live catalog. The URL is
 // read RAW (route search validation strips unknown params); `dev` is the
 // caller's `import.meta.env.DEV` so production builds answer false by
-// construction — the aid never ships.
+// construction, the aid never ships.
 export function isEmptyJudgingParam(dev: boolean, search: string): boolean {
   if (!dev) return false;
   return new URLSearchParams(search).get('empty') === '1';

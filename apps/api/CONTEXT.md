@@ -1,6 +1,6 @@
 # API
 
-The backend context: owns the data model and every read/write to it. The terms below are the project's canonical vocabulary — other contexts reference this file instead of redefining them.
+The backend context: owns the data model and every read/write to it. The terms below are the project's canonical vocabulary, other contexts reference this file instead of redefining them.
 
 ## Language
 
@@ -10,14 +10,14 @@ _Avoid_: store, location, studio (unqualified)
 
 **Service Package**:
 A bookable offering with a name, description, an optional price, duration, and cover image. Its fixed contents are its Inclusions; extras are attached at booking as Add-on Services.
-_Avoid_: plan, product, offering, package (unqualified — collides with npm packages)
+_Avoid_: plan, product, offering, package (unqualified, collides with npm packages)
 
 **Inclusion**:
-A fixed item or privilege bundled with a Service Package at no extra charge — framed pictures, prints, wardrobe/accessory use.
+A fixed item or privilege bundled with a Service Package at no extra charge, framed pictures, prints, wardrobe/accessory use.
 _Avoid_: freebie, bundle, "what's included" (in prose)
 
 **Add-on Service**:
-An optional extra — hairstyle, makeup — priced unless Unpriced, attached to an Appointment at booking time. An addition to whatever the Appointment books, never bookable instead of it; on Studio Service bookings, only the add-ons configured to apply to that service are offered.
+An optional extra, hairstyle, makeup, priced unless Unpriced, attached to an Appointment at booking time. An addition to whatever the Appointment books, never bookable instead of it; on Studio Service bookings, only the add-ons configured to apply to that service are offered.
 _Avoid_: service (unqualified), extra, option
 
 **Studio Service**:
@@ -29,11 +29,11 @@ A customer's reserved time at a Branch for a Service Package or a Studio Service
 _Avoid_: reservation, order, booking (as a noun for the record)
 
 **Status**:
-The lifecycle state of an Appointment — the closed set pending, confirmed, completed, cancelled, no-show, defined in `packages/types`.
+The lifecycle state of an Appointment, the closed set pending, confirmed, completed, cancelled, no-show, defined in `packages/types`.
 _Avoid_: ad-hoc state strings ("done", "closed")
 
 **Kind**:
-The kind of an Appointment — scheduled, walk-in, or visitation — describing how the session happens. Independent of Status: a walk-in Appointment is still pending, confirmed, and so on.
+The kind of an Appointment, scheduled, walk-in, or visitation, describing how the session happens. Independent of Status: a walk-in Appointment is still pending, confirmed, and so on.
 _Avoid_: type, mode, channel
 
 **Walk-in flag**:
@@ -45,15 +45,15 @@ A standard print dimension the studio offers (e.g. 1x1, 2x2, 2R, 8R), managed as
 _Avoid_: size (unqualified), format
 
 **Print finish**:
-The finishing applied to printed Inclusions — currently laminated or raw. Not stored per line: framed pictures are laminated, loose prints are raw.
+The finishing applied to printed Inclusions, currently laminated or raw. Not stored per line: framed pictures are laminated, loose prints are raw.
 _Avoid_: lamination, coating
 
 **Session**:
-The auth record the API verifies on gated routes: BetterAuth's session row over the shared tables, presented as an `Authorization: Bearer` token and checked by `requireSession` (ADR-0004) — never a cookie crossing apps, never a hand-rolled token lookup.
+The auth record the API verifies on gated routes: BetterAuth's session row over the shared tables, presented as an `Authorization: Bearer` token and checked by `requireSession` (ADR-0004), never a cookie crossing apps, never a hand-rolled token lookup.
 _Avoid_: JWT, cookie, auth context
 
 **Attire**:
-The wardrobe context a framed picture or print is shot in — stored atomically (Toga, Filipiniana, Executive, Uniform); combined contexts like Filipiniana/Executive are Inclusions linked to multiple Attire rows in catalog order.
+The wardrobe context a framed picture or print is shot in, stored atomically (Toga, Filipiniana, Executive, Uniform); combined contexts like Filipiniana/Executive are Inclusions linked to multiple Attire rows in catalog order.
 _Avoid_: outfit, costume, wardrobe (that is the usage Inclusion)
 
 **Frame**:
@@ -61,7 +61,7 @@ One physical frame bundled with a Service Package, numbered per package (catalog
 _Avoid_: framed picture (that is the Inclusion inside a Frame), frame size (that is the Print size of the framed picture)
 
 **API client**:
-The shared package (`@sevendays/api-client`) through which both apps call this API — the only supported path; frontends never hand-roll calls to it.
+The shared package (`@sevendays/api-client`) through which both apps call this API, the only supported path; frontends never hand-roll calls to it.
 _Avoid_: SDK, fetcher, wrapper
 
 ## Availability (ADR-0005)
@@ -87,7 +87,7 @@ Hidden from the landing site and new bookings, while existing Appointments on it
 _Avoid_: deleted, archived, cancelled (for packages)
 
 **Deactivated (Studio Service)**:
-The same catalog action as a deactivated Service Package: hidden from the landing site and new bookings; existing Appointments on it remain valid. Independent of Branch bookability — a service can be active yet bookable at only some Branches.
+The same catalog action as a deactivated Service Package: hidden from the landing site and new bookings; existing Appointments on it remain valid. Independent of Branch bookability, a service can be active yet bookable at only some Branches.
 _Avoid_: deleted, archived, cancelled (for catalog offerings)
 
 **Deactivated (Lookup)**:
@@ -95,41 +95,41 @@ The same catalog action applied to Print sizes and Attires, with a lookup-specif
 _Avoid_: deleted, archived, disabled
 
 **Lookup**:
-A shared reference entity that Inclusions resolve values against — Print size and Attire. Frame is not a lookup: it is numbered within, and owned by, its Service Package.
+A shared reference entity that Inclusions resolve values against, Print size and Attire. Frame is not a lookup: it is numbered within, and owned by, its Service Package.
 _Avoid_: dictionary, reference table
 
 **Delete**:
-Permanent removal of a CMS entity — refused while anything references it: an Appointment on the offering (any Status, ever), an add-on attached to a past Appointment, an Inclusion resolving a Lookup, a Gallery Photo in the category. A row that passes is destroyed with what it owns — Frames, Inclusions, matrix entries, its cover image or photo; a blocked row leaves Deactivation as its only path, for good.
+Permanent removal of a CMS entity, refused while anything references it: an Appointment on the offering (any Status, ever), an add-on attached to a past Appointment, an Inclusion resolving a Lookup, a Gallery Photo in the category. A row that passes is destroyed with what it owns, Frames, Inclusions, matrix entries, its cover image or photo; a blocked row leaves Deactivation as its only path, for good.
 _Avoid_: hard delete, remove, purge, cascade (in prose)
 
 **Unpriced**:
-A catalog item — Service Package, Studio Service, or Add-on Service — whose price is deliberately unset. The item stays fully functional: bookable and attachable exactly as a priced one, with no price rendered anywhere it would appear — no placeholder stands in, and a booking with any Unpriced part shows no total. Reversible at any time by setting a price.
+A catalog item, Service Package, Studio Service, or Add-on Service, whose price is deliberately unset. The item stays fully functional: bookable and attachable exactly as a priced one, with no price rendered anywhere it would appear, no placeholder stands in, and a booking with any Unpriced part shows no total. Reversible at any time by setting a price.
 _Avoid_: free (that is zero-priced), inquire-only, price-on-request
 
 ## Gallery & testimonials
 
 **Gallery Photo**:
 A single photograph in the studio's gallery, shown in the landing site's about grid; each belongs to at most one Gallery Category, and an uncategorized photo is visible to staff only.
-_Avoid_: picture (unqualified — collides with framed-picture Inclusions), image, media
+_Avoid_: picture (unqualified, collides with framed-picture Inclusions), image, media
 
 **Gallery Category**:
-A staff-managed grouping of Gallery Photos — one tab of the about grid, shown in a fixed order. A photo belongs to at most one category.
+A staff-managed grouping of Gallery Photos, one tab of the about grid, shown in a fixed order. A photo belongs to at most one category.
 _Avoid_: album, collection, tag
 
 **Testimonial**:
-A structured customer quote — the quote text, the person attributed, and a display position — rendered in the landing site's about slot.
+A structured customer quote, the quote text, the person attributed, and a display position, rendered in the landing site's about slot.
 _Avoid_: review, story (that is owner copy), blurb
 
 **Testimonial Submission**:
-An inbound customer quote from the public form — the quote text and the person attributed — awaiting staff review; it never renders anywhere. Accepting one creates a Testimonial, with the text editable at acceptance; rejecting one retains it as a record, never a rendering.
+An inbound customer quote from the public form, the quote text and the person attributed, awaiting staff review; it never renders anywhere. Accepting one creates a Testimonial, with the text editable at acceptance; rejecting one retains it as a record, never a rendering.
 _Avoid_: pending testimonial, feedback, entry
 
 ## Observability
 
 **Application Log**:
-The API's structured, ephemeral event stream — access lines, admin-mutation, media, and email events, errors — written for human debugging only: it serves no dashboard and is never a durable record.
+The API's structured, ephemeral event stream, access lines, admin-mutation, media, and email events, errors, written for human debugging only: it serves no dashboard and is never a durable record.
 _Avoid_: audit log (that is the Audit Log), telemetry, log trail
 
 **Audit Log**:
-The durable who/what/when record of a CMS write, held as a database table written in the same transaction as the mutation it records — never derived from the Application Log.
+The durable who/what/when record of a CMS write, held as a database table written in the same transaction as the mutation it records, never derived from the Application Log.
 _Avoid_: activity log, change history, mutation log

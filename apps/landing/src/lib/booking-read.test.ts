@@ -194,7 +194,7 @@ describe('offeringNameFor', () => {
 });
 
 describe('unpriced confirmations (ADR-0020)', () => {
-  it('a null bookedPriceCents nulls the total — omitted, never ₱0', () => {
+  it('a null bookedPriceCents nulls the total, omitted, never ₱0', () => {
     expect(confirmationTotalCents(record({ bookedPriceCents: null }))).toBeNull();
   });
 

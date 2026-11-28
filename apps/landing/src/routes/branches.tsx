@@ -29,14 +29,14 @@ export const Route = createFileRoute('/branches')({
 });
 
 function BranchesPage() {
-  // The ?empty=1 judging aid (M7 #223) — DEV-gated, never ships.
+  // The ?empty=1 judging aid (M7 #223), DEV-gated, never ships.
   const isEmpty = isEmptyJudgingParam(import.meta.env.DEV, useLocation().searchStr);
   const { data: branches } = useSuspenseQuery(branchQueries.all());
   const { settings } = Route.useLoaderData();
 
   if (isEmpty || branches.length === 0) {
     // The ruled no-branches line (#164 Round 5's copy) + the Back-to-home
-    // outline CTA — a branchless read reads as deliberate, not broken.
+    // outline CTA, a branchless read reads as deliberate, not broken.
     return (
       <div className='mx-auto max-w-5xl px-6 py-12'>
         <h1 className='font-bold font-serif text-4xl text-brand-ink dark:text-foreground'>
@@ -66,7 +66,7 @@ function BranchesPage() {
         </h1>
         {/* The ruled intro (#164 Round 4, draft ratified at the round's
             close). The v1 arm's tail "…or book online." → "…call ahead."
-            is a pick-time transform on the v1 branch — main renders the
+            is a pick-time transform on the v1 branch, main renders the
             settings copy verbatim, no runtime variant machinery. */}
         {settings.branchesDescription && (
           <p className='mt-2 max-w-prose text-muted-foreground'>{settings.branchesDescription}</p>

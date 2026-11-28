@@ -42,7 +42,7 @@ describe('deriveGalleryTabs', () => {
 
   it('photos but zero category rows: All alone, the grid still renders under it', () => {
     // AR3 (#138): an active photo whose category is deactivated stays in the
-    // payload — the tab derivation must not strand it.
+    // payload, the tab derivation must not strand it.
     const gallery: GalleryRead = {
       categories: [],
       photos: [photo('00000000-0000-4000-8000-000000000099')],

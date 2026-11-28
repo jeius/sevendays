@@ -39,7 +39,7 @@ function row(overrides: Partial<ServicePackageRead> = {}): ServicePackageRead {
   return {
     id: UUID,
     name: 'Basic Package',
-    description: 'Entry graduation portrait package — 1 framed 8x10 Toga plus wallet-size prints.',
+    description: 'Entry graduation portrait package, 1 framed 8x10 Toga plus wallet-size prints.',
     priceCents: 90000,
     durationMinutes: null,
     isActive: true,
@@ -55,11 +55,11 @@ function row(overrides: Partial<ServicePackageRead> = {}): ServicePackageRead {
 }
 
 describe('durationLine (the line durationMinutes gets)', () => {
-  it('null renders nothing — the catalog specifies no durations (absent, never a placeholder)', () => {
+  it('null renders nothing, the catalog specifies no durations (absent, never a placeholder)', () => {
     expect(expandedRowModel(row({ durationMinutes: null })).durationLine).toBeNull();
   });
 
-  it('formats with pluralization — 60 → "60 minutes", 1 → "1 minute"', () => {
+  it('formats with pluralization, 60 → "60 minutes", 1 → "1 minute"', () => {
     expect(expandedRowModel(row({ durationMinutes: 60 })).durationLine).toBe('60 minutes');
     expect(expandedRowModel(row({ durationMinutes: 1 })).durationLine).toBe('1 minute');
   });
@@ -119,7 +119,7 @@ describe('inclusionLines (label + print size + attires, " · " between parts)', 
     expect(model.inclusionLines).toEqual(['4 prints · 2R · Toga', '4 prints · Toga']);
   });
 
-  it('privilege: the description stands alone — no attire suffix (it would duplicate the subject); a null description falls back to "Privilege"', () => {
+  it('privilege: the description stands alone, no attire suffix (it would duplicate the subject); a null description falls back to "Privilege"', () => {
     const model = expandedRowModel(
       row({
         inclusions: [
@@ -165,7 +165,7 @@ describe('inclusionLines (label + print size + attires, " · " between parts)', 
 });
 
 describe('expandedRowModel (the seeded Basic Package, whole)', () => {
-  it('derives the exact model — description passthrough, no duration, one chip, ten bullet lines in served order', () => {
+  it('derives the exact model, description passthrough, no duration, one chip, ten bullet lines in served order', () => {
     const basic = row({
       frames: [{ id: UUID, frameNumber: 1 }],
       inclusions: [
@@ -189,7 +189,7 @@ describe('expandedRowModel (the seeded Basic Package, whole)', () => {
     });
     expect(expandedRowModel(basic)).toEqual({
       description:
-        'Entry graduation portrait package — 1 framed 8x10 Toga plus wallet-size prints.',
+        'Entry graduation portrait package, 1 framed 8x10 Toga plus wallet-size prints.',
       durationLine: null,
       frameChips: ['Frame 1'],
       inclusionLines: [

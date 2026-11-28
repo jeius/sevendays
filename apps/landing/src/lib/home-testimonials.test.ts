@@ -1,4 +1,4 @@
-// Home testimonial pagination (#164 Round 2, owner-ruled: 3 per page — a
+// Home testimonial pagination (#164 Round 2, owner-ruled: 3 per page, a
 // pull-quote lead + a 2-item side rail; non-looping, the UI disables the
 // ends). The seam is the pure chunking; page STATE is the component's.
 import type { PublicTestimonial } from '@sevendays/types';
@@ -15,7 +15,7 @@ function t(): PublicTestimonial {
   };
 }
 
-describe('paginateTestimonials (M7 #223 — 3 per page, lead + side rail)', () => {
+describe('paginateTestimonials (M7 #223, 3 per page, lead + side rail)', () => {
   it('zero testimonials → zero pages (the component renders the coming-soon line)', () => {
     expect(paginateTestimonials([])).toEqual([]);
   });

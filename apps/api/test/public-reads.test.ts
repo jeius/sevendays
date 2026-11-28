@@ -31,7 +31,7 @@ describe('GET /api/v1/gallery (the assembled public read, #138)', () => {
       { id: gallery.categoryB, name: 'Graduation' },
     ]);
     // Active + categorized only: photoRetired is BOTH inactive and
-    // uncategorized — absent on either count. Raw keys never appear.
+    // uncategorized, absent on either count. Raw keys never appear.
     expect(body.photos).toHaveLength(2);
     const photoA = body.photos.find((p) => p.id === gallery.photoA);
     expect(photoA?.photoUrl).toBe(
@@ -97,7 +97,7 @@ describe('GET /api/v1/gallery (the assembled public read, #138)', () => {
     expect(body.photos.map((p) => p.id)).toEqual([gallery.photoB, gallery.photoA]);
   });
 
-  it('an ACTIVE photo under a DEACTIVATED category stays public (AR3 — category deactivation is not a photo filter)', async () => {
+  it('an ACTIVE photo under a DEACTIVATED category stays public (AR3, category deactivation is not a photo filter)', async () => {
     // #138 T4 minor: AR3 was asserted only structurally (the query filters
     // on photo activity + categorized-ness, nothing else). This is the real
     // fixture case: retire the TAB, the photo under it stays in the payload.

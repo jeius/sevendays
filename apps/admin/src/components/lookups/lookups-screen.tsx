@@ -1,16 +1,16 @@
 // The lookups screen (M5 #141): print sizes + attires on ONE screen under
-// the Studio taxonomy — ported element-for-element from the composition of
+// the Studio taxonomy, ported element-for-element from the composition of
 // record (prototype/131-admin-cms-compositions, screens/lookups.tsx, rounds
 // 2–5) onto the task seams. Print sizes adopt the Packages format (the code
 // main column / dot + description beneath, full text on expand); attires
-// render the status dot FIRST, then the name — no description, so no expand
+// render the status dot FIRST, then the name, no description, so no expand
 // affordance. The prototype's local fixture state is replaced by the task
 // seams: `adminLookupQueries.printSizes()/attires()` for the lists (the
 // Task 2 wrappers' first write consumers); Task 4's state seam
 // (`printSizeStateFromRead` / `newPrintSizeState` / `buildPrintSizePayload`
-// / `buildPrintSizeFlipPayload` / `validatePrintSizeState` — attires
+// / `buildPrintSizeFlipPayload` / `validatePrintSizeState`, attires
 // mirror) driving the two editors and the optimistic single flips through
-// the result-valued save fns. NO order PUTs — neither table carries
+// the result-valued save fns. NO order PUTs, neither table carries
 // positions; the reads' (position, id)-absent order is the display order.
 import type { Attire, PrintSize } from '@sevendays/types';
 import { Button } from '@sevendays/ui/components/button';
@@ -116,7 +116,7 @@ interface AttireFlipInput {
   isActive: boolean;
 }
 
-/** The pending posture's fixed four rows — stable keys, never reordered. */
+/** The pending posture's fixed four rows, stable keys, never reordered. */
 const PENDING_ROW_KEYS = ['row-1', 'row-2', 'row-3', 'row-4'];
 
 export function LookupsScreen() {
@@ -133,14 +133,14 @@ export function LookupsScreen() {
     refetch: refetchAttires,
   } = useQuery(adminLookupQueries.attires());
   const queryClient = useQueryClient();
-  // T3: controlled disclosure — one expanded row at a time across BOTH
+  // T3: controlled disclosure, one expanded row at a time across BOTH
   // sections (id or null; uuid ids never collide). Only print sizes expand.
   const [expandedId, setExpandedId] = useState<string | null>(null);
   // Deep-linkable in the prototype frame pass; here a plain selection. One
-  // confirm id spans both sections — uuid ids never collide.
+  // confirm id spans both sections, uuid ids never collide.
   const [confirmId, setConfirmId] = useState<string | null>(null);
   // The two sections' toolbar segments (#218): default All per visit, never
-  // persisted; the filtered views are render-time only — the caches and
+  // persisted; the filtered views are render-time only, the caches and
   // mutations ride the full lists. One delete target spans both sections
   // (uuid ids never collide), with its last blockers (empty until a blocked
   // 400 answers).
@@ -149,7 +149,7 @@ export function LookupsScreen() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteBlockers, setDeleteBlockers] = useState<string[]>([]);
   // The editor's create/edit switch and its open flag are separate: the
-  // async Save contract (#218) closes the shell ONLY on a resolved-true —
+  // async Save contract (#218) closes the shell ONLY on a resolved-true;
   // a held save (veto, failure) keeps the sheet open over the intact
   // parent-held state; onOpenChange(false) (Cancel, overlay, or the
   // post-success exit) clears both.
@@ -169,10 +169,10 @@ export function LookupsScreen() {
 
   // Single-row flips: optimistic on the section's list cache (cancel +
   // snapshot + patch ONLY isActive; rollback + toast on error; invalidate
-  // either way) — the posture 139's packages table pinned.
+  // either way), the posture 139's packages table pinned.
   const flipSize = useMutation({
     // Result-valued fn (Task 2's seam): ok:false converts to a throw so the
-    // optimistic handlers below own rollback + the error toast — a flip has
+    // optimistic handlers below own rollback + the error toast, a flip has
     // no inline field slot in the table, so a conflict surfaces as its
     // message.
     mutationFn: async ({ row, isActive }: SizeFlipInput) => {
@@ -359,7 +359,7 @@ export function LookupsScreen() {
           toast.success('Saved.');
           return true;
         }
-        // #245: details is the unwrapped inner array — map what maps, toast
+        // #245: details is the unwrapped inner array, map what maps, toast
         // when nothing did (the package editor's handleSaveFailure law).
         const codeConflict = conflictFieldErrors(result.details).code;
         if (codeConflict) {
@@ -616,7 +616,7 @@ interface SectionSegmentProps {
 /**
  * The print sizes section: the Packages-format table (code main column /
  * dot + description beneath, full description on expand) over live
- * PrintSize rows — the prototype's print-sizes Card transcribed, with the
+ * PrintSize rows, the prototype's print-sizes Card transcribed, with the
  * branches screen's pending/empty postures per section.
  */
 function PrintSizesSection({
@@ -658,7 +658,7 @@ function PrintSizesSection({
   }
 
   if (isError) {
-    // Error posture (#155) in the section's own card shell — the header
+    // Error posture (#155) in the section's own card shell, the header
     // (and its create action) stay reachable while the read is failed.
     return (
       <Card className='rounded-lg'>
@@ -680,7 +680,7 @@ function PrintSizesSection({
 
   if (isPending || !printSizes) {
     // Pending posture: skeleton rows echoing the two-line row anatomy
-    // (dot, code + description) at the table's rhythm — the branches
+    // (dot, code + description) at the table's rhythm, the branches
     // pattern, per section.
     return (
       <Card className='@container rounded-lg'>
@@ -734,7 +734,7 @@ function PrintSizesSection({
     );
   }
 
-  // The segment's filtered view is render-time only (#218) — the parent's
+  // The segment's filtered view is render-time only (#218), the parent's
   // caches and mutations keep operating on the full list.
   const rows = filterByStatusSegment(printSizes, segment);
 
@@ -760,10 +760,10 @@ function PrintSizesSection({
           <Table className='@max-[700px]:hidden'>
             <TableHeader>
               <TableRow>
-                {/* A3: the code column carries no fixed width — the only
+                {/* A3: the code column carries no fixed width, the only
                     explicit width constraint the prototype dropped. */}
                 <TableHead className='w-16'>Code</TableHead>
-                {/* T2: the Actions header renders empty — the icons carry
+                {/* T2: the Actions header renders empty, the icons carry
                     their own labels. */}
                 <TableHead className='text-right' />
               </TableRow>
@@ -773,7 +773,7 @@ function PrintSizesSection({
                 const expanded = expandedId === row.id;
                 return (
                   <Fragment key={row.id}>
-                    {/* N3: whole-row click toggles expansion — the actions
+                    {/* N3: whole-row click toggles expansion, the actions
                       cell stops propagation so icon clicks never toggle;
                       the chevron stays the keyboard/AT toggle. */}
                     <ExpandRow
@@ -783,7 +783,7 @@ function PrintSizesSection({
                     >
                       <TableCell className='cursor-pointer'>
                         {/* L1: identity = code (mono, semibold) / dot +
-                          description — the Packages format. Round 4: the
+                          description, the Packages format. Round 4: the
                           dot sits BESIDE the code (the attires reference
                           pattern) so it never strands on its own line when
                           the description hides. A3: the code truncates
@@ -803,7 +803,7 @@ function PrintSizesSection({
                           </div>
                           {/* N2: the truncated line hides while expanded.
                             A1: the line indents by the dot (size-2.5) +
-                            its gap-2 — 4.5 spacing steps — so the text
+                            its gap-2, 4.5 spacing steps, so the text
                             aligns with the code above it. */}
                           {expanded ? null : (
                             <div className='flex min-w-0 items-center pl-4.5'>
@@ -826,7 +826,7 @@ function PrintSizesSection({
                         />
                       </TableCell>
                     </ExpandRow>
-                    {/* T3 desktop reveal: the FULL description — the
+                    {/* T3 desktop reveal: the FULL description, the
                       description has no other full-text slot. */}
                     <ExpandPanel open={expanded} colSpan={2}>
                       {row.description}
@@ -889,7 +889,7 @@ function PrintSizesSection({
 }
 
 /**
- * The attires section: the dot-first flat table — single identity cell per
+ * The attires section: the dot-first flat table, single identity cell per
  * row (status dot FIRST, then the truncated tooltip name), NO expand
  * affordance (attires carry no description, so nothing to reveal; the
  * actions cluster rides without its chevron and no ExpandPanel). The
@@ -932,7 +932,7 @@ function AttiresSection({
   }
 
   if (isError) {
-    // Error posture (#155) in the section's own card shell — the header
+    // Error posture (#155) in the section's own card shell, the header
     // (and its create action) stay reachable while the read is failed.
     return (
       <Card className='rounded-lg'>
@@ -954,7 +954,7 @@ function AttiresSection({
 
   if (isPending || !attires) {
     // Pending posture: skeleton rows echoing the one-line row anatomy
-    // (dot, name, actions) — the branches pattern, per section.
+    // (dot, name, actions), the branches pattern, per section.
     return (
       <Card className='@container rounded-lg'>
         <CardHeader>
@@ -1004,7 +1004,7 @@ function AttiresSection({
     );
   }
 
-  // The segment's filtered view is render-time only (#218) — the parent's
+  // The segment's filtered view is render-time only (#218), the parent's
   // caches and mutations keep operating on the full list.
   const rows = filterByStatusSegment(attires, segment);
 
@@ -1033,7 +1033,7 @@ function AttiresSection({
               {rows.map((row) => (
                 <TableRow key={row.id} className='group'>
                   <TableCell>
-                    {/* L2: status dot FIRST, then the name — no description
+                    {/* L2: status dot FIRST, then the name, no description
                       line, so no expand affordance. A3: the name truncates
                       (one line, tooltip carries the full text). */}
                     <div className='flex items-center gap-2'>
@@ -1059,7 +1059,7 @@ function AttiresSection({
           </Table>
         </TooltipProvider>
 
-        {/* Stacked posture — attires carry no secondary field, so the dot
+        {/* Stacked posture, attires carry no secondary field, so the dot
             leads and the icon actions sit inline (nothing to reveal). */}
         <div className='hidden flex-col @max-[700px]:flex'>
           {rows.map((row) => (

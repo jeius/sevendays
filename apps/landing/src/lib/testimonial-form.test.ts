@@ -14,7 +14,7 @@ describe('testimonialFormErrors + canSubmitTestimonialForm (the gate)', () => {
     expect(seam.canSubmitTestimonialForm(valid)).toBe(true);
   });
 
-  it('a 19-char quote errors (the spec min is the gate — not the prototype’s mere non-empty); 20 is clean', () => {
+  it('a 19-char quote errors (the spec min is the gate, not the prototype’s mere non-empty); 20 is clean', () => {
     expect(seam.testimonialFormErrors({ ...valid, quote: 'x'.repeat(19) })).toEqual({
       quote: 'Tell us a little more: at least 20 characters.',
     });

@@ -1,10 +1,10 @@
 // The About story seam (M7 #224): the Site tab stores the story as plain
-// text and newlines mean paragraphs (the spec's ruling — rich text stays
+// text and newlines mean paragraphs (the spec's ruling, rich text stays
 // parked). Pinned so the splitting law (trim + drop empties) survives.
 import { describe, expect, it } from 'vitest';
 import { storyParagraphs } from './story-paragraphs';
 
-describe('storyParagraphs (M7 #224 — newlines are paragraphs)', () => {
+describe('storyParagraphs (M7 #224, newlines are paragraphs)', () => {
   it('a single-line story is one paragraph (today’s placeholder default)', () => {
     expect(storyParagraphs('Our studio story is coming soon.')).toEqual([
       'Our studio story is coming soon.',

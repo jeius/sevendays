@@ -1,9 +1,9 @@
 // Confirmation read-back joins (issue #46). The public single-get carries
-// bare branch/offering refs — only the add-on entries embed name + booking-
-// time price — so the page joins names from the sibling list reads (the
+// bare branch/offering refs, only the add-on entries embed name + booking-
+// time price, so the page joins names from the sibling list reads (the
 // pages-join-names pattern). Prices NEVER come from the catalog: the total
 // sums only record-carried snapshot values, and no function here accepts a
-// catalog price as input — the snapshot rule is enforced by the signatures,
+// catalog price as input, the snapshot rule is enforced by the signatures,
 // not by discipline.
 
 import type {
@@ -15,7 +15,7 @@ import type {
 
 /**
  * Total due, from the record only: offering snapshot + add-on entry
- * snapshots. Null (ADR-0020) when ANY snapshot is unpriced — the Total is
+ * snapshots. Null (ADR-0020) when ANY snapshot is unpriced, the Total is
  * omitted entirely; priced add-on entries keep their per-item lines
  * elsewhere. Never a ₱0 stand-in.
  */

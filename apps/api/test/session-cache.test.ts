@@ -22,7 +22,7 @@ import { createTestDb } from './helpers/db.js';
 import { TEST_AUTH_SECRET, testEnv } from './helpers/env.js';
 import { truncateAll } from './helpers/truncate.js';
 
-// NOTE (import staging): the header carries ONLY what the unit block uses —
+// NOTE (import staging): the header carries ONLY what the unit block uses
 // (kept honest by Biome's noUnusedVariables, not a tsconfig gate). Task 3's integration describe adds its imports as
 // it lands (db, helpers, the scratch app). Deliberately free of booking-path
 // strings so the v1 pick carries this file (the audit-token discipline,
@@ -79,7 +79,7 @@ function sessionFixture(overrides?: { expiresAt?: Date }) {
 }
 
 // The scratch app (the require-session.test.ts posture): acquireDb +
-// requireSession + a probe route — the gate is route-independent; the
+// requireSession + a probe route, the gate is route-independent; the
 // file stays free of booking-path strings (the v1-pick note above).
 const scratch = new Hono<ApiEnv>()
   .use('*', acquireDb)
@@ -93,7 +93,7 @@ const db = createTestDb(url);
 const presented = 'presented.token.value';
 
 describe('the session-cache seam (unit)', () => {
-  it('has no store under plain Node — the vitest default is no-op', () => {
+  it('has no store under plain Node, the vitest default is no-op', () => {
     expect(getSessionCacheStore()).toBeNull();
   });
 
@@ -174,20 +174,20 @@ describe('requireSession with the session cache (scratch app, real Postgres)', (
     expect(store.keys()).toEqual([await sessionCacheKey(TEST_AUTH_SECRET, token)]);
   });
 
-  it('a hit serves without the database — even a revoked row passes within the TTL (the ruled pin)', async () => {
+  it('a hit serves without the database, even a revoked row passes within the TTL (the ruled pin)', async () => {
     const { token, userId } = await signUpSession(url, 'cache-hit@sevendays.test');
     expect(
       (await scratch.request('/protected', { headers: bearer(token) }, testEnv(url))).status
     ).toBe(200);
     expect(store.keys()).toHaveLength(1);
-    await signOutSession(url, token); // the row is deleted — a fresh verification would 401
+    await signOutSession(url, token); // the row is deleted, a fresh verification would 401
     const res = await scratch.request('/protected', { headers: bearer(token) }, testEnv(url));
-    expect(res.status).toBe(200); // the cached hit answers — the ruled ≤60 s trade, deliberate
+    expect(res.status).toBe(200); // the cached hit answers, the ruled ≤60 s trade, deliberate
     expect((await res.json()) as { userId?: string }).toEqual({ userId });
-    expect(store.keys()).toHaveLength(1); // no second verification — the hit never re-verified
+    expect(store.keys()).toHaveLength(1); // no second verification, the hit never re-verified
   });
 
-  it('401 outcomes never cache — garbage tokens leave the store empty', async () => {
+  it('401 outcomes never cache, garbage tokens leave the store empty', async () => {
     const res = await scratch.request(
       '/protected',
       { headers: bearer('not-a-real-token') },
@@ -199,14 +199,14 @@ describe('requireSession with the session cache (scratch app, real Postgres)', (
 
   it('the 401 envelope is byte-identical with the cache in the path', async () => {
     const { token } = await signUpSession(url, 'cache-envelope@sevendays.test');
-    await signOutSession(url, token); // revoked BEFORE any request — verification runs, caches nothing
+    await signOutSession(url, token); // revoked BEFORE any request, verification runs, caches nothing
     const res = await scratch.request('/protected', { headers: bearer(token) }, testEnv(url));
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: 'Authentication required.' });
     expect(store.keys()).toEqual([]);
   });
 
-  it('the expiry guard rejects a stale entry — a hit is never more permissive than verification', async () => {
+  it('the expiry guard rejects a stale entry, a hit is never more permissive than verification', async () => {
     const { token } = await signUpSession(url, 'cache-stale@sevendays.test');
     const key = await sessionCacheKey(TEST_AUTH_SECRET, token);
     // Seed an entry whose embedded expiresAt is already past (hand-built:
@@ -218,7 +218,7 @@ describe('requireSession with the session cache (scratch app, real Postgres)', (
       })
     );
     // The row is expired too (the require-session.test.ts method: expires_at
-    // moved to the past; the stored row carries the BARE token) — a fresh
+    // moved to the past; the stored row carries the BARE token), a fresh
     // verification would also 401.
     await db
       .update(sessionTable)
@@ -229,7 +229,7 @@ describe('requireSession with the session cache (scratch app, real Postgres)', (
     expect(store.keys()).toEqual([key]); // the stale entry was never served, and no fresh entry overwrote it (401s never cache)
   });
 
-  it('with no store (the Node/vitest default), the gate stays uncached — revocation is immediate', async () => {
+  it('with no store (the Node/vitest default), the gate stays uncached, revocation is immediate', async () => {
     resetSessionCacheStore();
     const { token } = await signUpSession(url, 'cache-null@sevendays.test');
     expect(

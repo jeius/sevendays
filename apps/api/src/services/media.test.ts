@@ -14,7 +14,7 @@ const CREDS = {
   CLOUDFLARE_ACCOUNT_ID: '0123456789abcdef0123456789abcdef',
 };
 
-// Binding-shaped stub over a Map — re-derived from the R2Bucket surface the
+// Binding-shaped stub over a Map, re-derived from the R2Bucket surface the
 // service uses (head/get/put/delete only): head returns an R2Object-shaped
 // metadata record, get returns it with a body, put records the FINAL key +
 // options the service chose, delete records deletions. Assertions run
@@ -69,11 +69,11 @@ describe('presignUpload', () => {
     );
   });
 
-  it('signs the Content-Type into the URL — allHeaders is load-bearing (X-Amz-SignedHeaders: content-type;host)', async () => {
+  it('signs the Content-Type into the URL, allHeaders is load-bearing (X-Amz-SignedHeaders: content-type;host)', async () => {
     // Spike-pinned (2026-09-26, aws4fetch 1.0.20): `content-type` sits in the
     // lib's UNSIGNABLE_HEADERS set, so signQuery alone emits SignedHeaders:
     // host and a swapped Content-Type PUT would SUCCEED. The service must
-    // pass allHeaders: true — this assertion is the regression lock on it.
+    // pass allHeaders: true, this assertion is the regression lock on it.
     const { uploadUrl } = await presignUpload(CREDS, {
       purpose: 'package-cover',
       contentType: 'image/jpeg',
@@ -106,7 +106,7 @@ describe('presignUpload', () => {
     expect(first.key).not.toBe(second.key);
   });
 
-  it('throws MissingR2CredentialsError when both S3 keys are missing (loud, typed — never a silent fallback)', async () => {
+  it('throws MissingR2CredentialsError when both S3 keys are missing (loud, typed, never a silent fallback)', async () => {
     const env = { CLOUDFLARE_ACCOUNT_ID: CREDS.CLOUDFLARE_ACCOUNT_ID };
     await expect(
       presignUpload(env, { purpose: 'gallery-photo', contentType: 'image/jpeg' })
@@ -217,7 +217,7 @@ describe('commitUpload', () => {
     expect(stub.deleteCalls).toEqual([]);
   });
 
-  it('answers not_found (no delete — nothing to clean) when the staging key is missing', async () => {
+  it('answers not_found (no delete, nothing to clean) when the staging key is missing', async () => {
     const stub = stubBucket();
     const result = await commitUpload(stub.bucket, {
       stagingKey: STAGING_KEY,
@@ -310,7 +310,7 @@ describe('commitUpload', () => {
   });
 
   it('#246: a tmp/<uuid>.png staging key passes the schema (not_found, not foreign_key)', async () => {
-    // An absent object under a VALID png staging key answers not_found —
+    // An absent object under a VALID png staging key answers not_found,
     // proving the key passed mediaStagingKeySchema, not the foreign-key gate.
     const stub = stubBucket({});
     const result = await commitUpload(stub.bucket, {
@@ -326,7 +326,7 @@ describe('commitUpload', () => {
   it('an object stored with NO contentType fails the caps check as (none) and is deleted', async () => {
     // The ?? "" fallback branch (#136 T4 minor): R2 hands head() an
     // httpMetadata object whose contentType is undefined when the PUT
-    // carried none — the violation message must name (none), not crash.
+    // carried none, the violation message must name (none), not crash.
     const stub = stubBucket({ [STAGING_KEY]: { size: 1024 } });
     const result = await commitUpload(stub.bucket, {
       stagingKey: STAGING_KEY,
@@ -381,7 +381,7 @@ describe('resolveMediaUrl', () => {
     expect(resolveMediaUrl(env, null)).toBeNull();
   });
 
-  it('is a plain join — no trailing-slash normalization beyond what the var carries', () => {
+  it('is a plain join, no trailing-slash normalization beyond what the var carries', () => {
     expect(
       resolveMediaUrl({ MEDIA_PUBLIC_BASE_URL: 'https://pub-test.r2.dev/' }, 'gallery/a.jpg')
     ).toBe('https://pub-test.r2.dev//gallery/a.jpg');

@@ -3,9 +3,9 @@ import { buildSentryOptions } from './sentry';
 
 // The errors-only posture as one asserted literal (M6 #184, spec § Sentry):
 // frontends errors at 100%, traces OFF, no replay, PII off. The no-DSN
-// no-op is the AC's dev posture — Sentry.init is never called on null.
+// no-op is the AC's dev posture, Sentry.init is never called on null.
 describe('buildSentryOptions (M6 #184)', () => {
-  it('returns null when the DSN is missing — init is never called', () => {
+  it('returns null when the DSN is missing, init is never called', () => {
     expect(
       buildSentryOptions({ dsn: undefined, release: 'abc123', environment: 'teaser' })
     ).toBeNull();
@@ -49,7 +49,7 @@ describe('buildSentryOptions (M6 #184)', () => {
     expect(options && 'release' in options).toBe(false);
   });
 
-  it('treats an empty-string release as unset too — the key is omitted, never release: "" (#208)', () => {
+  it('treats an empty-string release as unset too, the key is omitted, never release: "" (#208)', () => {
     const options = buildSentryOptions({
       dsn: 'https://key@o0.ingest.sentry.io/0',
       release: '',

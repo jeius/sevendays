@@ -1,31 +1,31 @@
-// The Global Search dropdown + its narrow form (M9 #315/#316, glossary —
+// The Global Search dropdown + its narrow form (M9 #315/#316, glossary:
 // never "command palette" / "omnibar" / "quick find"): the topbar Input IS
 // the typing surface; results drop from it in a non-modal anchored popover,
-// the page visible around them — searching never blanks the working
+// the page visible around them, searching never blanks the working
 // context. Below sm, where the Input is hidden by the house law, a
 // magnifier-icon button in the topbar opens the SAME results as a top
-// sheet with its own input inside (D6, #316) — that input lives INSIDE the
+// sheet with its own input inside (D6, #316), that input lives INSIDE the
 // cmdk tree, so cmdk's native roving + selection need no bridge there (the
 // structural mirror of the dropdown's outside-typing finding, D7), and
 // Escape closes through the Sheet's Base UI dialog behavior. The engine is
 // the hand-wired lib seam (#/lib/global-search, D7: fuse.js, identity >
-// body — cmdk's built-in filter CANNOT serve the dropdown posture, it only
+// body, cmdk's built-in filter CANNOT serve the dropdown posture, it only
 // filters items driven by its own Command.Input inside its tree, and the
 // dropdown types into the topbar, outside it); cmdk runs here as the
-// headless listbox core (shouldFilter={false} on BOTH trees) — the sheet's
+// headless listbox core (shouldFilter={false} on BOTH trees), the sheet's
 // keyboard roving + selection are cmdk's own; the dropdown's roving is
 // component-owned (cmdk 1.1.1's selection store never initializes in the
 // outside-input posture under React 19). The index builds over useQueries on the five
 // unchanged #288 factories at topbar (= shell) scope: same keys as the
 // screens, full arrays with deactivated rows included, freshness inherited
-// from the seam's own contracts — zero new fetch machinery. useDeferredValue
+// from the seam's own contracts, zero new fetch machinery. useDeferredValue
 // keeps typing responsive; selection navigates via the seam's ?focus= href
-// (the landing — scroll + highlight — is #316's useFocusLanding on the four
+// (the landing, scroll + highlight, is #316's useFocusLanding on the four
 // list screens). Posture + anatomy ported from prototype/search-ux-variants
-// variant B (#303's ruled pick) — values and rulings, never the branch. The
-// kbd chip's GLYPH is platform-picked (⌘K on Apple, Ctrl K elsewhere —
+// variant B (#303's ruled pick), values and rulings, never the branch. The
+// kbd chip's GLYPH is platform-picked (⌘K on Apple, Ctrl K elsewhere,
 // owner-ruled 2026-11-17); the shortcut BINDING never sniffs: ⌘K and Ctrl+K,
-// one rule (D6) — only the rule's SURFACE is posture-picked, by viewport.
+// one rule (D6), only the rule's SURFACE is posture-picked, by viewport.
 import { Button } from '@sevendays/ui/components/button';
 import { Input } from '@sevendays/ui/components/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@sevendays/ui/components/popover';
@@ -52,7 +52,7 @@ import {
   searchDropdownState,
 } from '#/lib/global-search';
 
-/** The Tailwind sm breakpoint (640px) — the ⌘K rule's surface picker. */
+/** The Tailwind sm breakpoint (640px), the ⌘K rule's surface picker. */
 const SM_QUERY = '(min-width: 640px)';
 
 const GROUP_ICONS: Record<SearchHit['group'], LucideIcon> = {
@@ -69,7 +69,7 @@ const GROUP_CLASS =
   '[&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium';
 
 export function GlobalSearch() {
-  // The index source (D8): the #288 factories, UNCHANGED — useQueries reads
+  // The index source (D8): the #288 factories, UNCHANGED, useQueries reads
   // the five cached lists at topbar scope so a result can never disagree
   // with the screen it lands on; deactivated rows ride the same arrays the
   // lists render.
@@ -85,7 +85,7 @@ export function GlobalSearch() {
 
   const [open, setOpen] = useState(false);
   // The narrow form's surface (D6, #316): the top sheet below sm. It shares
-  // the query state with the dropdown — one search, two postures.
+  // the query state with the dropdown, one search, two postures.
   const [sheetOpen, setSheetOpen] = useState(false);
   const [query, setQuery] = useState('');
   // Typing stays responsive: the Input tracks `query` immediately, the
@@ -108,7 +108,7 @@ export function GlobalSearch() {
   const groups = useMemo(() => runSearch(index, deferredQuery), [index, deferredQuery]);
   const state = searchDropdownState(deferredQuery, groups);
 
-  // The DROPDOWN's roving is COMPONENT-OWNED (fix round 3, #316 — cmdk
+  // The DROPDOWN's roving is COMPONENT-OWNED (fix round 3, #316, cmdk
   // 1.1.1's selection store never initializes in this outside-input posture
   // under React 19, so `data-selected` painted on no item and the
   // re-dispatched keys moved nothing): this index roves over the flattened
@@ -116,23 +116,23 @@ export function GlobalSearch() {
   // whenever the result set changes identity (the deferred query or the
   // index rebuilt).
   const [rovingIndex, setRovingIndex] = useState(0);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: the reset is keyed to `groups` IDENTITY (the deferred query or the index rebuilt) — a deliberate reset-on-change effect; nothing in the body needs to read it
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the reset is keyed to `groups` IDENTITY (the deferred query or the index rebuilt), a deliberate reset-on-change effect; nothing in the body needs to read it
   useEffect(() => {
     setRovingIndex(0);
   }, [groups]);
 
   // The chip's GLYPH alone is platform-picked (owner-ruled 2026-11-17);
-  // mounted-gated so SSR markup and the first client render agree — no
+  // mounted-gated so SSR markup and the first client render agree, no
   // hydration mismatch, the chip fills after mount.
   const [kbdGlyph, setKbdGlyph] = useState('');
   useEffect(() => {
     setKbdGlyph(/mac|iphone|ipad|ipod/i.test(navigator.platform) ? '⌘K' : 'Ctrl K');
   }, []);
 
-  // ⌘K and Ctrl+K, ONE rule — no platform sniffing on the binding (D6).
+  // ⌘K and Ctrl+K, ONE rule, no platform sniffing on the binding (D6).
   // Only the rule's SURFACE is posture-picked at the current viewport: the
   // dropdown + topbar Input at sm+, the sheet (its own input, autofocused
-  // on open) below sm — the expert gesture works from anywhere.
+  // on open) below sm, the expert gesture works from anywhere.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
@@ -149,13 +149,13 @@ export function GlobalSearch() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
-  // The keyboard bridge (the DROPDOWN's — the sheet needs none, its input
+  // The keyboard bridge (the DROPDOWN's, the sheet needs none, its input
   // lives inside its own cmdk tree and keeps cmdk's native roving +
   // selection): focus lives in the topbar Input, OUTSIDE the popover's
   // cmdk tree, so the roving keys move `rovingIndex` over the flattened
   // visible hits and Enter lands the row it points at. The overflow tail
-  // is an indicator, never a hit — it is not part of the roving space.
-  // Escape closes deterministically — in this posture focus never enters
+  // is an indicator, never a hit, it is not part of the roving space.
+  // Escape closes deterministically, in this posture focus never enters
   // the content, so the popover's own Escape arm cannot be relied on.
   const onTypingKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Escape') {
@@ -192,7 +192,7 @@ export function GlobalSearch() {
 
   // Selection lands on the entity's list screen via the seam's ?focus= href
   // (#316's useFocusLanding honors it on the four list screens). Whichever
-  // posture selected, both close; the query persists — reopening resumes
+  // posture selected, both close; the query persists, reopening resumes
   // where the eye was, nothing is cleared.
   const land = (hit: SearchHit) => {
     setOpen(false);
@@ -206,7 +206,7 @@ export function GlobalSearch() {
         {/* The trigger is a passive anchor div wrapping the Input (Base UI has
             no Popover.Anchor part): the Input's clicks stop propagation so the
             typing surface never toggle-closes its own dropdown; focus and
-            typing open it. nativeButton={false} — the anchor is a div, not a
+            typing open it. nativeButton={false}, the anchor is a div, not a
             button (Base UI's own remedy for the non-button render prop).
             Below sm the Input stays hidden (the house law) and the magnifier
             (inside this same anchor) carries the narrow form instead. */}
@@ -234,7 +234,7 @@ export function GlobalSearch() {
           </div>
           {/* The narrow form's trigger (D6): below sm a magnifier-icon
               button opens the same results as a top sheet. Its click stops
-              propagation — the button rides inside the popover's anchor
+              propagation, the button rides inside the popover's anchor
               div, and the anchor's own click must never toggle the
               (desktop) dropdown open below sm. */}
           <Button
@@ -251,14 +251,14 @@ export function GlobalSearch() {
             <Search aria-hidden='true' />
           </Button>
         </PopoverTrigger>
-        {/* initialFocus={false} — the installed Base UI popover's sanctioned
+        {/* initialFocus={false}, the installed Base UI popover's sanctioned
             "do not move focus on open" control (@base-ui/react 1.8.0,
             Popover.Popup.Props.initialFocus: `false: Do not move focus`):
             without it the popup's open-focus steals the topbar Input's focus
-            as it mounts (walk-probed on the deployed teaser — the INPUT at
+            as it mounts (walk-probed on the deployed teaser, the INPUT at
             T+100, the content DIV at T+400), killing the D6 contract's
             "focuses" half. Focus stays on the Input for every open path
-            (⌘K, click, onFocus) — this posture never wants it inside. */}
+            (⌘K, click, onFocus), this posture never wants it inside. */}
         <PopoverContent
           initialFocus={false}
           align='start'
@@ -266,7 +266,7 @@ export function GlobalSearch() {
           className='w-[min(24rem,calc(100vw-1.5rem))] gap-0 p-0'
         >
           {/* cmdk as the headless listbox core ONLY (D7): shouldFilter={false}
-              — matching is the lib seam's; the dropdown's roving is the
+              matching is the lib seam's; the dropdown's roving is the
               component-owned rovingIndex above, painted via data-roving. */}
           <Command shouldFilter={false} className='flex flex-col'>
             <GlobalSearchResults
@@ -281,7 +281,7 @@ export function GlobalSearch() {
       </Popover>
 
       {/* The narrow form (D6): the same results as a top sheet with its own
-          input INSIDE the cmdk tree — focus starts there, so cmdk's native
+          input INSIDE the cmdk tree, focus starts there, so cmdk's native
           roving + selection need no bridge; Escape closes through the
           Sheet's Base UI dialog behavior. Same width law as the dropdown,
           centered (the top side is inset-x-0; mx-auto over the width
@@ -325,11 +325,11 @@ export function GlobalSearch() {
 }
 
 /**
- * The ruled-contract result body (D9), shared by BOTH postures — the #302
+ * The ruled-contract result body (D9), shared by BOTH postures, the #302
  * contract (grouping, caps, states, item anatomy) is identical across
  * them; only the chrome differs (the prototype's search-results-body
  * shape, ported onto the production seams). Renders inside a cmdk
- * <Command> tree; does no matching — the lib seam already did.
+ * <Command> tree; does no matching, the lib seam already did.
  */
 function GlobalSearchResults({
   groups,
@@ -347,7 +347,7 @@ function GlobalSearchResults({
   rovingIndex?: number;
 }) {
   // The flat index each item occupies across the groups (the dropdown's
-  // roving space): the overflow tail contributes nothing — it is not a hit.
+  // roving space): the overflow tail contributes nothing, it is not a hit.
   const groupEntries: Array<{ group: SearchGroup; start: number }> = [];
   let running = 0;
   for (const group of groups) {
@@ -395,7 +395,7 @@ function SearchResultItem({
 }: {
   hit: SearchHit;
   onSelect: (hit: SearchHit) => void;
-  /** The dropdown's component-owned roving highlight (fix round 3, #316) —
+  /** The dropdown's component-owned roving highlight (fix round 3, #316):
    * the same visuals keyed on data-roving instead of cmdk's data-selected. */
   roving?: boolean;
 }) {
@@ -425,7 +425,7 @@ function SearchResultItem({
         <span className='text-muted-foreground shrink-0 text-xs tabular-nums'>{hit.price}</span>
       ) : null}
       {hit.group === 'gallery' && hit.thumbUrl !== null ? (
-        // The muted thumb slot — the #287 versioned thumb renders into it
+        // The muted thumb slot, the #287 versioned thumb renders into it
         // (D9). alt='': decorative, the identity line names the row.
         <img
           src={hit.thumbUrl}

@@ -1,4 +1,4 @@
-// The #131 bulk ruling + relations ruling (M5 #140): bulk selection + the fixed selected-actions bar are NEW compositions — the mechanics (Base-UI indeterminate, click-swallowed cells, desktop pill / mobile dock, the DeactivateConfirm Motion latch) port the composition of record (prototype/131-admin-cms-compositions, rounds 1–9) per the #140 plan.
+// The #131 bulk ruling + relations ruling (M5 #140): bulk selection + the fixed selected-actions bar are NEW compositions, the mechanics (Base-UI indeterminate, click-swallowed cells, desktop pill / mobile dock, the DeactivateConfirm Motion latch) port the composition of record (prototype/131-admin-cms-compositions, rounds 1–9) per the #140 plan.
 import { Button } from '@sevendays/ui/components/button';
 import { Checkbox } from '@sevendays/ui/components/checkbox';
 import { TableCell, TableHead } from '@sevendays/ui/components/table';
@@ -10,9 +10,9 @@ import { useState } from 'react';
 
 /**
  * The select-all header checkbox. `indeterminate` rides Base-UI's root prop
- * (present at @base-ui/react 1.8.0 — probed per the #140 plan): a partial
- * selection reads as the ruled indeterminate glyph — the check in an
- * unfilled, primary-bordered box (#155) — never a full filled check. The
+ * (present at @base-ui/react 1.8.0, probed per the #140 plan): a partial
+ * selection reads as the ruled indeterminate glyph, the check in an
+ * unfilled, primary-bordered box (#155), never a full filled check. The
  * next state is computed from the counts, never from the event, so the
  * toggle is authoritative against stale checkbox state.
  */
@@ -39,7 +39,7 @@ export function BulkSelectHeader({
 
 /**
  * The per-row select cell. The cell swallows clicks so a tap on the checkbox
- * NEVER toggles the row's expansion — the row's own click handling stays
+ * NEVER toggles the row's expansion, the row's own click handling stays
  * untouched (the #131 composition's explicit carve-out).
  */
 export function BulkSelectCell({
@@ -65,16 +65,16 @@ export function BulkSelectCell({
 /**
  * The selected-actions bar. The parent mounts it only while `selectedCount >
  * 0`; DeactivateConfirm's close-latch recipe (ported from #139's shared.tsx,
- * minus the portal machinery — this bar is a plain fixed element) makes
+ * minus the portal machinery, this bar is a plain fixed element) makes
  * Clear's exit play before the parent unmounts: Clear flips only the local
  * `visible` latch, AnimatePresence plays the slide-down exit, and
  * onExitComplete notifies the parent via `onClear`. Deactivate/Reactivate
- * fire the parent's handlers directly — confirm-before-deactivate lives in
+ * fire the parent's handlers directly, confirm-before-deactivate lives in
  * the parent (the #140 screens).
  *
  * Placement (pinned): desktop (≥ 768px) a centered pill (`bottom-6`,
  * rounded-full, shadow-lg); mobile a full-width dock (`inset-x-0 bottom-0`,
- * rounded-t-xl, border-t — the DeactivateConfirm dock posture). The
+ * rounded-t-xl, border-t, the DeactivateConfirm dock posture). The
  * `-translate-x-1/2` centering composes with the slide: Tailwind v4's
  * `translate` property is independent of the `transform` motion animates
  * (same composition as the DeactivateConfirm popup). Enter/exit: translateY
@@ -135,7 +135,7 @@ export function BulkActionBar({
             <PowerOff aria-hidden='true' />
             Deactivate
           </Button>
-          {/* Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families — never promote into packages/ui. */}
+          {/* Status palette (owner-reacted 2026-10-16, #218's variants round): the ruled families, never promote into packages/ui. */}
           <Button
             variant='outline'
             type='button'

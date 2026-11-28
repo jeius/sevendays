@@ -1,8 +1,8 @@
-// The Settings screen (M7 #215 + #221): the three-tab strip — Account
+// The Settings screen (M7 #215 + #221): the three-tab strip, Account
 // (every staff member), Users (owner-only, #221's Task 5), Site (all
 // staff, the #215 singleton editor moved verbatim). Tabs are local state,
 // no routes (the testimonials precedent); the strip hides the Users entry
-// for staff (role !== 'admin') the way nav.ts hides owner-only nav — the
+// for staff (role !== 'admin') the way nav.ts hides owner-only nav, the
 // server fns gate themselves regardless (the plugin's role gate).
 import { useState } from 'react';
 import { PageHeader, SegmentedControl } from '#/components/cms/shared';
@@ -20,7 +20,7 @@ const TAB_SUBLINES: Record<'account' | 'users' | 'site', string> = {
 export function SettingsScreen({ user }: { user: AccountUser }) {
   const [tab, setTab] = useState<'account' | 'users' | 'site'>('account');
   // Owners only (the 2026-10-18 amendment): the options array gains the Users
-  // entry between Account and Site — SegmentedControl takes the whole array.
+  // entry between Account and Site, SegmentedControl takes the whole array.
   const options: { value: 'account' | 'users' | 'site'; label: string }[] = [
     { value: 'account', label: 'Account' },
     ...(user.role === 'admin' ? [{ value: 'users' as const, label: 'Users' }] : []),

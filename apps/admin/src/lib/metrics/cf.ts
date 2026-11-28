@@ -5,7 +5,7 @@
 // metrics via GraphQL" tutorial (account-level viewer/accounts; sum
 // requests/errors/subrequests; quantiles cpuTimeP50/P99 in MICROSECONDS).
 // If the live probe (Task 6) rejects the `Time!` scalar on the datetime
-// variables, switch both to `string!` HERE and in the shape test — that
+// variables, switch both to `string!` HERE and in the shape test, that
 // is the one documented fallback, nothing else about the doc moves.
 import { z } from 'zod';
 
@@ -41,7 +41,7 @@ const WINDOW_MS: Record<MetricsWindow, number> = {
 
 // Adaptive datasets coarsen their `datetime` granularity as data ages, so
 // the range boundaries are ms-truncated ISO strings and the munging
-// re-buckets client-side — the incoming granularity never matters.
+// re-buckets client-side, the incoming granularity never matters.
 export function windowToRange(
   window: MetricsWindow,
   now: Date = new Date()
@@ -191,7 +191,7 @@ export async function fetchWorkerMetrics(
     return { ok: false, reason: 'not-configured' };
   }
   try {
-    // #208: the range is computed ONCE and shared by all three scripts —
+    // #208: the range is computed ONCE and shared by all three scripts;
     // per-arm windowToRange calls could straddle a wall-clock second
     // boundary and send the documents' ranges 1s apart (the #187 ledger's
     // real-code straddle; posthog.ts's fetchTrafficMetrics is the

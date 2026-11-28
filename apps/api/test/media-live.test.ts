@@ -7,14 +7,14 @@ import {
   presignUpload,
 } from '../src/services/media.js';
 
-// LIVE media round-trip (ticket #136 ACs 3 + 4) — NOT a CI gate: the file
+// LIVE media round-trip (ticket #136 ACs 3 + 4), NOT a CI gate: the file
 // skips unless LIVE_MEDIA_VERIFY=1 AND the real R2 S3-token trio is in env
 // (the packages/db TEST_DATABASE_URL-gated blocks are the house precedent).
 // It runs the REAL presign + commit service code against the REAL bucket:
 // presign → PUT (minted Content-Type) → commitUpload promotes + deletes
 // staging; a swapped Content-Type PUT must fail the signature; an over-cap
 // object must be deleted and answered 400-shaped. Invocation (controller /
-// owner only — docs/media-bucket-runbook.md § Live round-trip verify):
+// owner only, docs/media-bucket-runbook.md § Live round-trip verify):
 //
 //   cd apps/api && LIVE_MEDIA_VERIFY=1 \
 //     R2_S3_ACCESS_KEY_ID=… R2_S3_SECRET_ACCESS_KEY=… CLOUDFLARE_ACCOUNT_ID=… \
@@ -28,13 +28,13 @@ const LIVE =
 
 const liveDescribe = describe.runIf(LIVE);
 
-// Read ONCE (the guard above guarantees presence — the `as string` narrowing
+// Read ONCE (the guard above guarantees presence, the `as string` narrowing
 // is the house pattern; no non-null assertions, biome flags those).
 const ACCESS_KEY_ID = process.env.R2_S3_ACCESS_KEY_ID as string;
 const SECRET_ACCESS_KEY = process.env.R2_S3_SECRET_ACCESS_KEY as string;
 const ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID as string;
 
-// A sigv4 adapter shaped as the R2Bucket the service expects — header-signed
+// A sigv4 adapter shaped as the R2Bucket the service expects, header-signed
 // requests to the S3-compatible endpoint, so the REAL commitUpload code runs
 // unchanged against the REAL bucket. aws4fetch signs s3 requests with
 // UNSIGNED-PAYLOAD automatically (verified against the installed 1.0.20).
@@ -50,7 +50,7 @@ function liveBucket(): R2Bucket {
     const res = await client.fetch(`${base}/${key}`, { method: 'HEAD' });
     if (!res.ok) {
       // Reason-observable null (#154, the #136 T6 nit): callers still see
-      // null, the operator sees WHICH status ate it — a 404 (missing
+      // null, the operator sees WHICH status ate it, a 404 (missing
       // object) and a 403 (credentials) demand different runbook pages.
       console.warn(`[media-live] HEAD ${key} → non-ok ${res.status} ${res.statusText}`);
       return null;
@@ -102,7 +102,7 @@ const env = () => ({
   CLOUDFLARE_ACCOUNT_ID: ACCOUNT_ID,
 });
 
-liveDescribe('live media round-trip (REAL bucket — controller/owner only)', () => {
+liveDescribe('live media round-trip (REAL bucket, controller/owner only)', () => {
   it('presign → PUT (minted Content-Type) → commitUpload HEAD-verifies, promotes, deletes staging', {
     timeout: 120_000,
   }, async () => {
@@ -122,10 +122,10 @@ liveDescribe('live media round-trip (REAL bucket — controller/owner only)', ()
     const result = await commitUpload(bucket, { stagingKey: key, purpose: 'gallery-photo' });
     if (!result.ok) throw new Error(`expected ok, got ${result.reason}: ${result.message}`);
     expect(result.finalKey).toMatch(/^gallery\/[0-9a-f-]{36}\.jpg$/);
-    // cleanup: the harness owns its object — never leave test rows in the
+    // cleanup: the harness owns its object, never leave test rows in the
     // shared bucket. finally-wrapped (#154, the #136 T6 nit): an expect
     // failure between promote and delete used to skip the delete and litter
-    // gallery/ — no lifecycle rule cleans it.
+    // gallery/, no lifecycle rule cleans it.
     try {
       const finalObj = await bucket.head(result.finalKey);
       expect(finalObj).not.toBeNull();
@@ -137,7 +137,7 @@ liveDescribe('live media round-trip (REAL bucket — controller/owner only)', ()
     expect(await bucket.head(result.finalKey)).toBeNull();
   });
 
-  it('a PUT with a swapped Content-Type fails the signature (403) — type is enforced at presign', {
+  it('a PUT with a swapped Content-Type fails the signature (403), type is enforced at presign', {
     timeout: 120_000,
   }, async () => {
     const bucket = liveBucket();
@@ -166,7 +166,7 @@ liveDescribe('live media round-trip (REAL bucket — controller/owner only)', ()
       purpose: 'gallery-photo',
       contentType: 'image/jpeg',
     });
-    // The presigned PUT cannot carry a size condition — the over-cap object LANDS.
+    // The presigned PUT cannot carry a size condition, the over-cap object LANDS.
     const put = await fetch(uploadUrl, {
       method: 'PUT',
       headers: { 'content-type': 'image/jpeg' },

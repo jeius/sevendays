@@ -1,9 +1,9 @@
 // The reset email (M7 #221, ADR-0021): the API's second email consumer,
-// with its own failure posture — synchronous and result-returning (the user
+// with its own failure posture, synchronous and result-returning (the user
 // clicked "send reset link"; a silent failure is a support ticket), unlike
 // ADR-0014's waitUntil booking-confirmation. The BUILDER half is pure (the
 // suite pins every copy rule); the ROUTE half guards with the shared
-// INTERNAL_SEND_TOKEN secret — ADR-0021's "reachable only from the two
+// INTERNAL_SEND_TOKEN secret, ADR-0021's "reachable only from the two
 // frontend Workers" made enforceable, because the API Worker serves a
 // public workers.dev URL and a literally unauthenticated sender would be an
 // open relay (an attacker-chosen `url` in a studio-sent reset email is a
@@ -44,7 +44,7 @@ export interface ResetEmail {
   html: string;
 }
 
-/** Pure: the pinned reset-email copy — owner-ratified verbatim, 2026-10-19
+/** Pure: the pinned reset-email copy, owner-ratified verbatim, 2026-10-19
  * (#221 round). The subject is exempt from escaping (plain text); the body
  * greets by display name (escaped), states the 1-hour token TTL (BetterAuth's
  * default `resetPasswordTokenExpiresIn`), links the BetterAuth-built URL
@@ -64,13 +64,13 @@ export function buildResetEmail(input: ResetEmailInput): ResetEmail {
 
 /**
  * The guarded internal send (ADR-0021 § Decision): validate the shared
- * secret, build, send synchronously, return the result. No idempotency key
- * — every request mints a fresh BetterAuth token upstream, so a double-send
+ * secret, build, send synchronously, return the result. No idempotency key:
+ * every request mints a fresh BetterAuth token upstream, so a double-send
  * is two valid links by design. A missing INTERNAL_SEND_TOKEN answers the
- * curated 503 (the #155 leak-safe pattern — the loud detail stays in the
+ * curated 503 (the #155 leak-safe pattern, the loud detail stays in the
  * error event, never the response); a wrong token answers the uniform 401;
  * a Resend rejection is captured (the #184 email-seam posture) and answers
- * 502 with no free text. The display name rides the validated body — the
+ * 502 with no free text. The display name rides the validated body, the
  * send path NEVER touches Postgres (the route is outside /api/v1, no
  * acquireDb, and no user read is needed: BetterAuth gave the admin
  * `user.name` at sendResetPassword time).

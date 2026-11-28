@@ -1,10 +1,10 @@
 // The full Worker binding for integration tests (issue #47 made
-// RESEND_API_KEY + LANDING_ORIGIN required env — parseEnv fails without
+// RESEND_API_KEY + LANDING_ORIGIN required env, parseEnv fails without
 // them, so every /api/v1 request must carry the complete set). The key is a
 // placeholder: the Resend SDK is vi.mock'ed in the suites, so no real key
 // (and no network) is ever needed here. BETTER_AUTH_SECRET (M4 ticket 04)
 // is a fixed placeholder shared by the API's verification instance and the
-// test-shaped auth issuer (helpers/auth.ts) — same value on both sides is
+// test-shaped auth issuer (helpers/auth.ts), same value on both sides is
 // what makes issued sessions verifiable (ADR-0004's shared-secret rule,
 // mirrored at test scale). MEDIA_BUCKET/IMAGES (M5 #136) are binding-shaped
 // stubs: `{}` passes the env schema's object check, and suites that exercise
@@ -15,7 +15,7 @@
 // posture).
 // The reset-email pair (M7 #221) is intentionally absent here: the optional
 // INTERNAL_SEND_TOKEN / RESET_EMAIL_FROM stay unset unless a suite spreads
-// its own values (the reset-email suite does) — the 503 path is the default
+// its own values (the reset-email suite does), the 503 path is the default
 // posture every other suite sees, which is exactly the deployment's.
 export const TEST_AUTH_SECRET = 'integration-test-secret-0123456789-0123456789-0123456789';
 

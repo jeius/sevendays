@@ -63,7 +63,7 @@ describe('isAppleUserAgent (#273)', () => {
   });
 });
 
-describe('mapsHrefFor — Google base, Apple augments (#273)', () => {
+describe('mapsHrefFor, Google base, Apple augments (#273)', () => {
   const G = 'https://maps.app.goo.gl/g';
   const A = 'https://maps.apple.com/?q=a';
   it('both set: Apple → apple, non-Apple → google', () => {

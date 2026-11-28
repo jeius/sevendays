@@ -3,11 +3,11 @@ import type { Context } from 'hono';
 import type { ApiEnv } from '../services/db.js';
 import type { RequestLogger, RootEnv } from './logger.js';
 
-// The five event classes (M6 #183, spec § logging) — nothing else is ever
+// The five event classes (M6 #183, spec § logging), nothing else is ever
 // logged. Every class carries an enumerated field schema (asserted by the
 // suites); optional fields are spread only when present so the key set IS
 // the schema. PII floor: no raw bodies, no email addresses, no IP, no
-// User-Agent, no referrer — the email-failure `code` is classified
+// User-Agent, no referrer, the email-failure `code` is classified
 // (`resend:<error.name>` | `send_failed`) precisely to keep resend's
 // free-text error messages (which may echo the recipient) out of the log;
 // the reset purpose carries no appointmentId.
@@ -15,7 +15,7 @@ import type { RequestLogger, RootEnv } from './logger.js';
 // Levels: access / admin_mutation / email-attempt / email-sent at info;
 // media_failure at warn; email-failed and error at error.
 
-export type AdminMutationEntity = AuditEntity; // #185 canonicalized the list in packages/types — the ephemeral events and the durable rows share one vocabulary.
+export type AdminMutationEntity = AuditEntity; // #185 canonicalized the list in packages/types, the ephemeral events and the durable rows share one vocabulary.
 
 export type MediaFailureOp = 'presign' | 'commit' | 'thumbnail';
 
@@ -46,7 +46,7 @@ export function logAccess(
 /**
  * One line per committed CMS write (the write model's evidence class; the
  * durable twin is #185's Audit Log). Called at the route layer AFTER the
- * service result came back ok — a 400/401 path never reaches it. The
+ * service result came back ok, a 400/401 path never reaches it. The
  * context supplies method, route pattern, and the verified actor; the
  * order PUTs pass entityId null (they mutate the family, not one row).
  */
@@ -67,7 +67,7 @@ export function logAdminMutation(
 }
 
 /**
- * Media failures only — successful presigns stay quiet (the
+ * Media failures only, successful presigns stay quiet (the
  * highest-frequency admin call; its success is uninteresting). op +
  * classified reason; thrown errors ride logError instead.
  */
@@ -85,9 +85,9 @@ export function logEmail(
   log: RequestLogger,
   fields: {
     phase: EmailPhase;
-    /** Which email class — the booking confirmation (default) or the staff reset (#221). */
+    /** Which email class, the booking confirmation (default) or the staff reset (#221). */
     purpose?: 'confirmation' | 'reset';
-    /** Present for confirmations only — the reset flow has no appointment. */
+    /** Present for confirmations only, the reset flow has no appointment. */
     appointmentId?: string;
     code?: string;
   }
@@ -120,7 +120,7 @@ export function logError(c: Context<RootEnv>, error: Error): void {
       method: c.req.method,
       // Same wildcard rule as the access line: routePath is the registering
       // middleware's wildcard (/* or /api/v1/*) for 404s and middleware-
-      // thrown errors — the raw path names the actual request there.
+      // thrown errors, the raw path names the actual request there.
       route: c.req.routePath.includes('*') ? c.req.path : c.req.routePath,
       name: error.name,
       message: error.message,
